@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
 {
-    public class HizmetBinasi
+    public class HizmetBinasi : AuditableEntity
     {
         [Key]
         public int HizmetBinasiId { get; set; }
@@ -18,14 +18,11 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
         public required string HizmetBinasiAdi { get; set; }
 
         public int DepartmanId { get; set; }
-        [ForeignKey("DepartmanId")]
+        [ForeignKey(nameof(DepartmanId))]
         [InverseProperty("HizmetBinalari")]
         public Departman? Departman { get; set; }
 
         public Aktiflik HizmetBinasiAktiflik { get; set; }
-
-        public DateTime EklenmeTarihi { get; set; } = DateTime.Now;
-        public DateTime DuzenlenmeTarihi { get; set; } = DateTime.Now;
 
         [InverseProperty("HizmetBinasi")]
         public ICollection<Banko>? Bankolar { get; set; } = new List<Banko>();

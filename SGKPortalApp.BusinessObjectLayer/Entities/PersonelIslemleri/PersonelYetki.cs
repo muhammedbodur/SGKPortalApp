@@ -12,20 +12,18 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         [Key]
         public int PersonelYetkiId { get; set; }
 
-        // Personel ile ilişki
-        public string TcKimlikNo { get; set; }
-        [ForeignKey("TcKimlikNo")]
+        public required string TcKimlikNo { get; set; }
+        [ForeignKey(nameof(TcKimlikNo))]
         [InverseProperty("PersonelYetkileri")]
         public required Personel Personel { get; set; }
 
-        // Yetki ile ilişki
         public int YetkiId { get; set; }
-        [ForeignKey("YetkiId")]
+        [ForeignKey(nameof(YetkiId))]
         [InverseProperty("PersonelYetkileri")]
-        public Yetki Yetki { get; set; }
+        public required Yetki Yetki { get; set; }
 
         public int ModulControllerIslemId { get; set; }
-        [ForeignKey("ModulControllerIslemId")]
+        [ForeignKey(nameof(ModulControllerIslemId))]
         [InverseProperty("PersonelYetkileri")]
         public required ModulControllerIslem ModulControllerIslem { get; set; }
 

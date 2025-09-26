@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SGKPortalApp.BusinessObjectLayer;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
@@ -60,7 +59,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
             base.OnModelCreating(modelBuilder);
 
             ConfigureTableNaming(modelBuilder);
-            ConfigureRelationships(modelBuilder);
+            ConfigureOnlyNonConflictingRelationships(modelBuilder);
             ConfigurePerformanceIndexes(modelBuilder);
             ConfigureEnumConversions(modelBuilder);
             ConfigureBusinessRules(modelBuilder);
@@ -83,21 +82,14 @@ namespace SGKPortalApp.DataAccessLayer.Context
         {
             var namespaceName = entityType.Namespace ?? string.Empty;
 
-            if (namespaceName.Contains("PersonelIslemleri"))
-                return "PER";
-            else if (namespaceName.Contains("SiramatikIslemleri"))
-                return "SM";
-            else if (namespaceName.Contains("PdksIslemleri"))
-                return "PDKS";
-            else if (namespaceName.Contains("EshotIslemleri"))
-                return "ESHOT";
-            else if (namespaceName.Contains("Common") ||
-                     entityType.Name.Contains("User") ||
-                     entityType.Name.Contains("Log") ||
-                     entityType.Name.Contains("Il"))
-                return "GNL";
-            else
-                return "GEN";
+            return namespaceName switch
+            {
+                var ns when ns.Contains("PersonelIslemleri") => "PER",
+                var ns when ns.Contains("SiramatikIslemleri") => "SIR",
+                var ns when ns.Contains("PdksIslemleri") => "PDKS",
+                var ns when ns.Contains("EshotIslemleri") => "ESHOT",
+                _ => "CMN"
+            };
         }
 
         private string GetPluralName(string entityName)
@@ -105,39 +97,22 @@ namespace SGKPortalApp.DataAccessLayer.Context
             var turkishPluralRules = new Dictionary<string, string>
             {
                 { "Personel", "Personeller" },
-                { "PersonelCocuk", "PersonelCocuklari" },
-                { "PersonelDepartman", "PersonelDepartmanlar" },
-                { "PersonelYetki", "PersonelYetkileri" },
                 { "Departman", "Departmanlar" },
-                { "Unvan", "Unvanlar" },
-                { "Servis", "Servisler" },
-                { "Sendika", "Sendikalar" },
-                { "AtanmaNedenleri", "AtanmaNedenleri" },
                 { "Banko", "Bankolar" },
-                { "BankoKullanici", "BankoKullanicilari" },
-                { "BankoIslem", "BankoIslemleri" },
-                { "Kanal", "Kanallar" },
-                { "KanalAlt", "KanallarAlt" },
-                { "KanalIslem", "KanalIslemleri" },
-                { "KanalAltIslem", "KanalAltIslemleri" },
-                { "KanalPersonel", "KanalPersonelleri" },
-                { "KioskGrup", "KioskGruplari" },
-                { "KioskIslemGrup", "KioskIslemGruplari" },
                 { "Tv", "Tvler" },
-                { "TvBanko", "TvBankolari" },
-                { "Il", "Iller" },
-                { "Ilce", "Ilceler" },
-                { "Sira", "Siralar" },
-                { "User", "Users" },
-                { "DatabaseLog", "DatabaseLogs" },
-                { "LoginLogoutLog", "LoginLogoutLogs" },
                 { "HizmetBinasi", "HizmetBinalari" },
-                { "HubConnection", "HubConnections" },
-                { "HubTvConnection", "HubTvConnections" },
                 { "Yetki", "Yetkiler" },
-                { "Modul", "Moduller" },
-                { "ModulController", "ModulControllers" },
-                { "ModulControllerIslem", "ModulControllerIslemleri" }
+                { "Ilce", "Ilceler" },
+                { "Il", "Iller" },
+                { "PersonelCocuk", "PersonelCocuklari" },
+                { "PersonelYetki", "PersonelYetkileri" },
+                { "PersonelDepartman", "PersonelDepartmanlar" },
+                { "Servis", "Servisler" },
+                { "Unvan", "Unvanlar" },
+                { "Sendika", "Sendikalar" },
+                { "BankoKullanici", "BankoKullanicilari" },
+                { "TvBanko", "TvBankolari" },
+                { "Sira", "Siralar" }
             };
 
             return turkishPluralRules.ContainsKey(entityName)
@@ -146,91 +121,17 @@ namespace SGKPortalApp.DataAccessLayer.Context
         }
         #endregion
 
-        #region Relationships Configuration
-        private void ConfigureRelationships(ModelBuilder modelBuilder)
+        #region Non-Conflicting Relationships Configuration - CASCADE DÜZELTMELERI
+        private void ConfigureOnlyNonConflictingRelationships(ModelBuilder modelBuilder)
         {
-            ConfigurePersonelRelationships(modelBuilder);
-            ConfigureSiramatikRelationships(modelBuilder);
-            ConfigureCommonRelationships(modelBuilder);
-            ConfigureAuthorizationRelationships(modelBuilder);
-        }
-
-        private void ConfigurePersonelRelationships(ModelBuilder modelBuilder)
-        {
-            // Personel ana ilişkileri
-            modelBuilder.Entity<Personel>(entity =>
-            {
-                entity.HasOne(p => p.Departman)
-                      .WithMany(d => d.Personeller)
-                      .HasForeignKey(p => p.DepartmanId)
-                      .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne(p => p.Servis)
-                      .WithMany(s => s.Personeller)
-                      .HasForeignKey(p => p.ServisId)
-                      .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne(p => p.Unvan)
-                      .WithMany(u => u.Personeller)
-                      .HasForeignKey(p => p.UnvanId)
-                      .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne(p => p.Il)
-                      .WithMany()
-                      .HasForeignKey(p => p.IlId)
-                      .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne(p => p.Ilce)
-                      .WithMany()
-                      .HasForeignKey(p => p.IlceId)
-                      .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne(p => p.AtanmaNedeni)
-                      .WithMany(a => a.Personeller)
-                      .HasForeignKey(p => p.AtanmaNedeniId)
-                      .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne(p => p.Sendika)
-                      .WithMany(s => s.Personeller)
-                      .HasForeignKey(p => p.SendikaId)
-                      .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne(p => p.HizmetBinasi)
-                      .WithMany()
-                      .HasForeignKey(p => p.HizmetBinasiId)
-                      .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne(p => p.EsininIsIl)
-                      .WithMany()
-                      .HasForeignKey(p => p.EsininIsIlId)
-                      .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne(p => p.EsininIsIlce)
-                      .WithMany()
-                      .HasForeignKey(p => p.EsininIsIlceId)
-                      .OnDelete(DeleteBehavior.Restrict);
-            });
-
-            // PersonelCocuk ilişkisi
+            // PersonelCocuk ilişkisi - Cascade OK (child entity)
             modelBuilder.Entity<PersonelCocuk>()
                 .HasOne(pc => pc.Personel)
                 .WithMany(p => p.PersonelCocuklari)
                 .HasForeignKey(pc => pc.PersonelTcKimlikNo)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // PersonelYetki ilişkisi
-            modelBuilder.Entity<PersonelYetki>()
-                .HasOne(py => py.Personel)
-                .WithMany()
-                .HasForeignKey(py => py.TcKimlikNo)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<PersonelYetki>()
-                .HasOne(py => py.Yetki)
-                .WithMany(y => y.PersonelYetkileri)
-                .HasForeignKey(py => py.YetkiId)
-                .OnDelete(DeleteBehavior.Restrict);
-
+            // PersonelDepartman ilişkileri - Junction table, cascade yapmayalım
             modelBuilder.Entity<PersonelDepartman>()
                 .HasOne(pd => pd.Personel)
                 .WithMany()
@@ -242,18 +143,8 @@ namespace SGKPortalApp.DataAccessLayer.Context
                 .WithMany()
                 .HasForeignKey(pd => pd.DepartmanId)
                 .OnDelete(DeleteBehavior.Restrict);
-        }
 
-        private void ConfigureSiramatikRelationships(ModelBuilder modelBuilder)
-        {
-            // Banko ilişkileri
-            modelBuilder.Entity<Banko>()
-                .HasOne(b => b.HizmetBinasi)
-                .WithMany()
-                .HasForeignKey(b => b.HizmetBinasiId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // BankoKullanici ilişkileri
+            // BankoKullanici ilişkileri - Junction table
             modelBuilder.Entity<BankoKullanici>(entity =>
             {
                 entity.HasOne(bk => bk.Personel)
@@ -267,7 +158,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // TvBanko many-to-many
+            // TvBanko many-to-many - Junction table
             modelBuilder.Entity<TvBanko>(entity =>
             {
                 entity.HasOne(tb => tb.Tv)
@@ -281,19 +172,14 @@ namespace SGKPortalApp.DataAccessLayer.Context
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Tv ilişkileri
-            modelBuilder.Entity<Tv>()
-                .HasOne(t => t.HizmetBinasi)
-                .WithMany()
-                .HasForeignKey(t => t.HizmetBinasiId)
-                .OnDelete(DeleteBehavior.Restrict);
-
+            // HubTvConnection One-to-One
             modelBuilder.Entity<HubTvConnection>()
                 .HasOne(htc => htc.Tv)
                 .WithOne(t => t.HubTvConnection)
                 .HasForeignKey<HubTvConnection>(htc => htc.TvId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // HubConnection One-to-One
             modelBuilder.Entity<HubConnection>()
                 .HasOne(hc => hc.Personel)
                 .WithOne(p => p.HubConnection)
@@ -313,6 +199,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
                 .HasForeignKey(kp => kp.KanalAltIslemId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Sira ilişkileri
             modelBuilder.Entity<Sira>()
                 .HasOne(s => s.KanalAltIslem)
                 .WithMany(kai => kai.Siralar)
@@ -330,33 +217,15 @@ namespace SGKPortalApp.DataAccessLayer.Context
                 .WithMany()
                 .HasForeignKey(s => s.TcKimlikNo)
                 .OnDelete(DeleteBehavior.SetNull);
-        }
 
-        private void ConfigureCommonRelationships(ModelBuilder modelBuilder)
-        {
-            // Il-Ilce ilişkisi
+            // Il-Ilce ilişkisi - RESTRICT (döngüyü kır)
             modelBuilder.Entity<Ilce>()
                 .HasOne(i => i.Il)
                 .WithMany(il => il.Ilceler)
                 .HasForeignKey(i => i.IlId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // HizmetBinasi-Departman ilişkisi
-            modelBuilder.Entity<HizmetBinasi>()
-                .HasOne(hb => hb.Departman)
-                .WithMany()
-                .HasForeignKey(hb => hb.DepartmanId)
-                .OnDelete(DeleteBehavior.Restrict);
-        }
-
-        private void ConfigureAuthorizationRelationships(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Yetki>()
-                .HasOne(y => y.UstYetki)
-                .WithMany()
-                .HasForeignKey(y => y.UstYetkiId)
-                .OnDelete(DeleteBehavior.Restrict);
-
+            // ModulController ilişkileri
             modelBuilder.Entity<ModulController>()
                 .HasOne(mc => mc.Modul)
                 .WithMany(m => m.ModulControllers)
@@ -367,6 +236,96 @@ namespace SGKPortalApp.DataAccessLayer.Context
                 .HasOne(mci => mci.ModulController)
                 .WithMany(mc => mc.ModulControllerIslemler)
                 .HasForeignKey(mci => mci.ModulControllerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Kanal ilişkileri
+            modelBuilder.Entity<KanalAlt>()
+                .HasOne(ka => ka.Kanal)
+                .WithMany(k => k.KanalAltlari)
+                .HasForeignKey(ka => ka.KanalId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<KanalIslem>()
+                .HasOne(ki => ki.Kanal)
+                .WithMany(k => k.KanalIslemleri)
+                .HasForeignKey(ki => ki.KanalId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<KanalAltIslem>()
+                .HasOne(kai => kai.KanalAlt)
+                .WithMany(ka => ka.KanalAltIslemleri)
+                .HasForeignKey(kai => kai.KanalAltId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<KanalAltIslem>()
+                .HasOne(kai => kai.KanalIslem)
+                .WithMany(ki => ki.KanalAltIslemleri)
+                .HasForeignKey(kai => kai.KanalIslemId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ÖNEMLİ: Entity attribute'larda CASCADE olan ilişkileri RESTRICT yap
+            // Personel'in tüm referansları RESTRICT olmalı (çoklu cascade path'i önlemek için)
+            modelBuilder.Entity<Personel>(entity =>
+            {
+                // Ana lookups - RESTRICT
+                entity.HasOne(p => p.Departman)
+                      .WithMany(d => d.Personeller)
+                      .HasForeignKey(p => p.DepartmanId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(p => p.Servis)
+                      .WithMany(s => s.Personeller)
+                      .HasForeignKey(p => p.ServisId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(p => p.Unvan)
+                      .WithMany(u => u.Personeller)
+                      .HasForeignKey(p => p.UnvanId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(p => p.AtanmaNedeni)
+                      .WithMany(a => a.Personeller)
+                      .HasForeignKey(p => p.AtanmaNedeniId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(p => p.HizmetBinasi)
+                      .WithMany(hb => hb.Personeller)
+                      .HasForeignKey(p => p.HizmetBinasiId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(p => p.Sendika)
+                      .WithMany(s => s.Personeller)
+                      .HasForeignKey(p => p.SendikaId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // Location fields - RESTRICT (döngüyü kır)
+                entity.HasOne(p => p.Il)
+                      .WithMany()
+                      .HasForeignKey(p => p.IlId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(p => p.Ilce)
+                      .WithMany()
+                      .HasForeignKey(p => p.IlceId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // Eş bilgileri - RESTRICT
+                entity.HasOne(p => p.EsininIsIl)
+                      .WithMany()
+                      .HasForeignKey(p => p.EsininIsIlId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(p => p.EsininIsIlce)
+                      .WithMany()
+                      .HasForeignKey(p => p.EsininIsIlceId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // HizmetBinasi-Departman ilişkisi
+            modelBuilder.Entity<HizmetBinasi>()
+                .HasOne(hb => hb.Departman)
+                .WithMany(d => d.HizmetBinalari)
+                .HasForeignKey(hb => hb.DepartmanId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
         #endregion
@@ -409,7 +368,6 @@ namespace SGKPortalApp.DataAccessLayer.Context
 
             modelBuilder.Entity<TvBanko>()
                 .HasIndex(tb => new { tb.TvId, tb.BankoId }).IsUnique();
-
 
             modelBuilder.Entity<BankoKullanici>()
                 .HasIndex(bk => bk.BankoId).IsUnique();
@@ -484,7 +442,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.Entity<Banko>(entity =>
             {
                 entity.Property(b => b.BankoTipi).HasConversion<string>();
-                entity.Property(b => b.KatTipi).HasConversion<string>();
+                entity.Property(b => b.KatTipi).HasConversion<int>();
                 entity.Property(b => b.BankoAktiflik).HasConversion<int>();
             });
 
@@ -494,8 +452,11 @@ namespace SGKPortalApp.DataAccessLayer.Context
                 entity.Property(bi => bi.BankoIslemAktiflik).HasConversion<int>();
             });
 
-            modelBuilder.Entity<Tv>()
-                .Property(t => t.KatTipi).HasConversion<string>();
+            modelBuilder.Entity<Tv>(entity =>
+            {
+                entity.Property(t => t.KatTipi).HasConversion<int>();
+                entity.Property(t => t.Aktiflik).HasConversion<int>();
+            });
 
             modelBuilder.Entity<Sira>()
                 .Property(s => s.BeklemeDurum).HasConversion<int>();
@@ -522,7 +483,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
         {
             // Sira tablosu için özel kurallar
             modelBuilder.Entity<Sira>()
-                .ToTable("SGKP_SRM_Siralar", t => t.UseSqlOutputClause(false));
+                .ToTable("SIR_Siralar", t => t.UseSqlOutputClause(false));
 
             // Soft delete konfigürasyonu
             modelBuilder.Entity<User>()

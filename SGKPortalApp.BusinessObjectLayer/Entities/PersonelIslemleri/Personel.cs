@@ -31,53 +31,52 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         public DateTime? KartNoGonderimTarihi { get; set; }
         public IslemBasari KartGonderimIslemBasari { get; set; }
 
-        // Foreign Key Relationships
         [Required]
         public int DepartmanId { get; set; }
-        [ForeignKey("DepartmanId")]
+        [ForeignKey(nameof(DepartmanId))]
         [InverseProperty("Personeller")]
         public Departman? Departman { get; set; }
 
         public int ServisId { get; set; }
-        [ForeignKey("ServisId")]
+        [ForeignKey(nameof(ServisId))]
         [InverseProperty("Personeller")]
         public Servis? Servis { get; set; }
 
         public int UnvanId { get; set; }
-        [ForeignKey("UnvanId")]
+        [ForeignKey(nameof(UnvanId))]
         [InverseProperty("Personeller")]
         public Unvan? Unvan { get; set; }
 
         public int AtanmaNedeniId { get; set; }
-        [ForeignKey("AtanmaNedeniId")]
+        [ForeignKey(nameof(AtanmaNedeniId))]
         [InverseProperty("Personeller")]
         public AtanmaNedenleri? AtanmaNedeni { get; set; }
 
         public int HizmetBinasiId { get; set; }
-        [ForeignKey("HizmetBinasiId")]
+        [ForeignKey(nameof(HizmetBinasiId))]
         [InverseProperty("Personeller")]
         public HizmetBinasi? HizmetBinasi { get; set; }
 
         public int IlId { get; set; }
-        [ForeignKey("IlId")]
+        [ForeignKey(nameof(IlId))]
         public Il? Il { get; set; }
 
         public int IlceId { get; set; }
-        [ForeignKey("IlceId")]
+        [ForeignKey(nameof(IlceId))]
         public Ilce? Ilce { get; set; }
 
         public int SendikaId { get; set; }
-        [ForeignKey("SendikaId")]
+        [ForeignKey(nameof(SendikaId))]
         [InverseProperty("Personeller")]
         public Sendika? Sendika { get; set; }
 
         // Eşinin iş bilgileri
         public int EsininIsIlId { get; set; } = 0;
-        [ForeignKey("EsininIsIlId")]
+        [ForeignKey(nameof(EsininIsIlId))]
         public Il? EsininIsIl { get; set; }
 
         public int EsininIsIlceId { get; set; } = 0;
-        [ForeignKey("EsininIsIlceId")]
+        [ForeignKey(nameof(EsininIsIlceId))]
         public Ilce? EsininIsIlce { get; set; }
 
         // Personal Information

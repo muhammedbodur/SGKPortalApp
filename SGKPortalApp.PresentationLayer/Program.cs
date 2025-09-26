@@ -6,6 +6,14 @@ using SGKPortalApp.DataAccessLayer.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Port ayarlarını appsettings'den al
+var httpsUrl = builder.Configuration["AppSettings:Urls:HttpsUrl"] ?? "https://localhost:7037";
+var httpUrl = builder.Configuration["AppSettings:Urls:HttpUrl"] ?? "http://localhost:5243";
+var apiUrl = builder.Configuration["AppSettings:ApiUrl"] ?? "https://localhost:7021";
+
+// URL konfigürasyonu
+builder.WebHost.UseUrls(httpsUrl, httpUrl);
+
 // Blazor Server servisleri
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
@@ -29,12 +37,12 @@ builder.Services.AddDbContext<SGKDbContext>(options =>
 // SGK Portal servislerini kaydet (Repository Pattern)
 builder.Services.AddSGKPortalServices(connectionString);
 
-// CORS (API kullanımı için)
+// CORS (API kullanımı için) - appsettings'den al
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("https://localhost:7001", "https://localhost:5001")
+        policy.WithOrigins(httpsUrl, apiUrl)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -117,6 +125,8 @@ using (var scope = app.Services.CreateScope())
 
 Console.WriteLine("SGK Portal uygulaması başlatılıyor...");
 Console.WriteLine($"Ortam: {app.Environment.EnvironmentName}");
-Console.WriteLine($"URL: https://localhost:7001");
+Console.WriteLine($"HTTPS URL: {httpsUrl}");
+Console.WriteLine($"HTTP URL: {httpUrl}");
+Console.WriteLine($"API URL: {apiUrl}");
 
 app.Run();

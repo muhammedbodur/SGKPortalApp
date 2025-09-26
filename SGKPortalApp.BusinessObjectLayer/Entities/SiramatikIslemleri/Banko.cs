@@ -15,14 +15,14 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
 
         [Required]
         public int HizmetBinasiId { get; set; }
-        [ForeignKey("HizmetBinasiId")]
+        [ForeignKey(nameof(HizmetBinasiId))]
         [InverseProperty("Bankolar")]
         public required HizmetBinasi HizmetBinasi { get; set; }
 
         public int BankoNo { get; set; }
         public BankoTipi BankoTipi { get; set; }
         public KatTipi KatTipi { get; set; }
-        public Aktiflik BankoAktiflik { get; set; }
+        public Aktiflik BankoAktiflik { get; set; } = Aktiflik.Aktif;
 
         [InverseProperty("Banko")]
         public ICollection<BankoKullanici>? BankoKullanicilari { get; set; } = new List<BankoKullanici>();

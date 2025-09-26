@@ -14,7 +14,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         public int TvId { get; set; }
 
         public int HizmetBinasiId { get; set; }
-        [ForeignKey("HizmetBinasiId")]
+        [ForeignKey(nameof(HizmetBinasiId))]
         [InverseProperty("Tvler")]
         public required HizmetBinasi HizmetBinasi { get; set; }
 

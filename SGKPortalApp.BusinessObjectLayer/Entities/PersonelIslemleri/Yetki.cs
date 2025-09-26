@@ -15,7 +15,6 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         // Yetki türü (Ana, Orta, Alt Yetki)
         public required YetkiTurleri YetkiTuru { get; set; }
 
-        // Yetki adı ve açıklama
         [Required]
         [StringLength(100)]
         public string YetkiAdi { get; set; } = null!;
@@ -29,22 +28,19 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         */
         public int? UstYetkiId { get; set; }
 
-        // Self-referencing navigation - InverseProperty ile açık tanım
-        [ForeignKey("UstYetkiId")]
+        [ForeignKey(nameof(UstYetkiId))]
         [InverseProperty("AltYetkiler")]
         public Yetki? UstYetki { get; set; }
 
         [InverseProperty("UstYetki")]
         public ICollection<Yetki> AltYetkiler { get; set; } = new List<Yetki>();
 
-        // Controller ve Action ile ilişkilendirme
         [StringLength(100)]
-        public string? ControllerAdi { get; set; }  // Ana Yetki için Controller atanır
+        public string? ControllerAdi { get; set; }
 
         [StringLength(100)]
-        public string? ActionAdi { get; set; }      // Orta ve Alt Yetkiler için Action atanır
+        public string? ActionAdi { get; set; }
 
-        // PersonelYetki collection - Many-to-Many relationship
         [InverseProperty("Yetki")]
         public ICollection<PersonelYetki> PersonelYetkileri { get; set; } = new List<PersonelYetki>();
     }
