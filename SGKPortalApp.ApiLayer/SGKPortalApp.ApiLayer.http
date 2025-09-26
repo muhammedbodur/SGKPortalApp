@@ -1,0 +1,6 @@
+@SGKPortalApp.ApiLayer_HostAddress = http://localhost:5272
+
+GET {{SGKPortalApp.ApiLayer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

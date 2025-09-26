@@ -1,0 +1,98 @@
+﻿using Microsoft.EntityFrameworkCore;
+using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
+using SGKPortalApp.DataAccessLayer.Context;
+using SGKPortalApp.DataAccessLayer.Repositories.Generic;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
+{
+    public class KanalPersonelRepository : GenericRepository<KanalPersonel>, IKanalPersonelRepository
+    {
+        public KanalPersonelRepository(SGKDbContext context) : base(context) { }
+
+        // Personel bazında atamaları listeler
+        public async Task<IEnumerable<KanalPersonel>> GetByPersonelAsync(string tcKimlikNo)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Include(kp => kp.Personel)
+                .Include(kp => kp.KanalAltIslem)
+                .Where(kp => kp.TcKimlikNo == tcKimlikNo)
+                .ToListAsync();
+        }
+
+        // Kanal alt işlem bazında personelleri listeler
+        public async Task<IEnumerable<KanalPersonel>> GetByKanalAltIslemAsync(int kanalAltIslemId)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Include(kp => kp.Personel)
+                .Include(kp => kp.KanalAltIslem)
+                .Where(kp => kp.KanalAltIslemId == kanalAltIslemId)
+                .ToListAsync();
+        }
+
+        // Atamayı detaylı getirir
+        public async Task<KanalPersonel?> GetWithDetailsAsync(int kanalPersonelId)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Include(kp => kp.Personel)
+                .Include(kp => kp.KanalAltIslem)
+                .FirstOrDefaultAsync(kp => kp.KanalPersonelId == kanalPersonelId);
+        }
+
+        // Tüm atamaları detaylı listeler
+        public async Task<IEnumerable<KanalPersonel>> GetAllWithDetailsAsync()
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Include(kp => kp.Personel)
+                .Include(kp => kp.KanalAltIslem)
+                .ToListAsync();
+        }
+
+        // Aktif atamaları listeler
+        public async Task<IEnumerable<KanalPersonel>> GetActiveAssignmentsAsync()
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Include(kp => kp.Personel)
+                .Include(kp => kp.KanalAltIslem)
+                .Where(kp => kp.KanalAltIslemPersonelAktiflik == Aktiflik.Aktif)
+                .ToListAsync();
+        }
+
+        // Tüm atamaları listeler
+        public async Task<IEnumerable<KanalPersonel>> GetAllAsync()
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        // Çakışma kontrolü yapar
+        public async Task<bool> HasConflictAsync(string tcKimlikNo, int kanalAltIslemId)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .AnyAsync(kp => kp.TcKimlikNo == tcKimlikNo && kp.KanalAltIslemId == kanalAltIslemId && kp.KanalAltIslemPersonelAktiflik == Aktiflik.Aktif);
+        }
+
+        // Uzmanlık bazında personelleri listeler
+        public async Task<IEnumerable<KanalPersonel>> GetByUzmanlikAsync(PersonelUzmanlik uzmanlik)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Include(kp => kp.Personel)
+                .Include(kp => kp.KanalAltIslem)
+                .Where(kp => kp.Uzmanlik == uzmanlik)
+                .ToListAsync();
+        }
+    }
+}

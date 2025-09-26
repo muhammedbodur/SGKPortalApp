@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Interfaces\Auth\" />
+    <Folder Include="Interfaces\EshotIslemleri\" />
+    <Folder Include="Interfaces\PdksIslemleri\" />
+    <Folder Include="Interfaces\SiramatikIslemleri\" />
+    <Folder Include="Interfaces\PersonelIslemleri\" />
+    <Folder Include="Mapping\Extensions\" />
+    <Folder Include="Mapping\Services\" />
+    <Folder Include="Mapping\Profiles\" />
+    <Folder Include="Services\Auth\" />
+    <Folder Include="Services\EshotIslemleri\" />
+    <Folder Include="Services\PdksIslemleri\" />
+    <Folder Include="Services\SiramatikIslemleri\" />
+    <Folder Include="Services\PersonelIslemleri\" />
+    <Folder Include="Validators\Auth\" />
+    <Folder Include="Validators\EshotIslemleri\" />
+    <Folder Include="Validators\PdksIslemleri\" />
+    <Folder Include="Validators\SiramatikIslemleri\" />
+    <Folder Include="Validators\PersonelIslemleri\" />
+  </ItemGroup>
+
+</Project>

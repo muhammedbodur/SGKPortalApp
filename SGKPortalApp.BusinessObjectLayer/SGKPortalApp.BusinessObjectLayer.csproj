@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="DTOs\Request\Auth\" />
+    <Folder Include="DTOs\Request\EshotIslemleri\" />
+    <Folder Include="DTOs\Request\Common\" />
+    <Folder Include="DTOs\Request\PdksIslemleri\" />
+    <Folder Include="DTOs\Request\SiramatikIslemleri\" />
+    <Folder Include="DTOs\Response\Auth\" />
+    <Folder Include="DTOs\Response\EshotIslemleri\" />
+    <Folder Include="DTOs\Response\Common\" />
+    <Folder Include="DTOs\Response\PdksIslemleri\" />
+    <Folder Include="DTOs\Response\SiramatikIslemleri\" />
+    <Folder Include="DTOs\Shared\Common\" />
+    <Folder Include="DTOs\Shared\Enums\" />
+    <Folder Include="DTOs\Shared\ValueObjects\" />
+    <Folder Include="Entities\EshotIslemleri\" />
+    <Folder Include="Entities\DenetmenlikIslemleri\" />
+    <Folder Include="Entities\RucuIslemleri\" />
+    <Folder Include="Enums\EshotIslemleri\" />
+    <Folder Include="Enums\PdksIslemleri\" />
+  </ItemGroup>
+
+</Project>
