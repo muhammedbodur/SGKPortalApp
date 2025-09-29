@@ -14,9 +14,24 @@ var apiUrl = builder.Configuration["AppSettings:ApiUrl"] ?? "https://localhost:7
 // URL konfigürasyonu
 builder.WebHost.UseUrls(httpsUrl, httpUrl);
 
+// Response Compression (3 Mbit bağlantılar için)
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+});
+
 // Blazor Server servisleri
 builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
+builder.Services.AddServerSideBlazor(options =>
+{
+    options.DetailedErrors = builder.Environment.IsDevelopment();
+    options.DisconnectedCircuitMaxRetained = 50;
+    options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
+
+    // Yavaş bağlantılar için timeout'ları artır
+    options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(2);
+    options.MaxBufferedUnacknowledgedRenderBatches = 5;
+});
 
 // Veritabanı bağlantısı
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -64,6 +79,9 @@ if (builder.Environment.IsDevelopment())
 
 var app = builder.Build();
 
+// Response Compression middleware'i
+app.UseResponseCompression();
+
 // Development/Production ayarları
 if (!app.Environment.IsDevelopment())
 {
@@ -84,16 +102,16 @@ app.UseRouting();
 // CORS middleware
 app.UseCors();
 
-// Authentication & Authorization (ileride eklenecek)
+// Authentication & Authorization
 // app.UseAuthentication();
 // app.UseAuthorization();
 
 // Blazor Hub ve routing
 app.MapBlazorHub(options =>
 {
-    // SignalR için timeout ayarları
-    options.ApplicationMaxBufferSize = 65536;
-    options.TransportMaxBufferSize = 65536;
+    // SignalR için buffer boyutları (3 Mbit için optimize edildi)
+    options.ApplicationMaxBufferSize = 32768;  // 32KB
+    options.TransportMaxBufferSize = 32768;
 });
 
 app.MapFallbackToPage("/_Host");
@@ -101,14 +119,13 @@ app.MapFallbackToPage("/_Host");
 // Razor Pages (API endpoint'leri için)
 app.MapRazorPages();
 
-// Veritabanı migration'larını otomatik uygula (opsiyonel)
+// Veritabanı migration'larını otomatik uyguluyoruz
 using (var scope = app.Services.CreateScope())
 {
     try
     {
         var context = scope.ServiceProvider.GetRequiredService<SGKDbContext>();
 
-        // Veritabanı var mı kontrol et
         if (context.Database.GetPendingMigrations().Any())
         {
             Console.WriteLine("Bekleyen migration'lar uygulanıyor...");
