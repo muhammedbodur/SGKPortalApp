@@ -13,12 +13,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SGKPortalApp.ApiLayer", "SG
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SGKPortalApp.PresentationLayer", "SGKPortalApp.PresentationLayer\SGKPortalApp.PresentationLayer.csproj", "{DBFB534E-345B-4EC2-9801-E4087943DDCA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Proje Tanıtımı", "Proje Tanıtımı", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
-	ProjectSection(SolutionItems) = preProject
-		şablon.txt = şablon.txt
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SGKPortalApp.Common", "SGKPortalApp.Common\SGKPortalApp.Common.csproj", "{A8261DBC-0FC5-4144-A82E-8832965B20E7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Proje Mimarisi", "Proje Mimarisi", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		sablon.txt = sablon.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

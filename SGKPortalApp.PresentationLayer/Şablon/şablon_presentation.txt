@@ -1,0 +1,516 @@
+SGKPortalApp.PresentationLayer
+
+## Proje Yapısı
+
+```
+SGKPortalApp/
+├── SGKPortalApp.sln                                    # Çözüm dosyası
+└── SGKPortalApp.PresentationLayer/                     # Blazor Server UI (Sneat Teması ile Modernize Edilmiş)
+    ├── Pages/                                         # Yönlendirilebilir Razor sayfaları
+    │   ├── Index.razor                                # Ana dashboard sayfası
+    │   ├── _Host.cshtml                               # Blazor Server host sayfası
+    │   │
+    │   ├── Account/                                   # Kullanıcı hesap işlemleri
+    │   │   ├── Login.razor
+    │   │   └── Profile.razor
+    │   │
+    │   ├── PersonelIslemleri/                         # Personel modülü sayfaları
+    │   │   ├── PersonelListele.razor                  # Personel listesi (tablo, filtreleme, arama)
+    │   │   ├── PersonelDetay.razor                    # Personel detay görüntüleme
+    │   │   ├── PersonelDuzenle.razor                  # Personel düzenleme formu
+    │   │   ├── DepartmanYonetimi.razor                # Departman CRUD işlemleri
+    │   │   ├── ServisYonetimi.razor                   # Servis CRUD işlemleri
+    │   │   └── UnvanYonetimi.razor                    # Unvan CRUD işlemleri
+    │   │
+    │   ├── SiramatikIslemleri/                        # Sıramatik modülü sayfaları
+    │   │   ├── BankoIzleme.razor                      # Banko durumu ve izleme
+    │   │   ├── BankoYonetimi.razor                    # Banko CRUD işlemleri
+    │   │   ├── KanalYonetimi.razor                    # Kanal ve alt kanal yönetimi
+    │   │   ├── KioskYonetimi.razor                    # Kiosk CRUD ve eşleştirme
+    │   │   └── TvYonetimi.razor                       # TV ekran yönetimi
+    │   │
+    │   ├── PdksIslemleri/                             # PDKS modülü sayfaları
+    │   │   ├── GirisCikisTakip.razor                  # Giriş/çıkış kayıtları
+    │   │   ├── IzinTalepleri.razor                    # İzin talep ve onay sistemi
+    │   │   ├── MesaiRaporlari.razor                   # Mesai raporları
+    │   │   └── CalismaGunHesaplama.razor              # Çalışma gün hesaplamaları
+    │   │
+    │   ├── EshotIslemleri/                            # Eshot modülü sayfaları
+    │   │   ├── EshotHareketleri.razor                 # Eshot kullanım hareketleri
+    │   │   ├── KullanimHakki.razor                    # Kullanım hakkı tanımlama
+    │   │   └── UcretBilgileri.razor                   # Ücret bilgileri yönetimi
+    │   │
+    │   └── Error.razor                                # Hata sayfası
+    │
+    ├── Shared/                                        # Paylaşılan layout ve bileşenler
+    │   ├── Layout/                                    # Ana layout bileşenleri (Sneat temasından)
+    │   │   ├── MainLayout.razor                       # Ana layout wrapper
+    │   │   │   # İçerik: <div class="layout-wrapper layout-content-navbar">
+    │   │   │   #   <div class="layout-container">
+    │   │   │   #     <NavMenu />
+    │   │   │   #     <div class="layout-page">
+    │   │   │   #       <TopNavbar />
+    │   │   │   #       <div class="content-wrapper">
+    │   │   │   #         @Body
+    │   │   │   #       </div>
+    │   │   │   #       <Footer />
+    │   │   │   #     </div>
+    │   │   │   #   </div>
+    │   │   │   # </div>
+    │   │   │
+    │   │   ├── NavMenu.razor                          # Sol sidebar menü (Sneat aside#layout-menu)
+    │   │   │   # İçerik: Logo, menü öğeleri, kategoriler
+    │   │   │   # Sneat HTML'den alınacak: <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+    │   │   │
+    │   │   ├── TopNavbar.razor                        # Üst navigasyon barı
+    │   │   │   # İçerik: Arama, bildirimler, kullanıcı profili dropdown
+    │   │   │   # Sneat HTML'den alınacak: <nav class="layout-navbar">
+    │   │   │
+    │   │   └── Footer.razor                           # Alt bilgi (Sneat footer)
+    │   │       # İçerik: Copyright, linkler
+    │   │       # Sneat HTML'den alınacak: <footer class="content-footer footer bg-footer-theme">
+    │   │
+    │   ├── Common/                                    # Genel UI bileşenleri
+    │   │   ├── LoadingIndicator.razor                 # Yükleniyor animasyonu
+    │   │   ├── ConfirmationModal.razor                # Onay dialog penceresi
+    │   │   ├── CustomButton.razor                     # Özel buton bileşeni
+    │   │   ├── DataGrid.razor                         # Veri tablosu (pagination, sort, filter)
+    │   │   ├── Breadcrumb.razor                       # Sayfa yolu göstergesi
+    │   │   └── Toast.razor                            # Bildirim mesajları
+    │   │
+    │   └── ErrorBoundary.razor                        # Hata yakalama bileşeni
+    │
+    ├── Components/                                    # Sayfaya özgü bileşenler
+    │   ├── PersonelIslemleri/
+    │   │   ├── PersonelKart.razor                     # Personel bilgi kartı
+    │   │   ├── PersonelFiltrelemeForm.razor           # Filtreleme formu
+    │   │   └── PersonelIstatistikWidget.razor         # İstatistik widget'ı
+    │   │
+    │   ├── SiramatikIslemleri/
+    │   │   ├── BankoDurumGostergesi.razor             # Banko durum kartı
+    │   │   ├── SiraListesi.razor                      # Sıra listesi bileşeni
+    │   │   └── KanalAtamaMatrisi.razor                # Kanal atama matrisi
+    │   │
+    │   ├── PdksIslemleri/
+    │   │   ├── GirisCikisTimeline.razor               # Zaman çizelgesi
+    │   │   └── IzinTalepFormu.razor                   # İzin talep formu
+    │   │
+    │   ├── Dashboard/
+    │   │   ├── IstatistikKarti.razor                  # Dashboard istatistik kartı
+    │   │   ├── GrafikWidget.razor                     # Grafik gösterimi
+    │   │   └── SonIslemlerTablosu.razor               # Son işlemler listesi
+    │   │
+    │   └── Charts/                                    # Grafik bileşenleri
+    │       ├── BarChart.razor                         # Bar grafik
+    │       ├── PieChart.razor                         # Pasta grafik
+    │       └── LineChart.razor                        # Çizgi grafik
+    │
+    ├── Services/                                      # UI servisleri
+    │   ├── Abstract/
+    │   │   ├── IThemeService.cs                       # Tema yönetimi
+    │   │   ├── INotificationService.cs                # Bildirim servisi
+    │   │   └── ILocalStorageService.cs                # Local storage yönetimi
+    │   │
+    │   └── Concrete/
+    │       ├── ThemeService.cs                        # Tema değiştirme (light/dark)
+    │       ├── ToastNotificationService.cs            # Toast bildirimleri
+    │       └── LocalStorageService.cs                 # Browser storage işlemleri
+    │
+    ├── wwwroot/                                       # Statik dosyalar (Sneat teması varlıkları)
+    │   ├── css/
+    │   │   ├── sneat/                                 # Sneat tema CSS dosyaları
+    │   │   │   ├── core.css                           # Sneat core CSS
+    │   │   │   ├── theme-default.css                  # Sneat varsayılan tema
+    │   │   │   └── demo.css                           # Sneat demo stilleri
+    │   │   ├── app.css                                # Özel uygulama stilleri
+    │   │   └── modules/                               # Modül bazlı stiller
+    │   │       ├── personel.css
+    │   │       ├── siramatik.css
+    │   │       ├── pdks.css
+    │   │       └── eshot.css
+    │   │
+    │   ├── js/
+    │   │   ├── sneat/                                 # Sneat tema JavaScript dosyaları
+    │   │   │   ├── helpers.js                         # Sneat yardımcı fonksiyonlar
+    │   │   │   ├── config.js                          # Sneat yapılandırma
+    │   │   │   ├── menu.js                            # Sneat menü işlemleri
+    │   │   │   └── main.js                            # Sneat ana JS
+    │   │   ├── app.js                                 # Özel uygulama JS
+    │   │   └── blazor-interop.js                      # Blazor JS interop fonksiyonları
+    │   │
+    │   ├── vendor/                                    # Sneat vendor kütüphaneleri
+    │   │   ├── fonts/                                 # Boxicons, Font Awesome
+    │   │   ├── libs/
+    │   │   │   ├── jquery/
+    │   │   │   ├── bootstrap/
+    │   │   │   ├── perfect-scrollbar/
+    │   │   │   └── apex-charts/
+    │   │   └── css/
+    │   │       └── rtl/
+    │   │
+    │   └── images/
+    │       ├── logo.png                               # SGK Portal logosu
+    │       ├── favicon.ico
+    │       └── avatars/                               # Kullanıcı avatarları
+    │
+    ├── _Imports.razor                                 # Global using direktifleri
+    ├── App.razor                                      # Router bileşeni
+    ├── Program.cs                                     # Blazor Server başlangıç noktası
+    ├── appsettings.json                               # Genel ayarlar
+    ├── appsettings.Development.json                   # Development ayarları
+    └── SGKPortalApp.PresentationLayer.csproj          # Proje dosyası
+```
+
+## Sneat Teması Layout Yapısı ve Kullanımı
+
+### 1. MainLayout.razor Yapısı
+Sneat temasının `index.html` dosyasından alınan ana yapı:
+
+```razor
+@inherits LayoutComponentBase
+
+<!-- Layout wrapper -->
+<div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+        
+        <!-- Sol Sidebar Menü -->
+        <NavMenu />
+        
+        <!-- Layout page -->
+        <div class="layout-page">
+            
+            <!-- Üst Navbar -->
+            <TopNavbar />
+            
+            <!-- Content wrapper -->
+            <div class="content-wrapper">
+                
+                <!-- Sayfa İçeriği -->
+                <div class="container-xxl flex-grow-1 container-p-y">
+                    @Body
+                </div>
+                
+                <!-- Footer -->
+                <Footer />
+                
+                <div class="content-backdrop fade"></div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- Overlay (mobil menü için) -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+</div>
+```
+
+### 2. NavMenu.razor (Sol Sidebar)
+Sneat HTML'den alınacak yapı:
+
+```razor
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+    
+    <!-- App Brand (Logo) -->
+    <div class="app-brand demo">
+        <a href="/" class="app-brand-link">
+            <span class="app-brand-logo demo">
+                <!-- SVG Logo buraya -->
+            </span>
+            <span class="app-brand-text demo menu-text fw-bolder ms-2">SGK Portal</span>
+        </a>
+        
+        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
+            <i class="bx bx-chevron-left bx-sm align-middle"></i>
+        </a>
+    </div>
+    
+    <div class="menu-inner-shadow"></div>
+    
+    <!-- Menü İçeriği -->
+    <ul class="menu-inner py-1">
+        
+        <!-- Dashboard -->
+        <li class="menu-item active">
+            <a href="/" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                <div data-i18n="Ana Sayfa">Ana Sayfa</div>
+            </a>
+        </li>
+        
+        <!-- Personel İşlemleri -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Personel İşlemleri</span>
+        </li>
+        
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-user"></i>
+                <div data-i18n="Personel">Personel</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="/personel/listele" class="menu-link">
+                        <div data-i18n="Listele">Personel Listesi</div>
+                    </a>
+                </li>
+                <!-- Diğer alt menüler -->
+            </ul>
+        </li>
+        
+        <!-- Diğer modüller benzer şekilde -->
+        
+    </ul>
+</aside>
+```
+
+### 3. TopNavbar.razor (Üst Bar)
+```razor
+<nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+    <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+        <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+            <i class="bx bx-menu bx-sm"></i>
+        </a>
+    </div>
+    
+    <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+        
+        <!-- Arama -->
+        <div class="navbar-nav align-items-center">
+            <div class="nav-item d-flex align-items-center">
+                <i class="bx bx-search fs-4 lh-0"></i>
+                <input type="text" class="form-control border-0 shadow-none" placeholder="Ara..." />
+            </div>
+        </div>
+        
+        <ul class="navbar-nav flex-row align-items-center ms-auto">
+            
+            <!-- Bildirimler -->
+            <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-1">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                    <i class="bx bx-bell bx-sm"></i>
+                    <span class="badge bg-danger rounded-pill badge-notifications">5</span>
+                </a>
+                <!-- Dropdown içeriği -->
+            </li>
+            
+            <!-- Kullanıcı -->
+            <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                    <div class="avatar avatar-online">
+                        <img src="/images/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                    </div>
+                </a>
+                <!-- Dropdown içeriği -->
+            </li>
+            
+        </ul>
+    </div>
+</nav>
+```
+
+### 4. Footer.razor
+```razor
+<footer class="content-footer footer bg-footer-theme">
+    <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+        <div class="mb-2 mb-md-0">
+            © @DateTime.Now.Year, SGK Portal - İzmir Sosyal Güvenlik İl Müdürlüğü
+        </div>
+        <div class="d-none d-lg-inline-block">
+            <a href="/hakkinda" class="footer-link me-4">Hakkında</a>
+            <a href="/yardim" class="footer-link me-4">Yardım</a>
+            <a href="/iletisim" class="footer-link">İletişim</a>
+        </div>
+    </div>
+</footer>
+```
+
+## Sneat Tema Entegrasyonu - Adım Adım
+
+### 1. CSS Dosyalarının Eklenmesi (_Host.cshtml veya _Layout.cshtml)
+```html
+<head>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons (Boxicons) -->
+    <link rel="stylesheet" href="/vendor/fonts/boxicons.css" />
+    
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="/css/sneat/core.css" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="/css/sneat/theme-default.css" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="/css/sneat/demo.css" />
+    
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="/vendor/libs/apex-charts/apex-charts.css" />
+    
+    <!-- Custom App CSS -->
+    <link rel="stylesheet" href="/css/app.css" />
+</head>
+```
+
+### 2. JavaScript Dosyalarının Eklenmesi
+```html
+<body>
+    <!-- Blazor içeriği -->
+    
+    <!-- Core JS -->
+    <script src="/vendor/libs/jquery/jquery.js"></script>
+    <script src="/vendor/libs/popper/popper.js"></script>
+    <script src="/vendor/js/bootstrap.js"></script>
+    <script src="/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+    <script src="/vendor/js/menu.js"></script>
+    
+    <!-- Vendors JS -->
+    <script src="/vendor/libs/apex-charts/apexcharts.js"></script>
+    
+    <!-- Main JS -->
+    <script src="/js/sneat/main.js"></script>
+    
+    <!-- Blazor Interop -->
+    <script src="/js/blazor-interop.js"></script>
+    
+    <!-- Blazor framework -->
+    <script src="_framework/blazor.server.js"></script>
+</body>
+```
+
+### 3. Blazor-Sneat Entegrasyonu için JavaScript Interop
+`wwwroot/js/blazor-interop.js`:
+```javascript
+window.sneatHelpers = {
+    // Menüyü başlat
+    initMenu: function() {
+        if (typeof Menu !== 'undefined') {
+            const menuElement = document.getElementById('layout-menu');
+            if (menuElement) {
+                new Menu(menuElement, {
+                    orientation: 'vertical',
+                    closeChildren: false
+                });
+            }
+        }
+    },
+    
+    // Perfect Scrollbar başlat
+    initPerfectScrollbar: function(selector) {
+        const element = document.querySelector(selector);
+        if (element && typeof PerfectScrollbar !== 'undefined') {
+            new PerfectScrollbar(element);
+        }
+    },
+    
+    // Tooltip'leri başlat
+    initTooltips: function() {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+};
+```
+
+### 4. MainLayout.razor'da JavaScript Çağrısı
+```razor
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("sneatHelpers.initMenu");
+            await JSRuntime.InvokeVoidAsync("sneatHelpers.initPerfectScrollbar", ".menu-inner");
+            await JSRuntime.InvokeVoidAsync("sneatHelpers.initTooltips");
+        }
+    }
+}
+```
+
+## Kullanım Senaryoları
+
+### Personel Listesi Sayfası Örneği
+`Pages/PersonelIslemleri/PersonelListele.razor`:
+```razor
+@page "/personel/listele"
+@inject IPersonelService PersonelService
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Personel Listesi</h5>
+                <a href="/personel/ekle" class="btn btn-primary">
+                    <i class="bx bx-plus me-1"></i> Yeni Personel
+                </a>
+            </div>
+            
+            <div class="card-body">
+                <!-- Filtreleme Bileşeni -->
+                <PersonelFiltrelemeForm OnFilter="HandleFilter" />
+                
+                <!-- Veri Tablosu -->
+                <DataGrid TItem="PersonelResponseDto" 
+                          Items="@personeller"
+                          OnRowClick="HandleRowClick">
+                    <Columns>
+                        <DataGridColumn TItem="PersonelResponseDto" Field="@nameof(PersonelResponseDto.TcKimlikNo)" Title="TC Kimlik No" />
+                        <DataGridColumn TItem="PersonelResponseDto" Field="@nameof(PersonelResponseDto.AdSoyad)" Title="Ad Soyad" />
+                        <DataGridColumn TItem="PersonelResponseDto" Field="@nameof(PersonelResponseDto.DepartmanAdi)" Title="Departman" />
+                        <DataGridColumn TItem="PersonelResponseDto" Field="@nameof(PersonelResponseDto.UnvanAdi)" Title="Unvan" />
+                    </Columns>
+                </DataGrid>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<PersonelResponseDto> personeller = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+    
+    private async Task LoadData()
+    {
+        personeller = await PersonelService.GetAllAsync();
+    }
+    
+    private async Task HandleFilter(PersonelFilterRequestDto filter)
+    {
+        personeller = await PersonelService.GetFilteredAsync(filter);
+    }
+    
+    private void HandleRowClick(PersonelResponseDto personel)
+    {
+        NavigationManager.NavigateTo($"/personel/detay/{personel.Id}");
+    }
+}
+```
+
+## Teknik Özellikler
+
+### Blazor Server ile Sneat Entegrasyonu
+- **SignalR Hub**: Real-time sıra çağırma ve bildirimler için
+- **Component Lifecycle**: Sneat JS kütüphanelerinin doğru zamanda başlatılması
+- **CSS Isolation**: Blazor bileşenlerine özel stiller
+- **JavaScript Interop**: Sneat tema fonksiyonlarına erişim
+
+### Performans Optimizasyonları
+- **Lazy Loading**: Sayfa bazlı bileşen yükleme
+- **Virtual Scrolling**: Büyük listelerde performans
+- **Debouncing**: Arama ve filtreleme işlemlerinde
+- **Caching**: Sık kullanılan verilerin önbelleklenmesi
+
+### Güvenlik
+- **Authentication**: JWT token tabanlı
+- **Authorization**: Role-based erişim kontrolü
+- **CSRF Protection**: Anti-forgery token'lar
+- **XSS Prevention**: Input sanitization
+
+Bu şablon, modern bir SGK portal uygulaması için Sneat teması ile entegre edilmiş, tam kapsamlı bir Blazor Server yapısını içermektedir.

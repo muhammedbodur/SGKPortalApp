@@ -2,8 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
-using SGKPortalApp.DataAccessLayer.Repositories.Concrete;
 using System.Reflection;
+using SGKPortalApp.DataAccessLayer.Repositories;
 
 namespace SGKPortalApp.Common.Extensions
 {

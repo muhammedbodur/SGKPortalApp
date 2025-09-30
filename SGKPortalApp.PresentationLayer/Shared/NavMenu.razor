@@ -1,4 +1,6 @@
-﻿<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+﻿@inject IJSRuntime JSRuntime
+
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
 
     <!-- App Brand -->
     <div class="app-brand demo">
@@ -37,7 +39,7 @@
                     </g>
                 </svg>
             </span>
-            <span class="app-brand-text demo menu-text fw-bolder ms-2">sneat</span>
+            <span class="app-brand-text demo menu-text fw-bolder ms-2">SGK Portal</span>
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -188,3 +190,13 @@
 
     </ul>
 </aside>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("initMenu");
+        }
+    }
+}

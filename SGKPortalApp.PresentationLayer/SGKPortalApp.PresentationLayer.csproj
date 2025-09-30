@@ -50,6 +50,7 @@
     <Folder Include="wwwroot\images\" />
     <Folder Include="wwwroot\lib\" />
     <Folder Include="wwwroot\uploads\" />
+    <Folder Include="Şablon\sneat\html\vertical-menu-template\" />
   </ItemGroup>
 
   <ItemGroup>

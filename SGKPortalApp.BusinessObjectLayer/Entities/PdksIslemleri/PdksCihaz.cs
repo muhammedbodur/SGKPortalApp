@@ -4,7 +4,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SGKPortalApp.BusinessObjectLayer.DataBaseEntities.PdksIslemleri
+namespace SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri
 {
     public class PdksCihaz : BaseEntity
     {

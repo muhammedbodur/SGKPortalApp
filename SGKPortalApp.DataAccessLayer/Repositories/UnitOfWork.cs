@@ -12,7 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete
+namespace SGKPortalApp.DataAccessLayer.Repositories
 {
     /// <summary>
     /// Smart UnitOfWork Implementation - N-Layer Architecture
