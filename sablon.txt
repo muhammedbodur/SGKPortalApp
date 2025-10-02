@@ -542,221 +542,301 @@ SGKPortalApp/
 │   ├── appsettings.Development.json
 │   └── appsettings.Production.json
 │
-└── SGKPortalApp.PresentationLayer/                     # Blazor Server UI
-    ├── Pages/                                         # Razor sayfaları
-    │   ├── Account/
-    │   │   ├── Login.razor
-    │   │   ├── Register.razor
-    │   │   └── Profile.razor
-    │   ├── PersonelIslemleri/                         # Personel işlemleri sayfaları
-    │   │   ├── PersonelListele/
-    │   │   │   ├── PersonelList.razor
-    │   │   │   ├── PersonelDetail.razor
-    │   │   │   └── PersonelEdit.razor
-    │   │   ├── PersonelEkleme/
-    │   │   │   ├── PersonelEkle.razor
-    │   │   │   └── PersonelEkleForm.razor
-    │   │   ├── DepartmanBilgileri/
-    │   │   │   ├── DepartmanList.razor
-    │   │   │   ├── DepartmanEkle.razor
-    │   │   │   └── DepartmanDuzenle.razor
-    │   │   ├── ServisBilgileri/
-    │   │   │   ├── ServisList.razor
-    │   │   │   ├── ServisEkle.razor
-    │   │   │   └── ServisDuzenle.razor
-    │   │   └── UnvanBilgileri/
-    │   │       ├── UnvanList.razor
-    │   │       ├── UnvanEkle.razor
-    │   │       └── UnvanDuzenle.razor
-    │   ├── KullaniciIslemleri/                        # Kullanıcı işlemleri sayfaları
-    │   │   ├── KisiselBilgiler/
-    │   │   │   ├── KisiselBilgiler.razor
-    │   │   │   └── KisiselBilgilerDuzenle.razor
-    │   │   └── SifreYenileme/
-    │   │       └── SifreYenile.razor
-    │   ├── SiramatikIslemleri/                        # Sıramatik işlemleri sayfaları
-    │   │   ├── Bankolar/
-    │   │   │   ├── BankoBilgileri/
-    │   │   │   │   ├── BankoList.razor
-    │   │   │   │   ├── BankoEkle.razor
-    │   │   │   │   └── BankoDuzenle.razor
-    │   │   │   ├── BankoPersonelleri/
-    │   │   │   │   ├── BankoPersonelList.razor
-    │   │   │   │   └── BankoPersonelAtama.razor
-    │   │   │   └── BankoAltIslemleri/
-    │   │   │       ├── BankoAltIslemList.razor
-    │   │   │       ├── BankoAltIslemEkle.razor
-    │   │   │       └── BankoAltIslemDuzenle.razor
-    │   │   ├── Kanallar/
-    │   │   │   ├── KanalIslemleri/
-    │   │   │   │   ├── KanalList.razor
-    │   │   │   │   ├── KanalEkle.razor
-    │   │   │   │   └── KanalDuzenle.razor
-    │   │   │   ├── AltKanalIslemleri/
-    │   │   │   │   ├── AltKanalList.razor
-    │   │   │   │   ├── AltKanalEkle.razor
-    │   │   │   │   └── AltKanalDuzenle.razor
-    │   │   │   ├── KanalAltKanalAtama/
-    │   │   │   │   ├── KanalAtamaList.razor
-    │   │   │   │   └── KanalAtamaIslem.razor
-    │   │   │   ├── KanalPersonelleri/
-    │   │   │   │   ├── KanalPersonelList.razor
-    │   │   │   │   └── KanalPersonelAtama.razor
-    │   │   │   └── PersonelAltKanalEslestirmesi/
-    │   │   │       ├── PersonelEslestirmeList.razor
-    │   │   │       └── PersonelEslestirmeIslem.razor
-    │   │   ├── Kiosklar/
-    │   │   │   ├── KioskIslemleri/
-    │   │   │   │   ├── KioskList.razor
-    │   │   │   │   ├── KioskEkle.razor
-    │   │   │   │   └── KioskDuzenle.razor
-    │   │   │   └── KioskAltKanalEslestirme/
-    │   │   │       ├── KioskEslestirmeList.razor
-    │   │   │       └── KioskEslestirmeIslem.razor
-    │   │   └── Tvler/
-    │   │       ├── TvIslemleri/
-    │   │       │   ├── TvList.razor
-    │   │       │   ├── TvEkle.razor
-    │   │       │   └── TvDuzenle.razor
-    │   │       └── TvBankoEslestirme/
-    │   │           ├── TvEslestirmeList.razor
-    │   │           └── TvEslestirmeIslem.razor
-    │   ├── PdksIslemleri/                             # PDKS işlemleri sayfaları
+└── SGKPortalApp.PresentationLayer/
+    │
+    ├── Pages/                                             # Routable Razor Pages
+    │   ├── _Host.cshtml                                   # Blazor Server host page
+    │   ├── Index.razor                                    # Dashboard (@page "/")
+    │   ├── Error.razor                                    # Error page
+    │   │
+    │   ├── Auth/                                          # Authentication pages
+    │   │   ├── Login.razor                                # @page "/auth/login"
+    │   │   ├── Logout.razor                               # @page "/auth/logout"
+    │   │   └── AccessDenied.razor                         # @page "/auth/access-denied"
+    │   │
+    │   ├── Account/                                       # User account management
+    │   │   ├── Profile.razor                              # @page "/account/profile"
+    │   │   └── ChangePassword.razor                       # @page "/account/change-password"
+    │   │
+    │   ├── Personel/                                      # Personel module
+    │   │   ├── Index.razor                                # @page "/personel" - List
+    │   │   ├── Detail.razor                               # @page "/personel/{id:int}"
+    │   │   ├── Create.razor                               # @page "/personel/create"
+    │   │   ├── Edit.razor                                 # @page "/personel/edit/{id:int}"
+    │   │   │
+    │   │   ├── Departman/
+    │   │   │   ├── Index.razor                            # @page "/personel/departman"
+    │   │   │   └── Manage.razor                           # @page "/personel/departman/manage/{id:int?}"
+    │   │   │
+    │   │   ├── Servis/
+    │   │   │   ├── Index.razor                            # @page "/personel/servis"
+    │   │   │   └── Manage.razor                           # @page "/personel/servis/manage/{id:int?}"
+    │   │   │
+    │   │   └── Unvan/
+    │   │       ├── Index.razor                            # @page "/personel/unvan"
+    │   │       └── Manage.razor                           # @page "/personel/unvan/manage/{id:int?}"
+    │   │
+    │   ├── Siramatik/                                     # Queue management module
+    │   │   ├── Dashboard.razor                            # @page "/siramatik" - Live monitoring
+    │   │   │
+    │   │   ├── Banko/
+    │   │   │   ├── Index.razor                            # @page "/siramatik/banko"
+    │   │   │   ├── Manage.razor                           # @page "/siramatik/banko/manage/{id:int?}"
+    │   │   │   ├── PersonelAtama.razor                    # @page "/siramatik/banko/personel-atama"
+    │   │   │   └── IslemTanimlari.razor                   # @page "/siramatik/banko/islem-tanimlari"
+    │   │   │
+    │   │   ├── Kanal/
+    │   │   │   ├── Index.razor                            # @page "/siramatik/kanal"
+    │   │   │   ├── Manage.razor                           # @page "/siramatik/kanal/manage/{id:int?}"
+    │   │   │   ├── AltKanal.razor                         # @page "/siramatik/kanal/alt-kanal/{kanalId:int}"
+    │   │   │   ├── PersonelAtama.razor                    # @page "/siramatik/kanal/personel-atama"
+    │   │   │   └── Eslestirme.razor                       # @page "/siramatik/kanal/eslestirme"
+    │   │   │
+    │   │   ├── Kiosk/
+    │   │   │   ├── Index.razor                            # @page "/siramatik/kiosk"
+    │   │   │   ├── Manage.razor                           # @page "/siramatik/kiosk/manage/{id:int?}"
+    │   │   │   └── AltKanalEslestirme.razor              # @page "/siramatik/kiosk/eslestirme"
+    │   │   │
+    │   │   └── Tv/
+    │   │       ├── Index.razor                            # @page "/siramatik/tv"
+    │   │       ├── Manage.razor                           # @page "/siramatik/tv/manage/{id:int?}"
+    │   │       └── BankoEslestirme.razor                  # @page "/siramatik/tv/banko-eslestirme"
+    │   │
+    │   ├── Pdks/                                          # Time & attendance module
     │   │   ├── GirisCikis/
-    │   │   │   ├── GirisCikisBilgileri.razor
-    │   │   │   └── GirisCikisDetay.razor
-    │   │   ├── IzinTalepSistemi/
-    │   │   │   ├── IzinTalepList.razor
-    │   │   │   ├── IzinTalepEkle.razor
-    │   │   │   └── IzinTalepOnay.razor
-    │   │   ├── PersonelCalismaGun/
-    │   │   │   ├── CalismaGunList.razor
-    │   │   │   └── CalismaGunDetay.razor
-    │   │   ├── IzinKayitSorumlusu/
-    │   │   │   ├── IzinSorumlusuList.razor
-    │   │   │   └── IzinSorumlusuAtama.razor
+    │   │   │   ├── Index.razor                            # @page "/pdks/giris-cikis"
+    │   │   │   └── Detail.razor                           # @page "/pdks/giris-cikis/{personelId:int}/{tarih:datetime}"
+    │   │   │
+    │   │   ├── Izin/
+    │   │   │   ├── Taleplerim.razor                       # @page "/pdks/izin/taleplerim"
+    │   │   │   ├── YeniTalep.razor                        # @page "/pdks/izin/yeni-talep"
+    │   │   │   ├── OnayBekleyenler.razor                  # @page "/pdks/izin/onay-bekleyenler"
+    │   │   │   └── IzinSorumluAtama.razor                 # @page "/pdks/izin/sorumlu-atama"
+    │   │   │
+    │   │   ├── Mesai/
+    │   │   │   ├── CalismaGunleri.razor                   # @page "/pdks/mesai/calisma-gunleri"
+    │   │   │   └── SgmMesai.razor                         # @page "/pdks/mesai/sgm-mesai"
+    │   │   │
     │   │   └── Raporlar/
-    │   │       ├── SgmMesaiListesi/
-    │   │       │   └── SgmMesaiRaporu.razor
-    │   │       └── PersonelMesaiListesi/
-    │   │           └── PersonelMesaiRaporu.razor
-    │   ├── EshotIslemleri/                            # Eshot işlemleri sayfaları
-    │   │   ├── EshotHaraketleri/
-    │   │   │   ├── EshotHareket.razor
-    │   │   │   └── EshotHareketDetay.razor
-    │   │   ├── EshotKullanimHakki/
-    │   │   │   ├── KullanimHakkiList.razor
-    │   │   │   └── KullanimHakkiTanimla.razor
-    │   │   └── EshotUcretBilgileri/
-    │   │       ├── UcretBilgisiList.razor
-    │   │       └── UcretBilgisiDuzenle.razor
-    │   ├── Index.razor
-    │   └── Error.razor
+    │   │       ├── PersonelMesai.razor                    # @page "/pdks/raporlar/personel-mesai"
+    │   │       ├── DepartmanMesai.razor                   # @page "/pdks/raporlar/departman-mesai"
+    │   │       └── IzinRaporu.razor                       # @page "/pdks/raporlar/izin-raporu"
+    │   │
+    │   └── Eshot/                                         # Transportation module
+    │       ├── Hareketler/
+    │       │   ├── Index.razor                            # @page "/eshot/hareketler"
+    │       │   └── Detail.razor                           # @page "/eshot/hareketler/{personelId:int}"
+    │       │
+    │       ├── KullanimHakki/
+    │       │   ├── Index.razor                            # @page "/eshot/kullanim-hakki"
+    │       │   └── Tanimla.razor                          # @page "/eshot/kullanim-hakki/tanimla"
+    │       │
+    │       └── UcretBilgisi/
+    │           └── Index.razor                            # @page "/eshot/ucret-bilgisi"
     │
-    ├── Components/                                    # Yeniden kullanılabilir bileşenler
-    │   ├── PersonelIslemleri/                         # Personel bileşenleri
-    │   │   ├── PersonelTable.razor
-    │   │   ├── PersonelForm.razor
-    │   │   ├── PersonelFilter.razor
-    │   │   ├── DepartmanSelector.razor
-    │   │   └── UnvanSelector.razor
-    │   ├── SiramatikIslemleri/                        # Sıramatik bileşenleri
-    │   │   ├── BankoTable.razor
-    │   │   ├── KanalTable.razor
-    │   │   ├── KioskTable.razor
-    │   │   ├── TvTable.razor
-    │   │   ├── EslestirmeModal.razor
-    │   │   └── AtamaDialog.razor
-    │   ├── PdksIslemleri/                             # PDKS bileşenleri
-    │   │   ├── PdksTimeline.razor
-    │   │   ├── IzinTalepForm.razor
-    │   │   ├── IzinOnayModal.razor
-    │   │   ├── MesaiRaporFilter.razor
-    │   │   └── GirisCikisTable.razor
-    │   ├── EshotIslemleri/                            # Eshot bileşenleri
-    │   │   ├── EshotHareketTable.razor
-    │   │   ├── KullanimHakkiCard.razor
-    │   │   └── UcretBilgisiForm.razor
-    │   ├── Forms/                                     # Form bileşenleri
-    │   │   ├── ValidationSummary.razor
-    │   │   ├── DateRangePicker.razor
-    │   │   ├── SearchBox.razor
-    │   │   └── FileUploadComponent.razor
-    │   ├── Tables/                                    # Tablo bileşenleri
-    │   │   ├── DataGrid.razor
-    │   │   ├── PaginationComponent.razor
-    │   │   ├── FilterComponent.razor
-    │   │   ├── SortableHeader.razor
-    │   │   └── ExportToExcel.razor
-    │   ├── UI/                                        # UI bileşenleri
-    │   │   ├── LoadingSpinner.razor
-    │   │   ├── ConfirmDialog.razor
-    │   │   ├── AlertComponent.razor
-    │   │   ├── BreadcrumbComponent.razor
-    │   │   ├── StatusBadge.razor
-    │   │   └── ActionButton.razor
-    │   ├── Charts/                                    # Grafik bileşenleri
-    │   │   ├── BarChart.razor
-    │   │   ├── PieChart.razor
-    │   │   ├── LineChart.razor
-    │   │   └── ActivityChart.razor
-    │   └── Modals/                                    # Modal bileşenleri
-    │       ├── BaseModal.razor
-    │       ├── ConfirmationModal.razor
-    │       └── FormModal.razor
+    ├── Shared/                                            # Shared layouts and global components
+    │   ├── Layout/                                        # Layout components
+    │   │   ├── MainLayout.razor                           # Main layout with Sneat theme
+    │   │   ├── EmptyLayout.razor                          # Empty layout for auth pages
+    │   │   ├── NavMenu.razor                              # Left sidebar navigation
+    │   │   ├── TopBar.razor                               # Top navigation bar
+    │   │   └── Footer.razor                               # Footer component
+    │   │
+    │   ├── Common/                                        # Global reusable components
+    │   │   ├── DataGrid.razor                             # Generic data grid
+    │   │   │   └── DataGrid.razor.cs                      # Code-behind
+    │   │   ├── ConfirmDialog.razor                        # Confirmation modal
+    │   │   ├── LoadingSpinner.razor                       # Loading indicator
+    │   │   ├── Toast.razor                                # Toast notifications
+    │   │   ├── Breadcrumb.razor                           # Breadcrumb navigation
+    │   │   ├── PageHeader.razor                           # Page title & actions
+    │   │   ├── EmptyState.razor                           # Empty state placeholder
+    │   │   └── ErrorBoundary.razor                        # Error boundary wrapper
+    │   │
+    │   ├── Forms/                                         # Form components
+    │   │   ├── DateRangePicker.razor                      # Date range selector
+    │   │   ├── SearchBox.razor                            # Search input
+    │   │   ├── FileUpload.razor                           # File upload component
+    │   │   ├── MultiSelect.razor                          # Multi-select dropdown
+    │   │   └── ValidationMessage.razor                    # Custom validation display
+    │   │
+    │   └── Cards/                                         # Card components
+    │       ├── StatCard.razor                             # Statistic card
+    │       ├── InfoCard.razor                             # Information card
+    │       └── ChartCard.razor                            # Chart wrapper card
     │
-    ├── Shared/                                        # Paylaşılan layout'lar
-    │   ├── MainLayout.razor                           # Ana layout
-    │   ├── NavMenu.razor                              # Navigasyon menüsü
-    │   ├── SidebarMenu.razor                          # Yan menü
-    │   ├── TopHeader.razor                            # Üst header
-    │   ├── Footer.razor                               # Alt footer
-    │   ├── LoginDisplay.razor                         # Giriş gösterimi
-    │   └── BreadcrumbNav.razor                         # Sayfa navigasyonu
+    ├── Components/                                        # Feature-specific components
+    │   ├── Personel/
+    │   │   ├── PersonelCard.razor                         # Personel info card
+    │   │   ├── PersonelFilter.razor                       # Advanced filter form
+    │   │   ├── PersonelSelector.razor                     # Personel dropdown selector
+    │   │   ├── DepartmanTree.razor                        # Hierarchical department tree
+    │   │   └── PersonelStats.razor                        # Personel statistics widget
+    │   │
+    │   ├── Siramatik/
+    │   │   ├── BankoDurumCard.razor                       # Bank status card
+    │   │   ├── SiraListesi.razor                          # Queue list real-time
+    │   │   ├── KanalAtamaMatrix.razor                     # Channel assignment matrix
+    │   │   ├── EslestirmeModal.razor                      # Assignment modal
+    │   │   └── TvEkranPreview.razor                       # TV screen preview
+    │   │
+    │   ├── Pdks/
+    │   │   ├── GirisCikisTimeline.razor                   # Entry/exit timeline
+    │   │   ├── IzinTalepForm.razor                        # Leave request form
+    │   │   ├── IzinOnayCard.razor                         # Leave approval card
+    │   │   ├── MesaiKarti.razor                           # Work hours card
+    │   │   └── CalismaGunTablosu.razor                    # Working days table
+    │   │
+    │   ├── Eshot/
+    │   │   ├── HareketTablosu.razor                       # Transaction table
+    │   │   ├── KullanimGrafigi.razor                      # Usage chart
+    │   │   └── HakBilgisiCard.razor                       # Benefit info card
+    │   │
+    │   └── Dashboard/
+    │       ├── WelcomeCard.razor                          # Welcome widget
+    │       ├── QuickActions.razor                         # Quick action buttons
+    │       ├── RecentActivities.razor                     # Recent activities list
+    │       ├── NotificationPanel.razor                    # Notifications widget
+    │       └── StatisticsGrid.razor                       # Statistics grid
     │
-    ├── Services/                                      # UI servisleri
-    │   ├── ApiService.cs                              # HTTP client wrapper
-    │   ├── AuthService.cs                             # Authentication servisi
-    │   ├── NotificationService.cs                     # Bildirim servisi
-    │   ├── LocalStorageService.cs                     # Local storage yönetimi
-    │   └── FileService.cs                             # Dosya işlemleri
+    ├── Services/                                          # UI-layer services
+    │   ├── ApiServices/                                   # API communication services
+    │   │   ├── Base/
+    │   │   │   └── BaseApiService.cs                      # Base HTTP client wrapper
+    │   │   ├── IPersonelApiService.cs
+    │   │   ├── PersonelApiService.cs
+    │   │   ├── ISiramatikApiService.cs
+    │   │   ├── SiramatikApiService.cs
+    │   │   ├── IPdksApiService.cs
+    │   │   ├── PdksApiService.cs
+    │   │   ├── IEshotApiService.cs
+    │   │   ├── EshotApiService.cs
+    │   │   ├── IAuthApiService.cs
+    │   │   └── AuthApiService.cs
+    │   │
+    │   ├── StateServices/                                 # State management services
+    │   │   ├── AppStateService.cs                         # Global app state
+    │   │   ├── UserStateService.cs                        # Current user state
+    │   │   └── NavigationStateService.cs                  # Navigation state
+    │   │
+    │   ├── UIServices/                                    # UI-specific services
+    │   │   ├── IToastService.cs
+    │   │   ├── ToastService.cs
+    │   │   ├── IModalService.cs
+    │   │   ├── ModalService.cs
+    │   │   ├── ILoadingService.cs
+    │   │   ├── LoadingService.cs
+    │   │   ├── IThemeService.cs
+    │   │   └── ThemeService.cs
+    │   │
+    │   ├── StorageServices/                               # Browser storage services
+    │   │   ├── ILocalStorageService.cs
+    │   │   ├── LocalStorageService.cs
+    │   │   ├── ISessionStorageService.cs
+    │   │   └── SessionStorageService.cs
+    │   │
+    │   └── Hubs/                                          # SignalR hubs for real-time
+    │       ├── SiramatikHub.cs                            # Real-time queue updates
+    │       └── NotificationHub.cs                         # Real-time notifications
     │
-    ├── Models/                                        # UI modelleri
-    │   ├── LoginModel.cs                              # Login form modeli
-    │   ├── PersonelFilterModel.cs                     # Personel filtreleme
-    │   ├── SiramatikFilterModel.cs                    # Sıramatik filtreleme
-    │   └── ReportParameterModel.cs                    # Rapor parametreleri
+    ├── Models/                                            # UI-specific models
+    │   ├── ViewModels/                                    # Page view models
+    │   │   ├── PersonelListViewModel.cs
+    │   │   ├── SiramatikDashboardViewModel.cs
+    │   │   └── DashboardViewModel.cs
+    │   │
+    │   ├── FormModels/                                    # Form input models
+    │   │   ├── LoginFormModel.cs
+    │   │   ├── PersonelFilterFormModel.cs
+    │   │   ├── IzinTalepFormModel.cs
+    │   │   └── SiramatikFilterFormModel.cs
+    │   │
+    │   └── UIModels/                                      # UI state models
+    │       ├── BreadcrumbItem.cs
+    │       ├── MenuItem.cs
+    │       ├── ToastMessage.cs
+    │       └── TableColumn.cs
     │
-    ├── wwwroot/                                       # Statik dosyalar
+    ├── Helpers/                                           # UI helper classes
+    │   ├── NavigationHelper.cs                            # Navigation utilities
+    │   ├── FormHelper.cs                                  # Form validation helpers
+    │   ├── DateHelper.cs                                  # Date formatting
+    │   └── FileHelper.cs                                  # File handling utilities
+    │
+    ├── Extensions/                                        # Extension methods
+    │   ├── ServiceCollectionExtensions.cs                 # DI extensions
+    │   ├── ComponentExtensions.cs                         # Component helpers
+    │   └── JSRuntimeExtensions.cs                         # JS interop extensions
+    │
+    ├── wwwroot/                                           # Static files
     │   ├── css/
-    │   │   ├── bootstrap/                             # Bootstrap stilleri
-    │   │   ├── site.css                               # Ana site stilleri
-    │   │   ├── personel.css                           # Personel modülü stilleri
-    │   │   ├── siramatik.css                          # Sıramatik modülü stilleri
-    │   │   ├── pdks.css                               # PDKS modülü stilleri
-    │   │   └── eshot.css                              # Eshot modülü stilleri
+    │   │   ├── sneat/                                     # Sneat theme CSS
+    │   │   │   ├── core.css
+    │   │   │   ├── core-dark.css
+    │   │   │   ├── theme-default.css
+    │   │   │   ├── theme-default-dark.css
+    │   │   │   └── demo.css
+    │   │   │
+    │   │   ├── vendor/                                    # Vendor CSS
+    │   │   │   ├── perfect-scrollbar.css
+    │   │   │   └── apex-charts.css
+    │   │   │
+    │   │   ├── app.css                                    # Global app styles
+    │   │   │
+    │   │   └── modules/                                   # Module-specific styles
+    │   │       ├── personel.css
+    │   │       ├── siramatik.css
+    │   │       ├── pdks.css
+    │   │       └── eshot.css
+    │   │
     │   ├── js/
-    │   │   ├── site.js                                # Ana JavaScript
-    │   │   ├── blazor-utils.js                        # Blazor yardımcı fonksiyonlar
-    │   │   ├── charts.js                              # Grafik işlemleri
-    │   │   └── notifications.js                       # Bildirim işlemleri
+    │   │   ├── sneat/                                     # Sneat theme JS
+    │   │   │   ├── helpers.js
+    │   │   │   ├── config.js
+    │   │   │   ├── menu.js
+    │   │   │   └── main.js
+    │   │   │
+    │   │   ├── vendor/                                    # Vendor JS
+    │   │   │   ├── jquery.min.js
+    │   │   │   ├── bootstrap.bundle.min.js
+    │   │   │   ├── perfect-scrollbar.js
+    │   │   │   └── apexcharts.js
+    │   │   │
+    │   │   ├── interop.js                                 # Blazor-JS interop
+    │   │   ├── sneat-init.js                              # Sneat initialization
+    │   │   └── app.js                                     # Custom app JS
+    │   │
+    │   ├── vendor/                                        # Vendor assets
+    │   │   ├── fonts/
+    │   │   │   ├── boxicons/
+    │   │   │   └── fontawesome/
+    │   │   │
+    │   │   └── libs/
+    │   │       ├── perfect-scrollbar/
+    │   │       ├── apex-charts/
+    │   │       └── bootstrap/
+    │   │
     │   ├── images/
-    │   │   ├── logo.png                               # Site logosu
-    │   │   ├── icons/                                 # İkonlar
-    │   │   └── backgrounds/                           # Arkaplan resimleri
-    │   ├── lib/                                       # Third-party kütüphaneler
-    │   │   ├── jquery/
-    │   │   ├── bootstrap/
-    │   │   └── chart.js/
-    │   └── uploads/                                   # Yüklenen dosyalar
-    │       ├── personel/                              # Personel fotoğrafları
-    │       ├── documents/                             # Dökümanlar
-    │       └── reports/                               # Raporlar
+    │   │   ├── logo.png
+    │   │   ├── logo-light.png
+    │   │   ├── favicon.ico
+    │   │   ├── avatars/                                   # User avatars
+    │   │   └── backgrounds/                               # Background images
+    │   │
+    │   └── uploads/                                       # User uploaded files
+    │       ├── personel/                                  # Personnel photos
+    │       └── documents/                                 # Documents
     │
-    ├── Program.cs                                     # Blazor giriş noktası
-    ├── appsettings.json                               # Genel ayarlar
-    ├── appsettings.Development.json                   # Development ayarları
-    └── _Imports.razor                                 # Global using'ler
+    ├── Properties/
+    │   └── launchSettings.json                            # Launch configuration
+    │
+    ├── _Imports.razor                                     # Global using directives
+    ├── App.razor                                          # Router configuration
+    ├── Program.cs                                         # Application entry point
+    ├── appsettings.json                                   # App settings
+    ├── appsettings.Development.json                       # Development settings
+    ├── appsettings.Production.json                        # Production settings
+    └── SGKPortalApp.PresentationLayer.csproj             # Project file  
 ```
 
 

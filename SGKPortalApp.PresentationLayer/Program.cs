@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.Common.Extensions;
+using SGKPortalApp.PresentationLayer.Extensions;  // ← YENİ: Extension eklendi
 using SGKPortalApp.DataAccessLayer.Context;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -49,17 +50,22 @@ builder.Services.AddDbContext<SGKDbContext>(options =>
     }
 });
 
-// SGK Portal servislerini kaydet (Repository Pattern)
+// ⭐ KATMAN SERVİSLERİ ⭐
+// 1. Data Access Layer + Business Logic Layer
 builder.Services.AddSGKPortalServices(connectionString);
 
-// CORS (API kullanımı için) - appsettings'den al
+// 2. Presentation Layer (UI Services)
+builder.Services.AddPresentationServices(builder.Configuration);  // ← YENİ: Extension kullanımı
+
+// CORS (API kullanımı için)
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
         policy.WithOrigins(httpsUrl, apiUrl)
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();  // ← YENİ: Credentials eklendi
     });
 });
 
@@ -140,10 +146,10 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-Console.WriteLine("SGK Portal uygulaması başlatılıyor...");
-Console.WriteLine($"Ortam: {app.Environment.EnvironmentName}");
-Console.WriteLine($"HTTPS URL: {httpsUrl}");
-Console.WriteLine($"HTTP URL: {httpUrl}");
-Console.WriteLine($"API URL: {apiUrl}");
+Console.WriteLine("🚀 SGK Portal uygulaması başlatılıyor...");
+Console.WriteLine($"📍 Ortam: {app.Environment.EnvironmentName}");
+Console.WriteLine($"🔒 HTTPS URL: {httpsUrl}");
+Console.WriteLine($"🌐 HTTP URL: {httpUrl}");
+Console.WriteLine($"🔌 API URL: {apiUrl}");
 
 app.Run();
