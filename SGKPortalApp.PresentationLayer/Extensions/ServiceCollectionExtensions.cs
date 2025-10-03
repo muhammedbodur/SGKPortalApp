@@ -60,7 +60,7 @@ namespace SGKPortalApp.PresentationLayer.Extensions
                 assembly,
                 "SGKPortalApp.PresentationLayer.Services.ApiServices",
                 "API Services",
-                optional: true // API henüz hazır olmayabilir
+                optional: false
             );
 
             Console.WriteLine("🎉 Presentation Layer hazır!\n");

@@ -4,28 +4,23 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices;
+using SGKPortalApp.PresentationLayer.Services.UIServices;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
 {
     public partial class Index : ComponentBase
     {
-        private readonly IDepartmanApiService _departmanService;
-        private readonly NavigationManager _navigationManager;
-        private readonly IJSRuntime _jsRuntime;
+        // ═══════════════════════════════════════════════════════
+        // DEPENDENCY INJECTION
+        // ═══════════════════════════════════════════════════════
 
-        public Index(
-            IDepartmanApiService departmanService,
-            NavigationManager navigationManager,
-            IJSRuntime jsRuntime)
-        {
-            _departmanService = departmanService;
-            _navigationManager = navigationManager;
-            _jsRuntime = jsRuntime;
-        }
+        [Inject] private IDepartmanApiService _departmanService { get; set; } = default!;
+        [Inject] private NavigationManager _navigationManager { get; set; } = default!;
+        [Inject] private IToastService _toastService { get; set; } = default!;
 
+        // Properties
         private List<DepartmanResponseDto> Departmanlar { get; set; } = new();
         private List<DepartmanResponseDto> FilteredDepartmanlar { get; set; } = new();
-
         private string searchTerm = string.Empty;
         private bool IsLoading { get; set; } = true;
 
@@ -35,13 +30,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         private string DeleteDepartmanAdi { get; set; } = string.Empty;
         private bool IsDeleting { get; set; } = false;
 
-        // Lifecycle Methods
+        // Lifecycle
         protected override async Task OnInitializedAsync()
         {
             await LoadDepartmanlar();
         }
 
-        // Data Loading
         private async Task LoadDepartmanlar()
         {
             IsLoading = true;
@@ -53,7 +47,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             catch (Exception ex)
             {
                 Console.WriteLine($"Hata: {ex.Message}");
-                await ShowToast("Departmanlar yüklenirken bir hata oluştu!", "error");
+                await _toastService.ShowErrorAsync("Departmanlar yüklenirken bir hata oluştu!");
             }
             finally
             {
@@ -61,7 +55,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             }
         }
 
-        // Search
         private void OnSearchChanged()
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
@@ -74,40 +67,44 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                     .Where(d => d.DepartmanAdi.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
                     .ToList();
             }
+            StateHasChanged();
         }
 
-        // Navigation
         private void NavigateToCreate()
         {
-            _navigationManager.NavigateTo("/personel/departman/yeni");
+            _navigationManager.NavigateTo("/personel/departman/manage");
         }
 
         private void NavigateToEdit(int id)
         {
-            _navigationManager.NavigateTo($"/personel/departman/duzenle/{id}");
+            _navigationManager.NavigateTo($"/personel/departman/manage/{id}");
         }
 
-        // Toggle Aktiflik
         private async Task ToggleAktiflik(int id)
         {
             try
             {
                 var departman = Departmanlar.FirstOrDefault(d => d.DepartmanId == id);
-                if (departman == null) return;
+                if (departman == null)
+                {
+                    await _toastService.ShowErrorAsync("Departman bulunamadı!");
+                    return;
+                }
+
+                var yeniDurum = departman.DepartmanAktiflik == Aktiflik.Aktif
+                    ? Aktiflik.Pasif
+                    : Aktiflik.Aktif;
 
                 var updateDto = new DepartmanUpdateRequestDto
                 {
                     DepartmanAdi = departman.DepartmanAdi,
-                    DepartmanAktiflik = departman.DepartmanAktiflik == Aktiflik.Aktif
-                        ? Aktiflik.Pasif
-                        : Aktiflik.Aktif
+                    DepartmanAktiflik = yeniDurum
                 };
 
                 await _departmanService.UpdateAsync(id, updateDto);
 
-                await ShowToast(
-                    $"Departman {(updateDto.DepartmanAktiflik == Aktiflik.Aktif ? "aktif" : "pasif")} yapıldı.",
-                    "success"
+                await _toastService.ShowSuccessAsync(
+                    $"Departman {(yeniDurum == Aktiflik.Aktif ? "aktif" : "pasif")} yapıldı."
                 );
 
                 await LoadDepartmanlar();
@@ -115,16 +112,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             catch (Exception ex)
             {
                 Console.WriteLine($"Hata: {ex.Message}");
-                await ShowToast("Durum değiştirilirken bir hata oluştu!", "error");
+                await _toastService.ShowErrorAsync("Durum değiştirilirken bir hata oluştu!");
             }
         }
 
-        // Delete Operations
         private void ShowDeleteConfirmation(int id, string departmanAdi)
         {
             DeleteDepartmanId = id;
             DeleteDepartmanAdi = departmanAdi;
             ShowDeleteModal = true;
+            StateHasChanged();
         }
 
         private void HideDeleteConfirmation()
@@ -132,6 +129,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             ShowDeleteModal = false;
             DeleteDepartmanId = 0;
             DeleteDepartmanAdi = string.Empty;
+            StateHasChanged();
         }
 
         private async Task ConfirmDelete()
@@ -143,31 +141,24 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
 
                 if (success)
                 {
-                    await ShowToast("Departman başarıyla silindi.", "success");
+                    await _toastService.ShowSuccessAsync("Departman başarıyla silindi.");
                     await LoadDepartmanlar();
                     HideDeleteConfirmation();
                 }
                 else
                 {
-                    await ShowToast("Departman silinemedi!", "error");
+                    await _toastService.ShowErrorAsync("Departman silinemedi!");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Hata: {ex.Message}");
-                await ShowToast("Departman silinirken bir hata oluştu!", "error");
+                await _toastService.ShowErrorAsync("Departman silinirken bir hata oluştu!");
             }
             finally
             {
                 IsDeleting = false;
             }
-        }
-
-        // Toast Notification (Geçici - ToastService eklenince değişecek)
-        private async Task ShowToast(string message, string type)
-        {
-            await _jsRuntime.InvokeVoidAsync("console.log", $"[{type.ToUpper()}] {message}");
-            // TODO: ToastService.Show(message, type) şeklinde değişecek
         }
     }
 }
