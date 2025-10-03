@@ -1,25 +1,181 @@
-﻿<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+﻿@inject NavigationManager Navigation
+
+<!-- Layout menu -->
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+
     <div class="app-brand demo">
         <a href="/" class="app-brand-link">
             <span class="app-brand-logo demo">
-                <svg width="25" viewBox="0 0 25 42" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                    <g fill="#696cff">
-                        <path d="M13.7918663,0.358365126 L3.39788168,7.44174259 C0.566865006,9.69408886 -0.379795268,12.4788597 0.557900856,15.7960551 C0.68998853,16.2305145 1.09562888,17.7872135 3.12357076,19.2293357 C3.8146334,19.7207684 5.32369333,20.3834223 7.65075054,21.2172976 L7.59773219,21.2525164 L2.63468769,24.5493413 C0.445452254,26.3002124 0.0884951797,28.5083815 1.56381646,31.1738486 C2.83770406,32.8170431 5.20850219,33.2640127 7.09180128,32.5391577 C8.347334,32.0559211 11.4559176,30.0011079 16.4175519,26.3747182 C18.0338572,24.4997857 18.6973423,22.4544883 18.4080071,20.2388261 C17.963753,17.5346866 16.1776345,15.5799961 13.0496516,14.3747546 L10.9194936,13.4715819 L18.6192054,7.984237 L13.7918663,0.358365126 Z"></path>
-                    </g>
-                </svg>
-            </span>
-            <span class="app-brand-text demo menu-text fw-bold ms-2">SGK Portal</span>
-        </a>
+                <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                     viewBox="0 0 150 72.7" style="enable-background:new 0 0 150 72.7;" xml:space="preserve">
+                <style type="text/css">
+                    .st0 {
+                        fill-rule: evenodd;
+                        clip-rule: evenodd;
+                        fill: url(#SVGID_1_);
+                    }
 
-        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+                    .st1 {
+                        fill-rule: evenodd;
+                        clip-rule: evenodd;
+                        fill: #0087C2;
+                    }
+                </style>
+                <g id="SGK_LOGOTYPE_00000021814550640813195680000014554792784669715638_">
+                <linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="0.2736" y1="29.6472" x2="149.5569" y2="29.6472">
+                    <stop offset="0" style="stop-color:#154474" />
+                    <stop offset="1" style="stop-color:#0087C2" />
+                </linearGradient>
+                <path class="st0" d="M71.7,0.6C41.5,1.5,23.1,7.1,10.9,17C-1.4,26.8-0.5,40.2,1.4,45.3c1.6,4.4,2.4,5.5,4.5,8.2
+                c2.7,3.6,5.2,5.2,5.2,5.2S-8.4,32.9,25.8,21c34.2-11.9,95,0.5,95,0.5l28.7-12.7C149.6,8.8,101.9-0.3,71.7,0.6z" />
+                            <path class="st1" d="M19.9,54.4c-0.1-0.1-0.3-0.1-0.5,0c-0.2,0.1-0.4,0.1-0.5,0.3c0.1,0.6,0.2,1.4,0.3,2.6c0.1,1.1,0.3,2.2,0.5,3.2
+                c0.2,1,0.4,1.7,0.5,2c0.5,0.3,1.5,0.7,2.9,1c1.4,0.3,2.9,0.5,4.6,0.5c3.8-0.1,6.8-1,8.9-2.8c2.1-1.8,3.1-4.2,3.2-7.2
+                c0-1.8-0.5-3.4-1.5-4.8c-1-1.3-2.3-2.6-4-3.7c-1-0.7-2-1.3-2.9-1.8c-0.9-0.6-1.9-1.2-2.9-2c-1.1-0.8-1.9-1.7-2.5-2.6
+                c-0.6-1-0.9-2-0.9-3.3c0-1.5,0.5-2.8,1.4-3.8c0.9-1,2.3-1.5,3.9-1.5c0.8,0,1.6,0.1,2.2,0.2c0.7,0.2,1.3,0.5,1.9,0.9
+                c0.7,0.4,1.3,1.1,1.6,2c0.4,0.9,0.6,2.2,0.8,3.9c0.1,0.1,0.2,0.1,0.5,0c0.2,0,0.4-0.1,0.5-0.2c0.1-1.6,0.3-2.9,0.4-4.1
+                c0.2-1.2,0.3-2.2,0.5-3.2c-1-0.1-2.1-0.2-3.4-0.4s-2.7-0.3-4.5-0.4c-3,0-5.6,0.8-7.6,2.4c-2,1.6-3.1,3.9-3.2,6.9
+                c0,2.3,0.7,4.3,2,5.9c1.4,1.6,3.3,3.2,6,4.9c2.2,1.4,3.7,2.7,4.7,3.9c1,1.2,1.4,2.6,1.4,4.2c0,1.7-0.5,3-1.4,3.9
+                c-0.9,0.9-2.1,1.4-3.7,1.4c-1,0-1.9-0.1-2.8-0.3c-0.9-0.2-1.6-0.6-2.4-1c-1-0.6-1.8-1.5-2.4-2.6C21,57.7,20.4,56.3,19.9,54.4z" />
+                            <path class="st1" d="M75.1,61.1c-0.4-0.2-0.7-0.3-0.8-0.5c-0.1-0.2-0.2-0.4-0.3-0.8c-0.1-0.6-0.1-1.4-0.1-2.4c0-1,0-2,0.1-3
+                c0-1.5,0.1-2.5,0.3-3c0.2-0.5,0.6-0.7,1.1-0.8c0.2-0.1,0.4-0.2,0.6-0.2s0.5-0.1,0.7-0.2c0.1-0.1,0.1-0.2,0.1-0.5
+                c0-0.2,0-0.4-0.1-0.5c-0.5,0-1.2,0.1-2,0.1c-0.8,0-2.1,0.1-3.7,0.1c-1.5,0-2.9,0-4.3-0.1c-1.4-0.1-2.6-0.1-3.5-0.1
+                c-0.1,0.1-0.1,0.2-0.1,0.5c0,0.2,0,0.4,0.1,0.5c0.5,0,1,0.1,1.4,0.1s0.8,0.1,1.3,0.2c0.8,0.1,1.3,0.4,1.6,0.8
+                c0.3,0.4,0.5,1.2,0.5,2.3c0.1,1,0.1,2.1,0.1,3.4c0,1.3-0.1,2.4-0.2,3.2c-0.1,0.5-0.2,1-0.4,1.3c-0.2,0.3-0.5,0.6-0.9,0.7
+                c-0.3,0.1-0.6,0.2-1.1,0.3c-0.5,0.1-1.1,0.1-1.7,0.1c-3.9-0.1-7-1.6-9.2-4.6c-2.2-3-3.4-7.1-3.4-12.3c0.1-5.3,1.2-9.2,3.4-11.6
+                c2.2-2.4,4.9-3.6,8.2-3.5c1.6,0,3.1,0.2,4.3,0.5c1.2,0.3,2.3,0.8,3.3,1.5c0.7,0.5,1.2,1.2,1.6,2.1c0.4,0.9,0.6,2.3,0.8,4.1
+                c0.1,0.1,0.3,0.1,0.6,0.1c0.3,0,0.5-0.1,0.5-0.2c0-1.4,0.1-2.9,0.3-4.5c0.2-1.6,0.4-2.8,0.6-3.7c-1.2-0.1-2.7-0.4-4.5-0.7
+                c-1.8-0.3-3.7-0.5-5.9-0.5c-2.3,0-4.3,0.2-6,0.5c-1.6,0.3-3.2,0.8-4.6,1.4c-3,1.3-5.3,3.3-6.9,5.9c-1.7,2.6-2.5,5.7-2.5,9.3
+                c0,6,1.7,10.5,4.9,13.3C52.5,62.6,57.1,64,63,64c2.4,0,4.8-0.3,7-0.8c2.2-0.5,3.9-0.9,4.9-1.3c0.1-0.1,0.1-0.2,0.1-0.4
+                C75.1,61.3,75.1,61.2,75.1,61.1z" />
+                            <path class="st1" d="M98.3,31c0.7,0.1,1.3,0.2,1.7,0.3c0.4,0.1,0.9,0.2,1.2,0.3c0.4,0.1,0.6,0.3,0.8,0.4c0.1,0.2,0.2,0.4,0.2,0.5
+                c0,0.5-0.2,1-0.6,1.7c-0.4,0.6-0.9,1.4-1.5,2.2c-1.9,2.4-3.7,4.6-5.5,6.4c-1.8,1.8-3.4,3.1-4.6,3.8c-0.1,0-0.1,0.1-0.1,0.3
+                c0,0.1,0,0.2,0,0.3c0.1,0.1,0.3,0.2,0.4,0.3c0.1,0.1,0.2,0.3,0.4,0.4c0.9,1.3,1.9,2.7,3.1,4.3c1.2,1.6,2.4,3.1,3.6,4.6
+                c1.2,1.5,2.2,2.7,3.1,3.7c0.4,0.4,0.9,0.9,1.4,1.3c0.5,0.4,1.1,0.8,1.7,1c0.5,0.2,1.4,0.3,2.6,0.4c1.2,0.1,2.5,0.1,3.8,0.1
+                c1.3,0,2.5,0,3.4-0.2c0.1-0.1,0.1-0.2,0.2-0.5c0-0.2,0-0.4,0-0.5c-0.6,0-1.1-0.1-1.5-0.1c-0.5-0.1-0.9-0.2-1.4-0.4
+                c-0.4-0.1-0.7-0.3-1.1-0.5c-0.4-0.2-0.7-0.5-1.1-0.9c-1.2-1.1-2.6-2.7-4.4-4.7c-1.8-2.1-3.5-4.1-5.2-6.2c-1.6-2.1-2.8-3.8-3.5-5
+                v-0.2c1.1-1.2,2.4-2.6,3.9-4.4c1.5-1.7,3-3.5,4.5-5.2c1.3-1.5,2.3-2.4,3.2-2.8c0.9-0.4,2-0.7,3.3-0.8c0.1-0.1,0.1-0.3,0.1-0.5
+                c0-0.2,0-0.4-0.1-0.4l-6.4,0.2c-0.9,0-1.7,0-2.5-0.1c-0.8,0-1.8-0.1-3-0.1c-0.1,0.1-0.1,0.2-0.1,0.5S98.2,31,98.3,31z M89.4,46.2
+                c0-1,0-2.2,0-3.7c0-1.5,0-2.9,0-4.4c0-1.5,0-2.6,0-3.5c0-0.9,0.1-1.6,0.3-2.2c0.2-0.5,0.6-0.9,1.1-1c0.3-0.1,0.6-0.2,1-0.2
+                c0.4-0.1,0.8-0.1,1.2-0.2c0.1-0.1,0.1-0.3,0.1-0.5c0-0.2,0-0.4-0.1-0.4c-0.7,0-1.6,0-2.8,0.1c-1.2,0-2.4,0.1-3.6,0.1
+                c-1.7,0-3.1,0-4.3-0.1c-1.2,0-2.1-0.1-2.7-0.1c-0.1,0.1-0.1,0.2-0.1,0.4c0,0.2,0,0.4,0.1,0.5c0.4,0,0.8,0.1,1.2,0.2
+                s0.8,0.2,1.2,0.3c0.6,0.2,0.9,0.5,1.1,1c0.2,0.5,0.3,1.1,0.3,1.9c0,1.2,0,2.9,0,5c0,2.1,0,4.2,0,6.4c0,1.5,0,3.1,0,4.8
+                c0,1.7,0,3.2,0,4.6c0,1.4,0,2.6,0,3.5c0,1-0.2,1.8-0.4,2.4c-0.2,0.5-0.7,0.9-1.3,1c-0.3,0.1-0.7,0.1-1,0.2c-0.3,0-0.8,0.1-1.4,0.2
+                c-0.1,0.1-0.1,0.2-0.1,0.4s0,0.4,0.1,0.4c0.5,0,1.4,0,2.9-0.1c1.5-0.1,2.9-0.1,4.2-0.1c1.4,0,2.7,0,3.9,0.1s2.3,0.1,3.1,0.1
+                c0.1-0.1,0.1-0.2,0.2-0.4c0-0.2,0-0.4,0-0.5c-0.4,0-0.8-0.1-1.2-0.1c-0.4,0-0.8-0.1-1.2-0.2c-0.6-0.1-1.1-0.4-1.3-0.8
+                c-0.3-0.4-0.4-1.2-0.4-2.2c-0.1-1.8-0.1-3.8-0.1-6.1C89.4,50.6,89.4,48.4,89.4,46.2z" />
+                            <path class="st1" d="M20.1,72.4L19.4,71l0.6-0.3c0.2,0.3,0.5,0.6,0.8,0.8c0.3,0.2,0.5,0.3,0.8,0.3c0.2,0,0.3,0,0.5-0.1
+                c0.1-0.1,0.2-0.2,0.2-0.4c0-0.2-0.2-0.4-0.7-0.6l-0.2-0.1c-0.7-0.3-1.2-0.5-1.4-0.8c-0.2-0.2-0.3-0.5-0.3-0.9c0-0.4,0.1-0.7,0.4-1
+                c0.3-0.3,0.6-0.4,1-0.4c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0.1c0.1,0,0.3,0.1,0.4,0.2l0-0.2h0.4L23,69l-0.6,0.3
+                c-0.2-0.3-0.4-0.6-0.6-0.7c-0.2-0.2-0.4-0.2-0.7-0.2c-0.2,0-0.3,0-0.4,0.1c-0.1,0.1-0.1,0.2-0.1,0.3c0,0.2,0.3,0.5,1,0.8l0.3,0.1
+                c0.5,0.2,0.9,0.4,1.1,0.7c0.2,0.2,0.3,0.5,0.3,0.8c0,0.4-0.2,0.8-0.5,1c-0.3,0.3-0.7,0.4-1.2,0.4c-0.2,0-0.4,0-0.5-0.1
+                c-0.1,0-0.3-0.1-0.4-0.2l0,0.2H20.1z" />
+                            <path class="st1" d="M23.5,70c0-0.7,0.2-1.3,0.5-1.8c0.4-0.4,0.8-0.7,1.4-0.7c0.6,0,1.1,0.2,1.4,0.7c0.4,0.4,0.5,1,0.5,1.8
+                c0,0.7-0.2,1.3-0.6,1.8c-0.4,0.5-0.9,0.7-1.4,0.7c-0.6,0-1.1-0.2-1.4-0.7C23.7,71.4,23.5,70.8,23.5,70z M24.7,70
+                c0,0.6,0.1,1,0.2,1.3c0.1,0.3,0.3,0.5,0.5,0.5c0.2,0,0.4-0.2,0.5-0.5c0.1-0.3,0.2-0.8,0.2-1.3c0-0.6-0.1-1-0.2-1.3
+                c-0.1-0.3-0.3-0.5-0.5-0.5c-0.2,0-0.4,0.2-0.5,0.5C24.8,69.1,24.7,69.5,24.7,70z" />
+                            <path class="st1" d="M28.4,72.4L27.7,71l0.6-0.3c0.2,0.3,0.5,0.6,0.8,0.8c0.3,0.2,0.5,0.3,0.8,0.3c0.2,0,0.3,0,0.5-0.1
+                c0.1-0.1,0.2-0.2,0.2-0.4c0-0.2-0.2-0.4-0.7-0.6l-0.2-0.1c-0.7-0.3-1.2-0.5-1.4-0.8c-0.2-0.2-0.3-0.5-0.3-0.9c0-0.4,0.1-0.7,0.4-1
+                c0.3-0.3,0.6-0.4,1-0.4c0.1,0,0.2,0,0.2,0c0.1,0,0.1,0,0.2,0.1c0.1,0,0.3,0.1,0.4,0.2l0-0.2h0.4l0.6,1.3l-0.6,0.3
+                c-0.2-0.3-0.4-0.6-0.6-0.7s-0.4-0.2-0.7-0.2c-0.2,0-0.3,0-0.4,0.1c-0.1,0.1-0.1,0.2-0.1,0.3c0,0.2,0.3,0.5,1,0.8l0.3,0.1
+                c0.5,0.2,0.9,0.4,1.1,0.7c0.2,0.2,0.3,0.5,0.3,0.8c0,0.4-0.2,0.8-0.5,1c-0.3,0.3-0.7,0.4-1.2,0.4c-0.2,0-0.4,0-0.5-0.1
+                c-0.1,0-0.3-0.1-0.4-0.2l0,0.2H28.4z" />
+                            <path class="st1" d="M32.7,72.4v-0.6h0h0c0.3,0,0.4,0,0.5-0.1c0.1-0.1,0.1-0.2,0.1-0.5v-0.9l-1-1.6c-0.1-0.2-0.2-0.3-0.3-0.4
+                c-0.1-0.1-0.2-0.1-0.4-0.1h-0.1v-0.6h2.4v0.6l-0.1,0h-0.1c-0.1,0-0.2,0-0.2,0c0,0-0.1,0.1-0.1,0.1c0,0,0,0.1,0.1,0.2l0,0.1l0.5,0.9
+                l0.5-0.9l0.1-0.2c0,0,0-0.1,0-0.1c0,0,0-0.1-0.1-0.1c0,0,0,0-0.1,0c0,0-0.1,0-0.1,0h-0.1h-0.1v-0.6h1.8v0.6h-0.1
+                c-0.2,0-0.3,0-0.4,0.1c-0.1,0-0.2,0.2-0.3,0.4l-0.9,1.6v0.9c0,0.2,0,0.4,0.1,0.4c0.1,0.1,0.2,0.1,0.4,0.1H35h0.1v0.6H32.7z" />
+                            <path class="st1" d="M37.5,70.4l0.9,0l-0.5-1.6L37.5,70.4z M35.6,72.4v-0.6h0.1c0.2,0,0.3,0,0.4-0.1c0.1-0.1,0.2-0.2,0.3-0.5
+                l1.2-3.5h1.1l1.2,3.6c0.1,0.2,0.1,0.4,0.2,0.4c0.1,0.1,0.2,0.1,0.3,0.1h0.1h0.1v0.6h-2.3v-0.6l0.2,0c0.1,0,0.2,0,0.3-0.1
+                c0.1,0,0.1-0.1,0.1-0.2c0,0,0-0.1,0-0.1c0,0,0-0.1,0-0.1l0-0.1l-0.1-0.3h-1.3l-0.2,0.5l0,0.1l0,0.1c0,0,0,0.1,0.1,0.1
+                c0.1,0,0.1,0,0.2,0h0h0.2v0.6H35.6z" />
+                            <path class="st1" d="M40.7,72.4v-0.6h0h0c0.2,0,0.4,0,0.5-0.1c0.1-0.1,0.1-0.2,0.1-0.5v-2.4c0-0.2,0-0.4-0.1-0.5
+                c-0.1-0.1-0.2-0.1-0.4-0.1h-0.1v-0.6h2.4v0.6H43c-0.3,0-0.5,0-0.5,0.1c-0.1,0.1-0.1,0.2-0.1,0.4v3h0.1c0.4,0,0.7-0.1,0.9-0.3
+                c0.2-0.2,0.5-0.5,0.7-0.9l0.6,0.2L44,72.4H40.7z" />
+                            <path class="st1" d="M50.9,72c-0.1,0-0.2,0-0.3,0c-0.1,0-0.1,0-0.2,0c0,0,0,0-0.1,0c0,0-0.1,0.1-0.2,0.1c-0.4,0.2-0.7,0.3-1,0.3
+                c-0.1,0-0.2,0-0.3,0c-0.1,0-0.2-0.1-0.4-0.1c-0.2-0.1-0.4-0.2-0.6-0.4c-0.2-0.2-0.4-0.5-0.6-0.8c-0.1-0.2-0.1-0.3-0.1-0.5
+                c0-0.2-0.1-0.4-0.1-0.5c0-0.3,0-0.6,0.1-0.9c0.1-0.3,0.2-0.5,0.4-0.8c0.2-0.2,0.4-0.4,0.7-0.5c0.3-0.1,0.5-0.2,0.8-0.2
+                c0.2,0,0.3,0,0.4,0.1c0.1,0,0.3,0.1,0.4,0.2l0-0.2h0.5l0.5,1.2l-0.6,0.3c-0.2-0.3-0.4-0.5-0.5-0.7s-0.4-0.2-0.5-0.2
+                c-0.2,0-0.4,0.2-0.6,0.5c-0.2,0.3-0.2,0.7-0.2,1.2c0,0.6,0.1,1,0.3,1.4c0.2,0.3,0.4,0.5,0.7,0.5c0.2,0,0.3,0,0.3-0.1
+                c0.1-0.1,0.1-0.2,0.1-0.4v-0.6c0-0.2,0-0.3-0.1-0.3c-0.1-0.1-0.2-0.1-0.3-0.1l-0.1,0h-0.1v-0.6h2.2v0.6h-0.1c-0.2,0-0.3,0-0.3,0.1
+                c0,0.1-0.1,0.2-0.1,0.4V72z" />
+                            <path class="st1" d="M52.8,66.6c0-0.1,0-0.2,0.1-0.3c0.1-0.1,0.2-0.1,0.3-0.1c0.1,0,0.2,0,0.3,0.1c0.1,0.1,0.1,0.2,0.1,0.3
+                c0,0.1,0,0.3-0.1,0.3c-0.1,0.1-0.2,0.1-0.3,0.1c-0.1,0-0.2,0-0.3-0.1C52.9,66.9,52.8,66.8,52.8,66.6z M54.1,66.6
+                c0-0.1,0-0.2,0.1-0.3c0.1-0.1,0.2-0.1,0.3-0.1c0.1,0,0.2,0,0.3,0.1c0.1,0.1,0.1,0.2,0.1,0.3c0,0.1,0,0.3-0.1,0.3
+                c-0.1,0.1-0.2,0.1-0.3,0.1c-0.1,0-0.2,0-0.3-0.1C54.2,66.9,54.1,66.8,54.1,66.6z M51.6,68.3v-0.6h2.2v0.6h-0.1
+                c-0.2,0-0.3,0-0.4,0.1c-0.1,0.1-0.1,0.2-0.1,0.5v2c0,0.4,0.1,0.7,0.2,0.8c0.1,0.1,0.3,0.2,0.5,0.2c0.1,0,0.2,0,0.3-0.1
+                c0.1,0,0.2-0.1,0.2-0.2c0-0.1,0.1-0.1,0.1-0.2c0,0,0-0.1,0-0.2c0-0.1,0-0.2,0-0.2v-0.2v-1.9c0-0.2,0-0.4-0.1-0.5
+                c-0.1-0.1-0.2-0.1-0.3-0.1h-0.1h-0.1v-0.6H56v0.6h0c-0.2,0-0.4,0-0.5,0.1c-0.1,0.1-0.1,0.2-0.1,0.5v1.9c0,0.4,0,0.7-0.1,0.8
+                c-0.1,0.2-0.1,0.3-0.3,0.5c-0.1,0.1-0.3,0.2-0.5,0.3c-0.2,0.1-0.5,0.1-0.7,0.1c-0.6,0-1-0.1-1.3-0.4c-0.3-0.3-0.4-0.7-0.4-1.2v-2
+                c0-0.2,0-0.4-0.1-0.5c-0.1-0.1-0.2-0.1-0.4-0.1H51.6z" />
+                            <path class="st1" d="M58.1,72.4l-1.2-3.6c0,0,0,0,0,0c-0.1-0.3-0.3-0.5-0.7-0.5v-0.6h2.5v0.6h-0.1c-0.2,0-0.3,0-0.4,0
+                c-0.1,0-0.1,0.1-0.1,0.2l0,0.1l0.1,0.2l0.7,2.1l0.7-2l0.1-0.2l0-0.2c0-0.1,0-0.1-0.1-0.2c-0.1,0-0.2,0-0.3,0H59v-0.6h2v0.6h-0.1
+                c-0.2,0-0.3,0-0.4,0.1c-0.1,0.1-0.2,0.2-0.3,0.5l-1.2,3.5H58.1z" />
+                            <path class="st1" d="M61,72.4v-0.6h0h0c0.2,0,0.4,0,0.5-0.1c0.1-0.1,0.1-0.2,0.1-0.5v-2.4c0-0.2,0-0.4-0.1-0.5
+                c-0.1-0.1-0.2-0.1-0.4-0.1H61v-0.6h3.4l0.7,1.2l-0.6,0.3c-0.2-0.3-0.4-0.5-0.6-0.7c-0.2-0.1-0.5-0.2-0.9-0.2h-0.2v1.4h0.1
+                c0.2,0,0.3,0,0.4-0.1c0,0,0.1-0.1,0.1-0.2c0-0.1,0-0.2,0-0.4h0.6V71h-0.6c0-0.3,0-0.5-0.1-0.6c-0.1-0.1-0.2-0.1-0.4-0.1h-0.1v1.5
+                H63c0.4,0,0.8-0.1,1-0.2c0.3-0.1,0.5-0.4,0.7-0.8l0.6,0.2l-0.7,1.4H61z" />
+                            <path class="st1" d="M65.4,72.4v-0.6h0h0c0.3,0,0.4,0,0.5-0.1c0.1-0.1,0.1-0.2,0.1-0.5v-2.4c0-0.2,0-0.4-0.1-0.5
+                c-0.1-0.1-0.2-0.1-0.4-0.1h-0.1v-0.6h2l1.2,2.8v-1.7c0-0.2,0-0.4-0.1-0.5c-0.1-0.1-0.2-0.1-0.4-0.1H68H68v-0.6h1.9v0.6h0
+                c-0.3,0-0.4,0-0.5,0.1c-0.1,0.1-0.1,0.2-0.1,0.5v3.6h-0.9l-1.6-3.7v2.6c0,0.2,0,0.4,0.1,0.4c0.1,0.1,0.2,0.1,0.5,0.1h0.2v0.6H65.4z
+                " />
+                            <path class="st1" d="M70.1,72.4v-0.6h0h0c0.2,0,0.4,0,0.5-0.1c0.1-0.1,0.1-0.2,0.1-0.5v-2.4c0-0.2,0-0.4-0.1-0.5
+                c-0.1-0.1-0.2-0.1-0.4-0.1h-0.1v-0.6h2.4v0.6h-0.1c-0.3,0-0.5,0-0.5,0.1c-0.1,0.1-0.1,0.2-0.1,0.4v3H72c0.4,0,0.7-0.1,0.9-0.3
+                s0.5-0.5,0.7-0.9l0.6,0.2l-0.8,1.6H70.1z" />
+                            <path class="st1" d="M75,66.6c0-0.1,0-0.2,0.1-0.3s0.2-0.1,0.3-0.1c0.1,0,0.3,0,0.4,0.1c0.1,0.1,0.1,0.2,0.1,0.4
+                c0,0.1,0,0.3-0.1,0.4c-0.1,0.1-0.2,0.1-0.4,0.1c-0.1,0-0.2,0-0.3-0.1C75.1,66.9,75,66.8,75,66.6z M74.3,72.4v-0.6h0h0
+                c0.2,0,0.4,0,0.5-0.1c0.1-0.1,0.1-0.2,0.1-0.5v-2.4c0-0.2,0-0.4-0.1-0.5c-0.1-0.1-0.2-0.1-0.4-0.1h-0.1v-0.6h2.3v0.6h0
+                c-0.2,0-0.4,0-0.5,0.1c-0.1,0.1-0.1,0.2-0.1,0.5v2.4c0,0.2,0,0.4,0.1,0.5c0.1,0.1,0.2,0.1,0.4,0.1h0.1h0v0.6H74.3z" />
+                            <path class="st1" d="M76.9,72.4v-0.6h0h0c0.2,0,0.4,0,0.5-0.1c0.1-0.1,0.1-0.2,0.1-0.5v-2.4c0-0.2,0-0.4-0.1-0.5
+                c-0.1-0.1-0.2-0.1-0.4-0.1h-0.1v-0.6h2.2v0.6h0c-0.2,0-0.3,0-0.4,0.1c0,0.1-0.1,0.2-0.1,0.5l0,0.9l0.9-1.1l0.1-0.2c0,0,0-0.1,0-0.1
+                c0,0,0-0.1-0.1-0.1c0,0-0.1,0-0.2,0h-0.1v-0.6h2.1v0.6h-0.1c-0.2,0-0.4,0-0.5,0.1c-0.2,0.1-0.3,0.2-0.5,0.4l-0.8,0.8l1.2,1.6
+                c0.3,0.4,0.6,0.6,1,0.6h0.1v0.6h-2.4v-0.6h0.1c0.1,0,0.1,0,0.2,0c0,0,0.1-0.1,0.1-0.1c0,0,0-0.1,0-0.1c0,0,0-0.1-0.1-0.2l-0.9-1.3
+                v1.1c0,0.2,0,0.4,0.1,0.5c0,0.1,0.1,0.1,0.3,0.1h0.1h0v0.6H76.9z" />
+                            <path class="st1" d="M83.9,72.4v-0.6h0h0c0.2,0,0.4,0,0.5-0.1c0.1-0.1,0.1-0.2,0.1-0.5v-2.4c0-0.2,0-0.4-0.1-0.5
+                c-0.1-0.1-0.2-0.1-0.4-0.1h-0.1v-0.6h2.2v0.6h0c-0.2,0-0.3,0-0.4,0.1c0,0.1-0.1,0.2-0.1,0.5l0,0.9l0.9-1.1l0.1-0.2c0,0,0-0.1,0-0.1
+                c0,0,0-0.1-0.1-0.1c0,0-0.1,0-0.2,0h-0.1v-0.6h2.1v0.6h-0.1c-0.2,0-0.4,0-0.5,0.1c-0.2,0.1-0.3,0.2-0.5,0.4l-0.8,0.8l1.2,1.6
+                c0.3,0.4,0.6,0.6,1,0.6h0.1v0.6h-2.4v-0.6h0.1c0.1,0,0.1,0,0.2,0s0.1-0.1,0.1-0.1c0,0,0-0.1,0-0.1c0,0,0-0.1-0.1-0.2l-0.9-1.3v1.1
+                c0,0.2,0,0.4,0.1,0.5c0,0.1,0.1,0.1,0.3,0.1h0.1h0v0.6H83.9z" />
+                            <path class="st1" d="M89,68.3v-0.6h2.2v0.6h-0.1c-0.2,0-0.3,0-0.4,0.1c-0.1,0.1-0.1,0.2-0.1,0.5v2c0,0.4,0.1,0.7,0.2,0.8
+                c0.1,0.1,0.3,0.2,0.5,0.2c0.1,0,0.2,0,0.3-0.1s0.2-0.1,0.2-0.2c0-0.1,0.1-0.1,0.1-0.2c0,0,0-0.1,0-0.2c0-0.1,0-0.2,0-0.2v-0.2v-1.9
+                c0-0.2,0-0.4-0.1-0.5c-0.1-0.1-0.2-0.1-0.3-0.1h-0.1h-0.1v-0.6h1.9v0.6h0c-0.2,0-0.4,0-0.5,0.1c-0.1,0.1-0.1,0.2-0.1,0.5v1.9
+                c0,0.4,0,0.7-0.1,0.8c-0.1,0.2-0.1,0.3-0.3,0.5c-0.1,0.1-0.3,0.2-0.5,0.3c-0.2,0.1-0.5,0.1-0.7,0.1c-0.6,0-1-0.1-1.3-0.4
+                c-0.3-0.3-0.4-0.7-0.4-1.2v-2c0-0.2,0-0.4-0.1-0.5c-0.1-0.1-0.2-0.1-0.4-0.1H89z" />
+                            <path class="st1" d="M95.4,69.8h0.2c0.4,0,0.6-0.1,0.8-0.2c0.2-0.1,0.2-0.3,0.2-0.5c0-0.3-0.1-0.4-0.3-0.6
+                c-0.1-0.1-0.2-0.1-0.3-0.1c-0.1,0-0.3-0.1-0.4-0.1h-0.2V69.8z M93.7,72.4v-0.6h0h0c0.2,0,0.4,0,0.5-0.1c0.1-0.1,0.1-0.2,0.1-0.5
+                v-2.4c0-0.2,0-0.4-0.1-0.5c-0.1-0.1-0.2-0.1-0.4-0.1h-0.1v-0.6h1.9c0.2,0,0.3,0,0.4,0c0.1,0,0.2,0,0.3,0c0.2,0,0.4,0.1,0.5,0.1
+                c0.3,0.1,0.5,0.3,0.7,0.5c0.2,0.2,0.2,0.5,0.2,0.7c0,0.3-0.1,0.5-0.3,0.7c-0.2,0.2-0.4,0.4-0.7,0.4l0.6,1.1
+                c0.1,0.2,0.2,0.3,0.3,0.3c0.1,0,0.1,0.1,0.2,0.1c0.1,0,0.2,0,0.4,0v0.6h-1.6l-0.9-2h-0.3v0.8c0,0.2,0,0.4,0.1,0.5
+                c0.1,0.1,0.2,0.1,0.4,0.1h0.1H96v0.6H93.7z" />
+                            <path class="st1" d="M98.4,68.3v-0.6h2.2v0.6h-0.1c-0.2,0-0.3,0-0.4,0.1c-0.1,0.1-0.1,0.2-0.1,0.5v2c0,0.4,0.1,0.7,0.2,0.8
+                c0.1,0.1,0.3,0.2,0.5,0.2c0.1,0,0.2,0,0.3-0.1c0.1,0,0.2-0.1,0.2-0.2c0-0.1,0.1-0.1,0.1-0.2c0,0,0-0.1,0-0.2c0-0.1,0-0.2,0-0.2
+                v-0.2v-1.9c0-0.2,0-0.4-0.1-0.5c-0.1-0.1-0.2-0.1-0.3-0.1H101h-0.1v-0.6h1.9v0.6h0c-0.2,0-0.4,0-0.5,0.1c-0.1,0.1-0.1,0.2-0.1,0.5
+                v1.9c0,0.4,0,0.7-0.1,0.8c-0.1,0.2-0.1,0.3-0.3,0.5c-0.1,0.1-0.3,0.2-0.5,0.3c-0.2,0.1-0.5,0.1-0.7,0.1c-0.6,0-1-0.1-1.3-0.4
+                c-0.3-0.3-0.4-0.7-0.4-1.2v-2c0-0.2,0-0.4-0.1-0.5c-0.1-0.1-0.2-0.1-0.4-0.1H98.4z" />
+                            <path class="st1" d="M104.3,71.3c0,0.2,0,0.4,0.1,0.5c0.1,0.1,0.2,0.1,0.4,0.1h0.1h0.1v0.6H103v-0.6l0,0h0c0.3,0,0.4,0,0.5-0.1
+                c0.1-0.1,0.1-0.2,0.1-0.5v-2.4c0-0.2,0-0.4-0.1-0.5c-0.1-0.1-0.2-0.1-0.4-0.1H103v-0.6h2.1l0.8,2.6l0.8-2.6h2v0.6h0
+                c-0.2,0-0.4,0-0.4,0.1c-0.1,0.1-0.1,0.2-0.1,0.4v2.4c0,0.2,0,0.4,0.1,0.5c0.1,0.1,0.2,0.1,0.4,0.1h0.1h0.1v0.6h-2.2v-0.6l0,0h0
+                c0.2,0,0.4,0,0.4-0.1c0.1-0.1,0.1-0.2,0.1-0.5v-2.6l-1.1,3.7h-0.4l-1.1-3.8V71.3z" />
+                            <path class="st1" d="M109,68.3v-0.6h2.2v0.6h-0.1c-0.2,0-0.3,0-0.4,0.1c-0.1,0.1-0.1,0.2-0.1,0.5v2c0,0.4,0.1,0.7,0.2,0.8
+                c0.1,0.1,0.3,0.2,0.5,0.2c0.1,0,0.2,0,0.3-0.1c0.1,0,0.2-0.1,0.2-0.2c0-0.1,0.1-0.1,0.1-0.2c0,0,0-0.1,0-0.2c0-0.1,0-0.2,0-0.2
+                v-0.2v-1.9c0-0.2,0-0.4-0.1-0.5c-0.1-0.1-0.2-0.1-0.3-0.1h-0.1h-0.1v-0.6h1.9v0.6h0c-0.2,0-0.4,0-0.5,0.1c-0.1,0.1-0.1,0.2-0.1,0.5
+                v1.9c0,0.4,0,0.7-0.1,0.8c-0.1,0.2-0.1,0.3-0.3,0.5c-0.1,0.1-0.3,0.2-0.5,0.3c-0.2,0.1-0.5,0.1-0.7,0.1c-0.6,0-1-0.1-1.3-0.4
+                c-0.3-0.3-0.4-0.7-0.4-1.2v-2c0-0.2,0-0.4-0.1-0.5c-0.1-0.1-0.2-0.1-0.4-0.1H109z" />
+                </g>
+                </svg>
+
+            </span>
+            <span class="app-brand-text menu-text fw-bolder ms-2">İzmir Sgk Portal</span>
+        </a>
+        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
             <i class="bx bx-chevron-left bx-sm align-middle"></i>
         </a>
     </div>
 
     <div class="menu-inner-shadow"></div>
 
+    <!-- Menu Inner -->
     <ul class="menu-inner py-1">
-        <!-- Dashboard -->
+
+        <!-- ================ ANA SAYFA ================ -->
         <li class="menu-item @(IsActive("/") ? "active" : "")">
             <a href="/" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
@@ -27,18 +183,18 @@
             </a>
         </li>
 
-        <!-- Personel İşlemleri -->
+        <!-- ================ PERSONEL İŞLEMLERİ ================ -->
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Personel İşlemleri</span>
         </li>
 
-        <li class="menu-item @(IsActive("/personel") ? "active open" : "")">
+        <li class="menu-item @(IsSectionActive("/personel") ? "active open" : "")">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-user"></i>
                 <div>Personel</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item @(IsActive("/personel") ? "active" : "")">
+                <li class="menu-item @(IsActive("/personel") && !Navigation.Uri.Contains("/departman") && !Navigation.Uri.Contains("/servis") && !Navigation.Uri.Contains("/unvan") ? "active" : "")">
                     <a href="/personel" class="menu-link">
                         <div>Personel Listesi</div>
                     </a>
@@ -48,60 +204,283 @@
                         <div>Yeni Personel</div>
                     </a>
                 </li>
-            </ul>
-        </li>
-        <li class="menu-item @(IsActive("/departman") ? "active open" : "")">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-user"></i>
-                <div>Departman</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item @(IsActive("/departman") ? "active" : "")">
-                    <a href="/departman" class="menu-link">
-                        <div>Departman Listesi</div>
+                <li class="menu-item @(IsSectionActive("/personel/departman") ? "active" : "")">
+                    <a href="/personel/departman" class="menu-link">
+                        <div>Departmanlar</div>
                     </a>
                 </li>
-                <li class="menu-item @(IsActive("/departman/create") ? "active" : "")">
-                    <a href="/departman/create" class="menu-link">
-                        <div>Yeni Departman</div>
+                <li class="menu-item @(IsSectionActive("/personel/servis") ? "active" : "")">
+                    <a href="/personel/servis" class="menu-link">
+                        <div>Servisler</div>
+                    </a>
+                </li>
+                <li class="menu-item @(IsSectionActive("/personel/unvan") ? "active" : "")">
+                    <a href="/personel/unvan" class="menu-link">
+                        <div>Unvanlar</div>
                     </a>
                 </li>
             </ul>
         </li>
 
-        <!-- Sıramatik İşlemleri -->
+        <!-- ================ SIRAMATİK İŞLEMLERİ ================ -->
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Sıramatik İşlemleri</span>
         </li>
 
-        <li class="menu-item @(IsActive("/siramatik") ? "active open" : "")">
+        <li class="menu-item @(IsSectionActive("/siramatik") ? "active open" : "")">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-desktop"></i>
                 <div>Sıramatik</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item">
+                <li class="menu-item @(IsActive("/siramatik") && !Navigation.Uri.Contains("/banko") && !Navigation.Uri.Contains("/kanal") && !Navigation.Uri.Contains("/kiosk") && !Navigation.Uri.Contains("/tv") ? "active" : "")">
                     <a href="/siramatik" class="menu-link">
                         <div>Dashboard</div>
                     </a>
                 </li>
-                <li class="menu-item">
-                    <a href="/siramatik/banko" class="menu-link">
+
+                <!-- Bankolar -->
+                <li class="menu-item @(IsSectionActive("/siramatik/banko") ? "active open" : "")">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
                         <div>Bankolar</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item @(IsActive("/siramatik/banko") ? "active" : "")">
+                            <a href="/siramatik/banko" class="menu-link">
+                                <div>Banko Listesi</div>
+                            </a>
+                        </li>
+                        <li class="menu-item @(IsActive("/siramatik/banko/manage") ? "active" : "")">
+                            <a href="/siramatik/banko/manage" class="menu-link">
+                                <div>Banko Yönetimi</div>
+                            </a>
+                        </li>
+                        <li class="menu-item @(IsActive("/siramatik/banko/personel-atama") ? "active" : "")">
+                            <a href="/siramatik/banko/personel-atama" class="menu-link">
+                                <div>Personel Atama</div>
+                            </a>
+                        </li>
+                        <li class="menu-item @(IsActive("/siramatik/banko/islem-tanimlari") ? "active" : "")">
+                            <a href="/siramatik/banko/islem-tanimlari" class="menu-link">
+                                <div>İşlem Tanımları</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Kanallar -->
+                <li class="menu-item @(IsSectionActive("/siramatik/kanal") ? "active open" : "")">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <div>Kanallar</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item @(IsActive("/siramatik/kanal") ? "active" : "")">
+                            <a href="/siramatik/kanal" class="menu-link">
+                                <div>Kanal Listesi</div>
+                            </a>
+                        </li>
+                        <li class="menu-item @(IsActive("/siramatik/kanal/manage") ? "active" : "")">
+                            <a href="/siramatik/kanal/manage" class="menu-link">
+                                <div>Kanal Yönetimi</div>
+                            </a>
+                        </li>
+                        <li class="menu-item @(IsActive("/siramatik/kanal/alt-kanal") ? "active" : "")">
+                            <a href="/siramatik/kanal/alt-kanal" class="menu-link">
+                                <div>Alt Kanallar</div>
+                            </a>
+                        </li>
+                        <li class="menu-item @(IsActive("/siramatik/kanal/personel-atama") ? "active" : "")">
+                            <a href="/siramatik/kanal/personel-atama" class="menu-link">
+                                <div>Personel Atama</div>
+                            </a>
+                        </li>
+                        <li class="menu-item @(IsActive("/siramatik/kanal/eslestirme") ? "active" : "")">
+                            <a href="/siramatik/kanal/eslestirme" class="menu-link">
+                                <div>Eşleştirme</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Kiosklar -->
+                <li class="menu-item @(IsSectionActive("/siramatik/kiosk") ? "active open" : "")">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <div>Kiosklar</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item @(IsActive("/siramatik/kiosk") ? "active" : "")">
+                            <a href="/siramatik/kiosk" class="menu-link">
+                                <div>Kiosk Listesi</div>
+                            </a>
+                        </li>
+                        <li class="menu-item @(IsActive("/siramatik/kiosk/manage") ? "active" : "")">
+                            <a href="/siramatik/kiosk/manage" class="menu-link">
+                                <div>Kiosk Yönetimi</div>
+                            </a>
+                        </li>
+                        <li class="menu-item @(IsActive("/siramatik/kiosk/alt-kanal-eslestirme") ? "active" : "")">
+                            <a href="/siramatik/kiosk/alt-kanal-eslestirme" class="menu-link">
+                                <div>Alt Kanal Eşleştirme</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- TV'ler -->
+                <li class="menu-item @(IsSectionActive("/siramatik/tv") ? "active open" : "")">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <div>TV'ler</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item @(IsActive("/siramatik/tv") ? "active" : "")">
+                            <a href="/siramatik/tv" class="menu-link">
+                                <div>TV Listesi</div>
+                            </a>
+                        </li>
+                        <li class="menu-item @(IsActive("/siramatik/tv/manage") ? "active" : "")">
+                            <a href="/siramatik/tv/manage" class="menu-link">
+                                <div>TV Yönetimi</div>
+                            </a>
+                        </li>
+                        <li class="menu-item @(IsActive("/siramatik/tv/banko-eslestirme") ? "active" : "")">
+                            <a href="/siramatik/tv/banko-eslestirme" class="menu-link">
+                                <div>Banko Eşleştirme</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+
+        <!-- ================ PDKS İŞLEMLERİ ================ -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">PDKS İşlemleri</span>
+        </li>
+
+        <li class="menu-item @(IsSectionActive("/pdks") ? "active open" : "")">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-time-five"></i>
+                <div>PDKS</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item @(IsSectionActive("/pdks/giris-cikis") ? "active" : "")">
+                    <a href="/pdks/giris-cikis" class="menu-link">
+                        <div>Giriş/Çıkış</div>
+                    </a>
+                </li>
+                <li class="menu-item @(IsSectionActive("/pdks/izin") ? "active open" : "")">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <div>İzin Yönetimi</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item @(IsActive("/pdks/izin/taleplerim") ? "active" : "")">
+                            <a href="/pdks/izin/taleplerim" class="menu-link">
+                                <div>Taleplerim</div>
+                            </a>
+                        </li>
+                        <li class="menu-item @(IsActive("/pdks/izin/yeni-talep") ? "active" : "")">
+                            <a href="/pdks/izin/yeni-talep" class="menu-link">
+                                <div>Yeni Talep</div>
+                            </a>
+                        </li>
+                        <li class="menu-item @(IsActive("/pdks/izin/onay-bekleyenler") ? "active" : "")">
+                            <a href="/pdks/izin/onay-bekleyenler" class="menu-link">
+                                <div>Onay Bekleyenler</div>
+                            </a>
+                        </li>
+                        <li class="menu-item @(IsActive("/pdks/izin/sorumlu-atama") ? "active" : "")">
+                            <a href="/pdks/izin/sorumlu-atama" class="menu-link">
+                                <div>Sorumlu Atama</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="menu-item @(IsSectionActive("/pdks/mesai") ? "active" : "")">
+                    <a href="/pdks/mesai/calisma-gunleri" class="menu-link">
+                        <div>Mesai Yönetimi</div>
+                    </a>
+                </li>
+                <li class="menu-item @(IsSectionActive("/pdks/raporlar") ? "active" : "")">
+                    <a href="/pdks/raporlar/personel-mesai" class="menu-link">
+                        <div>Raporlar</div>
                     </a>
                 </li>
             </ul>
         </li>
+
+        <!-- ================ ESHOT İŞLEMLERİ ================ -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Eshot İşlemleri</span>
+        </li>
+
+        <li class="menu-item @(IsSectionActive("/eshot") ? "active open" : "")">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-bus"></i>
+                <div>Eshot</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item @(IsSectionActive("/eshot/hareketler") ? "active" : "")">
+                    <a href="/eshot/hareketler" class="menu-link">
+                        <div>Hareketler</div>
+                    </a>
+                </li>
+                <li class="menu-item @(IsSectionActive("/eshot/kullanim-hakki") ? "active" : "")">
+                    <a href="/eshot/kullanim-hakki" class="menu-link">
+                        <div>Kullanım Hakkı</div>
+                    </a>
+                </li>
+                <li class="menu-item @(IsSectionActive("/eshot/ucret-bilgisi") ? "active" : "")">
+                    <a href="/eshot/ucret-bilgisi" class="menu-link">
+                        <div>Ücret Bilgisi</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- ================ HESAP YÖNETİMİ ================ -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Hesap Yönetimi</span>
+        </li>
+
+        <li class="menu-item @(IsSectionActive("/account") ? "active open" : "")">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-cog"></i>
+                <div>Hesap Ayarları</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item @(IsActive("/account/profile") ? "active" : "")">
+                    <a href="/account/profile" class="menu-link">
+                        <div>Profil</div>
+                    </a>
+                </li>
+                <li class="menu-item @(IsActive("/account/change-password") ? "active" : "")">
+                    <a href="/account/change-password" class="menu-link">
+                        <div>Şifre Değiştir</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
     </ul>
 </aside>
 
 @code {
-    [Inject] NavigationManager Navigation { get; set; } = default!;
-
+    /// <summary>
+    /// Tam URL eşleşmesi kontrol eder
+    /// </summary>
     private bool IsActive(string path)
     {
         var currentPath = new Uri(Navigation.Uri).AbsolutePath;
-        return currentPath.Equals(path, StringComparison.OrdinalIgnoreCase) ||
-               (path != "/" && currentPath.StartsWith(path, StringComparison.OrdinalIgnoreCase));
+        return currentPath.Equals(path, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Section (bölüm) bazlı eşleşme kontrol eder
+    /// Örnek: "/personel/departman" -> "/personel" section'ında aktif
+    /// </summary>
+    private bool IsSectionActive(string sectionPath)
+    {
+        var currentPath = new Uri(Navigation.Uri).AbsolutePath;
+        return currentPath.StartsWith(sectionPath, StringComparison.OrdinalIgnoreCase);
     }
 }

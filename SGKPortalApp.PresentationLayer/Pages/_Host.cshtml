@@ -49,6 +49,7 @@
 <body>
     <component type="typeof(App)" render-mode="ServerPrerendered" />
 
+    <!-- ================== BLAZOR ERROR UI ================== -->
     <div id="blazor-error-ui">
         <environment include="Staging,Production">
             Bir hata oluştu.
@@ -60,7 +61,45 @@
         <a class="dismiss">🗙</a>
     </div>
 
-    <!-- Core JS -->
+    <!-- ================== BLAZOR RECONNECTION TÜRKÇE UI ================== -->
+    <div id="blazor-reconnect-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; background-color: rgba(0,0,0,0.6);">
+        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15); max-width: 400px; text-align: center; font-family: 'Public Sans', sans-serif;">
+
+            <!-- Yeniden bağlanıyor -->
+            <div class="components-reconnect-show">
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <h5 class="mb-2">🔄 Bağlantı koptu</h5>
+                <p class="text-muted mb-0">Sunucuya yeniden bağlanılıyor...</p>
+                <small class="text-muted">Lütfen bekleyin</small>
+            </div>
+
+            <!-- Bağlantı başarısız -->
+            <div class="components-reconnect-failed" style="display: none;">
+                <i class="bx bx-error-circle text-danger mb-3" style="font-size: 3rem;"></i>
+                <h5 class="mb-2">❌ Bağlantı başarısız</h5>
+                <p class="text-muted mb-3">Sunucuya bağlanılamadı. Lütfen sayfayı yenileyin.</p>
+                <button onclick="location.reload()" class="btn btn-primary">
+                    <i class="bx bx-refresh me-1"></i>
+                    Sayfayı Yenile
+                </button>
+            </div>
+
+            <!-- Bağlantı reddedildi -->
+            <div class="components-reconnect-rejected" style="display: none;">
+                <i class="bx bx-block text-danger mb-3" style="font-size: 3rem;"></i>
+                <h5 class="mb-2">🚫 Bağlantı reddedildi</h5>
+                <p class="text-muted mb-3">Sunucu bağlantıyı reddetti. Oturum süreniz dolmuş olabilir.</p>
+                <button onclick="location.reload()" class="btn btn-primary">
+                    <i class="bx bx-refresh me-1"></i>
+                    Sayfayı Yenile
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================== CORE JS FILES ================== -->
     <script src="/portal/assets/vendor/libs/jquery/jquery.js"></script>
     <script src="/portal/assets/vendor/libs/popper/popper.js"></script>
     <script src="/portal/assets/vendor/js/bootstrap.js"></script>
@@ -70,16 +109,63 @@
     <script src="/portal/assets/vendor/libs/typeahead-js/typeahead.js"></script>
     <script src="/portal/assets/vendor/js/menu.js"></script>
 
-    <!-- Main JS -->
+    <!-- ================== MAIN JS ================== -->
     <script src="/portal/assets/js/main.js"></script>
 
-    <!-- Blazor Framework Custom Türkçe Uyarılar -->
-    <script src="js/custom-blazor.js"></script>
+    <!-- ================== BLAZOR RECONNECTION CONTROL ================== -->
+    <script>
+        // Blazor bağlantı durumu yönetimi
+        document.addEventListener('DOMContentLoaded', function() {
+            // Blazor.start özelleştirmesi
+            window.blazorStartOptions = {
+                reconnectionHandler: {
+                    onConnectionDown: () => {
+                        console.log('🔴 Blazor bağlantısı koptu');
+                        const modal = document.getElementById('blazor-reconnect-modal');
+                        if (modal) {
+                            modal.style.display = 'block';
+                            // Show state'i göster
+                            const showElement = modal.querySelector('.components-reconnect-show');
+                            const failedElement = modal.querySelector('.components-reconnect-failed');
+                            const rejectedElement = modal.querySelector('.components-reconnect-rejected');
 
-    <!-- Blazor Framework -->
+                            if (showElement) showElement.style.display = 'block';
+                            if (failedElement) failedElement.style.display = 'none';
+                            if (rejectedElement) rejectedElement.style.display = 'none';
+                        }
+                    },
+                    onConnectionUp: () => {
+                        console.log('🟢 Blazor bağlantısı kuruldu');
+                        const modal = document.getElementById('blazor-reconnect-modal');
+                        if (modal) {
+                            modal.style.display = 'none';
+                        }
+                    }
+                },
+                reconnectionOptions: {
+                    maxRetries: 8,
+                    retryIntervalMilliseconds: retryCount => {
+                        // İlk 3 deneme: 1 saniye, sonraki denemeler: artarak 30 saniyeye kadar
+                        return Math.min(1000 * Math.pow(2, retryCount), 30000);
+                    }
+                }
+            };
+        });
+
+        // Blazor.start'ı override et
+        const originalBlazorStart = window.Blazor && window.Blazor.start;
+        if (window.Blazor) {
+            window.Blazor.start = function(options) {
+                const mergedOptions = Object.assign({}, window.blazorStartOptions || {}, options || {});
+                return originalBlazorStart ? originalBlazorStart.call(this, mergedOptions) : Promise.resolve();
+            };
+        }
+    </script>
+
+    <!-- ================== BLAZOR FRAMEWORK ================== -->
     <script src="_framework/blazor.server.js"></script>
 
-    <!-- Blazor Sneat Init -->
+    <!-- ================== BLAZOR SNEAT INIT ================== -->
     <script src="/js/blazor-sneat-init.js"></script>
 </body>
 </html>
