@@ -7,8 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
-    <Folder Include="Shared\Common\" />
     <Folder Include="Shared\Forms\" />
     <Folder Include="Shared\Cards\" />
     <Folder Include="wwwroot\images\" />

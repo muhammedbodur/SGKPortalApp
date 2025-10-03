@@ -1,0 +1,83 @@
+﻿@using SGKPortalApp.PresentationLayer.Services.UIServices
+@inherits ToastBase
+
+<!-- Toast Container - Sağ üst köşede bildirimler gösterilir -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+    @foreach (var toast in ActiveToasts)
+    {
+        <div class="toast show @GetToastClass(toast.Type)" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header @GetHeaderClass(toast.Type)">
+                <i class="@GetIconClass(toast.Type) me-2"></i>
+                <strong class="me-auto">@toast.Title</strong>
+                <small>@GetTimeAgo(toast.Timestamp)</small>
+                <button type="button" class="btn-close" @onclick="() => RemoveToast(toast)"></button>
+            </div>
+            <div class="toast-body">
+                @toast.Message
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    /* Toast container stilleri */
+    .toast {
+        min-width: 300px;
+        max-width: 400px;
+        margin-bottom: 1rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        animation: slideIn 0.3s ease-out;
+    }
+
+    /* Toast giriş animasyonu */
+    @@keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    /* Toast çıkış animasyonu */
+    .toast.removing {
+        animation: slideOut 0.3s ease-in;
+    }
+
+    @@keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+
+    /* Toast header stilleri */
+    .toast-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        font-weight: 600;
+    }
+
+    /* Toast body stilleri */
+    .toast-body {
+        padding: 0.75rem;
+        word-wrap: break-word;
+    }
+
+    /* Kapatma butonu rengi */
+    .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+
+    /* Warning tipinde kapatma butonunu koyulaştır */
+    .bg-warning .btn-close {
+        filter: none;
+    }
+</style>

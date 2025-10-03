@@ -14,7 +14,6 @@
     <Folder Include="Interfaces\PersonelIslemleri\" />
     <Folder Include="Mapping\Extensions\" />
     <Folder Include="Mapping\Services\" />
-    <Folder Include="Mapping\Profiles\" />
     <Folder Include="Services\Auth\" />
     <Folder Include="Services\EshotIslemleri\" />
     <Folder Include="Services\PdksIslemleri\" />
@@ -25,6 +24,15 @@
     <Folder Include="Validators\PdksIslemleri\" />
     <Folder Include="Validators\SiramatikIslemleri\" />
     <Folder Include="Validators\PersonelIslemleri\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="15.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SGKPortalApp.BusinessObjectLayer\SGKPortalApp.BusinessObjectLayer.csproj" />
   </ItemGroup>
 
 </Project>

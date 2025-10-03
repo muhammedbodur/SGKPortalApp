@@ -72,6 +72,9 @@ builder.Services.AddCors(options =>
 // Memory Cache
 builder.Services.AddMemoryCache();
 
+//AutoMapper
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 // HTTP Context Accessor (Blazor'da user bilgileri için)
 builder.Services.AddHttpContextAccessor();
 

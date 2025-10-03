@@ -1,1 +1,203 @@
-﻿
+﻿@page "/personel/departman"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+
+<!-- Sayfa Başlığı -->
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">Personel /</span> Departmanlar
+    </h4>
+
+    <!-- Ana Card -->
+    <div class="card">
+        <!-- Card Header - Başlık ve Yeni Ekle Butonu -->
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Departman Listesi</h5>
+            <button type="button" class="btn btn-primary" @onclick="NavigateToCreate">
+                <i class="bx bx-plus me-1"></i>
+                Yeni Departman Ekle
+            </button>
+        </div>
+
+        <!-- Card Body - Arama ve Tablo -->
+        <div class="card-body">
+
+            <!-- Arama Kutusu -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bx bx-search"></i></span>
+                        <input type="text"
+                               class="form-control"
+                               placeholder="Departman ara..."
+                               @bind="searchTerm"
+                               @bind:event="oninput"
+                               @onkeyup="OnSearchChanged" />
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <span class="text-muted">
+                        <strong>@FilteredDepartmanlar.Count</strong> departman gösteriliyor
+                    </span>
+                </div>
+            </div>
+
+            <!-- Tablo -->
+            <div class="table-responsive text-nowrap">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Departman Adı</th>
+                            <th>Personel Sayısı</th>
+                            <th>Durum</th>
+                            <th>Oluşturma Tarihi</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        @if (IsLoading)
+                        {
+                            <!-- Yükleniyor Durumu -->
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Yükleniyor...</span>
+                                    </div>
+                                    <p class="mt-2 text-muted">Departmanlar yükleniyor...</p>
+                                </td>
+                            </tr>
+                        }
+                        else if (FilteredDepartmanlar?.Any() == true)
+                        {
+                            <!-- Departman Listesi -->
+                            @foreach (var departman in FilteredDepartmanlar)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@departman.DepartmanAdi</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-label-info">
+                                            @departman.PersonelSayisi Personel
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (departman.DepartmanAktiflik == Aktiflik.Aktif)
+                                        {
+                                            <span class="badge bg-label-success">Aktif</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-label-secondary">Pasif</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            @departman.EklenmeTarihi.ToString("dd.MM.yyyy")
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button type="button"
+                                                    class="btn p-0 dropdown-toggle hide-arrow"
+                                                    data-bs-toggle="dropdown">
+                                                <i class="bx bx-dots-vertical-rounded"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item"
+                                                   @onclick="() => NavigateToEdit(departman.DepartmanId)"
+                                                   style="cursor: pointer;">
+                                                    <i class="bx bx-edit-alt me-1"></i> Düzenle
+                                                </a>
+                                                <a class="dropdown-item"
+                                                   @onclick="() => ToggleAktiflik(departman.DepartmanId)"
+                                                   style="cursor: pointer;">
+                                                    <i class="bx bx-refresh me-1"></i>
+                                                    @(departman.DepartmanAktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")
+                                                </a>
+                                                <div class="dropdown-divider"></div>
+                                                <a class="dropdown-item text-danger"
+                                                   @onclick="() => ShowDeleteConfirmation(departman.DepartmanId, departman.DepartmanAdi)"
+                                                   style="cursor: pointer;">
+                                                    <i class="bx bx-trash me-1"></i> Sil
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <!-- Boş Durum -->
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div>
+                                        <i class="bx bx-folder-open" style="font-size: 48px; color: #ccc;"></i>
+                                        <p class="text-muted mt-3">
+                                            @if (string.IsNullOrEmpty(searchTerm))
+                                            {
+                                                <span>Henüz hiç departman eklenmemiş.</span>
+                                            }
+                                            else
+                                            {
+                                                <span>"@searchTerm" için sonuç bulunamadı.</span>
+                                            }
+                                        </p>
+                                        @if (string.IsNullOrEmpty(searchTerm))
+                                        {
+                                            <button type="button" class="btn btn-primary btn-sm" @onclick="NavigateToCreate">
+                                                <i class="bx bx-plus me-1"></i> İlk Departmanı Ekle
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+@if (ShowDeleteModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Departman Sil</h5>
+                    <button type="button" class="btn-close" @onclick="HideDeleteConfirmation"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">
+                        <strong>@DeleteDepartmanAdi</strong> departmanını silmek istediğinizden emin misiniz?
+                    </p>
+                    <div class="alert alert-warning mt-3 mb-0" role="alert">
+                        <i class="bx bx-error me-2"></i>
+                        Bu işlem geri alınamaz!
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" @onclick="HideDeleteConfirmation">
+                        İptal
+                    </button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDelete" disabled="@IsDeleting">
+                        @if (IsDeleting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            <span>Siliniyor...</span>
+                        }
+                        else
+                        {
+                            <i class="bx bx-trash me-1"></i>
+                            <span>Evet, Sil</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
