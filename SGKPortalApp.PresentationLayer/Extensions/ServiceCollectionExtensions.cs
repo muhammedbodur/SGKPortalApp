@@ -44,7 +44,8 @@ namespace SGKPortalApp.PresentationLayer.Extensions
             services.RegisterServicesFromNamespace(
                 assembly,
                 "SGKPortalApp.PresentationLayer.Services.UIServices",
-                "UI Services"
+                "UI Services",
+                ensureCriticalServices: new Type[] { typeof(SGKPortalApp.PresentationLayer.Services.UIServices.IToastService) }
             );
 
             // 3. Storage Services (Otomatik)
@@ -76,7 +77,8 @@ namespace SGKPortalApp.PresentationLayer.Extensions
             Assembly assembly,
             string namespaceName,
             string serviceName,
-            bool optional = false)
+            bool optional = false,
+            Type[]? ensureCriticalServices = null) // kritik servisleri garanti et
         {
             try
             {
@@ -112,8 +114,6 @@ namespace SGKPortalApp.PresentationLayer.Extensions
                 // Her interface için implementation bul ve kaydet
                 foreach (var interfaceType in interfaces)
                 {
-                    // İsimlendirme kuralına göre implementation bul
-                    // Örnek: IDepartmanApiService -> DepartmanApiService
                     var implementationType = implementations.FirstOrDefault(impl =>
                         interfaceType.IsAssignableFrom(impl) &&
                         impl.Name == interfaceType.Name.Substring(1) // "I" harfini çıkar
@@ -151,6 +151,26 @@ namespace SGKPortalApp.PresentationLayer.Extensions
                     Console.WriteLine($"  ✅ {serviceType.Name} (Concrete)");
                 }
 
+                // Kritik servisler varsa ve kaydedilmemişse garantile
+                if (ensureCriticalServices != null)
+                {
+                    foreach (var criticalInterface in ensureCriticalServices)
+                    {
+                        if (!services.Any(s => s.ServiceType == criticalInterface))
+                        {
+                            var implType = assembly.GetTypes()
+                                .FirstOrDefault(t => criticalInterface.IsAssignableFrom(t) && t.IsClass);
+
+                            if (implType != null)
+                            {
+                                services.AddScoped(criticalInterface, implType);
+                                Console.WriteLine($"  ✅ Kritik servis kaydedildi: {criticalInterface.Name} -> {implType.Name}");
+                                registeredCount++;
+                            }
+                        }
+                    }
+                }
+
                 Console.WriteLine($"  ✅ {serviceName}: {registeredCount} servis kayıt edildi");
 
                 return services;
@@ -170,19 +190,6 @@ namespace SGKPortalApp.PresentationLayer.Extensions
                     return services;
                 }
             }
-        }
-
-        /// <summary>
-        /// Belirli bir servis interface ve implementation'ını manuel kaydet
-        /// </summary>
-        public static IServiceCollection AddService<TInterface, TImplementation>(
-            this IServiceCollection services)
-            where TInterface : class
-            where TImplementation : class, TInterface
-        {
-            services.AddScoped<TInterface, TImplementation>();
-            Console.WriteLine($"  ✅ {typeof(TInterface).Name} -> {typeof(TImplementation).Name}");
-            return services;
         }
     }
 }
