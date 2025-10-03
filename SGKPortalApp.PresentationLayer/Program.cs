@@ -2,8 +2,9 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.Common.Extensions;
-using SGKPortalApp.PresentationLayer.Extensions;  // ← YENİ: Extension eklendi
+using SGKPortalApp.PresentationLayer.Extensions; // ← YENİ: Extension eklendi
 using SGKPortalApp.DataAccessLayer.Context;
+using System.Globalization; // ← CultureInfo için gerekli namespace
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,7 +56,7 @@ builder.Services.AddDbContext<SGKDbContext>(options =>
 builder.Services.AddSGKPortalServices(connectionString);
 
 // 2. Presentation Layer (UI Services)
-builder.Services.AddPresentationServices(builder.Configuration);  // ← YENİ: Extension kullanımı
+builder.Services.AddPresentationServices(builder.Configuration); // ← YENİ: Extension kullanımı
 
 // CORS (API kullanımı için)
 builder.Services.AddCors(options =>
@@ -65,18 +66,33 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(httpsUrl, apiUrl)
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials();  // ← YENİ: Credentials eklendi
+              .AllowCredentials(); // ← YENİ: Credentials eklendi
     });
 });
 
 // Memory Cache
 builder.Services.AddMemoryCache();
 
-//AutoMapper
+// AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // HTTP Context Accessor (Blazor'da user bilgileri için)
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+// Yerelleştirme ayarları (hata düzeltildi)
+var supportedCultures = new[]
+{
+    new CultureInfo("tr-TR"),
+    new CultureInfo("en-US")
+};
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("tr-TR");
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+});
 
 // Logging konfigürasyonu
 builder.Logging.ClearProviders();
@@ -119,7 +135,7 @@ app.UseCors();
 app.MapBlazorHub(options =>
 {
     // SignalR için buffer boyutları (3 Mbit için optimize edildi)
-    options.ApplicationMaxBufferSize = 32768;  // 32KB
+    options.ApplicationMaxBufferSize = 32768; // 32KB
     options.TransportMaxBufferSize = 32768;
 });
 

@@ -43,9 +43,27 @@
                         <div>Personel Listesi</div>
                     </a>
                 </li>
-                <li class="menu-item">
+                <li class="menu-item @(IsActive("/personel/create") ? "active" : "")">
                     <a href="/personel/create" class="menu-link">
                         <div>Yeni Personel</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="menu-item @(IsActive("/departman") ? "active open" : "")">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-user"></i>
+                <div>Departman</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item @(IsActive("/departman") ? "active" : "")">
+                    <a href="/departman" class="menu-link">
+                        <div>Departman Listesi</div>
+                    </a>
+                </li>
+                <li class="menu-item @(IsActive("/departman/create") ? "active" : "")">
+                    <a href="/departman/create" class="menu-link">
+                        <div>Yeni Departman</div>
                     </a>
                 </li>
             </ul>
