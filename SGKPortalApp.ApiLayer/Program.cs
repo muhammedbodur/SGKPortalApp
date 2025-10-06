@@ -1,4 +1,8 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using SGKPortalApp.Common.Extensions;
+using SGKPortalApp.DataAccessLayer.Context;
+using System.Text.Json.Serialization;
 
 namespace SGKPortalApp.ApiLayer
 {
@@ -8,17 +12,58 @@ namespace SGKPortalApp.ApiLayer
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Port ayarlarını appsettings'den al
+            // ═══════════════════════════════════════════════════════
+            // 📌 PORT AYARLARI
+            // ═══════════════════════════════════════════════════════
             var httpsUrl = builder.Configuration["AppSettings:Urls:HttpsUrl"] ?? "https://localhost:7021";
             var httpUrl = builder.Configuration["AppSettings:Urls:HttpUrl"] ?? "http://localhost:5272";
 
             // URL konfigürasyonu
             builder.WebHost.UseUrls(httpsUrl, httpUrl);
 
-            // Add services to the container
-            builder.Services.AddControllers();
+            // ═══════════════════════════════════════════════════════
+            // 📦 CONTROLLERS & JSON SERİALİZATİON
+            // ═══════════════════════════════════════════════════════
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>  // ← GELİŞTİRİLDİ
+                {
+                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                    options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+                    options.JsonSerializerOptions.WriteIndented = true;
+                });
 
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            // ═══════════════════════════════════════════════════════
+            // 🗄️ DATABASE CONNECTION - YENİ EKLENEN
+            // ═══════════════════════════════════════════════════════
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("❌ DefaultConnection bağlantı dizesi bulunamadı!");
+
+            builder.Services.AddDbContext<SGKDbContext>(options =>
+            {
+                options.UseSqlServer(connectionString);
+
+                if (builder.Environment.IsDevelopment())
+                {
+                    options.EnableSensitiveDataLogging();
+                    options.EnableDetailedErrors();
+                }
+            });
+
+            // ═══════════════════════════════════════════════════════
+            // 🎯 SGK PORTAL SERVİSLERİ - YENİ EKLENEN
+            // Data Access Layer + Business Logic Layer
+            // ═══════════════════════════════════════════════════════
+            builder.Services.AddSGKPortalServices(connectionString);
+
+            // ═══════════════════════════════════════════════════════
+            // 🔧 AUTOMAPPER - YENİ EKLENEN
+            // ═══════════════════════════════════════════════════════
+            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            // ═══════════════════════════════════════════════════════
+            // 📖 SWAGGER/OpenAPI
+            // ═══════════════════════════════════════════════════════
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
@@ -63,7 +108,9 @@ namespace SGKPortalApp.ApiLayer
                 });
             });
 
-            // CORS configuration
+            // ═══════════════════════════════════════════════════════
+            // 🌐 CORS CONFIGURATION
+            // ═══════════════════════════════════════════════════════
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("SGKPortalPolicy", policy =>
@@ -71,24 +118,22 @@ namespace SGKPortalApp.ApiLayer
                     // Presentation layer'dan gelen istekleri kabul et
                     var presentationUrl = builder.Configuration["AppSettings:PresentationUrl"] ?? "https://localhost:7037";
 
-                    policy.WithOrigins(presentationUrl, "http://localhost:3000", "https://localhost:3001")
+                    policy.WithOrigins(
+                            presentationUrl,
+                            "http://localhost:3000",
+                            "https://localhost:3001",
+                            "http://localhost:5243",  // ← EKLENEN
+                            "https://localhost:8080"  // ← EKLENEN
+                          )
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials();
                 });
             });
 
-            // JSON serialization options
-            builder.Services.ConfigureHttpJsonOptions(options =>
-            {
-                options.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-                options.SerializerOptions.WriteIndented = true;
-            });
-
-            // Health checks
-            builder.Services.AddHealthChecks();
-
-            // Logging configuration
+            // ═══════════════════════════════════════════════════════
+            // 📝 LOGGING CONFIGURATION
+            // ═══════════════════════════════════════════════════════
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
             if (builder.Environment.IsDevelopment())
@@ -96,9 +141,14 @@ namespace SGKPortalApp.ApiLayer
                 builder.Logging.SetMinimumLevel(LogLevel.Debug);
             }
 
+            // ═══════════════════════════════════════════════════════
+            // 🏗️ BUILD APPLICATION
+            // ═══════════════════════════════════════════════════════
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline
+            // ═══════════════════════════════════════════════════════
+            // 🔧 MIDDLEWARE PIPELINE
+            // ═══════════════════════════════════════════════════════
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -134,7 +184,9 @@ namespace SGKPortalApp.ApiLayer
             // API Controllers
             app.MapControllers();
 
-            // API Info endpoint
+            // ═══════════════════════════════════════════════════════
+            // 📊 API INFO ENDPOINT
+            // ═══════════════════════════════════════════════════════
             app.MapGet("/", () => new
             {
                 Service = "SGK Portal API",
@@ -149,20 +201,59 @@ namespace SGKPortalApp.ApiLayer
                     {
                         "/api/personel",
                         "/api/departman",
+                        "/api/servis",
+                        "/api/unvan",
                         "/api/banko",
                         "/api/kanal",
+                        "/api/kiosk",
+                        "/api/tv",
                         "/api/sira",
+                        "/api/pdks",
+                        "/api/izin",
+                        "/api/eshot",
                         "/api/auth"
                     }
                 }
             }).WithTags("Info");
 
-            Console.WriteLine("SGK Portal API başlatılıyor...");
-            Console.WriteLine($"Ortam: {app.Environment.EnvironmentName}");
-            Console.WriteLine($"API HTTPS URL: {httpsUrl}");
-            Console.WriteLine($"API HTTP URL: {httpUrl}");
-            Console.WriteLine($"Swagger Dokümantasyon: {httpsUrl}");
-            Console.WriteLine($"Health Check: {httpsUrl}/health");
+            // ═══════════════════════════════════════════════════════
+            // 🗄️ DATABASE MIGRATION - YENİ EKLENEN
+            // ═══════════════════════════════════════════════════════
+            using (var scope = app.Services.CreateScope())
+            {
+                try
+                {
+                    var context = scope.ServiceProvider.GetRequiredService<SGKDbContext>();
+
+                    if (context.Database.GetPendingMigrations().Any())
+                    {
+                        Console.WriteLine("📊 Bekleyen migration'lar uygulanıyor...");
+                        context.Database.Migrate();
+                        Console.WriteLine("✅ Migration'lar başarıyla uygulandı");
+                    }
+                    else
+                    {
+                        Console.WriteLine("✅ Veritabanı güncel");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"❌ Migration hatası: {ex.Message}");
+                }
+            }
+
+            // ═══════════════════════════════════════════════════════
+            // 🚀 APPLICATION START
+            // ═══════════════════════════════════════════════════════
+            Console.WriteLine("\n╔════════════════════════════════════════════════════════╗");
+            Console.WriteLine("║         SGK PORTAL API BAŞLATILIYOR...                 ║");
+            Console.WriteLine("╚════════════════════════════════════════════════════════╝");
+            Console.WriteLine($"🌐 Ortam: {app.Environment.EnvironmentName}");
+            Console.WriteLine($"🔒 HTTPS URL: {httpsUrl}");
+            Console.WriteLine($"🌍 HTTP URL: {httpUrl}");
+            Console.WriteLine($"📖 Swagger: {httpsUrl}");
+            Console.WriteLine($"❤️  Health: {httpsUrl}/health");
+            Console.WriteLine("╚════════════════════════════════════════════════════════╝\n");
 
             app.Run();
         }

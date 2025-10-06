@@ -5,16 +5,19 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using System.Net.Http;
 using System.Net.Http.Json;
+using Microsoft.Extensions.Logging;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices
 {
     public class DepartmanApiService : IDepartmanApiService
     {
         private readonly HttpClient _httpClient;
+        private readonly ILogger<DepartmanApiService> _logger;
 
-        public DepartmanApiService(HttpClient httpClient)
+        public DepartmanApiService(HttpClient httpClient, ILogger<DepartmanApiService> logger)
         {
             _httpClient = httpClient;
+            _logger = logger;
         }
 
         public async Task<ServiceResult<List<DepartmanResponseDto>>> GetAllAsync()
@@ -43,15 +46,37 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices
 
         public async Task<ServiceResult<DepartmanResponseDto>> CreateAsync(DepartmanCreateRequestDto request)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/departman", request);
-            if (!response.IsSuccessStatusCode)
-                return ServiceResult<DepartmanResponseDto>.Fail("Departman eklenemedi.");
+            try
+            {
+                _logger.LogInformation("🔵 CreateAsync çağrıldı");
+                _logger.LogInformation("📦 Request: {@Request}", request);
 
-            var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<DepartmanResponseDto>>();
-            return apiResponse?.Success == true
-                ? ServiceResult<DepartmanResponseDto>.Ok(apiResponse.Data)
-                : ServiceResult<DepartmanResponseDto>.Fail(apiResponse?.Message ?? "Bilinmeyen hata");
+                var response = await _httpClient.PostAsJsonAsync("api/departman", request);
+
+                // ⭐ HAta detayını oku
+                var responseContent = await response.Content.ReadAsStringAsync();
+                _logger.LogInformation("📡 Status: {Status}, Content: {Content}",
+                    response.StatusCode, responseContent);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("❌ API Hatası: {Error}", responseContent);
+                    return ServiceResult<DepartmanResponseDto>.Fail(
+                        $"Departman eklenemedi. Detay: {responseContent}");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<DepartmanResponseDto>>();
+                return apiResponse?.Success == true
+                    ? ServiceResult<DepartmanResponseDto>.Ok(apiResponse.Data)
+                    : ServiceResult<DepartmanResponseDto>.Fail(apiResponse?.Message ?? "Bilinmeyen hata");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ CreateAsync Exception");
+                return ServiceResult<DepartmanResponseDto>.Fail($"Hata: {ex.Message}");
+            }
         }
+
 
         public async Task<ServiceResult<DepartmanResponseDto>> UpdateAsync(int id, DepartmanUpdateRequestDto request)
         {

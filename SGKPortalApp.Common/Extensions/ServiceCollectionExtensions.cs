@@ -4,6 +4,7 @@ using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using System.Reflection;
 using SGKPortalApp.DataAccessLayer.Repositories;
+using SGKPortalApp.BusinessLogicLayer.Extensions;
 
 namespace SGKPortalApp.Common.Extensions
 {
@@ -194,11 +195,7 @@ namespace SGKPortalApp.Common.Extensions
         /// </summary>
         public static IServiceCollection AddBusinessLayer(this IServiceCollection services)
         {
-            // AutoMapper - gerekirse eklenecek
-            // services.AddAutoMapper(typeof(SGKDbContext).Assembly);
-
-            // Business service'leri buraya eklenecek
-            // services.AddScoped<IPersonelService, PersonelService>();
+            services.AddBusinessLogicLayer();
 
             return services;
         }
