@@ -1,11 +1,12 @@
-﻿using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
+﻿using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
 {
-    public class HubTvConnection
+    public class HubTvConnection : AuditableEntity
     {
         [Key]
         public int HubTvConnectionId { get; set; }

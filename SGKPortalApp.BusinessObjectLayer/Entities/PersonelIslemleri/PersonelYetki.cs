@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
 {
-    public class PersonelYetki : BaseEntity
+    public class PersonelYetki : AuditableEntity
     {
         [Key]
         public int PersonelYetkiId { get; set; }

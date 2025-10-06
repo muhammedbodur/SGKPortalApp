@@ -1,102 +1,104 @@
 ﻿using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using System.Net.Http;
+using System.Net.Http.Json;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices
 {
-    /// <summary>
-    /// Departman API servisi - Mock implementation
-    /// Gerçek API hazır olunca bu değiştirilecek
-    /// </summary>
     public class DepartmanApiService : IDepartmanApiService
     {
-        // Mock veri listesi
-        private static readonly List<DepartmanResponseDto> _mockDepartmanlar = new()
-        {
-            new() { DepartmanId = 1, DepartmanAdi = "İnsan Kaynakları", DepartmanAktiflik = Aktiflik.Aktif, PersonelSayisi = 15, EklenmeTarihi = DateTime.Now.AddMonths(-12), DuzenlenmeTarihi = DateTime.Now.AddDays(-5) },
-            new() { DepartmanId = 2, DepartmanAdi = "Bilgi İşlem", DepartmanAktiflik = Aktiflik.Aktif, PersonelSayisi = 8, EklenmeTarihi = DateTime.Now.AddMonths(-10), DuzenlenmeTarihi = DateTime.Now.AddDays(-2) },
-            new() { DepartmanId = 3, DepartmanAdi = "Muhasebe", DepartmanAktiflik = Aktiflik.Aktif, PersonelSayisi = 12, EklenmeTarihi = DateTime.Now.AddMonths(-8), DuzenlenmeTarihi = DateTime.Now.AddDays(-10) },
-            new() { DepartmanId = 4, DepartmanAdi = "Satın Alma", DepartmanAktiflik = Aktiflik.Aktif, PersonelSayisi = 5, EklenmeTarihi = DateTime.Now.AddMonths(-6), DuzenlenmeTarihi = DateTime.Now.AddDays(-15) },
-            new() { DepartmanId = 5, DepartmanAdi = "Arşiv", DepartmanAktiflik = Aktiflik.Pasif, PersonelSayisi = 2, EklenmeTarihi = DateTime.Now.AddYears(-2), DuzenlenmeTarihi = DateTime.Now.AddMonths(-3) }
-        };
+        private readonly HttpClient _httpClient;
 
-        // Tüm departmanları getir
+        public DepartmanApiService(HttpClient httpClient)
+        {
+            _httpClient = httpClient;
+        }
+
         public async Task<ServiceResult<List<DepartmanResponseDto>>> GetAllAsync()
         {
-            await Task.Delay(300); // API çağrısını simüle et
-            var list = _mockDepartmanlar.OrderBy(d => d.DepartmanAdi).ToList();
-            return ServiceResult<List<DepartmanResponseDto>>.Ok(list, "Departman listesi yüklendi");
+            var response = await _httpClient.GetAsync("api/departman");
+            if (!response.IsSuccessStatusCode)
+                return ServiceResult<List<DepartmanResponseDto>>.Fail("Departman listesi alınamadı.");
+
+            var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<DepartmanResponseDto>>>();
+            return apiResponse?.Success == true
+                ? ServiceResult<List<DepartmanResponseDto>>.Ok(apiResponse.Data)
+                : ServiceResult<List<DepartmanResponseDto>>.Fail(apiResponse?.Message ?? "Bilinmeyen hata");
         }
 
-        // ID'ye göre departman getir
         public async Task<ServiceResult<DepartmanResponseDto>> GetByIdAsync(int id)
         {
-            await Task.Delay(200);
-            var departman = _mockDepartmanlar.FirstOrDefault(d => d.DepartmanId == id);
-            return departman != null
-                ? ServiceResult<DepartmanResponseDto>.Ok(departman, "Departman bulundu")
-                : ServiceResult<DepartmanResponseDto>.Fail("Departman bulunamadı");
+            var response = await _httpClient.GetAsync($"api/departman/{id}");
+            if (!response.IsSuccessStatusCode)
+                return ServiceResult<DepartmanResponseDto>.Fail("Departman bulunamadı.");
+
+            var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<DepartmanResponseDto>>();
+            return apiResponse?.Success == true
+                ? ServiceResult<DepartmanResponseDto>.Ok(apiResponse.Data)
+                : ServiceResult<DepartmanResponseDto>.Fail(apiResponse?.Message ?? "Bilinmeyen hata");
         }
 
-        // Yeni departman oluştur
         public async Task<ServiceResult<DepartmanResponseDto>> CreateAsync(DepartmanCreateRequestDto request)
         {
-            await Task.Delay(400);
+            var response = await _httpClient.PostAsJsonAsync("api/departman", request);
+            if (!response.IsSuccessStatusCode)
+                return ServiceResult<DepartmanResponseDto>.Fail("Departman eklenemedi.");
 
-            var newDepartman = new DepartmanResponseDto
-            {
-                DepartmanId = _mockDepartmanlar.Max(d => d.DepartmanId) + 1,
-                DepartmanAdi = request.DepartmanAdi,
-                DepartmanAktiflik = Aktiflik.Aktif,
-                PersonelSayisi = 0,
-                EklenmeTarihi = DateTime.Now,
-                DuzenlenmeTarihi = DateTime.Now
-            };
-
-            _mockDepartmanlar.Add(newDepartman);
-            return ServiceResult<DepartmanResponseDto>.Ok(newDepartman, "Departman başarıyla eklendi");
+            var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<DepartmanResponseDto>>();
+            return apiResponse?.Success == true
+                ? ServiceResult<DepartmanResponseDto>.Ok(apiResponse.Data)
+                : ServiceResult<DepartmanResponseDto>.Fail(apiResponse?.Message ?? "Bilinmeyen hata");
         }
 
-        // Departman güncelle
         public async Task<ServiceResult<DepartmanResponseDto>> UpdateAsync(int id, DepartmanUpdateRequestDto request)
         {
-            await Task.Delay(400);
+            var response = await _httpClient.PutAsJsonAsync($"api/departman/{id}", request);
+            if (!response.IsSuccessStatusCode)
+                return ServiceResult<DepartmanResponseDto>.Fail("Departman güncellenemedi.");
 
-            var departman = _mockDepartmanlar.FirstOrDefault(d => d.DepartmanId == id);
-            if (departman == null)
-                return ServiceResult<DepartmanResponseDto>.Fail("Departman bulunamadı");
-
-            departman.DepartmanAdi = request.DepartmanAdi;
-            departman.DepartmanAktiflik = request.DepartmanAktiflik;
-            departman.DuzenlenmeTarihi = DateTime.Now;
-
-            return ServiceResult<DepartmanResponseDto>.Ok(departman, "Departman başarıyla güncellendi");
+            var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<DepartmanResponseDto>>();
+            return apiResponse?.Success == true
+                ? ServiceResult<DepartmanResponseDto>.Ok(apiResponse.Data)
+                : ServiceResult<DepartmanResponseDto>.Fail(apiResponse?.Message ?? "Bilinmeyen hata");
         }
 
-        // Departman sil
         public async Task<ServiceResult<bool>> DeleteAsync(int id)
         {
-            await Task.Delay(300);
+            var response = await _httpClient.DeleteAsync($"api/departman/{id}");
+            if (!response.IsSuccessStatusCode)
+                return ServiceResult<bool>.Fail("Departman silinemedi.");
 
-            var departman = _mockDepartmanlar.FirstOrDefault(d => d.DepartmanId == id);
-            if (departman == null)
-                return ServiceResult<bool>.Fail("Departman bulunamadı");
-
-            _mockDepartmanlar.Remove(departman);
-            return ServiceResult<bool>.Ok(true, "Departman başarıyla silindi");
+            var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
+            return apiResponse?.Success == true
+                ? ServiceResult<bool>.Ok(true)
+                : ServiceResult<bool>.Fail(apiResponse?.Message ?? "Bilinmeyen hata");
         }
 
-        // Aktif departmanları getir
         public async Task<ServiceResult<List<DepartmanResponseDto>>> GetActiveAsync()
         {
-            await Task.Delay(300);
-            var activeList = _mockDepartmanlar
-                .Where(d => d.DepartmanAktiflik == Aktiflik.Aktif)
-                .OrderBy(d => d.DepartmanAdi)
-                .ToList();
+            var response = await _httpClient.GetAsync("api/departman/active");
+            if (!response.IsSuccessStatusCode)
+                return ServiceResult<List<DepartmanResponseDto>>.Fail("Aktif departmanlar alınamadı.");
 
-            return ServiceResult<List<DepartmanResponseDto>>.Ok(activeList, "Aktif departman listesi getirildi");
+            var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<DepartmanResponseDto>>>();
+            return apiResponse?.Success == true
+                ? ServiceResult<List<DepartmanResponseDto>>.Ok(apiResponse.Data)
+                : ServiceResult<List<DepartmanResponseDto>>.Fail(apiResponse?.Message ?? "Bilinmeyen hata");
+        }
+
+        public async Task<ServiceResult<PagedResponseDto<DepartmanResponseDto>>> GetPagedAsync(DepartmanFilterRequestDto filter)
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/departman/paged", filter);
+            if (!response.IsSuccessStatusCode)
+                return ServiceResult<PagedResponseDto<DepartmanResponseDto>>.Fail("Sayfalı liste alınamadı.");
+
+            var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<PagedResponseDto<DepartmanResponseDto>>>();
+            return apiResponse?.Success == true
+                ? ServiceResult<PagedResponseDto<DepartmanResponseDto>>.Ok(apiResponse.Data)
+                : ServiceResult<PagedResponseDto<DepartmanResponseDto>>.Fail(apiResponse?.Message ?? "Bilinmeyen hata");
         }
     }
 }

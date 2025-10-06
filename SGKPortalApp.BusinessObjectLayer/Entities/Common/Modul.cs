@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
 {
-    public class Modul : BaseEntity
+    public class Modul : AuditableEntity
     {
         [Key]
         public int ModulId { get; set; }

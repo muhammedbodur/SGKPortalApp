@@ -7,7 +7,7 @@ using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
 {
-    public class BankoKullanici : BaseEntity
+    public class BankoKullanici : AuditableEntity
     {
         [Key]
         public int BankoKullaniciId { get; set; }

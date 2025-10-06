@@ -6,7 +6,7 @@ using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
 {
-    public class AtanmaNedenleri : BaseEntity
+    public class AtanmaNedenleri : AuditableEntity
     {
         [Key]
         public int AtanmaNedeniId { get; set; }

@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
 {
-    public class HubConnection : BaseEntity
+    public class HubConnection : AuditableEntity
     {
         [Key]
         public int HubConnectionId { get; set; }

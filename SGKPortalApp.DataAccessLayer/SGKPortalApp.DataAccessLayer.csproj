@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Configurations\" />
+    <Folder Include="Configurations\Auth\" />
+    <Folder Include="Configurations\EshotIslemleri\" />
+    <Folder Include="Configurations\PdksIslemleri\" />
     <Folder Include="Migrations\" />
     <Folder Include="Repositories\Concrete\EshotIslemleri\" />
     <Folder Include="Repositories\Concrete\Complex\" />

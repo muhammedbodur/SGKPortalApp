@@ -13,6 +13,8 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         [Key]
         public int TvId { get; set; }
 
+        public string TvAdi { get; set; } = string.Empty;
+
         public int HizmetBinasiId { get; set; }
         [ForeignKey(nameof(HizmetBinasiId))]
         [InverseProperty("Tvler")]

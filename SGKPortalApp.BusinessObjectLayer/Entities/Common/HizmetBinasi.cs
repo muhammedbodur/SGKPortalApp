@@ -22,6 +22,8 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
         [InverseProperty("HizmetBinalari")]
         public Departman? Departman { get; set; }
 
+        public string Adres { get; set; } = string.Empty;
+
         public Aktiflik HizmetBinasiAktiflik { get; set; }
 
         [InverseProperty("HizmetBinasi")]

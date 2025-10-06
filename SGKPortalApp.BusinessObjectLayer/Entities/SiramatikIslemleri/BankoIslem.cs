@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
 {
-    public class BankoIslem : BaseEntity
+    public class BankoIslem : AuditableEntity
     {
         /*
          Bu tablo admin tarafından girilerek oluşturulacak, AnaGrup ise direkt devam edilecek, 

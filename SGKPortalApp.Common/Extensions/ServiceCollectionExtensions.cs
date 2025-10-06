@@ -8,7 +8,7 @@ using SGKPortalApp.DataAccessLayer.Repositories;
 namespace SGKPortalApp.Common.Extensions
 {
     /// <summary>
-    /// SGK Portal için Dependency Injection Extensions - ÇALIŞIR GARANTI
+    /// SGK Portal için Dependency Injection Extensions
     /// </summary>
     public static class ServiceCollectionExtensions
     {
@@ -38,7 +38,7 @@ namespace SGKPortalApp.Common.Extensions
         }
 
         /// <summary>
-        /// Repository'leri otomatik kaydet - KESIN ÇALIŞIR
+        /// Repository'leri otomatik kaydet
         /// </summary>
         private static IServiceCollection AddRepositoriesAutomatically(this IServiceCollection services)
         {

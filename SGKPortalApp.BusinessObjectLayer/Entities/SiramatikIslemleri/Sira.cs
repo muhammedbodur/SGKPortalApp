@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
 {
-    public class Sira
+    public class Sira : AuditableEntity
     {
         [Key]
         public int SiraId { get; set; }

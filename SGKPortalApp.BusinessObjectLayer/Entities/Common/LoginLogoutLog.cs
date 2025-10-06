@@ -8,7 +8,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
     {
         [Key]
         [Column("Id")]
-        public int Id { get; set; }
+        public int LoginLogoutLogId { get; set; }
 
         [Column("TcKimlikNo")]
         public string? TcKimlikNo { get; set; }

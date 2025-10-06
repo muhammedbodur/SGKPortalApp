@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
 {
-    public class Ilce
+    public class Ilce : AuditableEntity
     {
         [Key]
         public int IlceId { get; set; }

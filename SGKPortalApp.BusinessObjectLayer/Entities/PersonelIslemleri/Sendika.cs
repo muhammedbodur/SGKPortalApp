@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
 {
-    public class Sendika : BaseEntity
+    public class Sendika : AuditableEntity
     {
         [Key]
         public int SendikaId { get; set; }
