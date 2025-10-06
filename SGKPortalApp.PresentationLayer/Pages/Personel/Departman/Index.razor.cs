@@ -4,6 +4,7 @@ using Microsoft.JSInterop;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices;
@@ -79,9 +80,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
 
         protected override async Task OnInitializedAsync()
         {
-            // QuestPDF License
             QuestPDF.Settings.License = LicenseType.Community;
-
             await LoadDepartmanlar();
         }
 
@@ -90,8 +89,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             IsLoading = true;
             try
             {
-                Departmanlar = await _departmanService.GetAllAsync();
-                ApplyFiltersAndSort();
+                var result = await _departmanService.GetAllAsync();
+
+                if (result.Success && result.Data != null)
+                {
+                    Departmanlar = result.Data;
+                    ApplyFiltersAndSort();
+                }
+                else
+                {
+                    await _toastService.ShowErrorAsync(result.Message ?? "Departmanlar yüklenemedi!");
+                }
             }
             catch (Exception ex)
             {
@@ -140,14 +148,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         {
             var query = Departmanlar.AsEnumerable();
 
-            // Arama filtresi
             if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                query = query.Where(d => d.DepartmanAdi
-                    .Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
-            }
+                query = query.Where(d => d.DepartmanAdi.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
 
-            // Durum filtresi
             query = filterStatus switch
             {
                 "active" => query.Where(d => d.DepartmanAktiflik == Aktiflik.Aktif),
@@ -155,7 +158,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                 _ => query
             };
 
-            // Sıralama
             query = sortBy switch
             {
                 "name-asc" => query.OrderBy(d => d.DepartmanAdi),
@@ -185,15 +187,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // NAVİGASYON
         // ═══════════════════════════════════════════════════════
 
-        private void NavigateToCreate()
-        {
-            _navigationManager.NavigateTo("/personel/departman/manage");
-        }
-
-        private void NavigateToEdit(int id)
-        {
-            _navigationManager.NavigateTo($"/personel/departman/manage/{id}");
-        }
+        private void NavigateToCreate() => _navigationManager.NavigateTo("/personel/departman/manage");
+        private void NavigateToEdit(int id) => _navigationManager.NavigateTo($"/personel/departman/manage/{id}");
 
         // ═══════════════════════════════════════════════════════
         // TOGGLE STATUS MODAL
@@ -226,15 +221,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                     return;
                 }
 
-                // Mock implementation - Gerçek API gelince değişecek
-                var yeniDurum = departman.DepartmanAktiflik == Aktiflik.Aktif
-                    ? Aktiflik.Pasif
-                    : Aktiflik.Aktif;
-
-                departman.DepartmanAktiflik = yeniDurum;
+                departman.DepartmanAktiflik = departman.DepartmanAktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif;
                 departman.DuzenlenmeTarihi = DateTime.Now;
 
-                var statusText = yeniDurum == Aktiflik.Aktif ? "aktif" : "pasif";
+                var statusText = departman.DepartmanAktiflik == Aktiflik.Aktif ? "aktif" : "pasif";
                 await _toastService.ShowSuccessAsync($"Departman {statusText} yapıldı.");
 
                 ApplyFiltersAndSort();
@@ -276,17 +266,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             IsDeleting = true;
             try
             {
-                var success = await _departmanService.DeleteAsync(DeleteDepartmanId);
+                var result = await _departmanService.DeleteAsync(DeleteDepartmanId);
 
-                if (success)
+                if (result.Success)
                 {
-                    await _toastService.ShowSuccessAsync("Departman başarıyla silindi.");
+                    await _toastService.ShowSuccessAsync(result.Message ?? "Departman başarıyla silindi.");
                     await LoadDepartmanlar();
                     CloseDeleteModal();
                 }
                 else
                 {
-                    await _toastService.ShowErrorAsync("Departman silinemedi!");
+                    await _toastService.ShowErrorAsync(result.Message ?? "Departman silinemedi!");
                 }
             }
             catch (Exception ex)
@@ -335,11 +325,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                     worksheet.Cell(row, 4).Value = departman.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm");
                     worksheet.Cell(row, 5).Value = departman.DuzenlenmeTarihi.ToString("dd.MM.yyyy HH:mm");
 
-                    if (departman.DepartmanAktiflik == Aktiflik.Aktif)
-                        worksheet.Cell(row, 3).Style.Fill.BackgroundColor = XLColor.LightGreen;
-                    else
-                        worksheet.Cell(row, 3).Style.Fill.BackgroundColor = XLColor.LightPink;
-
+                    worksheet.Cell(row, 3).Style.Fill.BackgroundColor =
+                        departman.DepartmanAktiflik == Aktiflik.Aktif ? XLColor.LightGreen : XLColor.LightPink;
                     row++;
                 }
 
@@ -350,7 +337,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                 var content = stream.ToArray();
 
                 var fileName = $"Departmanlar_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
-                await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(content), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(content),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
                 await _toastService.ShowSuccessAsync("Excel dosyası indirildi!");
             }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
 {
@@ -7,5 +8,8 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         [Required(ErrorMessage = "Departman adı zorunludur")]
         [StringLength(150, ErrorMessage = "Departman adı en fazla 150 karakter olabilir")]
         public string DepartmanAdi { get; set; } = string.Empty;
+        
+        [Required(ErrorMessage = "Aktiflik durumu zorunludur")]
+        public Aktiflik DepartmanAktiflik { get; set; } = Aktiflik.Aktif;
     }
 }
