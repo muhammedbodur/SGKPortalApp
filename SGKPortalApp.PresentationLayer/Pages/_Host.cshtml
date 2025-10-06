@@ -44,6 +44,75 @@
     <script src="/portal/assets/vendor/js/template-customizer.js"></script>
     <script src="/portal/assets/js/config.js"></script>
 
+    <!-- ================== BLAZOR RECONNECTION CSS ================== -->
+    <style type="text/css">
+        /* Blazor'ın varsayılan reconnection modal'ını gizle */
+        #components-reconnect-modal {
+            display: none !important;
+        }
+
+        /* Kendi reconnection modal'ımız için stilleri */
+        .custom-reconnect-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(3px);
+            transition: all 0.3s ease;
+        }
+
+        .custom-reconnect-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            font-family: 'Public Sans', sans-serif;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @@keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .reconnect-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 4px solid #e3f2fd;
+            border-top: 4px solid #1976d2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem auto;
+        }
+
+        @@keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
 <body>
@@ -62,38 +131,46 @@
     </div>
 
     <!-- ================== BLAZOR RECONNECTION TÜRKÇE UI ================== -->
-    <div id="blazor-reconnect-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; background-color: rgba(0,0,0,0.6);">
-        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15); max-width: 400px; text-align: center; font-family: 'Public Sans', sans-serif;">
-
+    <div id="custom-blazor-reconnect-modal" class="custom-reconnect-modal" style="display: none;">
+        <div class="custom-reconnect-content">
             <!-- Yeniden bağlanıyor -->
-            <div class="components-reconnect-show">
-                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
-                    <span class="visually-hidden">Yükleniyor...</span>
+            <div class="reconnect-state-connecting">
+                <div class="reconnect-spinner"></div>
+                <h5 class="mb-2" style="color: #1976d2; font-weight: 600;">🔄 Bağlantı koptu</h5>
+                <p class="text-muted mb-3">Sunucuya yeniden bağlanılıyor...</p>
+
+                <!-- Sadece sonraki deneme süresi -->
+                <div class="reconnect-timer" id="reconnect-timer-container" style="display: none;">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <span class="badge bg-info fs-6" id="next-retry-time">Yeniden deneniyor...</span>
+                    </div>
                 </div>
-                <h5 class="mb-2">🔄 Bağlantı koptu</h5>
-                <p class="text-muted mb-0">Sunucuya yeniden bağlanılıyor...</p>
+
                 <small class="text-muted">Lütfen bekleyin</small>
             </div>
 
             <!-- Bağlantı başarısız -->
-            <div class="components-reconnect-failed" style="display: none;">
+            <div class="reconnect-state-failed" style="display: none;">
                 <i class="bx bx-error-circle text-danger mb-3" style="font-size: 3rem;"></i>
-                <h5 class="mb-2">❌ Bağlantı başarısız</h5>
-                <p class="text-muted mb-3">Sunucuya bağlanılamadı. Lütfen sayfayı yenileyin.</p>
-                <button onclick="location.reload()" class="btn btn-primary">
+                <h5 class="mb-2" style="color: #d32f2f; font-weight: 600;">❌ Bağlantı başarısız</h5>
+                <p class="text-muted mb-3">
+                    <span id="max-retries-reached">8 deneme</span> yapıldı ancak sunucuya bağlanılamadı.<br>
+                    Lütfen sayfayı manuel olarak yenileyin.
+                </p>
+                <button onclick="location.reload()" class="btn btn-primary" style="padding: 0.5rem 1.5rem;">
                     <i class="bx bx-refresh me-1"></i>
                     Sayfayı Yenile
                 </button>
             </div>
 
             <!-- Bağlantı reddedildi -->
-            <div class="components-reconnect-rejected" style="display: none;">
+            <div class="reconnect-state-rejected" style="display: none;">
                 <i class="bx bx-block text-danger mb-3" style="font-size: 3rem;"></i>
-                <h5 class="mb-2">🚫 Bağlantı reddedildi</h5>
+                <h5 class="mb-2" style="color: #d32f2f; font-weight: 600;">🚫 Bağlantı reddedildi</h5>
                 <p class="text-muted mb-3">Sunucu bağlantıyı reddetti. Oturum süreniz dolmuş olabilir.</p>
-                <button onclick="location.reload()" class="btn btn-primary">
+                <button onclick="location.reload()" class="btn btn-primary" style="padding: 0.5rem 1.5rem;">
                     <i class="bx bx-refresh me-1"></i>
-                    Sayfayı Yenile
+                    Yeniden Giriş Yap
                 </button>
             </div>
         </div>
@@ -114,52 +191,185 @@
 
     <!-- ================== BLAZOR RECONNECTION CONTROL ================== -->
     <script>
-        // Blazor bağlantı durumu yönetimi
-        document.addEventListener('DOMContentLoaded', function() {
-            // Blazor.start özelleştirmesi
-            window.blazorStartOptions = {
-                reconnectionHandler: {
-                    onConnectionDown: () => {
-                        console.log('🔴 Blazor bağlantısı koptu');
-                        const modal = document.getElementById('blazor-reconnect-modal');
-                        if (modal) {
-                            modal.style.display = 'block';
-                            // Show state'i göster
-                            const showElement = modal.querySelector('.components-reconnect-show');
-                            const failedElement = modal.querySelector('.components-reconnect-failed');
-                            const rejectedElement = modal.querySelector('.components-reconnect-rejected');
+        // Reconnection durumunu takip eden değişkenler
+        let reconnectState = {
+            currentRetry: 0,
+            maxRetries: 8,
+            isReconnecting: false,
+            countdownTimer: null
+        };
 
-                            if (showElement) showElement.style.display = 'block';
-                            if (failedElement) failedElement.style.display = 'none';
-                            if (rejectedElement) rejectedElement.style.display = 'none';
-                        }
-                    },
-                    onConnectionUp: () => {
-                        console.log('🟢 Blazor bağlantısı kuruldu');
-                        const modal = document.getElementById('blazor-reconnect-modal');
-                        if (modal) {
-                            modal.style.display = 'none';
-                        }
-                    }
-                },
-                reconnectionOptions: {
-                    maxRetries: 8,
-                    retryIntervalMilliseconds: retryCount => {
-                        // İlk 3 deneme: 1 saniye, sonraki denemeler: artarak 30 saniyeye kadar
-                        return Math.min(1000 * Math.pow(2, retryCount), 30000);
-                    }
-                }
-            };
+        // Blazor'ın varsayılan reconnection UI'sını devre dışı bırak
+        window.addEventListener('DOMContentLoaded', function() {
+            const originalModal = document.getElementById('components-reconnect-modal');
+            if (originalModal) {
+                originalModal.style.display = 'none !important';
+                originalModal.remove();
+            }
         });
 
-        // Blazor.start'ı override et
-        const originalBlazorStart = window.Blazor && window.Blazor.start;
-        if (window.Blazor) {
-            window.Blazor.start = function(options) {
-                const mergedOptions = Object.assign({}, window.blazorStartOptions || {}, options || {});
-                return originalBlazorStart ? originalBlazorStart.call(this, mergedOptions) : Promise.resolve();
-            };
+        // Kendi reconnection yönetimimizi oluştur
+        function showCustomReconnectModal(state = 'connecting') {
+            const modal = document.getElementById('custom-blazor-reconnect-modal');
+            if (!modal) return;
+
+            modal.querySelectorAll('[class^="reconnect-state-"]').forEach(el => {
+                el.style.display = 'none';
+            });
+
+            const stateElement = modal.querySelector(`.reconnect-state-${state}`);
+            if (stateElement) {
+                stateElement.style.display = 'block';
+            }
+
+            modal.style.display = 'block';
+
+            console.log(`🔄 Reconnection modal gösteriliyor: ${state}`);
         }
+
+        function hideCustomReconnectModal() {
+            const modal = document.getElementById('custom-blazor-reconnect-modal');
+            if (modal) {
+                modal.style.display = 'none';
+                // Timer'ı temizle
+                if (reconnectState.countdownTimer) {
+                    clearInterval(reconnectState.countdownTimer);
+                    reconnectState.countdownTimer = null;
+                }
+                console.log('✅ Reconnection modal gizlendi');
+            }
+        }
+
+        // Sadece geri sayım timer'ı
+        function startRetryCountdown() {
+            const timerContainer = document.getElementById('reconnect-timer-container');
+            const nextRetryElement = document.getElementById('next-retry-time');
+
+            if (!nextRetryElement || !timerContainer) return;
+
+            // İlk denemede timer gösterme
+            if (reconnectState.currentRetry <= 1) {
+                timerContainer.style.display = 'none';
+                return;
+            }
+
+            // Timer'ı göster
+            timerContainer.style.display = 'block';
+
+            // Önceki timer'ı temizle
+            if (reconnectState.countdownTimer) {
+                clearInterval(reconnectState.countdownTimer);
+            }
+
+            // Retry delay'i hesapla
+            const delay = Math.min(1000 * Math.pow(2, reconnectState.currentRetry - 1), 30000);
+            let remainingTime = Math.floor(delay / 1000);
+
+            nextRetryElement.textContent = `Sonraki deneme: ${remainingTime} saniye`;
+
+            // Her saniye güncelle
+            reconnectState.countdownTimer = setInterval(() => {
+                remainingTime--;
+                if (remainingTime > 0) {
+                    nextRetryElement.textContent = `Sonraki deneme: ${remainingTime} saniye`;
+                } else {
+                    nextRetryElement.textContent = 'Şimdi deneniyor...';
+                    clearInterval(reconnectState.countdownTimer);
+                    reconnectState.countdownTimer = null;
+                }
+            }, 1000);
+        }
+
+        // Blazor bağlantı olaylarını dinle
+        window.addEventListener('DOMContentLoaded', function() {
+            // Blazor yüklenene kadar bekle
+            let blazorLoadCheck = setInterval(() => {
+                if (window.Blazor) {
+                    clearInterval(blazorLoadCheck);
+
+                    // Blazor reconnection event'lerini override et
+                    const originalStart = window.Blazor.start;
+                    window.Blazor.start = function(options) {
+                        const customOptions = {
+                            ...options,
+                            reconnectionOptions: {
+                                maxRetries: reconnectState.maxRetries,
+                                retryIntervalMilliseconds: retryCount => {
+                                    reconnectState.currentRetry = retryCount + 1;
+                                    reconnectState.nextRetryDelay = Math.min(1000 * Math.pow(2, retryCount), 30000);
+
+                                    // Detayları güncelle
+                                    if (reconnectState.isReconnecting) {
+                                        updateReconnectDetails();
+                                    }
+
+                                    return reconnectState.nextRetryDelay;
+                                }
+                            },
+                            reconnectionHandler: {
+                                onConnectionDown: () => {
+                                    console.log('🔴 Blazor bağlantısı koptu - yeniden bağlanılıyor');
+                                    reconnectState.isReconnecting = true;
+                                    reconnectState.currentRetry = 0;
+                                    showCustomReconnectModal('connecting');
+                                },
+                                onConnectionUp: () => {
+                                    console.log('🟢 Blazor bağlantısı yeniden kuruldu');
+                                    reconnectState.isReconnecting = false;
+                                    reconnectState.currentRetry = 0;
+                                    hideCustomReconnectModal();
+                                },
+                                onReconnectionFailed: () => {
+                                    console.log('🔴 Blazor reconnection başarısız - maksimum deneme sayısına ulaşıldı');
+                                    reconnectState.isReconnecting = false;
+
+                                    // Maksimum deneme sayısını göster
+                                    const maxRetriesElement = document.getElementById('max-retries-reached');
+                                    if (maxRetriesElement) {
+                                        maxRetriesElement.textContent = `${reconnectState.maxRetries} deneme`;
+                                    }
+
+                                    showCustomReconnectModal('failed');
+                                }
+                            }
+                        };
+
+                        return originalStart ? originalStart.call(this, customOptions) : Promise.resolve();
+                    };
+                }
+            }, 100);
+        });
+
+        // Alternatif yaklaşım: Blazor'ın kendi reconnection olaylarını dinle
+        document.addEventListener('DOMContentLoaded', function() {
+            // MutationObserver ile Blazor'ın yarattığı modal'ları yakalayalım
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) { // Element node
+                            // Blazor'ın reconnection modal'ını yakalayıp gizle
+                            if (node.id === 'components-reconnect-modal' ||
+                                node.classList?.contains('components-reconnect-modal')) {
+                                console.log('🚫 Blazor varsayılan modal yakalandı ve gizlendi');
+                                node.style.display = 'none';
+
+                                // Kendi modal'ımızı göster
+                                if (!reconnectState.isReconnecting) {
+                                    reconnectState.isReconnecting = true;
+                                    reconnectState.currentRetry = 0;
+                                    showCustomReconnectModal('connecting');
+                                }
+                            }
+                        }
+                    });
+                });
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        });
     </script>
 
     <!-- ================== BLAZOR FRAMEWORK ================== -->

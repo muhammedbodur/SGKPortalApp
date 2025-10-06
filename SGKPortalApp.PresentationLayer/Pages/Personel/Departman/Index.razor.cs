@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices;
@@ -18,19 +16,49 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
 
-        // Properties
+        // ═══════════════════════════════════════════════════════
+        // DATA PROPERTIES
+        // ═══════════════════════════════════════════════════════
+
         private List<DepartmanResponseDto> Departmanlar { get; set; } = new();
         private List<DepartmanResponseDto> FilteredDepartmanlar { get; set; } = new();
+
+        // ═══════════════════════════════════════════════════════
+        // FILTER PROPERTIES
+        // ═══════════════════════════════════════════════════════
+
         private string searchTerm = string.Empty;
+        private string filterStatus = "all";
+        private string sortBy = "name-asc";
+
+        // ═══════════════════════════════════════════════════════
+        // PAGINATION PROPERTIES
+        // ═══════════════════════════════════════════════════════
+
+        private int CurrentPage { get; set; } = 1;
+        private int PageSize { get; set; } = 10;
+        private int TotalPages => (int)Math.Ceiling(FilteredDepartmanlar.Count / (double)PageSize);
+
+        // ═══════════════════════════════════════════════════════
+        // UI STATE
+        // ═══════════════════════════════════════════════════════
+
         private bool IsLoading { get; set; } = true;
 
-        // Delete Modal
+        // ═══════════════════════════════════════════════════════
+        // DELETE MODAL PROPERTIES
+        // ═══════════════════════════════════════════════════════
+
         private bool ShowDeleteModal { get; set; } = false;
         private int DeleteDepartmanId { get; set; }
         private string DeleteDepartmanAdi { get; set; } = string.Empty;
+        private int DeleteDepartmanPersonelSayisi { get; set; }
         private bool IsDeleting { get; set; } = false;
 
-        // Lifecycle
+        // ═══════════════════════════════════════════════════════
+        // LIFECYCLE METHODS
+        // ═══════════════════════════════════════════════════════
+
         protected override async Task OnInitializedAsync()
         {
             await LoadDepartmanlar();
@@ -42,7 +70,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             try
             {
                 Departmanlar = await _departmanService.GetAllAsync();
-                FilteredDepartmanlar = Departmanlar;
+                ApplyFiltersAndSort();
             }
             catch (Exception ex)
             {
@@ -55,20 +83,86 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             }
         }
 
+        // ═══════════════════════════════════════════════════════
+        // FİLTRELEME VE SIRALAMA
+        // ═══════════════════════════════════════════════════════
+
         private void OnSearchChanged()
         {
-            if (string.IsNullOrWhiteSpace(searchTerm))
+            CurrentPage = 1;
+            ApplyFiltersAndSort();
+        }
+
+        private void OnFilterStatusChanged(ChangeEventArgs e)
+        {
+            filterStatus = e.Value?.ToString() ?? "all";
+            CurrentPage = 1;
+            ApplyFiltersAndSort();
+        }
+
+        private void OnSortByChanged(ChangeEventArgs e)
+        {
+            sortBy = e.Value?.ToString() ?? "name-asc";
+            ApplyFiltersAndSort();
+        }
+
+        private void ClearFilters()
+        {
+            searchTerm = string.Empty;
+            filterStatus = "all";
+            sortBy = "name-asc";
+            CurrentPage = 1;
+            ApplyFiltersAndSort();
+        }
+
+        private void ApplyFiltersAndSort()
+        {
+            var query = Departmanlar.AsEnumerable();
+
+            // Arama filtresi
+            if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                FilteredDepartmanlar = Departmanlar;
+                query = query.Where(d => d.DepartmanAdi
+                    .Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
             }
-            else
+
+            // Durum filtresi
+            query = filterStatus switch
             {
-                FilteredDepartmanlar = Departmanlar
-                    .Where(d => d.DepartmanAdi.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-            }
+                "active" => query.Where(d => d.DepartmanAktiflik == Aktiflik.Aktif),
+                "passive" => query.Where(d => d.DepartmanAktiflik == Aktiflik.Pasif),
+                _ => query
+            };
+
+            // Sıralama
+            query = sortBy switch
+            {
+                "name-asc" => query.OrderBy(d => d.DepartmanAdi),
+                "name-desc" => query.OrderByDescending(d => d.DepartmanAdi),
+                "date-newest" => query.OrderByDescending(d => d.EklenmeTarihi),
+                "date-oldest" => query.OrderBy(d => d.EklenmeTarihi),
+                "personel-most" => query.OrderByDescending(d => d.PersonelSayisi),
+                "personel-least" => query.OrderBy(d => d.PersonelSayisi),
+                _ => query.OrderBy(d => d.DepartmanAdi)
+            };
+
+            FilteredDepartmanlar = query.ToList();
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // PAGİNATİON
+        // ═══════════════════════════════════════════════════════
+
+        private void ChangePage(int page)
+        {
+            if (page < 1 || page > TotalPages) return;
+            CurrentPage = page;
             StateHasChanged();
         }
+
+        // ═══════════════════════════════════════════════════════
+        // NAVİGASYON
+        // ═══════════════════════════════════════════════════════
 
         private void NavigateToCreate()
         {
@@ -80,56 +174,63 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             _navigationManager.NavigateTo($"/personel/departman/manage/{id}");
         }
 
-        private async Task ToggleAktiflik(int id)
+        private void NavigateBack()
+        {
+            _navigationManager.NavigateTo("/personel/departman");
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // CRUD İŞLEMLERİ
+        // ═══════════════════════════════════════════════════════
+
+        private async Task ToggleStatus(int departmanId)
         {
             try
             {
-                var departman = Departmanlar.FirstOrDefault(d => d.DepartmanId == id);
+                var departman = Departmanlar.FirstOrDefault(d => d.DepartmanId == departmanId);
                 if (departman == null)
                 {
                     await _toastService.ShowErrorAsync("Departman bulunamadı!");
                     return;
                 }
 
+                // Mock implementation - Gerçek API gelince değişecek
                 var yeniDurum = departman.DepartmanAktiflik == Aktiflik.Aktif
                     ? Aktiflik.Pasif
                     : Aktiflik.Aktif;
 
-                var updateDto = new DepartmanUpdateRequestDto
-                {
-                    DepartmanAdi = departman.DepartmanAdi,
-                    DepartmanAktiflik = yeniDurum
-                };
+                departman.DepartmanAktiflik = yeniDurum;
+                departman.DuzenlenmeTarihi = DateTime.Now;
 
-                await _departmanService.UpdateAsync(id, updateDto);
+                var statusText = yeniDurum == Aktiflik.Aktif ? "aktif" : "pasif";
+                await _toastService.ShowSuccessAsync($"Departman {statusText} yapıldı.");
 
-                await _toastService.ShowSuccessAsync(
-                    $"Departman {(yeniDurum == Aktiflik.Aktif ? "aktif" : "pasif")} yapıldı."
-                );
-
-                await LoadDepartmanlar();
+                ApplyFiltersAndSort();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Hata: {ex.Message}");
-                await _toastService.ShowErrorAsync("Durum değiştirilirken bir hata oluştu!");
+                await _toastService.ShowErrorAsync("Durum değiştirme işlemi başarısız!");
             }
         }
 
-        private void ShowDeleteConfirmation(int id, string departmanAdi)
+        private void ShowDeleteConfirmation(int departmanId, string departmanAdi)
         {
-            DeleteDepartmanId = id;
+            var departman = Departmanlar.FirstOrDefault(d => d.DepartmanId == departmanId);
+            if (departman == null) return;
+
+            DeleteDepartmanId = departmanId;
             DeleteDepartmanAdi = departmanAdi;
+            DeleteDepartmanPersonelSayisi = departman.PersonelSayisi;
             ShowDeleteModal = true;
-            StateHasChanged();
         }
 
-        private void HideDeleteConfirmation()
+        private void CloseDeleteModal()
         {
             ShowDeleteModal = false;
             DeleteDepartmanId = 0;
             DeleteDepartmanAdi = string.Empty;
-            StateHasChanged();
+            DeleteDepartmanPersonelSayisi = 0;
         }
 
         private async Task ConfirmDelete()
@@ -143,7 +244,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                 {
                     await _toastService.ShowSuccessAsync("Departman başarıyla silindi.");
                     await LoadDepartmanlar();
-                    HideDeleteConfirmation();
+                    CloseDeleteModal();
                 }
                 else
                 {
@@ -153,12 +254,30 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             catch (Exception ex)
             {
                 Console.WriteLine($"Hata: {ex.Message}");
-                await _toastService.ShowErrorAsync("Departman silinirken bir hata oluştu!");
+                await _toastService.ShowErrorAsync("Silme işlemi başarısız!");
             }
             finally
             {
                 IsDeleting = false;
             }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // EXPORT İŞLEMLERİ
+        // ═══════════════════════════════════════════════════════
+
+        private async Task ExportToExcel()
+        {
+            await _toastService.ShowInfoAsync("Excel export özelliği yakında eklenecek...");
+            // TODO: Excel export implementasyonu
+            // Bu özellik için ClosedXML veya EPPlus kullanılabilir
+        }
+
+        private async Task ExportToPdf()
+        {
+            await _toastService.ShowInfoAsync("PDF export özelliği yakında eklenecek...");
+            // TODO: PDF export implementasyonu
+            // Bu özellik için QuestPDF veya iTextSharp kullanılabilir
         }
     }
 }

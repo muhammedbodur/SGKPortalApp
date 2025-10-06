@@ -2,198 +2,374 @@
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
 
-<!-- Sayfa Başlığı -->
-<div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="py-3 mb-4">
-        <span class="text-muted fw-light">Personel /</span> Departmanlar
-    </h4>
+<PageTitle>Departman Yönetimi - SGK Portal</PageTitle>
 
-    <!-- Ana Card -->
-    <div class="card">
-        <!-- Card Header - Başlık ve Yeni Ekle Butonu -->
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Departman Listesi</h5>
-            <button type="button" class="btn btn-primary" @onclick="NavigateToCreate">
-                <i class="bx bx-plus me-1"></i>
-                Yeni Departman Ekle
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE HEADER -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="bx bx-buildings me-2"></i>Departman Yönetimi
+            </h4>
+            <p class="text-muted mb-0">
+                Tüm departmanları görüntüleyin ve yönetin
+            </p>
+        </div>
+        
+        <div class="d-flex gap-2">
+            <!-- Excel Export -->
+            <button class="btn btn-success" @onclick="ExportToExcel">
+                <i class="bx bx-download me-1"></i>Excel
+            </button>
+            
+            <!-- PDF Export -->
+            <button class="btn btn-danger" @onclick="ExportToPdf">
+                <i class="bx bxs-file-pdf me-1"></i>PDF
+            </button>
+            
+            <!-- Yeni Departman -->
+            <button class="btn btn-primary" @onclick="NavigateToCreate">
+                <i class="bx bx-plus me-1"></i>Yeni Departman
             </button>
         </div>
+    </div>
 
-        <!-- Card Body - Arama ve Tablo -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- FILTER CARD -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="card mb-4">
         <div class="card-body">
-
-            <!-- Arama Kutusu -->
-            <div class="row mb-3">
-                <div class="col-md-6">
+            <div class="row g-3">
+                <!-- Arama -->
+                <div class="col-md-4">
+                    <label class="form-label">Departman Ara</label>
                     <div class="input-group">
-                        <span class="input-group-text"><i class="bx bx-search"></i></span>
-                        <input type="text"
-                               class="form-control"
-                               placeholder="Departman ara..."
+                        <span class="input-group-text">
+                            <i class="bx bx-search"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control" 
+                               placeholder="Departman adı..." 
                                @bind="searchTerm"
                                @bind:event="oninput"
                                @onkeyup="OnSearchChanged" />
                     </div>
                 </div>
-                <div class="col-md-6 text-end">
-                    <span class="text-muted">
-                        <strong>@FilteredDepartmanlar.Count</strong> departman gösteriliyor
-                    </span>
+                
+                <!-- Durum Filtresi -->
+                <div class="col-md-3">
+                    <label class="form-label">Durum</label>
+                    <select class="form-select" value="@filterStatus" @onchange="OnFilterStatusChanged">
+                        <option value="all">Tümü</option>
+                        <option value="active">Aktif</option>
+                        <option value="passive">Pasif</option>
+                    </select>
+                </div>
+                
+                <!-- Sıralama -->
+                <div class="col-md-3">
+                    <label class="form-label">Sıralama</label>
+                    <select class="form-select" value="@sortBy" @onchange="OnSortByChanged">
+                        <option value="name-asc">İsim (A-Z)</option>
+                        <option value="name-desc">İsim (Z-A)</option>
+                        <option value="date-newest">En Yeni</option>
+                        <option value="date-oldest">En Eski</option>
+                        <option value="personel-most">En Çok Personel</option>
+                        <option value="personel-least">En Az Personel</option>
+                    </select>
+                </div>
+                
+                <!-- Temizle -->
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
+                        <i class="bx bx-reset me-1"></i>Temizle
+                    </button>
                 </div>
             </div>
+            
+            <!-- İstatistikler -->
+            <div class="row mt-3">
+                <div class="col">
+                    <div class="d-flex gap-4 text-muted small">
+                        <span>
+                            <i class="bx bx-buildings text-primary"></i>
+                            Toplam: <strong>@Departmanlar.Count</strong>
+                        </span>
+                        <span>
+                            <i class="bx bx-check-circle text-success"></i>
+                            Aktif: <strong>@Departmanlar.Count(d => d.DepartmanAktiflik == Aktiflik.Aktif)</strong>
+                        </span>
+                        <span>
+                            <i class="bx bx-x-circle text-danger"></i>
+                            Pasif: <strong>@Departmanlar.Count(d => d.DepartmanAktiflik == Aktiflik.Pasif)</strong>
+                        </span>
+                        <span>
+                            <i class="bx bx-filter-alt text-info"></i>
+                            Filtrelenen: <strong>@FilteredDepartmanlar.Count</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            <!-- Tablo -->
-            <div class="table-responsive text-nowrap">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Departman Adı</th>
-                            <th>Personel Sayısı</th>
-                            <th>Durum</th>
-                            <th>Oluşturma Tarihi</th>
-                            <th>İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-border-bottom-0">
-                        @if (IsLoading)
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- TABLE CARD -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="card">
+        <div class="card-body">
+            @if (IsLoading)
+            {
+                <!-- Loading Spinner -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Departmanlar yükleniyor...</p>
+                </div>
+            }
+            else if (!FilteredDepartmanlar.Any())
+            {
+                <!-- Empty State -->
+                <div class="text-center py-5">
+                    <i class="bx bx-search-alt display-1 text-muted"></i>
+                    <h5 class="mt-3">Departman Bulunamadı</h5>
+                    <p class="text-muted">
+                        @if (string.IsNullOrEmpty(searchTerm) && filterStatus == "all")
                         {
-                            <!-- Yükleniyor Durumu -->
-                            <tr>
-                                <td colspan="5" class="text-center py-5">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">Yükleniyor...</span>
-                                    </div>
-                                    <p class="mt-2 text-muted">Departmanlar yükleniyor...</p>
-                                </td>
-                            </tr>
+                            <span>Henüz departman eklenmemiş.</span>
                         }
-                        else if (FilteredDepartmanlar?.Any() == true)
+                        else
                         {
-                            <!-- Departman Listesi -->
-                            @foreach (var departman in FilteredDepartmanlar)
+                            <span>Arama kriterlerinize uygun departman bulunamadı.</span>
+                        }
+                    </p>
+                    @if (string.IsNullOrEmpty(searchTerm) && filterStatus == "all")
+                    {
+                        <button class="btn btn-primary mt-2" @onclick="NavigateToCreate">
+                            <i class="bx bx-plus me-1"></i>İlk Departmanı Ekle
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-outline-secondary mt-2" @onclick="ClearFilters">
+                            <i class="bx bx-reset me-1"></i>Filtreleri Temizle
+                        </button>
+                    }
+                </div>
+            }
+            else
+            {
+                <!-- Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">#</th>
+                                <th>Departman Adı</th>
+                                <th class="text-center" style="width: 120px;">Personel Sayısı</th>
+                                <th class="text-center" style="width: 100px;">Durum</th>
+                                <th class="text-center" style="width: 150px;">Eklenme Tarihi</th>
+                                <th class="text-center" style="width: 150px;">Son Güncelleme</th>
+                                <th class="text-center" style="width: 180px;">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var pagedData = FilteredDepartmanlar
+                                    .Skip((CurrentPage - 1) * PageSize)
+                                    .Take(PageSize)
+                                    .ToList();
+                            }
+                            @foreach (var (departman, index) in pagedData.Select((d, i) => (d, (CurrentPage - 1) * PageSize + i + 1)))
                             {
                                 <tr>
+                                    <td>@index</td>
                                     <td>
-                                        <strong>@departman.DepartmanAdi</strong>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm me-2">
+                                                <span class="avatar-initial rounded-circle bg-label-primary">
+                                                    @departman.DepartmanAdi.Substring(0, 1).ToUpper()
+                                                </span>
+                                            </div>
+                                            <strong>@departman.DepartmanAdi</strong>
+                                        </div>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <span class="badge bg-label-info">
-                                            @departman.PersonelSayisi Personel
+                                            <i class="bx bx-user me-1"></i>@departman.PersonelSayisi
                                         </span>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         @if (departman.DepartmanAktiflik == Aktiflik.Aktif)
                                         {
-                                            <span class="badge bg-label-success">Aktif</span>
+                                            <span class="badge bg-label-success">
+                                                <i class="bx bx-check-circle me-1"></i>Aktif
+                                            </span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-label-secondary">Pasif</span>
+                                            <span class="badge bg-label-danger">
+                                                <i class="bx bx-x-circle me-1"></i>Pasif
+                                            </span>
                                         }
                                     </td>
-                                    <td>
-                                        <small class="text-muted">
-                                            @departman.EklenmeTarihi.ToString("dd.MM.yyyy")
-                                        </small>
+                                    <td class="text-center text-muted small">
+                                        @departman.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm")
                                     </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button type="button"
-                                                    class="btn p-0 dropdown-toggle hide-arrow"
-                                                    data-bs-toggle="dropdown">
-                                                <i class="bx bx-dots-vertical-rounded"></i>
+                                    <td class="text-center text-muted small">
+                                        @departman.DuzenlenmeTarihi.ToString("dd.MM.yyyy HH:mm")
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-1">
+                                            <!-- Düzenle -->
+                                            <button class="btn btn-sm btn-icon btn-outline-primary" 
+                                                    @onclick="() => NavigateToEdit(departman.DepartmanId)"
+                                                    title="Düzenle">
+                                                <i class="bx bx-edit"></i>
                                             </button>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item"
-                                                   @onclick="() => NavigateToEdit(departman.DepartmanId)"
-                                                   style="cursor: pointer;">
-                                                    <i class="bx bx-edit-alt me-1"></i> Düzenle
-                                                </a>
-                                                <a class="dropdown-item"
-                                                   @onclick="() => ToggleAktiflik(departman.DepartmanId)"
-                                                   style="cursor: pointer;">
-                                                    <i class="bx bx-refresh me-1"></i>
-                                                    @(departman.DepartmanAktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")
-                                                </a>
-                                                <div class="dropdown-divider"></div>
-                                                <a class="dropdown-item text-danger"
-                                                   @onclick="() => ShowDeleteConfirmation(departman.DepartmanId, departman.DepartmanAdi)"
-                                                   style="cursor: pointer;">
-                                                    <i class="bx bx-trash me-1"></i> Sil
-                                                </a>
-                                            </div>
+                                            
+                                            <!-- Aktif/Pasif Toggle -->
+                                            <button class="btn btn-sm btn-icon @(departman.DepartmanAktiflik == Aktiflik.Aktif ? "btn-outline-warning" : "btn-outline-success")" 
+                                                    @onclick="() => ToggleStatus(departman.DepartmanId)"
+                                                    title="@(departman.DepartmanAktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")">
+                                                <i class="bx @(departman.DepartmanAktiflik == Aktiflik.Aktif ? "bx-toggle-right" : "bx-toggle-left")"></i>
+                                            </button>
+                                            
+                                            <!-- Sil -->
+                                            <button class="btn btn-sm btn-icon btn-outline-danger" 
+                                                    @onclick="() => ShowDeleteConfirmation(departman.DepartmanId, departman.DepartmanAdi)"
+                                                    title="Sil">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
                             }
-                        }
-                        else
-                        {
-                            <!-- Boş Durum -->
-                            <tr>
-                                <td colspan="5" class="text-center py-5">
-                                    <div>
-                                        <i class="bx bx-folder-open" style="font-size: 48px; color: #ccc;"></i>
-                                        <p class="text-muted mt-3">
-                                            @if (string.IsNullOrEmpty(searchTerm))
-                                            {
-                                                <span>Henüz hiç departman eklenmemiş.</span>
-                                            }
-                                            else
-                                            {
-                                                <span>"@searchTerm" için sonuç bulunamadı.</span>
-                                            }
-                                        </p>
-                                        @if (string.IsNullOrEmpty(searchTerm))
-                                        {
-                                            <button type="button" class="btn btn-primary btn-sm" @onclick="NavigateToCreate">
-                                                <i class="bx bx-plus me-1"></i> İlk Departmanı Ekle
-                                            </button>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                @if (TotalPages > 1)
+                {
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                        <div class="text-muted small">
+                            Gösterilen: <strong>@((CurrentPage - 1) * PageSize + 1)</strong> - <strong>@Math.Min(CurrentPage * PageSize, FilteredDepartmanlar.Count)</strong> / <strong>@FilteredDepartmanlar.Count</strong>
+                        </div>
+                        
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <!-- Previous -->
+                                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                                    <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)" disabled="@(CurrentPage == 1)">
+                                        <i class="bx bx-chevron-left"></i>
+                                    </button>
+                                </li>
+                                
+                                <!-- Page Numbers -->
+                                @{
+                                    var startPage = Math.Max(1, CurrentPage - 2);
+                                    var endPage = Math.Min(TotalPages, CurrentPage + 2);
+                                }
+                                
+                                @if (startPage > 1)
+                                {
+                                    <li class="page-item">
+                                        <button class="page-link" @onclick="() => ChangePage(1)">1</button>
+                                    </li>
+                                    @if (startPage > 2)
+                                    {
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    }
+                                }
+                                
+                                @for (int i = startPage; i <= endPage; i++)
+                                {
+                                    var pageNum = i;
+                                    <li class="page-item @(CurrentPage == pageNum ? "active" : "")">
+                                        <button class="page-link" @onclick="() => ChangePage(pageNum)">
+                                            @pageNum
+                                        </button>
+                                    </li>
+                                }
+                                
+                                @if (endPage < TotalPages)
+                                {
+                                    @if (endPage < TotalPages - 1)
+                                    {
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    }
+                                    <li class="page-item">
+                                        <button class="page-link" @onclick="() => ChangePage(TotalPages)">@TotalPages</button>
+                                    </li>
+                                }
+                                
+                                <!-- Next -->
+                                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                                    <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)" disabled="@(CurrentPage == TotalPages)">
+                                        <i class="bx bx-chevron-right"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            }
         </div>
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- DELETE CONFIRMATION MODAL -->
+<!-- ═══════════════════════════════════════════════════════ -->
 @if (ShowDeleteModal)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Departman Sil</h5>
-                    <button type="button" class="btn-close" @onclick="HideDeleteConfirmation"></button>
+                    <h5 class="modal-title">
+                        <i class="bx bx-trash text-danger me-2"></i>Departman Sil
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeleteModal" disabled="@IsDeleting"></button>
                 </div>
                 <div class="modal-body">
+                    <div class="alert alert-warning mb-3">
+                        <i class="bx bx-error-circle me-2"></i>
+                        <strong>Dikkat!</strong> Bu işlem geri alınamaz.
+                    </div>
                     <p class="mb-0">
                         <strong>@DeleteDepartmanAdi</strong> departmanını silmek istediğinizden emin misiniz?
                     </p>
-                    <div class="alert alert-warning mt-3 mb-0" role="alert">
-                        <i class="bx bx-error me-2"></i>
-                        Bu işlem geri alınamaz!
-                    </div>
+                    @if (DeleteDepartmanPersonelSayisi > 0)
+                    {
+                        <div class="alert alert-danger mt-3 mb-0">
+                            <i class="bx bx-info-circle me-2"></i>
+                            Bu departmanda <strong>@DeleteDepartmanPersonelSayisi personel</strong> bulunmaktadır.
+                        </div>
+                    }
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-label-secondary" @onclick="HideDeleteConfirmation">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDeleteModal" disabled="@IsDeleting">
                         İptal
                     </button>
                     <button type="button" class="btn btn-danger" @onclick="ConfirmDelete" disabled="@IsDeleting">
                         @if (IsDeleting)
                         {
-                            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                            <span class="spinner-border spinner-border-sm me-1"></span>
                             <span>Siliniyor...</span>
                         }
                         else
                         {
                             <i class="bx bx-trash me-1"></i>
-                            <span>Evet, Sil</span>
+                            <span>Sil</span>
                         }
                     </button>
                 </div>
