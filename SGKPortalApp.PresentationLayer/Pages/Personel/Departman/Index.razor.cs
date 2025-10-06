@@ -1,4 +1,9 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using ClosedXML.Excel;
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices;
@@ -15,6 +20,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         [Inject] private IDepartmanApiService _departmanService { get; set; } = default!;
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
+        [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════
         // DATA PROPERTIES
@@ -44,6 +50,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // ═══════════════════════════════════════════════════════
 
         private bool IsLoading { get; set; } = true;
+        private bool IsExporting { get; set; } = false;
+        private string ExportType { get; set; } = string.Empty;
+
+        // ═══════════════════════════════════════════════════════
+        // TOGGLE STATUS MODAL PROPERTIES
+        // ═══════════════════════════════════════════════════════
+
+        private bool ShowToggleModal { get; set; } = false;
+        private int ToggleDepartmanId { get; set; }
+        private string ToggleDepartmanAdi { get; set; } = string.Empty;
+        private Aktiflik ToggleDepartmanCurrentStatus { get; set; }
+        private bool IsToggling { get; set; } = false;
 
         // ═══════════════════════════════════════════════════════
         // DELETE MODAL PROPERTIES
@@ -61,6 +79,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
 
         protected override async Task OnInitializedAsync()
         {
+            // QuestPDF License
+            QuestPDF.Settings.License = LicenseType.Community;
+
             await LoadDepartmanlar();
         }
 
@@ -174,20 +195,31 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             _navigationManager.NavigateTo($"/personel/departman/manage/{id}");
         }
 
-        private void NavigateBack()
+        // ═══════════════════════════════════════════════════════
+        // TOGGLE STATUS MODAL
+        // ═══════════════════════════════════════════════════════
+
+        private void ShowToggleStatusConfirmation(int departmanId, string departmanAdi, Aktiflik currentStatus)
         {
-            _navigationManager.NavigateTo("/personel/departman");
+            ToggleDepartmanId = departmanId;
+            ToggleDepartmanAdi = departmanAdi;
+            ToggleDepartmanCurrentStatus = currentStatus;
+            ShowToggleModal = true;
         }
 
-        // ═══════════════════════════════════════════════════════
-        // CRUD İŞLEMLERİ
-        // ═══════════════════════════════════════════════════════
-
-        private async Task ToggleStatus(int departmanId)
+        private void CloseToggleModal()
         {
+            ShowToggleModal = false;
+            ToggleDepartmanId = 0;
+            ToggleDepartmanAdi = string.Empty;
+        }
+
+        private async Task ConfirmToggleStatus()
+        {
+            IsToggling = true;
             try
             {
-                var departman = Departmanlar.FirstOrDefault(d => d.DepartmanId == departmanId);
+                var departman = Departmanlar.FirstOrDefault(d => d.DepartmanId == ToggleDepartmanId);
                 if (departman == null)
                 {
                     await _toastService.ShowErrorAsync("Departman bulunamadı!");
@@ -206,22 +238,28 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                 await _toastService.ShowSuccessAsync($"Departman {statusText} yapıldı.");
 
                 ApplyFiltersAndSort();
+                CloseToggleModal();
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Hata: {ex.Message}");
                 await _toastService.ShowErrorAsync("Durum değiştirme işlemi başarısız!");
             }
+            finally
+            {
+                IsToggling = false;
+            }
         }
 
-        private void ShowDeleteConfirmation(int departmanId, string departmanAdi)
-        {
-            var departman = Departmanlar.FirstOrDefault(d => d.DepartmanId == departmanId);
-            if (departman == null) return;
+        // ═══════════════════════════════════════════════════════
+        // DELETE MODAL
+        // ═══════════════════════════════════════════════════════
 
+        private void ShowDeleteConfirmation(int departmanId, string departmanAdi, int personelSayisi)
+        {
             DeleteDepartmanId = departmanId;
             DeleteDepartmanAdi = departmanAdi;
-            DeleteDepartmanPersonelSayisi = departman.PersonelSayisi;
+            DeleteDepartmanPersonelSayisi = personelSayisi;
             ShowDeleteModal = true;
         }
 
@@ -263,21 +301,180 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         }
 
         // ═══════════════════════════════════════════════════════
-        // EXPORT İŞLEMLERİ
+        // EXCEL EXPORT (ClosedXML)
         // ═══════════════════════════════════════════════════════
 
         private async Task ExportToExcel()
         {
-            await _toastService.ShowInfoAsync("Excel export özelliği yakında eklenecek...");
-            // TODO: Excel export implementasyonu
-            // Bu özellik için ClosedXML veya EPPlus kullanılabilir
+            IsExporting = true;
+            ExportType = "excel";
+
+            try
+            {
+                using var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add("Departmanlar");
+
+                var headerRow = worksheet.Row(1);
+                headerRow.Style.Font.Bold = true;
+                headerRow.Style.Fill.BackgroundColor = XLColor.FromHtml("#4472C4");
+                headerRow.Style.Font.FontColor = XLColor.White;
+                headerRow.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                worksheet.Cell(1, 1).Value = "Departman Adı";
+                worksheet.Cell(1, 2).Value = "Personel Sayısı";
+                worksheet.Cell(1, 3).Value = "Durum";
+                worksheet.Cell(1, 4).Value = "Eklenme Tarihi";
+                worksheet.Cell(1, 5).Value = "Son Güncelleme";
+
+                int row = 2;
+                foreach (var departman in FilteredDepartmanlar)
+                {
+                    worksheet.Cell(row, 1).Value = departman.DepartmanAdi;
+                    worksheet.Cell(row, 2).Value = departman.PersonelSayisi;
+                    worksheet.Cell(row, 3).Value = departman.DepartmanAktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
+                    worksheet.Cell(row, 4).Value = departman.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm");
+                    worksheet.Cell(row, 5).Value = departman.DuzenlenmeTarihi.ToString("dd.MM.yyyy HH:mm");
+
+                    if (departman.DepartmanAktiflik == Aktiflik.Aktif)
+                        worksheet.Cell(row, 3).Style.Fill.BackgroundColor = XLColor.LightGreen;
+                    else
+                        worksheet.Cell(row, 3).Style.Fill.BackgroundColor = XLColor.LightPink;
+
+                    row++;
+                }
+
+                worksheet.Columns().AdjustToContents();
+
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+
+                var fileName = $"Departmanlar_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(content), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+                await _toastService.ShowSuccessAsync("Excel dosyası indirildi!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Excel Hatası: {ex.Message}");
+                await _toastService.ShowErrorAsync($"Excel hatası: {ex.Message}");
+            }
+            finally
+            {
+                IsExporting = false;
+                ExportType = string.Empty;
+            }
         }
+
+        // ═══════════════════════════════════════════════════════
+        // PDF EXPORT (QuestPDF)
+        // ═══════════════════════════════════════════════════════
 
         private async Task ExportToPdf()
         {
-            await _toastService.ShowInfoAsync("PDF export özelliği yakında eklenecek...");
-            // TODO: PDF export implementasyonu
-            // Bu özellik için QuestPDF veya iTextSharp kullanılabilir
+            IsExporting = true;
+            ExportType = "pdf";
+
+            try
+            {
+                var document = QuestPDF.Fluent.Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4);
+                        page.Margin(2, Unit.Centimetre);
+                        page.DefaultTextStyle(x => x.FontSize(10));
+
+                        page.Header().Row(row =>
+                        {
+                            row.RelativeItem().Column(column =>
+                            {
+                                column.Item().Text("DEPARTMAN LİSTESİ").FontSize(18).Bold().FontColor(Colors.Blue.Darken2);
+                                column.Item().Text($"Tarih: {DateTime.Now:dd.MM.yyyy HH:mm}").FontSize(9).FontColor(Colors.Grey.Medium);
+                            });
+                        });
+
+                        page.Content().PaddingVertical(1, Unit.Centimetre).Column(column =>
+                        {
+                            column.Item().Row(row =>
+                            {
+                                row.RelativeItem().Border(1).Padding(5).Column(col =>
+                                {
+                                    col.Item().Text("Toplam").Bold();
+                                    col.Item().Text(Departmanlar.Count.ToString()).FontSize(14).FontColor(Colors.Blue.Darken2);
+                                });
+
+                                row.RelativeItem().Border(1).Padding(5).Column(col =>
+                                {
+                                    col.Item().Text("Aktif").Bold();
+                                    col.Item().Text(Departmanlar.Count(d => d.DepartmanAktiflik == Aktiflik.Aktif).ToString()).FontSize(14).FontColor(Colors.Green.Darken2);
+                                });
+
+                                row.RelativeItem().Border(1).Padding(5).Column(col =>
+                                {
+                                    col.Item().Text("Pasif").Bold();
+                                    col.Item().Text(Departmanlar.Count(d => d.DepartmanAktiflik == Aktiflik.Pasif).ToString()).FontSize(14).FontColor(Colors.Red.Darken2);
+                                });
+                            });
+
+                            column.Item().PaddingTop(15);
+
+                            column.Item().Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.RelativeColumn(3);
+                                    columns.RelativeColumn(1);
+                                    columns.RelativeColumn(1);
+                                    columns.RelativeColumn(2);
+                                });
+
+                                table.Header(header =>
+                                {
+                                    header.Cell().Element(CellStyle).Text("Departman").Bold();
+                                    header.Cell().Element(CellStyle).Text("Personel").Bold();
+                                    header.Cell().Element(CellStyle).Text("Durum").Bold();
+                                    header.Cell().Element(CellStyle).Text("Tarih").Bold();
+
+                                    static IContainer CellStyle(IContainer container) => container.Border(1).Background(Colors.Grey.Lighten3).Padding(5).AlignCenter();
+                                });
+
+                                foreach (var d in FilteredDepartmanlar)
+                                {
+                                    table.Cell().Border(1).Padding(5).Text(d.DepartmanAdi);
+                                    table.Cell().Border(1).Padding(5).AlignCenter().Text(d.PersonelSayisi.ToString());
+                                    table.Cell().Border(1).Padding(5).AlignCenter().Text(d.DepartmanAktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif").FontColor(d.DepartmanAktiflik == Aktiflik.Aktif ? Colors.Green.Darken2 : Colors.Red.Darken2);
+                                    table.Cell().Border(1).Padding(5).AlignCenter().Text(d.EklenmeTarihi.ToString("dd.MM.yyyy"));
+                                }
+                            });
+                        });
+
+                        page.Footer().AlignCenter().Text(t =>
+                        {
+                            t.Span("Sayfa ");
+                            t.CurrentPageNumber();
+                            t.Span(" / ");
+                            t.TotalPages();
+                        });
+                    });
+                });
+
+                var pdfBytes = document.GeneratePdf();
+                var fileName = $"Departmanlar_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+                await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pdfBytes), "application/pdf");
+
+                await _toastService.ShowSuccessAsync("PDF dosyası indirildi!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"PDF Hatası: {ex.Message}");
+                await _toastService.ShowErrorAsync($"PDF hatası: {ex.Message}");
+            }
+            finally
+            {
+                IsExporting = false;
+                ExportType = string.Empty;
+            }
         }
     }
 }

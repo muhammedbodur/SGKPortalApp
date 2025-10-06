@@ -2,13 +2,12 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.Common.Extensions;
-using SGKPortalApp.PresentationLayer.Extensions; // ← YENİ: Extension eklendi
+using SGKPortalApp.PresentationLayer.Extensions;
 using SGKPortalApp.DataAccessLayer.Context;
-using System.Globalization; // ← CultureInfo için gerekli namespace
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Port ayarlarını appsettings'den al
 var httpsUrl = builder.Configuration["AppSettings:Urls:HttpsUrl"] ?? "https://localhost:7037";
 var httpUrl = builder.Configuration["AppSettings:Urls:HttpUrl"] ?? "http://localhost:5243";
 var apiUrl = builder.Configuration["AppSettings:ApiUrl"] ?? "https://localhost:7021";
@@ -30,7 +29,6 @@ builder.Services.AddServerSideBlazor(options =>
     options.DisconnectedCircuitMaxRetained = 50;
     options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
 
-    // Yavaş bağlantılar için timeout'ları artır
     options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(2);
     options.MaxBufferedUnacknowledgedRenderBatches = 5;
 });
@@ -56,7 +54,7 @@ builder.Services.AddDbContext<SGKDbContext>(options =>
 builder.Services.AddSGKPortalServices(connectionString);
 
 // 2. Presentation Layer (UI Services)
-builder.Services.AddPresentationServices(builder.Configuration); // ← YENİ: Extension kullanımı
+builder.Services.AddPresentationServices(builder.Configuration);
 
 // CORS (API kullanımı için)
 builder.Services.AddCors(options =>
@@ -66,7 +64,7 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(httpsUrl, apiUrl)
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials(); // ← YENİ: Credentials eklendi
+              .AllowCredentials();
     });
 });
 
@@ -81,7 +79,7 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
-// Yerelleştirme ayarları (hata düzeltildi)
+// Yerelleştirme ayarları
 var supportedCultures = new[]
 {
     new CultureInfo("tr-TR"),
@@ -134,7 +132,7 @@ app.UseCors();
 // Blazor Hub ve routing
 app.MapBlazorHub(options =>
 {
-    // SignalR için buffer boyutları (3 Mbit için optimize edildi)
+    // SignalR için buffer boyutları
     options.ApplicationMaxBufferSize = 32768; // 32KB
     options.TransportMaxBufferSize = 32768;
 });
