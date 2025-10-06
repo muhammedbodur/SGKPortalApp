@@ -1,29 +1,23 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SGKPortalApp.PresentationLayer.Services.StateServices;
+using SGKPortalApp.PresentationLayer.Services.ApiServices;
+using SGKPortalApp.PresentationLayer.Services.UIServices;
 using System.Reflection;
 
 namespace SGKPortalApp.PresentationLayer.Extensions
 {
-    /// <summary>
-    /// Presentation Layer Dependency Injection Extensions
-    /// </summary>
     public static class ServiceCollectionExtensions
     {
-        /// <summary>
-        /// Tüm Presentation Layer servislerini otomatik kaydet
-        /// </summary>
         public static IServiceCollection AddPresentationServices(
             this IServiceCollection services,
             IConfiguration configuration)
         {
             Console.WriteLine("🚀 Presentation Layer başlatılıyor...");
 
-            // API Base URL
             var apiUrl = configuration["AppSettings:ApiUrl"]
                 ?? throw new InvalidOperationException("❌ ApiUrl configuration'da bulunamadı!");
 
-            // HttpClient Factory
             services.AddHttpClient("SGKAPI", client =>
             {
                 client.BaseAddress = new Uri(apiUrl);
@@ -33,58 +27,52 @@ namespace SGKPortalApp.PresentationLayer.Extensions
 
             var assembly = Assembly.GetExecutingAssembly();
 
-            // 1. State Services (Manuel - Critical)
+            // 1. State Services
             Console.WriteLine("📌 State Services kaydediliyor...");
             services.AddScoped<AppStateService>();
             services.AddScoped<UserStateService>();
             services.AddScoped<NavigationStateService>();
             Console.WriteLine("  ✅ 3 State Service kayıt edildi");
 
-            // 2. UI Services (Otomatik)
+            // 2. UI Services
             services.RegisterServicesFromNamespace(
                 assembly,
                 "SGKPortalApp.PresentationLayer.Services.UIServices",
                 "UI Services",
-                ensureCriticalServices: new Type[] { typeof(SGKPortalApp.PresentationLayer.Services.UIServices.IToastService) }
+                ensureCriticalServices: new Type[] { typeof(IToastService) }
             );
 
-            // 3. Storage Services (Otomatik)
+            // 3. Storage Services
             services.RegisterServicesFromNamespace(
                 assembly,
                 "SGKPortalApp.PresentationLayer.Services.StorageServices",
                 "Storage Services"
             );
 
-            // 4. API Services (Otomatik - Interface/Implementation Matching)
-            services.RegisterServicesFromNamespace(
-                assembly,
-                "SGKPortalApp.PresentationLayer.Services.ApiServices",
-                "API Services",
-                optional: false
-            );
+            // 4. API Services - MANUEL KAYIT
+            Console.WriteLine("📦 API Services kaydediliyor (Manuel)...");
+            services.AddScoped<IDepartmanApiService, DepartmanApiService>();
+            services.AddScoped<IPersonelApiService, PersonelApiService>();
+            services.AddScoped<IAuthApiService, AuthApiService>();
+            Console.WriteLine("  ✅ 3 API Service kayıt edildi");
 
             Console.WriteLine("🎉 Presentation Layer hazır!\n");
 
             return services;
         }
 
-        /// <summary>
-        /// Belirtilen namespace'deki tüm servisleri otomatik kaydet
-        /// Interface ve Implementation eşleştirmesi yapar
-        /// </summary>
         private static IServiceCollection RegisterServicesFromNamespace(
             this IServiceCollection services,
             Assembly assembly,
             string namespaceName,
             string serviceName,
             bool optional = false,
-            Type[]? ensureCriticalServices = null) // kritik servisleri garanti et
+            Type[]? ensureCriticalServices = null)
         {
             try
             {
                 Console.WriteLine($"📦 {serviceName} kaydediliyor...");
 
-                // Namespace'deki tüm tipleri al
                 var types = assembly.GetTypes()
                     .Where(t => t.Namespace == namespaceName
                                 && !t.IsAbstract
@@ -105,21 +93,18 @@ namespace SGKPortalApp.PresentationLayer.Extensions
                     }
                 }
 
-                // Interface'leri ve Implementation'ları ayır
                 var interfaces = types.Where(t => t.IsInterface).ToList();
                 var implementations = types.Where(t => t.IsClass).ToList();
 
                 int registeredCount = 0;
 
-                // Her interface için implementation bul ve kaydet
                 foreach (var interfaceType in interfaces)
                 {
                     var implementationType = implementations.FirstOrDefault(impl =>
                         interfaceType.IsAssignableFrom(impl) &&
-                        impl.Name == interfaceType.Name.Substring(1) // "I" harfini çıkar
+                        impl.Name == interfaceType.Name.Substring(1)
                     );
 
-                    // Eğer isim kuralına uymazsa, interface'i implement eden class'ı bul
                     if (implementationType == null)
                     {
                         implementationType = implementations.FirstOrDefault(impl =>
@@ -139,7 +124,6 @@ namespace SGKPortalApp.PresentationLayer.Extensions
                     }
                 }
 
-                // Implementation'ı olmayan concrete class'ları da kaydet (BaseApiService gibi)
                 var standaloneServices = implementations
                     .Where(impl => !interfaces.Any(i => i.IsAssignableFrom(impl)))
                     .ToList();
@@ -151,7 +135,6 @@ namespace SGKPortalApp.PresentationLayer.Extensions
                     Console.WriteLine($"  ✅ {serviceType.Name} (Concrete)");
                 }
 
-                // Kritik servisler varsa ve kaydedilmemişse garantile
                 if (ensureCriticalServices != null)
                 {
                     foreach (var criticalInterface in ensureCriticalServices)
@@ -159,12 +142,12 @@ namespace SGKPortalApp.PresentationLayer.Extensions
                         if (!services.Any(s => s.ServiceType == criticalInterface))
                         {
                             var implType = assembly.GetTypes()
-                                .FirstOrDefault(t => criticalInterface.IsAssignableFrom(t) && t.IsClass);
+                                .FirstOrDefault(t => criticalInterface.IsAssignableFrom(t) && t.IsClass && !t.IsAbstract);
 
                             if (implType != null)
                             {
                                 services.AddScoped(criticalInterface, implType);
-                                Console.WriteLine($"  ✅ Kritik servis kaydedildi: {criticalInterface.Name} -> {implType.Name}");
+                                Console.WriteLine($"  ✅ Kritik servis: {criticalInterface.Name} -> {implType.Name}");
                                 registeredCount++;
                             }
                         }
