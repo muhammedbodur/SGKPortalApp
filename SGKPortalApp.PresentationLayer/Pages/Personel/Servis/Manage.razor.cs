@@ -7,7 +7,7 @@ using SGKPortalApp.PresentationLayer.Services.UIServices;
 using System.ComponentModel.DataAnnotations;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 
-namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
+namespace SGKPortalApp.PresentationLayer.Pages.Personel.Servis
 {
     public partial class Manage : ComponentBase
     {
@@ -15,7 +15,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // DEPENDENCY INJECTION
         // ═══════════════════════════════════════════════════════
 
-        [Inject] private IDepartmanApiService _departmanService { get; set; } = default!;
+        [Inject] private IServisApiService _ServisService { get; set; } = default!;
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
 
@@ -29,7 +29,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // PROPERTIES
         // ═══════════════════════════════════════════════════════
 
-        private DepartmanFormModel FormModel { get; set; } = new();
+        private ServisFormModel FormModel { get; set; } = new();
         private bool IsEditMode => Id.HasValue && Id.Value > 0;
         private int CurrentPersonelSayisi { get; set; } = 0;
 
@@ -74,30 +74,30 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             {
                 if (IsEditMode)
                 {
-                    var result = await _departmanService.GetByIdAsync(Id!.Value);
+                    var result = await _ServisService.GetByIdAsync(Id!.Value);
 
                     if (!result.Success || result.Data == null)
                     {
                         NotFound = true;
-                        await _toastService.ShowErrorAsync(result.Message ?? "Departman bulunamadı!");
+                        await _toastService.ShowErrorAsync(result.Message ?? "Servis bulunamadı!");
                     }
                     else
                     {
-                        var departman = result.Data;
-                        FormModel = new DepartmanFormModel
+                        var Servis = result.Data;
+                        FormModel = new ServisFormModel
                         {
-                            DepartmanAdi = departman.DepartmanAdi,
-                            IsActive = departman.DepartmanAktiflik == Aktiflik.Aktif
+                            ServisAdi = Servis.ServisAdi,
+                            IsActive = Servis.ServisAktiflik == Aktiflik.Aktif
                         };
 
-                        CurrentPersonelSayisi = departman.PersonelSayisi;
+                        CurrentPersonelSayisi = Servis.PersonelSayisi;
                     }
                 }
                 else
                 {
-                    FormModel = new DepartmanFormModel
+                    FormModel = new ServisFormModel
                     {
-                        DepartmanAdi = string.Empty,
+                        ServisAdi = string.Empty,
                         IsActive = true
                     };
                 }
@@ -126,42 +126,42 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             {
                 if (IsEditMode)
                 {
-                    var updateDto = new DepartmanUpdateRequestDto
+                    var updateDto = new ServisUpdateRequestDto
                     {
-                        DepartmanAdi = FormModel.DepartmanAdi.Trim(),
-                        DepartmanAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
+                        ServisAdi = FormModel.ServisAdi.Trim(),
+                        ServisAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
-                    var result = await _departmanService.UpdateAsync(Id!.Value, updateDto);
+                    var result = await _ServisService.UpdateAsync(Id!.Value, updateDto);
 
                     if (result.Success)
                     {
-                        await _toastService.ShowSuccessAsync(result.Message ?? "Departman başarıyla güncellendi!");
-                        NavigateToDepartmanList();
+                        await _toastService.ShowSuccessAsync(result.Message ?? "Servis başarıyla güncellendi!");
+                        NavigateToServisList();
                     }
                     else
                     {
-                        await _toastService.ShowErrorAsync(result.Message ?? "Departman güncellenemedi!");
+                        await _toastService.ShowErrorAsync(result.Message ?? "Servis güncellenemedi!");
                     }
                 }
                 else
                 {
-                    var createDto = new DepartmanCreateRequestDto
+                    var createDto = new ServisCreateRequestDto
                     {
-                        DepartmanAdi = FormModel.DepartmanAdi.Trim(),
-                        DepartmanAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
+                        ServisAdi = FormModel.ServisAdi.Trim(),
+                        ServisAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
-                    var result = await _departmanService.CreateAsync(createDto);
+                    var result = await _ServisService.CreateAsync(createDto);
 
                     if (result.Success)
                     {
-                        await _toastService.ShowSuccessAsync(result.Message ?? "Departman başarıyla oluşturuldu!");
-                        NavigateToDepartmanList();
+                        await _toastService.ShowSuccessAsync(result.Message ?? "Servis başarıyla oluşturuldu!");
+                        NavigateToServisList();
                     }
                     else
                     {
-                        await _toastService.ShowErrorAsync(result.Message ?? "Departman oluşturulamadı!");
+                        await _toastService.ShowErrorAsync(result.Message ?? "Servis oluşturulamadı!");
                     }
                 }
             }
@@ -196,16 +196,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
 
             try
             {
-                var result = await _departmanService.DeleteAsync(Id!.Value);
+                var result = await _ServisService.DeleteAsync(Id!.Value);
 
                 if (result.Success)
                 {
-                    await _toastService.ShowSuccessAsync(result.Message ?? "Departman başarıyla silindi!");
-                    NavigateToDepartmanList();
+                    await _toastService.ShowSuccessAsync(result.Message ?? "Servis başarıyla silindi!");
+                    NavigateToServisList();
                 }
                 else
                 {
-                    await _toastService.ShowErrorAsync(result.Message ?? "Departman silinemedi!");
+                    await _toastService.ShowErrorAsync(result.Message ?? "Servis silinemedi!");
                 }
             }
             catch (Exception ex)
@@ -224,9 +224,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // NAVIGATION
         // ═══════════════════════════════════════════════════════
 
-        private void NavigateToDepartmanList()
+        private void NavigateToServisList()
         {
-            _navigationManager.NavigateTo("/personel/departman");
+            _navigationManager.NavigateTo("/personel/Servis");
         }
 
         private void NavigateToHome()
@@ -238,11 +238,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // FORM MODEL
         // ═══════════════════════════════════════════════════════
 
-        public class DepartmanFormModel
+        public class ServisFormModel
         {
-            [Required(ErrorMessage = "Departman adı zorunludur")]
-            [StringLength(100, MinimumLength = 2, ErrorMessage = "Departman adı 2-100 karakter arasında olmalıdır")]
-            public string DepartmanAdi { get; set; } = string.Empty;
+            [Required(ErrorMessage = "Servis adı zorunludur")]
+            [StringLength(100, MinimumLength = 2, ErrorMessage = "Servis adı 2-100 karakter arasında olmalıdır")]
+            public string ServisAdi { get; set; } = string.Empty;
 
             public bool IsActive { get; set; } = true;
         }

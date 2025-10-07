@@ -4,9 +4,9 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
-using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 
-namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete
+namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
 {
     public class DepartmanApiService : IDepartmanApiService
     {

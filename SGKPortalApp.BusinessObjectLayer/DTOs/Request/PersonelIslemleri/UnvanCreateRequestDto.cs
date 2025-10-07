@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
 {
@@ -7,5 +8,6 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         [Required(ErrorMessage = "Unvan adı zorunludur")]
         [StringLength(150, ErrorMessage = "Unvan adı en fazla 150 karakter olabilir")]
         public string UnvanAdi { get; set; } = string.Empty;
+        public Aktiflik UnvanAktiflik { get; set; } = Aktiflik.Aktif;
     }
 }

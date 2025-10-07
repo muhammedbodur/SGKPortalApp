@@ -10,7 +10,7 @@ using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 using SGKPortalApp.PresentationLayer.Services.UIServices;
 
-namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
+namespace SGKPortalApp.PresentationLayer.Pages.Personel.Servis
 {
     public partial class Index : ComponentBase
     {
@@ -18,7 +18,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // DEPENDENCY INJECTION
         // ═══════════════════════════════════════════════════════
 
-        [Inject] private IDepartmanApiService _departmanService { get; set; } = default!;
+        [Inject] private IServisApiService _servisService { get; set; } = default!;
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
         [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
@@ -27,8 +27,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // DATA PROPERTIES
         // ═══════════════════════════════════════════════════════
 
-        private List<DepartmanResponseDto> Departmanlar { get; set; } = new();
-        private List<DepartmanResponseDto> FilteredDepartmanlar { get; set; } = new();
+        private List<ServisResponseDto> Servisler { get; set; } = new();
+        private List<ServisResponseDto> FilteredServisler { get; set; } = new();
 
         // ═══════════════════════════════════════════════════════
         // FILTER PROPERTIES
@@ -44,7 +44,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
 
         private int CurrentPage { get; set; } = 1;
         private int PageSize { get; set; } = 10;
-        private int TotalPages => (int)Math.Ceiling(FilteredDepartmanlar.Count / (double)PageSize);
+        private int TotalPages => (int)Math.Ceiling(FilteredServisler.Count / (double)PageSize);
 
         // ═══════════════════════════════════════════════════════
         // UI STATE
@@ -59,9 +59,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // ═══════════════════════════════════════════════════════
 
         private bool ShowToggleModal { get; set; } = false;
-        private int ToggleDepartmanId { get; set; }
-        private string ToggleDepartmanAdi { get; set; } = string.Empty;
-        private Aktiflik ToggleDepartmanCurrentStatus { get; set; }
+        private int ToggleServisId { get; set; }
+        private string ToggleServisAdi { get; set; } = string.Empty;
+        private Aktiflik ToggleServisCurrentStatus { get; set; }
         private bool IsToggling { get; set; } = false;
 
         // ═══════════════════════════════════════════════════════
@@ -69,9 +69,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // ═══════════════════════════════════════════════════════
 
         private bool ShowDeleteModal { get; set; } = false;
-        private int DeleteDepartmanId { get; set; }
-        private string DeleteDepartmanAdi { get; set; } = string.Empty;
-        private int DeleteDepartmanPersonelSayisi { get; set; }
+        private int DeleteServisId { get; set; }
+        private string DeleteServisAdi { get; set; } = string.Empty;
+        private int DeleteServisPersonelSayisi { get; set; }
         private bool IsDeleting { get; set; } = false;
 
         // ═══════════════════════════════════════════════════════
@@ -81,30 +81,30 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         protected override async Task OnInitializedAsync()
         {
             QuestPDF.Settings.License = LicenseType.Community;
-            await LoadDepartmanlar();
+            await LoadServisler();
         }
 
-        private async Task LoadDepartmanlar()
+        private async Task LoadServisler()
         {
             IsLoading = true;
             try
             {
-                var result = await _departmanService.GetAllAsync();
+                var result = await _servisService.GetAllAsync();
 
                 if (result.Success && result.Data != null)
                 {
-                    Departmanlar = result.Data;
+                    Servisler = result.Data;
                     ApplyFiltersAndSort();
                 }
                 else
                 {
-                    await _toastService.ShowErrorAsync(result.Message ?? "Departmanlar yüklenemedi!");
+                    await _toastService.ShowErrorAsync(result.Message ?? "Servisler yüklenemedi!");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Hata: {ex.Message}");
-                await _toastService.ShowErrorAsync("Departmanlar yüklenirken bir hata oluştu!");
+                await _toastService.ShowErrorAsync("Servisler yüklenirken bir hata oluştu!");
             }
             finally
             {
@@ -146,30 +146,30 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
 
         private void ApplyFiltersAndSort()
         {
-            var query = Departmanlar.AsEnumerable();
+            var query = Servisler.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
-                query = query.Where(d => d.DepartmanAdi.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+                query = query.Where(d => d.ServisAdi.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
 
             query = filterStatus switch
             {
-                "active" => query.Where(d => d.DepartmanAktiflik == Aktiflik.Aktif),
-                "passive" => query.Where(d => d.DepartmanAktiflik == Aktiflik.Pasif),
+                "active" => query.Where(d => d.ServisAktiflik == Aktiflik.Aktif),
+                "passive" => query.Where(d => d.ServisAktiflik == Aktiflik.Pasif),
                 _ => query
             };
 
             query = sortBy switch
             {
-                "name-asc" => query.OrderBy(d => d.DepartmanAdi),
-                "name-desc" => query.OrderByDescending(d => d.DepartmanAdi),
+                "name-asc" => query.OrderBy(d => d.ServisAdi),
+                "name-desc" => query.OrderByDescending(d => d.ServisAdi),
                 "date-newest" => query.OrderByDescending(d => d.EklenmeTarihi),
                 "date-oldest" => query.OrderBy(d => d.EklenmeTarihi),
                 "personel-most" => query.OrderByDescending(d => d.PersonelSayisi),
                 "personel-least" => query.OrderBy(d => d.PersonelSayisi),
-                _ => query.OrderBy(d => d.DepartmanAdi)
+                _ => query.OrderBy(d => d.ServisAdi)
             };
 
-            FilteredDepartmanlar = query.ToList();
+            FilteredServisler = query.ToList();
         }
 
         // ═══════════════════════════════════════════════════════
@@ -187,26 +187,26 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // NAVİGASYON
         // ═══════════════════════════════════════════════════════
 
-        private void NavigateToCreate() => _navigationManager.NavigateTo("/personel/departman/manage");
-        private void NavigateToEdit(int id) => _navigationManager.NavigateTo($"/personel/departman/manage/{id}");
+        private void NavigateToCreate() => _navigationManager.NavigateTo("/personel/Servis/manage");
+        private void NavigateToEdit(int id) => _navigationManager.NavigateTo($"/personel/Servis/manage/{id}");
 
         // ═══════════════════════════════════════════════════════
         // TOGGLE STATUS MODAL
         // ═══════════════════════════════════════════════════════
 
-        private void ShowToggleStatusConfirmation(int departmanId, string departmanAdi, Aktiflik currentStatus)
+        private void ShowToggleStatusConfirmation(int ServisId, string ServisAdi, Aktiflik currentStatus)
         {
-            ToggleDepartmanId = departmanId;
-            ToggleDepartmanAdi = departmanAdi;
-            ToggleDepartmanCurrentStatus = currentStatus;
+            ToggleServisId = ServisId;
+            ToggleServisAdi = ServisAdi;
+            ToggleServisCurrentStatus = currentStatus;
             ShowToggleModal = true;
         }
 
         private void CloseToggleModal()
         {
             ShowToggleModal = false;
-            ToggleDepartmanId = 0;
-            ToggleDepartmanAdi = string.Empty;
+            ToggleServisId = 0;
+            ToggleServisAdi = string.Empty;
         }
 
         private async Task ConfirmToggleStatus()
@@ -214,18 +214,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             IsToggling = true;
             try
             {
-                var departman = Departmanlar.FirstOrDefault(d => d.DepartmanId == ToggleDepartmanId);
-                if (departman == null)
+                var Servis = Servisler.FirstOrDefault(d => d.ServisId == ToggleServisId);
+                if (Servis == null)
                 {
-                    await _toastService.ShowErrorAsync("Departman bulunamadı!");
+                    await _toastService.ShowErrorAsync("Servis bulunamadı!");
                     return;
                 }
 
-                departman.DepartmanAktiflik = departman.DepartmanAktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif;
-                departman.DuzenlenmeTarihi = DateTime.Now;
+                Servis.ServisAktiflik = Servis.ServisAktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif;
+                Servis.DuzenlenmeTarihi = DateTime.Now;
 
-                var statusText = departman.DepartmanAktiflik == Aktiflik.Aktif ? "aktif" : "pasif";
-                await _toastService.ShowSuccessAsync($"Departman {statusText} yapıldı.");
+                var statusText = Servis.ServisAktiflik == Aktiflik.Aktif ? "aktif" : "pasif";
+                await _toastService.ShowSuccessAsync($"Servis {statusText} yapıldı.");
 
                 ApplyFiltersAndSort();
                 CloseToggleModal();
@@ -245,20 +245,20 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // DELETE MODAL
         // ═══════════════════════════════════════════════════════
 
-        private void ShowDeleteConfirmation(int departmanId, string departmanAdi, int personelSayisi)
+        private void ShowDeleteConfirmation(int ServisId, string ServisAdi, int personelSayisi)
         {
-            DeleteDepartmanId = departmanId;
-            DeleteDepartmanAdi = departmanAdi;
-            DeleteDepartmanPersonelSayisi = personelSayisi;
+            DeleteServisId = ServisId;
+            DeleteServisAdi = ServisAdi;
+            DeleteServisPersonelSayisi = personelSayisi;
             ShowDeleteModal = true;
         }
 
         private void CloseDeleteModal()
         {
             ShowDeleteModal = false;
-            DeleteDepartmanId = 0;
-            DeleteDepartmanAdi = string.Empty;
-            DeleteDepartmanPersonelSayisi = 0;
+            DeleteServisId = 0;
+            DeleteServisAdi = string.Empty;
+            DeleteServisPersonelSayisi = 0;
         }
 
         private async Task ConfirmDelete()
@@ -266,17 +266,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             IsDeleting = true;
             try
             {
-                var result = await _departmanService.DeleteAsync(DeleteDepartmanId);
+                var result = await _servisService.DeleteAsync(DeleteServisId);
 
                 if (result.Success)
                 {
-                    await _toastService.ShowSuccessAsync(result.Message ?? "Departman başarıyla silindi.");
-                    await LoadDepartmanlar();
+                    await _toastService.ShowSuccessAsync(result.Message ?? "Servis başarıyla silindi.");
+                    await LoadServisler();
                     CloseDeleteModal();
                 }
                 else
                 {
-                    await _toastService.ShowErrorAsync(result.Message ?? "Departman silinemedi!");
+                    await _toastService.ShowErrorAsync(result.Message ?? "Servis silinemedi!");
                 }
             }
             catch (Exception ex)
@@ -302,7 +302,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             try
             {
                 using var workbook = new XLWorkbook();
-                var worksheet = workbook.Worksheets.Add("Departmanlar");
+                var worksheet = workbook.Worksheets.Add("Servisler");
 
                 var headerRow = worksheet.Row(1);
                 headerRow.Style.Font.Bold = true;
@@ -310,23 +310,23 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                 headerRow.Style.Font.FontColor = XLColor.White;
                 headerRow.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
-                worksheet.Cell(1, 1).Value = "Departman Adı";
+                worksheet.Cell(1, 1).Value = "Servis Adı";
                 worksheet.Cell(1, 2).Value = "Personel Sayısı";
                 worksheet.Cell(1, 3).Value = "Durum";
                 worksheet.Cell(1, 4).Value = "Eklenme Tarihi";
                 worksheet.Cell(1, 5).Value = "Son Güncelleme";
 
                 int row = 2;
-                foreach (var departman in FilteredDepartmanlar)
+                foreach (var Servis in FilteredServisler)
                 {
-                    worksheet.Cell(row, 1).Value = departman.DepartmanAdi;
-                    worksheet.Cell(row, 2).Value = departman.PersonelSayisi;
-                    worksheet.Cell(row, 3).Value = departman.DepartmanAktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
-                    worksheet.Cell(row, 4).Value = departman.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm");
-                    worksheet.Cell(row, 5).Value = departman.DuzenlenmeTarihi.ToString("dd.MM.yyyy HH:mm");
+                    worksheet.Cell(row, 1).Value = Servis.ServisAdi;
+                    worksheet.Cell(row, 2).Value = Servis.PersonelSayisi;
+                    worksheet.Cell(row, 3).Value = Servis.ServisAktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
+                    worksheet.Cell(row, 4).Value = Servis.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm");
+                    worksheet.Cell(row, 5).Value = Servis.DuzenlenmeTarihi.ToString("dd.MM.yyyy HH:mm");
 
                     worksheet.Cell(row, 3).Style.Fill.BackgroundColor =
-                        departman.DepartmanAktiflik == Aktiflik.Aktif ? XLColor.LightGreen : XLColor.LightPink;
+                        Servis.ServisAktiflik == Aktiflik.Aktif ? XLColor.LightGreen : XLColor.LightPink;
                     row++;
                 }
 
@@ -336,7 +336,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                 workbook.SaveAs(stream);
                 var content = stream.ToArray();
 
-                var fileName = $"Departmanlar_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                var fileName = $"Servisler_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
                 await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(content),
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
@@ -377,7 +377,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                         {
                             row.RelativeItem().Column(column =>
                             {
-                                column.Item().Text("DEPARTMAN LİSTESİ").FontSize(18).Bold().FontColor(Colors.Blue.Darken2);
+                                column.Item().Text("Servis LİSTESİ").FontSize(18).Bold().FontColor(Colors.Blue.Darken2);
                                 column.Item().Text($"Tarih: {DateTime.Now:dd.MM.yyyy HH:mm}").FontSize(9).FontColor(Colors.Grey.Medium);
                             });
                         });
@@ -389,19 +389,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                                 row.RelativeItem().Border(1).Padding(5).Column(col =>
                                 {
                                     col.Item().Text("Toplam").Bold();
-                                    col.Item().Text(Departmanlar.Count.ToString()).FontSize(14).FontColor(Colors.Blue.Darken2);
+                                    col.Item().Text(Servisler.Count.ToString()).FontSize(14).FontColor(Colors.Blue.Darken2);
                                 });
 
                                 row.RelativeItem().Border(1).Padding(5).Column(col =>
                                 {
                                     col.Item().Text("Aktif").Bold();
-                                    col.Item().Text(Departmanlar.Count(d => d.DepartmanAktiflik == Aktiflik.Aktif).ToString()).FontSize(14).FontColor(Colors.Green.Darken2);
+                                    col.Item().Text(Servisler.Count(d => d.ServisAktiflik == Aktiflik.Aktif).ToString()).FontSize(14).FontColor(Colors.Green.Darken2);
                                 });
 
                                 row.RelativeItem().Border(1).Padding(5).Column(col =>
                                 {
                                     col.Item().Text("Pasif").Bold();
-                                    col.Item().Text(Departmanlar.Count(d => d.DepartmanAktiflik == Aktiflik.Pasif).ToString()).FontSize(14).FontColor(Colors.Red.Darken2);
+                                    col.Item().Text(Servisler.Count(d => d.ServisAktiflik == Aktiflik.Pasif).ToString()).FontSize(14).FontColor(Colors.Red.Darken2);
                                 });
                             });
 
@@ -419,7 +419,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
 
                                 table.Header(header =>
                                 {
-                                    header.Cell().Element(CellStyle).Text("Departman").Bold();
+                                    header.Cell().Element(CellStyle).Text("Servis").Bold();
                                     header.Cell().Element(CellStyle).Text("Personel").Bold();
                                     header.Cell().Element(CellStyle).Text("Durum").Bold();
                                     header.Cell().Element(CellStyle).Text("Tarih").Bold();
@@ -427,11 +427,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                                     static IContainer CellStyle(IContainer container) => container.Border(1).Background(Colors.Grey.Lighten3).Padding(5).AlignCenter();
                                 });
 
-                                foreach (var d in FilteredDepartmanlar)
+                                foreach (var d in FilteredServisler)
                                 {
-                                    table.Cell().Border(1).Padding(5).Text(d.DepartmanAdi);
+                                    table.Cell().Border(1).Padding(5).Text(d.ServisAdi);
                                     table.Cell().Border(1).Padding(5).AlignCenter().Text(d.PersonelSayisi.ToString());
-                                    table.Cell().Border(1).Padding(5).AlignCenter().Text(d.DepartmanAktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif").FontColor(d.DepartmanAktiflik == Aktiflik.Aktif ? Colors.Green.Darken2 : Colors.Red.Darken2);
+                                    table.Cell().Border(1).Padding(5).AlignCenter().Text(d.ServisAktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif").FontColor(d.ServisAktiflik == Aktiflik.Aktif ? Colors.Green.Darken2 : Colors.Red.Darken2);
                                     table.Cell().Border(1).Padding(5).AlignCenter().Text(d.EklenmeTarihi.ToString("dd.MM.yyyy"));
                                 }
                             });
@@ -448,7 +448,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                 });
 
                 var pdfBytes = document.GeneratePdf();
-                var fileName = $"Departmanlar_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+                var fileName = $"Servisler_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
                 await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pdfBytes), "application/pdf");
 
                 await _toastService.ShowSuccessAsync("PDF dosyası indirildi!");

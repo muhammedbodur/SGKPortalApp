@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri; // ← YENİ EKLENEN
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.UIServices;
 using System.ComponentModel.DataAnnotations;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 
-namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
+namespace SGKPortalApp.PresentationLayer.Pages.Personel.Unvan
 {
     public partial class Manage : ComponentBase
     {
@@ -15,7 +15,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // DEPENDENCY INJECTION
         // ═══════════════════════════════════════════════════════
 
-        [Inject] private IDepartmanApiService _departmanService { get; set; } = default!;
+        [Inject] private IUnvanApiService _unvanService { get; set; } = default!;
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
 
@@ -29,7 +29,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // PROPERTIES
         // ═══════════════════════════════════════════════════════
 
-        private DepartmanFormModel FormModel { get; set; } = new();
+        private UnvanFormModel FormModel { get; set; } = new();
         private bool IsEditMode => Id.HasValue && Id.Value > 0;
         private int CurrentPersonelSayisi { get; set; } = 0;
 
@@ -74,30 +74,30 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             {
                 if (IsEditMode)
                 {
-                    var result = await _departmanService.GetByIdAsync(Id!.Value);
+                    var result = await _unvanService.GetByIdAsync(Id!.Value);
 
                     if (!result.Success || result.Data == null)
                     {
                         NotFound = true;
-                        await _toastService.ShowErrorAsync(result.Message ?? "Departman bulunamadı!");
+                        await _toastService.ShowErrorAsync(result.Message ?? "Unvan bulunamadı!");
                     }
                     else
                     {
-                        var departman = result.Data;
-                        FormModel = new DepartmanFormModel
+                        var unvan = result.Data;
+                        FormModel = new UnvanFormModel
                         {
-                            DepartmanAdi = departman.DepartmanAdi,
-                            IsActive = departman.DepartmanAktiflik == Aktiflik.Aktif
+                            UnvanAdi = unvan.UnvanAdi,
+                            IsActive = unvan.UnvanAktiflik == Aktiflik.Aktif
                         };
 
-                        CurrentPersonelSayisi = departman.PersonelSayisi;
+                        CurrentPersonelSayisi = unvan.PersonelSayisi;
                     }
                 }
                 else
                 {
-                    FormModel = new DepartmanFormModel
+                    FormModel = new UnvanFormModel
                     {
-                        DepartmanAdi = string.Empty,
+                        UnvanAdi = string.Empty,
                         IsActive = true
                     };
                 }
@@ -126,42 +126,42 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             {
                 if (IsEditMode)
                 {
-                    var updateDto = new DepartmanUpdateRequestDto
+                    var updateDto = new UnvanUpdateRequestDto
                     {
-                        DepartmanAdi = FormModel.DepartmanAdi.Trim(),
-                        DepartmanAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
+                        UnvanAdi = FormModel.UnvanAdi.Trim(),
+                        UnvanAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
-                    var result = await _departmanService.UpdateAsync(Id!.Value, updateDto);
+                    var result = await _unvanService.UpdateAsync(Id!.Value, updateDto);
 
                     if (result.Success)
                     {
-                        await _toastService.ShowSuccessAsync(result.Message ?? "Departman başarıyla güncellendi!");
-                        NavigateToDepartmanList();
+                        await _toastService.ShowSuccessAsync(result.Message ?? "Unvan başarıyla güncellendi!");
+                        NavigateToUnvanList();
                     }
                     else
                     {
-                        await _toastService.ShowErrorAsync(result.Message ?? "Departman güncellenemedi!");
+                        await _toastService.ShowErrorAsync(result.Message ?? "Unvan güncellenemedi!");
                     }
                 }
                 else
                 {
-                    var createDto = new DepartmanCreateRequestDto
+                    var createDto = new UnvanCreateRequestDto
                     {
-                        DepartmanAdi = FormModel.DepartmanAdi.Trim(),
-                        DepartmanAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
+                        UnvanAdi = FormModel.UnvanAdi.Trim(),
+                        UnvanAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
-                    var result = await _departmanService.CreateAsync(createDto);
+                    var result = await _unvanService.CreateAsync(createDto);
 
                     if (result.Success)
                     {
-                        await _toastService.ShowSuccessAsync(result.Message ?? "Departman başarıyla oluşturuldu!");
-                        NavigateToDepartmanList();
+                        await _toastService.ShowSuccessAsync(result.Message ?? "Unvan başarıyla oluşturuldu!");
+                        NavigateToUnvanList();
                     }
                     else
                     {
-                        await _toastService.ShowErrorAsync(result.Message ?? "Departman oluşturulamadı!");
+                        await _toastService.ShowErrorAsync(result.Message ?? "Unvan oluşturulamadı!");
                     }
                 }
             }
@@ -196,16 +196,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
 
             try
             {
-                var result = await _departmanService.DeleteAsync(Id!.Value);
+                var result = await _unvanService.DeleteAsync(Id!.Value);
 
                 if (result.Success)
                 {
-                    await _toastService.ShowSuccessAsync(result.Message ?? "Departman başarıyla silindi!");
-                    NavigateToDepartmanList();
+                    await _toastService.ShowSuccessAsync(result.Message ?? "Unvan başarıyla silindi!");
+                    NavigateToUnvanList();
                 }
                 else
                 {
-                    await _toastService.ShowErrorAsync(result.Message ?? "Departman silinemedi!");
+                    await _toastService.ShowErrorAsync(result.Message ?? "Unvan silinemedi!");
                 }
             }
             catch (Exception ex)
@@ -224,9 +224,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // NAVIGATION
         // ═══════════════════════════════════════════════════════
 
-        private void NavigateToDepartmanList()
+        private void NavigateToUnvanList()
         {
-            _navigationManager.NavigateTo("/personel/departman");
+            _navigationManager.NavigateTo("/personel/unvan");
         }
 
         private void NavigateToHome()
@@ -238,11 +238,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // FORM MODEL
         // ═══════════════════════════════════════════════════════
 
-        public class DepartmanFormModel
+        public class UnvanFormModel
         {
-            [Required(ErrorMessage = "Departman adı zorunludur")]
-            [StringLength(100, MinimumLength = 2, ErrorMessage = "Departman adı 2-100 karakter arasında olmalıdır")]
-            public string DepartmanAdi { get; set; } = string.Empty;
+            [Required(ErrorMessage = "Unvan adı zorunludur")]
+            [StringLength(100, MinimumLength = 2, ErrorMessage = "Unvan adı 2-100 karakter arasında olmalıdır")]
+            public string UnvanAdi { get; set; } = string.Empty;
 
             public bool IsActive { get; set; } = true;
         }

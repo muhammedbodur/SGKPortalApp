@@ -3,8 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 using SGKPortalApp.PresentationLayer.Services.StateServices;
 using SGKPortalApp.PresentationLayer.Services.UIServices;
 using System.Reflection;
-using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces;
-using SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Auth;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel;
 
 namespace SGKPortalApp.PresentationLayer.Extensions
 {

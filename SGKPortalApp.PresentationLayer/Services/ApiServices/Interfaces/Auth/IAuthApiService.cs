@@ -1,4 +1,4 @@
-﻿namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces
+﻿namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Auth
 {
     public interface IAuthApiService
     {
