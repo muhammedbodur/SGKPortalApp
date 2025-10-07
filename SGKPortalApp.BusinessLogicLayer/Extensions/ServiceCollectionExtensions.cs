@@ -6,7 +6,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Extensions
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Business Logic Layer servislerini kaydet
+        /// Business Logic Layer servislerini kaydediyor - ANA METOT
         /// </summary>
         public static IServiceCollection AddBusinessLogicLayer(this IServiceCollection services)
         {
@@ -31,126 +31,72 @@ namespace SGKPortalApp.BusinessLogicLayer.Extensions
             // ═══════════════════════════════════════════════════════
             // 2️⃣ MODÜL BAZINDA SERVİS KAYITLARI
             // ═══════════════════════════════════════════════════════
-            services.AddPersonelIslemleriServices(businessAssembly);
-            services.AddSiramatikIslemleriServices(businessAssembly);
-            services.AddPdksIslemleriServices(businessAssembly);
-            services.AddEshotIslemleriServices(businessAssembly);
+            services.RegisterModuleServices(businessAssembly, "PersonelIslemleri");
+            services.RegisterModuleServices(businessAssembly, "SiramatikIslemleri");
+            services.RegisterModuleServices(businessAssembly, "PdksIslemleri");
+            services.RegisterModuleServices(businessAssembly, "EshotIslemleri");
 
             Console.WriteLine("  🎉 Business Logic Layer hazır!\n");
             return services;
         }
 
         // ═══════════════════════════════════════════════════════
-        // MODÜL BAZINDA KAYIT METODLARI
+        // MODÜL BAZINDA KAYIT - CROSS NAMESPACE DESTEKLI
         // ═══════════════════════════════════════════════════════
 
         /// <summary>
-        /// Personel İşlemleri modül servisleri
+        /// Bir modülün tüm servislerini kaydeder (Interface ve Service farklı namespace'lerde)
         /// </summary>
-        private static IServiceCollection AddPersonelIslemleriServices(
-            this IServiceCollection services,
-            Assembly assembly)
-        {
-            services.RegisterServicesFromNamespace(
-                assembly,
-                "SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri",
-                "Personel İşlemleri"
-            );
-            return services;
-        }
-
-        /// <summary>
-        /// Sıramatik İşlemleri modül servisleri
-        /// </summary>
-        private static IServiceCollection AddSiramatikIslemleriServices(
-            this IServiceCollection services,
-            Assembly assembly)
-        {
-            services.RegisterServicesFromNamespace(
-                assembly,
-                "SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri",
-                "Sıramatik İşlemleri"
-            );
-            return services;
-        }
-
-        /// <summary>
-        /// PDKS İşlemleri modül servisleri
-        /// </summary>
-        private static IServiceCollection AddPdksIslemleriServices(
-            this IServiceCollection services,
-            Assembly assembly)
-        {
-            services.RegisterServicesFromNamespace(
-                assembly,
-                "SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri",
-                "PDKS İşlemleri"
-            );
-            return services;
-        }
-
-        /// <summary>
-        /// Eshot İşlemleri modül servisleri
-        /// </summary>
-        private static IServiceCollection AddEshotIslemleriServices(
-            this IServiceCollection services,
-            Assembly assembly)
-        {
-            services.RegisterServicesFromNamespace(
-                assembly,
-                "SGKPortalApp.BusinessLogicLayer.Services.EshotIslemleri",
-                "Eshot İşlemleri"
-            );
-            return services;
-        }
-
-        // ═══════════════════════════════════════════════════════
-        // HELPER METOD: NAMESPACE BAZINDA OTOMATİK KAYIT
-        // ═══════════════════════════════════════════════════════
-
-        /// <summary>
-        /// Belirtilen namespace'deki tüm servisleri otomatik olarak kaydeder
-        /// Convention: IServiceName -> ServiceName
-        /// </summary>
-        private static IServiceCollection RegisterServicesFromNamespace(
+        private static IServiceCollection RegisterModuleServices(
             this IServiceCollection services,
             Assembly assembly,
-            string namespaceName,
             string moduleName)
         {
             try
             {
                 Console.WriteLine($"  📂 {moduleName} servisleri kaydediliyor...");
 
-                // Namespace'deki tüm tipleri al
-                var types = assembly.GetTypes()
-                    .Where(t => t.Namespace == namespaceName
+                var interfaceNamespace = $"SGKPortalApp.BusinessLogicLayer.Interfaces.{moduleName}";
+                var serviceNamespace = $"SGKPortalApp.BusinessLogicLayer.Services.{moduleName}";
+
+                // Interface'leri bul (Interfaces namespace'inden)
+                var interfaces = assembly.GetTypes()
+                    .Where(t => t.Namespace == interfaceNamespace
+                                && t.IsInterface
+                                && !t.IsGenericType)
+                    .ToList();
+
+                // Service implementation'larını bul (Services namespace'inden)
+                var implementations = assembly.GetTypes()
+                    .Where(t => t.Namespace == serviceNamespace
+                                && t.IsClass
                                 && !t.IsAbstract
                                 && !t.IsGenericType)
                     .ToList();
 
-                if (!types.Any())
+                if (!interfaces.Any() && !implementations.Any())
                 {
-                    Console.WriteLine($"    ⚠️  {namespaceName} namespace'inde tip bulunamadı");
+                    Console.WriteLine($"    ⚠️  {moduleName} modülünde servis bulunamadı");
                     return services;
                 }
 
-                // Interface'leri ve implementation'ları ayır
-                var interfaces = types.Where(t => t.IsInterface).ToList();
-                var implementations = types.Where(t => t.IsClass).ToList();
+                Console.WriteLine($"    🔍 Bulunan interface'ler: {interfaces.Count}");
+                Console.WriteLine($"    🔧 Bulunan implementation'lar: {implementations.Count}");
 
                 int registeredCount = 0;
 
-                // Her interface için implementation bul ve kaydet
+                // Her interface için eşleşen implementation bul
                 foreach (var interfaceType in interfaces)
                 {
                     // Convention: IServiceName -> ServiceName
+                    var expectedImplName = interfaceType.Name.Substring(1); // "I" harfini çıkar
+
                     var implementationType = implementations.FirstOrDefault(impl =>
-                        interfaceType.IsAssignableFrom(impl) &&
-                        impl.Name == interfaceType.Name.Substring(1) // "I" harfini çıkar
+                        impl.Name == expectedImplName &&
+                        interfaceType.IsAssignableFrom(impl)
                     );
 
-                    // Bulamazsan, interface'i implement eden herhangi bir sınıfı bul
+                    // İsim eşleşmesi yoksa, interface'i implement eden herhangi birini al
                     if (implementationType == null)
                     {
                         implementationType = implementations.FirstOrDefault(impl =>
@@ -170,7 +116,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Extensions
                     }
                 }
 
-                // Interface'i olmayan standalone servisler
+                // Interface'i olmayan standalone servisler (nadiren kullanılır)
                 var standaloneServices = implementations
                     .Where(impl => !interfaces.Any(i => i.IsAssignableFrom(impl)))
                     .ToList();
@@ -179,19 +125,27 @@ namespace SGKPortalApp.BusinessLogicLayer.Extensions
                 {
                     services.AddScoped(serviceType);
                     registeredCount++;
-                    Console.WriteLine($"    ✅ {serviceType.Name} (Concrete)");
+                    Console.WriteLine($"    ✅ {serviceType.Name} (Concrete - Interface yok)");
                 }
 
-                Console.WriteLine($"    🎯 {moduleName}: {registeredCount} servis kayıt edildi");
+                if (registeredCount > 0)
+                {
+                    Console.WriteLine($"    🎯 {moduleName}: {registeredCount} servis kayıt edildi");
+                }
+                else
+                {
+                    Console.WriteLine($"    ⚠️  {moduleName}: Hiçbir servis kayıt edilemedi");
+                }
 
                 return services;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"    ❌ {moduleName} kayıt hatası: {ex.Message}");
-                throw new InvalidOperationException(
-                    $"'{moduleName}' servisleri kayıt edilirken hata oluştu. Namespace: {namespaceName}",
-                    ex);
+                Console.WriteLine($"    📍 Stack Trace: {ex.StackTrace}");
+
+                // Diğer modüllerin çalışmasını engellememe
+                return services;
             }
         }
     }
