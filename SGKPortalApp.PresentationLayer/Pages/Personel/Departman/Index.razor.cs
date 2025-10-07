@@ -7,7 +7,7 @@ using QuestPDF.Infrastructure;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
-using SGKPortalApp.PresentationLayer.Services.ApiServices;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.UIServices;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman

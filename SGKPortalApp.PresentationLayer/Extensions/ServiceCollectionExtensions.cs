@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SGKPortalApp.PresentationLayer.Services.StateServices;
-using SGKPortalApp.PresentationLayer.Services.ApiServices;
 using SGKPortalApp.PresentationLayer.Services.UIServices;
 using System.Reflection;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete;
 
 namespace SGKPortalApp.PresentationLayer.Extensions
 {

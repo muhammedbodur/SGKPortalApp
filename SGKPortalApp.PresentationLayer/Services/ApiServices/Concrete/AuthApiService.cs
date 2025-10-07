@@ -1,6 +1,7 @@
 ﻿using SGKPortalApp.PresentationLayer.Services.ApiServices.Base;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces;
 
-namespace SGKPortalApp.PresentationLayer.Services.ApiServices
+namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete
 {
     public class AuthApiService : BaseApiService, IAuthApiService
     {

@@ -2,7 +2,7 @@
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 
-namespace SGKPortalApp.PresentationLayer.Services.ApiServices
+namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces
 {
     public interface IDepartmanApiService
     {
@@ -12,5 +12,6 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices
         Task<ServiceResult<DepartmanResponseDto>> UpdateAsync(int id, DepartmanUpdateRequestDto request);
         Task<ServiceResult<bool>> DeleteAsync(int id);
         Task<ServiceResult<List<DepartmanResponseDto>>> GetActiveAsync();
+        Task<ServiceResult<int>> GetPersonelCountAsync(int departmanId);
     }
 }

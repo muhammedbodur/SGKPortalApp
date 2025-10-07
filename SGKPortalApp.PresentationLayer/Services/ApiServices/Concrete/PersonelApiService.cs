@@ -1,8 +1,9 @@
 ﻿using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Base;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces;
 
-namespace SGKPortalApp.PresentationLayer.Services.ApiServices
+namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete
 {
     public class PersonelApiService : BaseApiService, IPersonelApiService
     {

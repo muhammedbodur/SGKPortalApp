@@ -4,8 +4,9 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces;
 
-namespace SGKPortalApp.PresentationLayer.Services.ApiServices
+namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete
 {
     public class DepartmanApiService : IDepartmanApiService
     {
@@ -241,6 +242,45 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices
             {
                 _logger.LogError(ex, "GetActiveAsync Exception");
                 return ServiceResult<List<DepartmanResponseDto>>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<int>> GetPersonelCountAsync(int departmanId)
+        {
+            try
+            {
+                _logger.LogInformation("🔵 GetPersonelCountAsync çağrıldı: Departman ID = {DepartmanId}", departmanId);
+
+                var response = await _httpClient.GetAsync($"api/departman/{departmanId}/personel-count");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("❌ GetPersonelCountAsync failed: {Error}", errorContent);
+                    return ServiceResult<int>.Fail("Personel sayısı alınamadı.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<int>>();
+
+                if (apiResponse?.Success == true)
+                {
+                    var successMessage = !string.IsNullOrWhiteSpace(apiResponse.Message)
+                        ? apiResponse.Message
+                        : "Personel sayısı başarıyla alındı!";
+
+                    _logger.LogInformation("✅ Personel sayısı alındı: {Message}, Sonuç = {Count}", successMessage, apiResponse.Data);
+
+                    return ServiceResult<int>.Ok(apiResponse.Data, successMessage);
+                }
+
+                return ServiceResult<int>.Fail(
+                    apiResponse?.Message ?? "Personel sayısı alınamadı"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ GetPersonelCountAsync Exception");
+                return ServiceResult<int>.Fail($"Hata: {ex.Message}");
             }
         }
     }

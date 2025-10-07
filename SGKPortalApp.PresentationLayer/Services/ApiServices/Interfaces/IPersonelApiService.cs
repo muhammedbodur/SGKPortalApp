@@ -1,7 +1,7 @@
 ﻿using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 
-namespace SGKPortalApp.PresentationLayer.Services.ApiServices
+namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces
 {
     public interface IPersonelApiService
     {
