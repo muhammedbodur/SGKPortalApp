@@ -1,0 +1,355 @@
+﻿@page "/common/hizmetbinasi/detail/{id:int}"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+
+<PageTitle>Hizmet Binası Detayı - SGK Portal</PageTitle>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- BREADCRUMB -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="container-xxl flex-grow-1 container-p-y">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-style1">
+            <li class="breadcrumb-item">
+                <a href="javascript:void(0);" @onclick="NavigateToHome">
+                    <i class="bx bx-home-alt me-1"></i>Ana Sayfa
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="javascript:void(0);" @onclick="NavigateToList">
+                    Hizmet Binası Yönetimi
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                Detay
+            </li>
+        </ol>
+    </nav>
+
+    @if (IsLoading)
+    {
+        <!-- Loading State -->
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <p class="text-muted">Hizmet binası detayları yükleniyor...</p>
+            </div>
+        </div>
+    }
+    else if (NotFound)
+    {
+        <!-- Not Found State -->
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bx bx-error-circle display-1 text-danger mb-3"></i>
+                <h5 class="mb-3">Hizmet Binası Bulunamadı</h5>
+                <p class="text-muted mb-4">
+                    Aradığınız hizmet binası bulunamadı veya silinmiş olabilir.
+                </p>
+                <button class="btn btn-primary" @onclick="NavigateToList">
+                    <i class="bx bx-list-ul me-1"></i>Hizmet Binası Listesine Dön
+                </button>
+            </div>
+        </div>
+    }
+    else if (HizmetBinasi != null)
+    {
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- PAGE HEADER -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">
+                    <i class="bx bx-buildings me-2"></i>@HizmetBinasi.HizmetBinasiAdi
+                </h4>
+                <p class="text-muted mb-0">
+                    Hizmet binası detayları ve ilişkili kayıtlar
+                </p>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary" @onclick="NavigateToList">
+                    <i class="bx bx-arrow-back me-1"></i>Geri Dön
+                </button>
+                <button class="btn btn-primary" @onclick="() => NavigateToEdit(Id)">
+                    <i class="bx bx-edit me-1"></i>Düzenle
+                </button>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- INFO CARDS -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <div class="row mb-4">
+            <!-- Temel Bilgiler -->
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bx bx-info-circle me-2"></i>Temel Bilgiler
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">Hizmet Binası Adı:</dt>
+                            <dd class="col-sm-8"><strong>@HizmetBinasi.HizmetBinasiAdi</strong></dd>
+
+                            <dt class="col-sm-4">Departman:</dt>
+                            <dd class="col-sm-8">@HizmetBinasi.DepartmanAdi</dd>
+
+                            <dt class="col-sm-4">Adres:</dt>
+                            <dd class="col-sm-8">@(string.IsNullOrEmpty(HizmetBinasi.Adres) ? "-" : HizmetBinasi.Adres)</dd>
+
+                            <dt class="col-sm-4">Durum:</dt>
+                            <dd class="col-sm-8">
+                                @if (HizmetBinasi.HizmetBinasiAktiflik == Aktiflik.Aktif)
+                                {
+                                    <span class="badge bg-label-success">
+                                        <i class="bx bx-check-circle me-1"></i>Aktif
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-label-danger">
+                                        <i class="bx bx-x-circle me-1"></i>Pasif
+                                    </span>
+                                }
+                            </dd>
+
+                            <dt class="col-sm-4">Eklenme Tarihi:</dt>
+                            <dd class="col-sm-8">@HizmetBinasi.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm")</dd>
+
+                            <dt class="col-sm-4">Son Güncelleme:</dt>
+                            <dd class="col-sm-8">@HizmetBinasi.DuzenlenmeTarihi.ToString("dd.MM.yyyy HH:mm")</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <!-- İstatistikler -->
+            <div class="col-md-4">
+                <div class="card bg-primary text-white mb-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="bx bx-user bx-lg"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0 text-white">Personel Sayısı</h6>
+                                <h3 class="mb-0 text-white">@HizmetBinasi.ToplamPersonelSayisi</h3>
+                                <small class="text-white-50">
+                                    @HizmetBinasi.AktifPersonelSayisi aktif
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card bg-success text-white mb-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="bx bx-desktop bx-lg"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0 text-white">Banko Sayısı</h6>
+                                <h3 class="mb-0 text-white">@HizmetBinasi.ToplamBankoSayisi</h3>
+                                <small class="text-white-50">
+                                    @HizmetBinasi.AktifBankoSayisi aktif
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- PERSONELLER TAB -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#personel-tab">
+                    <i class="bx bx-user me-1"></i>Personeller (@HizmetBinasi.Personeller.Count)
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#banko-tab">
+                    <i class="bx bx-desktop me-1"></i>Bankolar (@HizmetBinasi.Bankolar.Count)
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tv-tab">
+                    <i class="bx bx-tv me-1"></i>TV'ler (@HizmetBinasi.Tvler.Count)
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Personel Tab -->
+            <div class="tab-pane fade show active" id="personel-tab">
+                <div class="card">
+                    <div class="card-body">
+                        @if (!HizmetBinasi.Personeller.Any())
+                        {
+                            <div class="text-center py-5">
+                                <i class="bx bx-user-x display-3 text-muted"></i>
+                                <p class="text-muted mt-3">Bu hizmet binasında personel bulunmamaktadır.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Ad Soyad</th>
+                                            <th>Departman</th>
+                                            <th>Unvan</th>
+                                            <th>Durum</th>
+                                            <th>İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var personel in HizmetBinasi.Personeller)
+                                        {
+                                            <tr>
+                                                <td>@personel.AdSoyad</td>
+                                                <td>@personel.DepartmanAdi</td>
+                                                <td>@personel.UnvanAdi</td>
+                                                <td>
+                                                    @if (personel.PersonelAktiflikDurum == PersonelIslemleri.PersonelAktiflikDurum.Aktif)
+                                                    {
+                                                        <span class="badge bg-label-success">Aktif</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-label-danger">Pasif</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary"
+                                                            @onclick="() => NavigateToPersonelDetail(personel.PersonelId)">
+                                                        <i class="bx bx-show"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Banko Tab -->
+            <div class="tab-pane fade" id="banko-tab">
+                <div class="card">
+                    <div class="card-body">
+                        @if (!HizmetBinasi.Bankolar.Any())
+                        {
+                            <div class="text-center py-5">
+                                <i class="bx bx-desktop display-3 text-muted"></i>
+                                <p class="text-muted mt-3">Bu hizmet binasında banko bulunmamaktadır.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Banko Adı</th>
+                                            <th>Kat</th>
+                                            <th>Durum</th>
+                                            <th>İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var banko in HizmetBinasi.Bankolar)
+                                        {
+                                            <tr>
+                                                <td>@banko.BankoAdi</td>
+                                                <td>@banko.KatTipi</td>
+                                                <td>
+                                                    @if (banko.BankoAktiflik == Aktiflik.Aktif)
+                                                    {
+                                                        <span class="badge bg-label-success">Aktif</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-label-danger">Pasif</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary">
+                                                        <i class="bx bx-show"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- TV Tab -->
+            <div class="tab-pane fade" id="tv-tab">
+                <div class="card">
+                    <div class="card-body">
+                        @if (!HizmetBinasi.Tvler.Any())
+                        {
+                            <div class="text-center py-5">
+                                <i class="bx bx-tv display-3 text-muted"></i>
+                                <p class="text-muted mt-3">Bu hizmet binasında TV bulunmamaktadır.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>TV Adı</th>
+                                            <th>Durum</th>
+                                            <th>İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var tv in HizmetBinasi.Tvler)
+                                        {
+                                            <tr>
+                                                <td>@tv.TvAdi</td>
+                                                <td>
+                                                    @if (tv.TvAktiflik == Aktiflik.Aktif)
+                                                    {
+                                                        <span class="badge bg-label-success">Aktif</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-label-danger">Pasif</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary">
+                                                        <i class="bx bx-show"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

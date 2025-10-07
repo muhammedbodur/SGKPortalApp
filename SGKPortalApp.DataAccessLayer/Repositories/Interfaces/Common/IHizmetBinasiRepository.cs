@@ -1,30 +1,68 @@
-﻿using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
-using SGKPortalApp.BusinessObjectLayer.Entities.Common;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
 
 namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common
 {
     public interface IHizmetBinasiRepository : IGenericRepository<HizmetBinasi>
     {
-        // Temel arama
+        /// <summary>
+        /// Hizmet Binası adına göre arama (unique kontrol için)
+        /// </summary>
         Task<HizmetBinasi?> GetByHizmetBinasiAdiAsync(string hizmetBinasiAdi);
 
-        // Departman bazında binalar
+        /// <summary>
+        /// Departmana göre hizmet binalarını getir
+        /// </summary>
         Task<IEnumerable<HizmetBinasi>> GetByDepartmanAsync(int departmanId);
 
-        // Departman ile birlikte getir
+        /// <summary>
+        /// Hizmet Binasını departman bilgisi ile birlikte getir
+        /// </summary>
         Task<HizmetBinasi?> GetWithDepartmanAsync(int hizmetBinasiId);
 
-        // Listeleme
+        /// <summary>
+        /// Hizmet Binasını personelleri ile birlikte getir
+        /// </summary>
+        Task<HizmetBinasi?> GetWithPersonellerAsync(int hizmetBinasiId);
+
+        /// <summary>
+        /// Hizmet Binasını bankoları ile birlikte getir
+        /// </summary>
+        Task<HizmetBinasi?> GetWithBankolarAsync(int hizmetBinasiId);
+
+        /// <summary>
+        /// Hizmet Binasını TV'leri ile birlikte getir
+        /// </summary>
+        Task<HizmetBinasi?> GetWithTvlerAsync(int hizmetBinasiId);
+
+        /// <summary>
+        /// Hizmet Binasını tüm ilişkili verilerle birlikte getir (Detail için)
+        /// </summary>
+        Task<HizmetBinasi?> GetWithAllDetailsAsync(int hizmetBinasiId);
+
+        /// <summary>
+        /// Aktif hizmet binalarını getir
+        /// </summary>
         Task<IEnumerable<HizmetBinasi>> GetActiveAsync();
-        Task<IEnumerable<HizmetBinasi>> GetAllAsync();
 
-        // Dropdown için
-        Task<IEnumerable<(int Id, string Ad)>> GetDropdownAsync();
-        Task<IEnumerable<(int Id, string Ad)>> GetByDepartmanDropdownAsync(int departmanId);
-
-        // İstatistik
+        /// <summary>
+        /// Hizmet Binasındaki personel sayısını getir
+        /// </summary>
         Task<int> GetPersonelCountAsync(int hizmetBinasiId);
+
+        /// <summary>
+        /// Hizmet Binasındaki banko sayısını getir
+        /// </summary>
+        Task<int> GetBankoCountAsync(int hizmetBinasiId);
+
+        /// <summary>
+        /// Hizmet Binasındaki TV sayısını getir
+        /// </summary>
+        Task<int> GetTvCountAsync(int hizmetBinasiId);
+
+        /// <summary>
+        /// Dropdown için ID ve Ad listesi
+        /// </summary>
+        Task<IEnumerable<(int Id, string Ad)>> GetDropdownAsync();
     }
 }

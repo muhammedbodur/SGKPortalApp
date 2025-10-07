@@ -224,10 +224,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
         // NAVIGATION
         // ═══════════════════════════════════════════════════════
 
-        private void NavigateToHizmetBinasiList()
-        {
-            _navigationManager.NavigateTo("/personel/hizmetBinasi");
-        }
+        private void NavigateToHizmetBinasiList() => _navigationManager.NavigateTo("/common/hizmetbinasi");
 
         private void NavigateToHome()
         {

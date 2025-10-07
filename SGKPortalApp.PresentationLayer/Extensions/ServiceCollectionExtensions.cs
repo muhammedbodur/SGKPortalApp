@@ -57,6 +57,7 @@ namespace SGKPortalApp.PresentationLayer.Extensions
             // 4️⃣ API SERVICES - Modül Bazında Otomatik Kayıt
             // ═══════════════════════════════════════════════════════
             services.RegisterApiServices(assembly, apiUrl, "Auth");
+            services.RegisterApiServices(assembly, apiUrl, "Common");
             services.RegisterApiServices(assembly, apiUrl, "Personel");
             services.RegisterApiServices(assembly, apiUrl, "Siramatik");
             services.RegisterApiServices(assembly, apiUrl, "Pdks");

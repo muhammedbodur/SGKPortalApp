@@ -189,8 +189,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
         // NAVİGASYON
         // ═══════════════════════════════════════════════════════
 
-        private void NavigateToCreate() => _navigationManager.NavigateTo("/personel/hizmetBinasi/manage");
-        private void NavigateToEdit(int id) => _navigationManager.NavigateTo($"/personel/hizmetBinasi/manage/{id}");
+        private void NavigateToCreate() => _navigationManager.NavigateTo("/common/hizmetbinasi/manage");
+        private void NavigateToEdit(int id) => _navigationManager.NavigateTo($"/common/hizmetbinasi/manage/{id}");
 
         // ═══════════════════════════════════════════════════════
         // TOGGLE STATUS MODAL
