@@ -8,40 +8,70 @@ using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var httpsUrl = builder.Configuration["AppSettings:Urls:HttpsUrl"] ?? "https://localhost:7037";
-var httpUrl = builder.Configuration["AppSettings:Urls:HttpUrl"] ?? "http://localhost:5243";
-var apiUrl = builder.Configuration["AppSettings:ApiUrl"] ?? "https://localhost:7021";
+// ═══════════════════════════════════════════════════════
+// 📄 SHARED CONFIGURATION
+// ═══════════════════════════════════════════════════════
+var sharedConfigPath = Path.Combine(
+    Directory.GetParent(Directory.GetCurrentDirectory())!.FullName,
+    "appsettings.Shared.json"
+);
 
-// URL konfigürasyonu
+if (File.Exists(sharedConfigPath))
+{
+    builder.Configuration.AddJsonFile(
+        sharedConfigPath,
+        optional: false,
+        reloadOnChange: true
+    );
+    Console.WriteLine($"✅ Shared configuration yüklendi: {sharedConfigPath}");
+}
+else
+{
+    Console.WriteLine($"⚠️  Shared configuration bulunamadı: {sharedConfigPath}");
+}
+
+// ═══════════════════════════════════════════════════════
+// 📌 PORT AYARLARI
+// ═══════════════════════════════════════════════════════
+var httpsUrl = builder.Configuration["AppSettings:Urls:HttpsUrl"] ?? "https://localhost:8080";
+var httpUrl = builder.Configuration["AppSettings:Urls:HttpUrl"] ?? "http://localhost:8081";
+var apiUrl = builder.Configuration["AppSettings:ApiUrl"] ?? "https://localhost:9080";
+
 builder.WebHost.UseUrls(httpsUrl, httpUrl);
 
-// Response Compression (3 Mbit bağlantılar için)
+// ═══════════════════════════════════════════════════════
+// 🚀 RESPONSE COMPRESSION (3 Mbit bağlantılar için)
+// ═══════════════════════════════════════════════════════
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
 });
 
-// Blazor Server servisleri
+// ═══════════════════════════════════════════════════════
+// 🔥 BLAZOR SERVER SERVİSLERİ
+// ═══════════════════════════════════════════════════════
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor(options =>
 {
     options.DetailedErrors = builder.Environment.IsDevelopment();
     options.DisconnectedCircuitMaxRetained = 50;
     options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
-
     options.JSInteropDefaultCallTimeout = TimeSpan.FromMinutes(2);
     options.MaxBufferedUnacknowledgedRenderBatches = 5;
 });
 
-// Veritabanı bağlantısı
+// ═══════════════════════════════════════════════════════
+// 🗄️ DATABASE CONNECTION (Shared Configuration'dan)
+// ═══════════════════════════════════════════════════════
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("DefaultConnection bağlantı dizesi bulunamadı.");
+    ?? throw new InvalidOperationException("❌ DefaultConnection bağlantı dizesi bulunamadı!");
+
+Console.WriteLine($"📊 Database Connection: {connectionString.Substring(0, Math.Min(50, connectionString.Length))}...");
 
 builder.Services.AddDbContext<SGKDbContext>(options =>
 {
     options.UseSqlServer(connectionString);
 
-    // Development ortamında detaylı logging
     if (builder.Environment.IsDevelopment())
     {
         options.EnableSensitiveDataLogging();
@@ -49,14 +79,18 @@ builder.Services.AddDbContext<SGKDbContext>(options =>
     }
 });
 
+// ═══════════════════════════════════════════════════════
 // ⭐ KATMAN SERVİSLERİ ⭐
-// 1. Data Access Layer + Business Logic Layer
-builder.Services.AddSGKPortalServices(connectionString);
+// ═══════════════════════════════════════════════════════
+// 1. Data Access Layer + Business Logic Layer (Shared connection string kullanıyor)
+builder.Services.AddSGKPortalServices(builder.Configuration);
 
 // 2. Presentation Layer (UI Services)
 builder.Services.AddPresentationServices(builder.Configuration);
 
-// CORS (API kullanımı için)
+// ═══════════════════════════════════════════════════════
+// 🌐 CORS (API kullanımı için)
+// ═══════════════════════════════════════════════════════
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -68,23 +102,32 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Memory Cache
+// ═══════════════════════════════════════════════════════
+// 💾 MEMORY CACHE
+// ═══════════════════════════════════════════════════════
 builder.Services.AddMemoryCache();
 
-// AutoMapper
+// ═══════════════════════════════════════════════════════
+// 🔧 AUTOMAPPER
+// ═══════════════════════════════════════════════════════
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-// HTTP Context Accessor (Blazor'da user bilgileri için)
+// ═══════════════════════════════════════════════════════
+// 🔐 HTTP CONTEXT ACCESSOR (Blazor'da user bilgileri için)
+// ═══════════════════════════════════════════════════════
 builder.Services.AddHttpContextAccessor();
 
+// ═══════════════════════════════════════════════════════
+// 🌍 LOCALİZATİON (Yerelleştirme)
+// ═══════════════════════════════════════════════════════
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
-// Yerelleştirme ayarları
 var supportedCultures = new[]
 {
     new CultureInfo("tr-TR"),
     new CultureInfo("en-US")
 };
+
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("tr-TR");
@@ -92,7 +135,9 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedUICultures = supportedCultures;
 });
 
-// Logging konfigürasyonu
+// ═══════════════════════════════════════════════════════
+// 📝 LOGGING CONFIGURATION
+// ═══════════════════════════════════════════════════════
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 if (builder.Environment.IsDevelopment())
@@ -100,12 +145,16 @@ if (builder.Environment.IsDevelopment())
     builder.Logging.SetMinimumLevel(LogLevel.Debug);
 }
 
+// ═══════════════════════════════════════════════════════
+// 🏗️ BUILD APPLICATION
+// ═══════════════════════════════════════════════════════
 var app = builder.Build();
 
-// Response Compression middleware'i
+// ═══════════════════════════════════════════════════════
+// 🔧 MIDDLEWARE PIPELINE
+// ═══════════════════════════════════════════════════════
 app.UseResponseCompression();
 
-// Development/Production ayarları
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -116,33 +165,30 @@ else
     app.UseDeveloperExceptionPage();
 }
 
-// Middleware pipeline
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
-// CORS middleware
 app.UseCors();
 
-// Authentication & Authorization
+// Authentication & Authorization (Login yapısı kurulduğunda aktif edilecek)
 // app.UseAuthentication();
 // app.UseAuthorization();
 
-// Blazor Hub ve routing
+// ═══════════════════════════════════════════════════════
+// 🔌 BLAZOR HUB & ROUTING
+// ═══════════════════════════════════════════════════════
 app.MapBlazorHub(options =>
 {
-    // SignalR için buffer boyutları
     options.ApplicationMaxBufferSize = 32768; // 32KB
     options.TransportMaxBufferSize = 32768;
 });
 
 app.MapFallbackToPage("/_Host");
-
-// Razor Pages (API endpoint'leri için)
 app.MapRazorPages();
 
-// Veritabanı migration'larını otomatik uyguluyoruz
+// ═══════════════════════════════════════════════════════
+// 🗄️ DATABASE MIGRATION
+// ═══════════════════════════════════════════════════════
 using (var scope = app.Services.CreateScope())
 {
     try
@@ -151,22 +197,37 @@ using (var scope = app.Services.CreateScope())
 
         if (context.Database.GetPendingMigrations().Any())
         {
-            Console.WriteLine("Bekleyen migration'lar uygulanıyor...");
+            Console.WriteLine("📊 Bekleyen migration'lar uygulanıyor...");
             context.Database.Migrate();
-            Console.WriteLine("Migration'lar başarıyla uygulandı.");
+            Console.WriteLine("✅ Migration'lar başarıyla uygulandı");
         }
+        else
+        {
+            Console.WriteLine("✅ Veritabanı güncel");
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // 🌱 SEED DATA (İsteğe bağlı)
+        // ═══════════════════════════════════════════════════════
+        // var seeder = scope.ServiceProvider.GetRequiredService<DataSeed>();
+        // await seeder.SeedAsync();
     }
     catch (Exception ex)
     {
+        Console.WriteLine($"❌ Migration hatası: {ex.Message}");
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "Migration uygulanırken hata oluştu.");
     }
 }
 
-Console.WriteLine("🚀 SGK Portal uygulaması başlatılıyor...");
-Console.WriteLine($"📍 Ortam: {app.Environment.EnvironmentName}");
+Console.WriteLine("\n╔════════════════════════════════════════════════════════╗");
+Console.WriteLine("║      SGK PORTAL PRESENTATION BAŞLATILIYOR...           ║");
+Console.WriteLine("╚════════════════════════════════════════════════════════╝");
+Console.WriteLine($"🌐 Ortam: {app.Environment.EnvironmentName}");
 Console.WriteLine($"🔒 HTTPS URL: {httpsUrl}");
-Console.WriteLine($"🌐 HTTP URL: {httpUrl}");
+Console.WriteLine($"🌍 HTTP URL: {httpUrl}");
 Console.WriteLine($"🔌 API URL: {apiUrl}");
+Console.WriteLine($"📊 Database: {connectionString.Split(';')[0]}");
+Console.WriteLine("╚════════════════════════════════════════════════════════╝\n");
 
 app.Run();

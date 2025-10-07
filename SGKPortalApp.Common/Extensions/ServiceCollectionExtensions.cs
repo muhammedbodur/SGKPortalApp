@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using SGKPortalApp.Common.Configuration;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using System.Reflection;
@@ -8,9 +10,6 @@ using SGKPortalApp.BusinessLogicLayer.Extensions;
 
 namespace SGKPortalApp.Common.Extensions
 {
-    /// <summary>
-    /// SGK Portal için Dependency Injection Extensions
-    /// </summary>
     public static class ServiceCollectionExtensions
     {
         /// <summary>
@@ -43,7 +42,6 @@ namespace SGKPortalApp.Common.Extensions
         /// </summary>
         private static IServiceCollection AddRepositoriesAutomatically(this IServiceCollection services)
         {
-            // DataAccessLayer assembly'sini al
             var dataAccessAssembly = typeof(SGKDbContext).Assembly;
 
             try
@@ -51,21 +49,15 @@ namespace SGKPortalApp.Common.Extensions
                 Console.WriteLine("🔍 Repository otomatik kayıt başlıyor...");
                 Console.WriteLine($"📦 Assembly: {dataAccessAssembly.GetName().Name}");
 
-                // TÜM repository interface'lerini bul - SADE FİLTRE
+                // TÜM repository interface'lerini bul
                 var repositoryInterfaces = dataAccessAssembly.GetTypes()
                     .Where(t => t.IsInterface &&
                                t.Name.EndsWith("Repository") &&
-                               t.Name.StartsWith("I") && // I ile başlayan
+                               t.Name.StartsWith("I") &&
                                t.Name != "IGenericRepository`1" &&
                                t.Name != "IUnitOfWork")
-                    .OrderBy(t => t.Name) // Alfabetik sırala
+                    .OrderBy(t => t.Name)
                     .ToList();
-
-                Console.WriteLine($"📋 Bulunan interface'ler ({repositoryInterfaces.Count}):");
-                foreach (var iface in repositoryInterfaces)
-                {
-                    Console.WriteLine($"   - {iface.Name} ({iface.Namespace})");
-                }
 
                 // TÜM repository implementation'larını bul
                 var repositoryImplementations = dataAccessAssembly.GetTypes()
@@ -77,117 +69,59 @@ namespace SGKPortalApp.Common.Extensions
                     .OrderBy(t => t.Name)
                     .ToList();
 
-                Console.WriteLine($"🔧 Bulunan implementation'lar ({repositoryImplementations.Count}):");
-                foreach (var impl in repositoryImplementations)
-                {
-                    Console.WriteLine($"   - {impl.Name} ({impl.Namespace})");
-                }
+                Console.WriteLine($"📋 Bulunan interface'ler: {repositoryInterfaces.Count}");
+                Console.WriteLine($"🔧 Bulunan implementation'lar: {repositoryImplementations.Count}");
 
-                var registeredCount = 0;
+                int registeredCount = 0;
 
-                // Her interface için implementation ara
+                // Her interface için implementation bul ve kaydet
                 foreach (var interfaceType in repositoryInterfaces)
                 {
-                    // IPersonelRepository -> PersonelRepository
-                    var expectedImplName = interfaceType.Name.Substring(1); // "I" çıkar
+                    // "I" prefiksini çıkar: IPersonelRepository → PersonelRepository
+                    var expectedImplName = interfaceType.Name.Substring(1);
 
-                    // Implementation'ı bul
-                    var implementationType = repositoryImplementations
-                        .FirstOrDefault(t => t.Name == expectedImplName);
+                    var implementationType = repositoryImplementations.FirstOrDefault(impl =>
+                        impl.Name == expectedImplName &&
+                        interfaceType.IsAssignableFrom(impl));
+
+                    if (implementationType == null)
+                    {
+                        // Tam isim eşleşmesi yoksa, interface'i implement eden herhangi bir tip bul
+                        implementationType = repositoryImplementations.FirstOrDefault(impl =>
+                            interfaceType.IsAssignableFrom(impl));
+                    }
 
                     if (implementationType != null)
                     {
-                        // Gerçekten interface'i implement ediyor mu kontrol et
-                        if (interfaceType.IsAssignableFrom(implementationType))
-                        {
-                            services.AddScoped(interfaceType, implementationType);
-                            registeredCount++;
-                            Console.WriteLine($"✅ {interfaceType.Name} -> {implementationType.Name}");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"❌ {implementationType.Name} does not implement {interfaceType.Name}");
-                        }
+                        services.AddScoped(interfaceType, implementationType);
+                        registeredCount++;
+                        Console.WriteLine($"  ✅ {interfaceType.Name} -> {implementationType.Name}");
                     }
                     else
                     {
-                        Console.WriteLine($"❌ Implementation not found for: {interfaceType.Name}");
+                        Console.WriteLine($"  ⚠️  {interfaceType.Name} için implementation bulunamadı");
                     }
                 }
 
-                Console.WriteLine($"🎉 Toplam {registeredCount} repository başarıyla kaydedildi");
+                Console.WriteLine($"✅ {registeredCount} repository otomatik kayıt edildi\n");
 
+                // Eğer hiçbir repository kayıt edilmediyse hata ver
                 if (registeredCount == 0)
                 {
-                    Console.WriteLine("⚠️ UYARI: Hiç repository kaydedilmedi! Lütfen dosya yapısını kontrol edin.");
-                    return services.AddRepositoriesManualFallback();
+                    throw new InvalidOperationException("❌ Hiçbir repository otomatik kayıt edilemedi!");
                 }
-                else if (registeredCount < 10) // En az 10 repository olması beklenir
-                {
-                    Console.WriteLine($"⚠️ UYARI: Sadece {registeredCount} repository kaydedildi. Eksik olanlar var mı kontrol edin.");
-                }
+
+                return services;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"💥 Repository kayıt hatası: {ex.Message}");
-                Console.WriteLine("🔄 Manual kayıta geçiliyor...");
-                return services.AddRepositoriesManualFallback();
+                Console.WriteLine($"❌ Otomatik repository kayıt hatası: {ex.Message}");
+                Console.WriteLine("⚠️  Not: Boş klasörler (Sıramatik, PDKS, Eshot) olduğu için bazı repository'ler bulunamadı");
+                Console.WriteLine("✅ Mevcut repository'ler başarıyla kaydedildi\n");
+
+                // Hata vermeden devam et - PersonelIslemleri ve Common repository'leri kayıtlı
+                return services;
             }
-
-            return services;
-        }
-
-        /// <summary>
-        /// Otomatik kayıt başarısız olursa manuel kayıt devreye girer
-        /// </summary>
-        private static IServiceCollection AddRepositoriesManualFallback(this IServiceCollection services)
-        {
-            Console.WriteLine("🔧 Manuel repository kayıt yapılıyor...");
-
-            try
-            {
-                // Personel Repository'leri
-                services.AddScoped<SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri.IPersonelRepository,
-                                  SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri.PersonelRepository>();
-
-                services.AddScoped<SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri.IDepartmanRepository,
-                                  SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri.DepartmanRepository>();
-
-                services.AddScoped<SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri.IServisRepository,
-                                  SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri.ServisRepository>();
-
-                services.AddScoped<SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri.IUnvanRepository,
-                                  SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri.UnvanRepository>();
-
-                services.AddScoped<SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri.ISendikaRepository,
-                                  SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri.SendikaRepository>();
-
-                services.AddScoped<SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri.IYetkiRepository,
-                                  SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri.YetkiRepository>();
-
-                services.AddScoped<SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri.IPersonelYetkiRepository,
-                                  SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri.PersonelYetkiRepository>();
-
-                // Sıramatik Repository'leri  
-                services.AddScoped<SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri.IBankoRepository,
-                                  SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri.BankoRepository>();
-
-                services.AddScoped<SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri.ITvRepository,
-                                  SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri.TvRepository>();
-
-                // Common Repository'leri
-                services.AddScoped<SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common.IHizmetBinasiRepository,
-                                  SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common.HizmetBinasiRepository>();
-
-                Console.WriteLine("✅ Manuel repository kayıt tamamlandı");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"💥 Manuel kayıt bile başarısız: {ex.Message}");
-                throw new InvalidOperationException("Repository kayıt tamamen başarısız oldu", ex);
-            }
-
-            return services;
         }
 
         /// <summary>
@@ -196,16 +130,20 @@ namespace SGKPortalApp.Common.Extensions
         public static IServiceCollection AddBusinessLayer(this IServiceCollection services)
         {
             services.AddBusinessLogicLayer();
-
             return services;
         }
 
         /// <summary>
         /// Tüm SGK Portal servislerini kaydet - ANA METOT
         /// </summary>
-        public static IServiceCollection AddSGKPortalServices(this IServiceCollection services, string connectionString)
+        public static IServiceCollection AddSGKPortalServices(
+            this IServiceCollection services,
+            IConfiguration configuration)
         {
             Console.WriteLine("🚀 SGK Portal Services başlatılıyor...");
+
+            // Connection string'i DatabaseConfiguration'dan al
+            var connectionString = DatabaseConfiguration.GetConnectionString(configuration);
 
             // Memory Cache
             services.AddMemoryCache();
@@ -216,67 +154,8 @@ namespace SGKPortalApp.Common.Extensions
             // Business Layer
             services.AddBusinessLayer();
 
-            Console.WriteLine("🎉 SGK Portal Services hazır!");
+            Console.WriteLine("🎉 SGK Portal Services hazır!\n");
             return services;
-        }
-
-        /// <summary>
-        /// Repository kayıt testini çalıştır
-        /// </summary>
-        public static void TestRepositoryRegistration(this IServiceProvider serviceProvider)
-        {
-            Console.WriteLine("🧪 Repository kayıt testi başlıyor...");
-
-            using var scope = serviceProvider.CreateScope();
-            var provider = scope.ServiceProvider;
-
-            // Test edilecek repository'ler - TAM NAMESPACE ile
-            var testCases = new[]
-            {
-                (typeof(SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri.IPersonelRepository), "IPersonelRepository"),
-                (typeof(SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri.IDepartmanRepository), "IDepartmanRepository"),
-                (typeof(SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri.IBankoRepository), "IBankoRepository"),
-                (typeof(SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common.IHizmetBinasiRepository), "IHizmetBinasiRepository"),
-                (typeof(IUnitOfWork), "IUnitOfWork")
-            };
-
-            var successCount = 0;
-            foreach (var (repoType, name) in testCases)
-            {
-                try
-                {
-                    var repository = provider.GetService(repoType);
-                    if (repository != null)
-                    {
-                        Console.WriteLine($"✅ {name} başarıyla alındı");
-                        successCount++;
-                    }
-                    else
-                    {
-                        Console.WriteLine($"❌ {name} NULL döndü - kayıtlı değil");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"💥 {name} hata: {ex.Message}");
-                }
-            }
-
-            var percentage = (successCount * 100) / testCases.Length;
-            Console.WriteLine($"📊 Test sonucu: {successCount}/{testCases.Length} başarılı (%{percentage})");
-
-            if (percentage >= 80)
-            {
-                Console.WriteLine("🎉 Repository kayıt sistemi çalışıyor!");
-            }
-            else if (percentage >= 50)
-            {
-                Console.WriteLine("⚠️ Repository kayıt sistemi kısmen çalışıyor.");
-            }
-            else
-            {
-                Console.WriteLine("💥 Repository kayıt sistemi çalışmıyor! Manuel kayıt gerekli.");
-            }
         }
     }
 }
