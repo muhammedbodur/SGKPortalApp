@@ -4,11 +4,11 @@ using Microsoft.JSInterop;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 using SGKPortalApp.PresentationLayer.Services.UIServices;
+using SGKPortalApp.Common.Extensions;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
 {
@@ -149,7 +149,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             var query = Departmanlar.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
-                query = query.Where(d => d.DepartmanAdi.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+            {
+                query = query.Where(d => d.DepartmanAdi.ContainsTurkish(searchTerm));
+            }
 
             query = filterStatus switch
             {

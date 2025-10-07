@@ -3,10 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using SGKPortalApp.PresentationLayer.Services.StateServices;
 using SGKPortalApp.PresentationLayer.Services.UIServices;
 using System.Reflection;
-using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Auth;
-using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
-using SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth;
-using SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel;
 
 namespace SGKPortalApp.PresentationLayer.Extensions
 {
@@ -26,16 +22,6 @@ namespace SGKPortalApp.PresentationLayer.Extensions
                 ?? throw new InvalidOperationException("❌ ApiUrl configuration'da bulunamadı!");
 
             Console.WriteLine($"🔗 API URL: {apiUrl}");
-
-            // ═══════════════════════════════════════════════════════
-            // 📦 NAMED HttpClient (Global - İhtiyaç halinde kullanılabilir)
-            // ═══════════════════════════════════════════════════════
-            services.AddHttpClient("SGKAPI", client =>
-            {
-                client.BaseAddress = new Uri(apiUrl);
-                client.Timeout = TimeSpan.FromSeconds(30);
-                client.DefaultRequestHeaders.Add("Accept", "application/json");
-            });
 
             var assembly = Assembly.GetExecutingAssembly();
 
@@ -68,43 +54,142 @@ namespace SGKPortalApp.PresentationLayer.Extensions
             );
 
             // ═══════════════════════════════════════════════════════
-            // 4️⃣ API SERVICES - TYPED HttpClient ile kayıt
+            // 4️⃣ API SERVICES - Modül Bazında Otomatik Kayıt
             // ═══════════════════════════════════════════════════════
-            Console.WriteLine("📦 API Services kaydediliyor (Typed HttpClient)...");
+            services.RegisterApiServices(assembly, apiUrl, "Auth");
+            services.RegisterApiServices(assembly, apiUrl, "Personel");
+            services.RegisterApiServices(assembly, apiUrl, "Siramatik");
+            services.RegisterApiServices(assembly, apiUrl, "Pdks");
+            services.RegisterApiServices(assembly, apiUrl, "Eshot");
 
-            // 🔹 DepartmanApiService
-            services.AddHttpClient<IDepartmanApiService, DepartmanApiService>(client =>
-            {
-                client.BaseAddress = new Uri(apiUrl);
-                client.Timeout = TimeSpan.FromSeconds(30);
-                client.DefaultRequestHeaders.Add("Accept", "application/json");
-            });
-
-            // 🔹 PersonelApiService
-            services.AddHttpClient<IPersonelApiService, PersonelApiService>(client =>
-            {
-                client.BaseAddress = new Uri(apiUrl);
-                client.Timeout = TimeSpan.FromSeconds(30);
-                client.DefaultRequestHeaders.Add("Accept", "application/json");
-            });
-
-            // 🔹 AuthApiService
-            services.AddHttpClient<IAuthApiService, AuthApiService>(client =>
-            {
-                client.BaseAddress = new Uri(apiUrl);
-                client.Timeout = TimeSpan.FromSeconds(30);
-                client.DefaultRequestHeaders.Add("Accept", "application/json");
-            });
-
-            Console.WriteLine("  ✅ 3 API Service kayıt edildi (BaseAddress ile)");
             Console.WriteLine("🎉 Presentation Layer hazır!\n");
-
             return services;
         }
 
+        // ═══════════════════════════════════════════════════════
+        // API SERVICES - TYPED HttpClient ile Otomatik Kayıt
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Bir modülün tüm API servislerini Typed HttpClient ile kaydeder
+        /// </summary>
+        private static IServiceCollection RegisterApiServices(
+            this IServiceCollection services,
+            Assembly assembly,
+            string apiUrl,
+            string moduleName)
+        {
+            try
+            {
+                Console.WriteLine($"📦 {moduleName} API Services kaydediliyor...");
+
+                var interfaceNamespace = $"SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.{moduleName}";
+                var concreteNamespace = $"SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.{moduleName}";
+
+                // Interface'leri bul
+                var interfaces = assembly.GetTypes()
+                    .Where(t => t.Namespace == interfaceNamespace
+                                && t.IsInterface
+                                && !t.IsGenericType)
+                    .ToList();
+
+                // Implementation'ları bul
+                var implementations = assembly.GetTypes()
+                    .Where(t => t.Namespace == concreteNamespace
+                                && t.IsClass
+                                && !t.IsAbstract
+                                && !t.IsGenericType)
+                    .ToList();
+
+                if (!interfaces.Any() && !implementations.Any())
+                {
+                    Console.WriteLine($"    ⚠️  {moduleName} modülünde API service bulunamadı");
+                    return services;
+                }
+
+                Console.WriteLine($"    🔍 Bulunan interface'ler: {interfaces.Count}");
+                Console.WriteLine($"    🔧 Bulunan implementation'lar: {implementations.Count}");
+
+                int registeredCount = 0;
+
+                // Her interface için eşleşen implementation bul ve Typed HttpClient ile kaydet
+                foreach (var interfaceType in interfaces)
+                {
+                    // Convention: IServiceApiService -> ServiceApiService
+                    var expectedImplName = interfaceType.Name.Substring(1); // "I" harfini çıkar
+
+                    var implementationType = implementations.FirstOrDefault(impl =>
+                        impl.Name == expectedImplName &&
+                        interfaceType.IsAssignableFrom(impl)
+                    );
+
+                    // İsim eşleşmesi yoksa, interface'i implement eden herhangi birini al
+                    if (implementationType == null)
+                    {
+                        implementationType = implementations.FirstOrDefault(impl =>
+                            interfaceType.IsAssignableFrom(impl)
+                        );
+                    }
+
+                    if (implementationType != null)
+                    {
+                        // 🔹 AddHttpClient<TInterface, TImplementation> - Generic metod reflection ile çağırılıyor
+                        var addHttpClientMethod = typeof(HttpClientFactoryServiceCollectionExtensions)
+                            .GetMethods()
+                            .First(m => m.Name == "AddHttpClient"
+                                        && m.IsGenericMethodDefinition
+                                        && m.GetGenericArguments().Length == 2
+                                        && m.GetParameters().Length == 2
+                                        && m.GetParameters()[1].ParameterType.Name.Contains("Action"));
+
+                        var genericMethod = addHttpClientMethod.MakeGenericMethod(interfaceType, implementationType);
+
+                        // Action<HttpClient> oluştur
+                        Action<HttpClient> configureClient = client =>
+                        {
+                            client.BaseAddress = new Uri(apiUrl);
+                            client.Timeout = TimeSpan.FromSeconds(30);
+                            client.DefaultRequestHeaders.Add("Accept", "application/json");
+                        };
+
+                        // Metodu çağır: services.AddHttpClient<TInterface, TImplementation>(configureClient)
+                        genericMethod.Invoke(null, new object[] { services, configureClient });
+
+                        registeredCount++;
+                        Console.WriteLine($"    ✅ {interfaceType.Name} -> {implementationType.Name} (Typed HttpClient)");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"    ⚠️  {interfaceType.Name} için implementation bulunamadı");
+                    }
+                }
+
+                if (registeredCount > 0)
+                {
+                    Console.WriteLine($"    🎯 {moduleName}: {registeredCount} API service kayıt edildi");
+                }
+                else
+                {
+                    Console.WriteLine($"    ⚠️  {moduleName}: Hiçbir API service kayıt edilemedi");
+                }
+
+                return services;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"    ❌ {moduleName} API Services kayıt hatası: {ex.Message}");
+                Console.WriteLine($"    📍 Stack Trace: {ex.StackTrace}");
+                return services;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // NORMAL SERVICES - Standart Scoped Kayıt
+        // ═══════════════════════════════════════════════════════
+
         /// <summary>
         /// Belirtilen namespace'deki tüm servisleri otomatik olarak kaydeder
-        /// Interface-Implementation eşleştirmesi yapar
+        /// Interface-Implementation eşleştirmesi yapar (UI Services, Storage Services vb.)
         /// </summary>
         private static IServiceCollection RegisterServicesFromNamespace(
             this IServiceCollection services,
@@ -118,7 +203,6 @@ namespace SGKPortalApp.PresentationLayer.Extensions
             {
                 Console.WriteLine($"📦 {serviceName} kaydediliyor...");
 
-                // Namespace'deki tüm tipleri al
                 var types = assembly.GetTypes()
                     .Where(t => t.Namespace == namespaceName
                                 && !t.IsAbstract
@@ -139,22 +223,18 @@ namespace SGKPortalApp.PresentationLayer.Extensions
                     }
                 }
 
-                // Interface'leri ve implementation'ları ayır
                 var interfaces = types.Where(t => t.IsInterface).ToList();
                 var implementations = types.Where(t => t.IsClass).ToList();
 
                 int registeredCount = 0;
 
-                // Her interface için implementation bul ve kaydet
                 foreach (var interfaceType in interfaces)
                 {
-                    // Önce naming convention'a göre ara (IService -> Service)
                     var implementationType = implementations.FirstOrDefault(impl =>
                         interfaceType.IsAssignableFrom(impl) &&
-                        impl.Name == interfaceType.Name.Substring(1) // "I" harfini çıkar
+                        impl.Name == interfaceType.Name.Substring(1)
                     );
 
-                    // Bulamazsan interface'i implement eden herhangi bir class'ı bul
                     if (implementationType == null)
                     {
                         implementationType = implementations.FirstOrDefault(impl =>
@@ -174,7 +254,6 @@ namespace SGKPortalApp.PresentationLayer.Extensions
                     }
                 }
 
-                // Interface'i olmayan standalone servisleri kaydet
                 var standaloneServices = implementations
                     .Where(impl => !interfaces.Any(i => i.IsAssignableFrom(impl)))
                     .ToList();
@@ -186,15 +265,12 @@ namespace SGKPortalApp.PresentationLayer.Extensions
                     Console.WriteLine($"  ✅ {serviceType.Name} (Concrete)");
                 }
 
-                // Kritik servislerin kayıtlı olduğundan emin ol
                 if (ensureCriticalServices != null)
                 {
                     foreach (var criticalInterface in ensureCriticalServices)
                     {
-                        // Servis zaten kayıtlı mı kontrol et
                         if (!services.Any(s => s.ServiceType == criticalInterface))
                         {
-                            // Kayıtlı değilse implementation'ı bul ve kaydet
                             var implType = assembly.GetTypes()
                                 .FirstOrDefault(t => criticalInterface.IsAssignableFrom(t)
                                                   && t.IsClass
@@ -216,7 +292,6 @@ namespace SGKPortalApp.PresentationLayer.Extensions
                 }
 
                 Console.WriteLine($"  ✅ {serviceName}: {registeredCount} servis kayıt edildi");
-
                 return services;
             }
             catch (Exception ex)

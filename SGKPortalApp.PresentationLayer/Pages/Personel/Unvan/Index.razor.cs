@@ -7,6 +7,7 @@ using QuestPDF.Infrastructure;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 using SGKPortalApp.PresentationLayer.Services.UIServices;
 
@@ -149,8 +150,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Unvan
             var query = Unvanlar.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
-                query = query.Where(d => d.UnvanAdi.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
-
+            {
+                query = query.Where(d => d.UnvanAdi.ContainsTurkish(searchTerm));
+            }
             query = filterStatus switch
             {
                 "active" => query.Where(d => d.UnvanAktiflik == Aktiflik.Aktif),
