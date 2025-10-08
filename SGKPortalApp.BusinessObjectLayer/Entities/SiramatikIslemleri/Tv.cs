@@ -21,7 +21,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         public required HizmetBinasi HizmetBinasi { get; set; }
 
         public KatTipi KatTipi { get; set; }
-        public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
+        public Aktiflik TvAktiflik { get; set; } = Aktiflik.Aktif;
 
         [StringLength(500)]
         public string? Aciklama { get; set; }

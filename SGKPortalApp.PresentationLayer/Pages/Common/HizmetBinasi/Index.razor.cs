@@ -27,8 +27,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
         // DATA PROPERTIES
         // ═══════════════════════════════════════════════════════
 
-        private List<HizmetBinasiResponseDto> HizmetBinasilar { get; set; } = new();
-        private List<HizmetBinasiResponseDto> FilteredHizmetBinasilar { get; set; } = new();
+        private List<HizmetBinasiResponseDto> HizmetBinalari { get; set; } = new();
+        private List<HizmetBinasiResponseDto> FilteredHizmetBinalari { get; set; } = new();
 
         // ═══════════════════════════════════════════════════════
         // FILTER PROPERTIES
@@ -44,7 +44,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
 
         private int CurrentPage { get; set; } = 1;
         private int PageSize { get; set; } = 10;
-        private int TotalPages => (int)Math.Ceiling(FilteredHizmetBinasilar.Count / (double)PageSize);
+        private int TotalPages => (int)Math.Ceiling(FilteredHizmetBinalari.Count / (double)PageSize);
 
         // ═══════════════════════════════════════════════════════
         // UI STATE
@@ -81,10 +81,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
         protected override async Task OnInitializedAsync()
         {
             QuestPDF.Settings.License = LicenseType.Community;
-            await LoadHizmetBinasilar();
+            await LoadHizmetBinalari();
         }
 
-        private async Task LoadHizmetBinasilar()
+        private async Task LoadHizmetBinalari()
         {
             IsLoading = true;
             try
@@ -93,18 +93,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
 
                 if (result.Success && result.Data != null)
                 {
-                    HizmetBinasilar = result.Data;
+                    HizmetBinalari = result.Data;
                     ApplyFiltersAndSort();
                 }
                 else
                 {
-                    await _toastService.ShowErrorAsync(result.Message ?? "HizmetBinasilar yüklenemedi!");
+                    await _toastService.ShowErrorAsync(result.Message ?? "HizmetBinalari yüklenemedi!");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Hata: {ex.Message}");
-                await _toastService.ShowErrorAsync("HizmetBinasilar yüklenirken bir hata oluştu!");
+                await _toastService.ShowErrorAsync("HizmetBinalari yüklenirken bir hata oluştu!");
             }
             finally
             {
@@ -146,7 +146,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
 
         private void ApplyFiltersAndSort()
         {
-            var query = HizmetBinasilar.AsEnumerable();
+            var query = HizmetBinalari.AsEnumerable();
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
@@ -171,7 +171,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                 _ => query.OrderBy(d => d.HizmetBinasiAdi)
             };
 
-            FilteredHizmetBinasilar = query.ToList();
+            FilteredHizmetBinalari = query.ToList();
         }
 
         // ═══════════════════════════════════════════════════════
@@ -216,7 +216,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
             IsToggling = true;
             try
             {
-                var hizmetBinasi = HizmetBinasilar.FirstOrDefault(d => d.HizmetBinasiId == ToggleHizmetBinasiId);
+                var hizmetBinasi = HizmetBinalari.FirstOrDefault(d => d.HizmetBinasiId == ToggleHizmetBinasiId);
                 if (hizmetBinasi == null)
                 {
                     await _toastService.ShowErrorAsync("HizmetBinasi bulunamadı!");
@@ -273,7 +273,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                 if (result.Success)
                 {
                     await _toastService.ShowSuccessAsync(result.Message ?? "HizmetBinasi başarıyla silindi.");
-                    await LoadHizmetBinasilar();
+                    await LoadHizmetBinalari();
                     CloseDeleteModal();
                 }
                 else
@@ -304,7 +304,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
             try
             {
                 using var workbook = new XLWorkbook();
-                var worksheet = workbook.Worksheets.Add("HizmetBinasilar");
+                var worksheet = workbook.Worksheets.Add("HizmetBinalari");
 
                 var headerRow = worksheet.Row(1);
                 headerRow.Style.Font.Bold = true;
@@ -319,7 +319,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                 worksheet.Cell(1, 5).Value = "Son Güncelleme";
 
                 int row = 2;
-                foreach (var hizmetBinasi in FilteredHizmetBinasilar)
+                foreach (var hizmetBinasi in FilteredHizmetBinalari)
                 {
                     worksheet.Cell(row, 1).Value = hizmetBinasi.HizmetBinasiAdi;
                     worksheet.Cell(row, 2).Value = hizmetBinasi.PersonelSayisi;
@@ -338,7 +338,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                 workbook.SaveAs(stream);
                 var content = stream.ToArray();
 
-                var fileName = $"HizmetBinasilar_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                var fileName = $"HizmetBinalari_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
                 await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(content),
                     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
@@ -391,19 +391,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                                 row.RelativeItem().Border(1).Padding(5).Column(col =>
                                 {
                                     col.Item().Text("Toplam").Bold();
-                                    col.Item().Text(HizmetBinasilar.Count.ToString()).FontSize(14).FontColor(Colors.Blue.Darken2);
+                                    col.Item().Text(HizmetBinalari.Count.ToString()).FontSize(14).FontColor(Colors.Blue.Darken2);
                                 });
 
                                 row.RelativeItem().Border(1).Padding(5).Column(col =>
                                 {
                                     col.Item().Text("Aktif").Bold();
-                                    col.Item().Text(HizmetBinasilar.Count(d => d.HizmetBinasiAktiflik == Aktiflik.Aktif).ToString()).FontSize(14).FontColor(Colors.Green.Darken2);
+                                    col.Item().Text(HizmetBinalari.Count(d => d.HizmetBinasiAktiflik == Aktiflik.Aktif).ToString()).FontSize(14).FontColor(Colors.Green.Darken2);
                                 });
 
                                 row.RelativeItem().Border(1).Padding(5).Column(col =>
                                 {
                                     col.Item().Text("Pasif").Bold();
-                                    col.Item().Text(HizmetBinasilar.Count(d => d.HizmetBinasiAktiflik == Aktiflik.Pasif).ToString()).FontSize(14).FontColor(Colors.Red.Darken2);
+                                    col.Item().Text(HizmetBinalari.Count(d => d.HizmetBinasiAktiflik == Aktiflik.Pasif).ToString()).FontSize(14).FontColor(Colors.Red.Darken2);
                                 });
                             });
 
@@ -429,7 +429,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                                     static IContainer CellStyle(IContainer container) => container.Border(1).Background(Colors.Grey.Lighten3).Padding(5).AlignCenter();
                                 });
 
-                                foreach (var d in FilteredHizmetBinasilar)
+                                foreach (var d in FilteredHizmetBinalari)
                                 {
                                     table.Cell().Border(1).Padding(5).Text(d.HizmetBinasiAdi);
                                     table.Cell().Border(1).Padding(5).AlignCenter().Text(d.PersonelSayisi.ToString());
@@ -450,7 +450,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                 });
 
                 var pdfBytes = document.GeneratePdf();
-                var fileName = $"HizmetBinasilar_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+                var fileName = $"HizmetBinalari_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
                 await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pdfBytes), "application/pdf");
 
                 await _toastService.ShowSuccessAsync("PDF dosyası indirildi!");

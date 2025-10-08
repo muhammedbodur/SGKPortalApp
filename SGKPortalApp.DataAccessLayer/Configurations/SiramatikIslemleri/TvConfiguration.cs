@@ -25,7 +25,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .HasConversion<int>()
                 .HasComment("Kat bilgisi");
 
-            builder.Property(t => t.Aktiflik)
+            builder.Property(t => t.TvAktiflik)
                 .IsRequired()
                 .HasConversion<int>()
                 .HasDefaultValue(Aktiflik.Aktif)
@@ -48,7 +48,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .HasDatabaseName("IX_SIR_Tvler_TvAdi")
                 .HasFilter("[SilindiMi] = 0");
 
-            builder.HasIndex(t => t.Aktiflik)
+            builder.HasIndex(t => t.TvAktiflik)
                 .HasDatabaseName("IX_SIR_Tvler_Aktiflik");
 
             builder.HasQueryFilter(t => !t.SilindiMi);

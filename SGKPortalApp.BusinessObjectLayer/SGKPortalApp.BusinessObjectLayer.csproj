@@ -14,7 +14,6 @@
     <Folder Include="DTOs\Response\Auth\" />
     <Folder Include="DTOs\Response\EshotIslemleri\" />
     <Folder Include="DTOs\Response\PdksIslemleri\" />
-    <Folder Include="DTOs\Response\SiramatikIslemleri\" />
     <Folder Include="DTOs\Shared\Common\" />
     <Folder Include="DTOs\Shared\Enums\" />
     <Folder Include="DTOs\Shared\ValueObjects\" />

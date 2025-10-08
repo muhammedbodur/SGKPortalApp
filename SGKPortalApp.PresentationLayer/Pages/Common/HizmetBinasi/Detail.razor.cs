@@ -98,9 +98,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
             _navigationManager.NavigateTo($"/common/hizmetbinasi/manage/{id}");
         }
 
-        private void NavigateToPersonelDetail(int personelId)
+        private void NavigateToPersonelDetail(string TcKimlikNo)
         {
-            _navigationManager.NavigateTo($"/personel/detail/{personelId}");
+            _navigationManager.NavigateTo($"/personel/detail/{TcKimlikNo}");
         }
     }
 }
