@@ -6,6 +6,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 
 namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
@@ -38,8 +39,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
                     opt => opt.MapFrom(src => src.HizmetBinasiId))
                 .ForMember(dest => dest.HizmetBinasiAdi,
                     opt => opt.MapFrom(src => src.HizmetBinasiAdi))
+                .ForMember(dest => dest.Adres,
+                    opt => opt.MapFrom(src => src.Adres)) // ✅ EKLEME
                 .ForMember(dest => dest.HizmetBinasiAktiflik,
                     opt => opt.MapFrom(src => src.HizmetBinasiAktiflik))
+                .ForMember(dest => dest.DepartmanId,
+                    opt => opt.MapFrom(src => src.DepartmanId))
                 .ForMember(dest => dest.DepartmanAdi,
                     opt => opt.MapFrom(src => src.Departman != null ? src.Departman.DepartmanAdi : string.Empty))
                 .ForMember(dest => dest.EklenmeTarihi,
@@ -50,8 +55,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
                 // İstatistikler
                 .ForMember(dest => dest.ToplamPersonelSayisi,
                     opt => opt.MapFrom(src => src.Personeller != null ? src.Personeller.Count : 0))
+                .ForMember(dest => dest.AktifPersonelSayisi,
+                    opt => opt.MapFrom(src => src.Personeller != null
+                        ? src.Personeller.Count(p => p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif)
+                        : 0)) // ✅ EKLEME
                 .ForMember(dest => dest.ToplamBankoSayisi,
                     opt => opt.MapFrom(src => src.Bankolar != null ? src.Bankolar.Count : 0))
+                .ForMember(dest => dest.AktifBankoSayisi,
+                    opt => opt.MapFrom(src => src.Bankolar != null
+                        ? src.Bankolar.Count(b => b.BankoAktiflik == Aktiflik.Aktif)
+                        : 0)) // ✅ EKLEME
                 .ForMember(dest => dest.ToplamTvSayisi,
                     opt => opt.MapFrom(src => src.Tvler != null ? src.Tvler.Count : 0))
 
@@ -81,6 +94,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
                     opt => opt.MapFrom(src => src.BankoId))
                 .ForMember(dest => dest.BankoNo,
                     opt => opt.MapFrom(src => src.BankoNo))
+                .ForMember(dest => dest.BankoAdi,
+                    opt => opt.MapFrom(src => $"Banko {src.BankoNo}")) // ✅ EKLEME - Dinamik oluşturma
                 .ForMember(dest => dest.BankoTipi,
                     opt => opt.MapFrom(src => src.BankoTipi))
                 .ForMember(dest => dest.KatTipi,
@@ -121,8 +136,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
                     opt => opt.MapFrom(src => src.TvId))
                 .ForMember(dest => dest.TvAdi,
                     opt => opt.MapFrom(src => src.TvAdi))
-                .ForMember(dest => dest.Aciklama,
-                    opt => opt.MapFrom(src => src.Aciklama))
+                .ForMember(dest => dest.TvAciklama,
+                    opt => opt.MapFrom(src => src.TvAciklama))
                 .ForMember(dest => dest.TvAktiflik,
                     opt => opt.MapFrom(src => src.TvAktiflik))
                 .ForMember(dest => dest.HizmetBinasiId,

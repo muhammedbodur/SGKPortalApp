@@ -9,7 +9,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
     {
         public int TvId { get; set; }
         public string TvAdi { get; set; } = string.Empty;
-        public string? Aciklama { get; set; }
+        public string? TvAciklama { get; set; }
         public Aktiflik TvAktiflik { get; set; }
 
         // Foreign Key - Hizmet Binası

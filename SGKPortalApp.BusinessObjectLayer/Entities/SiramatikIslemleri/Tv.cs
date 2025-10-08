@@ -24,7 +24,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         public Aktiflik TvAktiflik { get; set; } = Aktiflik.Aktif;
 
         [StringLength(500)]
-        public string? Aciklama { get; set; }
+        public string? TvAciklama { get; set; }
 
         public DateTime IslemZamani { get; set; } = DateTime.Now;
         public HubTvConnection? HubTvConnection { get; set; }

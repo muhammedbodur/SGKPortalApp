@@ -97,7 +97,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Select(tv => new ValueTuple<int, string>(tv.TvId, tv.Aciklama ?? tv.TvId.ToString()))
+                .Select(tv => new ValueTuple<int, string>(tv.TvId, tv.TvAciklama ?? tv.TvId.ToString()))
                 .ToListAsync();
         }
 
@@ -107,7 +107,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Where(tv => tv.HizmetBinasiId == hizmetBinasiId)
-                .Select(tv => new ValueTuple<int, string>(tv.TvId, tv.Aciklama ?? tv.TvId.ToString()))
+                .Select(tv => new ValueTuple<int, string>(tv.TvId, tv.TvAciklama ?? tv.TvId.ToString()))
                 .ToListAsync();
         }
     }

@@ -17,6 +17,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
 
         public int HizmetBinasiId { get; set; }
         public string HizmetBinasiAdi { get; set; } = string.Empty;
+        public string? Adres { get; set; } // ✅ EKLEME
         public Aktiflik HizmetBinasiAktiflik { get; set; }
         public int DepartmanId { get; set; }
         public string DepartmanAdi { get; set; } = string.Empty;
@@ -28,7 +29,9 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
         // ═══════════════════════════════════════════════════════
 
         public int ToplamPersonelSayisi { get; set; }
+        public int AktifPersonelSayisi { get; set; } // ✅ EKLEME
         public int ToplamBankoSayisi { get; set; }
+        public int AktifBankoSayisi { get; set; } // ✅ EKLEME
         public int ToplamTvSayisi { get; set; }
 
         // ═══════════════════════════════════════════════════════
