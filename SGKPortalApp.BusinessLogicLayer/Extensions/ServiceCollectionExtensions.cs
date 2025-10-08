@@ -31,6 +31,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Extensions
             // ═══════════════════════════════════════════════════════
             // 2️⃣ MODÜL BAZINDA SERVİS KAYITLARI
             // ═══════════════════════════════════════════════════════
+            services.RegisterModuleServices(businessAssembly, "Common");
             services.RegisterModuleServices(businessAssembly, "PersonelIslemleri");
             services.RegisterModuleServices(businessAssembly, "SiramatikIslemleri");
             services.RegisterModuleServices(businessAssembly, "PdksIslemleri");

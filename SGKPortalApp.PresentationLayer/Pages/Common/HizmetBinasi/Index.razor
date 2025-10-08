@@ -210,7 +210,10 @@
                                                     @hizmetbinasi.HizmetBinasiAdi.Substring(0, 1).ToUpper()
                                                 </span>
                                             </div>
-                                            <strong>@hizmetbinasi.HizmetBinasiAdi</strong>
+                                            <strong @onclick="() => NavigateToDetail(hizmetbinasi.HizmetBinasiId)"
+                                                    style="cursor: pointer;">
+                                                @hizmetbinasi.HizmetBinasiAdi
+                                            </strong>
                                         </div>
                                     </td>
                                     <td class="text-center">

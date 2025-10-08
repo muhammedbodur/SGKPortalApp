@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Components;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 using SGKPortalApp.PresentationLayer.Services.UIServices;
 using System.ComponentModel.DataAnnotations;
-using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
 {
@@ -16,6 +16,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
         // ═══════════════════════════════════════════════════════
 
         [Inject] private IHizmetBinasiApiService _hizmetBinasiService { get; set; } = default!;
+        [Inject] private IDepartmanApiService _departmanService { get; set; } = default!;
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
 
@@ -30,38 +31,49 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
         // ═══════════════════════════════════════════════════════
 
         private HizmetBinasiFormModel FormModel { get; set; } = new();
+        private List<DepartmanResponseDto> Departmanlar { get; set; } = new();
+        private List<string> validationErrors = new();
+
         private bool IsEditMode => Id.HasValue && Id.Value > 0;
-        private int CurrentPersonelSayisi { get; set; } = 0;
-
-        // ═══════════════════════════════════════════════════════
-        // UI STATE
-        // ═══════════════════════════════════════════════════════
-
         private bool IsLoading { get; set; } = true;
         private bool IsSaving { get; set; } = false;
         private bool NotFound { get; set; } = false;
 
-        // ═══════════════════════════════════════════════════════
-        // DELETE MODAL
-        // ═══════════════════════════════════════════════════════
-
+        private int CurrentPersonelSayisi { get; set; } = 0;
         private bool ShowDeleteModal { get; set; } = false;
         private bool IsDeleting { get; set; } = false;
 
         // ═══════════════════════════════════════════════════════
-        // LIFECYCLE
+        // LIFECYCLE METHODS
         // ═══════════════════════════════════════════════════════
 
         protected override async Task OnInitializedAsync()
         {
+            await LoadDepartmanlar();
             await LoadData();
         }
 
-        protected override async Task OnParametersSetAsync()
+        // Departmanları yükleme kısmı
+        private async Task LoadDepartmanlar()
         {
-            if (IsEditMode)
+            try
             {
-                await LoadData();
+                var result = await _departmanService.GetAllAsync();
+
+                // ServiceResult içindeki Data'ya erişin
+                if (result.Success && result.Data != null && result.Data.Any())
+                {
+                    // Sadece aktif departmanları al
+                    Departmanlar = result.Data
+                        .Where(d => d.DepartmanAktiflik == Aktiflik.Aktif)
+                        .OrderBy(d => d.DepartmanAdi)
+                        .ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Departman yükleme hatası: {ex.Message}");
+                await _toastService.ShowWarningAsync("Departmanlar yüklenemedi!");
             }
         }
 
@@ -79,7 +91,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                     if (!result.Success || result.Data == null)
                     {
                         NotFound = true;
-                        await _toastService.ShowErrorAsync(result.Message ?? "HizmetBinasi bulunamadı!");
+                        await _toastService.ShowErrorAsync(result.Message
+                            ?? "Hizmet Binası bulunamadı!");
                     }
                     else
                     {
@@ -87,6 +100,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                         FormModel = new HizmetBinasiFormModel
                         {
                             HizmetBinasiAdi = hizmetBinasi.HizmetBinasiAdi,
+                            DepartmanId = hizmetBinasi.DepartmanId,
+                            Adres = hizmetBinasi.Adres,
                             IsActive = hizmetBinasi.HizmetBinasiAktiflik == Aktiflik.Aktif
                         };
 
@@ -98,6 +113,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                     FormModel = new HizmetBinasiFormModel
                     {
                         HizmetBinasiAdi = string.Empty,
+                        DepartmanId = 0,
+                        Adres = string.Empty,
                         IsActive = true
                     };
                 }
@@ -120,6 +137,25 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
 
         private async Task HandleSubmit()
         {
+            // ✅ Validation kontrolü
+            validationErrors.Clear();
+
+            if (string.IsNullOrWhiteSpace(FormModel.HizmetBinasiAdi))
+            {
+                validationErrors.Add("Hizmet Binası adı zorunludur!");
+            }
+
+            if (FormModel.DepartmanId == 0)
+            {
+                validationErrors.Add("Departman seçimi zorunludur!");
+            }
+
+            if (validationErrors.Any())
+            {
+                await _toastService.ShowWarningAsync("Lütfen tüm zorunlu alanları doldurun!");
+                return;
+            }
+
             IsSaving = true;
 
             try
@@ -129,6 +165,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                     var updateDto = new HizmetBinasiUpdateRequestDto
                     {
                         HizmetBinasiAdi = FormModel.HizmetBinasiAdi.Trim(),
+                        DepartmanId = FormModel.DepartmanId,
+                        Adres = FormModel.Adres?.Trim(),
                         HizmetBinasiAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
@@ -136,12 +174,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
 
                     if (result.Success)
                     {
-                        await _toastService.ShowSuccessAsync(result.Message ?? "HizmetBinasi başarıyla güncellendi!");
+                        await _toastService.ShowSuccessAsync(result.Message
+                            ?? "Hizmet Binası başarıyla güncellendi!");
                         NavigateToHizmetBinasiList();
                     }
                     else
                     {
-                        await _toastService.ShowErrorAsync(result.Message ?? "HizmetBinasi güncellenemedi!");
+                        await _toastService.ShowErrorAsync(result.Message
+                            ?? "Hizmet Binası güncellenemedi!");
                     }
                 }
                 else
@@ -149,6 +189,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                     var createDto = new HizmetBinasiCreateRequestDto
                     {
                         HizmetBinasiAdi = FormModel.HizmetBinasiAdi.Trim(),
+                        DepartmanId = FormModel.DepartmanId,
+                        Adres = FormModel.Adres?.Trim(),
                         HizmetBinasiAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
@@ -156,19 +198,21 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
 
                     if (result.Success)
                     {
-                        await _toastService.ShowSuccessAsync(result.Message ?? "HizmetBinasi başarıyla oluşturuldu!");
+                        await _toastService.ShowSuccessAsync(result.Message
+                            ?? "Hizmet Binası başarıyla oluşturuldu!");
                         NavigateToHizmetBinasiList();
                     }
                     else
                     {
-                        await _toastService.ShowErrorAsync(result.Message ?? "HizmetBinasi oluşturulamadı!");
+                        await _toastService.ShowErrorAsync(result.Message
+                            ?? "Hizmet Binası oluşturulamadı!");
                     }
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Hata: {ex.Message}");
-                await _toastService.ShowErrorAsync($"İşlem başarısız: {ex.Message}");
+                await _toastService.ShowErrorAsync("Kayıt işlemi sırasında bir hata oluştu!");
             }
             finally
             {
@@ -177,11 +221,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
         }
 
         // ═══════════════════════════════════════════════════════
-        // DELETE OPERATIONS
+        // DELETE MODAL
         // ═══════════════════════════════════════════════════════
 
         private void ShowDeleteConfirmation()
         {
+            if (CurrentPersonelSayisi > 0)
+            {
+                _toastService.ShowWarningAsync(
+                    $"Bu hizmet binasında {CurrentPersonelSayisi} personel bulunmaktadır. " +
+                    "Silmeden önce personelleri başka bir hizmet binasına taşıyın.");
+                return;
+            }
             ShowDeleteModal = true;
         }
 
@@ -200,12 +251,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
 
                 if (result.Success)
                 {
-                    await _toastService.ShowSuccessAsync(result.Message ?? "HizmetBinasi başarıyla silindi!");
+                    await _toastService.ShowSuccessAsync(result.Message
+                        ?? "Hizmet Binası başarıyla silindi!");
                     NavigateToHizmetBinasiList();
                 }
                 else
                 {
-                    await _toastService.ShowErrorAsync(result.Message ?? "HizmetBinasi silinemedi!");
+                    await _toastService.ShowErrorAsync(result.Message
+                        ?? "Hizmet Binası silinemedi!");
                 }
             }
             catch (Exception ex)
@@ -224,7 +277,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
         // NAVIGATION
         // ═══════════════════════════════════════════════════════
 
-        private void NavigateToHizmetBinasiList() => _navigationManager.NavigateTo("/common/hizmetbinasi");
+        private void NavigateToHizmetBinasiList()
+            => _navigationManager.NavigateTo("/common/hizmetbinasi");
 
         private void NavigateToHome()
         {
@@ -237,9 +291,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
 
         public class HizmetBinasiFormModel
         {
-            [Required(ErrorMessage = "HizmetBinasi adı zorunludur")]
-            [StringLength(100, MinimumLength = 2, ErrorMessage = "HizmetBinasi adı 2-100 karakter arasında olmalıdır")]
+            [Required(ErrorMessage = "Hizmet Binası adı zorunludur")]
+            [StringLength(100, MinimumLength = 2,
+                ErrorMessage = "Hizmet Binası adı 2-100 karakter arasında olmalıdır")]
             public string HizmetBinasiAdi { get; set; } = string.Empty;
+
+            [Range(1, int.MaxValue, ErrorMessage = "Departman seçimi zorunludur")]
+            public int DepartmanId { get; set; }
+
+            [StringLength(500, ErrorMessage = "Adres en fazla 500 karakter olabilir")]
+            public string? Adres { get; set; }
 
             public bool IsActive { get; set; } = true;
         }

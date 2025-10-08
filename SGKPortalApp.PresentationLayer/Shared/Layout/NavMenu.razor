@@ -183,6 +183,43 @@
             </a>
         </li>
 
+        <!-- ================ ORTAK TANIMLAR ================ -->
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Ortak Tanımlar</span>
+        </li>
+
+        <!-- Hizmet Binaları -->
+        <li class="menu-item @(IsSectionActive("/common") ? "active open" : "")">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-cog"></i>
+                <div>Ortak Tanımlar</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item @(IsActive("/common/hizmetbinasi") && !Navigation.Uri.Contains("/manage") && !Navigation.Uri.Contains("/detail") ? "active" : "")">
+                    <a href="/common/hizmetbinasi" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-building"></i>
+                        <div>Hizmet Binaları</div>
+                    </a>
+                </li>
+            </ul>
+            <ul class="menu-sub">
+                <li class="menu-item @(IsSectionActive("/common/il") ? "active" : "")">
+                    <a href="/common/il" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-map"></i>
+                        <div>İller</div>
+                    </a>
+                </li>
+            </ul>
+            <ul class="menu-sub">
+                <li class="menu-item @(IsSectionActive("/common/ilce") ? "active" : "")">
+                    <a href="/common/ilce" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-map-pin"></i>
+                        <div>İlçeler</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
         <!-- ================ PERSONEL İŞLEMLERİ ================ -->
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Personel İşlemleri</span>
@@ -196,26 +233,31 @@
             <ul class="menu-sub">
                 <li class="menu-item @(IsActive("/personel") && !Navigation.Uri.Contains("/departman") && !Navigation.Uri.Contains("/servis") && !Navigation.Uri.Contains("/unvan") ? "active" : "")">
                     <a href="/personel" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-user"></i>
                         <div>Personel Listesi</div>
                     </a>
                 </li>
                 <li class="menu-item @(IsActive("/personel/create") ? "active" : "")">
                     <a href="/personel/create" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-user-plus"></i>
                         <div>Yeni Personel</div>
                     </a>
                 </li>
                 <li class="menu-item @(IsSectionActive("/personel/departman") ? "active" : "")">
                     <a href="/personel/departman" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-git-branch"></i>
                         <div>Departmanlar</div>
                     </a>
                 </li>
                 <li class="menu-item @(IsSectionActive("/personel/servis") ? "active" : "")">
                     <a href="/personel/servis" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-group"></i>
                         <div>Servisler</div>
                     </a>
                 </li>
                 <li class="menu-item @(IsSectionActive("/personel/unvan") ? "active" : "")">
                     <a href="/personel/unvan" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-id-card"></i>
                         <div>Unvanlar</div>
                     </a>
                 </li>
@@ -464,6 +506,8 @@
     </ul>
 </aside>
 
+@implements IDisposable
+
 @code {
     /// <summary>
     /// Tam URL eşleşmesi kontrol eder
@@ -482,5 +526,20 @@
     {
         var currentPath = new Uri(Navigation.Uri).AbsolutePath;
         return currentPath.StartsWith(sectionPath, StringComparison.OrdinalIgnoreCase);
+    }
+
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 }

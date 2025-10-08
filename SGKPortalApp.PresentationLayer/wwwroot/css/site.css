@@ -10,3 +10,15 @@ html.layout-menu-fixed:not(.layout-menu-collapsed) .layout-menu-toggle .bx-chevr
 .bx-chevron-left {
     transition: transform 0.6s ease !important;
 }
+
+.clickable {
+    cursor: pointer;
+    /* İsteğe bağlı: Tıklanabilir hissi için ekstra stiller */
+    color: #007bff; /* Mavi renk, link gibi görünmesi için */
+    text-decoration: underline; /* Alt çizgi ekleyin (isteğe bağlı) */
+}
+
+.clickable:hover {
+    color: #0056b3; /* Hover efekti için renk değişimi */
+    text-decoration: underline; /* Hover'da alt çizgiyi kalınlaştırın (isteğe bağlı) */
+}

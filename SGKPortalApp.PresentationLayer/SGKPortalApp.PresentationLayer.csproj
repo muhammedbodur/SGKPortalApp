@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Pages\Common\Ilce\" />
+    <Folder Include="Pages\Common\Il\" />
+    <Folder Include="Pages\Personel\Departman\" />
     <Folder Include="Pages\Personel\Sendika\" />
     <Folder Include="Services\ApiServices\Concrete\Account\" />
     <Folder Include="Services\ApiServices\Concrete\Eshot\" />
