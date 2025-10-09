@@ -1,5 +1,434 @@
-﻿<h3>Detail</h3>
+@page "/personel/detail/{tcKimlikNo}"
+@using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
 
-@code {
+<PageTitle>Personel Detay - SGK Portal</PageTitle>
 
-}
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">Personel /</span> Detay
+    </h4>
+
+    @if (IsLoading)
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <p class="text-muted">Personel bilgileri yükleniyor...</p>
+            </div>
+        </div>
+    }
+    else if (NotFound)
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bx bx-error-circle display-1 text-danger mb-3"></i>
+                <h5 class="mb-3">Personel Bulunamadı</h5>
+                <p class="text-muted mb-4">
+                    Aradığınız personel bulunamadı veya silinmiş olabilir.
+                </p>
+                <button class="btn btn-primary" @onclick="NavigateToPersonelList">
+                    <i class="bx bx-list-ul me-1"></i>Personel Listesine Dön
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- SOL TARAF: PERSONEL KARTI -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="col-xl-4 col-lg-5 col-md-5 order-1 order-md-0">
+                <!-- Personel Kartı -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="user-avatar-section">
+                            <div class="d-flex align-items-center flex-column">
+                                @if (!string.IsNullOrEmpty(Personel?.Resim))
+                                {
+                                    <img class="img-fluid rounded my-4" src="@Personel.Resim" height="110" width="110" alt="Personel fotoğrafı" />
+                                }
+                                else
+                                {
+                                    <div class="avatar avatar-xl my-4">
+                                        <span class="avatar-initial rounded bg-label-primary" style="font-size: 3rem;">
+                                            @Personel?.AdSoyad?.Substring(0, 1).ToUpper()
+                                        </span>
+                                    </div>
+                                }
+                                <div class="user-info text-center">
+                                    <h4 class="mb-2">@Personel?.AdSoyad</h4>
+                                    @switch (Personel?.PersonelAktiflikDurum)
+                                    {
+                                        case PersonelAktiflikDurum.Aktif:
+                                            <span class="badge bg-label-success">Aktif</span>
+                                            break;
+                                        case PersonelAktiflikDurum.Pasif:
+                                            <span class="badge bg-label-danger">Pasif</span>
+                                            break;
+                                        case PersonelAktiflikDurum.Emekli:
+                                            <span class="badge bg-label-info">Emekli</span>
+                                            break;
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="pb-2 border-bottom mb-4 mt-4">Temel Bilgiler</h5>
+                        <div class="info-container">
+                            <ul class="list-unstyled">
+                                <li class="mb-3">
+                                    <span class="fw-medium me-2">TC Kimlik No:</span>
+                                    <span>@Personel?.TcKimlikNo</span>
+                                </li>
+                                <li class="mb-3">
+                                    <span class="fw-medium me-2">Sicil No:</span>
+                                    <span>@Personel?.SicilNo</span>
+                                </li>
+                                <li class="mb-3">
+                                    <span class="fw-medium me-2">Email:</span>
+                                    <span>@Personel?.Email</span>
+                                </li>
+                                <li class="mb-3">
+                                    <span class="fw-medium me-2">Departman:</span>
+                                    <span>@Personel?.DepartmanAdi</span>
+                                </li>
+                                <li class="mb-3">
+                                    <span class="fw-medium me-2">Servis:</span>
+                                    <span>@Personel?.ServisAdi</span>
+                                </li>
+                                <li class="mb-3">
+                                    <span class="fw-medium me-2">Ünvan:</span>
+                                    <span>@Personel?.UnvanAdi</span>
+                                </li>
+                                <li class="mb-3">
+                                    <span class="fw-medium me-2">Dahili:</span>
+                                    <span>@Personel?.Dahili</span>
+                                </li>
+                                <li class="mb-3">
+                                    <span class="fw-medium me-2">Cep Telefonu:</span>
+                                    <span>@Personel?.CepTelefonu</span>
+                                </li>
+                            </ul>
+                            <div class="d-flex justify-content-center gap-2 pt-3">
+                                <button class="btn btn-primary" @onclick="NavigateToEdit">
+                                    <i class="bx bx-edit me-1"></i>Düzenle
+                                </button>
+                                <button class="btn btn-outline-secondary" @onclick="NavigateToPersonelList">
+                                    <i class="bx bx-arrow-back me-1"></i>Geri
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- SAĞ TARAF: TABS + İÇERİK -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="col-xl-8 col-lg-7 col-md-7 order-0 order-md-1">
+                <!-- Tabs -->
+                <ul class="nav nav-tabs flex-column flex-md-row mb-3" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link @(ActiveTab == "personel" ? "active" : "")" 
+                                @onclick='() => SetActiveTab("personel")' type="button">
+                            <i class="bx bx-user me-1"></i>Personel
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link @(ActiveTab == "iletisim" ? "active" : "")" 
+                                @onclick='() => SetActiveTab("iletisim")' type="button">
+                            <i class="bx bx-phone me-1"></i>İletişim
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link @(ActiveTab == "kisisel" ? "active" : "")" 
+                                @onclick='() => SetActiveTab("kisisel")' type="button">
+                            <i class="bx bx-id-card me-1"></i>Kişisel
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link @(ActiveTab == "ozluk" ? "active" : "")" 
+                                @onclick='() => SetActiveTab("ozluk")' type="button">
+                            <i class="bx bx-file me-1"></i>Özlük
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link @(ActiveTab == "es-cocuk" ? "active" : "")" 
+                                @onclick='() => SetActiveTab("es-cocuk")' type="button">
+                            <i class="bx bx-group me-1"></i>Eş/Çocuk
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link @(ActiveTab == "hizmet" ? "active" : "")" 
+                                @onclick='() => SetActiveTab("hizmet")' type="button">
+                            <i class="bx bx-briefcase me-1"></i>Hizmet
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link @(ActiveTab == "egitim" ? "active" : "")" 
+                                @onclick='() => SetActiveTab("egitim")' type="button">
+                            <i class="bx bx-book me-1"></i>Eğitim
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link @(ActiveTab == "yetki" ? "active" : "")" 
+                                @onclick='() => SetActiveTab("yetki")' type="button">
+                            <i class="bx bx-key me-1"></i>Yetki
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link @(ActiveTab == "ceza" ? "active" : "")" 
+                                @onclick='() => SetActiveTab("ceza")' type="button">
+                            <i class="bx bx-error me-1"></i>Ceza
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link @(ActiveTab == "engel" ? "active" : "")" 
+                                @onclick='() => SetActiveTab("engel")' type="button">
+                            <i class="bx bx-accessibility me-1"></i>Engel
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link @(ActiveTab == "fotograf" ? "active" : "")" 
+                                @onclick='() => SetActiveTab("fotograf")' type="button">
+                            <i class="bx bx-image me-1"></i>Fotoğraf
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab İçerikleri -->
+                @if (ActiveTab == "personel")
+                {
+                    <div class="card mb-4">
+                        <h5 class="card-header">Personel Bilgileri</h5>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">TC Kimlik No</label>
+                                    <p class="fw-medium">@Personel?.TcKimlikNo</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Sicil No</label>
+                                    <p class="fw-medium">@Personel?.SicilNo</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Ad Soyad</label>
+                                    <p class="fw-medium">@Personel?.AdSoyad</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Departman</label>
+                                    <p class="fw-medium">@Personel?.DepartmanAdi</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Servis</label>
+                                    <p class="fw-medium">@Personel?.ServisAdi</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Ünvan</label>
+                                    <p class="fw-medium">@Personel?.UnvanAdi</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (ActiveTab == "iletisim")
+                {
+                    <div class="card mb-4">
+                        <h5 class="card-header">İletişim Bilgileri</h5>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">E-Posta</label>
+                                    <p class="fw-medium">@Personel?.Email</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Dahili Tel No</label>
+                                    <p class="fw-medium">@Personel?.Dahili</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Cep Tel No 1</label>
+                                    <p class="fw-medium">@Personel?.CepTelefonu</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Cep Tel No 2</label>
+                                    <p class="fw-medium">@Personel?.CepTelefonu2</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Ev Tel No</label>
+                                    <p class="fw-medium">@Personel?.EvTelefonu</p>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label text-muted small">Adres</label>
+                                    <p class="fw-medium">@Personel?.Adres</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Semt</label>
+                                    <p class="fw-medium">@Personel?.Semt</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (ActiveTab == "kisisel")
+                {
+                    <div class="card mb-4">
+                        <h5 class="card-header">Kişisel Bilgiler</h5>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Doğum Tarihi</label>
+                                    <p class="fw-medium">@Personel?.DogumTarihi.ToString("dd.MM.yyyy")</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Yaş</label>
+                                    <p class="fw-medium">@Personel?.Yas</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Cinsiyet</label>
+                                    <p class="fw-medium">@Personel?.Cinsiyet</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Medeni Durumu</label>
+                                    <p class="fw-medium">@Personel?.MedeniDurumu</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Kan Grubu</label>
+                                    <p class="fw-medium">@Personel?.KanGrubu</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (ActiveTab == "ozluk")
+                {
+                    <div class="card mb-4">
+                        <h5 class="card-header">Özlük Bilgileri</h5>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Öğrenim Durumu</label>
+                                    <p class="fw-medium">@Personel?.OgrenimDurumu</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Bitirdiği Okul</label>
+                                    <p class="fw-medium">@Personel?.BitirdigiOkul</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Bitirdiği Bölüm</label>
+                                    <p class="fw-medium">@Personel?.BitirdigiBolum</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (ActiveTab == "es-cocuk")
+                {
+                    <div class="card mb-4">
+                        <h5 class="card-header">Eş ve Çocuk Bilgileri</h5>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="bx bx-info-circle me-2"></i>
+                                Eş ve çocuk bilgileri henüz girilmemiş.
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (ActiveTab == "hizmet")
+                {
+                    <div class="card mb-4">
+                        <h5 class="card-header">Hizmet Bilgileri</h5>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="bx bx-info-circle me-2"></i>
+                                Hizmet bilgileri henüz girilmemiş.
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (ActiveTab == "egitim")
+                {
+                    <div class="card mb-4">
+                        <h5 class="card-header">Eğitim Bilgileri</h5>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="bx bx-info-circle me-2"></i>
+                                Eğitim bilgileri henüz girilmemiş.
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (ActiveTab == "yetki")
+                {
+                    <div class="card mb-4">
+                        <h5 class="card-header">Yetki Durumu</h5>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="bx bx-info-circle me-2"></i>
+                                Yetki bilgileri henüz girilmemiş.
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (ActiveTab == "ceza")
+                {
+                    <div class="card mb-4">
+                        <h5 class="card-header">Ceza Durumu</h5>
+                        <div class="card-body">
+                            <div class="alert alert-success">
+                                <i class="bx bx-check-circle me-2"></i>
+                                Personelin ceza kaydı bulunmamaktadır.
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (ActiveTab == "engel")
+                {
+                    <div class="card mb-4">
+                        <h5 class="card-header">Engel Bilgileri</h5>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="bx bx-info-circle me-2"></i>
+                                Engel bilgisi bulunmamaktadır.
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (ActiveTab == "fotograf")
+                {
+                    <div class="card mb-4">
+                        <h5 class="card-header">Fotoğraf</h5>
+                        <div class="card-body text-center">
+                            @if (!string.IsNullOrEmpty(Personel?.Resim))
+                            {
+                                <img src="@Personel.Resim" alt="Personel Fotoğrafı" class="img-fluid rounded" style="max-width: 300px;" />
+                            }
+                            else
+                            {
+                                <div class="avatar avatar-xl">
+                                    <span class="avatar-initial rounded bg-label-primary" style="font-size: 4rem;">
+                                        @Personel?.AdSoyad?.Substring(0, 1).ToUpper()
+                                    </span>
+                                </div>
+                                <p class="text-muted mt-3">Fotoğraf yüklenmemiş</p>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

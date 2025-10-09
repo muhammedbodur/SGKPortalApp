@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
@@ -28,6 +28,11 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<PersonelCocuk> PersonelCocuklari { get; set; }
         public DbSet<PersonelDepartman> PersonelDepartmanlar { get; set; }
         public DbSet<PersonelYetki> PersonelYetkileri { get; set; }
+        public DbSet<PersonelHizmet> PersonelHizmetleri { get; set; }
+        public DbSet<PersonelEgitim> PersonelEgitimleri { get; set; }
+        public DbSet<PersonelImzaYetkisi> PersonelImzaYetkileri { get; set; }
+        public DbSet<PersonelCeza> PersonelCezalari { get; set; }
+        public DbSet<PersonelEngel> PersonelEngelleri { get; set; }
         public DbSet<Departman> Departmanlar { get; set; }
         public DbSet<Servis> Servisler { get; set; }
         public DbSet<Unvan> Unvanlar { get; set; }
@@ -91,6 +96,11 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.ApplyConfiguration(new PersonelCocukConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelDepartmanConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelYetkiConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonelHizmetConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonelEgitimConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonelImzaYetkisiConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonelCezaConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonelEngelConfiguration());
 
             // Sıramatik İşlemleri
             modelBuilder.ApplyConfiguration(new BankoConfiguration());

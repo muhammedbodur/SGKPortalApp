@@ -1,10 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Data.SqlClient;
 using SGKPortalApp.DataAccessLayer.Context;
-using SGKPortalApp.DataAccessLayer.Repositories.Generic;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
+using SGKPortalApp.DataAccessLayer.Repositories.Generic;
+using SGKPortalApp.BusinessObjectLayer.Exceptions;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -118,10 +120,60 @@ namespace SGKPortalApp.DataAccessLayer.Repositories
             }
             catch (DbUpdateException ex)
             {
+                // SQL Exception'ı parse et
+                if (ex.InnerException is SqlException sqlException)
+                {
+                    var constraintName = ExtractConstraintName(ex.Message);
+                    
+                    switch (sqlException.Number)
+                    {
+                        case 547: // Foreign Key Violation or Check Constraint
+                            // Check constraint mesajında "CHECK" kelimesi var
+                            var errorType = ex.Message.Contains("CHECK", StringComparison.OrdinalIgnoreCase)
+                                ? DatabaseErrorType.CheckConstraintViolation
+                                : DatabaseErrorType.ForeignKeyViolation;
+                            
+                            throw new DatabaseException(
+                                ex.Message, 
+                                errorType, 
+                                constraintName);
+                        
+                        case 2627: // Unique Constraint Violation
+                        case 2601: // Duplicate Key
+                            throw new DatabaseException(
+                                ex.Message, 
+                                DatabaseErrorType.UniqueConstraintViolation, 
+                                constraintName);
+                        
+                        case 515: // Null Constraint Violation
+                            throw new DatabaseException(
+                                ex.Message, 
+                                DatabaseErrorType.NullConstraintViolation, 
+                                constraintName);
+                        
+                        default:
+                            throw new DatabaseException(
+                                ex.Message, 
+                                DatabaseErrorType.Unknown, 
+                                constraintName);
+                    }
+                }
+                
                 throw new InvalidOperationException(
                     "Veritabanına kayıt sırasında bir hata oluştu. Detaylar için inner exception'a bakınız.",
                     ex);
             }
+        }
+
+        private string? ExtractConstraintName(string errorMessage)
+        {
+            // "FK_PER_Personeller_CMN_HizmetBinalari" gibi constraint adını çıkar
+            var match = System.Text.RegularExpressions.Regex.Match(
+                errorMessage, 
+                @"constraint\s+""([^""]+)""", 
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            
+            return match.Success ? match.Groups[1].Value : null;
         }
 
         public async Task<IDbContextTransaction> BeginTransactionAsync()

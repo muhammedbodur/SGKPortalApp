@@ -1,0 +1,931 @@
+@page "/personel/manage"
+@page "/personel/manage/{tcKimlikNo}"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.BasePageComponent
+@using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+
+<PageTitle>@(IsEditMode ? "Personel Düzenle" : "Yeni Personel") - SGK Portal</PageTitle>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">Personel /</span> @(IsEditMode ? "Düzenle" : "Yeni Ekle")
+    </h4>
+
+    @if (IsLoading)
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <p class="text-muted">@(IsEditMode ? "Personel bilgileri yükleniyor..." : "Hazırlanıyor...")</p>
+            </div>
+        </div>
+    }
+    else if (!IsEditMode && CurrentStep == 1)
+    {
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- ADIM 1: TC + AD SOYAD (Sadece Yeni Ekleme İçin) -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <div class="row">
+            <div class="col-lg-6 col-xl-5 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bx bx-user-plus me-2"></i>Yeni Personel Ekle - Adım 1/2
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <EditForm Model="@Step1Model" OnValidSubmit="HandleStep1Submit">
+                            <DataAnnotationsValidator />
+
+                            <div class="mb-3">
+                                <label class="form-label required">TC Kimlik No</label>
+                                <InputText @bind-Value="Step1Model.TcKimlikNo"
+                                           class="form-control form-control-lg"
+                                           placeholder="11 haneli TC Kimlik No"
+                                           maxlength="11"
+                                           disabled="@IsSaving" />
+                                <ValidationMessage For="@(() => Step1Model.TcKimlikNo)" class="text-danger small mt-1" />
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label required">Ad Soyad</label>
+                                <InputText @bind-Value="Step1Model.AdSoyad"
+                                           class="form-control form-control-lg"
+                                           placeholder="Ad Soyad"
+                                           maxlength="200"
+                                           disabled="@IsSaving" />
+                                <ValidationMessage For="@(() => Step1Model.AdSoyad)" class="text-danger small mt-1" />
+                            </div>
+
+                            <div class="alert alert-info">
+                                <i class="bx bx-info-circle me-2"></i>
+                                Personel oluşturulduktan sonra diğer bilgileri girebilirsiniz.
+                            </div>
+
+                            <div class="d-flex gap-2 justify-content-end">
+                                <button type="button" class="btn btn-outline-secondary" @onclick="NavigateToPersonelList" disabled="@IsSaving">
+                                    İptal
+                                </button>
+                                <button type="submit" class="btn btn-primary" disabled="@IsSaving">
+                                    @if (IsSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1"></span>
+                                    }
+                                    Devam Et
+                                    <i class="bx bx-chevron-right ms-1"></i>
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- ADIM 2: TÜM BİLGİLER (Sol Kart + Sağ Tabs) -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <EditForm Model="@FormModel" OnValidSubmit="HandleFinalSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="row">
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <!-- SOL TARAF: PERSONEL KARTI -->
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <div class="col-xl-4 col-lg-5 col-md-5 order-1 order-md-0">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="user-avatar-section">
+                                <div class="d-flex align-items-center flex-column">
+                                    @if (!string.IsNullOrEmpty(FormModel.Resim))
+                                    {
+                                        <img class="img-fluid rounded my-4" src="@FormModel.Resim" height="110" width="110" alt="Personel fotoğrafı" />
+                                    }
+                                    else
+                                    {
+                                        <div class="avatar avatar-xl my-4">
+                                            <span class="avatar-initial rounded bg-label-primary" style="font-size: 3rem;">
+                                                @(string.IsNullOrEmpty(FormModel.AdSoyad) ? "?" : FormModel.AdSoyad.Substring(0, 1).ToUpper())
+                                            </span>
+                                        </div>
+                                    }
+                                    <div class="user-info text-center">
+                                        <h4 class="mb-2">@(string.IsNullOrEmpty(FormModel.AdSoyad) ? "Yeni Personel" : FormModel.AdSoyad)</h4>
+                                        <span class="badge bg-label-primary">@(IsEditMode ? "Düzenleniyor" : "Yeni")</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h5 class="pb-2 border-bottom mb-4 mt-4">Temel Bilgiler</h5>
+                            <div class="info-container">
+                                <ul class="list-unstyled">
+                                    <li class="mb-3">
+                                        <span class="fw-medium me-2">TC Kimlik No:</span>
+                                        <span>@FormModel.TcKimlikNo</span>
+                                    </li>
+                                    <li class="mb-3">
+                                        <span class="fw-medium me-2">Sicil No:</span>
+                                        <span>@FormModel.SicilNo</span>
+                                    </li>
+                                    <li class="mb-3">
+                                        <span class="fw-medium me-2">Email:</span>
+                                        <span>@FormModel.Email</span>
+                                    </li>
+                                    <li class="mb-3">
+                                        <span class="fw-medium me-2">Departman:</span>
+                                        <span>@GetDepartmanAdi(FormModel.DepartmanId)</span>
+                                    </li>
+                                    <li class="mb-3">
+                                        <span class="fw-medium me-2">Servis:</span>
+                                        <span>@GetServisAdi(FormModel.ServisId)</span>
+                                    </li>
+                                    <li class="mb-3">
+                                        <span class="fw-medium me-2">Ünvan:</span>
+                                        <span>@GetUnvanAdi(FormModel.UnvanId)</span>
+                                    </li>
+                                    <li class="mb-3">
+                                        <span class="fw-medium me-2">Dahili:</span>
+                                        <span>@FormModel.Dahili</span>
+                                    </li>
+                                    <li class="mb-3">
+                                        <span class="fw-medium me-2">Cep Telefonu:</span>
+                                        <span>@FormModel.CepTelefonu</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <!-- SAĞ TARAF: TABS + FORM İÇERİKLERİ -->
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <div class="col-xl-8 col-lg-7 col-md-7 order-0 order-md-1">
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs flex-column flex-md-row mb-3" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link @(ActiveTab == "personel" ? "active" : "")" 
+                                    @onclick='() => SetActiveTab("personel")' type="button">
+                                <i class="bx bx-user me-1"></i>Personel
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link @(ActiveTab == "iletisim" ? "active" : "")" 
+                                    @onclick='() => SetActiveTab("iletisim")' type="button">
+                                <i class="bx bx-phone me-1"></i>İletişim
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link @(ActiveTab == "kisisel" ? "active" : "")" 
+                                    @onclick='() => SetActiveTab("kisisel")' type="button">
+                                <i class="bx bx-id-card me-1"></i>Kişisel
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link @(ActiveTab == "ozluk" ? "active" : "")" 
+                                    @onclick='() => SetActiveTab("ozluk")' type="button">
+                                <i class="bx bx-file me-1"></i>Özlük
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link @(ActiveTab == "es-cocuk" ? "active" : "")" 
+                                    @onclick='() => SetActiveTab("es-cocuk")' type="button">
+                                <i class="bx bx-group me-1"></i>Eş/Çocuk
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link @(ActiveTab == "hizmet" ? "active" : "")" 
+                                    @onclick='() => SetActiveTab("hizmet")' type="button">
+                                <i class="bx bx-briefcase me-1"></i>Hizmet
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link @(ActiveTab == "egitim" ? "active" : "")" 
+                                    @onclick='() => SetActiveTab("egitim")' type="button">
+                                <i class="bx bx-book me-1"></i>Eğitim
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link @(ActiveTab == "yetki" ? "active" : "")" 
+                                    @onclick='() => SetActiveTab("yetki")' type="button">
+                                <i class="bx bx-key me-1"></i>Yetki
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link @(ActiveTab == "ceza" ? "active" : "")" 
+                                    @onclick='() => SetActiveTab("ceza")' type="button">
+                                <i class="bx bx-error me-1"></i>Ceza
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link @(ActiveTab == "engel" ? "active" : "")" 
+                                    @onclick='() => SetActiveTab("engel")' type="button">
+                                <i class="bx bx-accessibility me-1"></i>Engel
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link @(ActiveTab == "fotograf" ? "active" : "")" 
+                                    @onclick='() => SetActiveTab("fotograf")' type="button">
+                                <i class="bx bx-image me-1"></i>Fotoğraf
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- PERSONEL TAB -->
+                    @if (ActiveTab == "personel")
+                    {
+                        <div class="card mb-4">
+                            <h5 class="card-header">Personel Bilgileri</h5>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label required">TC Kimlik No</label>
+                                        <InputText @bind-Value="FormModel.TcKimlikNo"
+                                                   class="form-control"
+                                                   disabled="@IsEditMode"
+                                                   maxlength="11" />
+                                        <ValidationMessage For="@(() => FormModel.TcKimlikNo)" class="text-danger small" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Sicil No</label>
+                                        <InputNumber @bind-Value="FormModel.SicilNo"
+                                                     class="form-control" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label required">Ad Soyad</label>
+                                        <InputText @bind-Value="FormModel.AdSoyad"
+                                                   @bind-Value:after="() => FormModel.NickName = GenerateNickName(FormModel.AdSoyad)"
+                                                   class="form-control"
+                                                   maxlength="200" />
+                                        <ValidationMessage For="@(() => FormModel.AdSoyad)" class="text-danger small" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Nick Name</label>
+                                        <InputText @bind-Value="FormModel.NickName"
+                                                   class="form-control"
+                                                   maxlength="50"
+                                                   disabled />
+                                        <small class="form-text text-muted">Otomatik oluşturulur</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Departman</label>
+                                        <select value="@FormModel.DepartmanId" @onchange="@(e => FormModel.DepartmanId = int.Parse(e.Value.ToString()))" class="select2 form-select" data-placeholder="Departman seçiniz">
+                                            <option value="0">Seçiniz</option>
+                                            @foreach (var departman in Departmanlar)
+                                            {
+                                                <option value="@departman.DepartmanId">@departman.DepartmanAdi</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Servis</label>
+                                        <select value="@FormModel.ServisId" @onchange="@(e => FormModel.ServisId = int.Parse(e.Value.ToString()))" class="select2 form-select" data-placeholder="Servis seçiniz">
+                                            <option value="0">Seçiniz</option>
+                                            @foreach (var servis in Servisler)
+                                            {
+                                                <option value="@servis.ServisId">@servis.ServisAdi</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Ünvan</label>
+                                        <select value="@FormModel.UnvanId" @onchange="@(e => FormModel.UnvanId = int.Parse(e.Value.ToString()))" class="select2 form-select" data-placeholder="Ünvan seçiniz">
+                                            <option value="0">Seçiniz</option>
+                                            @foreach (var unvan in Unvanlar)
+                                            {
+                                                <option value="@unvan.UnvanId">@unvan.UnvanAdi</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Personel Tipi</label>
+                                        <select @bind="FormModel.PersonelTipi" class="form-select">
+                                            @foreach (var tip in Enum.GetValues<PersonelTipi>())
+                                            {
+                                                <option value="@tip">@tip</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Aktiflik Durumu</label>
+                                        <select @bind="FormModel.PersonelAktiflikDurum" class="form-select">
+                                            @foreach (var durum in Enum.GetValues<PersonelAktiflikDurum>())
+                                            {
+                                                <option value="@durum">@durum</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- İLETİŞİM TAB -->
+                    @if (ActiveTab == "iletisim")
+                    {
+                        <div class="card mb-4">
+                            <h5 class="card-header">İletişim Bilgileri</h5>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">E-Posta</label>
+                                        <InputText @bind-Value="FormModel.Email"
+                                                   class="form-control"
+                                                   type="email" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Dahili Tel No</label>
+                                        <InputNumber @bind-Value="FormModel.Dahili"
+                                                     class="form-control" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Cep Tel No 1</label>
+                                        <InputText @bind-Value="FormModel.CepTelefonu"
+                                                   class="form-control"
+                                                   maxlength="20" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Cep Tel No 2</label>
+                                        <InputText @bind-Value="FormModel.CepTelefonu2"
+                                                   class="form-control"
+                                                   maxlength="20" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Ev Tel No</label>
+                                        <InputText @bind-Value="FormModel.EvTelefonu"
+                                                   class="form-control"
+                                                   maxlength="20" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">İl</label>
+                                        <select value="@FormModel.IlId" @onchange="OnIlChanged" class="select2 form-select" data-placeholder="İl seçiniz">
+                                            <option value="0">Seçiniz</option>
+                                            @foreach (var il in Iller)
+                                            {
+                                                <option value="@il.IlId">@il.IlAdi</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">İlçe</label>
+                                        <select value="@FormModel.IlceId" @onchange="@(e => FormModel.IlceId = int.Parse(e.Value.ToString()))" class="select2 form-select" data-placeholder="İlçe seçiniz" disabled="@(FormModel.IlId == 0)">
+                                            <option value="0">Seçiniz</option>
+                                            @foreach (var ilce in Ilceler)
+                                            {
+                                                <option value="@ilce.IlceId">@ilce.IlceAdi</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Semt</label>
+                                        <InputText @bind-Value="FormModel.Semt"
+                                                   class="form-control"
+                                                   maxlength="100" />
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label">Adres</label>
+                                        <InputTextArea @bind-Value="FormModel.Adres"
+                                                       class="form-control"
+                                                       rows="3"
+                                                       maxlength="500" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- KİŞİSEL TAB -->
+                    @if (ActiveTab == "kisisel")
+                    {
+                        <div class="card mb-4">
+                            <h5 class="card-header">Kişisel Bilgiler</h5>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Doğum Tarihi</label>
+                                        <input type="text" @bind="FormModel.DogumTarihi" @bind:format="yyyy-MM-dd" class="form-control flatpickr-date" placeholder="YYYY-MM-DD" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Cinsiyet</label>
+                                        <select @bind="FormModel.Cinsiyet" class="form-select">
+                                            @foreach (var cinsiyet in Enum.GetValues<Cinsiyet>())
+                                            {
+                                                <option value="@cinsiyet">@GetEnumDisplayName(cinsiyet)</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Medeni Durumu</label>
+                                        <select @bind="FormModel.MedeniDurumu" class="form-select">
+                                            @foreach (var durum in Enum.GetValues<MedeniDurumu>())
+                                            {
+                                                <option value="@durum">@GetEnumDisplayName(durum)</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Kan Grubu</label>
+                                        <select @bind="FormModel.KanGrubu" class="form-select">
+                                            @foreach (var kan in Enum.GetValues<KanGrubu>())
+                                            {
+                                                <option value="@kan">@GetEnumDisplayName(kan)</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- ÖZLÜK TAB -->
+                    @if (ActiveTab == "ozluk")
+                    {
+                        <div class="card mb-4">
+                            <h5 class="card-header">Özlük Bilgileri</h5>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Öğrenim Durumu</label>
+                                        <select @bind="FormModel.OgrenimDurumu" class="form-select">
+                                            @foreach (var ogr in Enum.GetValues<OgrenimDurumu>())
+                                            {
+                                                <option value="@ogr">@ogr</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Bitirdiği Okul</label>
+                                        <InputText @bind-Value="FormModel.BitirdigiOkul"
+                                                   class="form-control"
+                                                   maxlength="200" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Bitirdiği Bölüm</label>
+                                        <InputText @bind-Value="FormModel.BitirdigiBolum"
+                                                   class="form-control"
+                                                   maxlength="100" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Emekli Sicil No</label>
+                                        <InputText @bind-Value="FormModel.EmekliSicilNo"
+                                                   class="form-control"
+                                                   maxlength="20" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- EŞ/ÇOCUK TAB -->
+                    @if (ActiveTab == "es-cocuk")
+                    {
+                        <div class="card mb-4">
+                            <h5 class="card-header">Eş Bilgileri</h5>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Eş Adı</label>
+                                        <InputText @bind-Value="FormModel.EsininAdi" class="form-control" maxlength="100" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Eş İş Durumu</label>
+                                        <select @bind="FormModel.EsininIsDurumu" class="form-select">
+                                            @foreach (var durum in Enum.GetValues<EsininIsDurumu>())
+                                            {
+                                                <option value="@durum">@durum</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Eş İş Ünvanı</label>
+                                        <InputText @bind-Value="FormModel.EsininUnvani" class="form-control" maxlength="100" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Eş İş Adresi</label>
+                                        <InputText @bind-Value="FormModel.EsininIsAdresi" class="form-control" maxlength="200" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Çocuk Bilgileri</h5>
+                                <button type="button" class="btn btn-sm btn-primary" @onclick="AddCocuk">
+                                    <i class="bx bx-plus me-1"></i>Çocuk Ekle
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                @if (Cocuklar.Any())
+                                {
+                                    @foreach (var (cocuk, index) in Cocuklar.Select((c, i) => (c, i)))
+                                    {
+                                        <div class="row mb-3 pb-3 border-bottom">
+                                            <div class="col-md-4">
+                                                <label class="form-label small">İsim</label>
+                                                <input type="text" @bind="cocuk.Isim" class="form-control form-control-sm" maxlength="100" />
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small">Doğum Tarihi</label>
+                                                <input type="text" @bind="cocuk.DogumTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label small">Eğitim</label>
+                                                <input type="text" @bind="cocuk.Egitim" class="form-control form-control-sm" maxlength="100" />
+                                            </div>
+                                            <div class="col-md-1 d-flex align-items-end">
+                                                <button type="button" class="btn btn-sm btn-danger w-100" @onclick="() => RemoveCocuk(index)">
+                                                    <i class="bx bx-x"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info mb-0">
+                                        <i class="bx bx-info-circle me-2"></i>
+                                        Henüz çocuk bilgisi eklenmemiş. "Çocuk Ekle" butonuna tıklayarak ekleyebilirsiniz.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- HİZMET TAB -->
+                    @if (ActiveTab == "hizmet")
+                    {
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Çalıştığı Servisler</h5>
+                                <button type="button" class="btn btn-sm btn-primary" @onclick="AddHizmet">
+                                    <i class="bx bx-plus me-1"></i>Hizmet Ekle
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                @if (Hizmetler.Any())
+                                {
+                                    @foreach (var (hizmet, index) in Hizmetler.Select((h, i) => (h, i)))
+                                    {
+                                        <div class="row mb-3 pb-3 border-bottom">
+                                            <div class="col-md-2">
+                                                <label class="form-label small">Departman</label>
+                                                <input type="text" @bind="hizmet.Departman" class="form-control form-control-sm" />
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label small">Servis</label>
+                                                <input type="text" @bind="hizmet.Servis" class="form-control form-control-sm" />
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label small">Başlama Tarihi</label>
+                                                <input type="text" @bind="hizmet.BaslamaTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label small">Ayrılma Tarihi</label>
+                                                <input type="text" @bind="hizmet.AyrilmaTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small">Sebep</label>
+                                                <input type="text" @bind="hizmet.Sebep" class="form-control form-control-sm" />
+                                            </div>
+                                            <div class="col-md-1 d-flex align-items-end">
+                                                <button type="button" class="btn btn-sm btn-danger w-100" @onclick="() => RemoveHizmet(index)">
+                                                    <i class="bx bx-x"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info mb-0">
+                                        <i class="bx bx-info-circle me-2"></i>
+                                        Henüz hizmet bilgisi eklenmemiş.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- EĞİTİM TAB -->
+                    @if (ActiveTab == "egitim")
+                    {
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Eğitim Bilgileri</h5>
+                                <button type="button" class="btn btn-sm btn-primary" @onclick="AddEgitim">
+                                    <i class="bx bx-plus me-1"></i>Eğitim Ekle
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                @if (Egitimler.Any())
+                                {
+                                    @foreach (var (egitim, index) in Egitimler.Select((e, i) => (e, i)))
+                                    {
+                                        <div class="row mb-3 pb-3 border-bottom">
+                                            <div class="col-md-5">
+                                                <label class="form-label small">Eğitim</label>
+                                                <input type="text" @bind="egitim.EgitimAdi" class="form-control form-control-sm" />
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small">Başlangıç Tarihi</label>
+                                                <input type="text" @bind="egitim.BaslangicTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small">Bitiş Tarihi</label>
+                                                <input type="text" @bind="egitim.BitisTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                            </div>
+                                            <div class="col-md-1 d-flex align-items-end">
+                                                <button type="button" class="btn btn-sm btn-danger w-100" @onclick="() => RemoveEgitim(index)">
+                                                    <i class="bx bx-x"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info mb-0">
+                                        <i class="bx bx-info-circle me-2"></i>
+                                        Henüz eğitim bilgisi eklenmemiş.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- YETKİ TAB -->
+                    @if (ActiveTab == "yetki")
+                    {
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">İmza Yetkileri</h5>
+                                <button type="button" class="btn btn-sm btn-primary" @onclick="AddYetki">
+                                    <i class="bx bx-plus me-1"></i>Yetki Ekle
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                @if (Yetkiler.Any())
+                                {
+                                    @foreach (var (yetki, index) in Yetkiler.Select((y, i) => (y, i)))
+                                    {
+                                        <div class="row mb-3 pb-3 border-bottom">
+                                            <div class="col-md-2">
+                                                <label class="form-label small">Departman</label>
+                                                <select @bind="yetki.DepartmanId" class="form-select form-select-sm">
+                                                    <option value="0">Seçiniz</option>
+                                                    @foreach (var departman in Departmanlar)
+                                                    {
+                                                        <option value="@departman.DepartmanId">@departman.DepartmanAdi</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label small">Servis</label>
+                                                <select @bind="yetki.ServisId" class="form-select form-select-sm">
+                                                    <option value="0">Seçiniz</option>
+                                                    @foreach (var servis in Servisler)
+                                                    {
+                                                        <option value="@servis.ServisId">@servis.ServisAdi</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label small">Sebep</label>
+                                                <input type="text" @bind="yetki.Sebep" class="form-control form-control-sm" />
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label small">Başlama Tarihi</label>
+                                                <input type="text" @bind="yetki.BaslamaTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label small">Bitiş Tarihi</label>
+                                                <input type="text" @bind="yetki.BitisTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                            </div>
+                                            <div class="col-md-1 d-flex align-items-end">
+                                                <button type="button" class="btn btn-sm btn-danger w-100" @onclick="() => RemoveYetki(index)">
+                                                    <i class="bx bx-x"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info mb-0">
+                                        <i class="bx bx-info-circle me-2"></i>
+                                        Henüz yetki bilgisi eklenmemiş.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- CEZA TAB -->
+                    @if (ActiveTab == "ceza")
+                    {
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Ceza Bilgileri</h5>
+                                <button type="button" class="btn btn-sm btn-primary" @onclick="AddCeza">
+                                    <i class="bx bx-plus me-1"></i>Ceza Ekle
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                @if (Cezalar.Any())
+                                {
+                                    @foreach (var (ceza, index) in Cezalar.Select((c, i) => (c, i)))
+                                    {
+                                        <div class="row mb-3 pb-3 border-bottom">
+                                            <div class="col-md-5">
+                                                <label class="form-label small">Ceza Sebebi</label>
+                                                <input type="text" @bind="ceza.Sebep" class="form-control form-control-sm" />
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small">Alt Bendi</label>
+                                                <input type="text" @bind="ceza.AltBendi" class="form-control form-control-sm" />
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small">Ceza Tarihi</label>
+                                                <input type="text" @bind="ceza.CezaTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                            </div>
+                                            <div class="col-md-1 d-flex align-items-end">
+                                                <button type="button" class="btn btn-sm btn-danger w-100" @onclick="() => RemoveCeza(index)">
+                                                    <i class="bx bx-x"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="alert alert-success mb-0">
+                                        <i class="bx bx-check-circle me-2"></i>
+                                        Personelin ceza kaydı bulunmamaktadır.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- ENGEL TAB -->
+                    @if (ActiveTab == "engel")
+                    {
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Engel Bilgileri</h5>
+                                <button type="button" class="btn btn-sm btn-primary" @onclick="AddEngel">
+                                    <i class="bx bx-plus me-1"></i>Engel Ekle
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                @if (Engeller.Any())
+                                {
+                                    @foreach (var (engel, index) in Engeller.Select((e, i) => (e, i)))
+                                    {
+                                        <div class="row mb-3 pb-3 border-bottom">
+                                            <div class="col-md-2">
+                                                <label class="form-label small">Engel Derecesi</label>
+                                                <select @bind="engel.EngelDerecesi" class="form-select form-select-sm">
+                                                    @foreach (var derece in Enum.GetValues<EngelDerecesi>())
+                                                    {
+                                                        <option value="@derece">@derece</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small">Engel Nedeni 1</label>
+                                                <input type="text" @bind="engel.Neden1" class="form-control form-control-sm" />
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small">Engel Nedeni 2</label>
+                                                <input type="text" @bind="engel.Neden2" class="form-control form-control-sm" />
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small">Engel Nedeni 3</label>
+                                                <input type="text" @bind="engel.Neden3" class="form-control form-control-sm" />
+                                            </div>
+                                            <div class="col-md-1 d-flex align-items-end">
+                                                <button type="button" class="btn btn-sm btn-danger w-100" @onclick="() => RemoveEngel(index)">
+                                                    <i class="bx bx-x"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info mb-0">
+                                        <i class="bx bx-info-circle me-2"></i>
+                                        Engel bilgisi bulunmamaktadır.
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- FOTOĞRAF TAB -->
+                    @if (ActiveTab == "fotograf")
+                    {
+                        <div class="card mb-4">
+                            <h5 class="card-header">Fotoğraf</h5>
+                            <div class="card-body">
+                                <div class="text-center mb-4">
+                                    @if (!string.IsNullOrEmpty(FormModel.Resim))
+                                    {
+                                        <img src="@FormModel.Resim" alt="Personel Fotoğrafı" class="img-fluid rounded mb-3" style="max-width: 300px; max-height: 300px; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="avatar avatar-xl mb-3 mx-auto" style="width: 150px; height: 150px;">
+                                            <span class="avatar-initial rounded bg-label-primary" style="font-size: 4rem;">
+                                                @(string.IsNullOrEmpty(FormModel.AdSoyad) ? "?" : FormModel.AdSoyad.Substring(0, 1).ToUpper())
+                                            </span>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Dosya Yükleme -->
+                                <div class="mb-3">
+                                    <label class="form-label">Fotoğraf Yükle</label>
+                                    <InputFile OnChange="HandleFileSelected" 
+                                               class="form-control" 
+                                               accept="image/*" />
+                                    <small class="form-text text-muted">
+                                        <i class="bx bx-info-circle me-1"></i>
+                                        Maksimum dosya boyutu: 5MB. Desteklenen formatlar: JPG, PNG, GIF
+                                    </small>
+                                </div>
+
+                                @if (IsUploadingImage)
+                                {
+                                    <div class="alert alert-info">
+                                        <div class="d-flex align-items-center">
+                                            <div class="spinner-border spinner-border-sm me-2" role="status">
+                                                <span class="visually-hidden">Yükleniyor...</span>
+                                            </div>
+                                            <span>Fotoğraf yükleniyor...</span>
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrEmpty(UploadErrorMessage))
+                                {
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <i class="bx bx-error-circle me-2"></i>
+                                        @UploadErrorMessage
+                                        <button type="button" class="btn-close" @onclick="() => UploadErrorMessage = string.Empty"></button>
+                                    </div>
+                                }
+
+                                <div class="border-top pt-3 mt-3">
+                                    <div class="mb-3">
+                                        <label class="form-label">veya Fotoğraf URL</label>
+                                        <InputText @bind-Value="FormModel.Resim"
+                                                   class="form-control"
+                                                   placeholder="https://example.com/photo.jpg" />
+                                        <small class="form-text text-muted">
+                                            <i class="bx bx-link me-1"></i>
+                                            Harici bir URL'den fotoğraf ekleyebilirsiniz
+                                        </small>
+                                    </div>
+                                </div>
+
+                                @if (!string.IsNullOrEmpty(FormModel.Resim))
+                                {
+                                    <div class="d-flex gap-2 justify-content-center mt-3">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" @onclick="RemovePhoto">
+                                            <i class="bx bx-trash me-1"></i>Fotoğrafı Kaldır
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- KAYDET BUTONU -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex gap-2 justify-content-end">
+                                <button type="button" class="btn btn-outline-secondary" @onclick="NavigateToPersonelList" disabled="@IsSaving">
+                                    İptal
+                                </button>
+                                <button type="submit" class="btn btn-primary" disabled="@IsSaving">
+                                    @if (IsSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1"></span>
+                                    }
+                                    <i class="bx bx-save me-1"></i>
+                                    @(IsEditMode ? "Güncelle" : "Kaydet")
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>

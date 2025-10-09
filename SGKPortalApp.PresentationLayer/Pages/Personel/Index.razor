@@ -1,5 +1,471 @@
-﻿<h3>Index</h3>
+@page "/personel"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+@using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
 
-@code {
+<PageTitle>Personel Yönetimi - SGK Portal</PageTitle>
 
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE HEADER -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="bx bx-user me-2"></i>Personel Yönetimi
+            </h4>
+            <p class="text-muted mb-0">
+                Tüm personelleri görüntüleyin ve yönetin
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <!-- Excel Export -->
+            <button class="btn btn-success" @onclick="ExportToExcel" disabled="@IsExporting">
+                @if (IsExporting && ExportType == "excel")
+                {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                else
+                {
+                    <i class="bx bx-download me-1"></i>
+                }
+                Excel
+            </button>
+
+            <!-- PDF Export -->
+            <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@IsExporting">
+                @if (IsExporting && ExportType == "pdf")
+                {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                else
+                {
+                    <i class="bx bxs-file-pdf me-1"></i>
+                }
+                PDF
+            </button>
+
+            <!-- Yeni Personel (Hızlı Ekleme) -->
+            <button class="btn btn-primary" @onclick="OpenQuickAddModal">
+                <i class="bx bx-plus me-1"></i>Yeni Personel
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- FILTER CARD -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <!-- TC Kimlik / Sicil / Ad Soyad Arama -->
+                <div class="col-md-3">
+                    <label class="form-label">TC / Sicil / Ad Soyad</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bx bx-search"></i>
+                        </span>
+                        <input type="text"
+                               class="form-control"
+                               placeholder="Ara..."
+                               @bind="searchTerm"
+                               @bind:event="oninput"
+                               @onkeyup="OnSearchChanged" />
+                    </div>
+                </div>
+
+                <!-- Departman Filtresi -->
+                <div class="col-md-2">
+                    <label class="form-label">Departman</label>
+                    <select class="form-select" value="@filterDepartmanId" @onchange="OnFilterDepartmanChanged">
+                        <option value="0">Tümü</option>
+                        @foreach (var dept in Departmanlar)
+                        {
+                            <option value="@dept.DepartmanId">@dept.DepartmanAdi</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Servis Filtresi -->
+                <div class="col-md-2">
+                    <label class="form-label">Servis</label>
+                    <select class="form-select" value="@filterServisId" @onchange="OnFilterServisChanged">
+                        <option value="0">Tümü</option>
+                        @foreach (var servis in Servisler)
+                        {
+                            <option value="@servis.ServisId">@servis.ServisAdi</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Hizmet Binası Filtresi -->
+                <div class="col-md-2">
+                    <label class="form-label">Hizmet Binası</label>
+                    <select class="form-select" value="@filterHizmetBinasiId" @onchange="OnFilterHizmetBinasiChanged">
+                        <option value="0">Tümü</option>
+                        @foreach (var bina in HizmetBinalari)
+                        {
+                            <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Ünvan Filtresi -->
+                <div class="col-md-2">
+                    <label class="form-label">Ünvan</label>
+                    <select class="form-select" value="@filterUnvanId" @onchange="OnFilterUnvanChanged">
+                        <option value="0">Tümü</option>
+                        @foreach (var unvan in Unvanlar)
+                        {
+                            <option value="@unvan.UnvanId">@unvan.UnvanAdi</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Aktiflik Filtresi -->
+                <div class="col-md-2">
+                    <label class="form-label">Aktiflik</label>
+                    <select class="form-select" value="@filterAktiflik" @onchange="OnFilterAktiflikChanged">
+                        <option value="-1">Tümü</option>
+                        <option value="0">Aktif</option>
+                        <option value="1">Pasif</option>
+                        <option value="2">Emekli</option>
+                    </select>
+                </div>
+
+                <!-- Sıralama -->
+                <div class="col-md-3">
+                    <label class="form-label">Sıralama</label>
+                    <select class="form-select" value="@sortBy" @onchange="OnSortByChanged">
+                        <option value="name-asc">Ad Soyad (A-Z)</option>
+                        <option value="name-desc">Ad Soyad (Z-A)</option>
+                        <option value="sicil-asc">Sicil (Küçük-Büyük)</option>
+                        <option value="sicil-desc">Sicil (Büyük-Küçük)</option>
+                        <option value="date-newest">En Yeni</option>
+                        <option value="date-oldest">En Eski</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- İstatistikler -->
+            <div class="row mt-3">
+                <div class="col">
+                    <div class="d-flex gap-4 text-muted small">
+                        <span>
+                            <i class="bx bx-user text-primary"></i>
+                            Toplam: <strong>@Personeller.Count</strong>
+                        </span>
+                        <span>
+                            <i class="bx bx-check-circle text-success"></i>
+                            Aktif: <strong>@Personeller.Count(p => p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif)</strong>
+                        </span>
+                        <span>
+                            <i class="bx bx-x-circle text-danger"></i>
+                            Pasif: <strong>@Personeller.Count(p => p.PersonelAktiflikDurum == PersonelAktiflikDurum.Pasif)</strong>
+                        </span>
+                        <span>
+                            <i class="bx bx-user-check text-info"></i>
+                            Emekli: <strong>@Personeller.Count(p => p.PersonelAktiflikDurum == PersonelAktiflikDurum.Emekli)</strong>
+                        </span>
+                        <span>
+                            <i class="bx bx-filter-alt text-warning"></i>
+                            Filtrelenen: <strong>@FilteredPersoneller.Count</strong>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="ClearFilters">
+                        <i class="bx bx-reset me-1"></i>Temizle
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- TABLE CARD -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="card">
+        <div class="card-body">
+            @if (IsLoading)
+            {
+                <!-- Loading Spinner -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Personeller yükleniyor...</p>
+                </div>
+            }
+            else if (!FilteredPersoneller.Any())
+            {
+                <!-- Empty State -->
+                <div class="text-center py-5">
+                    <i class="bx bx-search-alt display-1 text-muted"></i>
+                    <h5 class="mt-3">Personel Bulunamadı</h5>
+                    <p class="text-muted">
+                        @if (string.IsNullOrEmpty(searchTerm) && filterDepartmanId == 0 && filterServisId == 0)
+                        {
+                            <span>Henüz personel eklenmemiş.</span>
+                        }
+                        else
+                        {
+                            <span>Arama kriterlerinize uygun personel bulunamadı.</span>
+                        }
+                    </p>
+                    <button class="btn btn-primary mt-2" @onclick="OpenQuickAddModal">
+                        <i class="bx bx-plus me-1"></i>İlk Personeli Ekle
+                    </button>
+                </div>
+            }
+            else
+            {
+                <!-- Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">#</th>
+                                <th>TC Kimlik No</th>
+                                <th>Sicil No</th>
+                                <th>Ad Soyad</th>
+                                <th>Departman</th>
+                                <th>Servis</th>
+                                <th>Ünvan</th>
+                                <th class="text-center" style="width: 100px;">Durum</th>
+                                <th class="text-center" style="width: 180px;">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var pagedData = FilteredPersoneller
+                                .Skip((CurrentPage - 1) * PageSize)
+                                .Take(PageSize)
+                                .ToList();
+                            }
+
+                            @foreach (var (personel, index) in pagedData.Select((p, i) => (p, i)))
+                            {
+                                <tr style="cursor: pointer;" @onclick="() => NavigateToDetail(personel.TcKimlikNo)">
+                                    <td>@((CurrentPage - 1) * PageSize + index + 1)</td>
+                                    <td>
+                                        <span class="fw-medium">@personel.TcKimlikNo</span>
+                                    </td>
+                                    <td>@personel.SicilNo</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            @if (!string.IsNullOrEmpty(personel.Resim))
+                                            {
+                                                <img src="@personel.Resim" alt="avatar" class="rounded-circle me-2" width="32" height="32" />
+                                            }
+                                            else
+                                            {
+                                                <div class="avatar avatar-sm me-2">
+                                                    <span class="avatar-initial rounded-circle bg-label-primary">
+                                                        @personel.AdSoyad.Substring(0, 1).ToUpper()
+                                                    </span>
+                                                </div>
+                                            }
+                                            <div>
+                                                <span class="fw-medium">@personel.AdSoyad</span>
+                                                @if (!string.IsNullOrEmpty(personel.Email))
+                                                {
+                                                    <br /><small class="text-muted">@personel.Email</small>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@personel.DepartmanAdi</td>
+                                    <td>@personel.ServisAdi</td>
+                                    <td>@personel.UnvanAdi</td>
+                                    <td class="text-center">
+                                        @switch (personel.PersonelAktiflikDurum)
+                                        {
+                                            case PersonelAktiflikDurum.Aktif:
+                                                <span class="badge bg-label-success">
+                                                    <i class="bx bx-check-circle me-1"></i>Aktif
+                                                </span>
+                                                break;
+                                            case PersonelAktiflikDurum.Pasif:
+                                                <span class="badge bg-label-danger">
+                                                    <i class="bx bx-x-circle me-1"></i>Pasif
+                                                </span>
+                                                break;
+                                            case PersonelAktiflikDurum.Emekli:
+                                                <span class="badge bg-label-info">
+                                                    <i class="bx bx-user-check me-1"></i>Emekli
+                                                </span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-1">
+                                            <button class="btn btn-sm btn-icon btn-outline-primary"
+                                                    @onclick:stopPropagation="true"
+                                                    @onclick="() => NavigateToDetail(personel.TcKimlikNo)"
+                                                    title="Detay">
+                                                <i class="bx bx-show"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-icon btn-outline-info"
+                                                    @onclick:stopPropagation="true"
+                                                    @onclick="() => NavigateToEdit(personel.TcKimlikNo)"
+                                                    title="Düzenle">
+                                                <i class="bx bx-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-icon btn-outline-danger"
+                                                    @onclick:stopPropagation="true"
+                                                    @onclick="() => OpenDeleteModal(personel)"
+                                                    title="Sil">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (TotalPages > 1)
+                {
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="text-muted small">
+                            Gösterilen: @((CurrentPage - 1) * PageSize + 1) - @Math.Min(CurrentPage * PageSize, FilteredPersoneller.Count) / @FilteredPersoneller.Count
+                        </div>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                                    <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">
+                                        <i class="bx bx-chevron-left"></i>
+                                    </button>
+                                </li>
+
+                                @for (int i = Math.Max(1, CurrentPage - 2); i <= Math.Min(TotalPages, CurrentPage + 2); i++)
+                                {
+                                    var pageNum = i;
+                                    <li class="page-item @(CurrentPage == pageNum ? "active" : "")">
+                                        <button class="page-link" @onclick="() => ChangePage(pageNum)">@pageNum</button>
+                                    </li>
+                                }
+
+                                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                                    <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">
+                                        <i class="bx bx-chevron-right"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- QUICK ADD MODAL (TC + Ad Soyad) -->
+<!-- ═══════════════════════════════════════════════════════ -->
+@if (ShowQuickAddModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bx bx-user-plus me-2"></i>Hızlı Personel Ekle
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseQuickAddModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@QuickAddModel" OnValidSubmit="HandleQuickAdd">
+                        <DataAnnotationsValidator />
+
+                        <div class="mb-3">
+                            <label class="form-label required">TC Kimlik No</label>
+                            <InputText @bind-Value="QuickAddModel.TcKimlikNo"
+                                       class="form-control"
+                                       placeholder="11 haneli TC Kimlik No"
+                                       maxlength="11"
+                                       disabled="@IsQuickAdding" />
+                            <ValidationMessage For="@(() => QuickAddModel.TcKimlikNo)" class="text-danger small mt-1" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label required">Ad Soyad</label>
+                            <InputText @bind-Value="QuickAddModel.AdSoyad"
+                                       class="form-control"
+                                       placeholder="Ad Soyad"
+                                       maxlength="200"
+                                       disabled="@IsQuickAdding" />
+                            <ValidationMessage For="@(() => QuickAddModel.AdSoyad)" class="text-danger small mt-1" />
+                        </div>
+
+                        <div class="alert alert-info mb-0">
+                            <i class="bx bx-info-circle me-2"></i>
+                            Personel oluşturulduktan sonra detay sayfasına yönlendirileceksiniz.
+                        </div>
+
+                        <div class="modal-footer px-0 pb-0">
+                            <button type="button" class="btn btn-outline-secondary" @onclick="CloseQuickAddModal" disabled="@IsQuickAdding">
+                                İptal
+                            </button>
+                            <button type="submit" class="btn btn-primary" disabled="@IsQuickAdding">
+                                @if (IsQuickAdding)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                }
+                                Oluştur ve Devam Et
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- DELETE MODAL -->
+<!-- ═══════════════════════════════════════════════════════ -->
+@if (ShowDeleteModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h5 class="modal-title text-white">
+                        <i class="bx bx-trash me-2"></i>Personel Sil
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <i class="bx bx-error-circle display-1 text-danger"></i>
+                    </div>
+                    <h6 class="text-center mb-3">Bu personeli silmek istediğinizden emin misiniz?</h6>
+                    <div class="alert alert-warning">
+                        <strong>@DeletePersonelAdSoyad</strong> (@DeletePersonelTcKimlik)
+                    </div>
+                    <p class="text-muted small mb-0">
+                        <i class="bx bx-info-circle me-1"></i>
+                        Bu işlem geri alınamaz!
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" @onclick="CloseDeleteModal" disabled="@IsDeleting">
+                        İptal
+                    </button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDelete" disabled="@IsDeleting">
+                        @if (IsDeleting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        Evet, Sil
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 }

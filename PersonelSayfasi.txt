@@ -1,0 +1,90 @@
+Personel--->
+		->TC Kimlik No
+		->Ad Soyad
+		->Sicil
+		->Unvan
+		->Departman
+		->Servis
+		->Atanma Nedeni
+		->Hizmet Binası
+		->Hizmet Durumu(Aktiflik, Aktif/Pasif/Emekli)
+		
+İletişim--->
+		->E-Posta
+		->Dahili Tel No
+		->Cep Tel No 1
+		->Cep Tel No 2
+		->Ev Tel No
+		->Adres
+		->Semt
+		->İl
+		->İlçe
+		
+Kişisel--->
+		->Doğum Tarihi
+		->Cinsiyet
+		->Medeni Durumu
+		->Kan Grubu
+		->Ev Durumu(Enum Ev Sahibi/Kiracı/Diğer)
+		->Ulaştırma Servisi 1
+		->Ulaştırma Servisi 2
+		->Tabldot Servisi
+		->Pdks Kart No  --->Buton(Kart Bilgisini Uzak Cihazlara Gönderme Butonu Var!)
+		->Pdks Kart Aktif Olma Tarihi  
+		
+Özlük--->
+		->Emekli Sicil No
+		->Öğrenim Durumu (Enum İlkokul/Orta...)
+		->Bitirdiği Okul
+		->Bitirdiği Bölüm
+		->Öğrenim Süresi
+		->Branşı
+		->Sendika(tablodan)
+		->Şehit Yakınlığı(Enum Yok/Babası/Annesi/Kardeşi)
+		
+Eş ve Çocuk--->
+		->Eş adı	
+		->Eş İş Durumu (Enum Belirtilmemiş/Bekar/Ev Hanımı-Çalışmıyor/Emekli-Çalışmıyor/Çalışıyor-Özel/Çalışıyor-Kamu/Çalışmıyor)	
+		->Eş İş Unvanı	
+		->Eş İş Adresi	
+		->Eş İş Semt	
+		->Eş İş İlçe	
+		->Eş İş İl	
+		->Çocuk Bilgileri (arttırılabilir-azaltılabilir)
+			-> İsim   -   Doğum Tarihi   -   Eğitim
+			-> İsim   -   Doğum Tarihi   -   Eğitim
+			-> İsim   -   Doğum Tarihi   -   Eğitim
+			
+Hizmet--->
+		->Çalıştığı Servisler (arttırılabilir-azaltılabilir)
+			-> Departman   -  Servis   -   Göreve Başlama Tarihi   -   Görevden Ayrılma Tarihi   -  Sebep
+			-> Departman   -  Servis   -   Göreve Başlama Tarihi   -   Görevden Ayrılma Tarihi   -  Sebep
+			-> Departman   -  Servis   -   Göreve Başlama Tarihi   -   Görevden Ayrılma Tarihi   -  Sebep
+			
+Eğitim--->
+		->Eğitim Bilgileri (arttırılabilir-azaltılabilir)
+			-> Eğitim   -  Eğitim Başlangıç Tarihi   -   Eğitim Bitiş Tarihi
+			-> Eğitim   -  Eğitim Başlangıç Tarihi   -   Eğitim Bitiş Tarihi
+			-> Eğitim   -  Eğitim Başlangıç Tarihi   -   Eğitim Bitiş Tarihi
+			
+Yetki Durumu--->
+		->İmza Yetkileri (arttırılabilir-azaltılabilir)
+			-> Departman   -  Servis   -   Görev Değişim Sebebi   -   İmza Yetkisi Başlama Tarihi  - İmza Yetkisi Bitiş Tarihi
+			-> Departman   -  Servis   -   Görev Değişim Sebebi   -   İmza Yetkisi Başlama Tarihi  - İmza Yetkisi Bitiş Tarihi
+			-> Departman   -  Servis   -   Görev Değişim Sebebi   -   İmza Yetkisi Başlama Tarihi  - İmza Yetkisi Bitiş Tarihi
+			
+			
+Ceza Durumu--->
+		->Ceza Bilgileri (arttırılabilir-azaltılabilir)
+			-> Ceza Sebebi   -   Alt Bendi  -  Ceza Tarihi
+			-> Ceza Sebebi   -   Alt Bendi  -  Ceza Tarihi
+			-> Ceza Sebebi   -   Alt Bendi  -  Ceza Tarihi
+			
+Engel Bilgileri--->
+		->Engel Durumu (arttırılabilir-azaltılabilir)
+			->Engel Derecesi(Enum 1/2/3)  -  Engel Nedeni 1  -  Engel Nedeni 2  -  Engel Nedeni 3        			
+			->Engel Derecesi(Enum 1/2/3)  -  Engel Nedeni 1  -  Engel Nedeni 2  -  Engel Nedeni 3        			
+			->Engel Derecesi(Enum 1/2/3)  -  Engel Nedeni 1  -  Engel Nedeni 2  -  Engel Nedeni 3        			
+
+Fotoğraf--->
+		->Fotoğraf Ekle/Güncelle/Sil

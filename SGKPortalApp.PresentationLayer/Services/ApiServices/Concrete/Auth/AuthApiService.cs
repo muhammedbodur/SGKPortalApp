@@ -1,12 +1,12 @@
-﻿using SGKPortalApp.PresentationLayer.Services.ApiServices.Base;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Base;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Auth;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth
 {
     public class AuthApiService : BaseApiService, IAuthApiService
     {
-        public AuthApiService(IHttpClientFactory httpClientFactory, ILogger<AuthApiService> logger)
-            : base(httpClientFactory, logger)
+        public AuthApiService(HttpClient httpClient, ILogger<AuthApiService> logger)
+            : base(httpClient, logger)
         {
         }
 

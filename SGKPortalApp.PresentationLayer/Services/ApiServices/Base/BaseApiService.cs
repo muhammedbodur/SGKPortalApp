@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Base
@@ -9,9 +9,9 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Base
         protected readonly ILogger _logger;
         protected readonly JsonSerializerOptions _jsonOptions;
 
-        protected BaseApiService(IHttpClientFactory httpClientFactory, ILogger logger)
+        protected BaseApiService(HttpClient httpClient, ILogger logger)
         {
-            _httpClient = httpClientFactory.CreateClient("SGKAPI");
+            _httpClient = httpClient;
             _logger = logger;
             _jsonOptions = new JsonSerializerOptions
             {
@@ -28,7 +28,6 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Base
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"GET hatası: {endpoint}");
                 throw;
             }
         }
@@ -37,10 +36,28 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Base
         {
             try
             {
-                _logger.LogInformation($"POST: {endpoint}");
+                var fullUrl = $"{_httpClient.BaseAddress}{endpoint}";
+                _logger.LogInformation($"POST: {fullUrl}");
                 var response = await _httpClient.PostAsJsonAsync(endpoint, data, _jsonOptions);
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError($"POST hatası: {fullUrl} - Status: {response.StatusCode} - Content: {errorContent}");
+                    
+                    // Validation hatalarını parse et ve fırlat
+                    if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                    {
+                        throw new HttpRequestException($"Validation Error: {errorContent}");
+                    }
+                }
+                
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadFromJsonAsync<TResponse>(_jsonOptions);
+            }
+            catch (HttpRequestException)
+            {
+                throw; // Validation hatalarını yukarı fırlat
             }
             catch (Exception ex)
             {

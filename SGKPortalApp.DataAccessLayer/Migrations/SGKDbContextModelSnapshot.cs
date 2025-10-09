@@ -974,6 +974,70 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.ToTable("PER_Personeller", "dbo");
                 });
 
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.PersonelCeza", b =>
+                {
+                    b.Property<int>("PersonelCezaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PersonelCezaId"));
+
+                    b.Property<string>("Aciklama")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("AltBendi")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("CezaSebebi")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("CezaTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DuzenlenmeTarihi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("DuzenleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EklenmeTarihi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("EkleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SilenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("SilindiMi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("SilinmeTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TcKimlikNo")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
+
+                    b.HasKey("PersonelCezaId");
+
+                    b.HasIndex("TcKimlikNo")
+                        .HasDatabaseName("IX_PER_PersonelCezalari_TcKimlikNo");
+
+                    b.ToTable("PER_PersonelCezalari", "dbo");
+                });
+
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.PersonelCocuk", b =>
                 {
                     b.Property<int>("PersonelCocukId")
@@ -1099,6 +1163,278 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                         .HasDatabaseName("IX_PER_PersonelDepartmanlar_Tc_Departman");
 
                     b.ToTable("PER_PersonelDepartmanlar", "dbo");
+                });
+
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.PersonelEgitim", b =>
+                {
+                    b.Property<int>("PersonelEgitimId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PersonelEgitimId"));
+
+                    b.Property<string>("Aciklama")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("DuzenlenmeTarihi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("DuzenleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EgitimAdi")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("EgitimBaslangicTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EgitimBitisTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EklenmeTarihi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("EkleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SilenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("SilindiMi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("SilinmeTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TcKimlikNo")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
+
+                    b.HasKey("PersonelEgitimId");
+
+                    b.HasIndex("TcKimlikNo")
+                        .HasDatabaseName("IX_PER_PersonelEgitimleri_TcKimlikNo");
+
+                    b.ToTable("PER_PersonelEgitimleri", "dbo");
+                });
+
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.PersonelEngel", b =>
+                {
+                    b.Property<int>("PersonelEngelId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PersonelEngelId"));
+
+                    b.Property<string>("Aciklama")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("DuzenlenmeTarihi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("DuzenleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EklenmeTarihi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("EkleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EngelDerecesi")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("EngelNedeni1")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("EngelNedeni2")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("EngelNedeni3")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("SilenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("SilindiMi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("SilinmeTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TcKimlikNo")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
+
+                    b.HasKey("PersonelEngelId");
+
+                    b.HasIndex("TcKimlikNo")
+                        .HasDatabaseName("IX_PER_PersonelEngelleri_TcKimlikNo");
+
+                    b.ToTable("PER_PersonelEngelleri", "dbo");
+                });
+
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.PersonelHizmet", b =>
+                {
+                    b.Property<int>("PersonelHizmetId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PersonelHizmetId"));
+
+                    b.Property<int>("DepartmanId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DuzenlenmeTarihi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("DuzenleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EklenmeTarihi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("EkleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("GorevAyrilmaTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("GorevBaslamaTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Sebep")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("ServisId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SilenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("SilindiMi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("SilinmeTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TcKimlikNo")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
+
+                    b.HasKey("PersonelHizmetId");
+
+                    b.HasIndex("DepartmanId");
+
+                    b.HasIndex("ServisId");
+
+                    b.HasIndex("TcKimlikNo")
+                        .HasDatabaseName("IX_PER_PersonelHizmetleri_TcKimlikNo");
+
+                    b.ToTable("PER_PersonelHizmetleri", "dbo");
+                });
+
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.PersonelImzaYetkisi", b =>
+                {
+                    b.Property<int>("PersonelImzaYetkisiId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PersonelImzaYetkisiId"));
+
+                    b.Property<string>("Aciklama")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("DepartmanId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DuzenlenmeTarihi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("DuzenleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EklenmeTarihi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("EkleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GorevDegisimSebebi")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("ImzaYetkisiBaslamaTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ImzaYetkisiBitisTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ServisId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SilenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("SilindiMi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("SilinmeTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TcKimlikNo")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)");
+
+                    b.HasKey("PersonelImzaYetkisiId");
+
+                    b.HasIndex("DepartmanId");
+
+                    b.HasIndex("ServisId");
+
+                    b.HasIndex("TcKimlikNo")
+                        .HasDatabaseName("IX_PER_PersonelImzaYetkileri_TcKimlikNo");
+
+                    b.ToTable("PER_PersonelImzaYetkileri", "dbo");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.PersonelYetki", b =>
@@ -2569,6 +2905,18 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Navigation("Unvan");
                 });
 
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.PersonelCeza", b =>
+                {
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Personel", "Personel")
+                        .WithMany("PersonelCezalari")
+                        .HasForeignKey("TcKimlikNo")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_PER_PersonelCezalari_PER_Personeller");
+
+                    b.Navigation("Personel");
+                });
+
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.PersonelCocuk", b =>
                 {
                     b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Personel", "Personel")
@@ -2600,6 +2948,90 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Navigation("Departman");
 
                     b.Navigation("Personel");
+                });
+
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.PersonelEgitim", b =>
+                {
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Personel", "Personel")
+                        .WithMany("PersonelEgitimleri")
+                        .HasForeignKey("TcKimlikNo")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_PER_PersonelEgitimleri_PER_Personeller");
+
+                    b.Navigation("Personel");
+                });
+
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.PersonelEngel", b =>
+                {
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Personel", "Personel")
+                        .WithMany("PersonelEngelleri")
+                        .HasForeignKey("TcKimlikNo")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_PER_PersonelEngelleri_PER_Personeller");
+
+                    b.Navigation("Personel");
+                });
+
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.PersonelHizmet", b =>
+                {
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Departman", "Departman")
+                        .WithMany()
+                        .HasForeignKey("DepartmanId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_PER_PersonelHizmetleri_PER_Departmanlar");
+
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Servis", "Servis")
+                        .WithMany()
+                        .HasForeignKey("ServisId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_PER_PersonelHizmetleri_PER_Servisler");
+
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Personel", "Personel")
+                        .WithMany("PersonelHizmetleri")
+                        .HasForeignKey("TcKimlikNo")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_PER_PersonelHizmetleri_PER_Personeller");
+
+                    b.Navigation("Departman");
+
+                    b.Navigation("Personel");
+
+                    b.Navigation("Servis");
+                });
+
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.PersonelImzaYetkisi", b =>
+                {
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Departman", "Departman")
+                        .WithMany()
+                        .HasForeignKey("DepartmanId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_PER_PersonelImzaYetkileri_PER_Departmanlar");
+
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Servis", "Servis")
+                        .WithMany()
+                        .HasForeignKey("ServisId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_PER_PersonelImzaYetkileri_PER_Servisler");
+
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Personel", "Personel")
+                        .WithMany("PersonelImzaYetkileri")
+                        .HasForeignKey("TcKimlikNo")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_PER_PersonelImzaYetkileri_PER_Personeller");
+
+                    b.Navigation("Departman");
+
+                    b.Navigation("Personel");
+
+                    b.Navigation("Servis");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.PersonelYetki", b =>
@@ -2957,7 +3389,17 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
 
                     b.Navigation("KanalPersonelleri");
 
+                    b.Navigation("PersonelCezalari");
+
                     b.Navigation("PersonelCocuklari");
+
+                    b.Navigation("PersonelEgitimleri");
+
+                    b.Navigation("PersonelEngelleri");
+
+                    b.Navigation("PersonelHizmetleri");
+
+                    b.Navigation("PersonelImzaYetkileri");
 
                     b.Navigation("PersonelYetkileri");
                 });

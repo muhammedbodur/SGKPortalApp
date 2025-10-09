@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -171,7 +171,6 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         [InverseProperty("Personel")]
         public ICollection<BankoKullanici>? BankoKullanicilari { get; set; } = new List<BankoKullanici>();
 
-        [InverseProperty("Personel")]
         public ICollection<KanalPersonel>? KanalPersonelleri { get; set; } = new List<KanalPersonel>();
 
         [InverseProperty("Personel")]
@@ -179,6 +178,21 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
 
         [InverseProperty("Personel")]
         public ICollection<PersonelYetki>? PersonelYetkileri { get; set; } = new List<PersonelYetki>();
+
+        [InverseProperty("Personel")]
+        public ICollection<PersonelHizmet>? PersonelHizmetleri { get; set; } = new List<PersonelHizmet>();
+
+        [InverseProperty("Personel")]
+        public ICollection<PersonelEgitim>? PersonelEgitimleri { get; set; } = new List<PersonelEgitim>();
+
+        [InverseProperty("Personel")]
+        public ICollection<PersonelImzaYetkisi>? PersonelImzaYetkileri { get; set; } = new List<PersonelImzaYetkisi>();
+
+        [InverseProperty("Personel")]
+        public ICollection<PersonelCeza>? PersonelCezalari { get; set; } = new List<PersonelCeza>();
+
+        [InverseProperty("Personel")]
+        public ICollection<PersonelEngel>? PersonelEngelleri { get; set; } = new List<PersonelEngel>();
 
         public HubConnection? HubConnection { get; set; }
 

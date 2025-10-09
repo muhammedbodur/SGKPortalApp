@@ -21,7 +21,7 @@
     <Folder Include="Services\ApiServices\Interfaces\Siramatik\" />
     <Folder Include="Shared\Forms\" />
     <Folder Include="Shared\Cards\" />
-    <Folder Include="wwwroot\images\" />
+    <Folder Include="wwwroot\images\avatars\" />
     <Folder Include="wwwroot\js\vendor\" />
     <Folder Include="wwwroot\lib\" />
     <Folder Include="wwwroot\uploads\" />

@@ -1,4 +1,4 @@
-﻿using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using System.ComponentModel.DataAnnotations;
 
@@ -101,5 +101,103 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         public string? Resim { get; set; }
 
         public PersonelAktiflikDurum PersonelAktiflikDurum { get; set; } = PersonelAktiflikDurum.Aktif;
+
+        // Eş Bilgileri
+        [StringLength(200)]
+        public string? EsininAdi { get; set; }
+        
+        public EsininIsDurumu EsininIsDurumu { get; set; }
+        
+        [StringLength(100)]
+        public string? EsininUnvani { get; set; }
+        
+        [StringLength(500)]
+        public string? EsininIsAdresi { get; set; }
+
+        // Dinamik Listeler
+        public List<PersonelCocukCreateDto>? Cocuklar { get; set; }
+        public List<PersonelHizmetCreateDto>? Hizmetler { get; set; }
+        public List<PersonelEgitimCreateDto>? Egitimler { get; set; }
+        public List<PersonelYetkiCreateDto>? Yetkiler { get; set; }
+        public List<PersonelCezaCreateDto>? Cezalar { get; set; }
+        public List<PersonelEngelCreateDto>? Engeller { get; set; }
+    }
+
+    // Nested DTO'lar
+    public class PersonelCocukCreateDto
+    {
+        [Required]
+        [StringLength(200)]
+        public string Isim { get; set; } = string.Empty;
+        
+        public DateTime? DogumTarihi { get; set; }
+        
+        [StringLength(100)]
+        public string? Egitim { get; set; }
+    }
+
+    public class PersonelHizmetCreateDto
+    {
+        [StringLength(200)]
+        public string? Departman { get; set; }
+        
+        [StringLength(200)]
+        public string? Servis { get; set; }
+        
+        public DateTime? BaslamaTarihi { get; set; }
+        
+        public DateTime? AyrilmaTarihi { get; set; }
+        
+        [StringLength(500)]
+        public string? Sebep { get; set; }
+    }
+
+    public class PersonelEgitimCreateDto
+    {
+        [StringLength(200)]
+        public string? EgitimAdi { get; set; }
+        
+        public DateTime? BaslangicTarihi { get; set; }
+        
+        public DateTime? BitisTarihi { get; set; }
+    }
+
+    public class PersonelYetkiCreateDto
+    {
+        public int DepartmanId { get; set; }
+        
+        public int ServisId { get; set; }
+        
+        [StringLength(500)]
+        public string? Sebep { get; set; }
+        
+        public DateTime? BaslamaTarihi { get; set; }
+        
+        public DateTime? BitisTarihi { get; set; }
+    }
+
+    public class PersonelCezaCreateDto
+    {
+        [StringLength(500)]
+        public string? Sebep { get; set; }
+        
+        [StringLength(200)]
+        public string? AltBendi { get; set; }
+        
+        public DateTime? CezaTarihi { get; set; }
+    }
+
+    public class PersonelEngelCreateDto
+    {
+        public EngelDerecesi EngelDerecesi { get; set; }
+        
+        [StringLength(500)]
+        public string? Neden1 { get; set; }
+        
+        [StringLength(500)]
+        public string? Neden2 { get; set; }
+        
+        [StringLength(500)]
+        public string? Neden3 { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.PresentationLayer.Models.FormModels;
@@ -45,7 +45,6 @@ namespace SGKPortalApp.PresentationLayer.Mapping
             // UNVAN FORM MODEL MAPPING'LERİ
             // ═══════════════════════════════════════════════════════
 
-            // FormModel → Create Request DTO
             CreateMap<UnvanFormModel, UnvanCreateRequestDto>();
 
             // FormModel → Update Request DTO
@@ -53,6 +52,26 @@ namespace SGKPortalApp.PresentationLayer.Mapping
 
             // Response DTO → FormModel
             CreateMap<UnvanResponseDto, UnvanFormModel>();
+
+
+            // ═════════════════════════════════════════════════════════
+            // PERSONEL FORM MODEL MAPPING'LERİ
+            // ═════════════════════════════════════════════════════════
+
+            // FormModel → Create Request DTO
+            CreateMap<PersonelFormModel, PersonelCreateRequestDto>()
+                .ForMember(dest => dest.AtanmaNedeniId, opt => opt.MapFrom(src => 1))
+                .ForMember(dest => dest.HizmetBinasiId, opt => opt.MapFrom(src => 1))
+                .ForMember(dest => dest.IlId, opt => opt.MapFrom(src => 1))
+                .ForMember(dest => dest.IlceId, opt => opt.MapFrom(src => 1))
+                .ForMember(dest => dest.SendikaId, opt => opt.MapFrom(src => 0))
+                .ForMember(dest => dest.OgrenimSuresi, opt => opt.MapFrom(src => 0));
+
+            // FormModel → Update Request DTO
+            CreateMap<PersonelFormModel, PersonelUpdateRequestDto>();
+
+            // Response DTO → FormModel (Düzenleme için)
+            CreateMap<PersonelResponseDto, PersonelFormModel>();
         }
     }
 }

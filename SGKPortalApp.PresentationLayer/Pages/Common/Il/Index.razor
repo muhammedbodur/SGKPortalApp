@@ -1,0 +1,354 @@
+@page "/common/il"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
+
+<PageTitle>İl Yönetimi - SGK Portal</PageTitle>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PAGE HEADER -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="bx bx-map me-2"></i>İl Yönetimi
+            </h4>
+            <p class="text-muted mb-0">
+                Tüm illeri görüntüleyin ve yönetin
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <!-- Excel Export -->
+            <button class="btn btn-success" @onclick="ExportToExcel" disabled="@IsExporting">
+                @if (IsExporting && ExportType == "excel")
+                {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                else
+                {
+                    <i class="bx bx-download me-1"></i>
+                }
+                Excel
+            </button>
+
+            <!-- PDF Export -->
+            <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@IsExporting">
+                @if (IsExporting && ExportType == "pdf")
+                {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                else
+                {
+                    <i class="bx bxs-file-pdf me-1"></i>
+                }
+                PDF
+            </button>
+
+            <!-- Yeni İl -->
+            <button class="btn btn-primary" @onclick="NavigateToCreate">
+                <i class="bx bx-plus me-1"></i>Yeni İl
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- FILTER CARD -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <!-- Arama -->
+                <div class="col-md-6">
+                    <label class="form-label">İl Ara</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bx bx-search"></i>
+                        </span>
+                        <input type="text"
+                               class="form-control"
+                               placeholder="İl adı..."
+                               @bind="searchTerm"
+                               @bind:event="oninput"
+                               @onkeyup="OnSearchChanged" />
+                    </div>
+                </div>
+
+                <!-- Sıralama -->
+                <div class="col-md-4">
+                    <label class="form-label">Sıralama</label>
+                    <select class="form-select" value="@sortBy" @onchange="OnSortByChanged">
+                        <option value="name-asc">İsim (A-Z)</option>
+                        <option value="name-desc">İsim (Z-A)</option>
+                        <option value="date-newest">En Yeni</option>
+                        <option value="date-oldest">En Eski</option>
+                        <option value="ilce-most">En Çok İlçe</option>
+                        <option value="ilce-least">En Az İlçe</option>
+                    </select>
+                </div>
+
+                <!-- Temizle -->
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
+                        <i class="bx bx-reset me-1"></i>Temizle
+                    </button>
+                </div>
+            </div>
+
+            <!-- İstatistikler -->
+            <div class="row mt-3">
+                <div class="col">
+                    <div class="d-flex gap-4 text-muted small">
+                        <span>
+                            <i class="bx bx-map text-primary"></i>
+                            Toplam: <strong>@Iller.Count</strong>
+                        </span>
+                        <span>
+                            <i class="bx bx-filter-alt text-info"></i>
+                            Filtrelenen: <strong>@FilteredIller.Count</strong>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- TABLE CARD -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <div class="card">
+        <div class="card-body">
+            @if (IsLoading)
+            {
+                <!-- Loading Spinner -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="mt-2 text-muted">İller yükleniyor...</p>
+                </div>
+            }
+            else if (!FilteredIller.Any())
+            {
+                <!-- Empty State -->
+                <div class="text-center py-5">
+                    <i class="bx bx-search-alt display-1 text-muted"></i>
+                    <h5 class="mt-3">İl Bulunamadı</h5>
+                    <p class="text-muted">
+                        @if (string.IsNullOrEmpty(searchTerm))
+                        {
+                            <span>Henüz il eklenmemiş.</span>
+                        }
+                        else
+                        {
+                            <span>Arama kriterlerinize uygun il bulunamadı.</span>
+                        }
+                    </p>
+                    @if (string.IsNullOrEmpty(searchTerm))
+                    {
+                        <button class="btn btn-primary mt-2" @onclick="NavigateToCreate">
+                            <i class="bx bx-plus me-1"></i>İlk İli Ekle
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-outline-secondary mt-2" @onclick="ClearFilters">
+                            <i class="bx bx-reset me-1"></i>Filtreleri Temizle
+                        </button>
+                    }
+                </div>
+            }
+            else
+            {
+                <!-- Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">#</th>
+                                <th>İl Adı</th>
+                                <th class="text-center" style="width: 120px;">İlçe Sayısı</th>
+                                <th class="text-center" style="width: 150px;">Eklenme Tarihi</th>
+                                <th class="text-center" style="width: 150px;">Son Güncelleme</th>
+                                <th class="text-center" style="width: 150px;">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var pagedData = FilteredIller
+                                .Skip((CurrentPage - 1) * PageSize)
+                                .Take(PageSize)
+                                .ToList();
+                            }
+                            @foreach (var (il, index) in pagedData.Select((d, i) => (d, (CurrentPage - 1) * PageSize + i + 1)))
+                            {
+                                <tr>
+                                    <td>@index</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm me-2">
+                                                <span class="avatar-initial rounded-circle bg-label-primary">
+                                                    @il.IlAdi.Substring(0, 1).ToUpper()
+                                                </span>
+                                            </div>
+                                            <strong>@il.IlAdi</strong>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-label-info">
+                                            <i class="bx bx-buildings me-1"></i>@il.IlceSayisi
+                                        </span>
+                                    </td>
+                                    <td class="text-center text-muted small">
+                                        @il.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm")
+                                    </td>
+                                    <td class="text-center text-muted small">
+                                        @il.DuzenlenmeTarihi.ToString("dd.MM.yyyy HH:mm")
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-1">
+                                            <!-- Düzenle -->
+                                            <button class="btn btn-sm btn-icon btn-outline-primary"
+                                                    @onclick="() => NavigateToEdit(il.IlId)"
+                                                    title="Düzenle">
+                                                <i class="bx bx-edit"></i>
+                                            </button>
+
+                                            <!-- Sil -->
+                                            <button class="btn btn-sm btn-icon btn-outline-danger"
+                                                    @onclick="() => ShowDeleteConfirmation(il.IlId, il.IlAdi, il.IlceSayisi)"
+                                                    title="Sil">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (TotalPages > 1)
+                {
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                        <div class="text-muted small">
+                            Gösterilen: <strong>@((CurrentPage - 1) * PageSize + 1)</strong> - <strong>@Math.Min(CurrentPage * PageSize, FilteredIller.Count)</strong> / <strong>@FilteredIller.Count</strong>
+                        </div>
+
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <!-- Previous -->
+                                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                                    <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)" disabled="@(CurrentPage == 1)">
+                                        <i class="bx bx-chevron-left"></i>
+                                    </button>
+                                </li>
+
+                                <!-- Page Numbers -->
+                                @{
+                                    var startPage = Math.Max(1, CurrentPage - 2);
+                                    var endPage = Math.Min(TotalPages, CurrentPage + 2);
+                                }
+
+                                @if (startPage > 1)
+                                {
+                                    <li class="page-item">
+                                        <button class="page-link" @onclick="() => ChangePage(1)">1</button>
+                                    </li>
+                                    @if (startPage > 2)
+                                    {
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    }
+                                }
+
+                                @for (int i = startPage; i <= endPage; i++)
+                                {
+                                    var pageNum = i;
+                                    <li class="page-item @(CurrentPage == pageNum ? "active" : "")">
+                                        <button class="page-link" @onclick="() => ChangePage(pageNum)">
+                                            @pageNum
+                                        </button>
+                                    </li>
+                                }
+
+                                @if (endPage < TotalPages)
+                                {
+                                    @if (endPage < TotalPages - 1)
+                                    {
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    }
+                                    <li class="page-item">
+                                        <button class="page-link" @onclick="() => ChangePage(TotalPages)">@TotalPages</button>
+                                    </li>
+                                }
+
+                                <!-- Next -->
+                                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                                    <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)" disabled="@(CurrentPage == TotalPages)">
+                                        <i class="bx bx-chevron-right"></i>
+                                    </button>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- DELETE CONFIRMATION MODAL -->
+<!-- ═══════════════════════════════════════════════════════ -->
+@if (ShowDeleteModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bx bx-trash text-danger me-2"></i>İl Sil
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeleteModal" disabled="@IsDeleting"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger mb-3">
+                        <i class="bx bx-error-circle me-2"></i>
+                        <strong>Dikkat!</strong> Bu işlem geri alınamaz.
+                    </div>
+                    <p class="mb-0">
+                        <strong>@DeleteIlAdi</strong> ilini silmek istediğinizden emin misiniz?
+                    </p>
+                    @if (DeleteIlIlceSayisi > 0)
+                    {
+                        <div class="alert alert-warning mt-3 mb-0">
+                            <i class="bx bx-info-circle me-2"></i>
+                            Bu ile ait <strong>@DeleteIlIlceSayisi ilçe</strong> bulunmaktadır. Silme işleminden önce ilçeleri silmeniz gerekmektedir.
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDeleteModal" disabled="@IsDeleting">
+                        İptal
+                    </button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDelete" disabled="@IsDeleting">
+                        @if (IsDeleting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                            <span>Siliniyor...</span>
+                        }
+                        else
+                        {
+                            <i class="bx bx-trash me-1"></i>
+                            <span>Sil</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
