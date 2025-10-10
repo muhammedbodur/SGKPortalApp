@@ -22,6 +22,8 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
         public string AtanmaNedeniAdi { get; set; } = string.Empty;
         public int HizmetBinasiId { get; set; }
         public string HizmetBinasiAdi { get; set; } = string.Empty;
+        public int SendikaId { get; set; }
+        public string SendikaAdi { get; set; } = string.Empty;
 
         // İletişim bilgileri
         public int Dahili { get; set; }
@@ -37,6 +39,15 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
         public Cinsiyet Cinsiyet { get; set; }
         public MedeniDurumu MedeniDurumu { get; set; }
         public KanGrubu KanGrubu { get; set; }
+        public EvDurumu EvDurumu { get; set; }
+        public int UlasimServis1 { get; set; }
+        public int UlasimServis2 { get; set; }
+        public int Tabldot { get; set; }
+        public int KartNo { get; set; }
+        public DateTime? KartNoAktiflikTarihi { get; set; }
+        public DateTime? KartNoDuzenlenmeTarihi { get; set; }
+        public DateTime? KartNoGonderimTarihi { get; set; }
+        public IslemBasari KartGonderimIslemBasari { get; set; }
 
         // Durum bilgileri
         public PersonelTipi PersonelTipi { get; set; }
@@ -46,6 +57,10 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
         public OgrenimDurumu OgrenimDurumu { get; set; }
         public string? BitirdigiOkul { get; set; }
         public string? BitirdigiBolum { get; set; }
+        public int OgrenimSuresi { get; set; }
+        public string? Bransi { get; set; }
+        public string? EmekliSicilNo { get; set; }
+        public SehitYakinligi SehitYakinligi { get; set; }
 
         // Eş bilgileri
         public string? EsininAdi { get; set; }

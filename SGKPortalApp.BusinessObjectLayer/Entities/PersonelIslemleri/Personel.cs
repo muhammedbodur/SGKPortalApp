@@ -117,6 +117,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         public int UlasimServis1 { get; set; } = 0;
         public int UlasimServis2 { get; set; } = 0;
         public int Tabldot { get; set; } = 0;
+        
         public PersonelAktiflikDurum PersonelAktiflikDurum { get; set; }
 
         [StringLength(20)]

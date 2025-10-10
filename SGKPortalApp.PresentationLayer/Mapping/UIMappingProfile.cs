@@ -58,14 +58,14 @@ namespace SGKPortalApp.PresentationLayer.Mapping
             // PERSONEL FORM MODEL MAPPING'LERİ
             // ═════════════════════════════════════════════════════════
 
-            // FormModel → Create Request DTO
+            // ✅ DÜZELTİLMİŞ: FormModel'den gelen GERÇEK değerleri kullan
             CreateMap<PersonelFormModel, PersonelCreateRequestDto>()
-                .ForMember(dest => dest.AtanmaNedeniId, opt => opt.MapFrom(src => 1))
-                .ForMember(dest => dest.HizmetBinasiId, opt => opt.MapFrom(src => 1))
-                .ForMember(dest => dest.IlId, opt => opt.MapFrom(src => 1))
-                .ForMember(dest => dest.IlceId, opt => opt.MapFrom(src => 1))
-                .ForMember(dest => dest.SendikaId, opt => opt.MapFrom(src => 0))
-                .ForMember(dest => dest.OgrenimSuresi, opt => opt.MapFrom(src => 0));
+                .ForMember(dest => dest.AtanmaNedeniId, opt => opt.MapFrom(src => src.AtanmaNedeniId))
+                .ForMember(dest => dest.HizmetBinasiId, opt => opt.MapFrom(src => src.HizmetBinasiId))
+                .ForMember(dest => dest.IlId, opt => opt.MapFrom(src => src.IlId))
+                .ForMember(dest => dest.IlceId, opt => opt.MapFrom(src => src.IlceId))
+                .ForMember(dest => dest.SendikaId, opt => opt.MapFrom(src => src.SendikaId > 0 ? src.SendikaId : 0))
+                .ForMember(dest => dest.OgrenimSuresi, opt => opt.MapFrom(src => src.OgrenimSuresi));
 
             // FormModel → Update Request DTO
             CreateMap<PersonelFormModel, PersonelUpdateRequestDto>();

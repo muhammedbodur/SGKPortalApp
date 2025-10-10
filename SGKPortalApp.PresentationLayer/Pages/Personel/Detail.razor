@@ -305,6 +305,55 @@
                                     <label class="form-label text-muted small">Kan Grubu</label>
                                     <p class="fw-medium">@Personel?.KanGrubu</p>
                                 </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Ev Durumu</label>
+                                    <p class="fw-medium">@Personel?.EvDurumu</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Ulaştırma Servisi 1</label>
+                                    <p class="fw-medium">@(Personel?.UlasimServis1 == 0 ? "-" : Personel?.UlasimServis1.ToString())</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Ulaştırma Servisi 2</label>
+                                    <p class="fw-medium">@(Personel?.UlasimServis2 == 0 ? "-" : Personel?.UlasimServis2.ToString())</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Tabldot Servisi</label>
+                                    <p class="fw-medium">@(Personel?.Tabldot == 0 ? "-" : Personel?.Tabldot.ToString())</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">PDKS Kart No</label>
+                                    <p class="fw-medium">@(Personel?.KartNo == 0 ? "-" : Personel?.KartNo.ToString())</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Kart Aktiflik Tarihi</label>
+                                    <p class="fw-medium">@(Personel?.KartNoAktiflikTarihi?.ToString("dd.MM.yyyy") ?? "-")</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Kart Düzenleme Tarihi</label>
+                                    <p class="fw-medium">@(Personel?.KartNoDuzenlenmeTarihi?.ToString("dd.MM.yyyy") ?? "-")</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Kart Gönderim Tarihi</label>
+                                    <p class="fw-medium">@(Personel?.KartNoGonderimTarihi?.ToString("dd.MM.yyyy") ?? "-")</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Kart Gönderim Başarı</label>
+                                    <p class="fw-medium">
+                                        @if (Personel?.KartGonderimIslemBasari == IslemBasari.Basarili)
+                                        {
+                                            <span class="badge bg-success">Başarılı</span>
+                                        }
+                                        else if (Personel?.KartGonderimIslemBasari == IslemBasari.Basarisiz)
+                                        {
+                                            <span class="badge bg-danger">Başarısız</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Beklemede</span>
+                                        }
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -322,11 +371,31 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted small">Bitirdiği Okul</label>
-                                    <p class="fw-medium">@Personel?.BitirdigiOkul</p>
+                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.BitirdigiOkul) ? "-" : Personel.BitirdigiOkul)</p>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted small">Bitirdiği Bölüm</label>
-                                    <p class="fw-medium">@Personel?.BitirdigiBolum</p>
+                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.BitirdigiBolum) ? "-" : Personel.BitirdigiBolum)</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Öğrenim Süresi</label>
+                                    <p class="fw-medium">@Personel?.OgrenimSuresi yıl</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Branşı</label>
+                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.Bransi) ? "-" : Personel.Bransi)</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Emekli Sicil No</label>
+                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.EmekliSicilNo) ? "-" : Personel.EmekliSicilNo)</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Sendika</label>
+                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.SendikaAdi) ? "-" : Personel.SendikaAdi)</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Şehit Yakınlığı</label>
+                                    <p class="fw-medium">@Personel?.SehitYakinligi</p>
                                 </div>
                             </div>
                         </div>

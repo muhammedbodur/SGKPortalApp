@@ -405,6 +405,24 @@
                                             }
                                         </select>
                                     </div>
+
+                                    <!-- Sendika -->
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Sendika</label>
+                                        <select @bind="FormModel.SendikaId"
+                                                class="form-select"
+                                                disabled="@IsSaving">
+                                            <option value="0">Seçiniz (Opsiyonel)</option>
+                                            @foreach (var sendika in Sendikalar)
+                                            {
+                                                <option value="@sendika.SendikaId">@sendika.SendikaAdi</option>
+                                            }
+                                        </select>
+                                        @if (FormModel.SendikaId == 0)
+                                        {
+                                            <small class="text-muted">📦 @Sendikalar.Count sendika yüklendi</small>
+                                        }
+                                    </div>
                                 </div>
 
                                 <!-- Aktiflik Durumu -->
@@ -605,6 +623,50 @@
                                             }
                                         </select>
                                     </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Ev Durumu</label>
+                                        <select @bind="FormModel.EvDurumu" class="form-select">
+                                            @foreach (var ev in Enum.GetValues<EvDurumu>())
+                                            {
+                                                <option value="@ev">@GetEnumDisplayName(ev)</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Ulaştırma Servisi 1</label>
+                                        <InputNumber @bind-Value="FormModel.UlasimServis1"
+                                                     class="form-control"
+                                                     min="0" />
+                                        <small class="form-text text-muted">Servis numarası (0 = Yok)</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Ulaştırma Servisi 2</label>
+                                        <InputNumber @bind-Value="FormModel.UlasimServis2"
+                                                     class="form-control"
+                                                     min="0" />
+                                        <small class="form-text text-muted">Servis numarası (0 = Yok)</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Tabldot Servisi</label>
+                                        <InputNumber @bind-Value="FormModel.Tabldot"
+                                                     class="form-control"
+                                                     min="0" />
+                                        <small class="form-text text-muted">Servis numarası (0 = Yok)</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">PDKS Kart No</label>
+                                        <InputNumber @bind-Value="FormModel.KartNo"
+                                                     class="form-control"
+                                                     min="0"
+                                                     placeholder="PDKS kart numarası" />
+                                        <small class="form-text text-muted">0 = Kart yok</small>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Kart Aktiflik Tarihi</label>
+                                        <InputDate @bind-Value="FormModel.KartNoAktiflikTarihi"
+                                                   class="form-control" />
+                                        <small class="form-text text-muted">Kart aktif edilme tarihi</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -639,10 +701,32 @@
                                                    maxlength="100" />
                                     </div>
                                     <div class="col-md-6 mb-3">
+                                        <label class="form-label">Öğrenim Süresi (Yıl)</label>
+                                        <InputNumber @bind-Value="FormModel.OgrenimSuresi"
+                                                     class="form-control"
+                                                     min="0"
+                                                     max="50" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Branşı</label>
+                                        <InputText @bind-Value="FormModel.Bransi"
+                                                   class="form-control"
+                                                   maxlength="100" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
                                         <label class="form-label">Emekli Sicil No</label>
                                         <InputText @bind-Value="FormModel.EmekliSicilNo"
                                                    class="form-control"
                                                    maxlength="20" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Şehit Yakınlığı</label>
+                                        <select @bind="FormModel.SehitYakinligi" class="form-select">
+                                            @foreach (var yakinlik in Enum.GetValues<SehitYakinligi>())
+                                            {
+                                                <option value="@yakinlik">@GetEnumDisplayName(yakinlik)</option>
+                                            }
+                                        </select>
                                     </div>
                                 </div>
                             </div>

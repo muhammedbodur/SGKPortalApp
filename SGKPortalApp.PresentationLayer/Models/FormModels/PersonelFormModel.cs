@@ -19,15 +19,25 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels
         public string AdSoyad { get; set; } = string.Empty;
 
         public string? NickName { get; set; }
-        
+
         [Required(ErrorMessage = "Email zorunludur")]
         [EmailAddress(ErrorMessage = "Geçerli bir email adresi giriniz")]
         [StringLength(100)]
         public string Email { get; set; } = string.Empty;
+
+        // ═══════════════════════════════════════════════════════
+        // KURUM BİLGİLERİ
+        // ═══════════════════════════════════════════════════════
         public int DepartmanId { get; set; }
         public int ServisId { get; set; }
         public int UnvanId { get; set; }
         public int HizmetBinasiId { get; set; }
+        public int AtanmaNedeniId { get; set; }
+        public int SendikaId { get; set; } = 0;
+
+        // ═══════════════════════════════════════════════════════
+        // İLETİŞİM BİLGİLERİ
+        // ═══════════════════════════════════════════════════════
         public int Dahili { get; set; }
         public string? CepTelefonu { get; set; }
         public string? CepTelefonu2 { get; set; }
@@ -36,17 +46,41 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels
         public string? Semt { get; set; }
         public int IlId { get; set; }
         public int IlceId { get; set; }
-        public int AtanmaNedeniId { get; set; }
+
+        // ═══════════════════════════════════════════════════════
+        // KİŞİSEL BİLGİLER
+        // ═══════════════════════════════════════════════════════
         public DateTime DogumTarihi { get; set; } = DateTime.Now.AddYears(-30);
         public Cinsiyet Cinsiyet { get; set; }
         public MedeniDurumu MedeniDurumu { get; set; }
         public KanGrubu KanGrubu { get; set; }
+        public EvDurumu EvDurumu { get; set; }
+        public int UlasimServis1 { get; set; } = 0;
+        public int UlasimServis2 { get; set; } = 0;
+        public int Tabldot { get; set; } = 0;
+        public int KartNo { get; set; } = 0;
+        public DateTime? KartNoAktiflikTarihi { get; set; }
+        public DateTime? KartNoDuzenlenmeTarihi { get; set; }
+        public DateTime? KartNoGonderimTarihi { get; set; }
+        public IslemBasari KartGonderimIslemBasari { get; set; }
         public PersonelAktiflikDurum PersonelAktiflikDurum { get; set; } = PersonelAktiflikDurum.Aktif;
         public PersonelTipi PersonelTipi { get; set; }
+
+        // ═══════════════════════════════════════════════════════
         public OgrenimDurumu OgrenimDurumu { get; set; }
         public string? BitirdigiOkul { get; set; }
         public string? BitirdigiBolum { get; set; }
+
+        // ✅ EKSİK PROPERTY EKLENDİ
+        public int OgrenimSuresi { get; set; } = 0;
+        public string? Bransi { get; set; }
+
         public string? EmekliSicilNo { get; set; }
+        public SehitYakinligi SehitYakinligi { get; set; }
+
+        // ═════════════════════════════════════════════════════
+        // DİĞER BİLGİLER
+        // ═══════════════════════════════════════════════════════
         public string? Resim { get; set; }
         public string? EsininAdi { get; set; }
         public EsininIsDurumu EsininIsDurumu { get; set; }
@@ -54,7 +88,10 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels
         public string? EsininIsAdresi { get; set; }
     }
 
-    // Dinamik Liste Modelleri
+    // ═══════════════════════════════════════════════════════
+    // DİNAMİK LİSTE MODELLERİ
+    // ═══════════════════════════════════════════════════════
+
     public class CocukModel
     {
         public string Isim { get; set; } = string.Empty;
