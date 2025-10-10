@@ -27,6 +27,7 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels
         public int DepartmanId { get; set; }
         public int ServisId { get; set; }
         public int UnvanId { get; set; }
+        public int HizmetBinasiId { get; set; }
         public int Dahili { get; set; }
         public string? CepTelefonu { get; set; }
         public string? CepTelefonu2 { get; set; }

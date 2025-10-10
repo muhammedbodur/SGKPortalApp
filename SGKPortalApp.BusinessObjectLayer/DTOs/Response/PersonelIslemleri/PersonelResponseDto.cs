@@ -20,6 +20,8 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
         public string UnvanAdi { get; set; } = string.Empty;
         public int AtanmaNedeniId { get; set; }
         public string AtanmaNedeniAdi { get; set; } = string.Empty;
+        public int HizmetBinasiId { get; set; }
+        public string HizmetBinasiAdi { get; set; } = string.Empty;
 
         // İletişim bilgileri
         public int Dahili { get; set; }

@@ -301,6 +301,16 @@
                                         </select>
                                     </div>
                                     <div class="col-md-6 mb-3">
+                                        <label class="form-label">Hizmet Binası</label>
+                                        <select value="@FormModel.HizmetBinasiId" @onchange="@(e => FormModel.HizmetBinasiId = int.Parse(e.Value.ToString()))" class="select2 form-select" data-placeholder="Hizmet Binası seçiniz">
+                                            <option value="0">Seçiniz</option>
+                                            @foreach (var bina in HizmetBinalari)
+                                            {
+                                                <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
                                         <label class="form-label">Personel Tipi</label>
                                         <select @bind="FormModel.PersonelTipi" class="form-select">
                                             @foreach (var tip in Enum.GetValues<PersonelTipi>())

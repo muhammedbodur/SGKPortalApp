@@ -31,6 +31,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         [Inject] private IDepartmanApiService _departmanApiService { get; set; } = default!;
         [Inject] private IServisApiService _servisApiService { get; set; } = default!;
         [Inject] private IUnvanApiService _unvanApiService { get; set; } = default!;
+        [Inject] private IHizmetBinasiApiService _hizmetBinasiApiService { get; set; } = default!;
         [Inject] private IIlApiService _ilApiService { get; set; } = default!;
         [Inject] private IIlceApiService _ilceApiService { get; set; } = default!;
         [Inject] private IAtanmaNedeniApiService _atanmaNedeniApiService { get; set; } = default!;
@@ -52,6 +53,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private List<DepartmanResponseDto> Departmanlar { get; set; } = new();
         private List<ServisResponseDto> Servisler { get; set; } = new();
         private List<UnvanResponseDto> Unvanlar { get; set; } = new();
+        private List<HizmetBinasiResponseDto> HizmetBinalari { get; set; } = new();
         private List<IlResponseDto> Iller { get; set; } = new();
         private List<IlceResponseDto> TumIlceler { get; set; } = new();
         private List<IlceResponseDto> Ilceler { get; set; } = new();
@@ -125,15 +127,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 var departmanTask = _departmanApiService.GetAllAsync();
                 var servisTask = _servisApiService.GetAllAsync();
                 var unvanTask = _unvanApiService.GetAllAsync();
+                var hizmetBinasiTask = _hizmetBinasiApiService.GetAllAsync();
                 var ilTask = _ilApiService.GetAllAsync();
                 var ilceTask = _ilceApiService.GetAllAsync();
                 var atanmaNedeniTask = _atanmaNedeniApiService.GetAllAsync();
 
-                await Task.WhenAll(departmanTask, servisTask, unvanTask, ilTask, ilceTask, atanmaNedeniTask);
+                await Task.WhenAll(departmanTask, servisTask, unvanTask, hizmetBinasiTask, ilTask, ilceTask, atanmaNedeniTask);
 
                 Departmanlar = (await departmanTask)?.Data ?? new List<DepartmanResponseDto>();
                 Servisler = (await servisTask)?.Data ?? new List<ServisResponseDto>();
                 Unvanlar = (await unvanTask)?.Data ?? new List<UnvanResponseDto>();
+                HizmetBinalari = (await hizmetBinasiTask)?.Data ?? new List<HizmetBinasiResponseDto>();
                 Iller = (await ilTask)?.Data ?? new List<IlResponseDto>();
                 TumIlceler = (await ilceTask)?.Data ?? new List<IlceResponseDto>();
                 AtanmaNedenleri = (await atanmaNedeniTask)?.Data ?? new List<AtanmaNedeniResponseDto>();
