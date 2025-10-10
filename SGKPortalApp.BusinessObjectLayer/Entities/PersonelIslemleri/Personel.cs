@@ -71,11 +71,11 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         public Sendika? Sendika { get; set; }
 
         // Eşinin iş bilgileri
-        public int? EsininIsIlId { get; set; } = 0;
+        public int? EsininIsIlId { get; set; }
         [ForeignKey(nameof(EsininIsIlId))]
         public Il? EsininIsIl { get; set; }
 
-        public int? EsininIsIlceId { get; set; } = 0;
+        public int? EsininIsIlceId { get; set; }
         [ForeignKey(nameof(EsininIsIlceId))]
         public Ilce? EsininIsIlce { get; set; }
 

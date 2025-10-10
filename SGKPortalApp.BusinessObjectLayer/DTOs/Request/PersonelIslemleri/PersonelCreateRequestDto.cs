@@ -49,7 +49,8 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         [Required]
         public int IlceId { get; set; }
 
-        public int SendikaId { get; set; }
+        // ⭐ DEĞİŞTİRİLDİ: Nullable yapıldı
+        public int? SendikaId { get; set; }
 
         // İletişim
         public int Dahili { get; set; }
@@ -105,14 +106,21 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         // Eş Bilgileri
         [StringLength(200)]
         public string? EsininAdi { get; set; }
-        
+
         public EsininIsDurumu EsininIsDurumu { get; set; }
-        
+
         [StringLength(100)]
         public string? EsininUnvani { get; set; }
-        
+
         [StringLength(500)]
         public string? EsininIsAdresi { get; set; }
+
+        public int? EsininIsIlId { get; set; }
+
+        public int? EsininIsIlceId { get; set; }
+
+        [StringLength(100)]
+        public string? EsininIsSemt { get; set; }
 
         // Dinamik Listeler
         public List<PersonelCocukCreateDto>? Cocuklar { get; set; }
@@ -129,9 +137,9 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         [Required]
         [StringLength(200)]
         public string Isim { get; set; } = string.Empty;
-        
+
         public DateTime? DogumTarihi { get; set; }
-        
+
         [StringLength(100)]
         public string? Egitim { get; set; }
     }
@@ -140,14 +148,14 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
     {
         [StringLength(200)]
         public string? Departman { get; set; }
-        
+
         [StringLength(200)]
         public string? Servis { get; set; }
-        
+
         public DateTime? BaslamaTarihi { get; set; }
-        
+
         public DateTime? AyrilmaTarihi { get; set; }
-        
+
         [StringLength(500)]
         public string? Sebep { get; set; }
     }
@@ -156,23 +164,23 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
     {
         [StringLength(200)]
         public string? EgitimAdi { get; set; }
-        
+
         public DateTime? BaslangicTarihi { get; set; }
-        
+
         public DateTime? BitisTarihi { get; set; }
     }
 
     public class PersonelYetkiCreateDto
     {
         public int DepartmanId { get; set; }
-        
+
         public int ServisId { get; set; }
-        
+
         [StringLength(500)]
         public string? Sebep { get; set; }
-        
+
         public DateTime? BaslamaTarihi { get; set; }
-        
+
         public DateTime? BitisTarihi { get; set; }
     }
 
@@ -180,23 +188,23 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
     {
         [StringLength(500)]
         public string? Sebep { get; set; }
-        
+
         [StringLength(200)]
         public string? AltBendi { get; set; }
-        
+
         public DateTime? CezaTarihi { get; set; }
     }
 
     public class PersonelEngelCreateDto
     {
         public EngelDerecesi EngelDerecesi { get; set; }
-        
+
         [StringLength(500)]
         public string? Neden1 { get; set; }
-        
+
         [StringLength(500)]
         public string? Neden2 { get; set; }
-        
+
         [StringLength(500)]
         public string? Neden3 { get; set; }
     }
