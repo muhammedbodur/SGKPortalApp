@@ -332,12 +332,72 @@
                 @if (ActiveTab == "es-cocuk")
                 {
                     <div class="card mb-4">
-                        <h5 class="card-header">Eş ve Çocuk Bilgileri</h5>
+                        <h5 class="card-header">Eş Bilgileri</h5>
                         <div class="card-body">
-                            <div class="alert alert-info">
-                                <i class="bx bx-info-circle me-2"></i>
-                                Eş ve çocuk bilgileri henüz girilmemiş.
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Eş Adı</label>
+                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.EsininAdi) ? "-" : Personel.EsininAdi)</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Eş İş Durumu</label>
+                                    <p class="fw-medium">@Personel?.EsininIsDurumu</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Eş Unvanı</label>
+                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.EsininUnvani) ? "-" : Personel.EsininUnvani)</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Eş İş Adresi</label>
+                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.EsininIsAdresi) ? "-" : Personel.EsininIsAdresi)</p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label text-muted small">Eş İş Semt</label>
+                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.EsininIsSemt) ? "-" : Personel.EsininIsSemt)</p>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <h5 class="card-header">Çocuk Bilgileri</h5>
+                        <div class="card-body">
+                            @if (Cocuklar?.Any() == true)
+                            {
+                                <div class="row">
+                                    @foreach (var cocuk in Cocuklar)
+                                    {
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card border">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">
+                                                        <i class="bx bx-user text-primary me-2"></i>@cocuk.CocukAdi
+                                                    </h6>
+                                                    <p class="mb-1">
+                                                        <small class="text-muted">Doğum Tarihi:</small>
+                                                        <strong>@cocuk.CocukDogumTarihi.ToString("dd.MM.yyyy")</strong>
+                                                    </p>
+                                                    <p class="mb-1">
+                                                        <small class="text-muted">Yaş:</small>
+                                                        <strong>@cocuk.Yas</strong>
+                                                    </p>
+                                                    <p class="mb-0">
+                                                        <small class="text-muted">Öğrenim Durumu:</small>
+                                                        <strong>@cocuk.OgrenimDurumu</strong>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info">
+                                    <i class="bx bx-info-circle me-2"></i>
+                                    Çocuk bilgisi bulunmamaktadır.
+                                </div>
+                            }
                         </div>
                     </div>
                 }
@@ -345,12 +405,43 @@
                 @if (ActiveTab == "hizmet")
                 {
                     <div class="card mb-4">
-                        <h5 class="card-header">Hizmet Bilgileri</h5>
+                        <h5 class="card-header">Hizmet Geçmişi</h5>
                         <div class="card-body">
-                            <div class="alert alert-info">
-                                <i class="bx bx-info-circle me-2"></i>
-                                Hizmet bilgileri henüz girilmemiş.
-                            </div>
+                            @if (Hizmetler?.Any() == true)
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Departman</th>
+                                                <th>Servis</th>
+                                                <th>Göreve Başlama</th>
+                                                <th>Görevden Ayrılma</th>
+                                                <th>Sebep</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var hizmet in Hizmetler.OrderByDescending(h => h.GorevBaslamaTarihi))
+                                            {
+                                                <tr>
+                                                    <td>@hizmet.DepartmanAdi</td>
+                                                    <td>@hizmet.ServisAdi</td>
+                                                    <td>@hizmet.GorevBaslamaTarihi.ToString("dd.MM.yyyy")</td>
+                                                    <td>@(hizmet.GorevAyrilmaTarihi?.ToString("dd.MM.yyyy") ?? "Devam Ediyor")</td>
+                                                    <td>@(string.IsNullOrEmpty(hizmet.Sebep) ? "-" : hizmet.Sebep)</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info">
+                                    <i class="bx bx-info-circle me-2"></i>
+                                    Hizmet geçmişi bulunmamaktadır.
+                                </div>
+                            }
                         </div>
                     </div>
                 }
@@ -360,10 +451,39 @@
                     <div class="card mb-4">
                         <h5 class="card-header">Eğitim Bilgileri</h5>
                         <div class="card-body">
-                            <div class="alert alert-info">
-                                <i class="bx bx-info-circle me-2"></i>
-                                Eğitim bilgileri henüz girilmemiş.
-                            </div>
+                            @if (Egitimler?.Any() == true)
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Eğitim Adı</th>
+                                                <th>Başlangıç Tarihi</th>
+                                                <th>Bitiş Tarihi</th>
+                                                <th>Açıklama</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var egitim in Egitimler.OrderByDescending(e => e.EgitimBaslangicTarihi))
+                                            {
+                                                <tr>
+                                                    <td><strong>@egitim.EgitimAdi</strong></td>
+                                                    <td>@egitim.EgitimBaslangicTarihi.ToString("dd.MM.yyyy")</td>
+                                                    <td>@(egitim.EgitimBitisTarihi?.ToString("dd.MM.yyyy") ?? "Devam Ediyor")</td>
+                                                    <td>@(string.IsNullOrEmpty(egitim.Aciklama) ? "-" : egitim.Aciklama)</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info">
+                                    <i class="bx bx-info-circle me-2"></i>
+                                    Eğitim bilgisi bulunmamaktadır.
+                                </div>
+                            }
                         </div>
                     </div>
                 }
@@ -371,12 +491,43 @@
                 @if (ActiveTab == "yetki")
                 {
                     <div class="card mb-4">
-                        <h5 class="card-header">Yetki Durumu</h5>
+                        <h5 class="card-header">İmza Yetkileri</h5>
                         <div class="card-body">
-                            <div class="alert alert-info">
-                                <i class="bx bx-info-circle me-2"></i>
-                                Yetki bilgileri henüz girilmemiş.
-                            </div>
+                            @if (ImzaYetkileri?.Any() == true)
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Departman</th>
+                                                <th>Servis</th>
+                                                <th>Görev Değişim Sebebi</th>
+                                                <th>Başlama Tarihi</th>
+                                                <th>Bitiş Tarihi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var yetki in ImzaYetkileri.OrderByDescending(y => y.ImzaYetkisiBaslamaTarihi))
+                                            {
+                                                <tr>
+                                                    <td>@yetki.DepartmanAdi</td>
+                                                    <td>@yetki.ServisAdi</td>
+                                                    <td>@(string.IsNullOrEmpty(yetki.GorevDegisimSebebi) ? "-" : yetki.GorevDegisimSebebi)</td>
+                                                    <td>@yetki.ImzaYetkisiBaslamaTarihi.ToString("dd.MM.yyyy")</td>
+                                                    <td>@(yetki.ImzaYetkisiBitisTarihi?.ToString("dd.MM.yyyy") ?? "Devam Ediyor")</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info">
+                                    <i class="bx bx-info-circle me-2"></i>
+                                    İmza yetkisi bulunmamaktadır.
+                                </div>
+                            }
                         </div>
                     </div>
                 }
@@ -386,10 +537,39 @@
                     <div class="card mb-4">
                         <h5 class="card-header">Ceza Durumu</h5>
                         <div class="card-body">
-                            <div class="alert alert-success">
-                                <i class="bx bx-check-circle me-2"></i>
-                                Personelin ceza kaydı bulunmamaktadır.
-                            </div>
+                            @if (Cezalar?.Any() == true)
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Ceza Sebebi</th>
+                                                <th>Alt Bendi</th>
+                                                <th>Ceza Tarihi</th>
+                                                <th>Açıklama</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var ceza in Cezalar.OrderByDescending(c => c.CezaTarihi))
+                                            {
+                                                <tr>
+                                                    <td><strong>@ceza.CezaSebebi</strong></td>
+                                                    <td>@(string.IsNullOrEmpty(ceza.AltBendi) ? "-" : ceza.AltBendi)</td>
+                                                    <td>@ceza.CezaTarihi.ToString("dd.MM.yyyy")</td>
+                                                    <td>@(string.IsNullOrEmpty(ceza.Aciklama) ? "-" : ceza.Aciklama)</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-success">
+                                    <i class="bx bx-check-circle me-2"></i>
+                                    Personelin ceza kaydı bulunmamaktadır.
+                                </div>
+                            }
                         </div>
                     </div>
                 }
@@ -399,10 +579,48 @@
                     <div class="card mb-4">
                         <h5 class="card-header">Engel Bilgileri</h5>
                         <div class="card-body">
-                            <div class="alert alert-info">
-                                <i class="bx bx-info-circle me-2"></i>
-                                Engel bilgisi bulunmamaktadır.
-                            </div>
+                            @if (Engeller?.Any() == true)
+                            {
+                                <div class="row">
+                                    @foreach (var engel in Engeller)
+                                    {
+                                        <div class="col-md-12 mb-3">
+                                            <div class="card border-warning">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">
+                                                        <span class="badge bg-warning">Engel Derecesi: @engel.EngelDerecesi</span>
+                                                    </h6>
+                                                    <div class="mt-3">
+                                                        @if (!string.IsNullOrEmpty(engel.EngelNedeni1))
+                                                        {
+                                                            <p class="mb-2"><strong>Engel Nedeni 1:</strong> @engel.EngelNedeni1</p>
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(engel.EngelNedeni2))
+                                                        {
+                                                            <p class="mb-2"><strong>Engel Nedeni 2:</strong> @engel.EngelNedeni2</p>
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(engel.EngelNedeni3))
+                                                        {
+                                                            <p class="mb-2"><strong>Engel Nedeni 3:</strong> @engel.EngelNedeni3</p>
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(engel.Aciklama))
+                                                        {
+                                                            <p class="mb-0"><strong>Açıklama:</strong> @engel.Aciklama</p>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-info">
+                                    <i class="bx bx-info-circle me-2"></i>
+                                    Engel bilgisi bulunmamaktadır.
+                                </div>
+                            }
                         </div>
                     </div>
                 }

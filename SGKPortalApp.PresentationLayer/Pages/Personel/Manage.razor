@@ -325,20 +325,39 @@
                                     <div class="col-md-12 mb-3">
                                         <label class="form-label">Aktiflik Durumu <span class="text-danger">*</span></label>
                                         <div class="d-flex gap-4">
-                                            @foreach (var durum in Enum.GetValues<PersonelAktiflikDurum>())
+                                            @if (IsEditMode)
+                                            {
+                                                @foreach (var durum in Enum.GetValues<PersonelAktiflikDurum>())
+                                                {
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" 
+                                                               type="radio" 
+                                                               name="aktiflikDurumu" 
+                                                               id="aktiflik_@durum" 
+                                                               value="@durum"
+                                                               checked="@(FormModel.PersonelAktiflikDurum == durum)"
+                                                               @onchange="@(() => FormModel.PersonelAktiflikDurum = durum)" />
+                                                        <label class="form-check-label" for="aktiflik_@durum">
+                                                            @GetEnumDisplayName(durum)
+                                                        </label>
+                                                    </div>
+                                                }
+                                            }
+                                            else
                                             {
                                                 <div class="form-check">
                                                     <input class="form-check-input" 
                                                            type="radio" 
                                                            name="aktiflikDurumu" 
-                                                           id="aktiflik_@durum" 
-                                                           value="@durum"
-                                                           checked="@(FormModel.PersonelAktiflikDurum == durum)"
-                                                           @onchange="@(() => FormModel.PersonelAktiflikDurum = durum)" />
-                                                    <label class="form-check-label" for="aktiflik_@durum">
-                                                        @GetEnumDisplayName(durum)
+                                                           id="aktiflik_aktif" 
+                                                           value="@PersonelAktiflikDurum.Aktif"
+                                                           checked="true"
+                                                           disabled />
+                                                    <label class="form-check-label" for="aktiflik_aktif">
+                                                        @GetEnumDisplayName(PersonelAktiflikDurum.Aktif)
                                                     </label>
                                                 </div>
+                                                <small class="form-text text-muted">Yeni personel kaydı aktif olarak oluşturulur</small>
                                             }
                                         </div>
                                     </div>
@@ -718,16 +737,16 @@
                                                 </select>
                                             </div>
                                             <div class="col-md-2">
-                                                <label class="form-label small">Sebep</label>
-                                                <input type="text" @bind="yetki.Sebep" class="form-control form-control-sm" />
+                                                <label class="form-label small">Görev Değişim Sebebi</label>
+                                                <input type="text" @bind="yetki.GorevDegisimSebebi" class="form-control form-control-sm" />
                                             </div>
                                             <div class="col-md-2">
                                                 <label class="form-label small">Başlama Tarihi</label>
-                                                <input type="text" @bind="yetki.BaslamaTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                                <input type="text" @bind="yetki.ImzaYetkisiBaslamaTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
                                             </div>
                                             <div class="col-md-2">
                                                 <label class="form-label small">Bitiş Tarihi</label>
-                                                <input type="text" @bind="yetki.BitisTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                                <input type="text" @bind="yetki.ImzaYetkisiBitisTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
                                             </div>
                                             <div class="col-md-1 d-flex align-items-end">
                                                 <button type="button" class="btn btn-sm btn-danger w-100" @onclick="() => RemoveYetki(index)">
@@ -766,7 +785,7 @@
                                         <div class="row mb-3 pb-3 border-bottom">
                                             <div class="col-md-5">
                                                 <label class="form-label small">Ceza Sebebi</label>
-                                                <input type="text" @bind="ceza.Sebep" class="form-control form-control-sm" />
+                                                <input type="text" @bind="ceza.CezaSebebi" class="form-control form-control-sm" />
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label small">Alt Bendi</label>
@@ -822,15 +841,15 @@
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label small">Engel Nedeni 1</label>
-                                                <input type="text" @bind="engel.Neden1" class="form-control form-control-sm" />
+                                                <input type="text" @bind="engel.EngelNedeni1" class="form-control form-control-sm" />
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label small">Engel Nedeni 2</label>
-                                                <input type="text" @bind="engel.Neden2" class="form-control form-control-sm" />
+                                                <input type="text" @bind="engel.EngelNedeni2" class="form-control form-control-sm" />
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label small">Engel Nedeni 3</label>
-                                                <input type="text" @bind="engel.Neden3" class="form-control form-control-sm" />
+                                                <input type="text" @bind="engel.EngelNedeni3" class="form-control form-control-sm" />
                                             </div>
                                             <div class="col-md-1 d-flex align-items-end">
                                                 <button type="button" class="btn btn-sm btn-danger w-100" @onclick="() => RemoveEngel(index)">

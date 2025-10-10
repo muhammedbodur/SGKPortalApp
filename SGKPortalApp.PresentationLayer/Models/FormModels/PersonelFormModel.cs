@@ -63,7 +63,9 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels
 
     public class HizmetModel
     {
+        public int DepartmanId { get; set; }
         public string? Departman { get; set; }
+        public int ServisId { get; set; }
         public string? Servis { get; set; }
         public DateTime? BaslamaTarihi { get; set; }
         public DateTime? AyrilmaTarihi { get; set; }
@@ -81,14 +83,14 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels
     {
         public int DepartmanId { get; set; }
         public int ServisId { get; set; }
-        public string? Sebep { get; set; }
-        public DateTime? BaslamaTarihi { get; set; }
-        public DateTime? BitisTarihi { get; set; }
+        public string? GorevDegisimSebebi { get; set; }
+        public DateTime? ImzaYetkisiBaslamaTarihi { get; set; }
+        public DateTime? ImzaYetkisiBitisTarihi { get; set; }
     }
 
     public class CezaModel
     {
-        public string? Sebep { get; set; }
+        public string? CezaSebebi { get; set; }
         public string? AltBendi { get; set; }
         public DateTime? CezaTarihi { get; set; }
     }
@@ -96,9 +98,9 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels
     public class EngelModel
     {
         public EngelDerecesi EngelDerecesi { get; set; }
-        public string? Neden1 { get; set; }
-        public string? Neden2 { get; set; }
-        public string? Neden3 { get; set; }
+        public string? EngelNedeni1 { get; set; }
+        public string? EngelNedeni2 { get; set; }
+        public string? EngelNedeni3 { get; set; }
     }
 
     public class Step1Model

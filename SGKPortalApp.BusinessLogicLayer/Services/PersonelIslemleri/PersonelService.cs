@@ -251,5 +251,244 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     .ErrorResult("Servis personelleri getirilirken bir hata oluştu", ex.Message);
             }
         }
+
+        public async Task<ApiResponseDto<PersonelResponseDto>> CreateCompleteAsync(PersonelCompleteRequestDto request)
+        {
+            return await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                try
+                {
+                    // 1. Personel kaydet
+                    var personel = _mapper.Map<Personel>(request.Personel);
+                    await _unitOfWork.Repository<Personel>().AddAsync(personel);
+                    await _unitOfWork.SaveChangesAsync();
+
+                    var tcKimlikNo = personel.TcKimlikNo;
+
+                    // 2. Çocukları kaydet
+                    if (request.Cocuklar?.Any() == true)
+                    {
+                        foreach (var cocukDto in request.Cocuklar)
+                        {
+                            cocukDto.PersonelTcKimlikNo = tcKimlikNo;
+                            var cocuk = _mapper.Map<PersonelCocuk>(cocukDto);
+                            await _unitOfWork.Repository<PersonelCocuk>().AddAsync(cocuk);
+                        }
+                    }
+
+                    // 3. Hizmetleri kaydet
+                    if (request.Hizmetler?.Any() == true)
+                    {
+                        foreach (var hizmetDto in request.Hizmetler)
+                        {
+                            hizmetDto.TcKimlikNo = tcKimlikNo;
+                            var hizmet = _mapper.Map<PersonelHizmet>(hizmetDto);
+                            await _unitOfWork.Repository<PersonelHizmet>().AddAsync(hizmet);
+                        }
+                    }
+
+                    // 4. Eğitimleri kaydet
+                    if (request.Egitimler?.Any() == true)
+                    {
+                        foreach (var egitimDto in request.Egitimler)
+                        {
+                            egitimDto.TcKimlikNo = tcKimlikNo;
+                            var egitim = _mapper.Map<PersonelEgitim>(egitimDto);
+                            await _unitOfWork.Repository<PersonelEgitim>().AddAsync(egitim);
+                        }
+                    }
+
+                    // 5. İmza Yetkilerini kaydet
+                    if (request.ImzaYetkileri?.Any() == true)
+                    {
+                        foreach (var yetkiDto in request.ImzaYetkileri)
+                        {
+                            yetkiDto.TcKimlikNo = tcKimlikNo;
+                            var yetki = _mapper.Map<PersonelImzaYetkisi>(yetkiDto);
+                            await _unitOfWork.Repository<PersonelImzaYetkisi>().AddAsync(yetki);
+                        }
+                    }
+
+                    // 6. Cezaları kaydet
+                    if (request.Cezalar?.Any() == true)
+                    {
+                        foreach (var cezaDto in request.Cezalar)
+                        {
+                            cezaDto.TcKimlikNo = tcKimlikNo;
+                            var ceza = _mapper.Map<PersonelCeza>(cezaDto);
+                            await _unitOfWork.Repository<PersonelCeza>().AddAsync(ceza);
+                        }
+                    }
+
+                    // 7. Engelleri kaydet
+                    if (request.Engeller?.Any() == true)
+                    {
+                        foreach (var engelDto in request.Engeller)
+                        {
+                            engelDto.TcKimlikNo = tcKimlikNo;
+                            var engel = _mapper.Map<PersonelEngel>(engelDto);
+                            await _unitOfWork.Repository<PersonelEngel>().AddAsync(engel);
+                        }
+                    }
+
+                    // Tüm değişiklikleri kaydet
+                    await _unitOfWork.SaveChangesAsync();
+
+                    // Personel bilgisini geri döndür
+                    var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
+                    var savedPersonel = await personelRepo.GetByTcKimlikNoWithDetailsAsync(tcKimlikNo);
+                    var personelDto = _mapper.Map<PersonelResponseDto>(savedPersonel);
+
+                    return ApiResponseDto<PersonelResponseDto>
+                        .SuccessResult(personelDto, "Personel ve tüm bilgileri başarıyla kaydedildi");
+                }
+                catch (DatabaseException ex)
+                {
+                    _logger.LogWarning(ex, "Veritabanı kısıtlama hatası: {ErrorType}", ex.ErrorType);
+                    return ApiResponseDto<PersonelResponseDto>
+                        .ErrorResult(ex.UserFriendlyMessage, ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Personel toplu kayıt sırasında hata oluştu");
+                    return ApiResponseDto<PersonelResponseDto>
+                        .ErrorResult("Personel kaydedilirken bir hata oluştu. Tüm işlemler geri alındı.", ex.Message);
+                }
+            });
+        }
+
+        public async Task<ApiResponseDto<PersonelResponseDto>> UpdateCompleteAsync(string tcKimlikNo, PersonelCompleteRequestDto request)
+        {
+            return await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                try
+                {
+                    // 1. Personel güncelle
+                    var personel = await _unitOfWork.Repository<Personel>().GetByIdAsync(tcKimlikNo);
+                    if (personel == null)
+                        return ApiResponseDto<PersonelResponseDto>.ErrorResult("Personel bulunamadı");
+
+                    _mapper.Map(request.Personel, personel);
+                    _unitOfWork.Repository<Personel>().Update(personel);
+                    await _unitOfWork.SaveChangesAsync();
+
+                    // 2. Mevcut alt kayıtları sil
+                    var mevcutCocuklar = await _unitOfWork.Repository<PersonelCocuk>()
+                        .GetAllAsync(c => c.PersonelTcKimlikNo == tcKimlikNo);
+                    foreach (var cocuk in mevcutCocuklar)
+                        _unitOfWork.Repository<PersonelCocuk>().Delete(cocuk);
+
+                    var mevcutHizmetler = await _unitOfWork.Repository<PersonelHizmet>()
+                        .GetAllAsync(h => h.TcKimlikNo == tcKimlikNo);
+                    foreach (var hizmet in mevcutHizmetler)
+                        _unitOfWork.Repository<PersonelHizmet>().Delete(hizmet);
+
+                    var mevcutEgitimler = await _unitOfWork.Repository<PersonelEgitim>()
+                        .GetAllAsync(e => e.TcKimlikNo == tcKimlikNo);
+                    foreach (var egitim in mevcutEgitimler)
+                        _unitOfWork.Repository<PersonelEgitim>().Delete(egitim);
+
+                    var mevcutYetkiler = await _unitOfWork.Repository<PersonelImzaYetkisi>()
+                        .GetAllAsync(y => y.TcKimlikNo == tcKimlikNo);
+                    foreach (var yetki in mevcutYetkiler)
+                        _unitOfWork.Repository<PersonelImzaYetkisi>().Delete(yetki);
+
+                    var mevcutCezalar = await _unitOfWork.Repository<PersonelCeza>()
+                        .GetAllAsync(c => c.TcKimlikNo == tcKimlikNo);
+                    foreach (var ceza in mevcutCezalar)
+                        _unitOfWork.Repository<PersonelCeza>().Delete(ceza);
+
+                    var mevcutEngeller = await _unitOfWork.Repository<PersonelEngel>()
+                        .GetAllAsync(e => e.TcKimlikNo == tcKimlikNo);
+                    foreach (var engel in mevcutEngeller)
+                        _unitOfWork.Repository<PersonelEngel>().Delete(engel);
+
+                    await _unitOfWork.SaveChangesAsync();
+
+                    // 3. Yeni kayıtları ekle (CreateCompleteAsync ile aynı mantık)
+                    if (request.Cocuklar?.Any() == true)
+                    {
+                        foreach (var cocukDto in request.Cocuklar)
+                        {
+                            cocukDto.PersonelTcKimlikNo = tcKimlikNo;
+                            var cocuk = _mapper.Map<PersonelCocuk>(cocukDto);
+                            await _unitOfWork.Repository<PersonelCocuk>().AddAsync(cocuk);
+                        }
+                    }
+
+                    if (request.Hizmetler?.Any() == true)
+                    {
+                        foreach (var hizmetDto in request.Hizmetler)
+                        {
+                            hizmetDto.TcKimlikNo = tcKimlikNo;
+                            var hizmet = _mapper.Map<PersonelHizmet>(hizmetDto);
+                            await _unitOfWork.Repository<PersonelHizmet>().AddAsync(hizmet);
+                        }
+                    }
+
+                    if (request.Egitimler?.Any() == true)
+                    {
+                        foreach (var egitimDto in request.Egitimler)
+                        {
+                            egitimDto.TcKimlikNo = tcKimlikNo;
+                            var egitim = _mapper.Map<PersonelEgitim>(egitimDto);
+                            await _unitOfWork.Repository<PersonelEgitim>().AddAsync(egitim);
+                        }
+                    }
+
+                    if (request.ImzaYetkileri?.Any() == true)
+                    {
+                        foreach (var yetkiDto in request.ImzaYetkileri)
+                        {
+                            yetkiDto.TcKimlikNo = tcKimlikNo;
+                            var yetki = _mapper.Map<PersonelImzaYetkisi>(yetkiDto);
+                            await _unitOfWork.Repository<PersonelImzaYetkisi>().AddAsync(yetki);
+                        }
+                    }
+
+                    if (request.Cezalar?.Any() == true)
+                    {
+                        foreach (var cezaDto in request.Cezalar)
+                        {
+                            cezaDto.TcKimlikNo = tcKimlikNo;
+                            var ceza = _mapper.Map<PersonelCeza>(cezaDto);
+                            await _unitOfWork.Repository<PersonelCeza>().AddAsync(ceza);
+                        }
+                    }
+
+                    if (request.Engeller?.Any() == true)
+                    {
+                        foreach (var engelDto in request.Engeller)
+                        {
+                            engelDto.TcKimlikNo = tcKimlikNo;
+                            var engel = _mapper.Map<PersonelEngel>(engelDto);
+                            await _unitOfWork.Repository<PersonelEngel>().AddAsync(engel);
+                        }
+                    }
+
+                    await _unitOfWork.SaveChangesAsync();
+
+                    // Güncellenmiş personel bilgisini döndür
+                    var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
+                    var updatedPersonel = await personelRepo.GetByTcKimlikNoWithDetailsAsync(tcKimlikNo);
+                    var personelDto = _mapper.Map<PersonelResponseDto>(updatedPersonel);
+
+                    return ApiResponseDto<PersonelResponseDto>
+                        .SuccessResult(personelDto, "Personel ve tüm bilgileri başarıyla güncellendi");
+                }
+                catch (DatabaseException ex)
+                {
+                    _logger.LogWarning(ex, "Veritabanı kısıtlama hatası: {ErrorType}", ex.ErrorType);
+                    return ApiResponseDto<PersonelResponseDto>
+                        .ErrorResult(ex.UserFriendlyMessage, ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Personel toplu güncelleme sırasında hata oluştu. TC: {TcKimlikNo}", tcKimlikNo);
+                    return ApiResponseDto<PersonelResponseDto>
+                        .ErrorResult("Personel güncellenirken bir hata oluştu. Tüm işlemler geri alındı.", ex.Message);
+                }
+            });
+        }
     }
 }

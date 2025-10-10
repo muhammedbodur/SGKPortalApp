@@ -16,6 +16,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
         [Inject] private IPersonelApiService _personelApiService { get; set; } = default!;
+        [Inject] private IPersonelCocukApiService _personelCocukApiService { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════
         // PARAMETERS
@@ -28,6 +29,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         // ═══════════════════════════════════════════════════════
 
         private PersonelResponseDto? Personel { get; set; }
+        private List<PersonelCocukResponseDto> Cocuklar { get; set; } = new();
+        private List<PersonelHizmetResponseDto> Hizmetler { get; set; } = new();
+        private List<PersonelEgitimResponseDto> Egitimler { get; set; } = new();
+        private List<PersonelImzaYetkisiResponseDto> ImzaYetkileri { get; set; } = new();
+        private List<PersonelCezaResponseDto> Cezalar { get; set; } = new();
+        private List<PersonelEngelResponseDto> Engeller { get; set; } = new();
 
         // ═══════════════════════════════════════════════════════
         // UI STATE
@@ -66,6 +73,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 {
                     NotFound = true;
                 }
+                else
+                {
+                    // Alt tablo bilgilerini yükle
+                    await LoadCocuklar();
+                    // Diğer alt tabloları da yükleyebiliriz (isteğe bağlı - lazy loading)
+                }
             }
             catch (Exception ex)
             {
@@ -75,6 +88,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        private async Task LoadCocuklar()
+        {
+            try
+            {
+                var response = await _personelCocukApiService.GetByPersonelTcKimlikNoAsync(TcKimlikNo!);
+                Cocuklar = response?.Data ?? new List<PersonelCocukResponseDto>();
+            }
+            catch (Exception ex)
+            {
+                await _toastService.ShowErrorAsync($"Çocuk bilgileri yüklenirken hata oluştu: {ex.Message}");
             }
         }
 

@@ -15,5 +15,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri
         Task<ApiResponseDto<PagedResponseDto<PersonelListResponseDto>>> GetPagedAsync(PersonelFilterRequestDto filter);
         Task<ApiResponseDto<List<PersonelResponseDto>>> GetByDepartmanAsync(int departmanId);
         Task<ApiResponseDto<List<PersonelResponseDto>>> GetByServisAsync(int servisId);
+        
+        // Toplu kayıt işlemleri (Transaction)
+        Task<ApiResponseDto<PersonelResponseDto>> CreateCompleteAsync(PersonelCompleteRequestDto request);
+        Task<ApiResponseDto<PersonelResponseDto>> UpdateCompleteAsync(string tcKimlikNo, PersonelCompleteRequestDto request);
     }
 }

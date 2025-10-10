@@ -1,3 +1,4 @@
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Base;
@@ -35,6 +36,17 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         public async Task<bool> DeleteAsync(string tcKimlikNo)
         {
             return await DeleteAsync($"api/personel/{tcKimlikNo}");
+        }
+
+        // Toplu kayıt metodları (Transaction)
+        public async Task<ApiResponseDto<PersonelResponseDto>?> CreateCompleteAsync(PersonelCompleteRequestDto dto)
+        {
+            return await PostAsync<PersonelCompleteRequestDto, ApiResponseDto<PersonelResponseDto>>("api/personel/complete", dto);
+        }
+
+        public async Task<ApiResponseDto<PersonelResponseDto>?> UpdateCompleteAsync(string tcKimlikNo, PersonelCompleteRequestDto dto)
+        {
+            return await PutAsync<PersonelCompleteRequestDto, ApiResponseDto<PersonelResponseDto>>($"api/personel/{tcKimlikNo}/complete", dto);
         }
     }
 }

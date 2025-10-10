@@ -45,6 +45,13 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
         public string? BitirdigiOkul { get; set; }
         public string? BitirdigiBolum { get; set; }
 
+        // Eş bilgileri
+        public string? EsininAdi { get; set; }
+        public EsininIsDurumu EsininIsDurumu { get; set; }
+        public string? EsininUnvani { get; set; }
+        public string? EsininIsAdresi { get; set; }
+        public string? EsininIsSemt { get; set; }
+
         // Resim
         public string? Resim { get; set; }
 

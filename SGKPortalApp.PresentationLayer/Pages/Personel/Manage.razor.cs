@@ -230,42 +230,96 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             IsSaving = true;
             try
             {
+                // Toplu kayıt DTO'sunu hazırla
+                var completeRequest = new PersonelCompleteRequestDto
+                {
+                    Personel = MapToCreateDto(FormModel),
+                    Cocuklar = Cocuklar.Where(c => c.DogumTarihi.HasValue && !string.IsNullOrEmpty(c.Isim)).Select(c => new PersonelCocukCreateRequestDto
+                    {
+                        PersonelTcKimlikNo = FormModel.TcKimlikNo,
+                        CocukAdi = c.Isim,
+                        CocukDogumTarihi = DateOnly.FromDateTime(c.DogumTarihi!.Value),
+                        OgrenimDurumu = OgrenimDurumu.ilkokul
+                    }).ToList(),
+                    Hizmetler = Hizmetler.Where(h => h.BaslamaTarihi.HasValue && h.DepartmanId > 0 && h.ServisId > 0).Select(h => new PersonelHizmetCreateRequestDto
+                    {
+                        TcKimlikNo = FormModel.TcKimlikNo,
+                        DepartmanId = h.DepartmanId,
+                        ServisId = h.ServisId,
+                        GorevBaslamaTarihi = h.BaslamaTarihi!.Value,
+                        GorevAyrilmaTarihi = h.AyrilmaTarihi,
+                        Sebep = h.Sebep
+                    }).ToList(),
+                    Egitimler = Egitimler.Where(e => e.BaslangicTarihi.HasValue && !string.IsNullOrEmpty(e.EgitimAdi)).Select(e => new PersonelEgitimCreateRequestDto
+                    {
+                        TcKimlikNo = FormModel.TcKimlikNo,
+                        EgitimAdi = e.EgitimAdi!,
+                        EgitimBaslangicTarihi = e.BaslangicTarihi!.Value,
+                        EgitimBitisTarihi = e.BitisTarihi,
+                        Aciklama = null
+                    }).ToList(),
+                    ImzaYetkileri = Yetkiler.Where(y => y.ImzaYetkisiBaslamaTarihi.HasValue && y.DepartmanId > 0 && y.ServisId > 0).Select(y => new PersonelImzaYetkisiCreateRequestDto
+                    {
+                        TcKimlikNo = FormModel.TcKimlikNo,
+                        DepartmanId = y.DepartmanId,
+                        ServisId = y.ServisId,
+                        GorevDegisimSebebi = y.GorevDegisimSebebi,
+                        ImzaYetkisiBaslamaTarihi = y.ImzaYetkisiBaslamaTarihi!.Value,
+                        ImzaYetkisiBitisTarihi = y.ImzaYetkisiBitisTarihi,
+                        Aciklama = null
+                    }).ToList(),
+                    Cezalar = Cezalar.Where(c => c.CezaTarihi.HasValue && !string.IsNullOrEmpty(c.CezaSebebi)).Select(c => new PersonelCezaCreateRequestDto
+                    {
+                        TcKimlikNo = FormModel.TcKimlikNo,
+                        CezaSebebi = c.CezaSebebi!,
+                        AltBendi = c.AltBendi,
+                        CezaTarihi = c.CezaTarihi!.Value,
+                        Aciklama = null
+                    }).ToList(),
+                    Engeller = Engeller.Where(e => !string.IsNullOrEmpty(e.EngelNedeni1)).Select(e => new PersonelEngelCreateRequestDto
+                    {
+                        TcKimlikNo = FormModel.TcKimlikNo,
+                        EngelDerecesi = e.EngelDerecesi,
+                        EngelNedeni1 = e.EngelNedeni1,
+                        EngelNedeni2 = e.EngelNedeni2,
+                        EngelNedeni3 = e.EngelNedeni3,
+                        Aciklama = null
+                    }).ToList()
+                };
+
                 if (IsEditMode)
                 {
-                    // Güncelleme
-                    var updateDto = MapToUpdateDto(FormModel);
-                    var result = await _personelApiService.UpdateAsync(FormModel.TcKimlikNo, updateDto);
+                    // Toplu güncelleme (Transaction)
+                    var response = await _personelApiService.UpdateCompleteAsync(FormModel.TcKimlikNo, completeRequest);
                     
-                    if (result != null)
+                    if (response?.Success == true)
                     {
-                        await _toastService.ShowSuccessAsync($"{FormModel.AdSoyad} başarıyla güncellendi!");
+                        await _toastService.ShowSuccessAsync($"{FormModel.AdSoyad} ve tüm bilgileri başarıyla güncellendi!");
                         _navigationManager.NavigateTo($"/personel/detail/{FormModel.TcKimlikNo}");
                     }
                     else
                     {
-                        await _toastService.ShowErrorAsync("Güncelleme işlemi başarısız oldu!");
+                        await _toastService.ShowErrorAsync(response?.Message ?? "Güncelleme işlemi başarısız oldu!");
                     }
                 }
                 else
                 {
-                    // Yeni ekleme
-                    var createDto = MapToCreateDto(FormModel);
-                    var result = await _personelApiService.CreateAsync(createDto);
+                    // Toplu ekleme (Transaction)
+                    var response = await _personelApiService.CreateCompleteAsync(completeRequest);
                     
-                    if (result != null)
+                    if (response?.Success == true)
                     {
-                        await _toastService.ShowSuccessAsync($"{FormModel.AdSoyad} başarıyla eklendi!");
+                        await _toastService.ShowSuccessAsync($"{FormModel.AdSoyad} ve tüm bilgileri başarıyla eklendi!");
                         _navigationManager.NavigateTo($"/personel/detail/{FormModel.TcKimlikNo}");
                     }
                     else
                     {
-                        await _toastService.ShowErrorAsync("Ekleme işlemi başarısız oldu!");
+                        await _toastService.ShowErrorAsync(response?.Message ?? "Ekleme işlemi başarısız oldu!");
                     }
                 }
             }
             catch (HttpRequestException ex) when (ex.Message.Contains("Validation Error"))
             {
-                // Validation hatalarını parse et
                 var errorMessage = "Lütfen aşağıdaki alanları kontrol edin:\n";
                 if (ex.Message.Contains("Email"))
                     errorMessage += "- Email adresi gerekli\n";
@@ -276,8 +330,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             }
             catch (HttpRequestException ex)
             {
-                // API'den dönen hata mesajını direkt göster
-                // DatabaseException'dan gelen user-friendly mesajlar burada
                 await _toastService.ShowErrorAsync(ex.Message);
             }
             catch (Exception ex)

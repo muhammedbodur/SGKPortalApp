@@ -87,5 +87,26 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
             var result = await _personelService.GetByServisAsync(servisId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
+
+        // Toplu kayıt endpoint'leri (Transaction)
+        [HttpPost("complete")]
+        public async Task<IActionResult> CreateComplete([FromBody] PersonelCompleteRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _personelService.CreateCompleteAsync(request);
+            return result.Success ? CreatedAtAction(nameof(GetByTcKimlikNo), new { tcKimlikNo = result.Data?.TcKimlikNo }, result) : BadRequest(result);
+        }
+
+        [HttpPut("{tcKimlikNo}/complete")]
+        public async Task<IActionResult> UpdateComplete(string tcKimlikNo, [FromBody] PersonelCompleteRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _personelService.UpdateCompleteAsync(tcKimlikNo, request);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
     }
 }
