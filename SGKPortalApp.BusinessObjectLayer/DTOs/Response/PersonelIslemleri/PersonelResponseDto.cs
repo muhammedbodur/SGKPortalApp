@@ -1,4 +1,4 @@
-﻿using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 
 namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
@@ -18,6 +18,8 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
         public string ServisAdi { get; set; } = string.Empty;
         public int UnvanId { get; set; }
         public string UnvanAdi { get; set; } = string.Empty;
+        public int AtanmaNedeniId { get; set; }
+        public string AtanmaNedeniAdi { get; set; } = string.Empty;
 
         // İletişim bilgileri
         public int Dahili { get; set; }

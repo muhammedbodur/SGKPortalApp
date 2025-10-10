@@ -35,6 +35,7 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels
         public string? Semt { get; set; }
         public int IlId { get; set; }
         public int IlceId { get; set; }
+        public int AtanmaNedeniId { get; set; }
         public DateTime DogumTarihi { get; set; } = DateTime.Now.AddYears(-30);
         public Cinsiyet Cinsiyet { get; set; }
         public MedeniDurumu MedeniDurumu { get; set; }

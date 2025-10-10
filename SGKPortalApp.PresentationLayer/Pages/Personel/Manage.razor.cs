@@ -33,6 +33,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         [Inject] private IUnvanApiService _unvanApiService { get; set; } = default!;
         [Inject] private IIlApiService _ilApiService { get; set; } = default!;
         [Inject] private IIlceApiService _ilceApiService { get; set; } = default!;
+        [Inject] private IAtanmaNedeniApiService _atanmaNedeniApiService { get; set; } = default!;
         [Inject] private IMapper _mapper { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════
@@ -54,6 +55,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private List<IlResponseDto> Iller { get; set; } = new();
         private List<IlceResponseDto> TumIlceler { get; set; } = new();
         private List<IlceResponseDto> Ilceler { get; set; } = new();
+        private List<AtanmaNedeniResponseDto> AtanmaNedenleri { get; set; } = new();
         private bool IsLoading { get; set; } = false;
         private bool IsSaving { get; set; } = false;
         private int CurrentStep { get; set; } = 1; // 1: TC+Ad Soyad, 2: Tüm bilgiler
@@ -125,14 +127,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 var unvanTask = _unvanApiService.GetAllAsync();
                 var ilTask = _ilApiService.GetAllAsync();
                 var ilceTask = _ilceApiService.GetAllAsync();
+                var atanmaNedeniTask = _atanmaNedeniApiService.GetAllAsync();
 
-                await Task.WhenAll(departmanTask, servisTask, unvanTask, ilTask, ilceTask);
+                await Task.WhenAll(departmanTask, servisTask, unvanTask, ilTask, ilceTask, atanmaNedeniTask);
 
                 Departmanlar = (await departmanTask)?.Data ?? new List<DepartmanResponseDto>();
                 Servisler = (await servisTask)?.Data ?? new List<ServisResponseDto>();
                 Unvanlar = (await unvanTask)?.Data ?? new List<UnvanResponseDto>();
                 Iller = (await ilTask)?.Data ?? new List<IlResponseDto>();
                 TumIlceler = (await ilceTask)?.Data ?? new List<IlceResponseDto>();
+                AtanmaNedenleri = (await atanmaNedeniTask)?.Data ?? new List<AtanmaNedeniResponseDto>();
                 
                 // İl seçiliyse ilçeleri filtrele
                 FilterIlceler();

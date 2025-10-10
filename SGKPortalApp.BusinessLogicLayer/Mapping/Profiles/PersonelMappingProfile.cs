@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
@@ -91,9 +91,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore());
-
-
-            // ═══════════════════════════════════════════════════════
             // PERSONEL MAPPING'LERİ
             // ═══════════════════════════════════════════════════════
 
@@ -104,13 +101,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
                 .ForMember(dest => dest.ServisAdi,
                     opt => opt.MapFrom(src => src.Servis != null ? src.Servis.ServisAdi : ""))
                 .ForMember(dest => dest.UnvanAdi,
-                    opt => opt.MapFrom(src => src.Unvan != null ? src.Unvan.UnvanAdi : ""));
+                    opt => opt.MapFrom(src => src.Unvan != null ? src.Unvan.UnvanAdi : ""))
+                .ForMember(dest => dest.AtanmaNedeniAdi,
+                    opt => opt.MapFrom(src => src.AtanmaNedeni != null ? src.AtanmaNedeni.AtanmaNedeni : ""));
 
             // Create Request DTO → Entity
             CreateMap<PersonelCreateRequestDto, Personel>()
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
-                .ForMember(dest => dest.Departman, opt => opt.Ignore())
                 .ForMember(dest => dest.Servis, opt => opt.Ignore())
                 .ForMember(dest => dest.Unvan, opt => opt.Ignore())
                 .ForMember(dest => dest.PersonelCocuklari, opt => opt.Ignore());

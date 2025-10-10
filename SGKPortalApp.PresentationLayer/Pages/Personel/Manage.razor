@@ -305,18 +305,42 @@
                                         <select @bind="FormModel.PersonelTipi" class="form-select">
                                             @foreach (var tip in Enum.GetValues<PersonelTipi>())
                                             {
-                                                <option value="@tip">@tip</option>
+                                                <option value="@tip">@GetEnumDisplayName(tip)</option>
                                             }
                                         </select>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">Aktiflik Durumu</label>
-                                        <select @bind="FormModel.PersonelAktiflikDurum" class="form-select">
-                                            @foreach (var durum in Enum.GetValues<PersonelAktiflikDurum>())
+                                        <label class="form-label">Atanma Nedeni <span class="text-danger">*</span></label>
+                                        <select @bind="FormModel.AtanmaNedeniId" class="form-select select2" id="atanmaNedeniSelect">
+                                            <option value="0">Seçiniz...</option>
+                                            @foreach (var atanmaNedeni in AtanmaNedenleri)
                                             {
-                                                <option value="@durum">@durum</option>
+                                                <option value="@atanmaNedeni.AtanmaNedeniId">@atanmaNedeni.AtanmaNedeni</option>
                                             }
                                         </select>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">Aktiflik Durumu <span class="text-danger">*</span></label>
+                                        <div class="d-flex gap-4">
+                                            @foreach (var durum in Enum.GetValues<PersonelAktiflikDurum>())
+                                            {
+                                                <div class="form-check">
+                                                    <input class="form-check-input" 
+                                                           type="radio" 
+                                                           name="aktiflikDurumu" 
+                                                           id="aktiflik_@durum" 
+                                                           value="@durum"
+                                                           checked="@(FormModel.PersonelAktiflikDurum == durum)"
+                                                           @onchange="@(() => FormModel.PersonelAktiflikDurum = durum)" />
+                                                    <label class="form-check-label" for="aktiflik_@durum">
+                                                        @GetEnumDisplayName(durum)
+                                                    </label>
+                                                </div>
+                                            }
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -452,7 +476,7 @@
                                         <select @bind="FormModel.OgrenimDurumu" class="form-select">
                                             @foreach (var ogr in Enum.GetValues<OgrenimDurumu>())
                                             {
-                                                <option value="@ogr">@ogr</option>
+                                                <option value="@ogr">@GetEnumDisplayName(ogr)</option>
                                             }
                                         </select>
                                     </div>
@@ -495,7 +519,7 @@
                                         <select @bind="FormModel.EsininIsDurumu" class="form-select">
                                             @foreach (var durum in Enum.GetValues<EsininIsDurumu>())
                                             {
-                                                <option value="@durum">@durum</option>
+                                                <option value="@durum">@GetEnumDisplayName(durum)</option>
                                             }
                                         </select>
                                     </div>
