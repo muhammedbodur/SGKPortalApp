@@ -65,17 +65,17 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         [ForeignKey(nameof(IlceId))]
         public Ilce? Ilce { get; set; }
 
-        public int SendikaId { get; set; }
+        public int? SendikaId { get; set; }
         [ForeignKey(nameof(SendikaId))]
         [InverseProperty("Personeller")]
         public Sendika? Sendika { get; set; }
 
         // Eşinin iş bilgileri
-        public int EsininIsIlId { get; set; } = 0;
+        public int? EsininIsIlId { get; set; } = 0;
         [ForeignKey(nameof(EsininIsIlId))]
         public Il? EsininIsIl { get; set; }
 
-        public int EsininIsIlceId { get; set; } = 0;
+        public int? EsininIsIlceId { get; set; } = 0;
         [ForeignKey(nameof(EsininIsIlceId))]
         public Ilce? EsininIsIlce { get; set; }
 
