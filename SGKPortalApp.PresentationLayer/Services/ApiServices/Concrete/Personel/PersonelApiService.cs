@@ -1,8 +1,10 @@
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Base;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
+using System.Text;
+using System.Text.Json;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
 {
@@ -41,6 +43,8 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         // Toplu kayıt metodları (Transaction)
         public async Task<ApiResponseDto<PersonelResponseDto>?> CreateCompleteAsync(PersonelCompleteRequestDto dto)
         {
+            var json = JsonSerializer.Serialize(dto);
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
             return await PostAsync<PersonelCompleteRequestDto, ApiResponseDto<PersonelResponseDto>>("api/personel/complete", dto);
         }
 

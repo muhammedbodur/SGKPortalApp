@@ -100,10 +100,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 // Query string'den TC ve Ad Soyad kontrolü (Index'ten geldiyse)
                 var uri = new Uri(_navigationManager.Uri);
                 var queryParams = QueryHelpers.ParseQuery(uri.Query);
-                
-                if (queryParams.TryGetValue("tc", out var tc) && 
+
+                if (queryParams.TryGetValue("tc", out var tc) &&
                     queryParams.TryGetValue("adsoyad", out var adSoyad) &&
-                    !string.IsNullOrWhiteSpace(tc) && 
+                    !string.IsNullOrWhiteSpace(tc) &&
                     !string.IsNullOrWhiteSpace(adSoyad))
                 {
                     // Index'ten geldi, direkt Adım 2'ye geç
@@ -141,15 +141,35 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 Iller = (await ilTask)?.Data ?? new List<IlResponseDto>();
                 TumIlceler = (await ilceTask)?.Data ?? new List<IlceResponseDto>();
                 AtanmaNedenleri = (await atanmaNedeniTask)?.Data ?? new List<AtanmaNedeniResponseDto>();
-                
+
                 // İl seçiliyse ilçeleri filtrele
                 FilterIlceler();
-                
+
                 // Select2'leri initialize et
                 await RefreshSelect2();
+
+                // ✅ DEBUG: Yüklenen veriler
+                Console.WriteLine($"✅ Lookup Data Yüklendi:");
+                Console.WriteLine($"   📦 Departmanlar: {Departmanlar.Count}");
+                Console.WriteLine($"   📦 Servisler: {Servisler.Count}");
+                Console.WriteLine($"   📦 Ünvanlar: {Unvanlar.Count}");
+                Console.WriteLine($"   📦 Hizmet Binaları: {HizmetBinalari.Count}");
+                Console.WriteLine($"   📦 İller: {Iller.Count}");
+                Console.WriteLine($"   📦 İlçeler: {TumIlceler.Count}");
+                Console.WriteLine($"   📦 Atanma Nedenleri: {AtanmaNedenleri.Count}");
+
+                if (HizmetBinalari.Any())
+                {
+                    Console.WriteLine("   🏢 Hizmet Binaları:");
+                    foreach (var bina in HizmetBinalari)
+                    {
+                        Console.WriteLine($"      • ID: {bina.HizmetBinasiId}, Adı: {bina.HizmetBinasiAdi}");
+                    }
+                }
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"❌ Lookup verileri yüklenirken HATA: {ex.Message}");
                 await _toastService.ShowErrorAsync($"Lookup verileri yüklenirken hata: {ex.Message}");
             }
         }
@@ -161,7 +181,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             {
                 // API'den personel verisini getir
                 var personel = await _personelApiService.GetByTcKimlikNoAsync(TcKimlikNo!);
-                
+
                 if (personel == null)
                 {
                     await _toastService.ShowErrorAsync("Personel bulunamadı!");
@@ -171,10 +191,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
                 // DTO'dan FormModel'e dönüştür
                 FormModel = MapToFormModel(personel);
-                
+
                 // İlçeleri filtrele
                 FilterIlceler();
-                
+
                 // Select2'leri initialize et
                 await RefreshSelect2();
             }
@@ -196,6 +216,212 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
 
         // ═══════════════════════════════════════════════════════
+        // ✅ DROPDOWN CHANGE HANDLERS - GÜVENLİ PARSE
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Hizmet Binası değişiklik handler - GÜVENLİ INT PARSE
+        /// </summary>
+        private void OnHizmetBinasiChanged(ChangeEventArgs e)
+        {
+            try
+            {
+                var value = e.Value?.ToString();
+                Console.WriteLine($"🔍 [HIZMET BINASI] Raw Value: '{value}'");
+
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    Console.WriteLine("⚠️ [HIZMET BINASI] Boş değer");
+                    FormModel.HizmetBinasiId = 0;
+                    StateHasChanged();
+                    return;
+                }
+
+                if (int.TryParse(value, out int parsedValue))
+                {
+                    FormModel.HizmetBinasiId = parsedValue;
+                    Console.WriteLine($"✅ [HIZMET BINASI] Parse başarılı: {parsedValue}");
+
+                    // Seçilen binayı logla
+                    var selectedBina = HizmetBinalari.FirstOrDefault(b => b.HizmetBinasiId == parsedValue);
+                    if (selectedBina != null)
+                    {
+                        Console.WriteLine($"   🏢 Seçilen Bina: {selectedBina.HizmetBinasiAdi}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"❌ [HIZMET BINASI] Parse BAŞARISIZ: '{value}'");
+                    FormModel.HizmetBinasiId = 0;
+                }
+
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ [HIZMET BINASI] EXCEPTION: {ex.Message}");
+                FormModel.HizmetBinasiId = 0;
+                StateHasChanged();
+            }
+        }
+
+        /// <summary>
+        /// Departman değişiklik handler - GÜVENLİ INT PARSE
+        /// </summary>
+        private void OnDepartmanChanged(ChangeEventArgs e)
+        {
+            try
+            {
+                var value = e.Value?.ToString();
+                if (int.TryParse(value, out int parsedValue))
+                {
+                    FormModel.DepartmanId = parsedValue;
+                    Console.WriteLine($"✅ [DEPARTMAN] ID: {parsedValue}");
+                }
+                else
+                {
+                    FormModel.DepartmanId = 0;
+                    Console.WriteLine($"❌ [DEPARTMAN] Parse başarısız: '{value}'");
+                }
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ [DEPARTMAN] EXCEPTION: {ex.Message}");
+                FormModel.DepartmanId = 0;
+            }
+        }
+
+        /// <summary>
+        /// Servis değişiklik handler - GÜVENLİ INT PARSE
+        /// </summary>
+        private void OnServisChanged(ChangeEventArgs e)
+        {
+            try
+            {
+                var value = e.Value?.ToString();
+                if (int.TryParse(value, out int parsedValue))
+                {
+                    FormModel.ServisId = parsedValue;
+                    Console.WriteLine($"✅ [SERVIS] ID: {parsedValue}");
+                }
+                else
+                {
+                    FormModel.ServisId = 0;
+                    Console.WriteLine($"❌ [SERVIS] Parse başarısız: '{value}'");
+                }
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ [SERVIS] EXCEPTION: {ex.Message}");
+                FormModel.ServisId = 0;
+            }
+        }
+
+        /// <summary>
+        /// Ünvan değişiklik handler - GÜVENLİ INT PARSE
+        /// </summary>
+        private void OnUnvanChanged(ChangeEventArgs e)
+        {
+            try
+            {
+                var value = e.Value?.ToString();
+                if (int.TryParse(value, out int parsedValue))
+                {
+                    FormModel.UnvanId = parsedValue;
+                    Console.WriteLine($"✅ [ÜNVAN] ID: {parsedValue}");
+                }
+                else
+                {
+                    FormModel.UnvanId = 0;
+                    Console.WriteLine($"❌ [ÜNVAN] Parse başarısız: '{value}'");
+                }
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ [ÜNVAN] EXCEPTION: {ex.Message}");
+                FormModel.UnvanId = 0;
+            }
+        }
+
+        /// <summary>
+        /// İl değişiklik handler - GÜVENLİ INT PARSE + İLÇE FİLTRELEME
+        /// </summary>
+        private void OnIlChanged(ChangeEventArgs e)
+        {
+            try
+            {
+                var value = e.Value?.ToString();
+                Console.WriteLine($"🔍 [İL] Raw Value: '{value}'");
+
+                if (string.IsNullOrWhiteSpace(value))
+                {
+                    FormModel.IlId = 0;
+                    FormModel.IlceId = 0;
+                    Ilceler = new List<IlceResponseDto>();
+                    StateHasChanged();
+                    return;
+                }
+
+                if (int.TryParse(value, out int ilId))
+                {
+                    FormModel.IlId = ilId;
+                    FormModel.IlceId = 0; // İlçe sıfırlansın
+                    Console.WriteLine($"✅ [İL] Parse başarılı: {ilId}");
+
+                    // İlçeleri filtrele
+                    FilterIlceler();
+                    Console.WriteLine($"   📍 {Ilceler.Count} ilçe yüklendi");
+                }
+                else
+                {
+                    Console.WriteLine($"❌ [İL] Parse başarısız: '{value}'");
+                    FormModel.IlId = 0;
+                    FormModel.IlceId = 0;
+                    Ilceler = new List<IlceResponseDto>();
+                }
+
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ [İL] EXCEPTION: {ex.Message}");
+                FormModel.IlId = 0;
+                FormModel.IlceId = 0;
+                Ilceler = new List<IlceResponseDto>();
+            }
+        }
+
+        /// <summary>
+        /// İlçe değişiklik handler - GÜVENLİ INT PARSE
+        /// </summary>
+        private void OnIlceChanged(ChangeEventArgs e)
+        {
+            try
+            {
+                var value = e.Value?.ToString();
+                if (int.TryParse(value, out int parsedValue))
+                {
+                    FormModel.IlceId = parsedValue;
+                    Console.WriteLine($"✅ [İLÇE] ID: {parsedValue}");
+                }
+                else
+                {
+                    FormModel.IlceId = 0;
+                    Console.WriteLine($"❌ [İLÇE] Parse başarısız: '{value}'");
+                }
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ [İLÇE] EXCEPTION: {ex.Message}");
+                FormModel.IlceId = 0;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
         // STEP 1 METHODS (TC + Ad Soyad)
         // ═══════════════════════════════════════════════════════
 
@@ -211,7 +437,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 FormModel.TcKimlikNo = Step1Model.TcKimlikNo;
                 FormModel.AdSoyad = Step1Model.AdSoyad;
                 FormModel.NickName = GenerateNickName(Step1Model.AdSoyad);
-                
+
                 CurrentStep = 2;
                 await _toastService.ShowSuccessAsync("Temel bilgiler kaydedildi. Diğer bilgileri girebilirsiniz.");
             }
@@ -231,6 +457,60 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
         private async Task HandleFinalSubmit()
         {
+            // ✅ DETAYLI VALİDASYON + DEBUG LOG
+            Console.WriteLine("═══════════════════════════════════════════════════════");
+            Console.WriteLine("🚀 FORM SUBMIT BAŞLADI");
+            Console.WriteLine("═══════════════════════════════════════════════════════");
+            Console.WriteLine($"📋 TC Kimlik No: {FormModel.TcKimlikNo}");
+            Console.WriteLine($"📋 Ad Soyad: {FormModel.AdSoyad}");
+            Console.WriteLine($"📋 Email: {FormModel.Email}");
+            Console.WriteLine($"📋 Sicil No: {FormModel.SicilNo}");
+            Console.WriteLine($"───────────────────────────────────────────────────────");
+            Console.WriteLine($"🏢 HizmetBinasiId: {FormModel.HizmetBinasiId}");
+            Console.WriteLine($"🏢 DepartmanId: {FormModel.DepartmanId}");
+            Console.WriteLine($"🏢 ServisId: {FormModel.ServisId}");
+            Console.WriteLine($"🏢 UnvanId: {FormModel.UnvanId}");
+            Console.WriteLine($"🏢 AtanmaNedeniId: {FormModel.AtanmaNedeniId}");
+            Console.WriteLine($"───────────────────────────────────────────────────────");
+            Console.WriteLine($"📍 IlId: {FormModel.IlId}");
+            Console.WriteLine($"📍 IlceId: {FormModel.IlceId}");
+            Console.WriteLine("═══════════════════════════════════════════════════════");
+
+            // Validasyon
+            var validationErrors = new List<string>();
+
+            if (FormModel.HizmetBinasiId == 0)
+                validationErrors.Add("❌ Hizmet Binası seçilmedi!");
+
+            if (FormModel.DepartmanId == 0)
+                validationErrors.Add("❌ Departman seçilmedi!");
+
+            if (FormModel.ServisId == 0)
+                validationErrors.Add("❌ Servis seçilmedi!");
+
+            if (FormModel.UnvanId == 0)
+                validationErrors.Add("❌ Ünvan seçilmedi!");
+
+            if (FormModel.IlId == 0)
+                validationErrors.Add("❌ İl seçilmedi!");
+
+            if (FormModel.IlceId == 0)
+                validationErrors.Add("❌ İlçe seçilmedi!");
+
+            if (validationErrors.Any())
+            {
+                Console.WriteLine("❌ VALİDASYON HATALARI:");
+                foreach (var error in validationErrors)
+                {
+                    Console.WriteLine($"   {error}");
+                }
+
+                await _toastService.ShowErrorAsync(string.Join("\n", validationErrors));
+                return;
+            }
+
+            Console.WriteLine("✅ Tüm validasyonlar geçti!");
+
             IsSaving = true;
             try
             {
@@ -291,18 +571,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                     }).ToList()
                 };
 
+                Console.WriteLine($"🚀 API'ye gönderiliyor... HizmetBinasiId: {completeRequest.Personel.HizmetBinasiId}");
+
                 if (IsEditMode)
                 {
                     // Toplu güncelleme (Transaction)
                     var response = await _personelApiService.UpdateCompleteAsync(FormModel.TcKimlikNo, completeRequest);
-                    
+
                     if (response?.Success == true)
                     {
+                        Console.WriteLine("✅ Güncelleme başarılı!");
                         await _toastService.ShowSuccessAsync($"{FormModel.AdSoyad} ve tüm bilgileri başarıyla güncellendi!");
                         _navigationManager.NavigateTo($"/personel/detail/{FormModel.TcKimlikNo}");
                     }
                     else
                     {
+                        Console.WriteLine($"❌ API Hatası: {response?.Message}");
                         await _toastService.ShowErrorAsync(response?.Message ?? "Güncelleme işlemi başarısız oldu!");
                     }
                 }
@@ -310,14 +594,24 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 {
                     // Toplu ekleme (Transaction)
                     var response = await _personelApiService.CreateCompleteAsync(completeRequest);
-                    
+
                     if (response?.Success == true)
                     {
+                        Console.WriteLine("✅ Ekleme başarılı!");
                         await _toastService.ShowSuccessAsync($"{FormModel.AdSoyad} ve tüm bilgileri başarıyla eklendi!");
                         _navigationManager.NavigateTo($"/personel/detail/{FormModel.TcKimlikNo}");
                     }
                     else
                     {
+                        Console.WriteLine($"❌ API Hatası: {response?.Message}");
+                        if (response?.Errors != null && response.Errors.Any())
+                        {
+                            Console.WriteLine("❌ Detaylı Hatalar:");
+                            foreach (var error in response.Errors)
+                            {
+                                Console.WriteLine($"   • {error}");
+                            }
+                        }
                         await _toastService.ShowErrorAsync(response?.Message ?? "Ekleme işlemi başarısız oldu!");
                     }
                 }
@@ -329,15 +623,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                     errorMessage += "- Email adresi gerekli\n";
                 if (ex.Message.Contains("SicilNo"))
                     errorMessage += "- Sicil No gerekli\n";
-                
+
                 await _toastService.ShowErrorAsync(errorMessage);
             }
             catch (HttpRequestException ex)
             {
+                Console.WriteLine($"❌ HTTP Exception: {ex.Message}");
                 await _toastService.ShowErrorAsync(ex.Message);
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"❌ Genel Exception: {ex.Message}");
+                Console.WriteLine($"   StackTrace: {ex.StackTrace}");
                 await _toastService.ShowErrorAsync($"İşlem sırasında hata oluştu: {ex.Message}");
             }
             finally
@@ -358,20 +655,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
         // ═══════════════════════════════════════════════════════
         // TAB METHODS
+        // ═══════════════════════════════════════════════════════
+
         private void SetActiveTab(string tabName)
         {
             ActiveTab = tabName;
             StateHasChanged();
-        }
-
-        private void OnIlChanged(ChangeEventArgs e)
-        {
-            if (int.TryParse(e.Value?.ToString(), out int ilId))
-            {
-                FormModel.IlId = ilId;
-                FormModel.IlceId = 0;
-                FilterIlceler();
-            }
         }
 
         private void FilterIlceler()
@@ -565,7 +854,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 {
                     var fileName = Path.GetFileName(FormModel.Resim);
                     var filePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "avatars", fileName);
-                    
+
                     if (File.Exists(filePath))
                     {
                         File.Delete(filePath);

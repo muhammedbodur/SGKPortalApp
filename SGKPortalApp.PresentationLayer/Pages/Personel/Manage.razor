@@ -241,6 +241,7 @@
                             <h5 class="card-header">Personel Bilgileri</h5>
                             <div class="card-body">
                                 <div class="row">
+                                    <!-- TC Kimlik No -->
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label required">TC Kimlik No</label>
                                         <InputText @bind-Value="FormModel.TcKimlikNo"
@@ -249,11 +250,15 @@
                                                    maxlength="11" />
                                         <ValidationMessage For="@(() => FormModel.TcKimlikNo)" class="text-danger small" />
                                     </div>
+
+                                    <!-- Sicil No -->
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Sicil No</label>
                                         <InputNumber @bind-Value="FormModel.SicilNo"
                                                      class="form-control" />
                                     </div>
+
+                                    <!-- Ad Soyad -->
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label required">Ad Soyad</label>
                                         <InputText @bind-Value="FormModel.AdSoyad"
@@ -262,6 +267,8 @@
                                                    maxlength="200" />
                                         <ValidationMessage For="@(() => FormModel.AdSoyad)" class="text-danger small" />
                                     </div>
+
+                                    <!-- Nick Name -->
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Nick Name</label>
                                         <InputText @bind-Value="FormModel.NickName"
@@ -270,58 +277,127 @@
                                                    disabled />
                                         <small class="form-text text-muted">Otomatik oluşturulur</small>
                                     </div>
+
+                                    <!-- Departman -->
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Departman</label>
-                                        <select value="@FormModel.DepartmanId" @onchange="@(e => FormModel.DepartmanId = int.Parse(e.Value.ToString()))" class="select2 form-select" data-placeholder="Departman seçiniz">
+                                        <select value="@FormModel.DepartmanId"
+                                                @onchange="OnDepartmanChanged"
+                                                class="form-select @(FormModel.DepartmanId == 0 ? "border-warning" : "")"
+                                                data-placeholder="Departman seçiniz"
+                                                disabled="@IsSaving">
                                             <option value="0">Seçiniz</option>
                                             @foreach (var departman in Departmanlar)
                                             {
                                                 <option value="@departman.DepartmanId">@departman.DepartmanAdi</option>
                                             }
                                         </select>
+                                        @if (FormModel.DepartmanId == 0)
+                                        {
+                                            <small class="text-muted">📦 @Departmanlar.Count departman yüklendi</small>
+                                        }
                                     </div>
+
+                                    <!-- Servis -->
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Servis</label>
-                                        <select value="@FormModel.ServisId" @onchange="@(e => FormModel.ServisId = int.Parse(e.Value.ToString()))" class="select2 form-select" data-placeholder="Servis seçiniz">
+                                        <select value="@FormModel.ServisId"
+                                                @onchange="OnServisChanged"
+                                                class="form-select @(FormModel.ServisId == 0 ? "border-warning" : "")"
+                                                data-placeholder="Servis seçiniz"
+                                                disabled="@IsSaving">
                                             <option value="0">Seçiniz</option>
                                             @foreach (var servis in Servisler)
                                             {
                                                 <option value="@servis.ServisId">@servis.ServisAdi</option>
                                             }
                                         </select>
+                                        @if (FormModel.ServisId == 0)
+                                        {
+                                            <small class="text-muted">📦 @Servisler.Count servis yüklendi</small>
+                                        }
                                     </div>
+
+                                    <!-- Unvan -->
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">Ünvan</label>
-                                        <select value="@FormModel.UnvanId" @onchange="@(e => FormModel.UnvanId = int.Parse(e.Value.ToString()))" class="select2 form-select" data-placeholder="Ünvan seçiniz">
+                                        <label class="form-label">Unvan</label>
+                                        <select value="@FormModel.UnvanId"
+                                                @onchange="OnUnvanChanged"
+                                                class="form-select @(FormModel.UnvanId == 0 ? "border-warning" : "")"
+                                                data-placeholder="Ünvan seçiniz"
+                                                disabled="@IsSaving">
                                             <option value="0">Seçiniz</option>
                                             @foreach (var unvan in Unvanlar)
                                             {
                                                 <option value="@unvan.UnvanId">@unvan.UnvanAdi</option>
                                             }
                                         </select>
+                                        @if (FormModel.UnvanId == 0)
+                                        {
+                                            <small class="text-muted">📦 @Unvanlar.Count ünvan yüklendi</small>
+                                        }
                                     </div>
+
+                                    <!-- Hizmet Binası -->
                                     <div class="col-md-6 mb-3">
-                                        <label class="form-label">Hizmet Binası</label>
-                                        <select value="@FormModel.HizmetBinasiId" @onchange="@(e => FormModel.HizmetBinasiId = int.Parse(e.Value.ToString()))" class="select2 form-select" data-placeholder="Hizmet Binası seçiniz">
+                                        <label class="form-label">
+                                            Hizmet Binası
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <select value="@FormModel.HizmetBinasiId"
+                                                @onchange="OnHizmetBinasiChanged"
+                                                class="form-select @(FormModel.HizmetBinasiId == 0 ? "border-danger" : "")"
+                                                data-placeholder="Hizmet Binası seçiniz"
+                                                disabled="@IsSaving">
                                             <option value="0">Seçiniz</option>
                                             @foreach (var bina in HizmetBinalari)
                                             {
                                                 <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
                                             }
                                         </select>
+                                        @if (FormModel.HizmetBinasiId == 0 && HizmetBinalari.Any())
+                                        {
+                                            <small class="text-danger">
+                                                <i class="bx bx-error-circle me-1"></i>
+                                                Lütfen hizmet binası seçiniz (Toplam: @HizmetBinalari.Count)
+                                            </small>
+                                        }
+                                        else if (FormModel.HizmetBinasiId > 0)
+                                        {
+                                            <small class="text-success">
+                                                <i class="bx bx-check-circle me-1"></i>
+                                                Seçili ID: @FormModel.HizmetBinasiId
+                                            </small>
+                                        }
+                                        else if (!HizmetBinalari.Any())
+                                        {
+                                            <small class="text-warning">
+                                                <i class="bx bx-info-circle me-1"></i>
+                                                Hizmet binası yüklenmedi!
+                                            </small>
+                                        }
                                     </div>
+
+                                    <!-- Personel Tipi -->
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Personel Tipi</label>
-                                        <select @bind="FormModel.PersonelTipi" class="form-select">
+                                        <select @bind="FormModel.PersonelTipi"
+                                                class="form-select"
+                                                disabled="@IsSaving">
                                             @foreach (var tip in Enum.GetValues<PersonelTipi>())
                                             {
                                                 <option value="@tip">@GetEnumDisplayName(tip)</option>
                                             }
                                         </select>
                                     </div>
+
+                                    <!-- Atanma Nedeni -->
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Atanma Nedeni <span class="text-danger">*</span></label>
-                                        <select @bind="FormModel.AtanmaNedeniId" class="form-select select2" id="atanmaNedeniSelect">
+                                        <select @bind="FormModel.AtanmaNedeniId"
+                                                class="form-select"
+                                                id="atanmaNedeniSelect"
+                                                disabled="@IsSaving">
                                             <option value="0">Seçiniz...</option>
                                             @foreach (var atanmaNedeni in AtanmaNedenleri)
                                             {
@@ -331,6 +407,7 @@
                                     </div>
                                 </div>
 
+                                <!-- Aktiflik Durumu -->
                                 <div class="row">
                                     <div class="col-md-12 mb-3">
                                         <label class="form-label">Aktiflik Durumu <span class="text-danger">*</span></label>
@@ -340,10 +417,10 @@
                                                 @foreach (var durum in Enum.GetValues<PersonelAktiflikDurum>())
                                                 {
                                                     <div class="form-check">
-                                                        <input class="form-check-input" 
-                                                               type="radio" 
-                                                               name="aktiflikDurumu" 
-                                                               id="aktiflik_@durum" 
+                                                        <input class="form-check-input"
+                                                               type="radio"
+                                                               name="aktiflikDurumu"
+                                                               id="aktiflik_@durum"
                                                                value="@durum"
                                                                checked="@(FormModel.PersonelAktiflikDurum == durum)"
                                                                @onchange="@(() => FormModel.PersonelAktiflikDurum = durum)" />
@@ -356,10 +433,10 @@
                                             else
                                             {
                                                 <div class="form-check">
-                                                    <input class="form-check-input" 
-                                                           type="radio" 
-                                                           name="aktiflikDurumu" 
-                                                           id="aktiflik_aktif" 
+                                                    <input class="form-check-input"
+                                                           type="radio"
+                                                           name="aktiflikDurumu"
+                                                           id="aktiflik_aktif"
                                                            value="@PersonelAktiflikDurum.Aktif"
                                                            checked="true"
                                                            disabled />
@@ -372,6 +449,21 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- DEBUG INFO (Geliştirme modunda görünür) -->
+                                @if (!string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")) &&
+                                                        System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                                {
+                                    <div class="alert alert-info mt-3">
+                                        <strong>🔍 DEBUG INFO:</strong><br />
+                                        HizmetBinasiId: <code>@FormModel.HizmetBinasiId</code><br />
+                                        DepartmanId: <code>@FormModel.DepartmanId</code><br />
+                                        ServisId: <code>@FormModel.ServisId</code><br />
+                                        UnvanId: <code>@FormModel.UnvanId</code><br />
+                                        IlId: <code>@FormModel.IlId</code><br />
+                                        IlceId: <code>@FormModel.IlceId</code>
+                                    </div>
+                                }
                             </div>
                         </div>
                     }
@@ -412,9 +504,15 @@
                                                    class="form-control"
                                                    maxlength="20" />
                                     </div>
+
+                                    <!-- İl -->
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">İl</label>
-                                        <select value="@FormModel.IlId" @onchange="OnIlChanged" class="select2 form-select" data-placeholder="İl seçiniz">
+                                        <select value="@FormModel.IlId"
+                                                @onchange="OnIlChanged"
+                                                class="form-select"
+                                                data-placeholder="İl seçiniz"
+                                                disabled="@IsSaving">
                                             <option value="0">Seçiniz</option>
                                             @foreach (var il in Iller)
                                             {
@@ -422,16 +520,35 @@
                                             }
                                         </select>
                                     </div>
+
+                                    <!-- İlçe -->
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">İlçe</label>
-                                        <select value="@FormModel.IlceId" @onchange="@(e => FormModel.IlceId = int.Parse(e.Value.ToString()))" class="select2 form-select" data-placeholder="İlçe seçiniz" disabled="@(FormModel.IlId == 0)">
+                                        <select value="@FormModel.IlceId"
+                                                @onchange="OnIlceChanged"
+                                                class="form-select"
+                                                data-placeholder="İlçe seçiniz"
+                                                disabled="@(FormModel.IlId == 0 || IsSaving)">
                                             <option value="0">Seçiniz</option>
                                             @foreach (var ilce in Ilceler)
                                             {
                                                 <option value="@ilce.IlceId">@ilce.IlceAdi</option>
                                             }
                                         </select>
+                                        @if (FormModel.IlId == 0)
+                                        {
+                                            <small class="text-muted">
+                                                <i class="bx bx-info-circle me-1"></i>Önce il seçiniz
+                                            </small>
+                                        }
+                                        else if (!Ilceler.Any())
+                                        {
+                                            <small class="text-warning">
+                                                <i class="bx bx-error-circle me-1"></i>Bu il için ilçe bulunamadı
+                                            </small>
+                                        }
                                     </div>
+
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Semt</label>
                                         <InputText @bind-Value="FormModel.Semt"
