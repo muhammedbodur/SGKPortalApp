@@ -362,13 +362,6 @@
                                                 Lütfen hizmet binası seçiniz (Toplam: @HizmetBinalari.Count)
                                             </small>
                                         }
-                                        else if (FormModel.HizmetBinasiId > 0)
-                                        {
-                                            <small class="text-success">
-                                                <i class="bx bx-check-circle me-1"></i>
-                                                Seçili ID: @FormModel.HizmetBinasiId
-                                            </small>
-                                        }
                                         else if (!HizmetBinalari.Any())
                                         {
                                             <small class="text-warning">
@@ -467,21 +460,6 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- DEBUG INFO (Geliştirme modunda görünür) -->
-                                @if (!string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")) &&
-                                                        System.Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
-                                {
-                                    <div class="alert alert-info mt-3">
-                                        <strong>🔍 DEBUG INFO:</strong><br />
-                                        HizmetBinasiId: <code>@FormModel.HizmetBinasiId</code><br />
-                                        DepartmanId: <code>@FormModel.DepartmanId</code><br />
-                                        ServisId: <code>@FormModel.ServisId</code><br />
-                                        UnvanId: <code>@FormModel.UnvanId</code><br />
-                                        IlId: <code>@FormModel.IlId</code><br />
-                                        IlceId: <code>@FormModel.IlceId</code>
-                                    </div>
-                                }
                             </div>
                         </div>
                     }

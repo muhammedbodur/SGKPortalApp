@@ -7,6 +7,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri
 {
     public interface IPersonelCocukRepository : IGenericRepository<PersonelCocuk>
     {
+        Task<List<PersonelCocuk>> GetByPersonelTcKimlikNoAsync(string tcKimlikNo);
         // Personel bazında çocuklar
         Task<IEnumerable<PersonelCocuk>> GetByPersonelTcAsync(string tcKimlikNo);
 

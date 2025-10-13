@@ -82,11 +82,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
 
 
             // ═══════════════════════════════════════════════════════
-            // PERSONEL MAPPING'LERİ - ⭐ KRİTİK BÖLÜM
+            // ⭐ PERSONEL MAPPING'LERİ - OTOMATİK + ÖZEL DURUMLAR
             // ═══════════════════════════════════════════════════════
 
-            // Entity → Response DTO
+            //  Entity → Response DTO
             CreateMap<Personel, PersonelResponseDto>()
+                // Navigation property'lerden veri çekme
                 .ForMember(dest => dest.DepartmanAdi,
                     opt => opt.MapFrom(src => src.Departman != null ? src.Departman.DepartmanAdi : ""))
                 .ForMember(dest => dest.ServisAdi,
@@ -98,34 +99,56 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
                 .ForMember(dest => dest.HizmetBinasiAdi,
                     opt => opt.MapFrom(src => src.HizmetBinasi != null ? src.HizmetBinasi.HizmetBinasiAdi : ""))
                 .ForMember(dest => dest.SendikaAdi,
-                    opt => opt.MapFrom(src => src.Sendika != null ? src.Sendika.SendikaAdi : ""))
+                opt => opt.MapFrom(src => src.Sendika != null ? src.Sendika.SendikaAdi : ""))
+
+                // İl/İlçe bilgileri
+                .ForMember(dest => dest.IlAdi,
+                    opt => opt.MapFrom(src => src.Il != null ? src.Il.IlAdi : ""))
+                .ForMember(dest => dest.IlceAdi,
+                    opt => opt.MapFrom(src => src.Ilce != null ? src.Ilce.IlceAdi : ""))
+
+                // Eşinin İş Yeri İl/İlçe
+                .ForMember(dest => dest.EsininIsIlAdi,
+                    opt => opt.MapFrom(src => src.EsininIsIl != null ? src.EsininIsIl.IlAdi : null))
+                .ForMember(dest => dest.EsininIsIlceAdi,
+                    opt => opt.MapFrom(src => src.EsininIsIlce != null ? src.EsininIsIlce.IlceAdi : null))
+
+
+                // Navigation Collections
+                .ForMember(dest => dest.Cocuklar,
+                    opt => opt.MapFrom(src => src.PersonelCocuklari))
+                .ForMember(dest => dest.Hizmetler,
+                    opt => opt.MapFrom(src => src.PersonelHizmetleri))
+                .ForMember(dest => dest.Egitimler,
+                    opt => opt.MapFrom(src => src.PersonelEgitimleri))
+                .ForMember(dest => dest.ImzaYetkileriDetay,
+                    opt => opt.MapFrom(src => src.PersonelImzaYetkileri))
+                .ForMember(dest => dest.Cezalar,
+                    opt => opt.MapFrom(src => src.PersonelCezalari))
+                .ForMember(dest => dest.Engeller,
+                    opt => opt.MapFrom(src => src.PersonelEngelleri))
+
+                // Nullable int → int çevirme
                 .ForMember(dest => dest.SendikaId,
                     opt => opt.MapFrom(src => src.SendikaId.HasValue ? src.SendikaId.Value : 0));
 
-            // ⭐⭐⭐ Create Request DTO → Entity ⭐⭐⭐
+
+            //  Create Request DTO → Entity
             CreateMap<PersonelCreateRequestDto, Personel>()
-                // ✅ FOREIGN KEY FİXLERİ - 0 değerleri NULL'a çevir
+                // Nullable int handling
                 .ForMember(dest => dest.SendikaId, opt => opt.MapFrom(src =>
-                    src.SendikaId.HasValue && src.SendikaId.Value > 0
-                        ? src.SendikaId
-                        : (int?)null))
-
+                    src.SendikaId.HasValue && src.SendikaId.Value > 0 ? src.SendikaId : (int?)null))
                 .ForMember(dest => dest.EsininIsIlId, opt => opt.MapFrom(src =>
-                    src.EsininIsIlId.HasValue && src.EsininIsIlId.Value > 0
-                        ? src.EsininIsIlId
-                        : (int?)null))
-
+                    src.EsininIsIlId.HasValue && src.EsininIsIlId.Value > 0 ? src.EsininIsIlId : (int?)null))
                 .ForMember(dest => dest.EsininIsIlceId, opt => opt.MapFrom(src =>
-                    src.EsininIsIlceId.HasValue && src.EsininIsIlceId.Value > 0
-                        ? src.EsininIsIlceId
-                        : (int?)null))
+                    src.EsininIsIlceId.HasValue && src.EsininIsIlceId.Value > 0 ? src.EsininIsIlceId : (int?)null))
 
-                // ✅ AUDIT ALANLARI
+                // Audit
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.SilindiMi, opt => opt.MapFrom(src => false))
 
-                // ✅ OTOMATİK OLUŞTURULAN ALANLAR
+                // Otomatik oluşturulan alanlar
                 .ForMember(dest => dest.PersonelKayitNo, opt => opt.Ignore())
                 .ForMember(dest => dest.KartNo, opt => opt.Ignore())
                 .ForMember(dest => dest.KartNoAktiflikTarihi, opt => opt.Ignore())
@@ -135,7 +158,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
                 .ForMember(dest => dest.PassWord, opt => opt.Ignore())
                 .ForMember(dest => dest.SessionID, opt => opt.Ignore())
 
-                // ✅ NAVIGATION PROPERTIES - Ignore
+                // Navigation Properties
                 .ForMember(dest => dest.Departman, opt => opt.Ignore())
                 .ForMember(dest => dest.Servis, opt => opt.Ignore())
                 .ForMember(dest => dest.Unvan, opt => opt.Ignore())
@@ -157,9 +180,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
                 .ForMember(dest => dest.PersonelEngelleri, opt => opt.Ignore())
                 .ForMember(dest => dest.HubConnection, opt => opt.Ignore());
 
-            // ⭐⭐⭐ Update Request DTO → Entity ⭐⭐⭐
+
+            //  Update Request DTO → Entity
             CreateMap<PersonelUpdateRequestDto, Personel>()
-                // ✅ KORUNMASI GEREKEN ALANLAR - Değiştirilmemeli
+                // ═══ KORUNMASI GEREKEN ALANLAR ═══
                 .ForMember(dest => dest.TcKimlikNo, opt => opt.Ignore())
                 .ForMember(dest => dest.SicilNo, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
@@ -206,10 +230,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
                 .ForMember(dest => dest.IlceId, opt => opt.Ignore())
                 .ForMember(dest => dest.SendikaId, opt => opt.Ignore())
 
-                // ✅ AUDIT ALANLARI
+                // ═══ AUDIT ═══
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
 
-                // ✅ NAVIGATION PROPERTIES - Ignore
+                // ═══ NAVIGATION PROPERTIES ═══
                 .ForMember(dest => dest.Departman, opt => opt.Ignore())
                 .ForMember(dest => dest.Servis, opt => opt.Ignore())
                 .ForMember(dest => dest.Unvan, opt => opt.Ignore())
@@ -232,10 +256,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
                 .ForMember(dest => dest.HubConnection, opt => opt.Ignore());
 
 
-            // ═══════════════════════════════════════════════════════
-            // LİST RESPONSE MAPPING
-            // ═══════════════════════════════════════════════════════
-
+            //  List Response
             CreateMap<Personel, PersonelListResponseDto>()
                 .ForMember(dest => dest.DepartmanAdi,
                     opt => opt.MapFrom(src => src.Departman != null ? src.Departman.DepartmanAdi : ""))

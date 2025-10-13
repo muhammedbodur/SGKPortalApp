@@ -67,17 +67,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 }
 
                 // API'den personel detayını getir
-                Personel = await _personelApiService.GetByTcKimlikNoAsync(TcKimlikNo);
+                var result = await _personelApiService.GetByTcKimlikNoAsync(TcKimlikNo);
 
-                if (Personel == null)
+                if (result.Success && result.Data != null)
                 {
-                    NotFound = true;
-                }
-                else
-                {
+                    Personel = result.Data;
+                    
                     // Alt tablo bilgilerini yükle
                     await LoadCocuklar();
                     // Diğer alt tabloları da yükleyebiliriz (isteğe bağlı - lazy loading)
+                }
+                else
+                {
+                    NotFound = true;
                 }
             }
             catch (Exception ex)

@@ -113,7 +113,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
                 await Task.WhenAll(personelTask, departmanTask, servisTask, unvanTask, hizmetBinasiTask);
 
-                Personeller = (await personelTask) ?? new List<PersonelResponseDto>();
+                var personelResult = await personelTask;
+                Personeller = personelResult.Success ? personelResult.Data ?? new List<PersonelResponseDto>() : new List<PersonelResponseDto>();
+                
                 Departmanlar = (await departmanTask)?.Data ?? new List<DepartmanResponseDto>();
                 Servisler = (await servisTask)?.Data ?? new List<ServisResponseDto>();
                 Unvanlar = (await unvanTask)?.Data ?? new List<UnvanResponseDto>();
@@ -345,7 +347,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 // API'den personeli sil
                 var result = await _personelApiService.DeleteAsync(DeletePersonelTcKimlik);
                 
-                if (result)
+                if (result.Success)
                 {
                     await _toastService.ShowSuccessAsync($"{DeletePersonelAdSoyad} başarıyla silindi!");
                     CloseDeleteModal();
@@ -353,7 +355,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 }
                 else
                 {
-                    await _toastService.ShowErrorAsync("Personel silinemedi!");
+                    await _toastService.ShowErrorAsync(result.Message ?? "Personel silinemedi!");
                 }
             }
             catch (Exception ex)

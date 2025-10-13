@@ -15,6 +15,14 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
         {
         }
 
+        public async Task<List<PersonelCocuk>> GetByPersonelTcKimlikNoAsync(string tcKimlikNo)
+        {
+            return await _context.PersonelCocuklari
+                .Where(pc => pc.PersonelTcKimlikNo == tcKimlikNo)
+                .OrderBy(pc => pc.CocukDogumTarihi)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<PersonelCocuk>> GetByPersonelTcAsync(string tcKimlikNo)
         {
             if (string.IsNullOrWhiteSpace(tcKimlikNo))

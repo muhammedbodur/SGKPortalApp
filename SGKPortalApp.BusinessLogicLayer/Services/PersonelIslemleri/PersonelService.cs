@@ -2,13 +2,15 @@ using AutoMapper;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Exceptions;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
+using System.Text;
+using System.Text.Json;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 {
@@ -62,6 +64,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 }
 
                 var personelDto = _mapper.Map<PersonelResponseDto>(personel);
+
                 return ApiResponseDto<PersonelResponseDto>
                     .SuccessResult(personelDto, "Personel başarıyla getirildi");
             }
@@ -374,32 +377,32 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
                     // 2. Mevcut alt kayıtları sil
                     var mevcutCocuklar = await _unitOfWork.Repository<PersonelCocuk>()
-                        .GetAllAsync(c => c.PersonelTcKimlikNo == tcKimlikNo);
+                        .FindAsync(c => c.PersonelTcKimlikNo == tcKimlikNo);
                     foreach (var cocuk in mevcutCocuklar)
                         _unitOfWork.Repository<PersonelCocuk>().Delete(cocuk);
 
                     var mevcutHizmetler = await _unitOfWork.Repository<PersonelHizmet>()
-                        .GetAllAsync(h => h.TcKimlikNo == tcKimlikNo);
+                        .FindAsync(h => h.TcKimlikNo == tcKimlikNo);
                     foreach (var hizmet in mevcutHizmetler)
                         _unitOfWork.Repository<PersonelHizmet>().Delete(hizmet);
 
                     var mevcutEgitimler = await _unitOfWork.Repository<PersonelEgitim>()
-                        .GetAllAsync(e => e.TcKimlikNo == tcKimlikNo);
+                        .FindAsync(e => e.TcKimlikNo == tcKimlikNo);
                     foreach (var egitim in mevcutEgitimler)
                         _unitOfWork.Repository<PersonelEgitim>().Delete(egitim);
 
                     var mevcutYetkiler = await _unitOfWork.Repository<PersonelImzaYetkisi>()
-                        .GetAllAsync(y => y.TcKimlikNo == tcKimlikNo);
+                        .FindAsync(y => y.TcKimlikNo == tcKimlikNo);
                     foreach (var yetki in mevcutYetkiler)
                         _unitOfWork.Repository<PersonelImzaYetkisi>().Delete(yetki);
 
                     var mevcutCezalar = await _unitOfWork.Repository<PersonelCeza>()
-                        .GetAllAsync(c => c.TcKimlikNo == tcKimlikNo);
+                        .FindAsync(c => c.TcKimlikNo == tcKimlikNo);
                     foreach (var ceza in mevcutCezalar)
                         _unitOfWork.Repository<PersonelCeza>().Delete(ceza);
 
                     var mevcutEngeller = await _unitOfWork.Repository<PersonelEngel>()
-                        .GetAllAsync(e => e.TcKimlikNo == tcKimlikNo);
+                        .FindAsync(e => e.TcKimlikNo == tcKimlikNo);
                     foreach (var engel in mevcutEngeller)
                         _unitOfWork.Repository<PersonelEngel>().Delete(engel);
 

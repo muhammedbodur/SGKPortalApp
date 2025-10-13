@@ -32,6 +32,12 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
         public string? EvTelefonu { get; set; }
         public string? Adres { get; set; }
         public string? Semt { get; set; }
+        
+        // Adres - İl/İlçe
+        public int IlId { get; set; }
+        public string? IlAdi { get; set; }
+        public int IlceId { get; set; }
+        public string? IlceAdi { get; set; }
 
         // Kişisel bilgiler
         public DateTime DogumTarihi { get; set; }
@@ -61,6 +67,10 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
         public string? Bransi { get; set; }
         public string? EmekliSicilNo { get; set; }
         public SehitYakinligi SehitYakinligi { get; set; }
+        
+        // Görev/Uzmanlık
+        public string? Gorev { get; set; }
+        public string? Uzmanlik { get; set; }
 
         // Eş bilgileri
         public string? EsininAdi { get; set; }
@@ -68,9 +78,30 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
         public string? EsininUnvani { get; set; }
         public string? EsininIsAdresi { get; set; }
         public string? EsininIsSemt { get; set; }
+        
+        // Eşinin İş Yeri İl/İlçe
+        public int? EsininIsIlId { get; set; }
+        public string? EsininIsIlAdi { get; set; }
+        public int? EsininIsIlceId { get; set; }
+        public string? EsininIsIlceAdi { get; set; }
+
+        // JSON Bilgi Alanları
+        public string? HizmetBilgisi { get; set; }
+        public string? EgitimBilgisi { get; set; }
+        public string? ImzaYetkileri { get; set; }
+        public string? CezaBilgileri { get; set; }
+        public string? EngelBilgileri { get; set; }
 
         // Resim
         public string? Resim { get; set; }
+
+        // Navigation Collections
+        public List<PersonelCocukResponseDto>? Cocuklar { get; set; }
+        public List<PersonelHizmetResponseDto>? Hizmetler { get; set; }
+        public List<PersonelEgitimResponseDto>? Egitimler { get; set; }
+        public List<PersonelImzaYetkisiResponseDto>? ImzaYetkileriDetay { get; set; }
+        public List<PersonelCezaResponseDto>? Cezalar { get; set; }
+        public List<PersonelEngelResponseDto>? Engeller { get; set; }
 
         // Audit
         public DateTime EklenmeTarihi { get; set; }
