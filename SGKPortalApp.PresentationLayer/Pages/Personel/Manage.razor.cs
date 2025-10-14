@@ -14,6 +14,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.PresentationLayer.Models.FormModels;
+using SGKPortalApp.PresentationLayer.Helpers;
 using AutoMapper;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel
@@ -27,6 +28,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
         [Inject] private IWebHostEnvironment _webHostEnvironment { get; set; } = default!;
+        [Inject] private ILogger<Manage> _logger { get; set; } = default!;
+        [Inject] private ImageHelper _imageHelper { get; set; } = default!;
         [Inject] private IPersonelApiService _personelApiService { get; set; } = default!;
         [Inject] private IDepartmanApiService _departmanApiService { get; set; } = default!;
         [Inject] private IServisApiService _servisApiService { get; set; } = default!;
@@ -185,7 +188,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 // DTO'dan FormModel'e dönüştürme
                 FormModel = MapToFormModel(result.Data);
 
-                // ✅ COLLECTION'LARI YÜKLE
+                //  COLLECTION'LARI YÜKLE
                 Cocuklar = result.Data.Cocuklar?.Select(c => new CocukModel
                 {
                     Isim = c.CocukAdi,
@@ -516,36 +519,54 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             Console.WriteLine($"📍 IlceId: {FormModel.IlceId}");
             Console.WriteLine("═══════════════════════════════════════════════════════");
 
-            // Validasyon
+            // ✅ DETAYLI VALİDASYON
             var validationErrors = new List<string>();
 
+            // Temel bilgiler
+            if (string.IsNullOrWhiteSpace(FormModel.TcKimlikNo) || FormModel.TcKimlikNo.Length != 11)
+                validationErrors.Add("❌ TC Kimlik No 11 haneli olmalıdır");
+
+            if (string.IsNullOrWhiteSpace(FormModel.AdSoyad))
+                validationErrors.Add("❌ Ad Soyad zorunludur");
+
+            if (string.IsNullOrWhiteSpace(FormModel.Email))
+                validationErrors.Add("❌ Email zorunludur");
+            else if (!FormModel.Email.Contains("@"))
+                validationErrors.Add("❌ Geçerli bir email adresi giriniz");
+
+            if (FormModel.SicilNo <= 0)
+                validationErrors.Add("❌ Sicil No zorunludur");
+
+            // Kurum bilgileri
             if (FormModel.HizmetBinasiId == 0)
-                validationErrors.Add(" Hizmet Binası seçilmedi!");
+                validationErrors.Add("❌ Hizmet Binası seçimi zorunludur");
 
             if (FormModel.DepartmanId == 0)
-                validationErrors.Add(" Departman seçilmedi!");
+                validationErrors.Add("❌ Departman seçimi zorunludur");
 
             if (FormModel.ServisId == 0)
-                validationErrors.Add(" Servis seçilmedi!");
+                validationErrors.Add("❌ Servis seçimi zorunludur");
 
             if (FormModel.UnvanId == 0)
-                validationErrors.Add(" Ünvan seçilmedi!");
+                validationErrors.Add("❌ Ünvan seçimi zorunludur");
 
+            // İletişim bilgileri
             if (FormModel.IlId == 0)
-                validationErrors.Add(" İl seçilmedi!");
+                validationErrors.Add("❌ İl seçimi zorunludur");
 
             if (FormModel.IlceId == 0)
-                validationErrors.Add(" İlçe seçilmedi!");
+                validationErrors.Add("❌ İlçe seçimi zorunludur");
 
             if (validationErrors.Any())
             {
-                Console.WriteLine(" VALİDASYON HATALARI:");
+                Console.WriteLine("❌ VALİDASYON HATALARI:");
                 foreach (var error in validationErrors)
                 {
                     Console.WriteLine($"   {error}");
                 }
 
-                await _toastService.ShowErrorAsync(string.Join("\n", validationErrors));
+                var errorMessage = "⚠️ Lütfen aşağıdaki alanları kontrol ediniz:\n\n" + string.Join("\n", validationErrors);
+                await _toastService.ShowErrorAsync(errorMessage);
                 return;
             }
 
@@ -627,7 +648,20 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                     else
                     {
                         Console.WriteLine($" API Hatası: {response?.Message}");
-                        await _toastService.ShowErrorAsync(response?.Message ?? "Güncelleme işlemi başarısız oldu!");
+                        
+                        // Hata mesajlarını kullanıcı dostu hale getir
+                        var userFriendlyMessage = ParseApiErrorMessage(response?.Message);
+                        
+                        if (response?.Message != null && response.Message.Any())
+                        {
+                            Console.WriteLine(" Detaylı Hatalar:");
+                            foreach (var error in response.Message)
+                            {
+                                Console.WriteLine($"   • {error}");
+                            }
+                        }
+                        
+                        await _toastService.ShowErrorAsync(userFriendlyMessage);
                     }
                 }
                 else
@@ -644,6 +678,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                     else
                     {
                         Console.WriteLine($" API Hatası: {response?.Message}");
+                        
+                        // Hata mesajlarını kullanıcı dostu hale getir
+                        var userFriendlyMessage = ParseApiErrorMessage(response?.Message);
+                        
                         if (response?.Message != null && response.Message.Any())
                         {
                             Console.WriteLine(" Detaylı Hatalar:");
@@ -652,7 +690,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                                 Console.WriteLine($"   • {error}");
                             }
                         }
-                        await _toastService.ShowErrorAsync(response?.Message ?? "Ekleme işlemi başarısız oldu!");
+                        
+                        await _toastService.ShowErrorAsync(userFriendlyMessage);
                     }
                 }
             }
@@ -669,13 +708,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             catch (HttpRequestException ex)
             {
                 Console.WriteLine($" HTTP Exception: {ex.Message}");
-                await _toastService.ShowErrorAsync(ex.Message);
+                var userFriendlyMessage = ParseHttpErrorMessage(ex.Message);
+                await _toastService.ShowErrorAsync(userFriendlyMessage);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($" Genel Exception: {ex.Message}");
                 Console.WriteLine($"   StackTrace: {ex.StackTrace}");
-                await _toastService.ShowErrorAsync($"İşlem sırasında hata oluştu: {ex.Message}");
+                
+                var userFriendlyMessage = ParseGeneralErrorMessage(ex.Message);
+                await _toastService.ShowErrorAsync(userFriendlyMessage);
             }
             finally
             {
@@ -801,81 +843,93 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         {
             UploadErrorMessage = string.Empty;
             IsUploadingImage = true;
+            StateHasChanged();
 
             try
             {
                 var file = e.File;
 
-                // TC Kimlik No kontrolü
                 if (string.IsNullOrWhiteSpace(FormModel.TcKimlikNo))
                 {
-                    UploadErrorMessage = "Fotoğraf yüklemek için önce TC Kimlik No girilmelidir.";
+                    UploadErrorMessage = " Fotoğraf yüklemek için önce TC Kimlik No girilmelidir.";
                     await _toastService.ShowErrorAsync(UploadErrorMessage);
                     return;
                 }
 
-                // Dosya boyutu kontrolü (5MB)
-                const long maxFileSize = 5 * 1024 * 1024;
+                const long maxFileSize = 2 * 1024 * 1024; // 2MB
                 if (file.Size > maxFileSize)
                 {
-                    UploadErrorMessage = "Dosya boyutu 5MB'dan büyük olamaz.";
+                    UploadErrorMessage = $" Dosya boyutu çok büyük! (Maks: 2MB, Mevcut: {file.Size / 1024 / 1024:F2}MB)";
+                    await _toastService.ShowErrorAsync(UploadErrorMessage);
                     return;
                 }
 
-                // Dosya tipi kontrolü
-                var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/gif" };
-                if (!allowedTypes.Contains(file.ContentType.ToLower()))
+                _logger.LogInformation("Personel resmi yükleniyor: {TcKimlikNo}, Dosya boyutu: {FileSize} bytes",
+                    FormModel.TcKimlikNo, file.Size);
+
+                // ============================ ÇÖZÜM BURADA ============================
+                // Blazor'dan gelen geçici stream'i kalıcı bir MemoryStream'e kopyalıyoruz.
+                await using var memoryStream = new MemoryStream();
+                using var imageStreamFromBlazor = file.OpenReadStream(maxFileSize);
+                await imageStreamFromBlazor.CopyToAsync(memoryStream);
+                memoryStream.Position = 0; // Stream'in başına dönmeyi unutmuyoruz!
+                                           // =======================================================================
+
+                // Artık ImageHelper'a güvenli, kalıcı kopyayı gönderiyoruz.
+                var optimizedImage = await _imageHelper.LoadResizeAndOptimizeAsync(
+                    memoryStream, // GEÇİCİ STREAM YERİNE HAFIZADAKİ KOPYAYI VER
+                    maxWidth: 400,
+                    maxHeight: 400,
+                    quality: 85
+                );
+
+                if (optimizedImage == null)
                 {
-                    UploadErrorMessage = "Sadece JPG, PNG ve GIF formatları desteklenmektedir.";
+                    UploadErrorMessage = " Geçersiz resim dosyası! Desteklenen formatlar: JPG, PNG, GIF, WEBP vb. veya dosya bozuk.";
+                    await _toastService.ShowErrorAsync(UploadErrorMessage);
                     return;
                 }
 
-                // Dosya uzantısını al
-                var extension = Path.GetExtension(file.Name).ToLower();
-                if (string.IsNullOrEmpty(extension))
+                _logger.LogInformation("Resim işlendi: Orijinal {OriginalSize}KB → Optimize {OptimizedSize}KB",
+                    file.Size / 1024, optimizedImage.Length / 1024);
+
+                var fileName = _imageHelper.GenerateSafeFileName(FormModel.TcKimlikNo, ".jpg");
+
+                if (!string.IsNullOrEmpty(FormModel.Resim))
                 {
-                    extension = file.ContentType switch
+                    _imageHelper.DeleteImage(FormModel.Resim);
+                }
+
+                var imagePath = await _imageHelper.SaveImageAsync(
+                    optimizedImage,
+                    fileName,
+                    subfolder: "avatars"
+                );
+
+                FormModel.Resim = imagePath;
+
+                if (IsEditMode)
+                {
+                    var updateDto = MapToUpdateDto(FormModel);
+                    var response = await _personelApiService.UpdateAsync(FormModel.TcKimlikNo, updateDto);
+                    if (response?.Success == true)
                     {
-                        "image/jpeg" => ".jpg",
-                        "image/jpg" => ".jpg",
-                        "image/png" => ".png",
-                        "image/gif" => ".gif",
-                        _ => ".jpg"
-                    };
+                        await _toastService.ShowSuccessAsync($" Fotoğraf başarıyla yüklendi ve kaydedildi! ({optimizedImage.Length / 1024}KB)");
+                    }
+                    else
+                    {
+                        await _toastService.ShowWarningAsync(" Fotoğraf yüklendi ancak veritabanı güncellenemedi. Lütfen formu kaydedin.");
+                    }
                 }
-
-                // Dosya adı: TcKimlikNo.extension (örn: 12345678901.jpg)
-                var fileName = $"{FormModel.TcKimlikNo}{extension}";
-
-                // wwwroot/images/avatars klasörünü oluştur
-                var avatarFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "avatars");
-                if (!Directory.Exists(avatarFolder))
+                else
                 {
-                    Directory.CreateDirectory(avatarFolder);
+                    await _toastService.ShowSuccessAsync($" Fotoğraf başarıyla yüklendi! ({optimizedImage.Length / 1024}KB) - Formu kaydetmeyi unutmayın.");
                 }
-
-                // Tam dosya yolu
-                var filePath = Path.Combine(avatarFolder, fileName);
-
-                // Eski dosyayı sil (eğer varsa)
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                }
-
-                // Dosyayı kaydet
-                using var stream = file.OpenReadStream(maxFileSize);
-                using var fileStream = new FileStream(filePath, FileMode.Create);
-                await stream.CopyToAsync(fileStream);
-
-                // Veritabanı için relatif yol
-                FormModel.Resim = $"/images/avatars/{fileName}";
-
-                await _toastService.ShowSuccessAsync($"Fotoğraf başarıyla yüklendi: {fileName}");
             }
             catch (Exception ex)
             {
-                UploadErrorMessage = $"Fotoğraf yüklenirken hata oluştu: {ex.Message}";
+                _logger.LogError(ex, "Personel resmi yüklenirken genel bir hata oluştu: {TcKimlikNo}", FormModel.TcKimlikNo);
+                UploadErrorMessage = $" Fotoğraf yüklenirken bir hata oluştu: {ex.Message}";
                 await _toastService.ShowErrorAsync(UploadErrorMessage);
             }
             finally
@@ -885,32 +939,160 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             }
         }
 
+        // ═══════════════════════════════════════════════════════
+        // ERROR MESSAGE PARSING
+        // ═══════════════════════════════════════════════════════
+
+        private string ParseApiErrorMessage(dynamic? errorMessages)
+        {
+            if (errorMessages == null)
+                return "İşlem başarısız oldu. Lütfen tekrar deneyiniz.";
+
+            var errorList = errorMessages as IEnumerable<string>;
+            if (errorList == null || !errorList.Any())
+                return "İşlem başarısız oldu. Lütfen tekrar deneyiniz.";
+
+            var firstError = errorList.First();
+
+            // Duplicate TC Kimlik No
+            if (firstError.Contains("TC Kimlik") || firstError.Contains("TcKimlikNo") || 
+                firstError.Contains("duplicate key") && firstError.Contains("28228204"))
+            {
+                return "❌ Bu TC Kimlik Numarası zaten kayıtlı!\n\nBu personel sistemde mevcut. Düzenlemek için personel listesinden seçiniz.";
+            }
+
+            // Duplicate Email
+            if (firstError.Contains("Email") || firstError.Contains("email") || 
+                firstError.Contains("IX_PER_Personeller_Email"))
+            {
+                return "❌ Bu email adresi başka bir personel tarafından kullanılıyor!\n\nLütfen farklı bir email adresi giriniz.";
+            }
+
+            // Foreign Key Violation
+            if (firstError.Contains("FOREIGN KEY") || firstError.Contains("FK_"))
+            {
+                if (firstError.Contains("AtanmaNedenleri"))
+                    return "❌ Geçersiz Atanma Nedeni!\n\nLütfen listeden geçerli bir atanma nedeni seçiniz veya boş bırakınız.";
+                
+                if (firstError.Contains("Departman"))
+                    return "❌ Geçersiz Departman!\n\nLütfen listeden geçerli bir departman seçiniz.";
+                
+                if (firstError.Contains("Servis"))
+                    return "❌ Geçersiz Servis!\n\nLütfen listeden geçerli bir servis seçiniz.";
+                
+                if (firstError.Contains("Unvan"))
+                    return "❌ Geçersiz Ünvan!\n\nLütfen listeden geçerli bir ünvan seçiniz.";
+
+                return "❌ Geçersiz veri girişi!\n\nLütfen tüm zorunlu alanları doğru şekilde doldurunuz.";
+            }
+
+            // Unique Constraint Violation
+            if (firstError.Contains("unique") || firstError.Contains("UNIQUE"))
+            {
+                return "❌ Bu kayıt zaten mevcut!\n\nGirdiğiniz bilgiler başka bir kayıtta kullanılıyor.";
+            }
+
+            // Genel hata
+            return $"❌ İşlem başarısız!\n\n{firstError}";
+        }
+
+        private string ParseHttpErrorMessage(string errorMessage)
+        {
+            if (string.IsNullOrEmpty(errorMessage))
+                return "Sunucu ile bağlantı kurulamadı. Lütfen tekrar deneyiniz.";
+
+            if (errorMessage.Contains("duplicate key") || errorMessage.Contains("PRIMARY KEY"))
+            {
+                if (errorMessage.Contains("TcKimlikNo") || errorMessage.Contains("28228204"))
+                    return "❌ Bu TC Kimlik Numarası zaten kayıtlı!";
+                
+                if (errorMessage.Contains("Email"))
+                    return "❌ Bu email adresi başka bir personel tarafından kullanılıyor!";
+            }
+
+            if (errorMessage.Contains("FOREIGN KEY"))
+                return "❌ Geçersiz veri girişi! Lütfen tüm zorunlu alanları doğru şekilde doldurunuz.";
+
+            if (errorMessage.Contains("timeout") || errorMessage.Contains("Timeout"))
+                return "⏱️ İşlem zaman aşımına uğradı. Lütfen tekrar deneyiniz.";
+
+            if (errorMessage.Contains("404") || errorMessage.Contains("Not Found"))
+                return "❌ İstenen kaynak bulunamadı.";
+
+            if (errorMessage.Contains("500") || errorMessage.Contains("Internal Server"))
+                return "❌ Sunucu hatası oluştu. Lütfen sistem yöneticisine başvurunuz.";
+
+            return $"❌ Hata: {errorMessage}";
+        }
+
+        private string ParseGeneralErrorMessage(string errorMessage)
+        {
+            if (string.IsNullOrEmpty(errorMessage))
+                return "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyiniz.";
+
+            if (errorMessage.Contains("duplicate") || errorMessage.Contains("Duplicate"))
+                return "❌ Bu kayıt zaten mevcut! Lütfen farklı bilgiler giriniz.";
+
+            if (errorMessage.Contains("constraint") || errorMessage.Contains("Constraint"))
+                return "❌ Veri bütünlüğü hatası! Lütfen girdiğiniz bilgileri kontrol ediniz.";
+
+            if (errorMessage.Contains("null") || errorMessage.Contains("Null"))
+                return "❌ Zorunlu alanlar eksik! Lütfen tüm gerekli alanları doldurunuz.";
+
+            return $"❌ Hata: {errorMessage}";
+        }
+
         private async Task RemovePhoto()
         {
             try
             {
-                // Eğer dosya sunucuda varsa sil
-                if (!string.IsNullOrEmpty(FormModel.Resim) && FormModel.Resim.StartsWith("/images/avatars/"))
+                if (string.IsNullOrEmpty(FormModel.Resim))
                 {
-                    var fileName = Path.GetFileName(FormModel.Resim);
-                    var filePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "avatars", fileName);
+                    await _toastService.ShowWarningAsync(" Silinecek fotoğraf bulunmuyor.");
+                    return;
+                }
 
-                    if (File.Exists(filePath))
+                // Dosyayı sil
+                var deleted = _imageHelper.DeleteImage(FormModel.Resim);
+
+                // FormModel'den temizle
+                FormModel.Resim = string.Empty;
+
+                //  HEMEN VERİTABANINDAN SİL
+                if (IsEditMode)
+                {
+                    var updateDto = MapToUpdateDto(FormModel);
+                    var response = await _personelApiService.UpdateAsync(FormModel.TcKimlikNo, updateDto);
+
+                    if (response?.Success == true)
                     {
-                        File.Delete(filePath);
+                        _logger.LogInformation(" Resim veritabanından silindi: {TcKimlikNo}", FormModel.TcKimlikNo);
+                        await _toastService.ShowSuccessAsync(" Fotoğraf başarıyla kaldırıldı ve veritabanından silindi.");
+                    }
+                    else
+                    {
+                        _logger.LogWarning(" Resim dosyadan silindi ama DB güncellenemedi: {Message}", response?.Message);
+                        await _toastService.ShowWarningAsync(" Fotoğraf kaldırıldı ancak veritabanı güncellenemedi. Lütfen formu kaydedin.");
+                    }
+                }
+                else
+                {
+                    if (deleted)
+                    {
+                        await _toastService.ShowSuccessAsync(" Fotoğraf kaldırıldı. Formu kaydetmeyi unutmayın.");
+                    }
+                    else
+                    {
+                        await _toastService.ShowWarningAsync(" Fotoğraf dosyası bulunamadı ama temizlendi.");
                     }
                 }
 
-                FormModel.Resim = string.Empty;
-                await _toastService.ShowSuccessAsync("Fotoğraf kaldırıldı.");
+                StateHasChanged();
             }
             catch (Exception ex)
             {
-                await _toastService.ShowErrorAsync($"Fotoğraf kaldırılırken hata oluştu: {ex.Message}");
-            }
-            finally
-            {
-                StateHasChanged();
+                _logger.LogError(ex, "Personel resmi silinirken hata oluştu: {TcKimlikNo}", FormModel.TcKimlikNo);
+                await _toastService.ShowErrorAsync($" Fotoğraf kaldırılırken hata oluştu: {ex.Message}");
             }
         }
     }

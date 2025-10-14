@@ -28,12 +28,24 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels
         // ═══════════════════════════════════════════════════════
         // KURUM BİLGİLERİ
         // ═══════════════════════════════════════════════════════
+        [Required(ErrorMessage = "Departman seçimi zorunludur")]
+        [Range(1, int.MaxValue, ErrorMessage = "Lütfen bir departman seçiniz")]
         public int DepartmanId { get; set; }
+
+        [Required(ErrorMessage = "Servis seçimi zorunludur")]
+        [Range(1, int.MaxValue, ErrorMessage = "Lütfen bir servis seçiniz")]
         public int ServisId { get; set; }
+
+        [Required(ErrorMessage = "Ünvan seçimi zorunludur")]
+        [Range(1, int.MaxValue, ErrorMessage = "Lütfen bir ünvan seçiniz")]
         public int UnvanId { get; set; }
+
+        [Required(ErrorMessage = "Hizmet binası seçimi zorunludur")]
+        [Range(1, int.MaxValue, ErrorMessage = "Lütfen bir hizmet binası seçiniz")]
         public int HizmetBinasiId { get; set; }
-        public int AtanmaNedeniId { get; set; }
-        public int SendikaId { get; set; } = 0;
+
+        public int? AtanmaNedeniId { get; set; }
+        public int? SendikaId { get; set; }
 
         // ═══════════════════════════════════════════════════════
         // İLETİŞİM BİLGİLERİ
@@ -44,7 +56,13 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels
         public string? EvTelefonu { get; set; }
         public string? Adres { get; set; }
         public string? Semt { get; set; }
+
+        [Required(ErrorMessage = "İl seçimi zorunludur")]
+        [Range(1, int.MaxValue, ErrorMessage = "Lütfen bir il seçiniz")]
         public int IlId { get; set; }
+
+        [Required(ErrorMessage = "İlçe seçimi zorunludur")]
+        [Range(1, int.MaxValue, ErrorMessage = "Lütfen bir ilçe seçiniz")]
         public int IlceId { get; set; }
 
         // ═══════════════════════════════════════════════════════

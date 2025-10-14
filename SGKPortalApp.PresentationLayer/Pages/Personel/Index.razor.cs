@@ -507,5 +507,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             [StringLength(200, MinimumLength = 3, ErrorMessage = "Ad Soyad 3-200 karakter arasında olmalıdır")]
             public string AdSoyad { get; set; } = string.Empty;
         }
+
+        private void GoToManagePage()
+        {
+            _navigationManager.NavigateTo("/personel/manage");
+        }
     }
 }

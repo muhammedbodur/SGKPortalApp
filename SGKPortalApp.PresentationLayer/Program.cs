@@ -2,8 +2,9 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.Common.Extensions;
-using SGKPortalApp.PresentationLayer.Extensions;
 using SGKPortalApp.DataAccessLayer.Context;
+using SGKPortalApp.PresentationLayer.Extensions;
+using SGKPortalApp.PresentationLayer.Helpers;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -134,6 +135,9 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
 });
+
+// Image Helper Service
+builder.Services.AddScoped<ImageHelper>();
 
 // ═══════════════════════════════════════════════════════
 // 📝 LOGGING CONFIGURATION

@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
     'use strict';
 
     var initialized = false;
@@ -96,7 +96,7 @@
         if (isTemporarilyExpanded) {
             // Geçici açık → Kalıcı açık: SOL'a bak
             isTemporarilyExpanded = false;
-            chevron.style.transform = 'rotate(0deg)';
+            chevron.style.setProperty('transform', 'scaleX(1)', 'important');
 
             if (layoutWrapper) {
                 layoutWrapper.classList.remove('layout-menu-hover');
@@ -124,9 +124,9 @@
 
         // Chevron'u güncelle
         if (isCollapsed) {
-            chevron.style.transform = 'rotate(180deg)'; // Kapalı → Sağa
+            chevron.style.setProperty('transform', 'scaleX(-1)', 'important'); // Kapalı → Sağa
         } else {
-            chevron.style.transform = 'rotate(0deg)'; // Açık → Sola
+            chevron.style.setProperty('transform', 'scaleX(1)', 'important'); // Açık → Sola
         }
 
         if (typeof templateName !== 'undefined' && window.config && window.config.enableMenuLocalStorage) {
@@ -156,9 +156,9 @@
         function updateChevron() {
             var isCollapsed = window.Helpers.isCollapsed();
             if (isCollapsed) {
-                chevron.style.transform = 'rotate(180deg)'; // Kapalı → Sağa
+                chevron.style.setProperty('transform', 'scaleX(-1)', 'important'); // Kapalı → Sağa
             } else {
-                chevron.style.transform = 'rotate(0deg)'; // Açık → Sola
+                chevron.style.setProperty('transform', 'scaleX(1)', 'important'); // Açık → Sola
             }
             console.log('Chevron güncellendi. Collapsed:', isCollapsed);
         }
@@ -171,7 +171,7 @@
                     isTemporarilyExpanded = true;
 
                     // Hover ile açıldığında SAĞ'a bak (geçici)
-                    chevron.style.transform = 'rotate(180deg)';
+                    chevron.style.setProperty('transform', 'scaleX(-1)', 'important');
 
                     layoutWrapper.classList.add('layout-menu-hover');
                     console.log('Menu hover: Geçici açıldı, chevron sağda');
@@ -195,7 +195,7 @@
                 isTemporarilyExpanded = false;
 
                 // Kapandığında yine SAĞ'a bak
-                chevron.style.transform = 'rotate(180deg)';
+                chevron.style.setProperty('transform', 'scaleX(-1)', 'important');
 
                 layoutWrapper.classList.remove('layout-menu-hover');
                 console.log('Menu hover: Geçici kapandı');

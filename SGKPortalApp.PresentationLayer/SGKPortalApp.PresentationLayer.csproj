@@ -38,6 +38,7 @@
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.9" />
     <PackageReference Include="Microsoft.JSInterop" Version="9.0.9" />
     <PackageReference Include="QuestPDF" Version="2025.7.2" />
+    <PackageReference Include="SkiaSharp" Version="3.119.1" />
   </ItemGroup>
 
   <ItemGroup>

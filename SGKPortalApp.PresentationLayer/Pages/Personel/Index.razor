@@ -46,9 +46,8 @@
                 PDF
             </button>
 
-            <!-- Yeni Personel (Hızlı Ekleme) -->
-            <button class="btn btn-primary" @onclick="OpenQuickAddModal">
-                <i class="bx bx-plus me-1"></i>Yeni Personel
+            <button class="btn btn-primary" @onclick="GoToManagePage">
+                <i class="bx bx-user-plus me-1"></i> Yeni Personel Ekle
             </button>
         </div>
     </div>
@@ -128,8 +127,8 @@
                     <label class="form-label">Aktiflik</label>
                     <select class="form-select" value="@filterAktiflik" @onchange="OnFilterAktiflikChanged">
                         <option value="-1">Tümü</option>
-                        <option value="0">Aktif</option>
-                        <option value="1">Pasif</option>
+                        <option value="1">Aktif</option>
+                        <option value="0">Pasif</option>
                         <option value="2">Emekli</option>
                     </select>
                 </div>
@@ -233,6 +232,7 @@
                                 <th>Departman</th>
                                 <th>Servis</th>
                                 <th>Ünvan</th>
+                                <th>Dahili</th>
                                 <th class="text-center" style="width: 100px;">Durum</th>
                                 <th class="text-center" style="width: 180px;">İşlemler</th>
                             </tr>
@@ -279,6 +279,7 @@
                                     <td>@personel.DepartmanAdi</td>
                                     <td>@personel.ServisAdi</td>
                                     <td>@personel.UnvanAdi</td>
+                                    <td>@personel.Dahili</td>
                                     <td class="text-center">
                                         @switch (personel.PersonelAktiflikDurum)
                                         {
@@ -363,68 +364,6 @@
         </div>
     </div>
 </div>
-
-<!-- ═══════════════════════════════════════════════════════ -->
-<!-- QUICK ADD MODAL (TC + Ad Soyad) -->
-<!-- ═══════════════════════════════════════════════════════ -->
-@if (ShowQuickAddModal)
-{
-    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bx bx-user-plus me-2"></i>Hızlı Personel Ekle
-                    </h5>
-                    <button type="button" class="btn-close" @onclick="CloseQuickAddModal"></button>
-                </div>
-                <div class="modal-body">
-                    <EditForm Model="@QuickAddModel" OnValidSubmit="HandleQuickAdd">
-                        <DataAnnotationsValidator />
-
-                        <div class="mb-3">
-                            <label class="form-label required">TC Kimlik No</label>
-                            <InputText @bind-Value="QuickAddModel.TcKimlikNo"
-                                       class="form-control"
-                                       placeholder="11 haneli TC Kimlik No"
-                                       maxlength="11"
-                                       disabled="@IsQuickAdding" />
-                            <ValidationMessage For="@(() => QuickAddModel.TcKimlikNo)" class="text-danger small mt-1" />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label required">Ad Soyad</label>
-                            <InputText @bind-Value="QuickAddModel.AdSoyad"
-                                       class="form-control"
-                                       placeholder="Ad Soyad"
-                                       maxlength="200"
-                                       disabled="@IsQuickAdding" />
-                            <ValidationMessage For="@(() => QuickAddModel.AdSoyad)" class="text-danger small mt-1" />
-                        </div>
-
-                        <div class="alert alert-info mb-0">
-                            <i class="bx bx-info-circle me-2"></i>
-                            Personel oluşturulduktan sonra detay sayfasına yönlendirileceksiniz.
-                        </div>
-
-                        <div class="modal-footer px-0 pb-0">
-                            <button type="button" class="btn btn-outline-secondary" @onclick="CloseQuickAddModal" disabled="@IsQuickAdding">
-                                İptal
-                            </button>
-                            <button type="submit" class="btn btn-primary" disabled="@IsQuickAdding">
-                                @if (IsQuickAdding)
-                                {
-                                    <span class="spinner-border spinner-border-sm me-1"></span>
-                                }
-                                Oluştur ve Devam Et
-                            </button>
-                        </div>
-                    </EditForm>
-                </div>
-            </div>
-        </div>
-    </div>
-}
 
 <!-- ═══════════════════════════════════════════════════════ -->
 <!-- DELETE MODAL -->
