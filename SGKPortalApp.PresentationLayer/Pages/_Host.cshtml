@@ -14,9 +14,6 @@
     <title>SGK Portal - İzmir Sosyal Güvenlik İl Müdürlüğü</title>
     <base href="~/" />
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/portal/assets/img/favicon/favicon.ico" />
-
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -112,10 +109,10 @@
     </style>
 
     <!-- Custom Site CSS - EN SONDA YÜKLENMELİ -->
-    <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="/css/site.css" asp-append-version="true">
     
     <!-- Sıramatik Module CSS -->
-    <link rel="stylesheet" href="/css/modules/siramatik.css">
+    <link rel="stylesheet" href="/css/modules/siramatik.css" asp-append-version="true">
 
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
@@ -212,7 +209,7 @@
     <!-- ================== BLAZOR SNEAT INIT ================== -->
     <script src="/js/blazor-sneat-init.js"></script>
 
-    <!-- ================== SIRAMATIK PANEL ================== -->
-    <script src="/js/siramatik-panel.js"></script>
+    <!-- ================== SIRA ÇAĞIRMA PANEL ================== -->
+    <script src="/js/SiraCagirmaPanel.js" asp-append-version="true"></script>
 </body>
 </html>

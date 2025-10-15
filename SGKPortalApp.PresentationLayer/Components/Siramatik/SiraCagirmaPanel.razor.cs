@@ -5,7 +5,7 @@ using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 
 namespace SGKPortalApp.PresentationLayer.Components.Siramatik
 {
-    public partial class SiraCagirmaPanel : ComponentBase
+    public partial class SiraCagirmaPanel
     {
         [Inject] private IJSRuntime JS { get; set; } = default!;
 
@@ -24,9 +24,15 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
         {
             if (firstRender)
             {
-                await LoadStateFromLocalStorage();
-                await JS.InvokeVoidAsync("SiraCagirmaPanel.init", DotNetObjectReference.Create(this));
-                StateHasChanged();
+                try
+                {
+                    await JS.InvokeVoidAsync("SiraCagirmaPanel.init", DotNetObjectReference.Create(this));
+                    Console.WriteLine("SiraCagirmaPanel JavaScript initialized");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"SiraCagirmaPanel init error: {ex.Message}");
+                }
             }
         }
 
@@ -36,7 +42,6 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
             if (!IsPinned && IsVisible)
             {
                 IsVisible = false;
-                SaveStateToLocalStorage();
                 await OnPanelStateChanged.InvokeAsync(IsVisible);
                 StateHasChanged();
             }
@@ -49,7 +54,24 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
             {
                 IsPinned = false;
             }
-            SaveStateToLocalStorage();
+
+            // JavaScript'e bildir
+            try
+            {
+                if (IsVisible)
+                {
+                    await JS.InvokeVoidAsync("SiraCagirmaPanel.openPanel");
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("SiraCagirmaPanel.closePanel");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"TogglePanel JS error: {ex.Message}");
+            }
+
             await OnPanelStateChanged.InvokeAsync(IsVisible);
         }
 
@@ -57,14 +79,23 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
         {
             IsPinned = !IsPinned;
 
+            // JavaScript'e pin durumunu bildir
+            try
+            {
+                await JS.InvokeVoidAsync("SiraCagirmaPanel.setPin", IsPinned);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"TogglePin JS error: {ex.Message}");
+            }
+
             // Pin kaldırılınca paneli kapat
             if (!IsPinned)
             {
                 IsVisible = false;
                 await OnPanelStateChanged.InvokeAsync(IsVisible);
+                await JS.InvokeVoidAsync("SiraCagirmaPanel.closePanel");
             }
-
-            SaveStateToLocalStorage();
         }
 
         private async Task SiradakiCagir()
@@ -76,33 +107,9 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
             }
         }
 
-        private async Task LoadStateFromLocalStorage()
+        private async Task SiraSecildi(SiraCagirmaResponseDto sira)
         {
-            try
-            {
-                var isVisibleStr = await JS.InvokeAsync<string>("localStorage.getItem", "siraCagirmaPanel_isVisible");
-                var isPinnedStr = await JS.InvokeAsync<string>("localStorage.getItem", "siraCagirmaPanel_isPinned");
-
-                IsVisible = isVisibleStr == "true";
-                IsPinned = isPinnedStr == "true";
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"LocalStorage load error: {ex.Message}");
-            }
-        }
-
-        private async void SaveStateToLocalStorage()
-        {
-            try
-            {
-                await JS.InvokeVoidAsync("localStorage.setItem", "siraCagirmaPanel_isVisible", IsVisible.ToString().ToLower());
-                await JS.InvokeVoidAsync("localStorage.setItem", "siraCagirmaPanel_isPinned", IsPinned.ToString().ToLower());
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"LocalStorage save error: {ex.Message}");
-            }
+            await OnSiraCagir.InvokeAsync(sira.SiraId);
         }
     }
 }

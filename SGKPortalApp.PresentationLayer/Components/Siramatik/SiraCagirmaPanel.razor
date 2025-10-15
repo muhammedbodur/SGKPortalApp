@@ -1,47 +1,71 @@
-@* Banko Sıra Çağırma Paneli - Blazor Yaklaşımı *@
+@* Banko Sıra Çağırma Paneli - Sneat Template Customizer Versiyonu *@
 
-<!-- Panel Container -->
-<div id="siraCagirmaPanel" class="sira-cagirma-panel @(IsVisible ? "show" : "")">
+<!-- Panel Container - Sneat'in template-customizer ID'sini kullan -->
+<div id="template-customizer" class="@(IsVisible ? "show" : "")" style="width: 300px; height: 100vh; background-color: #f9f9f9; position: fixed; top: 0; right: 0; z-index: 2000; transition: transform 0.3s ease; transform: @(IsVisible ? "translateX(0)" : "translateX(100%)"); box-shadow: -2px 0 5px rgba(0,0,0,0.1);">
     
     <!-- Panel Header -->
-    <div class="sira-panel-header" style="background: @HeaderBackground; cursor: pointer;" @onclick="TogglePin" title="@(IsPinned ? "Sabitlemeyi Kaldır (Kapat)" : "Sabitle")">
-        <div class="d-flex align-items-center justify-content-between w-100">
-            <h5 class="mb-0 text-white">
-                <i class="bx bx-phone-call me-2"></i>
-                Banko Sıra Çağırma Paneli
-            </h5>
-            <span class="pin-indicator">
-                <i class="bx @(IsPinned ? "bx-pin text-white" : "bx-pin text-white-50")"></i>
-            </span>
-        </div>
+    <div id="panel-header" class="template-customizer-header" 
+         style="padding: 20px; background-color: @(IsPinned ? "#696bff" : "#d2e2fc"); color: white; font-size: 18px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; position: relative; cursor: pointer; transition: background-color 0.3s ease;" 
+         @onclick="TogglePin"
+         title="@(IsPinned ? "Sabitlemeyi Kaldır" : "Sabitle")">
+        <span id="pin-icon" style="font-size: 24px; cursor: pointer; color: white; position: absolute; top: 50%; right: -40px; transform: translateY(-50%); background-color: @(IsPinned ? "#696bff" : "#d2e2fc"); padding: 10px; border-radius: 50%; box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2); transition: right 0.3s ease, background-color 0.3s ease;">
+            <i class="bx @(IsPinned ? "bx-pin" : "bx-pin-off")"></i>
+        </span>
+        Banko Sıra Çağırma Paneli
     </div>
 
     <!-- Panel Body -->
-    <div class="sira-panel-body">
+    <div class="template-customizer-inner" style="padding: 20px;">
         
         <!-- Çağırma Butonu -->
-        <button type="button" class="btn btn-primary w-100 mb-3" @onclick="SiradakiCagir">
-            <i class="bx bx-phone-outgoing me-2"></i>
-            Sıradaki Vatandaşı Çağır
-        </button>
+        <div class="px-4 mb-4">
+            <button type="button" 
+                    class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" 
+                    @onclick="SiradakiCagir"
+                    disabled="@(!SiraListesi.Any())">
+                <i class="bx bx-phone-outgoing"></i>
+                <span>Sıradaki Vatandaşı Çağır</span>
+            </button>
+        </div>
 
         <!-- Sıra Listesi -->
-        <div class="sira-listesi">
+        <div class="px-4">
             @if (SiraListesi != null && SiraListesi.Any())
             {
+                <div class="mb-2">
+                    <small class="text-muted">Bekleyen @SiraListesi.Count sıra</small>
+                </div>
+
                 @foreach (var sira in SiraListesi)
                 {
-                    <div class="card sira-item mb-2 @(sira.BeklemeDurum == BeklemeDurum.Cagrildi ? "active" : "")">
+                    <div class="card mb-2 @(sira.BeklemeDurum == BeklemeDurum.Cagrildi ? "border-primary" : "")" 
+                         style="transition: all 0.2s ease; cursor: pointer;"
+                         @onclick="() => SiraSecildi(sira)">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <h6 class="mb-1 fw-bold">Sıra @sira.SiraNo</h6>
-                                    <small class="text-muted">@sira.KanalAltAdi</small>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold text-primary">Sıra @sira.SiraNo</h6>
+                                    <small class="text-muted d-block">
+                                        <i class="bx bx-user me-1"></i>@sira.KanalAltAdi
+                                    </small>
+                                    <small class="text-muted d-block">
+                                        <i class="bx bx-time me-1"></i>@sira.SiraAlisZamani.ToString("HH:mm")
+                                    </small>
                                 </div>
-                                @if (sira.BeklemeDurum == BeklemeDurum.Cagrildi)
-                                {
-                                    <span class="badge bg-label-primary">Çağrıldı</span>
-                                }
+                                <div class="text-end">
+                                    @if (sira.BeklemeDurum == BeklemeDurum.Cagrildi)
+                                    {
+                                        <span class="badge bg-label-primary">
+                                            <i class="bx bx-phone"></i> Çağrıldı
+                                        </span>
+                                    }
+                                    else if (sira.BeklemeDurum == BeklemeDurum.Beklemede)
+                                    {
+                                        <span class="badge bg-label-warning">
+                                            <i class="bx bx-time"></i> Bekliyor
+                                        </span>
+                                    }
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -49,16 +73,39 @@
             }
             else
             {
-                <div class="empty-state text-center py-4">
-                    <i class="bx bx-info-circle bx-lg text-muted mb-2 d-block"></i>
-                    <p class="text-muted mb-0">Bekleyen sıra yok</p>
+                <div class="text-center py-5">
+                    <i class="bx bx-info-circle display-4 text-muted mb-3 d-block"></i>
+                    <h6 class="text-muted">Bekleyen Sıra Yok</h6>
+                    <p class="text-muted small mb-0">Şu anda çağrılacak vatandaş bulunmuyor.</p>
                 </div>
             }
         </div>
+
+        <!-- Panel Footer (Optional - İstatistikler) -->
+        @if (SiraListesi.Any())
+        {
+            <div class="px-4 py-3 mt-3 border-top">
+                <div class="row g-2 text-center">
+                    <div class="col-6">
+                        <small class="text-muted d-block">Toplam</small>
+                        <strong class="text-primary">@SiraListesi.Count</strong>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted d-block">Çağrılan</small>
+                        <strong class="text-success">@SiraListesi.Count(s => s.BeklemeDurum == BeklemeDurum.Cagrildi)</strong>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 </div>
 
-<!-- Toggle Button -->
-<button class="sira-panel-toggle @(IsVisible ? "hide" : "")" @onclick="TogglePanel" title="Sıra Çağırma Paneli">
+<!-- Toggle Button - Panel Kapalıyken Görünür -->
+<button id="callPanelToggleCustomizerButton" 
+        type="button" 
+        class="@(IsVisible ? "hide" : "")"
+        style="position: fixed; top: 50%; right: @(IsVisible ? "-100px" : "0"); transform: translateY(-50%); background-color: #696bff; color: white; padding: 30px 20px; border: none; border-radius: 5px 0 0 5px; cursor: pointer; z-index: 2001; transition: right 0.3s ease, background-color 0.3s ease; font-size: 24px; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);"
+        @onclick="TogglePanel"
+        title="Sıra Çağırma Paneli">
     <i class="bx bx-phone-call"></i>
 </button>
