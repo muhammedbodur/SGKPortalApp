@@ -19,6 +19,7 @@
     <Folder Include="Services\ApiServices\Interfaces\Eshot\" />
     <Folder Include="Services\ApiServices\Interfaces\Pdks\" />
     <Folder Include="Services\ApiServices\Interfaces\Siramatik\" />
+    <Folder Include="Shared\Components\" />
     <Folder Include="Shared\Forms\" />
     <Folder Include="Shared\Cards\" />
     <Folder Include="wwwroot\images\avatars\" />

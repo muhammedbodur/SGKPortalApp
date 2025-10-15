@@ -1,0 +1,143 @@
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
+@using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri
+@inject IJSRuntime JS
+
+@* Banko Sıra Çağırma Paneli - Blazor Yaklaşımı *@
+
+<!-- Panel Container -->
+<div class="sira-cagirma-panel @(IsVisible ? "show" : "")">
+    
+    <!-- Panel Header -->
+    <div class="sira-panel-header" style="background: @HeaderBackground">
+        <div class="d-flex align-items-center justify-content-between w-100">
+            <h5 class="mb-0 text-white">
+                <i class="bx bx-phone-call me-2"></i>
+                Banko Sıra Çağırma Paneli
+            </h5>
+            <span class="pin-icon" @onclick="TogglePin" title="@(IsPinned ? "Sabitlemeyi Kaldır" : "Sabitle")">
+                <i class="bx @(IsPinned ? "bx-pin-off" : "bx-pin")"></i>
+            </span>
+        </div>
+    </div>
+
+    <!-- Panel Body -->
+    <div class="sira-panel-body">
+        
+        <!-- Çağırma Butonu -->
+        <button type="button" class="btn btn-primary w-100 mb-3" @onclick="SiradakiCagir">
+            <i class="bx bx-phone-outgoing me-2"></i>
+            Sıradaki Vatandaşı Çağır
+        </button>
+
+        <!-- Sıra Listesi -->
+        <div class="sira-listesi">
+            @if (SiraListesi != null && SiraListesi.Any())
+            {
+                @foreach (var sira in SiraListesi)
+                {
+                    <div class="card sira-item mb-2 @(sira.BeklemeDurum == BeklemeDurum.Cagrildi ? "active" : "")">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <h6 class="mb-1 fw-bold">Sıra @sira.SiraNo</h6>
+                                    <small class="text-muted">@sira.KanalAltAdi</small>
+                                </div>
+                                @if (sira.BeklemeDurum == BeklemeDurum.Cagrildi)
+                                {
+                                    <span class="badge bg-label-primary">Çağrıldı</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-state text-center py-4">
+                    <i class="bx bx-info-circle bx-lg text-muted mb-2 d-block"></i>
+                    <p class="text-muted mb-0">Bekleyen sıra yok</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Toggle Button -->
+<button class="sira-panel-toggle @(IsVisible ? "hide" : "")" @onclick="TogglePanel" title="Sıra Çağırma Paneli">
+    <i class="bx bx-phone-call"></i>
+</button>
+
+@code {
+    [Parameter] public List<SiraCagirmaResponseDto> SiraListesi { get; set; } = new();
+    [Parameter] public EventCallback<int> OnSiraCagir { get; set; }
+
+    private bool IsVisible { get; set; } = false;
+    private bool IsPinned { get; set; } = false;
+
+    private string HeaderBackground => IsPinned 
+        ? "linear-gradient(135deg, #696cff 0%, #5f61e6 100%)" 
+        : "linear-gradient(135deg, #8b8dff 0%, #7f81f6 100%)";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadStateFromLocalStorage();
+            StateHasChanged();
+        }
+    }
+
+    private void TogglePanel()
+    {
+        IsVisible = !IsVisible;
+        if (IsVisible)
+        {
+            IsPinned = false;
+        }
+        SaveStateToLocalStorage();
+    }
+
+    private void TogglePin()
+    {
+        IsPinned = !IsPinned;
+        SaveStateToLocalStorage();
+    }
+
+    private async Task SiradakiCagir()
+    {
+        var siradaki = SiraListesi.FirstOrDefault(x => x.BeklemeDurum == BeklemeDurum.Beklemede);
+        if (siradaki != null)
+        {
+            await OnSiraCagir.InvokeAsync(siradaki.SiraId);
+        }
+    }
+
+    private async Task LoadStateFromLocalStorage()
+    {
+        try
+        {
+            var isVisibleStr = await JS.InvokeAsync<string>("localStorage.getItem", "siraCagirmaPanel_isVisible");
+            var isPinnedStr = await JS.InvokeAsync<string>("localStorage.getItem", "siraCagirmaPanel_isPinned");
+
+            IsVisible = isVisibleStr == "true";
+            IsPinned = isPinnedStr == "true";
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"LocalStorage load error: {ex.Message}");
+        }
+    }
+
+    private async void SaveStateToLocalStorage()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", "siraCagirmaPanel_isVisible", IsVisible.ToString().ToLower());
+            await JS.InvokeVoidAsync("localStorage.setItem", "siraCagirmaPanel_isPinned", IsPinned.ToString().ToLower());
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"LocalStorage save error: {ex.Message}");
+        }
+    }
+}

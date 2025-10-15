@@ -1,5 +1,8 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @inject IJSRuntime JS
+@using SGKPortalApp.PresentationLayer.Components.Siramatik
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
+@using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri
 
 <div class="layout-wrapper layout-content-navbar">
     <div class="layout-container">
@@ -21,7 +24,18 @@
     <div class="layout-overlay layout-menu-toggle"></div>
 </div>
 
+@* Sıra Çağırma Paneli - Fixed Position Overlay *@
+<SiraCagirmaPanel SiraListesi="@siraListesi" OnSiraCagir="@HandleSiraCagir" />
+
 @code {
+    private List<SiraCagirmaResponseDto> siraListesi = new();
+
+    protected override void OnInitialized()
+    {
+        // TODO: Gerçek uygulamada service/SignalR'dan gelecek
+        OrnekSiraVerileriYukle();
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -36,6 +50,42 @@
             {
                 Console.WriteLine($"MainLayout JS hatası: {ex.Message}");
             }
+        }
+    }
+
+    private void OrnekSiraVerileriYukle()
+    {
+        // Örnek veri - Gerçek uygulamada service'den gelecek
+        siraListesi = new List<SiraCagirmaResponseDto>
+        {
+            new() { SiraId = 1, SiraNo = 1, KanalAltAdi = "Emeklilik İşlemleri", BeklemeDurum = BeklemeDurum.Beklemede, SiraAlisZamani = DateTime.Now, HizmetBinasiId = 1, HizmetBinasiAdi = "İzmir SGK" },
+            new() { SiraId = 2, SiraNo = 2, KanalAltAdi = "SGK Kayıt", BeklemeDurum = BeklemeDurum.Beklemede, SiraAlisZamani = DateTime.Now, HizmetBinasiId = 1, HizmetBinasiAdi = "İzmir SGK" },
+            new() { SiraId = 3, SiraNo = 3, KanalAltAdi = "Sağlık Raporu", BeklemeDurum = BeklemeDurum.Beklemede, SiraAlisZamani = DateTime.Now, HizmetBinasiId = 1, HizmetBinasiAdi = "İzmir SGK" },
+            new() { SiraId = 4, SiraNo = 4, KanalAltAdi = "Borç Sorgulama", BeklemeDurum = BeklemeDurum.Beklemede, SiraAlisZamani = DateTime.Now, HizmetBinasiId = 1, HizmetBinasiAdi = "İzmir SGK" }
+        };
+    }
+
+    private void HandleSiraCagir(int siraId)
+    {
+        // Sırayı çağır
+        var sira = siraListesi.FirstOrDefault(x => x.SiraId == siraId);
+        if (sira != null)
+        {
+            // Önceki çağrılmış sırayı beklemede yap
+            var oncekiCagrilan = siraListesi.FirstOrDefault(x => x.BeklemeDurum == BeklemeDurum.Cagrildi);
+            if (oncekiCagrilan != null)
+            {
+                oncekiCagrilan.BeklemeDurum = BeklemeDurum.Beklemede;
+            }
+
+            // Yeni sırayı çağır
+            sira.BeklemeDurum = BeklemeDurum.Cagrildi;
+            sira.IslemBaslamaZamani = DateTime.Now;
+
+            // TODO: Gerçek uygulamada API'ye çağrı yapılacak
+            // await SiraService.CagirAsync(siraId);
+
+            StateHasChanged();
         }
     }
 }

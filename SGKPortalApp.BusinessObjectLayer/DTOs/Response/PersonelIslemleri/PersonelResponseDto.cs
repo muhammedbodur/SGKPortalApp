@@ -58,6 +58,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
         // Durum bilgileri
         public PersonelTipi PersonelTipi { get; set; }
         public PersonelAktiflikDurum PersonelAktiflikDurum { get; set; }
+        public bool IsOnline { get; set; } = false;
 
         // Eğitim bilgileri
         public OgrenimDurumu OgrenimDurumu { get; set; }
