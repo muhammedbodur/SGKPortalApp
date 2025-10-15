@@ -4,7 +4,7 @@
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
 @using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri
 
-<div class="layout-wrapper layout-content-navbar">
+<div class="layout-wrapper layout-content-navbar @(siraPanelAcik ? "sira-panel-open" : "")">
     <div class="layout-container">
         <NavMenu />
         <div class="layout-page">
@@ -25,10 +25,11 @@
 </div>
 
 @* Sıra Çağırma Paneli - Fixed Position Overlay *@
-<SiraCagirmaPanel SiraListesi="@siraListesi" OnSiraCagir="@HandleSiraCagir" />
+<SiraCagirmaPanel SiraListesi="@siraListesi" OnSiraCagir="@HandleSiraCagir" OnPanelStateChanged="@HandlePanelStateChanged" />
 
 @code {
     private List<SiraCagirmaResponseDto> siraListesi = new();
+    private bool siraPanelAcik = false;
 
     protected override void OnInitialized()
     {
@@ -87,5 +88,11 @@
 
             StateHasChanged();
         }
+    }
+
+    private void HandlePanelStateChanged(bool isVisible)
+    {
+        siraPanelAcik = isVisible;
+        StateHasChanged();
     }
 }

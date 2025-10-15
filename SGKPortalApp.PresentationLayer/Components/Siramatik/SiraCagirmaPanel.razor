@@ -5,17 +5,17 @@
 @* Banko Sıra Çağırma Paneli - Blazor Yaklaşımı *@
 
 <!-- Panel Container -->
-<div class="sira-cagirma-panel @(IsVisible ? "show" : "")">
+<div id="siraCagirmaPanel" class="sira-cagirma-panel @(IsVisible ? "show" : "")">
     
     <!-- Panel Header -->
-    <div class="sira-panel-header" style="background: @HeaderBackground">
+    <div class="sira-panel-header" style="background: @HeaderBackground; cursor: pointer;" @onclick="TogglePin" title="@(IsPinned ? "Sabitlemeyi Kaldır (Kapat)" : "Sabitle")">
         <div class="d-flex align-items-center justify-content-between w-100">
             <h5 class="mb-0 text-white">
                 <i class="bx bx-phone-call me-2"></i>
                 Banko Sıra Çağırma Paneli
             </h5>
-            <span class="pin-icon" @onclick="TogglePin" title="@(IsPinned ? "Sabitlemeyi Kaldır" : "Sabitle")">
-                <i class="bx @(IsPinned ? "bx-pin-off" : "bx-pin")"></i>
+            <span class="pin-indicator">
+                <i class="bx @(IsPinned ? "bx-pin text-white" : "bx-pin text-white-50")"></i>
             </span>
         </div>
     </div>
@@ -70,6 +70,7 @@
 @code {
     [Parameter] public List<SiraCagirmaResponseDto> SiraListesi { get; set; } = new();
     [Parameter] public EventCallback<int> OnSiraCagir { get; set; }
+    [Parameter] public EventCallback<bool> OnPanelStateChanged { get; set; }
 
     private bool IsVisible { get; set; } = false;
     private bool IsPinned { get; set; } = false;
@@ -83,23 +84,45 @@
         if (firstRender)
         {
             await LoadStateFromLocalStorage();
+            await JS.InvokeVoidAsync("SiraCagirmaPanel.init", DotNetObjectReference.Create(this));
             StateHasChanged();
         }
     }
 
-    private void TogglePanel()
+    [JSInvokable]
+    public async Task CloseFromJS()
+    {
+        if (!IsPinned && IsVisible)
+        {
+            IsVisible = false;
+            SaveStateToLocalStorage();
+            await OnPanelStateChanged.InvokeAsync(IsVisible);
+            StateHasChanged();
+        }
+    }
+
+    private async Task TogglePanel()
     {
         IsVisible = !IsVisible;
-        if (IsVisible)
+        if (!IsVisible)
         {
             IsPinned = false;
         }
         SaveStateToLocalStorage();
+        await OnPanelStateChanged.InvokeAsync(IsVisible);
     }
 
-    private void TogglePin()
+    private async Task TogglePin()
     {
         IsPinned = !IsPinned;
+        
+        // Pin kaldırılınca paneli kapat
+        if (!IsPinned)
+        {
+            IsVisible = false;
+            await OnPanelStateChanged.InvokeAsync(IsVisible);
+        }
+        
         SaveStateToLocalStorage();
     }
 
