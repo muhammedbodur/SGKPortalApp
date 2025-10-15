@@ -1,6 +1,4 @@
-/* ============================================================
-   CHEVRON ROTATION - Menü Toggle Butonu
-   ============================================================ */
+/* Chevron Rotation - Menü Toggle Butonu */
 html.layout-menu-collapsed .layout-menu-toggle .bx-chevron-left {
     transform: scaleX(-1) !important;
 }
@@ -13,9 +11,7 @@ html.layout-menu-fixed:not(.layout-menu-collapsed) .layout-menu-toggle .bx-chevr
     transition: transform 1s ease !important;
 }
 
-/* ============================================================
-   APP BRAND - Logo ve Toggle Butonu Container
-   ============================================================ */
+/* App Brand - Logo ve Toggle Container */
 .app-brand {
     display: flex !important;
     align-items: center !important;
@@ -35,9 +31,7 @@ html.layout-menu-fixed:not(.layout-menu-collapsed) .layout-menu-toggle .bx-chevr
     min-width: 0 !important;
 }
 
-/* ============================================================
-   LOGO BOYUTLARI
-   ============================================================ */
+/* Logo Boyutları */
 .app-brand-logo.demo svg {
     width: 70px !important;
     height: 35px !important;
@@ -52,9 +46,7 @@ html.layout-menu-fixed:not(.layout-menu-collapsed) .layout-menu-toggle .bx-chevr
     max-width: calc(100% - 100px) !important;
 }
 
-/* ============================================================
-   LAYOUT MENU TOGGLE - Toggle Butonu Pozisyonu
-   ============================================================ */
+/* Layout Menu Toggle - Toggle Butonu Pozisyonu */
 .app-brand .layout-menu-toggle {
     flex-shrink: 0 !important;
     display: inline-flex !important;
@@ -66,23 +58,314 @@ html.layout-menu-fixed:not(.layout-menu-collapsed) .layout-menu-toggle .bx-chevr
     margin-left: auto !important;
 }
 
-.app-brand .layout-menu-toggle i {
-    font-size: 1.375rem !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    .app-brand .layout-menu-toggle i {
+        font-size: 1.375rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+/* ============================================================
+   GLOBAL CUSTOM STYLES - SGK Portal Özel Stiller
+   ============================================================ */
+
+/* CSS Variables */
+:root {
+    --sgk-primary: #696cff;
+    --sgk-secondary: #8592a3;
+    --sgk-success: #71dd37;
+    --sgk-info: #03c3ec;
+    --sgk-warning: #ffab00;
+    --sgk-danger: #ff3e1d;
+    --sgk-light: #fcfdfd;
+    --sgk-dark: #233446;
+}
+
+/* Blazor Reconnection - Hidden */
+#components-reconnect-modal {
+    display: none !important;
 }
 
 /* ============================================================
-   CLICKABLE - Genel Tıklanabilir Elementler
+   CARD ENHANCEMENTS
    ============================================================ */
-.clickable {
-    cursor: pointer;
-    color: #007bff;
-    text-decoration: underline;
+
+/* Hover Effect Cards */
+.card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.clickable:hover {
-    color: #0056b3;
+    .card-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(105, 108, 255, 0.15);
+    }
+
+/* Interactive Cards */
+.card-interactive {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .card-interactive:hover {
+        border-color: var(--sgk-primary);
+        box-shadow: 0 4px 20px rgba(105, 108, 255, 0.1);
+    }
+
+/* ============================================================
+   BADGES & LABELS
+   ============================================================ */
+
+/* Custom Badge - SGK Primary */
+.badge.bg-label-sgk {
+    background-color: rgba(105, 108, 255, 0.12) !important;
+    color: var(--sgk-primary) !important;
+    font-weight: 500;
+}
+
+/* Status Badges */
+.badge-status-active {
+    background-color: rgba(113, 221, 55, 0.12);
+    color: #71dd37;
+}
+
+.badge-status-inactive {
+    background-color: rgba(255, 62, 29, 0.12);
+    color: #ff3e1d;
+}
+
+.badge-status-pending {
+    background-color: rgba(255, 171, 0, 0.12);
+    color: #ffab00;
+}
+
+/* ============================================================
+   FORM CONTROLS
+   ============================================================ */
+
+/* Enhanced Focus States */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--sgk-primary);
+    box-shadow: 0 0 0 0.2rem rgba(105, 108, 255, 0.15);
+}
+
+/* Input Groups */
+.input-group-text {
+    background-color: #f8f9fa;
+    border-color: #d9dee3;
+}
+
+/* Required Field Indicator */
+.form-label.required::after {
+    content: " *";
+    color: var(--sgk-danger);
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+/* Button Hover Effects */
+.btn {
+    transition: all 0.2s ease;
+}
+
+    .btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn:active {
+        transform: translateY(0);
+    }
+
+/* Icon Buttons */
+.btn-icon {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ============================================================
+   TABLES
+   ============================================================ */
+
+/* DataTable Wrapper */
+.datatable-wrapper {
+    border: 1px solid #d9dee3;
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+/* Table Row Hover */
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+/* Responsive Table */
+@media (max-width: 991.98px) {
+    .table-responsive {
+        border: 1px solid #d9dee3;
+        border-radius: 0.375rem;
+    }
+}
+
+/* ============================================================
+   PAGE STRUCTURE
+   ============================================================ */
+
+/* Page Header */
+.page-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #d9dee3;
+}
+
+    .page-header h4 {
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+    }
+
+    .page-header .breadcrumb {
+        margin-bottom: 0;
+    }
+
+/* Page Actions */
+.page-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+/* ============================================================
+   LOADING & EMPTY STATES
+   ============================================================ */
+
+/* Loading Spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(105, 108, 255, 0.1);
+    border-left-color: var(--sgk-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #d9dee3;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h5 {
+        color: #697a8d;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: #a1acb8;
+    }
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+
+/* Clickable Elements */
+.clickable {
+    cursor: pointer;
+    color: var(--sgk-primary);
     text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+    .clickable:hover {
+        color: #5f61e6;
+    }
+
+/* Text Truncate with Tooltip */
+.text-truncate-line-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Shadow Utilities */
+.shadow-sm-hover {
+    transition: box-shadow 0.3s ease;
+}
+
+    .shadow-sm-hover:hover {
+        box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+/* ============================================================
+   RESPONSIVE UTILITIES
+   ============================================================ */
+
+/* Mobile Optimizations */
+@media (max-width: 767.98px) {
+    .page-header {
+        padding-bottom: 0.75rem;
+    }
+
+        .page-header h4 {
+            font-size: 1.25rem;
+        }
+
+    .page-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+        .page-actions .btn {
+            width: 100%;
+        }
+}
+
+/* Tablet Optimizations */
+@media (min-width: 768px) and (max-width: 1199.98px) {
+    .app-brand-text {
+        font-size: 1rem !important;
+    }
+}
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+
+@media print {
+    .no-print,
+    .layout-menu,
+    .layout-navbar,
+    .page-actions {
+        display: none !important;
+    }
+
+    .content-wrapper {
+        padding: 0 !important;
+    }
 }
