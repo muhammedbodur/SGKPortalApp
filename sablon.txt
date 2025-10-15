@@ -1,155 +1,356 @@
-# SGK Portal App - Proje Yapısı
+# SGK Portal App - Kapsamlı ve Güncellenmiş Proje Şablonu
+# Son Güncelleme: 15 Ekim 2025
+# Referans: SocialSecurityInstitution projesi analizi sonrası hazırlanmıştır
+
+## 📋 Proje Yapısı Overview
 
 ```
 SGKPortalApp/
-├── SGKPortalApp.sln
-├── appsettings.Shared.json
-├── ProjeTanimi.md
-├── sablon.txt
+├── SGKPortalApp.sln                                    # Çözüm dosyası
 │
-├── SGKPortalApp.Common/
+├── SGKPortalApp.Common/                                # Ortak altyapı katmanı
 │   ├── Configuration/
-│   │   └── DatabaseConfiguration.cs
-│   ├── Extensions/
-│   │   ├── ServiceCollectionExtensions.cs
-│   │   └── StringExtensions.cs
-│   ├── Helpers/
-│   ├── Constants/
-│   ├── Exceptions/
-│   └── Attributes/
+│   │   └── DatabaseConfiguration.cs                    # Database connection yönetimi
+│   ├── Helpers/                                        # Yardımcı sınıflar
+│   │   ├── DateHelper.cs                              # Tarih işlemleri
+│   │   ├── ValidationHelper.cs                        # Validasyon helper'ları
+│   │   ├── CryptoHelper.cs                            # Şifreleme işlemleri
+│   │   ├── FileHelper.cs                              # Dosya işlemleri
+│   │   ├── EmailHelper.cs                             # Email gönderimi
+│   │   ├── ExcelHelper.cs                             # Excel import/export
+│   │   └── PdfHelper.cs                               # PDF oluşturma
+│   ├── Extensions/                                     # Extension metodlar
+│   │   ├── StringExtensions.cs                        # String genişletmeleri
+│   │   ├── DateTimeExtensions.cs                      # DateTime genişletmeleri
+│   │   ├── EnumExtensions.cs                          # Enum genişletmeleri
+│   │   ├── IServiceCollectionExtensions.cs            # DI extension'ları
+│   │   ├── ClaimsPrincipalExtensions.cs               # Authentication ext.
+│   │   ├── IQueryableExtensions.cs                    # LINQ genişletmeleri
+│   │   └── ListExtensions.cs                          # List genişletmeleri
+│   ├── Constants/                                      # Sabitler ve mesajlar
+│   │   ├── Messages.cs                                # Sistem mesajları
+│   │   ├── DefaultValues.cs                           # Varsayılan değerler
+│   │   ├── ApiEndpoints.cs                            # API endpoint sabitleri
+│   │   ├── ClaimTypes.cs                              # Claim tipleri
+│   │   ├── Policies.cs                                # Authorization policy'ler
+│   │   ├── ValidationMessages.cs                      # Validasyon mesajları
+│   │   └── ErrorCodes.cs                              # Hata kodları
+│   ├── Exceptions/                                     # Custom exception'lar
+│   │   ├── BusinessException.cs                       # İş mantığı hataları
+│   │   ├── ValidationException.cs                     # Validasyon hataları
+│   │   ├── NotFoundException.cs                       # Kayıt bulunamadı
+│   │   ├── UnauthorizedException.cs                   # Yetkilendirme hatası
+│   │   ├── DuplicateException.cs                      # Tekrar kayıt hatası
+│   │   └── DatabaseException.cs                       # Veritabanı hataları
+│   └── Attributes/                                     # Custom attribute'lar
+│       ├── RequiredRoleAttribute.cs                   # Rol kontrolü
+│       ├── ValidateEnumAttribute.cs                   # Enum validasyonu
+│       ├── TcKimlikNoAttribute.cs                     # TC kimlik doğrulama
+│       └── DateRangeAttribute.cs                      # Tarih aralığı kontrolü
 │
-├── SGKPortalApp.BusinessObjectLayer/
-│   ├── Entities/
-│   │   ├── Common/
-│   │   │   ├── BaseEntity.cs
-│   │   │   ├── AuditableEntity.cs
-│   │   │   ├── User.cs
-│   │   │   ├── Il.cs
-│   │   │   ├── Ilce.cs
-│   │   │   ├── HizmetBinasi.cs
-│   │   │   ├── DatabaseLog.cs
-│   │   │   ├── LoginLogoutLog.cs
-│   │   │   ├── Modul.cs
-│   │   │   ├── ModulAlt.cs
-│   │   │   ├── ModulController.cs
-│   │   │   └── ModulControllerIslem.cs
-│   │   ├── PersonelIslemleri/
-│   │   │   ├── Personel.cs
-│   │   │   ├── PersonelCocuk.cs
-│   │   │   ├── PersonelDepartman.cs
-│   │   │   ├── PersonelYetki.cs
-│   │   │   ├── Departman.cs
-│   │   │   ├── Servis.cs
-│   │   │   ├── Unvan.cs
-│   │   │   ├── Sendika.cs
-│   │   │   ├── AtanmaNedeni.cs
-│   │   │   └── Yetki.cs
-│   │   ├── SiramatikIslemleri/
-│   │   │   ├── Banko.cs
-│   │   │   ├── BankoKullanici.cs
-│   │   │   ├── BankoIslem.cs
-│   │   │   ├── Kanal.cs
-│   │   │   ├── KanalAlt.cs
-│   │   │   ├── KanalIslem.cs
-│   │   │   ├── KanalAltIslem.cs
-│   │   │   ├── KanalPersonel.cs
-│   │   │   ├── KioskGrup.cs
-│   │   │   ├── KioskIslemGrup.cs
-│   │   │   ├── Tv.cs
-│   │   │   ├── TvBanko.cs
-│   │   │   ├── Sira.cs
-│   │   │   ├── HubConnection.cs
-│   │   │   └── HubTvConnection.cs
-│   │   ├── PdksIslemleri/
-│   │   │   └── PdksCihaz.cs
-│   │   ├── EshotIslemleri/
-│   │   ├── DenetmenlikIslemleri/
-│   │   └── RucuIslemleri/
+├── SGKPortalApp.BusinessObjectLayer/                   # Domain katmanı
+│   ├── Entities/                                       # Entity sınıfları
+│   │   ├── Common/                                     # Ortak entity'ler
+│   │   │   ├── BaseEntity.cs                          # Tüm entity'lerin base'i
+│   │   │   ├── AuditableEntity.cs                     # Audit field'lı base
+│   │   │   ├── User.cs                                # Kullanıcı entity'si
+│   │   │   ├── Il.cs                                  # İl tablosu
+│   │   │   ├── Ilce.cs                                # İlçe tablosu
+│   │   │   ├── HizmetBinasi.cs                        # Hizmet binası
+│   │   │   ├── DatabaseLog.cs                         # Database log kayıtları
+│   │   │   ├── LoginLogoutLog.cs                      # Giriş/Çıkış logları
+│   │   │   ├── Modul.cs                               # Modül tanımları
+│   │   │   ├── ModulAlt.cs                            # Alt modüller
+│   │   │   ├── ModulController.cs                     # Controller tanımları
+│   │   │   └── ModulControllerIslem.cs                # Controller action'ları
+│   │   │
+│   │   ├── PersonelIslemleri/                          # Personel işlemleri
+│   │   │   ├── Personel.cs                            # Personel ana tablosu
+│   │   │   ├── PersonelCocuk.cs                       # Personel çocuk bilgileri
+│   │   │   ├── PersonelDepartman.cs                   # Personel-Departman geçmişi
+│   │   │   ├── PersonelYetki.cs                       # Personel yetkileri
+│   │   │   ├── PersonelHizmet.cs                      # Personel hizmet geçmişi
+│   │   │   ├── PersonelImzaYetkisi.cs                 # İmza yetkileri
+│   │   │   ├── PersonelEgitim.cs                      # Eğitim bilgileri
+│   │   │   ├── PersonelCeza.cs                        # Ceza bilgileri
+│   │   │   ├── PersonelEngel.cs                       # Engel durumu bilgileri
+│   │   │   ├── Departman.cs                           # Departman tablosu
+│   │   │   ├── Servis.cs                              # Servis tablosu
+│   │   │   ├── Unvan.cs                               # Unvan tablosu
+│   │   │   ├── Sendika.cs                             # Sendika tablosu
+│   │   │   ├── AtanmaNedeni.cs                        # Atanma nedenleri
+│   │   │   └── Yetki.cs                               # Yetki tanımları
+│   │   │
+│   │   ├── SiramatikIslemleri/                         # Sıramatik işlemleri
+│   │   │   ├── Banko.cs                               # Banko tanımları
+│   │   │   ├── BankoKullanici.cs                      # Banko-Personel ataması
+│   │   │   ├── BankoIslem.cs                          # Banko işlem tanımları
+│   │   │   ├── Kanal.cs                               # Kanal tanımları
+│   │   │   ├── KanalAlt.cs                            # Alt kanal tanımları
+│   │   │   ├── KanalIslem.cs                          # Kanal işlemleri
+│   │   │   ├── KanalAltIslem.cs                       # Alt kanal işlemleri
+│   │   │   ├── KanalPersonel.cs                       # Kanal-Personel ataması
+│   │   │   ├── KioskGrup.cs                           # Kiosk grupları
+│   │   │   ├── KioskIslemGrup.cs                      # Kiosk işlem grupları
+│   │   │   ├── Tv.cs                                  # TV ekranları
+│   │   │   ├── TvBanko.cs                             # TV-Banko eşleştirme
+│   │   │   ├── Sira.cs                                # Sıra kayıtları
+│   │   │   ├── HubConnection.cs                       # SignalR bağlantıları
+│   │   │   └── HubTvConnection.cs                     # TV SignalR bağlantıları
+│   │   │
+│   │   ├── PdksIslemleri/                              # PDKS işlemleri
+│   │   │   ├── PdksCihaz.cs                           # PDKS cihaz tanımları
+│   │   │   ├── PdksGirisCikis.cs                      # Giriş/Çıkış kayıtları
+│   │   │   ├── IzinTalep.cs                           # İzin talepleri
+│   │   │   ├── IzinOnay.cs                            # İzin onay geçmişi
+│   │   │   ├── PersonelCalismaGun.cs                  # Çalışma gün sayıları
+│   │   │   ├── IzinKayitSorumlusu.cs                  # İzin sorumluları
+│   │   │   ├── SgmMesai.cs                            # SGM mesai kayıtları
+│   │   │   ├── PersonelMesai.cs                       # Personel mesai detayları
+│   │   │   ├── IzinTipi.cs                            # İzin tipi tanımları
+│   │   │   ├── MesaiTipi.cs                           # Mesai tipi tanımları
+│   │   │   └── VardiyaTanim.cs                        # Vardiya tanımları
+│   │   │
+│   │   ├── EshotIslemleri/                             # Eshot işlemleri
+│   │   │   ├── EshotHareket.cs                        # Eshot hareket kayıtları
+│   │   │   ├── EshotKullanimHakki.cs                  # Kullanım hakkı tanımları
+│   │   │   ├── EshotUcretBilgisi.cs                   # Ücret tarifeleri
+│   │   │   ├── EshotPersonelHak.cs                    # Personel hak atamaları
+│   │   │   ├── EshotKart.cs                           # Eshot kart bilgileri
+│   │   │   ├── EshotBakiye.cs                         # Kart bakiye bilgileri
+│   │   │   └── EshotHareketTip.cs                     # Hareket tipi tanımları
+│   │   │
+│   │   ├── DenetmenlikIslemleri/                       # Denetmenlik (Gelecek)
+│   │   │   └── README.md                              # Planlanan modül
+│   │   │
+│   │   └── RucuIslemleri/                              # Rücu İşlemleri (Gelecek)
+│   │       └── README.md                              # Planlanan modül
 │   │
-│   ├── DTOs/
+│   ├── DTOs/                                          # Data Transfer Objects
 │   │   ├── Common/
-│   │   │   └── ServiceResult.cs
-│   │   ├── Request/
+│   │   │   ├── ServiceResult.cs                       # Servis sonuç wrapper
+│   │   │   ├── ApiResponseDto.cs                      # API yanıt wrapper
+│   │   │   ├── PagedResponseDto.cs                    # Sayfalama wrapper
+│   │   │   ├── ErrorResponseDto.cs                    # Hata yanıtı
+│   │   │   └── SuccessResponseDto.cs                  # Başarı yanıtı
+│   │   │
+│   │   ├── Request/                                   # İstek DTOs
 │   │   │   ├── Auth/
+│   │   │   │   ├── LoginRequestDto.cs                 # Giriş isteği
+│   │   │   │   ├── RegisterRequestDto.cs              # Kayıt isteği
+│   │   │   │   ├── ChangePasswordRequestDto.cs        # Şifre değiştirme
+│   │   │   │   ├── ForgotPasswordRequestDto.cs        # Şifre sıfırlama
+│   │   │   │   └── ResetPasswordRequestDto.cs         # Şifre yenileme
+│   │   │   │
 │   │   │   ├── Common/
-│   │   │   │   ├── HizmetBinasiCreateRequestDto.cs
-│   │   │   │   └── HizmetBinasiUpdateRequestDto.cs
+│   │   │   │   ├── PaginationRequestDto.cs            # Sayfalama parametreleri
+│   │   │   │   ├── FilterRequestDto.cs                # Filtreleme parametreleri
+│   │   │   │   ├── SearchRequestDto.cs                # Arama parametreleri
+│   │   │   │   ├── HizmetBinasiCreateRequestDto.cs    # Hizmet binası oluşturma
+│   │   │   │   └── HizmetBinasiUpdateRequestDto.cs    # Hizmet binası güncelleme
+│   │   │   │
 │   │   │   ├── PersonelIslemleri/
-│   │   │   │   ├── PersonelCreateRequestDto.cs
-│   │   │   │   ├── PersonelUpdateRequestDto.cs
-│   │   │   │   ├── PersonelFilterRequestDto.cs
-│   │   │   │   ├── DepartmanCreateRequestDto.cs
-│   │   │   │   ├── DepartmanUpdateRequestDto.cs
-│   │   │   │   ├── DepartmanFilterRequestDto.cs
-│   │   │   │   ├── ServisCreateRequestDto.cs
-│   │   │   │   ├── ServisUpdateRequestDto.cs
-│   │   │   │   ├── ServisFilterRequestDto.cs
-│   │   │   │   ├── UnvanCreateRequestDto.cs
-│   │   │   │   ├── UnvanUpdateRequestDto.cs
-│   │   │   │   └── UnvanFilterRequestDto.cs
+│   │   │   │   ├── PersonelCreateRequestDto.cs        # Personel oluşturma
+│   │   │   │   ├── PersonelUpdateRequestDto.cs        # Personel güncelleme
+│   │   │   │   ├── PersonelFilterRequestDto.cs        # Personel filtreleme
+│   │   │   │   ├── PersonelCocukCreateRequestDto.cs   # Çocuk ekleme
+│   │   │   │   ├── PersonelEgitimCreateRequestDto.cs  # Eğitim ekleme
+│   │   │   │   ├── PersonelCezaCreateRequestDto.cs    # Ceza ekleme
+│   │   │   │   ├── DepartmanCreateRequestDto.cs       # Departman oluşturma
+│   │   │   │   ├── DepartmanUpdateRequestDto.cs       # Departman güncelleme
+│   │   │   │   ├── DepartmanFilterRequestDto.cs       # Departman filtreleme
+│   │   │   │   ├── ServisCreateRequestDto.cs          # Servis oluşturma
+│   │   │   │   ├── ServisUpdateRequestDto.cs          # Servis güncelleme
+│   │   │   │   ├── ServisFilterRequestDto.cs          # Servis filtreleme
+│   │   │   │   ├── UnvanCreateRequestDto.cs           # Unvan oluşturma
+│   │   │   │   ├── UnvanUpdateRequestDto.cs           # Unvan güncelleme
+│   │   │   │   └── UnvanFilterRequestDto.cs           # Unvan filtreleme
+│   │   │   │
 │   │   │   ├── SiramatikIslemleri/
+│   │   │   │   ├── BankoCreateRequestDto.cs           # Banko oluşturma
+│   │   │   │   ├── BankoUpdateRequestDto.cs           # Banko güncelleme
+│   │   │   │   ├── BankoFilterRequestDto.cs           # Banko filtreleme
+│   │   │   │   ├── BankoPersonelAtamaRequestDto.cs    # Banko personel atama
+│   │   │   │   ├── KanalCreateRequestDto.cs           # Kanal oluşturma
+│   │   │   │   ├── KanalUpdateRequestDto.cs           # Kanal güncelleme
+│   │   │   │   ├── AltKanalCreateRequestDto.cs        # Alt kanal oluşturma
+│   │   │   │   ├── AltKanalUpdateRequestDto.cs        # Alt kanal güncelleme
+│   │   │   │   ├── KanalPersonelAtamaRequestDto.cs    # Kanal personel atama
+│   │   │   │   ├── KioskCreateRequestDto.cs           # Kiosk oluşturma
+│   │   │   │   ├── KioskUpdateRequestDto.cs           # Kiosk güncelleme
+│   │   │   │   ├── TvCreateRequestDto.cs              # TV oluşturma
+│   │   │   │   ├── TvUpdateRequestDto.cs              # TV güncelleme
+│   │   │   │   ├── AtamaRequestDto.cs                 # Genel atama işlemi
+│   │   │   │   └── EslestirmeRequestDto.cs            # Eşleştirme işlemi
+│   │   │   │
 │   │   │   ├── PdksIslemleri/
+│   │   │   │   ├── PdksCihazCreateRequestDto.cs       # Cihaz tanımlama
+│   │   │   │   ├── GirisCikisCreateRequestDto.cs      # Manuel giriş/çıkış
+│   │   │   │   ├── GirisCikisFilterRequestDto.cs      # Giriş/çıkış filtreleme
+│   │   │   │   ├── IzinTalepCreateRequestDto.cs       # İzin talep oluşturma
+│   │   │   │   ├── IzinTalepUpdateRequestDto.cs       # İzin talep güncelleme
+│   │   │   │   ├── IzinOnayRequestDto.cs              # İzin onay işlemi
+│   │   │   │   ├── IzinRedRequestDto.cs               # İzin red işlemi
+│   │   │   │   ├── IzinFilterRequestDto.cs            # İzin filtreleme
+│   │   │   │   ├── MesaiCreateRequestDto.cs           # Mesai tanımlama
+│   │   │   │   ├── MesaiRaporRequestDto.cs            # Mesai rapor parametreleri
+│   │   │   │   ├── IzinSorumluAtamaRequestDto.cs      # Sorumlu atama
+│   │   │   │   └── VardiyaTanimRequestDto.cs          # Vardiya tanımlama
+│   │   │   │
 │   │   │   └── EshotIslemleri/
-│   │   ├── Response/
+│   │   │       ├── EshotHareketCreateRequestDto.cs    # Hareket kaydı oluşturma
+│   │   │       ├── EshotHareketFilterRequestDto.cs    # Hareket filtreleme
+│   │   │       ├── KullanimHakkiTanimlaRequestDto.cs  # Hak tanımlama
+│   │   │       ├── KullanimHakkiAtaRequestDto.cs      # Hak atama
+│   │   │       ├── UcretBilgisiCreateRequestDto.cs    # Ücret tanımlama
+│   │   │       ├── UcretBilgisiUpdateRequestDto.cs    # Ücret güncelleme
+│   │   │       ├── KartTanimRequestDto.cs             # Kart tanımlama
+│   │   │       └── BakiyeYuklemeRequestDto.cs         # Bakiye yükleme
+│   │   │
+│   │   ├── Response/                                  # Yanıt DTOs
 │   │   │   ├── Auth/
+│   │   │   │   ├── LoginResponseDto.cs                # Giriş yanıtı (Token, User)
+│   │   │   │   ├── UserProfileResponseDto.cs          # Kullanıcı profil bilgisi
+│   │   │   │   └── TokenResponseDto.cs                # Token bilgisi
+│   │   │   │
 │   │   │   ├── Common/
-│   │   │   │   ├── ApiResponseDto.cs
-│   │   │   │   ├── HizmetBinasiResponseDto.cs
-│   │   │   │   └── HizmetBinasiDetailResponseDto.cs
+│   │   │   │   ├── HizmetBinasiResponseDto.cs         # Hizmet binası bilgisi
+│   │   │   │   ├── HizmetBinasiDetailResponseDto.cs   # Detaylı hizmet binası
+│   │   │   │   ├── IlResponseDto.cs                   # İl bilgisi
+│   │   │   │   └── IlceResponseDto.cs                 # İlçe bilgisi
+│   │   │   │
 │   │   │   ├── PersonelIslemleri/
-│   │   │   │   ├── PersonelResponseDto.cs
-│   │   │   │   ├── PersonelDetailResponseDto.cs
-│   │   │   │   ├── DepartmanResponseDto.cs
-│   │   │   │   ├── ServisResponseDto.cs
-│   │   │   │   └── UnvanResponseDto.cs
+│   │   │   │   ├── PersonelResponseDto.cs             # Personel liste item
+│   │   │   │   ├── PersonelDetailResponseDto.cs       # Personel detay bilgisi
+│   │   │   │   ├── PersonelListResponseDto.cs         # Sayfalı personel listesi
+│   │   │   │   ├── PersonelOzetResponseDto.cs         # Personel özet bilgi
+│   │   │   │   ├── DepartmanResponseDto.cs            # Departman bilgisi
+│   │   │   │   ├── DepartmanDetailResponseDto.cs      # Detaylı departman
+│   │   │   │   ├── ServisResponseDto.cs               # Servis bilgisi
+│   │   │   │   ├── UnvanResponseDto.cs                # Unvan bilgisi
+│   │   │   │   ├── SendikaResponseDto.cs              # Sendika bilgisi
+│   │   │   │   └── PersonelIstatistikResponseDto.cs   # Personel istatistikleri
+│   │   │   │
 │   │   │   ├── SiramatikIslemleri/
+│   │   │   │   ├── BankoResponseDto.cs                # Banko bilgisi
+│   │   │   │   ├── BankoDetailResponseDto.cs          # Detaylı banko
+│   │   │   │   ├── BankoDurumResponseDto.cs           # Banko durum bilgisi
+│   │   │   │   ├── KanalResponseDto.cs                # Kanal bilgisi
+│   │   │   │   ├── KanalDetailResponseDto.cs          # Detaylı kanal
+│   │   │   │   ├── AltKanalResponseDto.cs             # Alt kanal bilgisi
+│   │   │   │   ├── KioskResponseDto.cs                # Kiosk bilgisi
+│   │   │   │   ├── TvResponseDto.cs                   # TV bilgisi
+│   │   │   │   ├── SiraResponseDto.cs                 # Sıra bilgisi
+│   │   │   │   ├── SiraIstatistikResponseDto.cs       # Sıra istatistikleri
+│   │   │   │   └── EslestirmeStatusResponseDto.cs     # Eşleştirme durumu
+│   │   │   │
 │   │   │   ├── PdksIslemleri/
+│   │   │   │   ├── PdksCihazResponseDto.cs            # Cihaz bilgisi
+│   │   │   │   ├── PdksGirisCikisResponseDto.cs       # Giriş/çıkış kaydı
+│   │   │   │   ├── GirisCikisOzetResponseDto.cs       # Günlük özet
+│   │   │   │   ├── IzinTalepResponseDto.cs            # İzin talep bilgisi
+│   │   │   │   ├── IzinTalepDetailResponseDto.cs      # Detaylı izin talebi
+│   │   │   │   ├── IzinTalepListResponseDto.cs        # İzin talep listesi
+│   │   │   │   ├── PersonelCalismaGunResponseDto.cs   # Çalışma gün bilgisi
+│   │   │   │   ├── MesaiResponseDto.cs                # Mesai bilgisi
+│   │   │   │   ├── MesaiRaporResponseDto.cs           # Mesai rapor verisi
+│   │   │   │   ├── IzinSorumluResponseDto.cs          # İzin sorumlu bilgisi
+│   │   │   │   └── IzinBakiyeResponseDto.cs           # İzin bakiye bilgisi
+│   │   │   │
 │   │   │   └── EshotIslemleri/
-│   │   └── Shared/
+│   │   │       ├── EshotHareketResponseDto.cs         # Hareket kaydı
+│   │   │       ├── HareketOzetResponseDto.cs          # Hareket özet
+│   │   │       ├── KullanimHakkiResponseDto.cs        # Kullanım hakkı bilgisi
+│   │   │       ├── PersonelHakResponseDto.cs          # Personel hak bilgisi
+│   │   │       ├── UcretBilgisiResponseDto.cs         # Ücret bilgisi
+│   │   │       ├── KartResponseDto.cs                 # Kart bilgisi
+│   │   │       ├── BakiyeResponseDto.cs               # Bakiye bilgisi
+│   │   │       └── KullanimIstatistikResponseDto.cs   # Kullanım istatistikleri
+│   │   │
+│   │   └── Shared/                                    # Paylaşılan DTOs
+│   │       ├── Common/
+│   │       │   ├── AddressDto.cs                      # Adres bilgisi
+│   │       │   ├── ContactDto.cs                      # İletişim bilgisi
+│   │       │   ├── FileDto.cs                         # Dosya bilgisi
+│   │       │   └── AuditDto.cs                        # Audit bilgileri
+│   │       │
+│   │       ├── Enums/                                 # Enum DTO'ları
+│   │       │   ├── UserRoleDto.cs                     # Kullanıcı rolleri
+│   │       │   ├── StatusDto.cs                       # Durum enum'ı
+│   │       │   ├── PriorityDto.cs                     # Öncelik enum'ı
+│   │       │   └── AktiflikDto.cs                     # Aktiflik durumu
+│   │       │
+│   │       └── ValueObjects/
+│   │           ├── MoneyDto.cs                        # Para birimi
+│   │           ├── DateRangeDto.cs                    # Tarih aralığı
+│   │           ├── TimeRangeDto.cs                    # Saat aralığı
+│   │           └── ContactInfoDto.cs                  # İletişim bilgisi grubu
 │   │
-│   └── Enums/
+│   └── Enums/                                         # Enum tanımları
 │       ├── Common/
-│       │   ├── Aktiflik.cs
-│       │   ├── DatabaseAction.cs
-│       │   ├── EntityStatus.cs
-│       │   ├── IslemBasari.cs
-│       │   ├── YetkiTipleri.cs
-│       │   └── YetkiTurleri.cs
+│       │   ├── Aktiflik.cs                            # 0: Pasif, 1: Aktif
+│       │   ├── DatabaseAction.cs                      # Insert, Update, Delete
+│       │   ├── EntityStatus.cs                        # Draft, Active, Archived
+│       │   ├── IslemBasari.cs                         # Başarılı, Başarısız
+│       │   ├── YetkiTipleri.cs                        # Admin, User, Manager
+│       │   └── YetkiTurleri.cs                        # Read, Write, Delete
+│       │
 │       ├── PersonelIslemleri/
-│       │   ├── Cinsiyet.cs
-│       │   ├── EsininIsDurumu.cs
-│       │   ├── EvDurumu.cs
-│       │   ├── KanGrubu.cs
-│       │   ├── MedeniDurumu.cs
-│       │   ├── OgrenimDurumu.cs
-│       │   ├── PersonelAktiflikDurum.cs
-│       │   ├── PersonelDurum.cs
-│       │   ├── PersonelTipi.cs
-│       │   ├── PersonelUzmanlik.cs
-│       │   └── SehitYakinligi.cs
+│       │   ├── Cinsiyet.cs                            # Erkek, Kadın
+│       │   ├── MedeniDurum.cs                         # Bekar, Evli, Dul, Boşanmış
+│       │   ├── KanGrubu.cs                            # A+, A-, B+, B-, AB+, AB-, 0+, 0-
+│       │   ├── OgrenimDurumu.cs                       # İlkokul, Ortaokul, Lise, Üniversite, Yüksek Lisans, Doktora
+│       │   ├── EvDurumu.cs                            # Ev Sahibi, Kiracı, Lojman, Diğer
+│       │   ├── EsininIsDurumu.cs                      # Çalışmıyor, Çalışıyor-Özel, Çalışıyor-Kamu, Emekli
+│       │   ├── SehitYakinligi.cs                      # Yok, Babası, Annesi, Kardeşi, Eşi
+│       │   ├── PersonelDurum.cs                       # Aktif, İzinli, İstifa, Emekli, Vefat
+│       │   ├── PersonelTipi.cs                        # Kadrolu, Sözleşmeli, Stajyer
+│       │   ├── PersonelUzmanlik.cs                    # Uzman, Uzman Yardımcısı, Müfettiş
+│       │   ├── DepartmanTip.cs                        # Merkez, Taşra, Bağlı Kuruluş
+│       │   ├── UnvanSeviye.cs                         # Seviye 1, Seviye 2, Seviye 3, Yönetici
+│       │   ├── CezaTipi.cs                            # Uyarı, Kınama, Maaş Kesimi, İhraç
+│       │   └── EngelDerecesi.cs                       # Derece 1, Derece 2, Derece 3
+│       │
 │       ├── SiramatikIslemleri/
-│       │   ├── BankoGrup.cs
-│       │   ├── BankoStatus.cs
-│       │   ├── BankoTipi.cs
-│       │   ├── BeklemeDurum.cs
-│       │   ├── ConnectionStatus.cs
-│       │   ├── KanalTip.cs
-│       │   ├── KatTipi.cs
-│       │   ├── KioskDurum.cs
-│       │   ├── OncelikSeviyesi.cs
-│       │   ├── SiraDurum.cs
-│       │   └── TvDurum.cs
+│       │   ├── BankoStatus.cs                         # Aktif, Pasif, Arızalı, Bakımda
+│       │   ├── BankoGrup.cs                           # Genel, VIP, Hızlı İşlem
+│       │   ├── BankoTipi.cs                           # Danışma, İşlem, Ödeme
+│       │   ├── KanalTip.cs                            # Hizmet Kanalı, Bilgilendirme Kanalı
+│       │   ├── KatTipi.cs                             # Zemin Kat, 1.Kat, 2.Kat
+│       │   ├── KioskDurum.cs                          # Açık, Kapalı, Arızalı, Güncelleniyor
+│       │   ├── TvDurum.cs                             # Aktif, Pasif, Bakımda
+│       │   ├── SiraDurum.cs                           # Bekliyor, Çağrıldı, İşlemde, Tamamlandı, İptal
+│       │   ├── BeklemeDurum.cs                        # Kuyrukta, Çağrıldı, İşlem Başladı, Tamamlandı
+│       │   ├── OncelikSeviyesi.cs                     # Normal, Acil, VIP, Engelli
+│       │   ├── AtamaDurum.cs                          # Beklemede, Onaylandı, Reddedildi
+│       │   └── ConnectionStatus.cs                    # Connected, Disconnected, Reconnecting
+│       │
 │       ├── PdksIslemleri/
+│       │   ├── IzinTip.cs                             # Yıllık, Mazeret, Hastalık, Doğum, Evlenme, Vefat, Ücretsiz
+│       │   ├── IzinDurum.cs                           # Beklemede, Onaylandı, Reddedildi, İptal
+│       │   ├── MesaiTip.cs                            # Normal, Fazla, Hafta Sonu, Resmi Tatil, Gece
+│       │   ├── OnayDurum.cs                           # Beklemede, 1.Seviye Onay, 2.Seviye Onay, Onaylandı, Reddedildi
+│       │   ├── GirisCikisTip.cs                       # Normal Giriş, Normal Çıkış, Ara Giriş, Ara Çıkış
+│       │   ├── CihazTipi.cs                           # Kart Okuyucu, Parmak İzi, Yüz Tanıma
+│       │   ├── VardiyaTipi.cs                         # Gündüz, Gece, Haftasonu, Esnek
+│       │   └── CalismaSekli.cs                        # Tam Zamanlı, Yarı Zamanlı, Esnek, Proje Bazlı
+│       │
 │       └── EshotIslemleri/
+│           ├── EshotHareketTip.cs                     # Yükleme, Kullanım, İade, İptal
+│           ├── KullanimHakkiTip.cs                    # Aylık, Günlük, Sınırsız, Sınırlı
+│           ├── UcretTip.cs                            # Tam, İndirimli, Ücretsiz
+│           ├── KartTipi.cs                            # Personel, Yönetici, Misafir
+│           ├── KartDurum.cs                           # Aktif, Pasif, Kayıp, Çalıntı, İptal
+│           └── OdemeYontemi.cs                        # Maaştan Kesinti, Nakit, Kredi Kartı
 │
-├── SGKPortalApp.DataAccessLayer/
+├── SGKPortalApp.DataAccessLayer/                       # Veri erişim katmanı
 │   ├── Context/
-│   │   └── SGKDbContext.cs
+│   │   └── SGKDbContext.cs                            # Ana DbContext
 │   │
-│   ├── Repositories/
+│   ├── Repositories/                                   # Repository implementasyonları
 │   │   ├── Interfaces/
 │   │   │   ├── Base/
-│   │   │   │   └── IGenericRepository.cs
+│   │   │   │   └── IGenericRepository.cs              # Generic base interface
 │   │   │   │
 │   │   │   ├── Common/
 │   │   │   │   ├── IUserRepository.cs
@@ -168,11 +369,16 @@ SGKPortalApp/
 │   │   │   │   ├── IPersonelCocukRepository.cs
 │   │   │   │   ├── IPersonelDepartmanRepository.cs
 │   │   │   │   ├── IPersonelYetkiRepository.cs
+│   │   │   │   ├── IPersonelHizmetRepository.cs
+│   │   │   │   ├── IPersonelImzaYetkisiRepository.cs
+│   │   │   │   ├── IPersonelEgitimRepository.cs
+│   │   │   │   ├── IPersonelCezaRepository.cs
+│   │   │   │   ├── IPersonelEngelRepository.cs
 │   │   │   │   ├── IDepartmanRepository.cs
 │   │   │   │   ├── IServisRepository.cs
 │   │   │   │   ├── IUnvanRepository.cs
 │   │   │   │   ├── ISendikaRepository.cs
-│   │   │   │   ├── IAtanmaNedenleriRepository.cs
+│   │   │   │   ├── IAtanmaNedeniRepository.cs
 │   │   │   │   └── IYetkiRepository.cs
 │   │   │   │
 │   │   │   ├── SiramatikIslemleri/
@@ -196,30 +402,37 @@ SGKPortalApp/
 │   │   │   │   ├── IPdksCihazRepository.cs
 │   │   │   │   ├── IPdksGirisCikisRepository.cs
 │   │   │   │   ├── IIzinTalepRepository.cs
+│   │   │   │   ├── IIzinOnayRepository.cs
 │   │   │   │   ├── IPersonelCalismaGunRepository.cs
 │   │   │   │   ├── IIzinKayitSorumlusuRepository.cs
 │   │   │   │   ├── ISgmMesaiRepository.cs
-│   │   │   │   └── IPersonelMesaiRepository.cs
+│   │   │   │   ├── IPersonelMesaiRepository.cs
+│   │   │   │   ├── IIzinTipiRepository.cs
+│   │   │   │   ├── IMesaiTipiRepository.cs
+│   │   │   │   └── IVardiyaTanimRepository.cs
 │   │   │   │
 │   │   │   ├── EshotIslemleri/
 │   │   │   │   ├── IEshotHareketRepository.cs
 │   │   │   │   ├── IEshotKullanimHakkiRepository.cs
 │   │   │   │   ├── IEshotUcretBilgisiRepository.cs
-│   │   │   │   └── IEshotPersonelHakRepository.cs
+│   │   │   │   ├── IEshotPersonelHakRepository.cs
+│   │   │   │   ├── IEshotKartRepository.cs
+│   │   │   │   ├── IEshotBakiyeRepository.cs
+│   │   │   │   └── IEshotHareketTipRepository.cs
 │   │   │   │
-│   │   │   ├── Complex/
-│   │   │   │   ├── IPersonelQueryRepository.cs
-│   │   │   │   ├── ISiramatikQueryRepository.cs
-│   │   │   │   ├── IPdksQueryRepository.cs
-│   │   │   │   ├── IEshotQueryRepository.cs
-│   │   │   │   ├── IDashboardQueryRepository.cs
-│   │   │   │   ├── IReportQueryRepository.cs
-│   │   │   │   └── IStatisticsQueryRepository.cs
+│   │   │   ├── Complex/                               # Kompleks sorgular için özel repository'ler
+│   │   │   │   ├── IPersonelQueryRepository.cs       # Personel kompleks sorguları
+│   │   │   │   ├── ISiramatikQueryRepository.cs      # Sıramatik kompleks sorguları
+│   │   │   │   ├── IPdksQueryRepository.cs           # PDKS kompleks sorguları
+│   │   │   │   ├── IEshotQueryRepository.cs          # Eshot kompleks sorguları
+│   │   │   │   ├── IDashboardQueryRepository.cs      # Dashboard sorguları
+│   │   │   │   ├── IReportQueryRepository.cs         # Raporlama sorguları
+│   │   │   │   └── IStatisticsQueryRepository.cs     # İstatistik sorguları
 │   │   │   │
-│   │   │   └── IUnitOfWork.cs
+│   │   │   └── IUnitOfWork.cs                        # Transaction management
 │   │   │
 │   │   ├── Generic/
-│   │   │   └── GenericRepository.cs
+│   │   │   └── GenericRepository.cs                  # Generic repository implementation
 │   │   │
 │   │   ├── Concrete/
 │   │   │   ├── Common/
@@ -239,11 +452,16 @@ SGKPortalApp/
 │   │   │   │   ├── PersonelCocukRepository.cs
 │   │   │   │   ├── PersonelDepartmanRepository.cs
 │   │   │   │   ├── PersonelYetkiRepository.cs
+│   │   │   │   ├── PersonelHizmetRepository.cs
+│   │   │   │   ├── PersonelImzaYetkisiRepository.cs
+│   │   │   │   ├── PersonelEgitimRepository.cs
+│   │   │   │   ├── PersonelCezaRepository.cs
+│   │   │   │   ├── PersonelEngelRepository.cs
 │   │   │   │   ├── DepartmanRepository.cs
 │   │   │   │   ├── ServisRepository.cs
 │   │   │   │   ├── UnvanRepository.cs
 │   │   │   │   ├── SendikaRepository.cs
-│   │   │   │   ├── AtanmaNedenleriRepository.cs
+│   │   │   │   ├── AtanmaNedeniRepository.cs
 │   │   │   │   └── YetkiRepository.cs
 │   │   │   │
 │   │   │   ├── SiramatikIslemleri/
@@ -267,18 +485,25 @@ SGKPortalApp/
 │   │   │   │   ├── PdksCihazRepository.cs
 │   │   │   │   ├── PdksGirisCikisRepository.cs
 │   │   │   │   ├── IzinTalepRepository.cs
+│   │   │   │   ├── IzinOnayRepository.cs
 │   │   │   │   ├── PersonelCalismaGunRepository.cs
 │   │   │   │   ├── IzinKayitSorumlusuRepository.cs
 │   │   │   │   ├── SgmMesaiRepository.cs
-│   │   │   │   └── PersonelMesaiRepository.cs
+│   │   │   │   ├── PersonelMesaiRepository.cs
+│   │   │   │   ├── IzinTipiRepository.cs
+│   │   │   │   ├── MesaiTipiRepository.cs
+│   │   │   │   └── VardiyaTanimRepository.cs
 │   │   │   │
 │   │   │   ├── EshotIslemleri/
 │   │   │   │   ├── EshotHareketRepository.cs
 │   │   │   │   ├── EshotKullanimHakkiRepository.cs
 │   │   │   │   ├── EshotUcretBilgisiRepository.cs
-│   │   │   │   └── EshotPersonelHakRepository.cs
+│   │   │   │   ├── EshotPersonelHakRepository.cs
+│   │   │   │   ├── EshotKartRepository.cs
+│   │   │   │   ├── EshotBakiyeRepository.cs
+│   │   │   │   └── EshotHareketTipRepository.cs
 │   │   │   │
-│   │   │   └── Complex/
+│   │   │   └── Complex/                               # Kompleks query implementations
 │   │   │       ├── PersonelQueryRepository.cs
 │   │   │       ├── SiramatikQueryRepository.cs
 │   │   │       ├── PdksQueryRepository.cs
@@ -287,382 +512,622 @@ SGKPortalApp/
 │   │   │       ├── ReportQueryRepository.cs
 │   │   │       └── StatisticsQueryRepository.cs
 │   │   │
-│   │   └── UnitOfWork.cs
+│   │   └── UnitOfWork.cs                             # UnitOfWork implementation
 │   │
-│   ├── Configurations/
+│   ├── Configurations/                                 # Entity konfigürasyonları
 │   │   ├── Common/
 │   │   │   ├── UserConfiguration.cs
 │   │   │   ├── IlConfiguration.cs
 │   │   │   ├── IlceConfiguration.cs
 │   │   │   ├── HizmetBinasiConfiguration.cs
 │   │   │   ├── DatabaseLogConfiguration.cs
+│   │   │   ├── LoginLogoutLogConfiguration.cs
 │   │   │   ├── ModulConfiguration.cs
 │   │   │   └── YetkiConfiguration.cs
+│   │   │
 │   │   ├── PersonelIslemleri/
 │   │   │   ├── PersonelConfiguration.cs
 │   │   │   ├── PersonelCocukConfiguration.cs
+│   │   │   ├── PersonelDepartmanConfiguration.cs
 │   │   │   ├── PersonelYetkiConfiguration.cs
+│   │   │   ├── PersonelHizmetConfiguration.cs
+│   │   │   ├── PersonelImzaYetkisiConfiguration.cs
+│   │   │   ├── PersonelEgitimConfiguration.cs
+│   │   │   ├── PersonelCezaConfiguration.cs
+│   │   │   ├── PersonelEngelConfiguration.cs
 │   │   │   ├── DepartmanConfiguration.cs
 │   │   │   ├── ServisConfiguration.cs
-│   │   │   └── UnvanConfiguration.cs
+│   │   │   ├── UnvanConfiguration.cs
+│   │   │   └── SendikaConfiguration.cs
+│   │   │
 │   │   ├── SiramatikIslemleri/
 │   │   │   ├── BankoConfiguration.cs
+│   │   │   ├── BankoIslemConfiguration.cs
 │   │   │   ├── KanalConfiguration.cs
+│   │   │   ├── KanalAltConfiguration.cs
+│   │   │   ├── KanalIslemConfiguration.cs
+│   │   │   ├── KanalPersonelConfiguration.cs
 │   │   │   ├── SiraConfiguration.cs
 │   │   │   ├── TvConfiguration.cs
+│   │   │   ├── TvBankoConfiguration.cs
+│   │   │   ├── KioskConfiguration.cs
 │   │   │   └── HubConnectionConfiguration.cs
+│   │   │
 │   │   ├── PdksIslemleri/
-│   │   │   ├── PdksConfiguration.cs
+│   │   │   ├── PdksCihazConfiguration.cs
+│   │   │   ├── PdksGirisCikisConfiguration.cs
 │   │   │   ├── IzinTalepConfiguration.cs
-│   │   │   └── MesaiConfiguration.cs
+│   │   │   ├── IzinOnayConfiguration.cs
+│   │   │   ├── PersonelCalismaGunConfiguration.cs
+│   │   │   ├── IzinKayitSorumlusuConfiguration.cs
+│   │   │   ├── MesaiConfiguration.cs
+│   │   │   └── VardiyaTanimConfiguration.cs
+│   │   │
 │   │   └── EshotIslemleri/
-│   │       ├── EshotConfiguration.cs
-│   │       └── KullanimHakkiConfiguration.cs
+│   │       ├── EshotHareketConfiguration.cs
+│   │       ├── EshotKullanimHakkiConfiguration.cs
+│   │       ├── EshotUcretBilgisiConfiguration.cs
+│   │       ├── EshotPersonelHakConfiguration.cs
+│   │       ├── EshotKartConfiguration.cs
+│   │       └── EshotBakiyeConfiguration.cs
 │   │
-│   ├── Specifications/
+│   ├── Specifications/                                 # Specification pattern
 │   │   ├── Common/
 │   │   │   └── BaseSpecification.cs
 │   │   ├── PersonelSpecifications/
 │   │   │   ├── ActivePersonelSpecification.cs
 │   │   │   ├── PersonelByDepartmanSpecification.cs
-│   │   │   └── PersonelWithChildrenSpecification.cs
+│   │   │   ├── PersonelWithChildrenSpecification.cs
+│   │   │   └── PersonelByHizmetBinasiSpecification.cs
 │   │   ├── SiramatikSpecifications/
 │   │   │   ├── ActiveBankoSpecification.cs
 │   │   │   ├── SiraByStatusSpecification.cs
+│   │   │   ├── SiraByDateRangeSpecification.cs
 │   │   │   └── BankoByBuildingSpecification.cs
 │   │   ├── PdksSpecifications/
 │   │   │   ├── IzinTalepByDateSpecification.cs
-│   │   │   └── MesaiByPersonelSpecification.cs
+│   │   │   ├── IzinTalepByStatusSpecification.cs
+│   │   │   ├── MesaiByPersonelSpecification.cs
+│   │   │   └── GirisCikisByDateSpecification.cs
 │   │   └── EshotSpecifications/
 │   │       ├── HareketByDateSpecification.cs
+│   │       ├── HareketByPersonelSpecification.cs
 │   │       └── KullanimHakkiByPersonelSpecification.cs
 │   │
-│   ├── QueryObjects/
+│   ├── QueryObjects/                                   # Complex query objects
 │   │   ├── Dashboard/
 │   │   │   ├── PersonelStatsQuery.cs
 │   │   │   ├── SiraStatisticsQuery.cs
-│   │   │   └── DepartmanSummaryQuery.cs
+│   │   │   ├── DepartmanSummaryQuery.cs
+│   │   │   ├── DailyActivityQuery.cs
+│   │   │   └── MonthlyReportQuery.cs
 │   │   ├── Reports/
 │   │   │   ├── PersonelReportQuery.cs
 │   │   │   ├── MesaiReportQuery.cs
-│   │   │   └── SiramatikReportQuery.cs
+│   │   │   ├── IzinReportQuery.cs
+│   │   │   ├── SiramatikReportQuery.cs
+│   │   │   └── EshotReportQuery.cs
 │   │   └── Analytics/
 │   │       ├── PerformanceAnalyticsQuery.cs
-│   │       └── UsageAnalyticsQuery.cs
+│   │       ├── UsageAnalyticsQuery.cs
+│   │       ├── TrendAnalysisQuery.cs
+│   │       └── PredictionQuery.cs
 │   │
-│   ├── Migrations/
-│   │   └── (Auto-generated files)
+│   ├── Migrations/                                     # Database migration'ları
+│   │   ├── 20251006130658_mig_1_InitialCreate.cs
+│   │   ├── 20251006130658_mig_2_AddPersonelTables.cs
+│   │   ├── 20251008075641_mig_3_AddSiramatikTables.cs
+│   │   ├── 20251008131759_mig_4_UpdateRelations.cs
+│   │   ├── 20251008131759_mig_5_AddPdksTables.cs
+│   │   ├── 20251010091726_mig_6_AddEshotTables.cs
+│   │   └── (Future migrations...)
 │   │
-│   └── Seeds/
+│   └── Seeds/                                         # Seed verileri
 │       ├── Common/
-│       │   ├── IlSeed.cs
-│       │   ├── IlceSeed.cs
-│       │   ├── HizmetBinasiSeed.cs
-│       │   └── ModulSeed.cs
+│       │   ├── IlSeed.cs                              # 81 il verisi
+│       │   ├── IlceSeed.cs                            # İlçe verileri
+│       │   ├── HizmetBinasiSeed.cs                    # Örnek hizmet binaları
+│       │   └── ModulSeed.cs                           # Modül tanımları
 │       ├── PersonelIslemleri/
-│       │   ├── PersonelSeed.cs
-│       │   ├── DepartmanSeed.cs
-│       │   ├── ServisSeed.cs
-│       │   ├── UnvanSeed.cs
-│       │   └── SendikaSeed.cs
+│       │   ├── DepartmanSeed.cs                       # Departman seed
+│       │   ├── ServisSeed.cs                          # Servis seed
+│       │   ├── UnvanSeed.cs                           # Unvan seed
+│       │   ├── SendikaSeed.cs                         # Sendika seed
+│       │   └── AtanmaNedeniSeed.cs                    # Atanma nedeni seed
 │       ├── SiramatikIslemleri/
-│       │   ├── BankoSeed.cs
-│       │   ├── KanalSeed.cs
-│       │   └── TvSeed.cs
+│       │   ├── BankoSeed.cs                           # Örnek bankolar
+│       │   ├── KanalSeed.cs                           # Örnek kanallar
+│       │   ├── KanalIslemSeed.cs                      # Kanal işlemleri
+│       │   └── TvSeed.cs                              # Örnek TV'ler
+│       ├── PdksIslemleri/
+│       │   ├── IzinTipiSeed.cs                        # İzin tipleri
+│       │   ├── MesaiTipiSeed.cs                       # Mesai tipleri
+│       │   └── VardiyaTanimSeed.cs                    # Vardiya tanımları
+│       ├── EshotIslemleri/
+│       │   ├── EshotHareketTipSeed.cs                 # Hareket tipleri
+│       │   ├── KullanimHakkiSeed.cs                   # Kullanım hakları
+│       │   └── UcretBilgisiSeed.cs                    # Ücret tarifeleri
 │       ├── TestData/
-│       │   ├── TestPersonelSeed.cs
-│       │   ├── TestSiraSeed.cs
-│       │   └── TestUserSeed.cs
-│       └── DataSeed.cs
+│       │   ├── TestPersonelSeed.cs                    # Test personelleri
+│       │   ├── TestSiraSeed.cs                        # Test sıraları
+│       │   └── TestUserSeed.cs                        # Test kullanıcıları
+│       └── DataSeed.cs                                # Master seed orchestrator
 │
-├── SGKPortalApp.BusinessLogicLayer/
-│   ├── Interfaces/
-│   │   ├── IAuthenticationService.cs
+├── SGKPortalApp.BusinessLogicLayer/                    # İş mantığı katmanı
+│   ├── Interfaces/                                     # Servis arayüzleri
+│   │   ├── IAuthenticationService.cs                  # Kimlik doğrulama servisi
+│   │   │
+│   │   ├── Common/
+│   │   │   ├── IHizmetBinasiService.cs
+│   │   │   ├── IIlService.cs
+│   │   │   ├── IIlceService.cs
+│   │   │   ├── IModulService.cs
+│   │   │   └── IYetkiService.cs
+│   │   │
 │   │   ├── PersonelIslemleri/
 │   │   │   ├── IPersonelService.cs
+│   │   │   ├── IPersonelCocukService.cs
+│   │   │   ├── IPersonelEgitimService.cs
+│   │   │   ├── IPersonelCezaService.cs
 │   │   │   ├── IDepartmanService.cs
 │   │   │   ├── IServisService.cs
-│   │   │   └── IUnvanService.cs
+│   │   │   ├── IUnvanService.cs
+│   │   │   └── ISendikaService.cs
+│   │   │
 │   │   ├── SiramatikIslemleri/
 │   │   │   ├── IBankoService.cs
 │   │   │   ├── IKanalService.cs
+│   │   │   ├── IKanalAltService.cs
 │   │   │   ├── IKioskService.cs
 │   │   │   ├── ITvService.cs
+│   │   │   ├── ISiraService.cs
 │   │   │   └── IEslestirmeService.cs
+│   │   │
 │   │   ├── PdksIslemleri/
 │   │   │   ├── IPdksService.cs
+│   │   │   ├── IGirisCikisService.cs
 │   │   │   ├── IIzinTalepService.cs
+│   │   │   ├── IIzinOnayService.cs
 │   │   │   ├── IMesaiService.cs
+│   │   │   ├── ICalismaGunService.cs
+│   │   │   ├── IVardiyaService.cs
 │   │   │   └── IRaporService.cs
+│   │   │
 │   │   └── EshotIslemleri/
 │   │       ├── IEshotService.cs
+│   │       ├── IEshotHareketService.cs
 │   │       ├── IKullanimHakkiService.cs
-│   │       └── IUcretBilgisiService.cs
-│   ├── Services/
+│   │       ├── IUcretBilgisiService.cs
+│   │       ├── IKartYonetimService.cs
+│   │       └── IBakiyeService.cs
+│   │
+│   ├── Services/                                       # Servis implementasyonları
 │   │   ├── AuthenticationService.cs
+│   │   │
+│   │   ├── Common/
+│   │   │   ├── HizmetBinasiService.cs
+│   │   │   ├── IlService.cs
+│   │   │   ├── IlceService.cs
+│   │   │   ├── ModulService.cs
+│   │   │   └── YetkiService.cs
+│   │   │
 │   │   ├── PersonelIslemleri/
 │   │   │   ├── PersonelService.cs
+│   │   │   ├── PersonelCocukService.cs
+│   │   │   ├── PersonelEgitimService.cs
+│   │   │   ├── PersonelCezaService.cs
 │   │   │   ├── DepartmanService.cs
 │   │   │   ├── ServisService.cs
-│   │   │   └── UnvanService.cs
+│   │   │   ├── UnvanService.cs
+│   │   │   └── SendikaService.cs
+│   │   │
 │   │   ├── SiramatikIslemleri/
 │   │   │   ├── BankoService.cs
 │   │   │   ├── KanalService.cs
+│   │   │   ├── KanalAltService.cs
 │   │   │   ├── KioskService.cs
 │   │   │   ├── TvService.cs
+│   │   │   ├── SiraService.cs
 │   │   │   └── EslestirmeService.cs
+│   │   │
 │   │   ├── PdksIslemleri/
 │   │   │   ├── PdksService.cs
+│   │   │   ├── GirisCikisService.cs
 │   │   │   ├── IzinTalepService.cs
+│   │   │   ├── IzinOnayService.cs
 │   │   │   ├── MesaiService.cs
+│   │   │   ├── CalismaGunService.cs
+│   │   │   ├── VardiyaService.cs
 │   │   │   └── RaporService.cs
+│   │   │
 │   │   └── EshotIslemleri/
 │   │       ├── EshotService.cs
+│   │       ├── EshotHareketService.cs
 │   │       ├── KullanimHakkiService.cs
-│   │       └── UcretBilgisiService.cs
-│   ├── Mapping/
+│   │       ├── UcretBilgisiService.cs
+│   │       ├── KartYonetimService.cs
+│   │       └── BakiyeService.cs
+│   │
+│   ├── Mapping/                                        # AutoMapper profilleri
 │   │   ├── Profiles/
+│   │   │   ├── CommonMappingProfile.cs                # Ortak mapping'ler
 │   │   │   ├── PersonelMappingProfile.cs
 │   │   │   ├── SiramatikMappingProfile.cs
 │   │   │   ├── PdksMappingProfile.cs
 │   │   │   └── EshotMappingProfile.cs
-│   │   ├── Services/
+│   │   │
+│   │   ├── Services/                                   # Custom mapping servisleri
 │   │   │   ├── IPersonelMappingService.cs
-│   │   │   └── PersonelMappingService.cs
-│   │   └── Extensions/
+│   │   │   ├── PersonelMappingService.cs
+│   │   │   ├── ISiramatikMappingService.cs
+│   │   │   └── SiramatikMappingService.cs
+│   │   │
+│   │   └── Extensions/                                 # Mapping extension'ları
 │   │       ├── PersonelMappingExtensions.cs
+│   │       ├── SiramatikMappingExtensions.cs
 │   │       └── CommonMappingExtensions.cs
-│   └── Validators/
-│       ├── PersonelIslemleri/
-│       │   ├── CreatePersonelValidator.cs
-│       │   └── UpdatePersonelValidator.cs
-│       ├── SiramatikIslemleri/
-│       │   ├── CreateBankoValidator.cs
-│       │   └── EslestirmeValidator.cs
-│       └── Common/
-│           ├── PaginationValidator.cs
-│           └── FilterValidator.cs
+│   │
+│   ├── Validators/                                     # FluentValidation
+│   │   ├── Common/
+│   │   │   ├── PaginationValidator.cs
+│   │   │   ├── FilterValidator.cs
+│   │   │   └── HizmetBinasiValidator.cs
+│   │   │
+│   │   ├── PersonelIslemleri/
+│   │   │   ├── CreatePersonelValidator.cs
+│   │   │   ├── UpdatePersonelValidator.cs
+│   │   │   ├── PersonelCocukValidator.cs
+│   │   │   ├── DepartmanValidator.cs
+│   │   │   └── ServisValidator.cs
+│   │   │
+│   │   ├── SiramatikIslemleri/
+│   │   │   ├── CreateBankoValidator.cs
+│   │   │   ├── UpdateBankoValidator.cs
+│   │   │   ├── KanalValidator.cs
+│   │   │   └── EslestirmeValidator.cs
+│   │   │
+│   │   ├── PdksIslemleri/
+│   │   │   ├── IzinTalepValidator.cs
+│   │   │   ├── IzinOnayValidator.cs
+│   │   │   ├── MesaiValidator.cs
+│   │   │   └── GirisCikisValidator.cs
+│   │   │
+│   │   └── EshotIslemleri/
+│   │       ├── EshotHareketValidator.cs
+│   │       ├── KullanimHakkiValidator.cs
+│   │       └── UcretBilgisiValidator.cs
+│   │
+│   ├── BusinessRules/                                  # İş kuralları
+│   │   ├── Common/
+│   │   │   ├── DateRangeRule.cs
+│   │   │   ├── UniqueCheckRule.cs
+│   │   │   └── StatusTransitionRule.cs
+│   │   │
+│   │   ├── PersonelRules/
+│   │   │   ├── PersonelAgeRule.cs
+│   │   │   ├── PersonelActiveStatusRule.cs
+│   │   │   └── DepartmanAssignmentRule.cs
+│   │   │
+│   │   ├── SiramatikRules/
+│   │   │   ├── BankoAvailabilityRule.cs
+│   │   │   ├── SiraCapacityRule.cs
+│   │   │   └── KanalAssignmentRule.cs
+│   │   │
+│   │   ├── PdksRules/
+│   │   │   ├── IzinBalanceRule.cs
+│   │   │   ├── MesaiLimitRule.cs
+│   │   │   └── VardiyaConflictRule.cs
+│   │   │
+│   │   └── EshotRules/
+│   │       ├── KullanimHakkiLimitRule.cs
+│   │       ├── BakiyeSufficiencyRule.cs
+│   │       └── KartValidityRule.cs
+│   │
+│   └── Helpers/                                        # Business layer helper'ları
+│       ├── CalculationHelper.cs                       # Hesaplama yardımcıları
+│       ├── BusinessDateHelper.cs                      # İş günü hesaplamaları
+│       ├── NotificationHelper.cs                      # Bildirim helper'ı
+│       └── AuditHelper.cs                             # Audit log helper'ı
 │
-├── SGKPortalApp.ApiLayer/
-│   ├── Controllers/
-│   │   ├── AuthController.cs
+├── SGKPortalApp.ApiLayer/                              # REST API katmanı
+│   ├── Controllers/                                    # API Controller'ları
+│   │   ├── AuthController.cs                          # Authentication endpoints
+│   │   │
+│   │   ├── Common/
+│   │   │   ├── HizmetBinalarıController.cs
+│   │   │   ├── IllerController.cs
+│   │   │   ├── IlcelerController.cs
+│   │   │   └── ModullerController.cs
+│   │   │
 │   │   ├── PersonelIslemleri/
 │   │   │   ├── PersonelController.cs
+│   │   │   ├── PersonelCocukController.cs
+│   │   │   ├── PersonelEgitimController.cs
+│   │   │   ├── PersonelCezaController.cs
 │   │   │   ├── DepartmanController.cs
 │   │   │   ├── ServisController.cs
-│   │   │   └── UnvanController.cs
+│   │   │   ├── UnvanController.cs
+│   │   │   └── SendikaController.cs
+│   │   │
 │   │   ├── SiramatikIslemleri/
 │   │   │   ├── BankoController.cs
 │   │   │   ├── KanalController.cs
+│   │   │   ├── KanalAltController.cs
 │   │   │   ├── KioskController.cs
 │   │   │   ├── TvController.cs
+│   │   │   ├── SiraController.cs
 │   │   │   └── EslestirmeController.cs
+│   │   │
 │   │   ├── PdksIslemleri/
 │   │   │   ├── PdksController.cs
+│   │   │   ├── GirisCikisController.cs
 │   │   │   ├── IzinTalepController.cs
+│   │   │   ├── IzinOnayController.cs
 │   │   │   ├── MesaiController.cs
+│   │   │   ├── CalismaGunController.cs
 │   │   │   └── RaporController.cs
+│   │   │
 │   │   ├── EshotIslemleri/
 │   │   │   ├── EshotController.cs
+│   │   │   ├── EshotHareketController.cs
 │   │   │   ├── KullanimHakkiController.cs
-│   │   │   └── UcretBilgisiController.cs
+│   │   │   ├── UcretBilgisiController.cs
+│   │   │   ├── KartYonetimController.cs
+│   │   │   └── BakiyeController.cs
+│   │   │
 │   │   └── KullaniciIslemleri/
 │   │       ├── KisiselBilgilerController.cs
-│   │       └── SifreController.cs
-│   ├── Middleware/
-│   │   ├── ExceptionMiddleware.cs
-│   │   ├── LoggingMiddleware.cs
-│   │   └── AuthenticationMiddleware.cs
-│   ├── Filters/
-│   │   ├── ValidateModelAttribute.cs
-│   │   ├── AuthorizeRoleAttribute.cs
-│   │   └── LogActionAttribute.cs
-│   ├── Extensions/
-│   │   ├── ServiceCollectionExtensions.cs
-│   │   └── ApplicationBuilderExtensions.cs
-│   ├── Program.cs
-│   ├── appsettings.json
-│   ├── appsettings.Development.json
-│   └── appsettings.Production.json
+│   │       ├── SifreController.cs
+│   │       └── ProfilController.cs
+│   │
+│   ├── Middleware/                                     # Custom middleware'ler
+│   │   ├── ExceptionMiddleware.cs                     # Global exception handling
+│   │   ├── LoggingMiddleware.cs                       # Request/Response logging
+│   │   ├── AuthenticationMiddleware.cs                # JWT authentication
+│   │   ├── PerformanceMiddleware.cs                   # Performance monitoring
+│   │   └── RateLimitMiddleware.cs                     # Rate limiting
+│   │
+│   ├── Filters/                                        # Action filter'lar
+│   │   ├── ValidateModelAttribute.cs                  # Model validation filter
+│   │   ├── AuthorizeRoleAttribute.cs                  # Role-based authorization
+│   │   ├── LogActionAttribute.cs                      # Action logging
+│   │   ├── CacheAttribute.cs                          # Response caching
+│   │   └── ApiKeyAuthAttribute.cs                     # API key validation
+│   │
+│   ├── Extensions/                                     # Servis extension'ları
+│   │   ├── ServiceCollectionExtensions.cs             # DI registrations
+│   │   ├── ApplicationBuilderExtensions.cs            # Middleware pipeline
+│   │   ├── SwaggerExtensions.cs                       # Swagger configuration
+│   │   └── CorsExtensions.cs                          # CORS policy
+│   │
+│   ├── Hubs/                                          # SignalR Hub'ları
+│   │   ├── DashboardHub.cs                            # Dashboard real-time updates
+│   │   ├── SiramatikHub.cs                            # Sıramatik real-time
+│   │   ├── TvHub.cs                                   # TV ekran updates
+│   │   └── NotificationHub.cs                         # Genel bildirimler
+│   │
+│   ├── Program.cs                                     # Application entry point
+│   ├── appsettings.json                               # Configuration settings
+│   ├── appsettings.Development.json                   # Development settings
+│   └── appsettings.Production.json                    # Production settings
 │
-└── SGKPortalApp.PresentationLayer/
+└── SGKPortalApp.PresentationLayer/                     # Blazor Server UI katmanı
     │
-    ├── Pages/
-    │   ├── _Host.cshtml
-    │   ├── Index.razor
-    │   ├── Error.razor
+    ├── Pages/                                             # Routable Razor Pages
+    │   ├── _Host.cshtml                                   # Blazor Server host page
+    │   ├── Index.razor                                    # Dashboard (@page "/")
+    │   ├── Error.razor                                    # Error page
     │   │
-    │   ├── Auth/
-    │   │   ├── Login.razor
-    │   │   ├── Logout.razor
-    │   │   └── AccessDenied.razor
+    │   ├── Auth/                                          # Authentication pages
+    │   │   ├── Login.razor                                # @page "/auth/login"
+    │   │   ├── Logout.razor                               # @page "/auth/logout"
+    │   │   ├── ForgotPassword.razor                       # @page "/auth/forgot-password"
+    │   │   └── AccessDenied.razor                         # @page "/auth/access-denied"
     │   │
-    │   ├── Account/
-    │   │   ├── Profile.razor
-    │   │   └── ChangePassword.razor
+    │   ├── Account/                                       # User account management
+    │   │   ├── Profile.razor                              # @page "/account/profile"
+    │   │   ├── ChangePassword.razor                       # @page "/account/change-password"
+    │   │   └── Settings.razor                             # @page "/account/settings"
     │   │
-    │   ├── Personel/
-    │   │   ├── Index.razor
-    │   │   ├── Detail.razor
-    │   │   ├── Create.razor
-    │   │   ├── Edit.razor
+    │   ├── Personel/                                      # Personel module
+    │   │   ├── Index.razor                                # @page "/personel" - List
+    │   │   ├── Detail.razor                               # @page "/personel/{id:int}"
+    │   │   ├── Create.razor                               # @page "/personel/create"
+    │   │   ├── Edit.razor                                 # @page "/personel/edit/{id:int}"
     │   │   │
     │   │   ├── Departman/
-    │   │   │   ├── Index.razor
-    │   │   │   └── Manage.razor
+    │   │   │   ├── Index.razor                            # @page "/personel/departman"
+    │   │   │   └── Manage.razor                           # @page "/personel/departman/manage/{id:int?}"
     │   │   │
     │   │   ├── Servis/
-    │   │   │   ├── Index.razor
-    │   │   │   └── Manage.razor
+    │   │   │   ├── Index.razor                            # @page "/personel/servis"
+    │   │   │   └── Manage.razor                           # @page "/personel/servis/manage/{id:int?}"
     │   │   │
     │   │   └── Unvan/
-    │   │       ├── Index.razor
-    │   │       └── Manage.razor
+    │   │       ├── Index.razor                            # @page "/personel/unvan"
+    │   │       └── Manage.razor                           # @page "/personel/unvan/manage/{id:int?}"
     │   │
-    │   ├── Siramatik/
-    │   │   ├── Dashboard.razor
+    │   ├── Siramatik/                                     # Queue management module
+    │   │   ├── Dashboard.razor                            # @page "/siramatik" - Live monitoring
     │   │   │
     │   │   ├── Banko/
-    │   │   │   ├── Index.razor
-    │   │   │   ├── Manage.razor
-    │   │   │   ├── PersonelAtama.razor
-    │   │   │   └── IslemTanimlari.razor
+    │   │   │   ├── Index.razor                            # @page "/siramatik/banko"
+    │   │   │   ├── Manage.razor                           # @page "/siramatik/banko/manage/{id:int?}"
+    │   │   │   ├── PersonelAtama.razor                    # @page "/siramatik/banko/personel-atama"
+    │   │   │   └── IslemTanimlari.razor                   # @page "/siramatik/banko/islem-tanimlari"
     │   │   │
     │   │   ├── Kanal/
-    │   │   │   ├── Index.razor
-    │   │   │   ├── Manage.razor
-    │   │   │   ├── AltKanal.razor
-    │   │   │   ├── PersonelAtama.razor
-    │   │   │   └── Eslestirme.razor
+    │   │   │   ├── Index.razor                            # @page "/siramatik/kanal"
+    │   │   │   ├── Manage.razor                           # @page "/siramatik/kanal/manage/{id:int?}"
+    │   │   │   ├── AltKanal.razor                         # @page "/siramatik/kanal/alt-kanal/{kanalId:int}"
+    │   │   │   ├── PersonelAtama.razor                    # @page "/siramatik/kanal/personel-atama"
+    │   │   │   └── Eslestirme.razor                       # @page "/siramatik/kanal/eslestirme"
     │   │   │
     │   │   ├── Kiosk/
-    │   │   │   ├── Index.razor
-    │   │   │   ├── Manage.razor
-    │   │   │   └── AltKanalEslestirme.razor
+    │   │   │   ├── Index.razor                            # @page "/siramatik/kiosk"
+    │   │   │   ├── Manage.razor                           # @page "/siramatik/kiosk/manage/{id:int?}"
+    │   │   │   └── AltKanalEslestirme.razor              # @page "/siramatik/kiosk/eslestirme"
     │   │   │
     │   │   └── Tv/
-    │   │       ├── Index.razor
-    │   │       ├── Manage.razor
-    │   │       └── BankoEslestirme.razor
+    │   │       ├── Index.razor                            # @page "/siramatik/tv"
+    │   │       ├── Manage.razor                           # @page "/siramatik/tv/manage/{id:int?}"
+    │   │       └── BankoEslestirme.razor                  # @page "/siramatik/tv/banko-eslestirme"
     │   │
-    │   ├── Pdks/
+    │   ├── Pdks/                                          # Time & attendance module
     │   │   ├── GirisCikis/
-    │   │   │   ├── Index.razor
-    │   │   │   └── Detail.razor
+    │   │   │   ├── Index.razor                            # @page "/pdks/giris-cikis"
+    │   │   │   ├── Detail.razor                           # @page "/pdks/giris-cikis/{personelId:int}/{tarih:datetime}"
+    │   │   │   └── Manuel.razor                           # @page "/pdks/giris-cikis/manuel"
     │   │   │
     │   │   ├── Izin/
-    │   │   │   ├── Taleplerim.razor
-    │   │   │   ├── YeniTalep.razor
-    │   │   │   ├── OnayBekleyenler.razor
-    │   │   │   └── IzinSorumluAtama.razor
+    │   │   │   ├── Taleplerim.razor                       # @page "/pdks/izin/taleplerim"
+    │   │   │   ├── YeniTalep.razor                        # @page "/pdks/izin/yeni-talep"
+    │   │   │   ├── OnayBekleyenler.razor                  # @page "/pdks/izin/onay-bekleyenler"
+    │   │   │   ├── IzinSorumluAtama.razor                 # @page "/pdks/izin/sorumlu-atama"
+    │   │   │   └── IzinBakiye.razor                       # @page "/pdks/izin/bakiye"
     │   │   │
     │   │   ├── Mesai/
-    │   │   │   ├── CalismaGunleri.razor
-    │   │   │   └── SgmMesai.razor
+    │   │   │   ├── CalismaGunleri.razor                   # @page "/pdks/mesai/calisma-gunleri"
+    │   │   │   ├── SgmMesai.razor                         # @page "/pdks/mesai/sgm-mesai"
+    │   │   │   ├── PersonelMesai.razor                    # @page "/pdks/mesai/personel-mesai"
+    │   │   │   └── VardiyaTanim.razor                     # @page "/pdks/mesai/vardiya-tanim"
+    │   │   │
+    │   │   ├── Cihaz/
+    │   │   │   ├── Index.razor                            # @page "/pdks/cihaz"
+    │   │   │   └── Manage.razor                           # @page "/pdks/cihaz/manage/{id:int?}"
     │   │   │
     │   │   └── Raporlar/
-    │   │       ├── PersonelMesai.razor
-    │   │       ├── DepartmanMesai.razor
-    │   │       └── IzinRaporu.razor
+    │   │       ├── PersonelMesai.razor                    # @page "/pdks/raporlar/personel-mesai"
+    │   │       ├── DepartmanMesai.razor                   # @page "/pdks/raporlar/departman-mesai"
+    │   │       ├── IzinRaporu.razor                       # @page "/pdks/raporlar/izin-raporu"
+    │   │       └── GirisCikisRaporu.razor                 # @page "/pdks/raporlar/giris-cikis"
     │   │
-    │   └── Eshot/
+    │   └── Eshot/                                         # Transportation module
     │       ├── Hareketler/
-    │       │   ├── Index.razor
-    │       │   └── Detail.razor
+    │       │   ├── Index.razor                            # @page "/eshot/hareketler"
+    │       │   ├── Detail.razor                           # @page "/eshot/hareketler/{personelId:int}"
+    │       │   └── Raporla.razor                          # @page "/eshot/hareketler/rapor"
     │       │
     │       ├── KullanimHakki/
-    │       │   ├── Index.razor
-    │       │   └── Tanimla.razor
+    │       │   ├── Index.razor                            # @page "/eshot/kullanim-hakki"
+    │       │   ├── Tanimla.razor                          # @page "/eshot/kullanim-hakki/tanimla"
+    │       │   └── PersonelAtama.razor                    # @page "/eshot/kullanim-hakki/atama"
+    │       │
+    │       ├── Kart/
+    │       │   ├── Index.razor                            # @page "/eshot/kart"
+    │       │   ├── Manage.razor                           # @page "/eshot/kart/manage/{id:int?}"
+    │       │   └── BakiyeYukle.razor                      # @page "/eshot/kart/bakiye-yukle"
     │       │
     │       └── UcretBilgisi/
-    │           └── Index.razor
+    │           ├── Index.razor                            # @page "/eshot/ucret-bilgisi"
+    │           └── Manage.razor                           # @page "/eshot/ucret-bilgisi/manage/{id:int?}"
     │
-    ├── Shared/
-    │   ├── Layout/
-    │   │   ├── MainLayout.razor
-    │   │   ├── EmptyLayout.razor
-    │   │   ├── NavMenu.razor
-    │   │   ├── TopBar.razor
-    │   │   └── Footer.razor
+    ├── Shared/                                            # Shared layouts and global components
+    │   ├── Layout/                                        # Layout components
+    │   │   ├── MainLayout.razor                           # Main layout with Sneat theme
+    │   │   ├── EmptyLayout.razor                          # Empty layout for auth pages
+    │   │   ├── NavMenu.razor                              # Left sidebar navigation
+    │   │   ├── TopBar.razor                               # Top navigation bar
+    │   │   └── Footer.razor                               # Footer component
     │   │
-    │   ├── Common/
-    │   │   ├── DataGrid.razor
-    │   │   │   └── DataGrid.razor.cs
-    │   │   ├── ConfirmDialog.razor
-    │   │   ├── LoadingSpinner.razor
-    │   │   ├── Toast.razor
-    │   │   ├── Breadcrumb.razor
-    │   │   ├── PageHeader.razor
-    │   │   ├── EmptyState.razor
-    │   │   └── ErrorBoundary.razor
+    │   ├── Common/                                        # Global reusable components
+    │   │   ├── DataGrid.razor                             # Generic data grid
+    │   │   │   └── DataGrid.razor.cs                      # Code-behind
+    │   │   ├── ConfirmDialog.razor                        # Confirmation modal
+    │   │   ├── LoadingSpinner.razor                       # Loading indicator
+    │   │   ├── Toast.razor                                # Toast notifications
+    │   │   ├── Breadcrumb.razor                           # Breadcrumb navigation
+    │   │   ├── PageHeader.razor                           # Page title & actions
+    │   │   ├── EmptyState.razor                           # Empty state placeholder
+    │   │   ├── ErrorBoundary.razor                        # Error boundary wrapper
+    │   │   ├── Pagination.razor                           # Pagination component
+    │   │   └── SearchBox.razor                            # Global search
     │   │
-    │   ├── Forms/
-    │   │   ├── DateRangePicker.razor
-    │   │   ├── SearchBox.razor
-    │   │   ├── FileUpload.razor
-    │   │   ├── MultiSelect.razor
-    │   │   └── ValidationMessage.razor
+    │   ├── Forms/                                         # Form components
+    │   │   ├── DateRangePicker.razor                      # Date range selector
+    │   │   ├── TimePicker.razor                           # Time picker
+    │   │   ├── FileUpload.razor                           # File upload component
+    │   │   ├── MultiSelect.razor                          # Multi-select dropdown
+    │   │   ├── AutoComplete.razor                         # Autocomplete input
+    │   │   ├── ValidationMessage.razor                    # Custom validation display
+    │   │   └── FormWizard.razor                           # Multi-step form wizard
     │   │
-    │   └── Cards/
-    │       ├── StatCard.razor
-    │       ├── InfoCard.razor
-    │       └── ChartCard.razor
+    │   └── Cards/                                         # Card components
+    │       ├── StatCard.razor                             # Statistic card
+    │       ├── InfoCard.razor                             # Information card
+    │       ├── ChartCard.razor                            # Chart wrapper card
+    │       └── ActionCard.razor                           # Action button card
     │
-    ├── Components/
+    ├── Components/                                        # Feature-specific components
     │   ├── Personel/
-    │   │   ├── PersonelCard.razor
-    │   │   ├── PersonelFilter.razor
-    │   │   ├── PersonelSelector.razor
-    │   │   ├── DepartmanTree.razor
-    │   │   └── PersonelStats.razor
+    │   │   ├── PersonelCard.razor                         # Personel info card
+    │   │   ├── PersonelFilter.razor                       # Advanced filter form
+    │   │   ├── PersonelSelector.razor                     # Personel dropdown selector
+    │   │   ├── DepartmanTree.razor                        # Hierarchical department tree
+    │   │   ├── PersonelStats.razor                        # Personel statistics widget
+    │   │   ├── PersonelFotoUpload.razor                   # Photo upload component
+    │   │   └── PersonelTimeline.razor                     # Personel history timeline
     │   │
     │   ├── Siramatik/
-    │   │   ├── BankoDurumCard.razor
-    │   │   ├── SiraListesi.razor
-    │   │   ├── KanalAtamaMatrix.razor
-    │   │   ├── EslestirmeModal.razor
-    │   │   └── TvEkranPreview.razor
+    │   │   ├── BankoDurumCard.razor                       # Bank status card
+    │   │   ├── SiraListesi.razor                          # Queue list real-time
+    │   │   ├── KanalAtamaMatrix.razor                     # Channel assignment matrix
+    │   │   ├── EslestirmeModal.razor                      # Assignment modal
+    │   │   ├── TvEkranPreview.razor                       # TV screen preview
+    │   │   ├── SiraIstatistik.razor                       # Queue statistics
+    │   │   └── CanliDurum.razor                           # Live status monitor
     │   │
     │   ├── Pdks/
-    │   │   ├── GirisCikisTimeline.razor
-    │   │   ├── IzinTalepForm.razor
-    │   │   ├── IzinOnayCard.razor
-    │   │   ├── MesaiKarti.razor
-    │   │   └── CalismaGunTablosu.razor
+    │   │   ├── GirisCikisTimeline.razor                   # Entry/exit timeline
+    │   │   ├── IzinTalepForm.razor                        # Leave request form
+    │   │   ├── IzinOnayCard.razor                         # Leave approval card
+    │   │   ├── MesaiKarti.razor                           # Work hours card
+    │   │   ├── CalismaGunTablosu.razor                    # Working days table
+    │   │   ├── IzinTakvimiWidget.razor                    # Leave calendar widget
+    │   │   ├── VardiyaCalendar.razor                      # Shift calendar
+    │   │   └── MesaiGrafik.razor                          # Work hours chart
     │   │
     │   ├── Eshot/
-    │   │   ├── HareketTablosu.razor
-    │   │   ├── KullanimGrafigi.razor
-    │   │   └── HakBilgisiCard.razor
+    │   │   ├── HareketTablosu.razor                       # Transaction table
+    │   │   ├── KullanimGrafigi.razor                      # Usage chart
+    │   │   ├── HakBilgisiCard.razor                       # Benefit info card
+    │   │   ├── BakiyeWidget.razor                         # Balance widget
+    │   │   ├── KartDurumCard.razor                        # Card status card
+    │   │   └── KullanimAnaliz.razor                       # Usage analysis
     │   │
     │   └── Dashboard/
-    │       ├── WelcomeCard.razor
-    │       ├── QuickActions.razor
-    │       ├── RecentActivities.razor
-    │       ├── NotificationPanel.razor
-    │       └── StatisticsGrid.razor
+    │       ├── WelcomeCard.razor                          # Welcome widget
+    │       ├── QuickActions.razor                         # Quick action buttons
+    │       ├── RecentActivities.razor                     # Recent activities list
+    │       ├── NotificationPanel.razor                    # Notifications widget
+    │       ├── StatisticsGrid.razor                       # Statistics grid
+    │       ├── AnnouncementCard.razor                     # Announcement widget
+    │       └── WeatherWidget.razor                        # Weather info
     │
-    ├── Services/
-    │   ├── ApiServices/
+    ├── Services/                                          # UI-layer services
+    │   ├── ApiServices/                                   # API communication services
     │   │   ├── Base/
-    │   │   │   └── BaseApiService.cs
-    │   │   ├── IPersonelApiService.cs
-    │   │   ├── PersonelApiService.cs
-    │   │   ├── ISiramatikApiService.cs
-    │   │   ├── SiramatikApiService.cs
-    │   │   ├── IPdksApiService.cs
-    │   │   ├── PdksApiService.cs
-    │   │   ├── IEshotApiService.cs
-    │   │   ├── EshotApiService.cs
-    │   │   ├── IAuthApiService.cs
-    │   │   └── AuthApiService.cs
+    │   │   │   ├── BaseApiService.cs                      # Base HTTP client wrapper
+    │   │   │   └── ApiConfig.cs                           # API configuration
+    │   │   │
+    │   │   ├── Common/
+    │   │   │   ├── IAuthApiService.cs
+    │   │   │   ├── AuthApiService.cs
+    │   │   │   ├── IHizmetBinasiApiService.cs
+    │   │   │   └── HizmetBinasiApiService.cs
+    │   │   │
+    │   │   ├── PersonelApiService.cs                      # Personel API client
+    │   │   ├── SiramatikApiService.cs                     # Sıramatik API client
+    │   │   ├── PdksApiService.cs                          # PDKS API client
+    │   │   └── EshotApiService.cs                         # Eshot API client
     │   │
-    │   ├── StateServices/
-    │   │   ├── AppStateService.cs
-    │   │   ├── UserStateService.cs
-    │   │   └── NavigationStateService.cs
+    │   ├── StateServices/                                 # State management services
+    │   │   ├── AppStateService.cs                         # Global app state
+    │   │   ├── UserStateService.cs                        # Current user state
+    │   │   ├── NavigationStateService.cs                  # Navigation state
+    │   │   └── FilterStateService.cs                      # Filter persistence
     │   │
-    │   ├── UIServices/
+    │   ├── UIServices/                                    # UI-specific services
     │   │   ├── IToastService.cs
     │   │   ├── ToastService.cs
     │   │   ├── IModalService.cs
@@ -670,86 +1135,103 @@ SGKPortalApp/
     │   │   ├── ILoadingService.cs
     │   │   ├── LoadingService.cs
     │   │   ├── IThemeService.cs
-    │   │   └── ThemeService.cs
+    │   │   ├── ThemeService.cs
+    │   │   ├── IConfirmService.cs
+    │   │   └── ConfirmService.cs
     │   │
-    │   ├── StorageServices/
+    │   ├── StorageServices/                               # Browser storage services
     │   │   ├── ILocalStorageService.cs
     │   │   ├── LocalStorageService.cs
     │   │   ├── ISessionStorageService.cs
     │   │   └── SessionStorageService.cs
     │   │
-    │   └── Hubs/
-    │       ├── SiramatikHub.cs
-    │       └── NotificationHub.cs
+    │   └── Hubs/                                          # SignalR hub clients
+    │       ├── SiramatikHubClient.cs                      # Real-time queue updates
+    │       ├── TvHubClient.cs                             # TV screen updates
+    │       ├── NotificationHubClient.cs                   # Real-time notifications
+    │       └── DashboardHubClient.cs                      # Dashboard updates
     │
-    ├── Models/
-    │   ├── ViewModels/
+    ├── Models/                                            # UI-specific models
+    │   ├── ViewModels/                                    # Page view models
+    │   │   ├── DashboardViewModel.cs
     │   │   ├── PersonelListViewModel.cs
     │   │   ├── SiramatikDashboardViewModel.cs
-    │   │   └── DashboardViewModel.cs
+    │   │   ├── PdksViewModel.cs
+    │   │   └── EshotViewModel.cs
     │   │
-    │   ├── FormModels/
+    │   ├── FormModels/                                    # Form input models
     │   │   ├── LoginFormModel.cs
     │   │   ├── PersonelFilterFormModel.cs
     │   │   ├── IzinTalepFormModel.cs
-    │   │   └── SiramatikFilterFormModel.cs
+    │   │   ├── SiramatikFilterFormModel.cs
+    │   │   └── EshotHareketFormModel.cs
     │   │
-    │   └── UIModels/
+    │   └── UIModels/                                      # UI state models
     │       ├── BreadcrumbItem.cs
     │       ├── MenuItem.cs
     │       ├── ToastMessage.cs
-    │       └── TableColumn.cs
+    │       ├── TableColumn.cs
+    │       ├── ChartDataModel.cs
+    │       └── NotificationModel.cs
     │
-    ├── Helpers/
-    │   ├── NavigationHelper.cs
-    │   ├── FormHelper.cs
-    │   ├── DateHelper.cs
-    │   └── FileHelper.cs
+    ├── Helpers/                                           # UI helper classes
+    │   ├── NavigationHelper.cs                            # Navigation utilities
+    │   ├── FormHelper.cs                                  # Form validation helpers
+    │   ├── DateHelper.cs                                  # Date formatting
+    │   ├── FileHelper.cs                                  # File handling utilities
+    │   ├── ExportHelper.cs                                # Export to Excel/PDF
+    │   └── PrintHelper.cs                                 # Print utilities
     │
-    ├── Extensions/
-    │   ├── ServiceCollectionExtensions.cs
-    │   ├── ComponentExtensions.cs
-    │   └── JSRuntimeExtensions.cs
+    ├── Extensions/                                        # Extension methods
+    │   ├── ServiceCollectionExtensions.cs                 # DI extensions
+    │   ├── ComponentExtensions.cs                         # Component helpers
+    │   ├── JSRuntimeExtensions.cs                         # JS interop extensions
+    │   └── NavigationManagerExtensions.cs                 # Navigation extensions
     │
-    ├── wwwroot/
+    ├── wwwroot/                                           # Static files
     │   ├── css/
-    │   │   ├── sneat/
+    │   │   ├── sneat/                                     # Sneat theme CSS
     │   │   │   ├── core.css
     │   │   │   ├── core-dark.css
     │   │   │   ├── theme-default.css
     │   │   │   ├── theme-default-dark.css
     │   │   │   └── demo.css
     │   │   │
-    │   │   ├── vendor/
+    │   │   ├── vendor/                                    # Vendor CSS
     │   │   │   ├── perfect-scrollbar.css
-    │   │   │   └── apex-charts.css
+    │   │   │   ├── apex-charts.css
+    │   │   │   └── datatables.css
     │   │   │
-    │   │   ├── app.css
+    │   │   ├── app.css                                    # Global app styles
     │   │   │
-    │   │   └── modules/
+    │   │   └── modules/                                   # Module-specific styles
     │   │       ├── personel.css
     │   │       ├── siramatik.css
     │   │       ├── pdks.css
     │   │       └── eshot.css
     │   │
     │   ├── js/
-    │   │   ├── sneat/
+    │   │   ├── sneat/                                     # Sneat theme JS
     │   │   │   ├── helpers.js
     │   │   │   ├── config.js
     │   │   │   ├── menu.js
     │   │   │   └── main.js
     │   │   │
-    │   │   ├── vendor/
+    │   │   ├── vendor/                                    # Vendor JS
     │   │   │   ├── jquery.min.js
     │   │   │   ├── bootstrap.bundle.min.js
     │   │   │   ├── perfect-scrollbar.js
-    │   │   │   └── apexcharts.js
+    │   │   │   ├── apexcharts.js
+    │   │   │   └── datatables.js
     │   │   │
-    │   │   ├── interop.js
-    │   │   ├── sneat-init.js
-    │   │   └── app.js
+    │   │   ├── signalr/                                   # SignalR client
+    │   │   │   └── signalr.min.js
+    │   │   │
+    │   │   ├── interop.js                                 # Blazor-JS interop
+    │   │   ├── sneat-init.js                              # Sneat initialization
+    │   │   └── app.js                                     # Custom app JS
     │   │
-    │   ├── vendor/
+    │   ├── vendor/                                        # Vendor assets
     │   │   ├── fonts/
     │   │   │   ├── boxicons/
     │   │   │   └── fontawesome/
@@ -757,27 +1239,494 @@ SGKPortalApp/
     │   │   └── libs/
     │   │       ├── perfect-scrollbar/
     │   │       ├── apex-charts/
-    │   │       └── bootstrap/
+    │   │       ├── bootstrap/
+    │   │       └── datatables/
     │   │
     │   ├── images/
     │   │   ├── logo.png
     │   │   ├── logo-light.png
     │   │   ├── favicon.ico
-    │   │   ├── avatars/
-    │   │   └── backgrounds/
+    │   │   ├── avatars/                                   # User avatars
+    │   │   ├── backgrounds/                               # Background images
+    │   │   └── illustrations/                             # UI illustrations
     │   │
-    │   └── uploads/
-    │       ├── personel/
-    │       └── documents/
+    │   └── uploads/                                       # User uploaded files
+    │       ├── personel/                                  # Personnel photos
+    │       │   └── avatars/
+    │       └── documents/                                 # Documents
+    │           ├── izin/                                  # Leave documents
+    │           ├── egitim/                                # Training certificates
+    │           └── genel/                                 # General documents
     │
     ├── Properties/
-    │   └── launchSettings.json
+    │   └── launchSettings.json                            # Launch configuration
     │
-    ├── _Imports.razor
-    ├── App.razor
-    ├── Program.cs
-    ├── appsettings.json
-    ├── appsettings.Development.json
-    ├── appsettings.Production.json
-    └── SGKPortalApp.PresentationLayer.csproj
+    ├── _Imports.razor                                     # Global using directives
+    ├── App.razor                                          # Router configuration
+    ├── Program.cs                                         # Application entry point
+    ├── appsettings.json                                   # App settings
+    ├── appsettings.Development.json                       # Development settings
+    ├── appsettings.Production.json                        # Production settings
+    └── SGKPortalApp.PresentationLayer.csproj             # Project file
 ```
+
+## 📋 Teknoloji Stack ve Özellikler
+
+### Backend
+- **.NET 8.0** (veya .NET 6.0+)
+- **ASP.NET Core Web API**
+- **Entity Framework Core 8.0**
+- **AutoMapper 12.0**
+- **FluentValidation 11.0**
+- **SignalR** (Real-time communication)
+
+### Frontend
+- **Blazor Server**
+- **Sneat Admin Template**
+- **Bootstrap 5**
+- **ApexCharts** (Charts & Graphs)
+- **DataTables** (Grid component)
+- **SignalR Client**
+
+### Database
+- **SQL Server 2019+**
+- **Entity Framework Migrations**
+
+### Authentication & Authorization
+- **JWT Bearer Authentication**
+- **Role-based Authorization**
+- **Claims-based Authorization**
+
+### Logging & Monitoring
+- **Serilog** (Structured logging)
+- **Application Insights** (Optional)
+
+### Caching
+- **In-Memory Cache**
+- **Distributed Cache** (Redis - Optional)
+
+## 🎯 Önemli Notlar
+
+### 1. Naming Conventions
+- **Entity'ler**: Tekil isim (Personel, Departman, Kanal)
+- **DTO'lar**: Entity adı + Dto suffix (PersonelDto, DepartmanDto)
+- **Repository'ler**: Entity adı + Repository suffix (PersonelRepository)
+- **Service'ler**: Entity adı + Service suffix (PersonelService)
+
+### 2. Katmanlar Arası Bağımlılık
+```
+PresentationLayer → ApiLayer/BusinessLogicLayer
+ApiLayer → BusinessLogicLayer
+BusinessLogicLayer → DataAccessLayer + BusinessObjectLayer
+DataAccessLayer → BusinessObjectLayer
+```
+
+### 3. PDKS Modülü Detayları
+- **Giriş/Çıkış**: PDKS cihazlarından otomatik veri çekme
+- **İzin Yönetimi**: Çok seviyeli onay süreci
+- **Mesai Takibi**: Otomatik mesai hesaplama
+- **Vardiya Yönetimi**: Esnek vardiya tanımlama
+- **Raporlama**: Excel/PDF export desteği
+
+### 4. Eshot Modülü Detayları
+- **Hareket Kayıtları**: Tüm kart kullanım geçmişi
+- **Kullanım Hakkı**: Personel bazlı hak tanımlama
+- **Kart Yönetimi**: Kart tanımlama, aktivasyon, iptal
+- **Bakiye Yönetimi**: Otomatik ve manuel bakiye yükleme
+- **Ücret Yönetimi**: Tarife tanımlama ve güncelleme
+
+### 5. SignalR Real-time Features
+- **Dashboard**: Anlık istatistikler
+- **Sıramatik**: Sıra durumu güncellemeleri
+- **TV Ekranları**: Canlı sıra gösterimi
+- **Bildirimler**: Kullanıcı bazlı bildirimler
+- **Personel Durumu**: Online/Offline durumu
+
+### 6. Security Features
+- **JWT Token Authentication**
+- **Role-based Access Control (RBAC)**
+- **Password Hashing** (BCrypt)
+- **XSS Prevention**
+- **CSRF Protection**
+- **SQL Injection Prevention** (Parameterized queries)
+- **Rate Limiting**
+- **API Key Authentication** (Optional)
+
+### 7. Performance Optimizations
+- **Lazy Loading** (Navigation properties)
+- **AsNoTracking** (Read-only queries)
+- **Pagination** (Tüm listeleme ekranlarında)
+- **Caching** (Frequently accessed data)
+- **Index Optimization** (Database indexes)
+- **Connection Pooling**
+- **Response Compression**
+
+## 📊 Database Schema Highlights
+
+### Ortak Tablolar (Common)
+- **CMN_Iller**: 81 İl
+- **CMN_Ilceler**: ~1000 İlçe
+- **CMN_HizmetBinalari**: Hizmet binaları
+- **CMN_Users**: Kullanıcılar
+- **CMN_DatabaseLogs**: Database işlem logları
+- **CMN_LoginLogoutLogs**: Giriş/Çıkış logları
+
+### Personel Tabloları (PER_)
+- **PER_Personeller**: Ana personel tablosu
+- **PER_PersonelCocuklari**: Çocuk bilgileri
+- **PER_PersonelHizmetleri**: Hizmet geçmişi
+- **PER_PersonelImzaYetkileri**: İmza yetkileri
+- **PER_PersonelEgitimler**: Eğitim bilgileri
+- **PER_PersonelCezalar**: Ceza kayıtları
+- **PER_PersonelEngeller**: Engel durumu
+- **PER_Departmanlar**: Departmanlar
+- **PER_Servisler**: Servisler
+- **PER_Unvanlar**: Unvanlar
+- **PER_Sendikalar**: Sendikalar
+
+### Sıramatik Tabloları (SIR_)
+- **SIR_Bankolar**: Banko tanımları
+- **SIR_BankolarKullanici**: Banko-Personel
+- **SIR_BankoIslemleri**: Banko işlem tanımları
+- **SIR_Kanallar**: Kanal tanımları
+- **SIR_KanallarAlt**: Alt kanal tanımları
+- **SIR_KanalIslemleri**: Kanal işlemleri
+- **SIR_KanalAltIslemleri**: Alt kanal işlemleri
+- **SIR_KanalPersonelleri**: Kanal-Personel
+- **SIR_Siralar**: Sıra kayıtları (En yoğun tablo)
+- **SIR_Tvler**: TV ekranları
+- **SIR_TvBankolari**: TV-Banko eşleştirme
+- **SIR_KioskGruplari**: Kiosk grupları
+- **SIR_HubConnections**: SignalR bağlantıları
+
+### PDKS Tabloları (PDK_)
+- **PDK_Cihazlar**: PDKS cihaz tanımları
+- **PDK_GirisCikislar**: Giriş/Çıkış kayıtları
+- **PDK_IzinTalepleri**: İzin talepleri
+- **PDK_IzinOnaylar**: İzin onay geçmişi
+- **PDK_PersonelCalismaGunleri**: Çalışma gün sayıları
+- **PDK_IzinKayitSorumlulari**: İzin sorumluları
+- **PDK_SgmMesaileri**: SGM mesai listesi
+- **PDK_PersonelMesaileri**: Personel mesai detayları
+- **PDK_IzinTipleri**: İzin tipleri
+- **PDK_MesaiTipleri**: Mesai tipleri
+- **PDK_VardiyaTanimlari**: Vardiya tanımları
+
+### Eshot Tabloları (ESH_)
+- **ESH_Hareketler**: Hareket kayıtları
+- **ESH_KullanimHaklari**: Kullanım hakları
+- **ESH_UcretBilgileri**: Ücret tarifeleri
+- **ESH_PersonelHaklari**: Personel-Hak atamaları
+- **ESH_Kartlar**: Kart bilgileri
+- **ESH_Bakiyeler**: Bakiye kayıtları
+- **ESH_HareketTipleri**: Hareket tipleri
+
+## 🔒 Environment Variables
+
+```bash
+# Database
+ConnectionStrings__DefaultConnection="Server=localhost;Database=SGKPortalDb;Trusted_Connection=true;MultipleActiveResultSets=true"
+
+# JWT Settings
+JwtSettings__SecretKey="your-super-secret-key-min-32-characters"
+JwtSettings__Issuer="SGKPortalApp"
+JwtSettings__Audience="SGKPortalAppUsers"
+JwtSettings__ExpirationMinutes=60
+
+# PDKS Settings
+PdksSettings__CihazIpAddress="192.168.1.100"
+PdksSettings__Port=4370
+PdksSettings__AutoSyncInterval=300
+
+# Eshot Settings
+EshotSettings__ApiUrl="https://eshot.gov.tr/api"
+EshotSettings__ApiKey="your-api-key"
+
+# Email Settings
+EmailSettings__SmtpHost="smtp.gmail.com"
+EmailSettings__SmtpPort=587
+EmailSettings__FromEmail="noreply@sgkportal.com"
+EmailSettings__Username="your-email@gmail.com"
+EmailSettings__Password="your-app-password"
+
+# SignalR
+SignalRSettings__PingInterval=30
+SignalRSettings__ClientTimeout=60
+
+# File Upload
+FileUploadSettings__MaxFileSizeMB=10
+FileUploadSettings__AllowedExtensions=".jpg,.jpeg,.png,.pdf,.docx"
+```
+
+## 📦 NuGet Packages
+
+### Common Layer
+```xml
+<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+```
+
+### BusinessObjectLayer
+```xml
+<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+```
+
+### DataAccessLayer
+```xml
+<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
+<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0" />
+<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />
+```
+
+### BusinessLogicLayer
+```xml
+<PackageReference Include="AutoMapper" Version="12.0.1" />
+<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+<PackageReference Include="FluentValidation" Version="11.8.0" />
+<PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+<PackageReference Include="EPPlus" Version="7.0.0" /> <!-- Excel işlemleri -->
+<PackageReference Include="iTextSharp.LGPLv2.Core" Version="3.4.0" /> <!-- PDF işlemleri -->
+```
+
+### ApiLayer
+```xml
+<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
+<PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+<PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
+<PackageReference Include="AspNetCoreRateLimit" Version="5.0.0" />
+```
+
+### PresentationLayer (Blazor)
+```xml
+<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />
+<PackageReference Include="Blazored.LocalStorage" Version="4.4.0" />
+<PackageReference Include="Blazored.SessionStorage" Version="2.4.0" />
+<PackageReference Include="Blazored.Toast" Version="4.1.0" />
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+- .NET 8.0 SDK
+- SQL Server 2019+
+- Visual Studio 2022 / VS Code
+- Node.js (for frontend tooling)
+
+### Installation Steps
+
+1. **Clone Repository**
+```bash
+git clone https://github.com/your-org/SGKPortalApp.git
+cd SGKPortalApp
+```
+
+2. **Update Connection String**
+```bash
+# appsettings.json içinde connection string'i güncelleyin
+```
+
+3. **Apply Migrations**
+```bash
+cd SGKPortalApp.DataAccessLayer
+dotnet ef database update
+```
+
+4. **Run Seed Data** (Optional)
+```bash
+# Program.cs içinde seed metodunu aktif edin
+```
+
+5. **Run Application**
+```bash
+# API Layer
+cd SGKPortalApp.ApiLayer
+dotnet run
+
+# Presentation Layer
+cd SGKPortalApp.PresentationLayer
+dotnet run
+```
+
+6. **Access Application**
+```
+API: https://localhost:7001
+UI: https://localhost:7002
+Swagger: https://localhost:7001/swagger
+```
+
+## 📝 API Endpoints Overview
+
+### Authentication
+- POST `/api/auth/login` - Kullanıcı girişi
+- POST `/api/auth/register` - Yeni kullanıcı kaydı
+- POST `/api/auth/refresh-token` - Token yenileme
+- POST `/api/auth/logout` - Çıkış
+
+### Personel
+- GET `/api/personel` - Personel listesi
+- GET `/api/personel/{id}` - Personel detay
+- POST `/api/personel` - Personel oluştur
+- PUT `/api/personel/{id}` - Personel güncelle
+- DELETE `/api/personel/{id}` - Personel sil
+- GET `/api/personel/{id}/cocuklar` - Personel çocukları
+
+### Sıramatik
+- GET `/api/banko` - Banko listesi
+- GET `/api/banko/{id}/durum` - Banko durum
+- POST `/api/sira` - Yeni sıra oluştur
+- PUT `/api/sira/{id}/cagirildi` - Sıra çağır
+- GET `/api/sira/istatistik` - Sıra istatistikleri
+
+### PDKS
+- GET `/api/pdks/giris-cikis` - Giriş/Çıkış listesi
+- POST `/api/pdks/izin-talep` - İzin talebi oluştur
+- PUT `/api/pdks/izin-onay/{id}` - İzin onayla
+- GET `/api/pdks/mesai-rapor` - Mesai raporu
+- GET `/api/pdks/izin-bakiye/{personelId}` - İzin bakiyesi
+
+### Eshot
+- GET `/api/eshot/hareket` - Hareket listesi
+- POST `/api/eshot/bakiye-yukle` - Bakiye yükle
+- GET `/api/eshot/kullanim-istatistik` - Kullanım istatistikleri
+- POST `/api/eshot/kart-tanimla` - Yeni kart tanımla
+
+## 📊 Database Indexing Strategy
+
+### High Performance Indexes
+```sql
+-- Personel tablosu
+CREATE INDEX IX_Personel_TcKimlikNo ON PER_Personeller(TcKimlikNo);
+CREATE INDEX IX_Personel_DepartmanId ON PER_Personeller(DepartmanId);
+CREATE INDEX IX_Personel_Aktiflik ON PER_Personeller(PersonelAktiflik);
+
+-- Sıra tablosu (En kritik)
+CREATE INDEX IX_Sira_Tarih_Durum ON SIR_Siralar(SiraAlisTarihi, SiraDurum);
+CREATE INDEX IX_Sira_HizmetBinasi ON SIR_Siralar(HizmetBinasiId, SiraAlisTarihi);
+
+-- PDKS tablosu
+CREATE INDEX IX_GirisCikis_PersonelId_Tarih ON PDK_GirisCikislar(PersonelId, GirisTarihi);
+CREATE INDEX IX_IzinTalep_Durum ON PDK_IzinTalepleri(IzinDurum, TalepTarihi);
+
+-- Eshot tablosu
+CREATE INDEX IX_Hareket_PersonelId_Tarih ON ESH_Hareketler(PersonelId, HareketTarihi);
+CREATE INDEX IX_Hareket_KartId ON ESH_Hareketler(KartId);
+```
+
+## 🎨 UI Theme Customization
+
+### Sneat Theme Colors
+```css
+/* Primary Color */
+--bs-primary: #696cff;
+
+/* Secondary Color */
+--bs-secondary: #8592a3;
+
+/* Success Color */
+--bs-success: #71dd37;
+
+/* Warning Color */
+--bs-warning: #ffab00;
+
+/* Danger Color */
+--bs-danger: #ff3e1d;
+
+/* Info Color */
+--bs-info: #03c3ec;
+```
+
+## 📈 Monitoring & Logging
+
+### Log Levels
+- **Trace**: Çok detaylı debug bilgileri
+- **Debug**: Geliştirme aşaması debug
+- **Information**: Genel bilgilendirme
+- **Warning**: Uyarılar
+- **Error**: Hatalar
+- **Critical**: Kritik hatalar
+
+### Log Categories
+- `SGKPortalApp.Api.*` - API katmanı
+- `SGKPortalApp.Business.*` - Business katmanı
+- `SGKPortalApp.DataAccess.*` - Data access katmanı
+- `SGKPortalApp.UI.*` - UI katmanı
+
+## 🔐 Security Best Practices
+
+1. **Password Policy**
+   - Minimum 8 karakter
+   - En az 1 büyük harf
+   - En az 1 küçük harf
+   - En az 1 rakam
+   - En az 1 özel karakter
+
+2. **JWT Token**
+   - Access Token: 60 dakika
+   - Refresh Token: 7 gün
+   - Token rotation aktif
+
+3. **API Rate Limiting**
+   - 100 request / dakika / IP
+   - 1000 request / saat / IP
+
+4. **CORS Policy**
+   - Sadece belirlenen origin'lere izin
+   - Credentials: true
+
+## 📱 Mobile Responsiveness
+
+Tüm sayfalar aşağıdaki breakpoint'lerde test edilmiştir:
+- **Mobile**: 320px - 767px
+- **Tablet**: 768px - 1023px
+- **Desktop**: 1024px+
+- **Large Desktop**: 1920px+
+
+## 🌐 Internationalization (i18n)
+
+Proje Türkçe dilini desteklemektedir. Gelecekte çoklu dil desteği eklenebilir:
+- Türkçe (TR) - Default
+- İngilizce (EN) - Planlı
+- Arapça (AR) - Planlı
+
+## 📚 Documentation
+
+- **API Documentation**: Swagger UI (`/swagger`)
+- **Database Schema**: Database diagram export
+- **Architecture Diagrams**: `/docs/architecture`
+- **User Manual**: `/docs/user-manual.pdf`
+
+## 🤝 Contributing
+
+1. Feature branch oluşturun (`git checkout -b feature/AmazingFeature`)
+2. Değişikliklerinizi commit edin (`git commit -m 'Add some AmazingFeature'`)
+3. Branch'inizi push edin (`git push origin feature/AmazingFeature`)
+4. Pull Request oluşturun
+
+## 📄 License
+
+Bu proje [MIT License](LICENSE) altında lisanslanmıştır.
+
+## 👥 Team
+
+- **Project Manager**: [İsim]
+- **Lead Developer**: [İsim]
+- **Backend Developers**: [İsimler]
+- **Frontend Developers**: [İsimler]
+- **QA Team**: [İsimler]
+
+## 📞 Support
+
+Destek için:
+- Email: support@sgkportal.com
+- Phone: +90 XXX XXX XX XX
+- Issue Tracker: GitHub Issues
+
+---
+
+**Son Güncelleme**: 15 Ekim 2025
+**Versiyon**: 1.0.0
+**Durum**: Aktif Geliştirme
+
+**Not**: Bu şablon, SocialSecurityInstitution referans projesinden öğrenilen best practice'ler ve mimari kararlar doğrultusunda hazırlanmıştır.
