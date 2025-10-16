@@ -1,4 +1,4 @@
-// Sıra Çağırma Paneli - JavaScript (Referans projeden uyarlandı)
+// Sıra Çağırma Paneli
 var SiraCagirmaPanel = (function () {
     var isPinned = false;
     var panelHeader = null;
