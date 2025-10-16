@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
-using SGKPortalApp.PresentationLayer.Services.UIServices;
+using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Common.Il

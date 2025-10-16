@@ -7,8 +7,8 @@ using QuestPDF.Infrastructure;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
-using SGKPortalApp.PresentationLayer.Services.UIServices;
 using SGKPortalApp.Common.Extensions;
+using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
 {

@@ -1,5 +1,109 @@
-﻿<h3>Login</h3>
+@page "/auth/login"
+@layout EmptyLayout
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth
 
-@code {
+<PageTitle>Giriş Yap - SGK Portal</PageTitle>
 
-}
+<!-- Content -->
+<div class="container-xxl">
+    <div class="authentication-wrapper authentication-basic container-p-y">
+        <div class="authentication-inner">
+            <!-- Login Card -->
+            <div class="card">
+                <div class="card-body">
+                    <!-- Logo -->
+                    <div class="app-brand justify-content-center mb-4">
+                        <a href="/" class="app-brand-link gap-2">
+                            <SgkLogo Width="120" Height="48" />
+                            <span class="app-brand-text demo text-body fw-bold fs-4">SGK Portal</span>
+                        </a>
+                    </div>
+                    <!-- /Logo -->
+                    
+                    <h4 class="mb-2">Hoş Geldiniz! 👋</h4>
+                    <p class="mb-4">Lütfen TC Kimlik Numaranız ve şifreniz ile giriş yapın</p>
+
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible" role="alert">
+                            <button type="button" class="btn-close" @onclick="() => errorMessage = null"></button>
+                            <i class="bx bx-error-circle me-2"></i>
+                            @errorMessage
+                        </div>
+                    }
+
+                    <EditForm Model="@loginModel" OnValidSubmit="HandleLogin" class="mb-3">
+                        <DataAnnotationsValidator />
+                        
+                        <!-- TC Kimlik No -->
+                        <div class="mb-3">
+                            <label for="tcKimlikNo" class="form-label">TC Kimlik No</label>
+                            <InputText @bind-Value="loginModel.TcKimlikNo" 
+                                       class="form-control" 
+                                       id="tcKimlikNo" 
+                                       placeholder="11 haneli TC Kimlik No" 
+                                       maxlength="11"
+                                       autofocus />
+                            <ValidationMessage For="@(() => loginModel.TcKimlikNo)" class="text-danger" />
+                        </div>
+
+                        <!-- Şifre -->
+                        <div class="mb-3 form-password-toggle">
+                            <div class="d-flex justify-content-between">
+                                <label class="form-label" for="password">Şifre</label>
+                                <a href="/auth/forgot-password">
+                                    <small>Şifremi Unuttum?</small>
+                                </a>
+                            </div>
+                            <div class="input-group input-group-merge">
+                                <InputText type="@(showPassword ? "text" : "password")" 
+                                           @bind-Value="loginModel.Password" 
+                                           class="form-control" 
+                                           id="password" 
+                                           placeholder="••••••••" />
+                                <span class="input-group-text cursor-pointer" @onclick="TogglePasswordVisibility">
+                                    <i class="bx @(showPassword ? "bx-show" : "bx-hide")"></i>
+                                </span>
+                            </div>
+                            <ValidationMessage For="@(() => loginModel.Password)" class="text-danger" />
+                        </div>
+
+                        <!-- Beni Hatırla -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <InputCheckbox @bind-Value="loginModel.RememberMe" class="form-check-input" id="remember-me" />
+                                <label class="form-check-label" for="remember-me">
+                                    Beni Hatırla
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Giriş Butonu -->
+                        <div class="mb-3">
+                            <button class="btn btn-primary d-grid w-100" type="submit" disabled="@isLoading">
+                                @if (isLoading)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    <span>Giriş yapılıyor...</span>
+                                }
+                                else
+                                {
+                                    <span>Giriş Yap</span>
+                                }
+                            </button>
+                        </div>
+                    </EditForm>
+
+                    <p class="text-center">
+                        <small class="text-muted">
+                            İlk kez giriş yapıyorsanız, şifreniz TC Kimlik Numaranız ile aynıdır.
+                        </small>
+                    </p>
+                </div>
+            </div>
+            <!-- /Login Card -->
+        </div>
+    </div>
+</div>
+<!-- / Content -->
+

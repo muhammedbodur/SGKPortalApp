@@ -3,9 +3,9 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri; // ← YENİ EKLENEN
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
-using SGKPortalApp.PresentationLayer.Services.UIServices;
 using System.ComponentModel.DataAnnotations;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
+using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel.Servis
 {

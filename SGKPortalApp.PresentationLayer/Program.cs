@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.Common.Extensions;
@@ -119,6 +119,25 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddHttpContextAccessor();
 
 // ═══════════════════════════════════════════════════════
+// 🔒 AUTHENTICATION & AUTHORIZATION
+// ═══════════════════════════════════════════════════════
+builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/auth/login";
+        options.LogoutPath = "/auth/logout";
+        options.AccessDeniedPath = "/auth/access-denied";
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+        options.Cookie.Name = "SGKPortal.Auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+    });
+
+builder.Services.AddAuthorization();
+
+// ═══════════════════════════════════════════════════════
 // 🌍 LOCALİZATİON (Yerelleştirme)
 // ═══════════════════════════════════════════════════════
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
@@ -174,9 +193,11 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseCors();
 
-// Authentication & Authorization (Login yapısı kurulduğunda aktif edilecek)
-// app.UseAuthentication();
-// app.UseAuthorization();
+// Authentication & Authorization
+// ÖNEMLİ: UseAuthentication, UseRouting'den SONRA olmalı
+// Böylece _framework gibi static dosyalar authentication gerektirmez
+app.UseAuthentication();
+app.UseAuthorization();
 
 // ═══════════════════════════════════════════════════════
 // 🔌 BLAZOR HUB & ROUTING
@@ -185,10 +206,10 @@ app.MapBlazorHub(options =>
 {
     options.ApplicationMaxBufferSize = 32768; // 32KB
     options.TransportMaxBufferSize = 32768;
-});
+}).AllowAnonymous(); // Blazor Hub authentication gerektirmez
 
-app.MapFallbackToPage("/_Host");
 app.MapRazorPages();
+app.MapFallbackToPage("/_Host");
 
 // ═══════════════════════════════════════════════════════
 // 🗄️ DATABASE MIGRATION

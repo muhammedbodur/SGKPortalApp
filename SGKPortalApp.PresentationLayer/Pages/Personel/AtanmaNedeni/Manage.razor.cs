@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
-using SGKPortalApp.PresentationLayer.Services.UIServices;
+using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel.AtanmaNedeni
 {

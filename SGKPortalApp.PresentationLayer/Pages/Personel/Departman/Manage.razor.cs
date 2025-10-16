@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
-using SGKPortalApp.PresentationLayer.Services.UIServices;
+using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman

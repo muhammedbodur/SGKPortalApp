@@ -1,16 +1,29 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-    </Found>
-    <NotFound>
-        <PageTitle>Sayfa Bulunamadı</PageTitle>
-        <LayoutView Layout="@typeof(MainLayout)">
-            <div class="misc-wrapper">
-                <h2 class="mb-2 mx-2">Sayfa Bulunamadı :(</h2>
-                <p class="mb-4 mx-2">Aradığınız sayfa bulunamadı.</p>
-                <a href="/" class="btn btn-primary">Ana Sayfaya Dön</a>
-            </div>
-        </LayoutView>
-    </NotFound>
-</Router>
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(App).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                <NotAuthorized>
+                    <RedirectToLogin />
+                </NotAuthorized>
+                <Authorizing>
+                    <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Yükleniyor...</span>
+                        </div>
+                    </div>
+                </Authorizing>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </Found>
+        <NotFound>
+            <PageTitle>Sayfa Bulunamadı</PageTitle>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <div class="misc-wrapper">
+                    <h2 class="mb-2 mx-2">Sayfa Bulunamadı :(</h2>
+                    <p class="mb-4 mx-2">Aradığınız sayfa bulunamadı.</p>
+                    <a href="/" class="btn btn-primary">Ana Sayfaya Dön</a>
+                </div>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>

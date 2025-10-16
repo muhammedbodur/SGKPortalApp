@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
-using SGKPortalApp.PresentationLayer.Services.UIServices;
+using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
 namespace SGKPortalApp.PresentationLayer.Shared.Common
 {

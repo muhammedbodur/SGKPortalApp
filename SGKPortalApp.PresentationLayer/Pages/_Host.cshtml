@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Components.Web
 @namespace SGKPortalApp.PresentationLayer.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@attribute [Microsoft.AspNetCore.Authorization.AllowAnonymous]
 
 <!DOCTYPE html>
 <html lang="tr" class="light-style layout-menu-fixed" dir="ltr"
@@ -114,10 +115,10 @@
     <!-- Sıramatik Module CSS -->
     <link rel="stylesheet" href="/css/modules/siramatik.css" asp-append-version="true">
 
-    <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
+    <component type="typeof(HeadOutlet)" render-mode="Server" />
 </head>
 <body>
-    <component type="typeof(App)" render-mode="ServerPrerendered" />
+    <component type="typeof(App)" render-mode="Server" />
 
     @* <!-- ================== BLAZOR ERROR UI ================== -->
     <div id="blazor-error-ui">
@@ -204,7 +205,7 @@
     <script src="~/js/flatpickr-blazor.js"></script>
 
     <!-- ================== BLAZOR FRAMEWORK ================== -->
-    <script src="_framework/blazor.server.js"></script>
+    <script src="~/_framework/blazor.server.js"></script>
 
     <!-- ================== BLAZOR SNEAT INIT ================== -->
     <script src="/js/blazor-sneat-init.js"></script>

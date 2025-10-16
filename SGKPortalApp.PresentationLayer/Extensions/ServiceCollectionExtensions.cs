@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SGKPortalApp.PresentationLayer.Services.StateServices;
-using SGKPortalApp.PresentationLayer.Services.UIServices;
+using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System.Reflection;
 
 namespace SGKPortalApp.PresentationLayer.Extensions
@@ -35,26 +35,27 @@ namespace SGKPortalApp.PresentationLayer.Extensions
             Console.WriteLine("  ✅ 3 State Service kayıt edildi");
 
             // ═══════════════════════════════════════════════════════
-            // 2️⃣ UI SERVICES (Otomatik Kayıt)
+            // 1️⃣ AUTHENTICATION SERVICES (Cookie Management)
             // ═══════════════════════════════════════════════════════
-            services.RegisterServicesFromNamespace(
-                assembly,
-                "SGKPortalApp.PresentationLayer.Services.UIServices",
-                "UI Services",
-                ensureCriticalServices: new Type[] { typeof(IToastService) }
-            );
+            services.RegisterModuleServicesWithSubfolders(assembly, "AuthenticationServices");
 
             // ═══════════════════════════════════════════════════════
-            // 3️⃣ STORAGE SERVICES (Otomatik Kayıt)
+            // 2️⃣ USER SESSION SERVICES (Claims-based)
             // ═══════════════════════════════════════════════════════
-            services.RegisterServicesFromNamespace(
-                assembly,
-                "SGKPortalApp.PresentationLayer.Services.StorageServices",
-                "Storage Services"
-            );
+            services.RegisterModuleServicesWithSubfolders(assembly, "UserSessionServices");
 
             // ═══════════════════════════════════════════════════════
-            // 4️⃣ API SERVICES - Modül Bazında Otomatik Kayıt
+            // 3️⃣ STORAGE SERVICES
+            // ═══════════════════════════════════════════════════════
+            services.RegisterModuleServicesWithSubfolders(assembly, "StorageServices");
+
+            // ═══════════════════════════════════════════════════════
+            // 4️⃣ UI SERVICES
+            // ═══════════════════════════════════════════════════════
+            services.RegisterModuleServicesWithSubfolders(assembly, "UIServices");
+
+            // ═══════════════════════════════════════════════════════
+            // 5️⃣ API SERVICES - Modül Bazında Otomatik Kayıt
             // ═══════════════════════════════════════════════════════
             services.RegisterApiServices(assembly, apiUrl, "Auth");
             services.RegisterApiServices(assembly, apiUrl, "Common");
@@ -148,7 +149,9 @@ namespace SGKPortalApp.PresentationLayer.Extensions
                         // Action<HttpClient> oluştur
                         Action<HttpClient> configureClient = client =>
                         {
-                            client.BaseAddress = new Uri(apiUrl);
+                            // API URL'e /api prefix'i ekle
+                            var baseUrl = apiUrl.TrimEnd('/') + "/api/";
+                            client.BaseAddress = new Uri(baseUrl);
                             client.Timeout = TimeSpan.FromSeconds(30);
                             client.DefaultRequestHeaders.Add("Accept", "application/json");
                         };
@@ -180,6 +183,95 @@ namespace SGKPortalApp.PresentationLayer.Extensions
             {
                 Console.WriteLine($"    ❌ {moduleName} API Services kayıt hatası: {ex.Message}");
                 Console.WriteLine($"    📍 Stack Trace: {ex.StackTrace}");
+                return services;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // MODULE SERVICES - Interfaces/Concrete Alt Klasörlü
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Interfaces ve Concrete alt klasörleri olan modül servislerini kaydeder
+        /// Örnek: AuthenticationServices/Interfaces ve AuthenticationServices/Concrete
+        /// </summary>
+        private static IServiceCollection RegisterModuleServicesWithSubfolders(
+            this IServiceCollection services,
+            Assembly assembly,
+            string moduleName)
+        {
+            try
+            {
+                Console.WriteLine($"📦 {moduleName} servisleri kaydediliyor...");
+
+                var interfaceNamespace = $"SGKPortalApp.PresentationLayer.Services.{moduleName}.Interfaces";
+                var concreteNamespace = $"SGKPortalApp.PresentationLayer.Services.{moduleName}.Concrete";
+
+                // Interface'leri bul
+                var interfaces = assembly.GetTypes()
+                    .Where(t => t.Namespace == interfaceNamespace
+                                && t.IsInterface
+                                && !t.IsGenericType)
+                    .ToList();
+
+                // Implementation'ları bul
+                var implementations = assembly.GetTypes()
+                    .Where(t => t.Namespace == concreteNamespace
+                                && t.IsClass
+                                && !t.IsAbstract
+                                && !t.IsGenericType)
+                    .ToList();
+
+                if (!interfaces.Any() && !implementations.Any())
+                {
+                    Console.WriteLine($"    ⚠️  {moduleName} modülünde servis bulunamadı");
+                    return services;
+                }
+
+                Console.WriteLine($"    🔍 Bulunan interface'ler: {interfaces.Count}");
+                Console.WriteLine($"    🔧 Bulunan implementation'lar: {implementations.Count}");
+
+                int registeredCount = 0;
+
+                foreach (var interfaceType in interfaces)
+                {
+                    // Convention: IServiceName -> ServiceName
+                    var expectedImplName = interfaceType.Name.Substring(1);
+
+                    var implementationType = implementations.FirstOrDefault(impl =>
+                        impl.Name == expectedImplName &&
+                        interfaceType.IsAssignableFrom(impl)
+                    );
+
+                    if (implementationType == null)
+                    {
+                        implementationType = implementations.FirstOrDefault(impl =>
+                            interfaceType.IsAssignableFrom(impl)
+                        );
+                    }
+
+                    if (implementationType != null)
+                    {
+                        services.AddScoped(interfaceType, implementationType);
+                        registeredCount++;
+                        Console.WriteLine($"    ✅ {interfaceType.Name} -> {implementationType.Name}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"    ⚠️  {interfaceType.Name} için implementation bulunamadı");
+                    }
+                }
+
+                if (registeredCount > 0)
+                {
+                    Console.WriteLine($"    🎯 {moduleName}: {registeredCount} servis kayıt edildi");
+                }
+
+                return services;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"    ❌ {moduleName} kayıt hatası: {ex.Message}");
                 return services;
             }
         }

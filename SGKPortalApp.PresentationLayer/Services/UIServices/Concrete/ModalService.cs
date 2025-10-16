@@ -1,4 +1,6 @@
-﻿namespace SGKPortalApp.PresentationLayer.Services.UIServices
+﻿using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
+
+namespace SGKPortalApp.PresentationLayer.Services.UIServices.Concrete
 {
     public class ModalService : IModalService
     {

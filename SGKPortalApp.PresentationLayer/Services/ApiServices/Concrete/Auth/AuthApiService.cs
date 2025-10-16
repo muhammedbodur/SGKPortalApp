@@ -1,3 +1,5 @@
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Base;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Auth;
 
@@ -10,30 +12,26 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth
         {
         }
 
-        public async Task<string?> LoginAsync(string username, string password)
+        public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto request)
         {
-            var request = new { Username = username, Password = password };
-            var response = await PostAsync<object, LoginResponse>("auth/login", request);
-            return response?.Token;
+            return await PostAsync<LoginRequestDto, LoginResponseDto>("auth/login", request);
+        }
+
+        public async Task<VerifyIdentityResponseDto?> VerifyIdentityAsync(VerifyIdentityRequestDto request)
+        {
+            return await PostAsync<VerifyIdentityRequestDto, VerifyIdentityResponseDto>("auth/verify-identity", request);
+        }
+
+        public async Task<bool> ResetPasswordAsync(ResetPasswordRequestDto request)
+        {
+            var response = await PostAsync<ResetPasswordRequestDto, object>("auth/reset-password", request);
+            return response != null;
         }
 
         public async Task<bool> LogoutAsync()
         {
-            return await PostAsync<object, bool>("auth/logout", new { });
-        }
-
-        public async Task<bool> ValidateTokenAsync(string token)
-        {
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-            var response = await GetAsync<bool>("auth/validate");
-            return response;
-        }
-
-        private class LoginResponse
-        {
-            public string Token { get; set; } = string.Empty;
+            var response = await PostAsync<object, object>("auth/logout", new { });
+            return response != null;
         }
     }
 }

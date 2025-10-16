@@ -1,5 +1,20 @@
-﻿<h3>EmptyLayout</h3>
+@inherits LayoutComponentBase
+
+<!DOCTYPE html>
+<html lang="tr" class="light-style layout-wide customizer-hide" dir="ltr" data-theme="theme-default">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="~/" />
+    
+    <!-- Page Auth CSS -->
+    <link rel="stylesheet" href="/portal/assets/vendor/css/pages/page-auth.css" asp-append-version="true">
+</head>
+<body>
+    @Body
+</body>
+</html>
 
 @code {
-
+    // Auth sayfaları için boş layout (navbar/sidebar yok)
 }

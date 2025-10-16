@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
 namespace SGKPortalApp.BusinessLogicLayer.Extensions
@@ -31,6 +31,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Extensions
             // ═══════════════════════════════════════════════════════
             // 2️⃣ MODÜL BAZINDA SERVİS KAYITLARI
             // ═══════════════════════════════════════════════════════
+            services.RegisterModuleServices(businessAssembly, "Auth");
             services.RegisterModuleServices(businessAssembly, "Common");
             services.RegisterModuleServices(businessAssembly, "PersonelIslemleri");
             services.RegisterModuleServices(businessAssembly, "SiramatikIslemleri");

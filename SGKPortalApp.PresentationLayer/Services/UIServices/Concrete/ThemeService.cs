@@ -1,6 +1,7 @@
 ﻿using Microsoft.JSInterop;
+using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
-namespace SGKPortalApp.PresentationLayer.Services.UIServices
+namespace SGKPortalApp.PresentationLayer.Services.UIServices.Concrete
 {
     public class ThemeService : IThemeService
     {

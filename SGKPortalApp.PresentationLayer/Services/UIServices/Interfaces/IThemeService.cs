@@ -1,4 +1,4 @@
-﻿namespace SGKPortalApp.PresentationLayer.Services.UIServices
+﻿namespace SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces
 {
     public interface IThemeService
     {
