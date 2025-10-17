@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
@@ -9,8 +8,6 @@ using System.Text.Json;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Auth
 {
-    [AllowAnonymous]
-    [IgnoreAntiforgeryToken]
     public class LoginHandlerModel : PageModel
     {
         private readonly ILogger<LoginHandlerModel> _logger;
@@ -20,25 +17,36 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
             _logger = logger;
         }
 
-        public async Task<IActionResult> OnPostAsync([FromBody] LoginResponseDto loginResponse)
+        public async Task<IActionResult> OnPostAsync()
         {
             try
             {
-                _logger.LogInformation("LoginHandler: POST isteği alındı");
+                _logger.LogDebug("🔵 LoginHandler.OnPostAsync başladı");
 
-                if (loginResponse == null)
+                // Request body'den LoginResponseDto'yu al
+                using var reader = new StreamReader(Request.Body);
+                var body = await reader.ReadToEndAsync();
+
+                _logger.LogDebug($"🔵 Request Body uzunluğu: {body.Length}");
+
+                if (string.IsNullOrEmpty(body))
                 {
-                    _logger.LogError("LoginHandler: loginResponse null");
-                    return BadRequest(new { message = "Login response null" });
+                    _logger.LogError("❌ Request body boş!");
+                    return BadRequest("Request body boş");
                 }
 
-                if (!loginResponse.Success)
+                var loginResponse = JsonSerializer.Deserialize<LoginResponseDto>(body, new JsonSerializerOptions
                 {
-                    _logger.LogError("LoginHandler: Login başarısız");
-                    return BadRequest(new { message = "Login başarısız" });
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (loginResponse == null || !loginResponse.Success)
+                {
+                    _logger.LogError("❌ Login response null veya başarısız!");
+                    return BadRequest("Geçersiz login response");
                 }
 
-                _logger.LogInformation($"LoginHandler: {loginResponse.AdSoyad} için cookie oluşturuluyor...");
+                _logger.LogDebug($"🔵 Login response alındı: {loginResponse.AdSoyad}");
 
                 // Claims oluştur
                 var claims = new List<Claim>
@@ -75,13 +83,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                     new ClaimsPrincipal(claimsIdentity),
                     authProperties);
 
-                _logger.LogInformation($"LoginHandler: Cookie başarıyla oluşturuldu - {loginResponse.AdSoyad}");
-                return new JsonResult(new { success = true, message = "Giriş başarılı" });
+                _logger.LogInformation("✅ Kullanıcı giriş yaptı: {AdSoyad} ({TcKimlikNo})",
+                    loginResponse.AdSoyad, loginResponse.TcKimlikNo);
+
+                // Başarılı yanıt dön
+                return new JsonResult(new { success = true, message = "Login başarılı" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "LoginHandler: Hata oluştu");
-                return StatusCode(500, new { message = ex.Message, stackTrace = ex.StackTrace });
+                _logger.LogError(ex, "❌ LoginHandler hatası");
+                return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
     }

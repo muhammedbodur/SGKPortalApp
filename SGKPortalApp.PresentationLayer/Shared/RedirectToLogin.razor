@@ -1,14 +1,14 @@
 @inject NavigationManager Navigation
+
 @code {
     protected override void OnInitialized()
     {
-        var currentUri = Navigation.ToAbsoluteUri(Navigation.Uri);
-        
-        // Zaten login sayfasındaysa yönlendirme yapma
-        if (!currentUri.AbsolutePath.StartsWith("/auth/login", StringComparison.OrdinalIgnoreCase))
+        var returnUrl = Navigation.ToBaseRelativePath(Navigation.Uri);
+
+        // Eğer zaten auth sayfasındaysak tekrar yönlendirme yapma
+        if (!returnUrl.StartsWith("auth/", StringComparison.OrdinalIgnoreCase))
         {
-            var returnUrl = Uri.EscapeDataString(currentUri.PathAndQuery);
-            Navigation.NavigateTo($"/auth/login?returnUrl={returnUrl}", forceLoad: true);
+            Navigation.NavigateTo($"/auth/login?returnUrl=/{returnUrl}", forceLoad: true);
         }
     }
 }

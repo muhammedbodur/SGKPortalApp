@@ -89,6 +89,11 @@ builder.Services.AddSGKPortalServices(builder.Configuration);
 // 2. Presentation Layer (UI Services)
 builder.Services.AddPresentationServices(builder.Configuration);
 
+builder.Services.AddScoped<Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider,
+    SGKPortalApp.PresentationLayer.Services.AuthenticationServices.Concrete.ServerAuthenticationStateProvider>();
+
+Console.WriteLine("✅ ServerAuthenticationStateProvider MANUEL kayıt edildi");
+
 // ═══════════════════════════════════════════════════════
 // 🌐 CORS (API kullanımı için)
 // ═══════════════════════════════════════════════════════
@@ -131,7 +136,7 @@ builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.C
         options.SlidingExpiration = true;
         options.Cookie.Name = "SGKPortal.Auth";
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // HTTPS ve HTTP için uyumlu
         options.Cookie.SameSite = SameSiteMode.Lax;
     });
 
@@ -195,7 +200,6 @@ app.UseCors();
 
 // Authentication & Authorization
 // ÖNEMLİ: UseAuthentication, UseRouting'den SONRA olmalı
-// Böylece _framework gibi static dosyalar authentication gerektirmez
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -206,7 +210,7 @@ app.MapBlazorHub(options =>
 {
     options.ApplicationMaxBufferSize = 32768; // 32KB
     options.TransportMaxBufferSize = 32768;
-}).AllowAnonymous(); // Blazor Hub authentication gerektirmez
+});
 
 app.MapRazorPages();
 app.MapFallbackToPage("/_Host");
@@ -230,12 +234,6 @@ using (var scope = app.Services.CreateScope())
         {
             Console.WriteLine("✅ Veritabanı güncel");
         }
-
-        // ═══════════════════════════════════════════════════════
-        // 🌱 SEED DATA (İsteğe bağlı)
-        // ═══════════════════════════════════════════════════════
-        // var seeder = scope.ServiceProvider.GetRequiredService<DataSeed>();
-        // await seeder.SeedAsync();
     }
     catch (Exception ex)
     {
