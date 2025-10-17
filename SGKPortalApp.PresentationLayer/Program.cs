@@ -210,7 +210,7 @@ app.MapBlazorHub(options =>
 {
     options.ApplicationMaxBufferSize = 32768; // 32KB
     options.TransportMaxBufferSize = 32768;
-});
+}).AllowAnonymous();
 
 app.MapRazorPages();
 app.MapFallbackToPage("/_Host");

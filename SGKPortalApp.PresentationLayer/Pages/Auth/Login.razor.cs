@@ -58,15 +58,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                 {
                     await JS.InvokeVoidAsync("console.log", "🔵 7. Cookie başarıyla oluşturuldu!");
 
-                    // Sayfayı tamamen yenile (cookie'nin geçerli olması için)
+                    // Sayfayı tamamen yenile - window.location kullan
                     await JS.InvokeVoidAsync("console.log", "🔵 8. Ana sayfaya yönlendiriliyor...");
-                    Navigation.NavigateTo("/", forceLoad: true);
+
+                    // ✅ FİKS: window.location.href ile tam browser refresh
+                    // Bu şekilde:
+                    // 1. Browser yeni HTTP request yapar
+                    // 2. Cookie'ler yeniden gönderilir
+                    // 3. ServerAuthenticationStateProvider'a erişilerek yeni user döndürülür
+                    // 4. AuthorizeRouteView yeni state'i görür
+                    await JS.InvokeVoidAsync("eval", "window.location.href = '/'");
                 }
                 else
                 {
                     var errorContent = await loginHandlerResponse.Content.ReadAsStringAsync();
-                    await JS.InvokeVoidAsync("console.error", $"❌ LoginHandler hatası: {errorContent}");
-                    errorMessage = "Oturum oluşturulamadı. Lütfen tekrar deneyin.";
+                    await JS.InvokeVoidAsync("console.error", $"❌ LoginHandler hatası: Status={loginHandlerResponse.StatusCode}, Content={errorContent}");
+                    errorMessage = $"Oturum oluşturulamadı (Status: {loginHandlerResponse.StatusCode}). Lütfen tekrar deneyin.";
                 }
             }
             catch (Exception ex)

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
@@ -8,6 +9,8 @@ using System.Text.Json;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Auth
 {
+    [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
     public class LoginHandlerModel : PageModel
     {
         private readonly ILogger<LoginHandlerModel> _logger;
