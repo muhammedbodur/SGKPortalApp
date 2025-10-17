@@ -89,8 +89,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                 _logger.LogInformation("✅ Kullanıcı giriş yaptı: {AdSoyad} ({TcKimlikNo})",
                     loginResponse.AdSoyad, loginResponse.TcKimlikNo);
 
-                // Başarılı yanıt dön
-                return new JsonResult(new { success = true, message = "Login başarılı" });
+                // ✅ Cookie set edildikten sonra ana sayfaya redirect
+                // forceLoad ile browser tam sayfa yüklemesi yapacak
+                // ServerAuthenticationStateProvider cookie'den user bilgilerini okuyacak
+                _logger.LogDebug("🔵 Ana sayfaya redirect yapılıyor: /");
+                
+                return Redirect("/");
             }
             catch (Exception ex)
             {

@@ -48,33 +48,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                 // Başarılı giriş - LoginHandler Razor Page'e POST yap
                 await JS.InvokeVoidAsync("console.log", $"🔵 5. Login başarılı: {response.AdSoyad}");
 
-                await JS.InvokeVoidAsync("console.log", "🔵 6. LoginHandler'a POST yapılıyor...");
+                await JS.InvokeVoidAsync("console.log", "🔵 6. LoginHandler'a form submit yapılıyor...");
 
-                // HttpClient kullanarak LoginHandler'a POST yap
-                var httpClient = new HttpClient { BaseAddress = new Uri(Navigation.BaseUri) };
-                var loginHandlerResponse = await httpClient.PostAsJsonAsync("/auth/loginhandler", response);
-
-                if (loginHandlerResponse.IsSuccessStatusCode)
-                {
-                    await JS.InvokeVoidAsync("console.log", "🔵 7. Cookie başarıyla oluşturuldu!");
-
-                    // Sayfayı tamamen yenile - window.location kullan
-                    await JS.InvokeVoidAsync("console.log", "🔵 8. Ana sayfaya yönlendiriliyor...");
-
-                    // ✅ FİKS: window.location.href ile tam browser refresh
-                    // Bu şekilde:
-                    // 1. Browser yeni HTTP request yapar
-                    // 2. Cookie'ler yeniden gönderilir
-                    // 3. ServerAuthenticationStateProvider'a erişilerek yeni user döndürülür
-                    // 4. AuthorizeRouteView yeni state'i görür
-                    await JS.InvokeVoidAsync("eval", "window.location.href = '/'");
-                }
-                else
-                {
-                    var errorContent = await loginHandlerResponse.Content.ReadAsStringAsync();
-                    await JS.InvokeVoidAsync("console.error", $"❌ LoginHandler hatası: Status={loginHandlerResponse.StatusCode}, Content={errorContent}");
-                    errorMessage = $"Oturum oluşturulamadı (Status: {loginHandlerResponse.StatusCode}). Lütfen tekrar deneyin.";
-                }
+                // ✅ FİKS: JavaScript ile form submit kullan
+                // Bu sayede browser cookie'leri otomatik olarak alır ve gönderir
+                var loginDataJson = System.Text.Json.JsonSerializer.Serialize(response);
+                await JS.InvokeVoidAsync("submitLoginForm", loginDataJson);
             }
             catch (Exception ex)
             {

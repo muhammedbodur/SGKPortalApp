@@ -107,3 +107,43 @@
 </div>
 <!-- / Content -->
 
+@code {
+    // JavaScript fonksiyonu: Form submit ile LoginHandler'a POST yap
+    // Bu sayede browser cookie'leri otomatik olarak alır
+}
+
+<script>
+    window.submitLoginForm = async function(loginDataJson) {
+        console.log('🔵 7. submitLoginForm çağrıldı');
+        
+        try {
+            // Fetch API ile POST yap - cookie'ler otomatik gönderilir/alınır
+            console.log('🔵 8. LoginHandler\'a POST yapılıyor...');
+            
+            const response = await fetch('/auth/loginhandler', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: loginDataJson,
+                credentials: 'same-origin' // Cookie'leri dahil et
+            });
+            
+            console.log('🔵 9. Response alındı:', response.status);
+            
+            if (response.ok) {
+                // LoginHandler redirect döndü, takip et
+                console.log('🔵 10. Cookie set edildi, ana sayfaya yönlendiriliyor...');
+                window.location.href = '/';
+            } else {
+                const errorData = await response.json();
+                console.error('❌ LoginHandler hatası:', errorData);
+                alert('Oturum oluşturulamadı: ' + (errorData.message || 'Bilinmeyen hata'));
+            }
+        } catch (error) {
+            console.error('❌ submitLoginForm hatası:', error);
+            alert('Bir hata oluştu: ' + error.message);
+        }
+    };
+</script>
+
