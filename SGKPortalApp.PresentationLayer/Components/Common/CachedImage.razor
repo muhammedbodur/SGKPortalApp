@@ -1,0 +1,116 @@
+@* 
+    Cache-busting özellikli Image Component
+    Kullanım: <CachedImage Src="@Personel.Resim" Alt="Personel" Class="img-fluid" />
+*@
+
+@if (!string.IsNullOrEmpty(Src))
+{
+    <img src="@GetCachedUrl()" 
+         alt="@Alt" 
+         class="@Class" 
+         style="@Style"
+         width="@Width"
+         height="@Height" />
+}
+
+@code {
+    /// <summary>
+    /// Resim URL'si
+    /// </summary>
+    [Parameter]
+    public string? Src { get; set; }
+
+    /// <summary>
+    /// Alt text
+    /// </summary>
+    [Parameter]
+    public string? Alt { get; set; }
+
+    /// <summary>
+    /// CSS Class
+    /// </summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    /// <summary>
+    /// Inline Style
+    /// </summary>
+    [Parameter]
+    public string? Style { get; set; }
+
+    /// <summary>
+    /// Width attribute
+    /// </summary>
+    [Parameter]
+    public string? Width { get; set; }
+
+    /// <summary>
+    /// Height attribute
+    /// </summary>
+    [Parameter]
+    public string? Height { get; set; }
+
+    /// <summary>
+    /// Cache-busting aktif mi? (null = otomatik)
+    /// </summary>
+    [Parameter]
+    public bool? CacheBust { get; set; }
+
+    /// <summary>
+    /// Cache stratejisi (timestamp, version, hash)
+    /// </summary>
+    [Parameter]
+    public string CacheStrategy { get; set; } = "timestamp";
+
+    // Otomatik cache-busting uygulanacak klasörler
+    private static readonly string[] AutoCacheBustPaths = new[]
+    {
+        "/images/",
+        "/uploads/"
+    };
+
+    /// <summary>
+    /// Cache-busting parametresi eklenmiş URL döndürür
+    /// </summary>
+    private string GetCachedUrl()
+    {
+        if (string.IsNullOrEmpty(Src))
+            return string.Empty;
+
+        // Cache-busting gerekli mi?
+        if (!ShouldApplyCacheBusting())
+            return Src;
+
+        // Cache-busting parametresi oluştur
+        string cacheBustParam = CacheStrategy.ToLower() switch
+        {
+            "timestamp" => $"v={DateTime.Now.Ticks}",
+            "version" => "v=1.0.0",
+            "hash" => $"v={DateTime.Now.Ticks}",
+            _ => $"v={DateTime.Now.Ticks}"
+        };
+
+        // URL'ye parametre ekle
+        var separator = Src.Contains('?') ? "&" : "?";
+        return $"{Src}{separator}{cacheBustParam}";
+    }
+
+    /// <summary>
+    /// Cache-busting uygulanmalı mı kontrol eder
+    /// </summary>
+    private bool ShouldApplyCacheBusting()
+    {
+        // Manuel olarak belirtilmişse ona göre hareket et
+        if (CacheBust.HasValue)
+            return CacheBust.Value;
+
+        // Otomatik kontrol: Belirtilen path'lerden birini içeriyor mu?
+        foreach (var path in AutoCacheBustPaths)
+        {
+            if (Src!.Contains(path, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
+    }
+}

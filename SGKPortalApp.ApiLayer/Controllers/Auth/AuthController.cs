@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
 
-namespace SGKPortalApp.ApiLayer.Controllers
+namespace SGKPortalApp.ApiLayer.Controllers.Auth
 {
     [Route("api/[controller]")]
     [ApiController]

@@ -15,32 +15,32 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
 
         public async Task<ApiResponseDto<List<PersonelCocukResponseDto>>?> GetAllAsync()
         {
-            return await GetAsync<ApiResponseDto<List<PersonelCocukResponseDto>>>("api/personel-cocuk");
+            return await GetAsync<ApiResponseDto<List<PersonelCocukResponseDto>>>("personel-cocuk");
         }
 
         public async Task<ApiResponseDto<List<PersonelCocukResponseDto>>?> GetByPersonelTcKimlikNoAsync(string tcKimlikNo)
         {
-            return await GetAsync<ApiResponseDto<List<PersonelCocukResponseDto>>>($"api/personel-cocuk/personel/{tcKimlikNo}");
+            return await GetAsync<ApiResponseDto<List<PersonelCocukResponseDto>>>($"personel-cocuk/personel/{tcKimlikNo}");
         }
 
         public async Task<ApiResponseDto<PersonelCocukResponseDto>?> GetByIdAsync(int id)
         {
-            return await GetAsync<ApiResponseDto<PersonelCocukResponseDto>>($"api/personel-cocuk/{id}");
+            return await GetAsync<ApiResponseDto<PersonelCocukResponseDto>>($"personel-cocuk/{id}");
         }
 
         public async Task<ApiResponseDto<PersonelCocukResponseDto>?> CreateAsync(PersonelCocukCreateRequestDto dto)
         {
-            return await PostAsync<PersonelCocukCreateRequestDto, ApiResponseDto<PersonelCocukResponseDto>>("api/personel-cocuk", dto);
+            return await PostAsync<PersonelCocukCreateRequestDto, ApiResponseDto<PersonelCocukResponseDto>>("personel-cocuk", dto);
         }
 
         public async Task<ApiResponseDto<PersonelCocukResponseDto>?> UpdateAsync(int id, PersonelCocukUpdateRequestDto dto)
         {
-            return await PutAsync<PersonelCocukUpdateRequestDto, ApiResponseDto<PersonelCocukResponseDto>>($"api/personel-cocuk/{id}", dto);
+            return await PutAsync<PersonelCocukUpdateRequestDto, ApiResponseDto<PersonelCocukResponseDto>>($"personel-cocuk/{id}", dto);
         }
 
         public async Task<ApiResponseDto<bool>?> DeleteAsync(int id)
         {
-            var response = await _httpClient.DeleteAsync($"api/personel-cocuk/{id}");
+            var response = await _httpClient.DeleteAsync($"personel-cocuk/{id}");
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();

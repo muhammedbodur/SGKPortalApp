@@ -15,27 +15,27 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
 
         public async Task<ApiResponseDto<List<AtanmaNedeniResponseDto>>?> GetAllAsync()
         {
-            return await GetAsync<ApiResponseDto<List<AtanmaNedeniResponseDto>>>("api/atanma-nedeni");
+            return await GetAsync<ApiResponseDto<List<AtanmaNedeniResponseDto>>>("atanma-nedeni");
         }
 
         public async Task<ApiResponseDto<AtanmaNedeniResponseDto>?> GetByIdAsync(int id)
         {
-            return await GetAsync<ApiResponseDto<AtanmaNedeniResponseDto>>($"api/atanma-nedeni/{id}");
+            return await GetAsync<ApiResponseDto<AtanmaNedeniResponseDto>>($"atanma-nedeni/{id}");
         }
 
         public async Task<ApiResponseDto<AtanmaNedeniResponseDto>?> CreateAsync(AtanmaNedeniCreateRequestDto dto)
         {
-            return await PostAsync<AtanmaNedeniCreateRequestDto, ApiResponseDto<AtanmaNedeniResponseDto>>("api/atanma-nedeni", dto);
+            return await PostAsync<AtanmaNedeniCreateRequestDto, ApiResponseDto<AtanmaNedeniResponseDto>>("atanma-nedeni", dto);
         }
 
         public async Task<ApiResponseDto<AtanmaNedeniResponseDto>?> UpdateAsync(int id, AtanmaNedeniUpdateRequestDto dto)
         {
-            return await PutAsync<AtanmaNedeniUpdateRequestDto, ApiResponseDto<AtanmaNedeniResponseDto>>($"api/atanma-nedeni/{id}", dto);
+            return await PutAsync<AtanmaNedeniUpdateRequestDto, ApiResponseDto<AtanmaNedeniResponseDto>>($"atanma-nedeni/{id}", dto);
         }
 
         public async Task<ApiResponseDto<bool>?> DeleteAsync(int id)
         {
-            var response = await _httpClient.DeleteAsync($"api/atanma-nedeni/{id}");
+            var response = await _httpClient.DeleteAsync($"atanma-nedeni/{id}");
             if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();

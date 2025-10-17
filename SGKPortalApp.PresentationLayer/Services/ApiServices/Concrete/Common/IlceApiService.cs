@@ -22,7 +22,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.GetAsync("api/ilce");
+                var response = await _httpClient.GetAsync("ilce");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -56,7 +56,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/ilce/{id}");
+                var response = await _httpClient.GetAsync($"ilce/{id}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -90,7 +90,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("api/ilce", request);
+                var response = await _httpClient.PostAsJsonAsync("ilce", request);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -124,7 +124,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.PutAsJsonAsync($"api/ilce/{id}", request);
+                var response = await _httpClient.PutAsJsonAsync($"ilce/{id}", request);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -158,7 +158,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"api/ilce/{id}");
+                var response = await _httpClient.DeleteAsync($"ilce/{id}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -192,7 +192,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/ilce/by-il/{ilId}");
+                var response = await _httpClient.GetAsync($"ilce/by-il/{ilId}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -260,7 +260,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/ilce/dropdown/by-il/{ilId}");
+                var response = await _httpClient.GetAsync($"ilce/dropdown/by-il/{ilId}");
 
                 if (!response.IsSuccessStatusCode)
                 {

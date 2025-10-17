@@ -26,7 +26,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
             {
                 _logger.LogDebug("🔵 LoginHandler.OnPostAsync başladı");
 
-                // Request body'den LoginResponseDto'yu al
                 using var reader = new StreamReader(Request.Body);
                 var body = await reader.ReadToEndAsync();
 
@@ -51,7 +50,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
 
                 _logger.LogDebug($"🔵 Login response alındı: {loginResponse.AdSoyad}");
 
-                // Claims oluştur
                 var claims = new List<Claim>
                 {
                     new Claim("TcKimlikNo", loginResponse.TcKimlikNo),
@@ -89,9 +87,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                 _logger.LogInformation("✅ Kullanıcı giriş yaptı: {AdSoyad} ({TcKimlikNo})",
                     loginResponse.AdSoyad, loginResponse.TcKimlikNo);
 
-                // ✅ Cookie set edildikten sonra ana sayfaya redirect
-                // forceLoad ile browser tam sayfa yüklemesi yapacak
-                // ServerAuthenticationStateProvider cookie'den user bilgilerini okuyacak
+                
                 _logger.LogDebug("🔵 Ana sayfaya redirect yapılıyor: /");
                 
                 return Redirect("/");

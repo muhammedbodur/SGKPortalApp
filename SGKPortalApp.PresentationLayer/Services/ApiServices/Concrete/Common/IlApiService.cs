@@ -22,7 +22,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.GetAsync("api/il");
+                var response = await _httpClient.GetAsync("il");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -56,7 +56,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/il/{id}");
+                var response = await _httpClient.GetAsync($"il/{id}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -90,7 +90,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("api/il", request);
+                var response = await _httpClient.PostAsJsonAsync("il", request);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -124,7 +124,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.PutAsJsonAsync($"api/il/{id}", request);
+                var response = await _httpClient.PutAsJsonAsync($"il/{id}", request);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -158,7 +158,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"api/il/{id}");
+                var response = await _httpClient.DeleteAsync($"il/{id}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -192,7 +192,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/il/{ilId}/ilce-count");
+                var response = await _httpClient.GetAsync($"il/{ilId}/ilce-count");
 
                 if (!response.IsSuccessStatusCode)
                 {

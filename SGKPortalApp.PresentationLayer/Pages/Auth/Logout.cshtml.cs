@@ -27,13 +27,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
 
                 _logger.LogInformation($"Logout: {userName} başarıyla çıkış yaptı");
 
-                // Login sayfasına yönlendir
-                return RedirectToPage("/Auth/Login");
+                // Login sayfasına yönlendir (Blazor route kullan)
+                return Redirect("/auth/login");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Logout: Hata oluştu");
-                return RedirectToPage("/Auth/Login");
+                return Redirect("/auth/login");
             }
         }
     }

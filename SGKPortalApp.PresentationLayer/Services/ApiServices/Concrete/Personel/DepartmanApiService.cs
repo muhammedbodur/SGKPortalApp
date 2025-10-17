@@ -1,4 +1,4 @@
-﻿using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
@@ -23,7 +23,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         {
             try
             {
-                var response = await _httpClient.GetAsync("api/departman");
+                var response = await _httpClient.GetAsync("departman");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -57,7 +57,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/departman/{id}");
+                var response = await _httpClient.GetAsync($"departman/{id}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -93,7 +93,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
             {
                 _logger.LogInformation("🔵 CreateAsync çağrıldı: {@Request}", request);
 
-                var response = await _httpClient.PostAsJsonAsync("api/departman", request);
+                var response = await _httpClient.PostAsJsonAsync("departman", request);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 _logger.LogInformation("📡 Status: {Status}, Content: {Content}",
@@ -142,7 +142,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         {
             try
             {
-                var response = await _httpClient.PutAsJsonAsync($"api/departman/{id}", request);
+                var response = await _httpClient.PutAsJsonAsync($"departman/{id}", request);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -180,7 +180,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"api/departman/{id}");
+                var response = await _httpClient.DeleteAsync($"departman/{id}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -215,7 +215,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         {
             try
             {
-                var response = await _httpClient.GetAsync("api/departman/active");
+                var response = await _httpClient.GetAsync("departman/active");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -251,7 +251,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
             {
                 _logger.LogInformation("🔵 GetPersonelCountAsync çağrıldı: Departman ID = {DepartmanId}", departmanId);
 
-                var response = await _httpClient.GetAsync($"api/departman/{departmanId}/personel-count");
+                var response = await _httpClient.GetAsync($"departman/{departmanId}/personel-count");
 
                 if (!response.IsSuccessStatusCode)
                 {

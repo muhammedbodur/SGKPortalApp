@@ -49,7 +49,7 @@
                             <div class="d-flex align-items-center flex-column">
                                 @if (!string.IsNullOrEmpty(Personel?.Resim))
                                 {
-                                    <img class="img-fluid rounded my-4" src="@Personel.Resim" height="110" width="110" alt="Personel fotoğrafı" />
+                                    <CachedImage Src="@Personel.Resim" Class="img-fluid rounded my-4" Height="110" Width="110" Alt="Personel fotoğrafı" />
                                 }
                                 else
                                 {
@@ -705,7 +705,7 @@
                         <div class="card-body text-center">
                             @if (!string.IsNullOrEmpty(Personel?.Resim))
                             {
-                                <img src="@Personel.Resim" alt="Personel Fotoğrafı" class="img-fluid rounded" style="max-width: 300px;" />
+                                <CachedImage Src="@Personel.Resim" Alt="Personel Fotoğrafı" Class="img-fluid rounded" Style="max-width: 300px;" />
                             }
                             else
                             {

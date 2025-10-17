@@ -23,7 +23,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         {
             try
             {
-                var response = await _httpClient.GetAsync("api/sendika");
+                var response = await _httpClient.GetAsync("sendika");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -57,7 +57,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/sendika/{id}");
+                var response = await _httpClient.GetAsync($"sendika/{id}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -91,7 +91,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("api/sendika", request);
+                var response = await _httpClient.PostAsJsonAsync("sendika", request);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -125,7 +125,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         {
             try
             {
-                var response = await _httpClient.PutAsJsonAsync($"api/sendika/{id}", request);
+                var response = await _httpClient.PutAsJsonAsync($"sendika/{id}", request);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -159,7 +159,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"api/sendika/{id}");
+                var response = await _httpClient.DeleteAsync($"sendika/{id}");
 
                 if (!response.IsSuccessStatusCode)
                 {

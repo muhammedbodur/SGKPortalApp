@@ -10,7 +10,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
     public class SiraCagirmaApiService : ISiraCagirmaApiService
     {
         private readonly HttpClient _httpClient;
-        private const string BaseUrl = "api/siramatik/sira-cagirma";
+        private const string BaseUrl = "siramatik/sira-cagirma";
 
         public SiraCagirmaApiService(HttpClient httpClient)
         {

@@ -1,4 +1,4 @@
-﻿// ════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
 // 📁 PresentationLayer/Services/ApiServices/Concrete/Common/HizmetBinasiApiService.cs
 // ════════════════════════════════════════════════════════════════
 using Microsoft.Extensions.Logging;
@@ -25,7 +25,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.GetAsync("api/hizmetbinasi");
+                var response = await _httpClient.GetAsync("hizmetbinasi");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -59,7 +59,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/hizmetbinasi/{id}");
+                var response = await _httpClient.GetAsync($"hizmetbinasi/{id}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -93,7 +93,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/hizmetbinasi/{id}/detail");
+                var response = await _httpClient.GetAsync($"hizmetbinasi/{id}/detail");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -129,7 +129,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
             {
                 _logger.LogInformation("🔵 CreateAsync çağrıldı: {@Request}", request);
 
-                var response = await _httpClient.PostAsJsonAsync("api/hizmetbinasi", request);
+                var response = await _httpClient.PostAsJsonAsync("hizmetbinasi", request);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 _logger.LogInformation("📡 Status: {Status}, Content: {Content}",
@@ -176,7 +176,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.PutAsJsonAsync($"api/hizmetbinasi/{id}", request);
+                var response = await _httpClient.PutAsJsonAsync($"hizmetbinasi/{id}", request);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -214,7 +214,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"api/hizmetbinasi/{id}");
+                var response = await _httpClient.DeleteAsync($"hizmetbinasi/{id}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -249,7 +249,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.GetAsync("api/hizmetbinasi/active");
+                var response = await _httpClient.GetAsync("hizmetbinasi/active");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -283,7 +283,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/hizmetbinasi/by-departman/{departmanId}");
+                var response = await _httpClient.GetAsync($"hizmetbinasi/by-departman/{departmanId}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -319,7 +319,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
             {
                 _logger.LogInformation("🔵 GetPersonelCountAsync çağrıldı: Hizmet Binası ID = {Id}", hizmetBinasiId);
 
-                var response = await _httpClient.GetAsync($"api/hizmetbinasi/{hizmetBinasiId}/personel-count");
+                var response = await _httpClient.GetAsync($"hizmetbinasi/{hizmetBinasiId}/personel-count");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -358,7 +358,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
             {
                 _logger.LogInformation("🔵 ToggleStatusAsync çağrıldı: ID = {Id}", id);
 
-                var response = await _httpClient.PatchAsync($"api/hizmetbinasi/{id}/toggle-status", null);
+                var response = await _httpClient.PatchAsync($"hizmetbinasi/{id}/toggle-status", null);
 
                 if (!response.IsSuccessStatusCode)
                 {

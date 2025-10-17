@@ -102,7 +102,7 @@
                                 <div class="d-flex align-items-center flex-column">
                                     @if (!string.IsNullOrEmpty(FormModel.Resim))
                                     {
-                                        <img class="img-fluid rounded my-4" src="@FormModel.Resim" height="110" width="110" alt="Personel fotoğrafı" />
+                                        <CachedImage Src="@FormModel.Resim" Class="img-fluid rounded my-4" Height="110" Width="110" Alt="Personel fotoğrafı" />
                                     }
                                     else
                                     {
@@ -1068,7 +1068,7 @@
                                 <div class="text-center mb-4">
                                     @if (!string.IsNullOrEmpty(FormModel.Resim))
                                     {
-                                        <img src="@FormModel.Resim" alt="Personel Fotoğrafı" class="img-fluid rounded mb-3" style="max-width: 300px; max-height: 300px; object-fit: cover;" />
+                                        <CachedImage Src="@FormModel.Resim" Alt="Personel Fotoğrafı" Class="img-fluid rounded mb-3" Style="max-width: 300px; max-height: 300px; object-fit: cover;" />
                                     }
                                     else
                                     {
