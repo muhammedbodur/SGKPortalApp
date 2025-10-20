@@ -1,13 +1,37 @@
-@* 
-    Cache-busting özellikli Image Component
-    Kullanım: <CachedImage Src="@Personel.Resim" Alt="Personel" Class="img-fluid" />
+@using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces
+@*
+    ⭐ GÜNCELLENMIŞ CachedImage Component
+    
+    ANAHTAR:
+    - Server-side IImageCacheService'den ETag'i alıyor
+    - Her resim güncellemede otomatik yeni ETag döndürülüyor
+    - Browser cache problemi çözüldü ✅
+    
+    Kullanım: 
+    <CachedImage Src="@Personel.Resim" Alt="Personel Fotoğrafı" Class="img-fluid rounded-circle" />
+    <CachedImage Src="/images/avatars/28165202398.jpg" Alt="Avatar" />
 *@
+
+@inject IImageCacheService ImageCacheService
+@inject ILogger<CachedImage> Logger
 
 @if (!string.IsNullOrEmpty(Src))
 {
-    <img src="@GetCachedUrl()" 
-         alt="@Alt" 
-         class="@Class" 
+    <img src="@GetCachedUrl()"
+         alt="@(Alt ?? "Resim")"
+         class="@(Class ?? "img-fluid")"
+         style="@Style"
+         width="@Width"
+         height="@Height"
+         loading="lazy"
+         onerror="this.src='/images/placeholder.png'" />
+}
+else
+{
+    <!-- Placeholder görüntü -->
+    <img src="/images/placeholder.png"
+         alt="@(Alt ?? "Resim")"
+         class="@(Class ?? "img-fluid")"
          style="@Style"
          width="@Width"
          height="@Height" />
@@ -15,25 +39,26 @@
 
 @code {
     /// <summary>
-    /// Resim URL'si
+    /// Resim URL'si (Örnek: /images/avatars/28165202398.jpg)
     /// </summary>
     [Parameter]
     public string? Src { get; set; }
 
     /// <summary>
-    /// Alt text
+    /// Alt text (Erişilebilirlik için)
     /// </summary>
     [Parameter]
     public string? Alt { get; set; }
 
     /// <summary>
-    /// CSS Class
+    /// CSS Class'lar
+    /// Örnek: "img-fluid rounded-circle"
     /// </summary>
     [Parameter]
-    public string? Class { get; set; }
+    public string? Class { get; set; } = "img-fluid";
 
     /// <summary>
-    /// Inline Style
+    /// Inline CSS style
     /// </summary>
     [Parameter]
     public string? Style { get; set; }
@@ -51,66 +76,71 @@
     public string? Height { get; set; }
 
     /// <summary>
-    /// Cache-busting aktif mi? (null = otomatik)
+    /// Cache busting aktif mı? (varsayılan: true)
+    /// Eski resimler için veya test amaçlı false yapabilirsin
     /// </summary>
     [Parameter]
-    public bool? CacheBust { get; set; }
+    public bool EnableCacheBusting { get; set; } = true;
+
+    private string? _cachedUrl;
 
     /// <summary>
-    /// Cache stratejisi (timestamp, version, hash)
-    /// </summary>
-    [Parameter]
-    public string CacheStrategy { get; set; } = "timestamp";
-
-    // Otomatik cache-busting uygulanacak klasörler
-    private static readonly string[] AutoCacheBustPaths = new[]
-    {
-        "/images/",
-        "/uploads/"
-    };
-
-    /// <summary>
-    /// Cache-busting parametresi eklenmiş URL döndürür
+    /// Server-side ImageCacheService'ten ETag'i alır
+    /// ve URL'ye parametre olarak ekler
+    ///
+    /// Sonuç örneği: /images/avatars/28165202398.jpg?v=A1B2C3D4
+    ///
+    /// Resim güncellenirse ETag değişir: /images/avatars/28165202398.jpg?v=X9Y8Z7W6
+    /// Browser URL'nin değiştiğini görüp yeni resmi indirir!
     /// </summary>
     private string GetCachedUrl()
     {
         if (string.IsNullOrEmpty(Src))
-            return string.Empty;
+            return "/images/placeholder.png";
 
-        // Cache-busting gerekli mi?
-        if (!ShouldApplyCacheBusting())
+        // Cache busting devre dışı bırakıldıysa orijinal URL'yi döndür
+        if (!EnableCacheBusting)
             return Src;
 
-        // Cache-busting parametresi oluştur
-        string cacheBustParam = CacheStrategy.ToLower() switch
+        try
         {
-            "timestamp" => $"v={DateTime.Now.Ticks}",
-            "version" => "v=1.0.0",
-            "hash" => $"v={DateTime.Now.Ticks}",
-            _ => $"v={DateTime.Now.Ticks}"
-        };
+            // ⭐ ANAHTAR SATIR: Server'dan cache busting parametresi (ETag) al
+            var etag = ImageCacheService.GetCacheBustParameter(Src);
 
-        // URL'ye parametre ekle
-        var separator = Src.Contains('?') ? "&" : "?";
-        return $"{Src}{separator}{cacheBustParam}";
+            if (string.IsNullOrEmpty(etag) || etag == "notfound")
+            {
+                Logger.LogWarning("⚠️  Resim bulunamadı: {Src}", Src);
+                return Src; // Yine de denemeyi sağla
+            }
+
+            if (etag == "error")
+            {
+                Logger.LogError("❌ ETag alınamadı: {Src}", Src);
+                return Src;
+            }
+
+            // URL'ye ETag'i parametre olarak ekle
+            // Örnek: /images/avatars/28165202398.jpg?v=A1B2C3D4
+            var separator = Src.Contains('?') ? "&" : "?";
+            _cachedUrl = $"{Src}{separator}v={etag}";
+
+            Logger.LogDebug("✅ Cache-bust URL oluşturuldu: {CachedUrl}", _cachedUrl);
+            return _cachedUrl;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "❌ Cache-bust URL oluşturulamadı: {Src}", Src);
+            return Src; // Fallback
+        }
     }
 
     /// <summary>
-    /// Cache-busting uygulanmalı mı kontrol eder
+    /// Src parametresi değiştiğinde cache'lemiş URL'i sıfırla
+    /// Böylece GetCachedUrl() yeniden çalışacak
     /// </summary>
-    private bool ShouldApplyCacheBusting()
+    protected override void OnParametersSet()
     {
-        // Manuel olarak belirtilmişse ona göre hareket et
-        if (CacheBust.HasValue)
-            return CacheBust.Value;
-
-        // Otomatik kontrol: Belirtilen path'lerden birini içeriyor mu?
-        foreach (var path in AutoCacheBustPaths)
-        {
-            if (Src!.Contains(path, StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-
-        return false;
+        _cachedUrl = null;
+        base.OnParametersSet();
     }
 }
