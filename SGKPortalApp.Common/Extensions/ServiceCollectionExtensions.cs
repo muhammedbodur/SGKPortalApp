@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using SGKPortalApp.Common.Configuration;
@@ -33,6 +33,9 @@ namespace SGKPortalApp.Common.Extensions
 
             // Repository'leri otomatik kaydet
             services.AddRepositoriesAutomatically();
+
+            // Complex Query Repositories (Manuel kayıt)
+            services.AddComplexQueryRepositories();
 
             return services;
         }
@@ -122,6 +125,22 @@ namespace SGKPortalApp.Common.Extensions
                 // Hata vermeden devam et - PersonelIslemleri ve Common repository'leri kayıtlı
                 return services;
             }
+        }
+
+        /// <summary>
+        /// Complex Query Repository'leri kaydet
+        /// </summary>
+        private static IServiceCollection AddComplexQueryRepositories(this IServiceCollection services)
+        {
+            Console.WriteLine("🔍 Complex Query Repositories kaydediliyor...");
+
+            // Sıramatik Query Repository
+            services.AddScoped<SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex.ISiramatikQueryRepository,
+                              SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex.SiramatikQueryRepository>();
+            Console.WriteLine("  ✅ ISiramatikQueryRepository -> SiramatikQueryRepository");
+
+            Console.WriteLine("✅ Complex Query Repositories kayıt edildi\n");
+            return services;
         }
 
         /// <summary>

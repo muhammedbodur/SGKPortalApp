@@ -1,7 +1,7 @@
-﻿using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
-using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -24,6 +24,6 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         public required KanalAltIslem KanalAltIslem { get; set; }
 
         public PersonelUzmanlik Uzmanlik { get; set; }
-        public Aktiflik KanalAltIslemPersonelAktiflik { get; set; } = Aktiflik.Aktif;
+        public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
     }
 }

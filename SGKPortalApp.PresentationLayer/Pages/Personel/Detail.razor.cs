@@ -4,10 +4,11 @@ using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
+using SGKPortalApp.PresentationLayer.Components.Base;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel
 {
-    public partial class Detail : ComponentBase
+    public partial class Detail : BasePageComponent
     {
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
@@ -16,7 +17,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
         [Inject] private IPersonelApiService _personelApiService { get; set; } = default!;
-        [Inject] private IPersonelCocukApiService _personelCocukApiService { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════
         // PARAMETERS
@@ -74,8 +74,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                     Personel = result.Data;
                     
                     // Alt tablo bilgilerini yükle
-                    await LoadCocuklar();
-                    // Diğer alt tabloları da yükleyebiliriz (isteğe bağlı - lazy loading)
+                    Cocuklar = result.Data.Cocuklar ?? new List<PersonelCocukResponseDto>();
+                    Hizmetler = result.Data.Hizmetler ?? new List<PersonelHizmetResponseDto>();
+                    Egitimler = result.Data.Egitimler ?? new List<PersonelEgitimResponseDto>();
+                    ImzaYetkileri = result.Data.ImzaYetkileriDetay ?? new List<PersonelImzaYetkisiResponseDto>();
+                    Cezalar = result.Data.Cezalar ?? new List<PersonelCezaResponseDto>();
+                    Engeller = result.Data.Engeller ?? new List<PersonelEngelResponseDto>();
                 }
                 else
                 {
@@ -92,20 +96,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 IsLoading = false;
             }
         }
-
-        private async Task LoadCocuklar()
-        {
-            try
-            {
-                var response = await _personelCocukApiService.GetByPersonelTcKimlikNoAsync(TcKimlikNo!);
-                Cocuklar = response?.Data ?? new List<PersonelCocukResponseDto>();
-            }
-            catch (Exception ex)
-            {
-                await _toastService.ShowErrorAsync($"Çocuk bilgileri yüklenirken hata oluştu: {ex.Message}");
-            }
-        }
-
 
         // ═══════════════════════════════════════════════════════
         // TAB METHODS

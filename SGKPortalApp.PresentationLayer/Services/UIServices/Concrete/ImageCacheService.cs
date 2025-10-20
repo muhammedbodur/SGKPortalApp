@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System.Security.Cryptography;
 using System.Text;
@@ -28,7 +28,6 @@ namespace SGKPortalApp.PresentationLayer.Services.UIServices.Concrete
     {
         private readonly ILogger<ImageCacheService> _logger;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly Dictionary<string, string> _etagCache;
 
         public ImageCacheService(
             ILogger<ImageCacheService> logger,
@@ -36,13 +35,12 @@ namespace SGKPortalApp.PresentationLayer.Services.UIServices.Concrete
         {
             _logger = logger;
             _webHostEnvironment = webHostEnvironment;
-            _etagCache = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             _logger.LogDebug("✅ ImageCacheService başlatıldı");
         }
 
         /// <summary>
         /// Resim dosyası için ETag (cache-busting parametresi) döndürür.
-        /// Cache'de yoksa dosya bilgilerinden yeni oluşturur.
+        /// Her seferinde dosyadan GÜNCEL ETag oluşturur (cache'lenmez).
         /// </summary>
         public string GetCacheBustParameter(string imagePath)
         {
@@ -62,33 +60,13 @@ namespace SGKPortalApp.PresentationLayer.Services.UIServices.Concrete
 
                 var fileInfo = new FileInfo(fullPath);
 
-                // Cache'te var mı kontrol et
-                if (_etagCache.TryGetValue(imagePath, out var cachedETag))
-                {
-                    // Cache'teki ETag ile dosyanın mevcut ETag'ini karşılaştır
-                    var currentETag = GenerateETag(fileInfo);
-
-                    if (cachedETag == currentETag)
-                    {
-                        // ETag değişmedi, cache'teki değeri döndür
-                        _logger.LogDebug("✅ ETag (cache): {ETag}", cachedETag);
-                        return cachedETag;
-                    }
-                    else
-                    {
-                        // ETag değişti (dosya güncellenmiş), yenisini güncelle
-                        _logger.LogDebug("🔄 ETag güncellendi (eski: {OldETag}, yeni: {NewETag})",
-                            cachedETag, currentETag);
-                        _etagCache[imagePath] = currentETag;
-                        return currentETag;
-                    }
-                }
-
-                // Cache'te yoksa yeni ETag oluştur
+                // ⭐ HER SEFERINDE DOSYADAN GÜNCEL ETag OLUŞTUR
+                // Cache'leme yapılmıyor, böylece resim güncellendiğinde hemen yeni ETag alınır
                 var etag = GenerateETag(fileInfo);
-                _etagCache[imagePath] = etag;
 
-                _logger.LogDebug("🆕 Yeni ETag oluşturuldu: {ETag}", etag);
+                _logger.LogDebug("✅ ETag oluşturuldu: {ETag} (Dosya: {Size} bytes, Değiştirilme: {LastWrite})", 
+                    etag, fileInfo.Length, fileInfo.LastWriteTimeUtc);
+                
                 return etag;
             }
             catch (Exception ex)
@@ -100,14 +78,13 @@ namespace SGKPortalApp.PresentationLayer.Services.UIServices.Concrete
 
         /// <summary>
         /// Cache'i invalidate et (resim silindiğinde veya güncellendiğinde)
+        /// NOT: Artık cache kullanılmıyor, bu metod boş bırakıldı (interface uyumluluğu için)
         /// </summary>
         public void InvalidateCache(string imagePath)
         {
-            if (!string.IsNullOrEmpty(imagePath))
-            {
-                _etagCache.Remove(imagePath);
-                _logger.LogDebug("🧹 Cache invalidate edildi: {ImagePath}", imagePath);
-            }
+            // Cache kullanılmadığı için hiçbir şey yapmaya gerek yok
+            // Her GetCacheBustParameter çağrısında dosyadan güncel ETag alınıyor
+            _logger.LogDebug("🧹 InvalidateCache çağrıldı (cache yok): {ImagePath}", imagePath);
         }
 
         /// <summary>

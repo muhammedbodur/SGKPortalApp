@@ -82,8 +82,6 @@ else
     [Parameter]
     public bool EnableCacheBusting { get; set; } = true;
 
-    private string? _cachedUrl;
-
     /// <summary>
     /// Server-side ImageCacheService'ten ETag'i alır
     /// ve URL'ye parametre olarak ekler
@@ -92,6 +90,8 @@ else
     ///
     /// Resim güncellenirse ETag değişir: /images/avatars/28165202398.jpg?v=X9Y8Z7W6
     /// Browser URL'nin değiştiğini görüp yeni resmi indirir!
+    /// 
+    /// NOT: Her render'da GÜNCEL ETag alınır, cache'lenmez!
     /// </summary>
     private string GetCachedUrl()
     {
@@ -104,7 +104,7 @@ else
 
         try
         {
-            // ⭐ ANAHTAR SATIR: Server'dan cache busting parametresi (ETag) al
+            // ⭐ ANAHTAR: Her seferinde GÜNCEL ETag al (cache'leme!)
             var etag = ImageCacheService.GetCacheBustParameter(Src);
 
             if (string.IsNullOrEmpty(etag) || etag == "notfound")
@@ -122,25 +122,15 @@ else
             // URL'ye ETag'i parametre olarak ekle
             // Örnek: /images/avatars/28165202398.jpg?v=A1B2C3D4
             var separator = Src.Contains('?') ? "&" : "?";
-            _cachedUrl = $"{Src}{separator}v={etag}";
+            var cachedUrl = $"{Src}{separator}v={etag}";
 
-            Logger.LogDebug("✅ Cache-bust URL oluşturuldu: {CachedUrl}", _cachedUrl);
-            return _cachedUrl;
+            Logger.LogDebug("✅ Cache-bust URL oluşturuldu: {CachedUrl}", cachedUrl);
+            return cachedUrl;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "❌ Cache-bust URL oluşturulamadı: {Src}", Src);
             return Src; // Fallback
         }
-    }
-
-    /// <summary>
-    /// Src parametresi değiştiğinde cache'lemiş URL'i sıfırla
-    /// Böylece GetCachedUrl() yeniden çalışacak
-    /// </summary>
-    protected override void OnParametersSet()
-    {
-        _cachedUrl = null;
-        base.OnParametersSet();
     }
 }

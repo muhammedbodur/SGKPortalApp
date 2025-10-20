@@ -1189,6 +1189,8 @@ SGKPortalApp/
     │   └── NavigationManagerExtensions.cs                 # Navigation extensions
     │
     ├── wwwroot/                                           # Static files
+    │   ├── images/
+    │   │   ├── avatars/                                   # personel resimleri
     │   ├── css/
     │   │   ├── sneat/                                     # Sneat theme CSS
     │   │   │   ├── core.css

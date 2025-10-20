@@ -1,4 +1,4 @@
-﻿using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -29,7 +29,9 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         [ForeignKey("KioskIslemGrupId")]
         public KioskIslemGrup? KioskIslemGrup { get; set; }
 
-        public Aktiflik KanalAltIslemAktiflik { get; set; } = Aktiflik.Aktif;
+        public int Sira { get; set; }
+
+        public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
 
         [InverseProperty("KanalAltIslem")]
         public ICollection<Sira>? Siralar { get; set; } = new List<Sira>();

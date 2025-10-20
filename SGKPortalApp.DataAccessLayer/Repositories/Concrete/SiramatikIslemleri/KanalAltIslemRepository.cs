@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.DataAccessLayer.Context;
@@ -97,7 +97,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Where(kai => kai.KanalAltIslemAktiflik == Aktiflik.Aktif)
+                .Where(kai => kai.Aktiflik == Aktiflik.Aktif)
                 .ToListAsync();
         }
     }

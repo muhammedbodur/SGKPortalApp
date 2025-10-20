@@ -102,7 +102,7 @@
                                 <div class="d-flex align-items-center flex-column">
                                     @if (!string.IsNullOrEmpty(FormModel.Resim))
                                     {
-                                        <CachedImage Src="@FormModel.Resim" Class="img-fluid rounded my-4" Height="110" Width="110" Alt="Personel fotoğrafı" />
+                                        <CachedImage @key="@FormModel.Resim" Src="@FormModel.Resim" Class="img-fluid rounded my-4" Height="110" Width="110" Alt="Personel fotoğrafı" />
                                     }
                                     else
                                     {
@@ -766,7 +766,12 @@
                                             </div>
                                             <div class="col-md-4">
                                                 <label class="form-label small">Eğitim</label>
-                                                <input type="text" @bind="cocuk.Egitim" class="form-control form-control-sm" maxlength="100" />
+                                                <select @bind="cocuk.OgrenimDurumu" class="form-select form-select-sm">
+                                                    @foreach (var ogrenim in Enum.GetValues<OgrenimDurumu>())
+                                                    {
+                                                        <option value="@ogrenim">@GetEnumDisplayName(ogrenim)</option>
+                                                    }
+                                                </select>
                                             </div>
                                             <div class="col-md-1 d-flex align-items-end">
                                                 <button type="button" class="btn btn-sm btn-danger w-100" @onclick="() => RemoveCocuk(index)">
@@ -805,23 +810,35 @@
                                         <div class="row mb-3 pb-3 border-bottom">
                                             <div class="col-md-2">
                                                 <label class="form-label small">Departman</label>
-                                                <input type="text" @bind="hizmet.Departman" class="form-control form-control-sm" />
+                                                <select @bind="hizmet.DepartmanId" class="form-select form-select-sm">
+                                                    <option value="0">Seçiniz...</option>
+                                                    @foreach (var departman in Departmanlar)
+                                                    {
+                                                        <option value="@departman.DepartmanId">@departman.DepartmanAdi</option>
+                                                    }
+                                                </select>
                                             </div>
                                             <div class="col-md-2">
                                                 <label class="form-label small">Servis</label>
-                                                <input type="text" @bind="hizmet.Servis" class="form-control form-control-sm" />
+                                                <select @bind="hizmet.ServisId" class="form-select form-select-sm">
+                                                    <option value="0">Seçiniz...</option>
+                                                    @foreach (var servis in Servisler)
+                                                    {
+                                                        <option value="@servis.ServisId">@servis.ServisAdi</option>
+                                                    }
+                                                </select>
                                             </div>
                                             <div class="col-md-2">
                                                 <label class="form-label small">Başlama Tarihi</label>
-                                                <input type="text" @bind="hizmet.BaslamaTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                                <input type="date" @bind="hizmet.BaslamaTarihi" class="form-control form-control-sm" />
                                             </div>
                                             <div class="col-md-2">
                                                 <label class="form-label small">Ayrılma Tarihi</label>
-                                                <input type="text" @bind="hizmet.AyrilmaTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                                <input type="date" @bind="hizmet.AyrilmaTarihi" class="form-control form-control-sm" />
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="form-label small">Sebep</label>
-                                                <input type="text" @bind="hizmet.Sebep" class="form-control form-control-sm" />
+                                                <input type="text" @bind="hizmet.Sebep" class="form-control form-control-sm" maxlength="200" />
                                             </div>
                                             <div class="col-md-1 d-flex align-items-end">
                                                 <button type="button" class="btn btn-sm btn-danger w-100" @onclick="() => RemoveHizmet(index)">
@@ -1068,7 +1085,7 @@
                                 <div class="text-center mb-4">
                                     @if (!string.IsNullOrEmpty(FormModel.Resim))
                                     {
-                                        <CachedImage Src="@FormModel.Resim" Alt="Personel Fotoğrafı" Class="img-fluid rounded mb-3" Style="max-width: 300px; max-height: 300px; object-fit: cover;" />
+                                        <CachedImage @key="@FormModel.Resim" Src="@FormModel.Resim" Alt="Personel Fotoğrafı" Class="img-fluid rounded mb-3" Style="max-width: 300px; max-height: 300px; object-fit: cover;" />
                                     }
                                     else
                                     {

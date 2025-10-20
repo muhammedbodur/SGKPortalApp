@@ -1,12 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 
 namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex
 {
-    internal interface ISiramatikQueryRepository
+    public interface ISiramatikQueryRepository
     {
+        // Kanal Alt İşlem Sorguları
+        Task<List<KanalAltIslemResponseDto>> GetAllKanalAltIslemlerAsync();
+        Task<List<KanalAltIslemResponseDto>> GetKanalAltIslemlerByHizmetBinasiIdAsync(int hizmetBinasiId);
+        Task<KanalAltIslemResponseDto?> GetKanalAltIslemByIdWithDetailsAsync(int kanalAltIslemId);
+        Task<List<KanalAltIslemResponseDto>> GetKanalAltIslemlerByKanalIslemIdAsync(int kanalIslemId);
+        
+        // Kanal İşlem Sorguları
+        Task<List<KanalIslemResponseDto>> GetKanalIslemlerByHizmetBinasiIdAsync(int hizmetBinasiId);
+        Task<KanalIslemResponseDto?> GetKanalIslemByIdWithDetailsAsync(int kanalIslemId);
+        
+        // Kanal Personel Sorguları
+        Task<List<KanalPersonelResponseDto>> GetKanalPersonellerByHizmetBinasiIdAsync(int hizmetBinasiId);
+        Task<List<KanalPersonelResponseDto>> GetKanalPersonellerByKanalAltIslemIdAsync(int kanalAltIslemId);
+        
+        // İstatistik ve Dashboard Sorguları
+        Task<Dictionary<int, int>> GetKanalAltIslemPersonelSayilariAsync(int hizmetBinasiId);
+        Task<List<KanalAltIslemResponseDto>> GetEslestirmeYapilmamisKanalAltIslemlerAsync(int hizmetBinasiId);
     }
 }

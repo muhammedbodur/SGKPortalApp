@@ -114,7 +114,7 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels
     {
         public string Isim { get; set; } = string.Empty;
         public DateTime? DogumTarihi { get; set; }
-        public string? Egitim { get; set; }
+        public OgrenimDurumu OgrenimDurumu { get; set; } = OgrenimDurumu.ilkokul;
     }
 
     public class HizmetModel

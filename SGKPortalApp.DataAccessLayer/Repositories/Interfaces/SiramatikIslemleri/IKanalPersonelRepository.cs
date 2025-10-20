@@ -1,6 +1,6 @@
-﻿using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
-using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

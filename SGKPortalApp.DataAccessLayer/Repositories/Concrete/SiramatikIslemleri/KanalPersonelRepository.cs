@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
-using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Generic;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
@@ -64,7 +64,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .AsNoTracking()
                 .Include(kp => kp.Personel)
                 .Include(kp => kp.KanalAltIslem)
-                .Where(kp => kp.KanalAltIslemPersonelAktiflik == Aktiflik.Aktif)
+                .Where(kp => kp.Aktiflik == Aktiflik.Aktif)
                 .ToListAsync();
         }
 
@@ -81,7 +81,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .AnyAsync(kp => kp.TcKimlikNo == tcKimlikNo && kp.KanalAltIslemId == kanalAltIslemId && kp.KanalAltIslemPersonelAktiflik == Aktiflik.Aktif);
+                .AnyAsync(kp => kp.TcKimlikNo == tcKimlikNo && kp.KanalAltIslemId == kanalAltIslemId && kp.Aktiflik == Aktiflik.Aktif);
         }
 
         // Uzmanlık bazında personelleri listeler

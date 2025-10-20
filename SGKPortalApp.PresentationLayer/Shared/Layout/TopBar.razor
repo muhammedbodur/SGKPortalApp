@@ -53,7 +53,7 @@
                     <div class="avatar avatar-online">
                         @if (!string.IsNullOrEmpty(UserImage))
                         {
-                            <img src="@UserImage" alt="@UserFullName" class="w-px-40 h-auto rounded-circle">
+                            <CachedImage @key="@UserImage" Src="@UserImage" Alt="@UserFullName" Class="w-px-40 h-auto rounded-circle" />
                         }
                         else
                         {
@@ -69,7 +69,7 @@
                                     <div class="avatar avatar-online">
                                         @if (!string.IsNullOrEmpty(UserImage))
                                         {
-                                            <img src="@UserImage" alt="@UserFullName" class="w-px-40 h-auto rounded-circle">
+                                            <CachedImage @key="@UserImage" Src="@UserImage" Alt="@UserFullName" Class="w-px-40 h-auto rounded-circle" />
                                         }
                                         else
                                         {

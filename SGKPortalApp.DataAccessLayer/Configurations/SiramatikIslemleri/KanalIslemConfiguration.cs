@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 
@@ -21,7 +21,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
             builder.Property(ki => ki.BitisNumara)
                 .IsRequired();
 
-            builder.Property(ki => ki.KanalIslemAktiflik)
+            builder.Property(ki => ki.Aktiflik)
                 .HasConversion<int>()
                 .IsRequired();
 

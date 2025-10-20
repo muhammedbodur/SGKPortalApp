@@ -1,6 +1,8 @@
 @page "/personel/detail/{tcKimlikNo}"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.BasePageComponent
 @using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
+
 
 <PageTitle>Personel Detay - SGK Portal</PageTitle>
 
@@ -49,7 +51,7 @@
                             <div class="d-flex align-items-center flex-column">
                                 @if (!string.IsNullOrEmpty(Personel?.Resim))
                                 {
-                                    <CachedImage Src="@Personel.Resim" Class="img-fluid rounded my-4" Height="110" Width="110" Alt="Personel fotoğrafı" />
+                                    <CachedImage @key="@Personel.Resim" Src="@Personel.Resim" Class="img-fluid rounded my-4" Height="110" Width="110" Alt="Personel fotoğrafı" />
                                 }
                                 else
                                 {
@@ -103,6 +105,10 @@
                                 <li class="mb-3">
                                     <span class="fw-medium me-2">Ünvan:</span>
                                     <span>@Personel?.UnvanAdi</span>
+                                </li>
+                                <li class="mb-3">
+                                    <span class="fw-medium me-2">Personel Tipi:</span>
+                                    <span>@(Personel?.PersonelTipi != null ? GetEnumDisplayName(Personel.PersonelTipi) : "-")</span>
                                 </li>
                                 <li class="mb-3">
                                     <span class="fw-medium me-2">Dahili:</span>
@@ -295,19 +301,19 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted small">Cinsiyet</label>
-                                    <p class="fw-medium">@Personel?.Cinsiyet</p>
+                                    <p class="fw-medium">@(Personel?.Cinsiyet != null ? GetEnumDisplayName(Personel.Cinsiyet) : "-")</p>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted small">Medeni Durumu</label>
-                                    <p class="fw-medium">@Personel?.MedeniDurumu</p>
+                                    <p class="fw-medium">@(Personel?.MedeniDurumu != null ? GetEnumDisplayName(Personel.MedeniDurumu) : "-")</p>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted small">Kan Grubu</label>
-                                    <p class="fw-medium">@Personel?.KanGrubu</p>
+                                    <p class="fw-medium">@(Personel?.KanGrubu != null ? GetEnumDisplayName(Personel.KanGrubu) : "-")</p>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted small">Ev Durumu</label>
-                                    <p class="fw-medium">@Personel?.EvDurumu</p>
+                                    <p class="fw-medium">@(Personel?.EvDurumu != null ? GetEnumDisplayName(Personel.EvDurumu) : "-")</p>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted small">Ulaştırma Servisi 1</label>
@@ -367,7 +373,7 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted small">Öğrenim Durumu</label>
-                                    <p class="fw-medium">@Personel?.OgrenimDurumu</p>
+                                    <p class="fw-medium">@(Personel?.OgrenimDurumu != null ? GetEnumDisplayName(Personel.OgrenimDurumu) : "-")</p>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted small">Bitirdiği Okul</label>
@@ -395,7 +401,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted small">Şehit Yakınlığı</label>
-                                    <p class="fw-medium">@Personel?.SehitYakinligi</p>
+                                    <p class="fw-medium">@(Personel?.SehitYakinligi != null ? GetEnumDisplayName(Personel.SehitYakinligi) : "-")</p>
                                 </div>
                             </div>
                         </div>
@@ -414,7 +420,7 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted small">Eş İş Durumu</label>
-                                    <p class="fw-medium">@Personel?.EsininIsDurumu</p>
+                                    <p class="fw-medium">@(Personel?.EsininIsDurumu != null ? GetEnumDisplayName(Personel.EsininIsDurumu) : "-")</p>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label text-muted small">Eş Unvanı</label>
@@ -456,7 +462,7 @@
                                                     </p>
                                                     <p class="mb-0">
                                                         <small class="text-muted">Öğrenim Durumu:</small>
-                                                        <strong>@cocuk.OgrenimDurumu</strong>
+                                                        <strong>@GetEnumDisplayName(cocuk.OgrenimDurumu)</strong>
                                                     </p>
                                                 </div>
                                             </div>
@@ -705,7 +711,7 @@
                         <div class="card-body text-center">
                             @if (!string.IsNullOrEmpty(Personel?.Resim))
                             {
-                                <CachedImage Src="@Personel.Resim" Alt="Personel Fotoğrafı" Class="img-fluid rounded" Style="max-width: 300px;" />
+                                <CachedImage @key="@Personel.Resim" Src="@Personel.Resim" Alt="Personel Fotoğrafı" Class="img-fluid rounded" Style="max-width: 300px;" />
                             }
                             else
                             {

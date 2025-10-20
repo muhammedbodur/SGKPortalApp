@@ -16,6 +16,7 @@ using SGKPortalApp.PresentationLayer.Models.FormModels;
 using SGKPortalApp.PresentationLayer.Helpers;
 using AutoMapper;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
+using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel
 {
@@ -40,6 +41,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         [Inject] private IIlceApiService _ilceApiService { get; set; } = default!;
         [Inject] private IAtanmaNedeniApiService _atanmaNedeniApiService { get; set; } = default!;
         [Inject] private IMapper _mapper { get; set; } = default!;
+        [Inject] private IUserInfoService _userInfoService { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════
         // PARAMETERS
@@ -192,13 +194,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 Cocuklar = result.Data.Cocuklar?.Select(c => new CocukModel
                 {
                     Isim = c.CocukAdi,
-                    DogumTarihi = c.CocukDogumTarihi.ToDateTime(TimeOnly.MinValue)
+                    DogumTarihi = c.CocukDogumTarihi.ToDateTime(TimeOnly.MinValue),
+                    OgrenimDurumu = c.OgrenimDurumu
                 }).ToList() ?? new List<CocukModel>();
 
                 Hizmetler = result.Data.Hizmetler?.Select(h => new HizmetModel
                 {
                     DepartmanId = h.DepartmanId,
+                    Departman = h.DepartmanAdi,
                     ServisId = h.ServisId,
+                    Servis = h.ServisAdi,
                     BaslamaTarihi = h.GorevBaslamaTarihi,
                     AyrilmaTarihi = h.GorevAyrilmaTarihi,
                     Sebep = h.Sebep
@@ -584,7 +589,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                         PersonelTcKimlikNo = FormModel.TcKimlikNo,
                         CocukAdi = c.Isim,
                         CocukDogumTarihi = DateOnly.FromDateTime(c.DogumTarihi!.Value),
-                        OgrenimDurumu = OgrenimDurumu.ilkokul
+                        OgrenimDurumu = c.OgrenimDurumu
                     }).ToList(),
                     Hizmetler = Hizmetler.Where(h => h.BaslamaTarihi.HasValue && h.DepartmanId > 0 && h.ServisId > 0).Select(h => new PersonelHizmetCreateRequestDto
                     {
@@ -767,28 +772,82 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         // ═══════════════════════════════════════════════════════
 
         // Çocuk
-        private void AddCocuk() => Cocuklar.Add(new CocukModel());
-        private void RemoveCocuk(int index) => Cocuklar.RemoveAt(index);
+        private void AddCocuk()
+        {
+            Cocuklar.Add(new CocukModel());
+            StateHasChanged();
+        }
+        
+        private void RemoveCocuk(int index)
+        {
+            Cocuklar.RemoveAt(index);
+            StateHasChanged();
+        }
 
         // Hizmet
-        private void AddHizmet() => Hizmetler.Add(new HizmetModel());
-        private void RemoveHizmet(int index) => Hizmetler.RemoveAt(index);
+        private void AddHizmet()
+        {
+            Hizmetler.Add(new HizmetModel());
+            StateHasChanged();
+        }
+        
+        private void RemoveHizmet(int index)
+        {
+            Hizmetler.RemoveAt(index);
+            StateHasChanged();
+        }
 
         // Eğitim
-        private void AddEgitim() => Egitimler.Add(new EgitimModel());
-        private void RemoveEgitim(int index) => Egitimler.RemoveAt(index);
+        private void AddEgitim()
+        {
+            Egitimler.Add(new EgitimModel());
+            StateHasChanged();
+        }
+        
+        private void RemoveEgitim(int index)
+        {
+            Egitimler.RemoveAt(index);
+            StateHasChanged();
+        }
 
         // Yetki
-        private void AddYetki() => Yetkiler.Add(new YetkiModel());
-        private void RemoveYetki(int index) => Yetkiler.RemoveAt(index);
+        private void AddYetki()
+        {
+            Yetkiler.Add(new YetkiModel());
+            StateHasChanged();
+        }
+        
+        private void RemoveYetki(int index)
+        {
+            Yetkiler.RemoveAt(index);
+            StateHasChanged();
+        }
 
         // Ceza
-        private void AddCeza() => Cezalar.Add(new CezaModel());
-        private void RemoveCeza(int index) => Cezalar.RemoveAt(index);
+        private void AddCeza()
+        {
+            Cezalar.Add(new CezaModel());
+            StateHasChanged();
+        }
+        
+        private void RemoveCeza(int index)
+        {
+            Cezalar.RemoveAt(index);
+            StateHasChanged();
+        }
 
         // Engel
-        private void AddEngel() => Engeller.Add(new EngelModel());
-        private void RemoveEngel(int index) => Engeller.RemoveAt(index);
+        private void AddEngel()
+        {
+            Engeller.Add(new EngelModel());
+            StateHasChanged();
+        }
+        
+        private void RemoveEngel(int index)
+        {
+            Engeller.RemoveAt(index);
+            StateHasChanged();
+        }
 
         // ═══════════════════════════════════════════════════════
         // HELPER METHODS
@@ -807,32 +866,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private string GetUnvanAdi(int id)
         {
             return Unvanlar.FirstOrDefault(u => u.UnvanId == id)?.UnvanAdi ?? "-";
-        }
-
-        private string GenerateNickName(string adSoyad)
-        {
-            if (string.IsNullOrWhiteSpace(adSoyad))
-                return string.Empty;
-
-            var parts = adSoyad.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length == 0)
-                return string.Empty;
-
-            if (parts.Length == 1)
-                return parts[0].ToUpper();
-
-            // Son kelime soyad, diğerleri ad
-            var soyad = parts[^1].ToUpper();
-            var adIlkHarfler = string.Join(".", parts.Take(parts.Length - 1).Select(p => p[0].ToString().ToUpper()));
-
-            return $"{adIlkHarfler}.{soyad}";
-        }
-
-        private string GetEnumDisplayName(Enum value)
-        {
-            var field = value.GetType().GetField(value.ToString());
-            var attribute = field?.GetCustomAttribute<DisplayAttribute>();
-            return attribute?.Name ?? value.ToString();
         }
 
         // ═══════════════════════════════════════════════════════
@@ -906,7 +939,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                     subfolder: "avatars"
                 );
 
+                // Dosya sisteminin güncellenmesi için kısa bir bekleme
+                await Task.Delay(100);
+
+                // ⭐ KRITIK: Resmi önce null yap, sonra set et
+                // Bu sayede CachedImage component'i tamamen yeniden render olur
+                FormModel.Resim = null;
+                StateHasChanged();
+                await Task.Delay(50);
+                
                 FormModel.Resim = imagePath;
+                StateHasChanged();
 
                 if (IsEditMode)
                 {
@@ -915,6 +958,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                     if (response?.Success == true)
                     {
                         await _toastService.ShowSuccessAsync($" Fotoğraf başarıyla yüklendi ve kaydedildi! ({optimizedImage.Length / 1024}KB)");
+                        
+                        // Eğer kullanıcı kendi resmini güncelliyorsa, TopBar'ı güncellemek için sayfayı yenile
+                        var currentUserTcKimlikNo = _userInfoService.GetTcKimlikNo();
+                        if (FormModel.TcKimlikNo == currentUserTcKimlikNo)
+                        {
+                            await Task.Delay(500); // Toast mesajının görünmesi için kısa bekleme
+                            _navigationManager.NavigateTo(_navigationManager.Uri, forceLoad: true);
+                        }
                     }
                     else
                     {
