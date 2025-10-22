@@ -56,31 +56,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             }
             else
             {
-                // Yeni kayıt - URL'den hizmet binası kontrolü
-                if (HizmetBinasiId.HasValue && HizmetBinasiId.Value > 0)
-                {
-                    selectedHizmetBinasiId = HizmetBinasiId.Value;
-                    // Hizmet binası adını bul
-                    var bina = hizmetBinalari.FirstOrDefault(b => b.HizmetBinasiId == selectedHizmetBinasiId);
-                    hizmetBinasiAdi = bina?.HizmetBinasiAdi ?? "Bilinmeyen";
-                }
-                else
-                {
-                    // URL'de parametre yok - hata
-                    await _toastService.ShowErrorAsync("Hizmet binası seçilmeden kanal işlem eklenemez");
-                    _navigationManager.NavigateTo("/siramatik/kanal-islem");
-                    return;
-                }
-
                 // Yeni kayıt için varsayılan değerler
                 model = new KanalIslemFormModel
                 {
-                    HizmetBinasiId = selectedHizmetBinasiId,
+                    HizmetBinasiId = 0, // Kullanıcı dropdown'dan seçecek
                     BaslangicNumara = 0,
                     BitisNumara = 9999,
                     Sira = 1,
                     Aktiflik = Aktiflik.Aktif
                 };
+
+                // URL'den hizmet binası parametresi geldiyse otomatik seç
+                if (HizmetBinasiId.HasValue && HizmetBinasiId.Value > 0)
+                {
+                    model.HizmetBinasiId = HizmetBinasiId.Value;
+                }
+
                 isAktif = true;
             }
         }
@@ -128,16 +119,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
 
                     // HizmetBinasiId'yi DTO'dan al
                     selectedHizmetBinasiId = kanalIslem.HizmetBinasiId;
-                    
-                    // Hizmet binası adını bul
-                    var bina = hizmetBinalari.FirstOrDefault(b => b.HizmetBinasiId == selectedHizmetBinasiId);
+
+                    // Hizmet binası adını bul (edit modda readonly input için)
+                    var bina = hizmetBinalari.FirstOrDefault(b => b.HizmetBinasiId == kanalIslem.HizmetBinasiId);
                     hizmetBinasiAdi = bina?.HizmetBinasiAdi ?? kanalIslem.HizmetBinasiAdi;
 
                     model = new KanalIslemFormModel
                     {
                         KanalId = kanalIslem.KanalId,
                         KanalAdi = kanalIslem.KanalAdi,
-                        HizmetBinasiId = selectedHizmetBinasiId,
+                        HizmetBinasiId = kanalIslem.HizmetBinasiId,
                         BaslangicNumara = kanalIslem.BaslangicNumara,
                         BitisNumara = kanalIslem.BitisNumara,
                         Sira = kanalIslem.Sira,
@@ -147,8 +138,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                     isAktif = kanalIslem.Aktiflik == Aktiflik.Aktif;
                     eklenmeTarihi = kanalIslem.EklenmeTarihi;
                     duzenlenmeTarihi = kanalIslem.DuzenlenmeTarihi;
-                    
-                    _logger.LogInformation($"📝 Model güncellendi - KanalId: {model.KanalId}, HizmetBinasiId: {selectedHizmetBinasiId}");
+
+                    _logger.LogInformation($"📝 Model güncellendi - KanalId: {model.KanalId}, HizmetBinasiId: {model.HizmetBinasiId}");
                 }
                 else
                 {
@@ -176,15 +167,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 isSaving = true;
                 
                 _logger.LogInformation($"🔄 Form submit başladı - IsEditMode: {IsEditMode}, KanalIslemId: {KanalIslemId}");
-                _logger.LogInformation($"📝 Form değerleri - KanalId: {model.KanalId}, HizmetBinasiId: {selectedHizmetBinasiId}, Sira: {model.Sira}");
+                _logger.LogInformation($"📝 Form değerleri - KanalId: {model.KanalId}, HizmetBinasiId: {model.HizmetBinasiId}, Sira: {model.Sira}");
 
                 model.Aktiflik = isAktif ? Aktiflik.Aktif : Aktiflik.Pasif;
 
                 // Validasyon
-                if (selectedHizmetBinasiId <= 0)
+                if (model.HizmetBinasiId <= 0)
                 {
-                    _logger.LogWarning("⚠️ Hizmet binası ID geçersiz");
-                    await _toastService.ShowErrorAsync("Hizmet binası bilgisi eksik. Lütfen sayfayı yenileyin.");
+                    _logger.LogWarning("⚠️ Hizmet binası seçimi zorunlu");
+                    await _toastService.ShowErrorAsync("Lütfen bir hizmet binası seçiniz");
                     return;
                 }
 
@@ -224,7 +215,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             var createDto = new KanalIslemCreateRequestDto
             {
                 KanalId = model.KanalId,
-                HizmetBinasiId = selectedHizmetBinasiId,
+                HizmetBinasiId = model.HizmetBinasiId,
                 BaslangicNumara = model.BaslangicNumara,
                 BitisNumara = model.BitisNumara,
                 Sira = model.Sira,
@@ -257,7 +248,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             var updateDto = new KanalIslemUpdateRequestDto
             {
                 KanalId = model.KanalId,
-                HizmetBinasiId = selectedHizmetBinasiId,
+                HizmetBinasiId = model.HizmetBinasiId,
                 BaslangicNumara = model.BaslangicNumara,
                 BitisNumara = model.BitisNumara,
                 Sira = model.Sira,

@@ -73,21 +73,33 @@
                             <ValidationSummary />
                             <DataAnnotationsValidator />
 
-                            <!-- Hizmet Binası Bilgisi (Sadece Gösterim) -->
-                            @if (selectedHizmetBinasiId > 0)
-                            {
-                                <div class="mb-3">
-                                    <label class="form-label">
-                                        <i class="bx bx-building me-1"></i>Hizmet Binası
-                                    </label>
-                                    <input type="text" class="form-control" 
-                                           value="@hizmetBinasiAdi" 
+                            <!-- Hizmet Binası Seçimi -->
+                            <div class="mb-3">
+                                <label class="form-label required">
+                                    <i class="bx bx-building me-1"></i>Hizmet Binası
+                                </label>
+                                @if (IsEditMode)
+                                {
+                                    <!-- Düzenleme modunda readonly -->
+                                    <input type="text" class="form-control"
+                                           value="@hizmetBinasiAdi"
                                            disabled readonly />
-                                    <small class="text-muted">
-                                        @(IsEditMode ? "Düzenleme sırasında hizmet binası değiştirilemez" : "Index sayfasından seçilen hizmet binası")
-                                    </small>
-                                </div>
-                            }
+                                    <small class="text-muted">Düzenleme sırasında hizmet binası değiştirilemez</small>
+                                }
+                                else
+                                {
+                                    <!-- Ekleme modunda dropdown -->
+                                    <InputSelect @bind-Value="model.HizmetBinasiId" class="form-select" disabled="@isSaving">
+                                        <option value="0">-- Hizmet Binası Seçiniz --</option>
+                                        @foreach (var bina in hizmetBinalari)
+                                        {
+                                            <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => model.HizmetBinasiId)" class="text-danger small mt-1" />
+                                    <small class="text-muted">Lütfen bir hizmet binası seçiniz</small>
+                                }
+                            </div>
 
                             <!-- Kanal Seçimi -->
                             <div class="mb-3">
