@@ -229,11 +229,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
             {
                 var yeniAktiflik = altIslem.Aktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif;
 
-                var updateDto = new KanalAltUpdateRequestDto
+                var updateDto = new KanalAltIslemUpdateRequestDto
                 {
                     KanalAltId = altIslem.KanalAltId,
                     KanalIslemId = altIslem.KanalIslemId,
                     HizmetBinasiId = altIslem.HizmetBinasiId,
+                    KioskIslemGrupId = null,
                     Aktiflik = yeniAktiflik
                 };
 

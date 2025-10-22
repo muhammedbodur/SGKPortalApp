@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri
 {
-    public class KanalAltCreateRequestDto
+    public class KanalAltIslemUpdateRequestDto
     {
         [Required(ErrorMessage = "Kanal alt zorunludur")]
         [Range(1, int.MaxValue, ErrorMessage = "Geçerli bir kanal alt seçiniz")]
@@ -17,9 +17,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri
         [Range(1, int.MaxValue, ErrorMessage = "Geçerli bir hizmet binası seçiniz")]
         public int HizmetBinasiId { get; set; }
 
-        [Required(ErrorMessage = "Sıra numarası zorunludur")]
-        [Range(1, int.MaxValue, ErrorMessage = "Sıra numarası 1'den büyük olmalıdır")]
-        public int Sira { get; set; }
+        public int? KioskIslemGrupId { get; set; }
 
         [Required(ErrorMessage = "Aktiflik durumu zorunludur")]
         public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
