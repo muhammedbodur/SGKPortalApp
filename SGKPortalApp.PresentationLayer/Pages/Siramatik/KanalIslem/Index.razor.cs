@@ -47,6 +47,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
         protected override async Task OnInitializedAsync()
         {
             QuestPDF.Settings.License = LicenseType.Community;
+
             await LoadDropdownData();
 
             // TODO: Login olan kullanıcının hizmet binası ID'sini al
@@ -194,6 +195,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 var updateDto = new KanalIslemUpdateRequestDto
                 {
                     KanalId = kanal.KanalId,
+                    HizmetBinasiId = kanal.HizmetBinasiId,
                     BaslangicNumara = kanal.BaslangicNumara,
                     BitisNumara = kanal.BitisNumara,
                     Sira = kanal.Sira,
@@ -205,14 +207,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 if (result.Success)
                 {
                     kanal.Aktiflik = yeniAktiflik;
-                    kanal.DuzenlenmeTarihi = DateTime.Now;
-
-                    var mesaj = yeniAktiflik == Aktiflik.Aktif
-                        ? $"{kanal.KanalAdi} aktif hale getirildi"
-                        : $"{kanal.KanalAdi} pasif hale getirildi";
-
-                    await _toastService.ShowSuccessAsync(mesaj);
-                    ApplyFilters();
+                    await _toastService.ShowSuccessAsync($"Durum başarıyla değiştirildi");
+                    StateHasChanged();
                 }
                 else
                 {
