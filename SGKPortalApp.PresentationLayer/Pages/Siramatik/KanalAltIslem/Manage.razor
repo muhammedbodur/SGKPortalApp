@@ -78,17 +78,30 @@
                                 <label class="form-label required">
                                     <i class="bx bx-building me-1"></i>Hizmet Binası
                                 </label>
-                                <InputSelect @bind-Value="selectedHizmetBinasiId" 
-                                             class="form-select"
-                                             @onchange="OnHizmetBinasiChanged"
-                                             disabled="@isSaving">
-                                    <option value="0">-- Hizmet Binası Seçiniz --</option>
-                                    @foreach (var bina in hizmetBinalari)
-                                    {
-                                        <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
-                                    }
-                                </InputSelect>
-                                <small class="text-muted">Önce hizmet binası seçilmelidir</small>
+                                @if (IsEditMode)
+                                {
+                                    <!-- Düzenleme modunda readonly -->
+                                    <input type="text" class="form-control"
+                                           value="@hizmetBinasiAdi"
+                                           disabled readonly />
+                                    <small class="text-muted">Düzenleme sırasında hizmet binası değiştirilemez</small>
+                                }
+                                else
+                                {
+                                    <!-- Ekleme modunda dropdown -->
+                                    <select class="form-select"
+                                            value="@selectedHizmetBinasiId"
+                                            @onchange="OnHizmetBinasiChanged"
+                                            disabled="@isSaving">
+                                        <option value="0">-- Hizmet Binası Seçiniz --</option>
+                                        @foreach (var bina in hizmetBinalari)
+                                        {
+                                            <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                                        }
+                                    </select>
+                                    <ValidationMessage For="@(() => model.HizmetBinasiId)" class="text-danger small mt-1" />
+                                    <small class="text-muted">Lütfen bir hizmet binası seçiniz</small>
+                                }
                             </div>
 
                             <!-- Kanal İşlem Seçimi -->
@@ -96,16 +109,16 @@
                                 <label class="form-label required">
                                     <i class="bx bx-list-ul me-1"></i>Kanal İşlem
                                 </label>
-                                <InputSelect @bind-Value="model.KanalIslemId"
-                                             class="form-select"
-                                             @onchange="OnKanalIslemChanged"
-                                             disabled="@(isSaving || selectedHizmetBinasiId == 0)">
+                                <select class="form-select"
+                                        value="@model.KanalIslemId"
+                                        @onchange="OnKanalIslemChanged"
+                                        disabled="@(isSaving || selectedHizmetBinasiId == 0)">
                                     <option value="0">-- Kanal İşlem Seçin --</option>
                                     @foreach (var kanal in kanalIslemler)
                                     {
                                         <option value="@kanal.KanalIslemId">@kanal.KanalAdi</option>
                                     }
-                                </InputSelect>
+                                </select>
                                 <ValidationMessage For="@(() => model.KanalIslemId)" class="text-danger small mt-1" />
                                 <small class="text-muted">Seçili hizmet binasına ait kanal işlemler</small>
                             </div>

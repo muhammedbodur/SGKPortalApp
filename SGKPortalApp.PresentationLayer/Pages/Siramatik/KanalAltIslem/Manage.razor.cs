@@ -40,6 +40,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
         private List<KanalIslemResponseDto> kanalIslemler = new();
         private List<KanalAltResponseDto> kanalAltlar = new();
         private int selectedHizmetBinasiId = 0;
+        private string hizmetBinasiAdi = string.Empty;
 
         // Edit Mode Data
         private DateTime eklenmeTarihi = DateTime.Now;
@@ -70,6 +71,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                     selectedHizmetBinasiId = HizmetBinasiId.Value;
                     model.HizmetBinasiId = HizmetBinasiId.Value;
                     await LoadKanalIslemler();
+                    _logger.LogInformation($"🔗 URL'den HizmetBinasiId alındı: {HizmetBinasiId.Value}");
                 }
 
                 isAktif = true;
@@ -132,6 +134,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
             if (int.TryParse(e.Value?.ToString(), out int binaId))
             {
                 selectedHizmetBinasiId = binaId;
+                model.HizmetBinasiId = binaId; // Model'i de güncelle
                 model.KanalIslemId = 0; // Kanal işlem seçimini sıfırla
                 model.KanalAltId = 0; // Alt işlem seçimini sıfırla
                 kanalAltlar = new(); // Alt işlem listesini temizle
@@ -212,8 +215,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                         Aktiflik = altIslem.Aktiflik
                     };
 
-                    // Hizmet binasını seç ve kanal işlemleri yükle
+                    // Hizmet binasını seç ve hizmet binası adını bul (edit modda readonly input için)
                     selectedHizmetBinasiId = altIslem.HizmetBinasiId;
+                    var bina = hizmetBinalari.FirstOrDefault(b => b.HizmetBinasiId == altIslem.HizmetBinasiId);
+                    hizmetBinasiAdi = bina?.HizmetBinasiAdi ?? "Bilinmeyen";
+
+                    // Kanal işlemleri yükle
                     await LoadKanalIslemler();
 
                     // Kanal işlem seçili olduğunda KanalAlt'ları da yükle
