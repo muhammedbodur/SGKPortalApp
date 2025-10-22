@@ -192,7 +192,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 _logger.LogInformation("Kanal silindi. ID: {KanalId}", kanalId);
 
                 return ApiResponseDto<bool>
-                    .SuccessResult(true, "Kanal başarıyla silindi");
+                    .SuccessResult(true, "Kanal işlem başarıyla silindi");
             }
             catch (Exception ex)
             {

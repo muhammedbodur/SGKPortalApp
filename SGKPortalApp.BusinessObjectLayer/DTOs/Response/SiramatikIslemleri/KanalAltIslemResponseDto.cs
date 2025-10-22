@@ -7,6 +7,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
         public int KanalAltIslemId { get; set; }
         public int KanalAltId { get; set; }
         public string KanalAltAdi { get; set; } = string.Empty;
+        public int HizmetBinasiId { get; set; }
         public int KanalIslemId { get; set; }
         public string KanalIslemAdi { get; set; } = string.Empty;
         public int Sira { get; set; }

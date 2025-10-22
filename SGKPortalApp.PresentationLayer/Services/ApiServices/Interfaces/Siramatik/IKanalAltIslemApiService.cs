@@ -1,4 +1,5 @@
 using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik
@@ -11,5 +12,10 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramat
         Task<ServiceResult<List<KanalAltIslemResponseDto>>> GetByKanalIslemIdAsync(int kanalIslemId);
         Task<ServiceResult<Dictionary<int, int>>> GetPersonelSayilariAsync(int hizmetBinasiId);
         Task<ServiceResult<List<KanalAltIslemResponseDto>>> GetEslestirmeYapilmamisAsync(int hizmetBinasiId);
+        
+        // CRUD Operations
+        Task<ServiceResult<KanalAltIslemResponseDto>> CreateAsync(KanalAltCreateRequestDto dto);
+        Task<ServiceResult<KanalAltIslemResponseDto>> UpdateAsync(int id, KanalAltUpdateRequestDto dto);
+        Task<ServiceResult<bool>> DeleteAsync(int id);
     }
 }

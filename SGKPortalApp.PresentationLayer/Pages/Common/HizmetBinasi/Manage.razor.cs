@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.PresentationLayer.Models.FormModels.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
@@ -137,7 +138,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
 
         private async Task HandleSubmit()
         {
-            // ✅ Validation kontrolü
+            // Validation kontrolü
             validationErrors.Clear();
 
             if (string.IsNullOrWhiteSpace(FormModel.HizmetBinasiAdi))
@@ -283,26 +284,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
         private void NavigateToHome()
         {
             _navigationManager.NavigateTo("/");
-        }
-
-        // ═══════════════════════════════════════════════════════
-        // FORM MODEL
-        // ═══════════════════════════════════════════════════════
-
-        public class HizmetBinasiFormModel
-        {
-            [Required(ErrorMessage = "Hizmet Binası adı zorunludur")]
-            [StringLength(100, MinimumLength = 2,
-                ErrorMessage = "Hizmet Binası adı 2-100 karakter arasında olmalıdır")]
-            public string HizmetBinasiAdi { get; set; } = string.Empty;
-
-            [Range(1, int.MaxValue, ErrorMessage = "Departman seçimi zorunludur")]
-            public int DepartmanId { get; set; }
-
-            [StringLength(500, ErrorMessage = "Adres en fazla 500 karakter olabilir")]
-            public string? Adres { get; set; }
-
-            public bool IsActive { get; set; } = true;
         }
     }
 }

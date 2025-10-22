@@ -1,6 +1,5 @@
 # SGK Portal App - Kapsamlı ve Güncellenmiş Proje Şablonu
 # Son Güncelleme: 15 Ekim 2025
-# Referans: SocialSecurityInstitution projesi analizi sonrası hazırlanmıştır
 
 ## 📋 Proje Yapısı Overview
 

@@ -12,11 +12,11 @@ using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
-using SGKPortalApp.PresentationLayer.Models.FormModels;
 using SGKPortalApp.PresentationLayer.Helpers;
 using AutoMapper;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces;
+using SGKPortalApp.PresentationLayer.Models.FormModels.PersonelIslemleri;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel
 {

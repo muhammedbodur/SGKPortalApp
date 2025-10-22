@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 
-namespace SGKPortalApp.PresentationLayer.Models.FormModels
+namespace SGKPortalApp.PresentationLayer.Models.FormModels.PersonelIslemleri
 {
     public class DepartmanFormModel
     {

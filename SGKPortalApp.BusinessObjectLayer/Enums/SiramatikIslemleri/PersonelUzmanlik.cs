@@ -1,19 +1,20 @@
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri
 {
     /// <summary>
     /// Kanal personelinin uzmanlık seviyesi
     /// </summary>
-    public enum PersonelUzmanlik
+    public enum PersonelUzmanlik : int
     {
-        [Description("Normal")]
-        Normal = 0,
-
-        [Description("Uzman")]
+        [Display(Name = "Konusunda Uzman")]
         Uzman = 1,
 
-        [Description("Kıdemli Uzman")]
-        KidemliUzman = 2
+        [Display(Name = "Bilgisi Yok")]
+        BilgisiYok = 0,
+
+        [Display(Name = "Konusunda Yrd. Uzman")]
+        YrdUzman = 2
     }
 }

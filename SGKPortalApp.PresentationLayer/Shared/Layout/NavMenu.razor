@@ -287,12 +287,6 @@
                 <div>Sıramatik</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item @(IsActive("/siramatik") && !Navigation.Uri.Contains("/banko") && !Navigation.Uri.Contains("/kanal") && !Navigation.Uri.Contains("/kiosk") && !Navigation.Uri.Contains("/tv") ? "active" : "")">
-                    <a href="/siramatik" class="menu-link">
-                        <div>Dashboard</div>
-                    </a>
-                </li>
-
                 <!-- Bankolar -->
                 <li class="menu-item @(IsSectionActive("/siramatik/banko") ? "active open" : "")">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -322,35 +316,55 @@
                     </ul>
                 </li>
 
-                <!-- Kanallar -->
-                <li class="menu-item @(IsSectionActive("/siramatik/kanal") ? "active open" : "")">
+                <!-- Ana Kanal -->
+                <li class="menu-item @(IsSectionActive("/siramatik/kanal") || IsSectionActive("/siramatik/alt-kanal") || IsSectionActive("/siramatik/kanal") || IsSectionActive("/siramatik/personel-atama") ? "active open" : "")">
                     <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <div>Kanallar</div>
+                        <div>Kanal Yönetimi</div>
                     </a>
                     <ul class="menu-sub">
-                        <li class="menu-item @(IsActive("/siramatik/kanal") ? "active" : "")">
+                        <li class="menu-item @(IsActive("/siramatik/kanal") && !Navigation.Uri.Contains("/manage") ? "active" : "")">
                             <a href="/siramatik/kanal" class="menu-link">
-                                <div>Kanal Listesi</div>
+                                <div>Kanallar</div>
                             </a>
                         </li>
-                        <li class="menu-item @(IsActive("/siramatik/kanal/manage") ? "active" : "")">
+                        @* <li class="menu-item @(IsActive("/siramatik/kanal/manage") ? "active" : "")">
                             <a href="/siramatik/kanal/manage" class="menu-link">
-                                <div>Kanal Yönetimi</div>
+                                <div>Yeni Kanal</div>
                             </a>
-                        </li>
-                        <li class="menu-item @(IsActive("/siramatik/kanal/alt-kanal") ? "active" : "")">
-                            <a href="/siramatik/kanal/alt-kanal" class="menu-link">
+                        </li> *@
+                        <li class="menu-item @(IsActive("/siramatik/alt-kanal") && !Navigation.Uri.Contains("/manage") ? "active" : "")">
+                            <a href="/siramatik/alt-kanal" class="menu-link">
                                 <div>Alt Kanallar</div>
                             </a>
                         </li>
-                        <li class="menu-item @(IsActive("/siramatik/kanal/personel-atama") ? "active" : "")">
-                            <a href="/siramatik/kanal/personel-atama" class="menu-link">
-                                <div>Personel Atama</div>
+                        @* <li class="menu-item @(IsActive("/siramatik/alt-kanal/manage") ? "active" : "")">
+                            <a href="/siramatik/alt-kanal/manage" class="menu-link">
+                                <div>Yeni Alt Kanal</div>
+                            </a>
+                        </li> *@
+                        <li class="menu-item @(IsActive("/siramatik/kanal-islem") && !Navigation.Uri.Contains("/manage") ? "active" : "")">
+                            <a href="/siramatik/kanal-islem" class="menu-link">
+                                <div>Kanal İşlemleri</div>
                             </a>
                         </li>
-                        <li class="menu-item @(IsActive("/siramatik/kanal/eslestirme") ? "active" : "")">
-                            <a href="/siramatik/kanal/eslestirme" class="menu-link">
-                                <div>Eşleştirme</div>
+                        @* <li class="menu-item @(IsActive("/siramatik/kanal/manage") ? "active" : "")">
+                            <a href="/siramatik/kanal/manage" class="menu-link">
+                                <div>Yeni Kanal İşlem</div>
+                            </a>
+                        </li> *@
+                        <li class="menu-item @(IsActive("/siramatik/kanal-alt-islem") && !Navigation.Uri.Contains("/manage") ? "active" : "")">
+                            <a href="/siramatik/kanal-alt-islem" class="menu-link">
+                                <div>Alt Kanal İşlemleri</div>
+                            </a>
+                        </li>
+                        @* <li class="menu-item @(IsActive("/siramatik/kanal-alt-islem/manage") ? "active" : "")">
+                            <a href="/siramatik/kanal-alt-islem/manage" class="menu-link">
+                                <div>Yeni Alt İşlem</div>
+                            </a>
+                        </li> *@
+                        <li class="menu-item @(IsActive("/siramatik/personel-atama") ? "active" : "")">
+                            <a href="/siramatik/personel-atama" class="menu-link">
+                                <div>Personel Atama</div>
                             </a>
                         </li>
                     </ul>

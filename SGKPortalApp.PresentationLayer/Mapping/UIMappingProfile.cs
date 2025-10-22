@@ -1,7 +1,7 @@
 using AutoMapper;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
-using SGKPortalApp.PresentationLayer.Models.FormModels;
+using SGKPortalApp.PresentationLayer.Models.FormModels.PersonelIslemleri;
 
 namespace SGKPortalApp.PresentationLayer.Mapping
 {

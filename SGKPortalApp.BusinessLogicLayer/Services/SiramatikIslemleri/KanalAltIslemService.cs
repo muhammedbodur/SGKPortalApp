@@ -1,21 +1,32 @@
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 {
     public class KanalAltIslemService : IKanalAltIslemService
     {
         private readonly ISiramatikQueryRepository _siramatikQueryRepo;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
         private readonly ILogger<KanalAltIslemService> _logger;
 
         public KanalAltIslemService(
             ISiramatikQueryRepository siramatikQueryRepo,
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
             ILogger<KanalAltIslemService> logger)
         {
             _siramatikQueryRepo = siramatikQueryRepo;
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
             _logger = logger;
         }
 
@@ -167,6 +178,175 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     hizmetBinasiId);
                 return ApiResponseDto<List<KanalAltIslemResponseDto>>
                     .ErrorResult("Eşleştirilmemiş kanal alt işlemler getirilirken bir hata oluştu", ex.Message);
+            }
+        }
+
+        // CRUD Operations
+        public async Task<ApiResponseDto<KanalAltIslemResponseDto>> CreateAsync(KanalAltCreateRequestDto request)
+        {
+            try
+            {
+                if (request.KanalAltId <= 0)
+                {
+                    return ApiResponseDto<KanalAltIslemResponseDto>
+                        .ErrorResult("Geçersiz kanal alt ID");
+                }
+
+                if (request.KanalIslemId <= 0)
+                {
+                    return ApiResponseDto<KanalAltIslemResponseDto>
+                        .ErrorResult("Geçersiz kanal işlem ID");
+                }
+
+                var kanalAltIslem = _mapper.Map<KanalAltIslem>(request);
+                kanalAltIslem.Aktiflik = request.Aktiflik;
+
+                var kanalAltIslemRepo = _unitOfWork.GetRepository<IKanalAltIslemRepository>();
+                await kanalAltIslemRepo.AddAsync(kanalAltIslem);
+                await _unitOfWork.SaveChangesAsync();
+
+                var kanalAltIslemDto = _mapper.Map<KanalAltIslemResponseDto>(kanalAltIslem);
+
+                _logger.LogInformation("Yeni kanal alt işlem oluşturuldu. ID: {KanalAltIslemId}", 
+                    kanalAltIslem.KanalAltIslemId);
+
+                return ApiResponseDto<KanalAltIslemResponseDto>
+                    .SuccessResult(kanalAltIslemDto, "Kanal alt işlem başarıyla oluşturuldu");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Kanal alt işlem oluşturulurken hata oluştu");
+                return ApiResponseDto<KanalAltIslemResponseDto>
+                    .ErrorResult("Kanal alt işlem oluşturulurken bir hata oluştu", ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<KanalAltIslemResponseDto>> UpdateAsync(int kanalAltIslemId, KanalAltUpdateRequestDto request)
+        {
+            try
+            {
+                if (kanalAltIslemId <= 0)
+                {
+                    return ApiResponseDto<KanalAltIslemResponseDto>
+                        .ErrorResult("Geçersiz kanal alt işlem ID");
+                }
+
+                if (request.KanalAltId <= 0)
+                {
+                    return ApiResponseDto<KanalAltIslemResponseDto>
+                        .ErrorResult("Geçersiz kanal alt ID");
+                }
+
+                if (request.KanalIslemId <= 0)
+                {
+                    return ApiResponseDto<KanalAltIslemResponseDto>
+                        .ErrorResult("Geçersiz kanal işlem ID");
+                }
+
+                var kanalAltIslemRepo = _unitOfWork.GetRepository<IKanalAltIslemRepository>();
+                var kanalAltIslem = await kanalAltIslemRepo.GetByIdAsync(kanalAltIslemId);
+
+                if (kanalAltIslem == null)
+                {
+                    return ApiResponseDto<KanalAltIslemResponseDto>
+                        .ErrorResult("Kanal alt işlem bulunamadı");
+                }
+
+                // Update
+                kanalAltIslem.KanalAltId = request.KanalAltId;
+                kanalAltIslem.KanalIslemId = request.KanalIslemId;
+                kanalAltIslem.HizmetBinasiId = request.HizmetBinasiId;
+                kanalAltIslem.Sira = request.Sira;
+                kanalAltIslem.Aktiflik = request.Aktiflik;
+                kanalAltIslem.DuzenlenmeTarihi = DateTime.Now;
+
+                kanalAltIslemRepo.Update(kanalAltIslem);
+                await _unitOfWork.SaveChangesAsync();
+
+                var kanalAltIslemDto = _mapper.Map<KanalAltIslemResponseDto>(kanalAltIslem);
+
+                _logger.LogInformation("Kanal alt işlem güncellendi. ID: {KanalAltIslemId}", 
+                    kanalAltIslem.KanalAltIslemId);
+
+                return ApiResponseDto<KanalAltIslemResponseDto>
+                    .SuccessResult(kanalAltIslemDto, "Kanal alt işlem başarıyla güncellendi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Kanal alt işlem güncellenirken hata oluştu. ID: {KanalAltIslemId}", kanalAltIslemId);
+                return ApiResponseDto<KanalAltIslemResponseDto>
+                    .ErrorResult("Kanal alt işlem güncellenirken bir hata oluştu", ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<bool>> DeleteAsync(int kanalAltIslemId)
+        {
+            try
+            {
+                if (kanalAltIslemId <= 0)
+                {
+                    return ApiResponseDto<bool>
+                        .ErrorResult("Geçersiz kanal alt işlem ID");
+                }
+
+                var kanalAltIslemRepo = _unitOfWork.GetRepository<IKanalAltIslemRepository>();
+                var kanalAltIslem = await kanalAltIslemRepo.GetByIdAsync(kanalAltIslemId);
+
+                if (kanalAltIslem == null)
+                {
+                    return ApiResponseDto<bool>
+                        .ErrorResult("Kanal alt işlem bulunamadı");
+                }
+
+                // Soft delete
+                kanalAltIslem.SilindiMi = true;
+                kanalAltIslem.DuzenlenmeTarihi = DateTime.Now;
+
+                kanalAltIslemRepo.Update(kanalAltIslem);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("Kanal alt işlem silindi. ID: {KanalAltIslemId}", kanalAltIslemId);
+
+                return ApiResponseDto<bool>
+                    .SuccessResult(true, "Kanal alt işlem başarıyla silindi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Kanal alt işlem silinirken hata oluştu. ID: {KanalAltIslemId}", kanalAltIslemId);
+                return ApiResponseDto<bool>
+                    .ErrorResult("Kanal alt işlem silinirken bir hata oluştu", ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<KanalAltIslemResponseDto>> GetByIdAsync(int kanalAltIslemId)
+        {
+            try
+            {
+                if (kanalAltIslemId <= 0)
+                {
+                    return ApiResponseDto<KanalAltIslemResponseDto>
+                        .ErrorResult("Geçersiz kanal alt işlem ID");
+                }
+
+                var kanalAltIslemRepo = _unitOfWork.GetRepository<IKanalAltIslemRepository>();
+                var kanalAltIslem = await kanalAltIslemRepo.GetByIdAsync(kanalAltIslemId);
+
+                if (kanalAltIslem == null)
+                {
+                    return ApiResponseDto<KanalAltIslemResponseDto>
+                        .ErrorResult("Kanal alt işlem bulunamadı");
+                }
+
+                var kanalAltIslemDto = _mapper.Map<KanalAltIslemResponseDto>(kanalAltIslem);
+
+                return ApiResponseDto<KanalAltIslemResponseDto>
+                    .SuccessResult(kanalAltIslemDto, "Kanal alt işlem başarıyla getirildi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Kanal alt işlem getirilirken hata oluştu. ID: {KanalAltIslemId}", kanalAltIslemId);
+                return ApiResponseDto<KanalAltIslemResponseDto>
+                    .ErrorResult("Kanal alt işlem getirilirken bir hata oluştu", ex.Message);
             }
         }
     }

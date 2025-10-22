@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
+using SGKPortalApp.PresentationLayer.Models.FormModels.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System.ComponentModel.DataAnnotations;
@@ -216,14 +217,5 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.Il
         }
 
         // ═══════════════════════════════════════════════════════
-        // FORM MODEL
-        // ═══════════════════════════════════════════════════════
-
-        public class IlFormModel
-        {
-            [Required(ErrorMessage = "İl adı zorunludur")]
-            [StringLength(50, ErrorMessage = "İl adı en fazla 50 karakter olabilir")]
-            public string IlAdi { get; set; } = string.Empty;
-        }
     }
 }

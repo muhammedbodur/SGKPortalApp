@@ -1,0 +1,487 @@
+﻿# SIRAMATİK SİSTEMİ NASIL ÇALIŞIR? - DETAYLI ANLATIM
+
+Merhaba! Şimdi size SGK'daki sıramatik sistemini sıfırdan, adım adım anlatacağım. Sistemin her bir parçasını, nasıl çalıştığını ve neden böyle tasarlandığını anlayacaksınız.
+
+## BAŞLANGIC: ORGANIZASYON YAPISI
+
+Öncelikle SGK'nın organizasyon yapısını anlayalım. Sistemimizde her bir çalışma birimi "Departman" olarak tanımlanır. Yani departman = SGK'daki bir çalışma birimi demektir.
+
+İzmir'deki departmanlar şöyle:
+
+**1. İzmir İl Müdürlüğü (Departman):**
+İl Müdürlüğü de bir departmandır! Çünkü burada da bir sürü çalışan var. İl müdürü, müdür yardımcıları, destek personelleri, idari personeller hepsi burada çalışıyor. İl Müdürlüğü'nün de kendi servisleri var: İdari ve Mali İşler Servisi, İnsan Kaynakları Servisi, Hukuk Servisi, Bilgi İşlem Servisi gibi.
+
+**2. SGM'ler (Departmanlar):**
+İl Müdürlüğü ile aynı seviyede, bağımsız çalışan diğer departmanlar da var. Bunlara SGM (Sosyal Güvenlik Merkezi) diyoruz:
+- Menemen SGM (Departman)
+- Karşıyaka SGM (Departman)
+- Bornova SGM (Departman)
+- Konak SGM (Departman)
+- vb.
+
+Yani özetle: İzmir'de bir sürü departman var. İl Müdürlüğü bir departman, her SGM de bir departman. Hepsi eşit seviyede, bağımsız çalışma birimleri.
+
+Her departmanın (İl Müdürlüğü de dahil, her SGM de dahil) kendi içinde birden fazla servis bulunuyor. Servisler, departman içindeki daha küçük çalışma birimleridir.
+
+Örneğin Menemen SGM (Departman) içinde şu servisler olabilir: Emeklilik Servisi, İşveren Servisi, Sigortalı Tescil Servisi, Tahsis Servisi, Genel Sağlık Sigortası Servisi. Her servis kendi alanındaki işlerle ilgileniyor.
+
+Bu servislerde de personeller çalışıyor. Her personel bir departmana ve bir servise atanmış durumda. Örneğin Ahmet, Menemen SGM (departman) bünyesinde, Emeklilik Servisi'nde görevlidir.
+
+## FİZİKSEL YAPI: BİNALAR, KATLAR VE BANKOLAR
+
+Şimdi fiziksel yapıya bakalım. Bir SGM'nin birden fazla binası olabilir. Menemen SGM'nin A Binası ve B Binası gibi. Bu binalarda farklı servisler hizmet verebilir. Mesela A Binası'nın 1. katında İşveren Servisi, 2. katında Emeklilik Servisi olabilir.
+
+Her katta da "banko" dediğimiz hizmet noktaları var. Banko, vatandaşın karşısına oturup işlemlerini yaptığı yerdir. Her bankonun bir numarası var ve bu numara o SGM içinde benzersizdir. Yani Menemen SGM'de 3 nolu banko dediğimizde, bu banko sadece bir tanedir.
+
+**ÖNEMLİ:** Her banko bir **kişiye** aittir! Yani 3 nolu banko Ahmet'e atanmıştır. O bankoda Ahmet'in yetkinlik seviyesine göre sıralar gelir. Ahmet hangi alt kanallarda uzman veya yardımcı uzmansa, 3 nolu bankoya sadece o alt kanalların sıraları gelir.
+
+Mesela:
+- 3 nolu banko → Ahmet'e atanmış
+- Ahmet'in yetkinlikleri:
+  - Yaşlılık Aylığı (Uzman)
+  - Malullük (Yardımcı Uzman)
+  - Aylık Sorgulama (Uzman)
+
+Sonuç: 3 nolu bankoya sadece Yaşlılık, Malullük ve Aylık Sorgulama sıraları gelir. Başka bir işlem gelmez.
+
+Yarın Ahmet 5 nolu bankoya atanabilir, o zaman 5 nolu banko Ahmet'in yetkinliklerine göre çalışmaya başlar.
+
+Bankoların durumu da vardır: Aktif, Pasif veya Bakımda. Aktif banko çalışıyor demektir, Pasif banko kapalı demektir, Bakımda ise teknik bir sorun var, geçici kapalı demektir.
+
+## KANAL SİSTEMİ: VATANDAŞ NE İŞLEM YAPACAK?
+
+Şimdi en önemli kısımlardan birine geldik: Kanal sistemi. Vatandaş SGM'ye geldiğinde, birçok farklı işlem yapabilir. İşte bu işlemleri organize etmek için "kanal" ve "alt kanal" sistemi kullanılıyor.
+
+### KANAL NEDİR?
+
+Kanal, vatandaşın anlayabileceği dilde bir ana kategoridir. Yani vatandaş geldiğinde "Ben emeklilik işlemi yapmak istiyorum" diyebilmeli. İşte bu bir kanaldır: "Emeklilik İşlemleri". Başka kanallar da olabilir: "İşveren İşlemleri", "Sigortalı İşlemleri", "Tahsis İşlemleri", "Genel Sağlık Sigortası" gibi.
+
+Her kanalın bir özelliği daha var: Numara aralığı. Bu çok önemli! Örneğin Emeklilik İşlemleri kanalının numara aralığı 1001-1999 olsun. Bu ne demek? Bu kanaldaki tüm sıralar 1001'den başlayıp 1999'a kadar verilecek. İşveren İşlemleri kanalının numara aralığı 2001-2999 olabilir. Böylece sadece sıra numarasına bakarak hangi kanaldan alındığını anlayabilirsiniz.
+
+Her sabah saat 08:30'da sistem açılır ve bu sayaçlar sıfırlanır. Yani ilk gelen vatandaş Emeklilik kanalından sıra alırsa 1001 numarasını alır. İkinci gelen 1002'yi alır ve böyle devam eder.
+
+Her kanal **opsiyonel olarak** bir veya birden fazla servise bağlanabilir. Bu bağlantı organizasyonel amaçlıdır, sistemin çalışması için zorunlu değildir. Önemli olan personellerin hangi alt kanallarda yetkili olduğudur.
+
+### ALT KANAL NEDİR?
+
+Alt kanal ise daha spesifik işlem türleridir. Vatandaş "Emeklilik İşlemleri" kanalını seçtiğinde, daha sonra hangi emeklilik işlemini yapmak istediğini seçmesi gerekiyor. İşte bu seçenekler alt kanallardır.
+
+Örneğin Emeklilik İşlemleri kanalının altında şu alt kanallar olabilir:
+- Yaşlılık Aylığı Başvurusu
+- Malullük Başvurusu
+- Aylık Bağlama Durumu Sorgulama
+- Emekli Maaş Hesaplama
+- Emekli Sandık Aktarma
+
+Her alt kanalın da bir sırası vardır. Bu sıra, kioskta (sıra verme cihazında) hangi sırada gösterileceğini belirler. Yani en çok kullanılan işlem en üstte olabilir.
+
+## SIRA ALMA SÜRECİ: VATANDAŞ NASIL SIRA ALIR?
+
+Şimdi bir vatandaşın SGM'ye gelip sıra almasını adım adım anlatalım.
+
+1. Vatandaş sabah 08:30 ile akşam 17:30 arasında SGM'ye gelir. (Çalışma saatleri)
+
+2. Kiosk dediğimiz sıra verme cihazına gider. Bu cihaz genellikle giriş katında veya her katta olabilir.
+
+3. Ekrana dokunur ve sistem ona kanalları gösterir. Mesela:
+   - Emeklilik İşlemleri
+   - İşveren İşlemleri
+   - Sigortalı İşlemleri
+   - vb.
+
+4. Vatandaş "Emeklilik İşlemleri"ni seçer.
+
+5. Sistem ona bu kanalın altındaki alt kanalları gösterir:
+   - Yaşlılık Aylığı Başvurusu
+   - Malullük Başvurusu
+   - Aylık Bağlama Durumu
+   - vb.
+
+6. Vatandaş "Yaşlılık Aylığı Başvurusu"nu seçer.
+
+7. Sistem ona bir sıra numarası verir: 1125
+
+8. Kiosk bir fiş yazdırır. Fişte şunlar yazar:
+   - Sıra Numarası: 1125
+   - İşlem: Yaşlılık Aylığı Başvurusu
+   - Tarih ve Saat
+   - Hangi kata gitmeli: 2. Kat - Emeklilik Servisi
+
+9. Vatandaş fişi alır ve bekleme alanına gider. TV ekranını takip etmeye başlar.
+
+Bu noktada sistemde bir "sıra" kaydı oluşmuştur ve durumu "Bekliyor"dur.
+
+## ORTAK SIRA HAVUZU: EN ÖNEMLİ KAVRAM!
+
+Şimdi çok önemli bir konuya geldik: Ortak Sıra Havuzu sistemi. Bu sistem tüm sıramatik yapısının temelidir.
+
+Tüm bekleyen sıralar merkezi bir havuzda tutulur. Yani sistem bir veritabanında şu an bekleyen tüm sıraları görüyor. Mesela:
+
+- 1105 (Yaşlılık Aylığı)
+- 1107 (Malullük)
+- 1109 (Aylık Sorgulama)
+- 1112 (Yaşlılık Aylığı)
+- 1115 (Malullük)
+
+Şimdi önemli soru: Bu sıraları kim çağıracak? Cevap: Yetkili personeller!
+
+Ama burada şöyle bir durum var: Her personel her sırayı çağıramaz. Her personelin hangi alt kanallarda yetkili olduğu bellidir. Bu yetkilikleri yetkili kişi belirler (birazdan anlatacağım).
+
+Mesela Ahmet diye bir personel 3 nolu bankoda çalışıyor. **3 nolu banko Ahmet'e atanmıştır.** Ahmet'in şu alt kanallarda yetkisi var:
+- Yaşlılık Aylığı (Uzman seviyesinde)
+- Malullük (Yardımcı Uzman seviyesinde)
+- Aylık Sorgulama (Uzman seviyesinde)
+
+Ama Ahmet'in Sandık Aktarma işleminde yetkisi yok.
+
+**ÖNEMLİ:** 3 nolu banko Ahmet'e ait olduğu için, bu bankoya sadece Ahmet'in yetkili olduğu alt kanalların sıraları gelir. Yani 3 nolu bankoya gelen tüm sıralar, Ahmet'in yapabileceği işlemlerdir.
+
+Ahmet ekranına baktığında, sadece yetkili olduğu alt kanalların sıralarını görür:
+- 1105 (Yaşlılık Aylığı)------08:35
+- 1509 (Aylık Sorgulama)------08:41
+- 1106 (Yaşlılık Aylığı)------08:45
+- 1107 (Malullük)-------------08:40
+
+Ahmet ekranında bir "Sonraki Sıra" butonu vardır. Bu butona bastığında sistem otomatik olarak uzmanlık seviyesine göre EN KÜÇÜK sıra numarasını çağırır. Yani Ahmet butona bastığında 1105 çağrılır.
+
+ÇOK ÖNEMLİ: Ahmet 1105'i çağırdığı anda, bu sıra tüm sistemdeki diğer personellerin ekranından ANINDA silinir! Çünkü sıra artık "çağrıldı" durumuna geçmiştir ve başka biri çağıramaz.
+
+Aynı anda Mehmet diye başka bir personel 5 nolu bankoda çalışıyor olsun. Mehmet'in de Yaşlılık ve Aylık Sorgulama yetkileri var ama Malullük yetkisi yok. Mehmet'in ekranında:
+- 1105 (Yaşlılık)
+- 1109 (Aylık Sorgulama)
+- 1112 (Yaşlılık)
+
+Mehmet 1107'yi görmüyor çünkü o Malullük işlemi ve Mehmet'in yetkisi yok.
+
+Ahmet 1105'i çağırdığında, Mehmet'in ekranından da 1105 ANINDA kaldırılır. Çünkü o sıra artık Ahmet tarafından alındı.
+
+Bu sistem sayede:
+- Hiçbir sıra iki kere çağrılmaz
+- Sıralar otomatik en küçükten büyüğe çağrılır
+- Her personel sadece yetkili olduğu işlemleri görür
+- Sistem gerçek zamanlı çalışır (SignalR teknolojisi ile)
+
+## TV EKRANLARI: VATANDAŞ SIRA TAKİBİ
+
+Her katta veya bölümde TV ekranları vardır. Bu ekranlar vatandaşların sıralarını takip etmesi için konulmuştur.
+
+Her TV ekranı birden fazla bankonun çağrılarını gösterebilir. Mesela 2. kattaki TV:
+- 3 Nolu Banko
+- 4 Nolu Banko
+- 5 Nolu Banko
+- 6 Nolu Banko
+
+Bu bankoların çağrılarını gösterir.
+
+Ahmet 3 nolu bankodan 1105 numaralı sırayı çağırdığında, TV ekranında şu görünür:
+
+```
+1125 → 3 NOLU BANKO
+1126 → 5 NOLU BANKO
+1127 → 4 NOLU BANKO
+1105 → 3 NOLU BANKO  (YENİ ÇAĞRI - KIRMIZI RENKTE)
+```
+
+Aynı anda sesli anons da yapılır: "Bin yüz beş numaralı sıra, üç nolu bankoya"
+
+Vatandaş fişine bakar: "Benim sıram 1105" der ve TV'de görür. 3 nolu bankoya gider.
+
+TV ekranları gerçek zamanlı güncellenir. SignalR teknolojisi ile personel butona bastığı anda, tüm TV ekranları anında güncellenir.
+
+## KİOSK SİSTEMİ: SIRA VERME CİHAZLARI
+
+Kiosklarda bir özellik daha var: Her kiosk farklı alt kanalları gösterebilir.
+
+Örneğin giriş katındaki kiosk tüm alt kanalları gösterebilir. Çünkü orası genel giriş, herkes her işlem için sıra alabilir.
+
+Ama 2. kattaki kiosk sadece Emeklilik Servisi ile ilgili alt kanalları gösterebilir. Çünkü o kat Emeklilik Servisi katıdır, vatandaş zaten emeklilik işlemi için o kata çıkmıştır.
+
+Bu yapılandırma şöyle yapılır: Sistem yöneticisi "2. kat kiosku" tanımlar ve ona sadece Emeklilik kanalının alt kanallarını eşleştirir. Böylece o kiosktan sadece emeklilik sıraları verilebilir.
+
+## YETKİNLİK SEVİYELERİ VE ÖNCELİK SİSTEMİ: PERSONEL NE KADAR BİLİYOR?
+
+Her personelin her işlemi yapabileceğini düşünmeyin! Her personelin her alt kanaldaki yetkinlik seviyesi farklıdır ve bu seviye aynı zamanda o personele hangi sıranın önce geleceğini belirler.
+
+Üç seviye vardır:
+
+**Seviye 0 - Bilgisi Yok:** Personel bu işlemi hiç yapamaz. O alt kanaldan ona sıra GEL MEZ.
+
+**Seviye 1 - Uzman:** Personel o konuda uzmandır, her türlü işlemi yapabilir. Karmaşık durumları da çözebilir. Bu seviyedeki alt kanallardaki sıralar **ÖNCELİKLİDİR**.
+
+**Seviye 2 - Yardımcı Uzman:** Personel basit işlemleri yapabilir. Ama karmaşık durumlarda uzman seviyesindeki birine danışması gerekir. Bu seviyedeki sıralar **İKİNCİL ÖNCELİĞE** sahiptir.
+
+### ÖNEMLİ: ÖNCELİK SİSTEMİ
+
+Ahmet'in ekranına sıralar gelirken, sistem şöyle çalışır:
+
+**1. Önce UZMAN olduğu konuların sıraları gelir** (Seviye 1)
+**2. Sonra YARDIMCI UZMAN olduğu konuların sıraları gelir** (Seviye 2)
+
+Örnek: Ahmet'in yetkinlik seviyeleri:
+- Yaşlılık Aylığı → **Uzman (1)** ⭐ ÖNCELİKLİ
+- Aylık Sorgulama → **Uzman (1)** ⭐ ÖNCELİKLİ
+- Malullük → **Yardımcı Uzman (2)** 
+- Maaş Hesaplama → **Yardımcı Uzman (2)**
+- Sandık Aktarma → **Bilgisi Yok (0)** ❌
+
+**Ahmet'in ekranında gördüğü sıra sırası:**
+Bekleyen sıralar:
+- 1105 (Yaşlılık Aylığı)
+- 1209 (Aylık Sorgulama)
+- 1112 (Yaşlılık Aylığı)
+- 1607 (Malullük)
+- 1615 (Malullük)
+- 1018 (Maaş Hesaplama)
+
+
+Ahmet "Sonraki Sıra" butonuna bastığında:
+- **İLK ÖNCE** uzman olduğu konulardan en küçük sıra çağrılır: **1105**
+- Uzman olduğu tüm sıralar bittikten SONRA, yardımcı uzman olduğu sıralar gelir
+
+Bu sistem sayede:
+- **Uzman personeller önce kendi uzmanlık alanlarındaki işleri bitirir**
+- Yardımcı uzman oldukları konular "yedek" olarak bekler
+- Böylece iş yükü en verimli şekilde dağıtılır
+- Vatandaşlar mümkün olan en hızlı hizmeti alır
+
+Bu yetkinlik seviyelerini yetkisi olan kişi belirler (genellikle bu görevi şef yapar, ama bu işlemi yapacak kişi illede **şef unvanı** olmak zorunda değil, bir **yetki**dir). İlgili yetkiye sahip kişi, her personeli tanır ve onların hangi işlerde ne kadar yetkin olduğunu bilir. Sisteme girer ve bu seviyeleri ayarlar.
+
+## YETKİ SİSTEMİ: KİM NE YAPAR?
+
+**ÖNEMLİ:** Sıramatikte "Şef" bir unvan değildir! "Şef" bir **yetki setidir**. Yani sistemde "Şef" unvanına sahip olmayan biri bile, eğer kendisine gerekli yetkiler verilmişse, şef görevlerini yapabilir.
+
+Mesela Mehmet'in unvanı "Uzman Memur" olabilir ama kendisine aşağıdaki yetkiler verilmişse, o serviste şef görevini yerine getirir:
+- Personel-Alt Kanal Eşleştirme Yetkisi
+- Yetkinlik Seviyesi Belirleme Yetkisi  
+- Personel-Banko Atama Yetkisi
+
+Aynı şekilde bir kişi birden fazla serviste bu yetkilere sahip olabilir. Yani aynı kişi hem Emeklilik Servisi'nde hem İşveren Servisi'nde "şef görevini" yapabilir.
+
+### Bu Yetkilere Sahip Kişinin Görevleri:
+
+**1. Personel-Alt Kanal Eşleştirme:**
+İlgili yetkiye sahip kişi, hangi personelin hangi alt kanallarda çalışabileceğine karar verir.
+
+Mesela Ahmet'i sisteme alır ve der ki:
+- Ahmet Yaşlılık işlemlerinde çalışsın
+- Ahmet Malullük işlemlerinde çalışsın
+- Ahmet Aylık Sorgulama'da çalışsın
+- Ama Ahmet Sandık Aktarma'da çalışmasın
+
+**2. Yetkinlik Seviyesi Belirleme:**
+Her alt kanal için Ahmet'in seviyesini belirler:
+- Yaşlılık → Uzman (1)
+- Malullük → Yardımcı Uzman (2)
+- Aylık Sorgulama → Uzman (1)
+
+**3. Personel-Banko Atama:**
+Yetkili kişi, her personeli bir bankoya atar.
+
+Mesela bugün:
+- Ahmet 3 nolu bankoda çalışacak
+- Mehmet 5 nolu bankoda çalışacak
+- Ayşe 7 nolu bankoda çalışacak
+
+Yarın değişebilir:
+- Ahmet 5 nolu bankoda çalışacak
+- Mehmet 3 nolu bankoda çalışacak
+
+Bu atamaları yetkili kişi yapar. Sistem esnektir, günlük değiştirilebilir.
+
+### Birden Fazla Serviste Yetki
+
+Bir kişi birden fazla serviste bu yetkilere sahip olabilir! Mesela Mehmet hem Emeklilik Servisi'nde hem İşveren Servisi'nde bu yetkilere sahipse:
+
+Mehmet:
+- Emeklilik Servisi'ndeki tüm personelleri yönetir
+- İşveren Servisi'ndeki tüm personelleri yönetir
+- Her iki servisteki personel-alt kanal eşleştirmelerini yapar
+- Her iki servisteki personel-banko atamalarını yapar
+
+### Yedek Yetkilendirme Sistemi
+
+Her yetkili kişinin bir veya birden fazla yedeği olabilir.
+
+Ana yetkili kişi izinli, hastalıklı veya sisteme giriş yapmadığında, yedek yetkili otomatik olarak aktif olur ve ana yetkili kişinin tüm yetkilerine sahip olur.
+
+Örnek:
+- Ana Yetkili: Ahmet (Emeklilik Servisi)
+- Yedek Yetkili: Mehmet
+
+Ahmet izin aldığında, sistem otomatik olarak Mehmet'i aktif yapar. Mehmet artık Ahmet'in tüm yetkilerine sahiptir ve personelleri yönetebilir.
+
+**ÖNEMLİ NOT:** Sistemde bu görevleri yapmak için "Şef" unvanına sahip olmak **gerekmez**. Önemli olan, yukarıdaki **yetkilere** sahip olmaktır. Bu yetkiler herhangi bir unvana sahip herhangi bir personele verilebilir.
+
+## SIRA ÇAĞIRMA VE İŞLEM SÜRECİ
+
+Şimdi tam akışı görelim:
+
+**1. Vatandaş sıra alır:** 1125 numaralı sıra verilir. Durum: Bekliyor
+
+**2. Personel ekranına bakar:** Ahmet 3 nolu bankoda oturuyor. Ekranında bekleyen sıralar var:
+   - 1105 (Yaşlılık)
+   - 1107 (Malullük)
+   - 1109 (Aylık Sorgulama)
+   - 1112 (Yaşlılık)
+   - 1125 (Yaşlılık)
+
+**3. Ahmet "Sonraki Sıra" butonuna basar:** Sistem otomatik 1105'i seçer (en küçük)
+
+**4. Sıra çağrılır:** 
+   - Sıra durumu "Bekliyor" → "Çağrıldı" olur
+   - TV ekranında görünür: "1105 → 3 NOLU BANKO"
+   - Sesli anons: "Bin yüz beş numaralı sıra, üç nolu bankoya"
+   - Tüm personellerin ekranından 1105 silinir (kimse bir daha çağıramaz)
+
+**5. Vatandaş bankoya gider:** 1105 numaralı vatandaş 3 nolu bankoya gelir
+
+**6. Ahmet işlemi başlatır:** çağırma butonu zaten işlemi başlatmış anlamına gelir
+   - Sıra durumu "Çağrıldı" → "İşlemde" olur
+   - İşlem başlama zamanı kaydedilir
+
+**7. Ahmet işlemi yapar:** Vatandaşın emeklilik başvurusunu alır, evrakları kontrol eder, sisteme girer...
+
+**8. İşlem tamamlanır:** Ahmet "İşlemi Tamamla" butonuna basar veya bir sonraki sırayı çağırırsa mevcut işlem bitmiş kabul edilir.
+   - Sıra durumu "İşlemde" → "Tamamlandı" olur
+   - İşlem bitiş zamanı kaydedilir
+   - İstatistikler güncellenir (kaç dakika sürdü, vb.)
+
+**9. Ahmet sonraki sıraya geçer:** "Sonraki Sıra" butonuna tekrar basar, sistem 1107'yi (sonraki en küçük) çağırır
+
+## MOLA SİSTEMİ
+
+Personel ara verebilir. Mesela tuvalete gidecek, yemek yiyecek veya kısa bir mola verecek.
+
+Ahmet portaldan çıkış yaptığında veya connection ı gittiğinde:
+- Ahmet'in durumu "Molada/Çevrimdışı" olur
+- Artık ona sıra gelmez
+- Ekranında "Login Ol" butonu görünür
+
+Ahmet geri geldiğinde login olup işlemlerine devam eder
+
+## SIRA İPTAL ETME
+
+Bazen vatandaş gelmeyebilir veya vazgeçebilir. Personel sırayı iptal edebilir.
+
+Ahmet 1105'i çağırdı ama vatandaş gelmedi. Ahmet "Sırayı İptal Et" butonuna basar:
+- Sıra durumu "İptal" olur
+- Log kaydedilir (Hangi sıra, kim tarafından, ne zaman iptal edildi)
+- Ahmet sonraki sıraya geçebilir
+
+## İSTATİSTİKLER VE RAPORLAR
+
+Sistem her şeyi kaydediyor:
+- Her sıranın ne zaman alındığı
+- Ne zaman çağrıldığı
+- Ne zaman işlem başladığı
+- Ne zaman tamamlandığı
+- Toplam bekleme süresi
+- Toplam işlem süresi
+- Hangi personel yaptı
+- Hangi alt kanal işlemiydi
+
+Bu verilerle şunlar yapılabilir:
+- Günlük sıra sayısı raporu
+- Aylık istatistikler
+- Personel performans raporları (Ahmet günde kaç sıra bitiriyor?)
+- Hangi alt kanal en çok kullanılıyor?
+- Ortalama bekleme süresi ne kadar?
+- Hangi saatlerde yoğunluk var?
+
+## NUMARA ARALIKLARI SİSTEMİ: NEDEN ÖNEMLİ?
+
+Her kanalın numara aralığı var dedik. Peki neden? Çünkü bu şu avantajları sağlıyor:
+
+**1. Kolay Tanıma:** Vatandaş 1125 numaralı sıra aldı. Personel sadece numaraya bakarak "Bu Emeklilik işlemi" diyor (çünkü 1000-1999 arası Emeklilik).
+
+**2. TV Ekranında Filtreleme:** 2. katta sadece Emeklilik servisi var. TV ekranı sadece 1000-1999 arasındaki sıraları gösterebilir. Böylece o kattaki vatandaşlar sadece kendi sıralarını görür.
+
+**3. Günlük Sıfırlama:** Her sabah 08:30'da sayaçlar sıfırlanır ve her kanal kendi başlangıç numarasından başlar. Böylece her gün temiz başlanır.
+
+**4. Kapasite Planlaması:** 1000-1999 arası 999 sıra demek. Yani Emeklilik kanalında günde maksimum 999 sıra verilebilir. Bu yeterli mi, değil mi, kapasite planlaması yapılabilir.
+
+## YÖNETİM HİYERARŞİSİ
+
+Sistemi şöyle bir hiyerarşi yönetiyor:
+
+**Bilgi İşlem:**
+- Sistem ayarlarını yapar
+- Binaları, katları tanımlar
+- Kanalları ve numara aralıklarını belirler
+- Tüm yetkileri verebilir
+
+**İnsan Kaynakları:**
+- SGM'leri (departmanları) tanımlar
+- Servisleri tanımlar
+- Personelleri işe alır ve SGM'lere atar
+- Personelleri servislere atar
+
+**Müdür Yardımcısı (SGM Bazlı):**
+- Kendi SGM'sindeki işleri yönetir
+- Supervisor atar
+- Raporları görüntüler
+
+**Supervisor (SGM Bazlı):**
+- Kendi SGM'sindeki servislere yetkili kişiler atar
+- Yetkili kişileri denetler
+- Kanal ve banko planlaması yapar
+
+**Yetkili Kişi (Servis Bazlı - "Şef Görevini Yapan"):**
+- Kendi servisindeki personelleri yönetir
+- Personel-alt kanal eşleştirmeleri yapar
+- Yetkinlik seviyelerini belirler
+- Personel-banko atamalarını yapar
+- Günlük operasyonel yönetimi yapar
+- **NOT:** Bu görevi yapmak için "Şef" unvanına sahip olmak gerekmez, sadece gerekli yetkilere sahip olmak yeterlidir
+
+**Personel:**
+- Bankoda oturur
+- Sıra çağırır
+- İşlemleri yapar
+- Sıraları tamamlar
+
+## GERÇEK ZAMANLI SİSTEM: SİGNALR
+
+Tüm sistem gerçek zamanlı çalışır. Bunu SignalR teknolojisi sağlar.
+
+Mesela:
+- Ahmet bir sıra çağırdı → TÜM personellerin ekranı ANINDA güncellenir
+- Vatandaş kiosktan sıra aldı → Personel ekranına ANINDA düşer
+- TV ekranları ANINDA güncellenir
+- Hiçbir yerde sayfa yenilemeye gerek yoktur
+
+Bu sayede sistemde hiçbir gecikme olmaz, herkes aynı anda aynı bilgiyi görür.
+
+## ÇALIŞMA SAATLERİ VE GÜNLÜK DÖNGÜ
+
+Sistem her gün şöyle çalışır:
+
+**08:30:** Sistem açılır, tüm sayaçlar sıfırlanır. İlk sıralar verilebilir.
+
+**08:30 - 17:30:** Aktif çalışma saati. Vatandaşlar gelir, sıra alır, işlemlerini yapar.
+
+**17:30:** Sistem kapanır. Artık yeni sıra verilemez.
+
+**17:30 sonrası:** Personeller o gün alınmış ama tamamlanmamış sıraları bitirmeye çalışır. Tamamlayamadıkları sıralar "İptal" olarak işaretlenebilir veya ertesi güne kalabilir.
+
+**Gece:** Sistem bakımı, yedekleme, raporların hazırlanması.
+
+**Ertesi gün 08:30:** Yeni gün başlar, sayaçlar sıfırlanır, her şey baştan başlar.
+
+## SONUÇ: NEDEN BU KADAR KARMAŞIK?
+
+Şimdi sorabilirsiniz: "Bu kadar detaylı bir sistem neden gerekli?"
+
+Cevap basit: Çünkü SGK'da günde binlerce vatandaş hizmet alıyor. Her vatandaşın işlemi farklı. Her personelin yetkinliği farklı. Her servisin iş yükü farklı.
+
+Bu sistem sayede:
+- Vatandaş en kısa sürede hizmet alır
+- Personeller sadece yetkili oldukları işleri yapar
+- İş yükü dengeli dağıtılır
+- Her şey kayıt altındadır
+- Raporlar ve analizler yapılabilir
+- Sistem şeffaftır ve adildir
+
+İşte sıramatik sistemi budur! Her parçası birbiriyle entegre, gerçek zamanlı çalışan, esnek, ölçeklenebilir ve kullanıcı dostu bir sistem.
+
+Umarım sistemi anlamışsınızdır. Başka sorularınız varsa sormaktan çekinmeyin!

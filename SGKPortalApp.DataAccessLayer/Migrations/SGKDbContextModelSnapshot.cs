@@ -2220,6 +2220,9 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("KanalAltIslemId"));
 
+                    b.Property<int>("Aktiflik")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("DuzenlenmeTarihi")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -2242,9 +2245,6 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Property<int>("KanalAltId")
                         .HasColumnType("int");
 
-                    b.Property<int>("KanalAltIslemAktiflik")
-                        .HasColumnType("int");
-
                     b.Property<int>("KanalIslemId")
                         .HasColumnType("int");
 
@@ -2261,6 +2261,9 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("SilinmeTarihi")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("Sira")
+                        .HasColumnType("int");
 
                     b.HasKey("KanalAltIslemId");
 
@@ -2285,6 +2288,9 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("KanalIslemId"));
+
+                    b.Property<int>("Aktiflik")
+                        .HasColumnType("int");
 
                     b.Property<int>("BaslangicNumara")
                         .HasColumnType("int");
@@ -2314,8 +2320,10 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Property<int>("KanalId")
                         .HasColumnType("int");
 
-                    b.Property<int>("KanalIslemAktiflik")
-                        .HasColumnType("int");
+                    b.Property<string>("KanalIslemAdi")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("SilenKullanici")
                         .HasColumnType("nvarchar(max)");
@@ -2327,6 +2335,9 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
 
                     b.Property<DateTime?>("SilinmeTarihi")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("Sira")
+                        .HasColumnType("int");
 
                     b.HasKey("KanalIslemId");
 
@@ -2347,6 +2358,9 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("KanalPersonelId"));
 
+                    b.Property<int>("Aktiflik")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("DuzenlenmeTarihi")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -2364,9 +2378,6 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("KanalAltIslemId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KanalAltIslemPersonelAktiflik")
                         .HasColumnType("int");
 
                     b.Property<string>("PersonelTcKimlikNo")

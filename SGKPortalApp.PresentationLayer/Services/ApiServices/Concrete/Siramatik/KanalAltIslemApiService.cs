@@ -1,4 +1,5 @@
 using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
@@ -218,6 +219,108 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             {
                 _logger.LogError(ex, "GetEslestirmeYapilmamisAsync Exception");
                 return ServiceResult<List<KanalAltIslemResponseDto>>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<KanalAltIslemResponseDto>> CreateAsync(KanalAltCreateRequestDto dto)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("kanalaltislem", dto);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("CreateAsync failed: {Error}", errorContent);
+                    return ServiceResult<KanalAltIslemResponseDto>.Fail("Kanal alt işlem oluşturulamadı.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<KanalAltIslemResponseDto>>();
+
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return ServiceResult<KanalAltIslemResponseDto>.Ok(
+                        apiResponse.Data,
+                        apiResponse.Message ?? "Kanal alt işlem başarıyla oluşturuldu"
+                    );
+                }
+
+                return ServiceResult<KanalAltIslemResponseDto>.Fail(
+                    apiResponse?.Message ?? "Kanal alt işlem oluşturulamadı"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "CreateAsync Exception");
+                return ServiceResult<KanalAltIslemResponseDto>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<KanalAltIslemResponseDto>> UpdateAsync(int id, KanalAltUpdateRequestDto dto)
+        {
+            try
+            {
+                var response = await _httpClient.PutAsJsonAsync($"kanalaltislem/{id}", dto);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("UpdateAsync failed: {Error}", errorContent);
+                    return ServiceResult<KanalAltIslemResponseDto>.Fail("Kanal alt işlem güncellenemedi.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<KanalAltIslemResponseDto>>();
+
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return ServiceResult<KanalAltIslemResponseDto>.Ok(
+                        apiResponse.Data,
+                        apiResponse.Message ?? "Kanal alt işlem başarıyla güncellendi"
+                    );
+                }
+
+                return ServiceResult<KanalAltIslemResponseDto>.Fail(
+                    apiResponse?.Message ?? "Kanal alt işlem güncellenemedi"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "UpdateAsync Exception");
+                return ServiceResult<KanalAltIslemResponseDto>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<bool>> DeleteAsync(int id)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"kanalaltislem/{id}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("DeleteAsync failed: {Error}", errorContent);
+                    return ServiceResult<bool>.Fail("Kanal alt işlem silinemedi.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
+
+                if (apiResponse?.Success == true)
+                {
+                    return ServiceResult<bool>.Ok(
+                        true,
+                        apiResponse.Message ?? "Kanal alt işlem başarıyla silindi"
+                    );
+                }
+
+                return ServiceResult<bool>.Fail(
+                    apiResponse?.Message ?? "Kanal alt işlem silinemedi"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DeleteAsync Exception");
+                return ServiceResult<bool>.Fail($"Hata: {ex.Message}");
             }
         }
     }

@@ -9,10 +9,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
     {
         public KanalMappingProfile()
         {
-            // Request -> Entity
+            // Request -> Entity (Kanal için)
             CreateMap<KanalCreateRequestDto, Kanal>()
                 .ForMember(dest => dest.KanalId, opt => opt.Ignore())
-                .ForMember(dest => dest.Aktiflik, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
@@ -20,13 +19,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
                 .ForMember(dest => dest.KanalIslemleri, opt => opt.Ignore());
 
             CreateMap<KanalUpdateRequestDto, Kanal>()
+                .ForMember(dest => dest.KanalId, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
                 .ForMember(dest => dest.KanalAltlari, opt => opt.Ignore())
                 .ForMember(dest => dest.KanalIslemleri, opt => opt.Ignore());
 
-            // Entity -> Response
+            // Entity -> Response (Kanal için)
             CreateMap<Kanal, KanalResponseDto>()
                 .ForMember(dest => dest.KanalAltSayisi,
                     opt => opt.MapFrom(src => src.KanalAltlari != null ? src.KanalAltlari.Count : 0))

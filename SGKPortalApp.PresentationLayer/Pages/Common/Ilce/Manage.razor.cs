@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.PresentationLayer.Models.FormModels.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System.ComponentModel.DataAnnotations;
@@ -257,18 +258,5 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.Ilce
         }
 
         // ═══════════════════════════════════════════════════════
-        // FORM MODEL
-        // ═══════════════════════════════════════════════════════
-
-        public class IlceFormModel
-        {
-            [Required(ErrorMessage = "İl seçimi zorunludur")]
-            [Range(1, int.MaxValue, ErrorMessage = "Geçerli bir il seçiniz")]
-            public int IlId { get; set; }
-
-            [Required(ErrorMessage = "İlçe adı zorunludur")]
-            [StringLength(50, ErrorMessage = "İlçe adı en fazla 50 karakter olabilir")]
-            public string IlceAdi { get; set; } = string.Empty;
-        }
     }
 }

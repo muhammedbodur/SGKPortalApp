@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 
 namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
 {
@@ -75,6 +76,44 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         public async Task<IActionResult> GetEslestirmeYapilmamis(int hizmetBinasiId)
         {
             var result = await _kanalAltIslemService.GetEslestirmeYapilmamisAsync(hizmetBinasiId);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Yeni kanal alt işlem oluşturur
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] KanalAltCreateRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _kanalAltIslemService.CreateAsync(request);
+            return result.Success 
+                ? CreatedAtAction(nameof(GetByIdWithDetails), new { id = result.Data?.KanalAltIslemId }, result) 
+                : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Kanal alt işlem günceller
+        /// </summary>
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] KanalAltUpdateRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _kanalAltIslemService.UpdateAsync(id, request);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Kanal alt işlem siler (soft delete)
+        /// </summary>
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _kanalAltIslemService.DeleteAsync(id);
             return result.Success ? Ok(result) : BadRequest(result);
         }
     }
