@@ -36,6 +36,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
+                .Include(ka => ka.Kanal)
                 .Include(ka => ka.KanalAltIslemleri)
                 .FirstOrDefaultAsync(ka => ka.KanalAltId == kanalAltId);
         }
@@ -45,6 +46,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
+                .Include(ka => ka.Kanal)
                 .Include(ka => ka.KanalAltIslemleri)
                 .ToListAsync();
         }

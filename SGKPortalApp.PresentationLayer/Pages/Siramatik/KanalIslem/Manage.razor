@@ -125,10 +125,21 @@
                             <!-- Sıra -->
                             <div class="mb-3">
                                 <label class="form-label fw-bold">
-                                    Sıra Numarası <span class="text-danger">*</span>
+                                    Sıra Numarası Başlangıç <span class="text-danger">*</span>
                                 </label>
                                 <InputNumber @bind-Value="model.Sira" 
                                              class="form-control" 
+                                             placeholder="1" />
+                                <small class="text-muted">Kanal işlemlerinin sıralanmasında kullanılır</small>
+                                <ValidationMessage For="@(() => model.Sira)" class="text-danger" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    Sıra Numarası Bitiş <span class="text-danger">*</span>
+                                </label>
+                                <InputNumber @bind-Value="model.Sira"
+                                             class="form-control"
                                              placeholder="1" />
                                 <small class="text-muted">Kanal işlemlerinin sıralanmasında kullanılır</small>
                                 <ValidationMessage For="@(() => model.Sira)" class="text-danger" />
