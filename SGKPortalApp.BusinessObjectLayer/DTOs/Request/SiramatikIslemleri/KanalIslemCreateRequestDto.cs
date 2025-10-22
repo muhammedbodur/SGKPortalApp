@@ -16,7 +16,10 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri
         public string KanalIslemAdi { get; set; } = string.Empty;
 
         [Range(1, 999, ErrorMessage = "Sıra 1 ile 999 arasında olmalıdır")]
-        public int Sira { get; set; } = 1;
+        public int BaslangicNumara { get; set; }
+
+        [Range(1, 999, ErrorMessage = "Sıra 1 ile 999 arasında olmalıdır")]
+        public int BitisNumara { get; set; }
 
         public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
     }

@@ -142,8 +142,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 // Update
                 kanalIslem.KanalId = request.KanalId;
                 kanalIslem.HizmetBinasiId = request.HizmetBinasiId;
-                kanalIslem.KanalIslemAdi = request.KanalIslemAdi.Trim();
-                kanalIslem.Sira = request.Sira;
                 kanalIslem.Aktiflik = request.Aktiflik;
                 kanalIslem.DuzenlenmeTarihi = DateTime.Now;
 

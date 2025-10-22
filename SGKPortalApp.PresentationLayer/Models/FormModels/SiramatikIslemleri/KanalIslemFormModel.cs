@@ -17,9 +17,11 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels.SiramatikIslemleri
         [Range(1, int.MaxValue, ErrorMessage = "Lütfen bir hizmet binası seçiniz")]
         public int HizmetBinasiId { get; set; }
 
-        [Required(ErrorMessage = "Sıra numarası zorunludur")]
-        [Range(1, 999, ErrorMessage = "Sıra numarası 1-999 arasında olmalıdır")]
-        public int Sira { get; set; }
+        [Range(0, 9999, ErrorMessage = "Başlangıç numarası 0 ile 9999 arasında olmalıdır")]
+        public int BaslangicNumara { get; set; }
+
+        [Range(0, 9999, ErrorMessage = "Bitiş numarası 0 ile 9999 arasında olmalıdır")]
+        public int BitisNumara { get; set; }
 
         public Aktiflik Aktiflik { get; set; }
     }

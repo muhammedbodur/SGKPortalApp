@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Models.FormModels.SiramatikIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
 {
@@ -30,13 +30,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
         private KanalIslemFormModel model = new();
         private bool isAktif = true;
 
+        // Dropdown Data
+        private List<KanalResponseDto> anaKanallar = new();
+        private List<HizmetBinasiResponseDto> hizmetBinalari = new();
+
         // Edit Mode Data
         private DateTime eklenmeTarihi = DateTime.Now;
         private DateTime? duzenlenmeTarihi;
-
-        // Dropdown Lists
-        private List<KanalResponseDto> kanallar = new();
-        private List<HizmetBinasiResponseDto> hizmetBinalari = new();
 
         protected override async Task OnInitializedAsync()
         {
@@ -49,6 +49,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             else
             {
                 // Yeni kayıt için varsayılan değerler
+                model = new KanalIslemFormModel
+                {
+                    BaslangicNumara = 0,
+                    BitisNumara = 9999,
+                    Aktiflik = Aktiflik.Aktif
+                };
+                isAktif = true;
             }
         }
 
@@ -56,22 +63,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
         {
             try
             {
-                var kanalTask = _kanalService.GetAllAsync();
-                var hizmetBinasiTask = _hizmetBinasiService.GetAllAsync();
-
-                await Task.WhenAll(kanalTask, hizmetBinasiTask);
-
-                var kanalResult = await kanalTask;
-                var hizmetBinasiResult = await hizmetBinasiTask;
-
+                // Ana kanalları yükle
+                var kanalResult = await _kanalService.GetActiveAsync();
                 if (kanalResult.Success && kanalResult.Data != null)
                 {
-                    kanallar = kanalResult.Data.Where(k => k.Aktiflik == Aktiflik.Aktif).ToList();
+                    anaKanallar = kanalResult.Data;
                 }
 
-                if (hizmetBinasiResult.Success && hizmetBinasiResult.Data != null)
+                // Hizmet binalarını yükle
+                var binaResult = await _hizmetBinasiService.GetActiveAsync();
+                if (binaResult.Success && binaResult.Data != null)
                 {
-                    hizmetBinalari = hizmetBinasiResult.Data.Where(h => h.HizmetBinasiAktiflik == Aktiflik.Aktif).ToList();
+                    hizmetBinalari = binaResult.Data;
                 }
             }
             catch (Exception ex)
@@ -86,36 +89,38 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             try
             {
                 isLoading = true;
+
                 var result = await _kanalIslemService.GetByIdAsync(KanalIslemId!.Value);
 
                 if (result.Success && result.Data != null)
                 {
-                    var kanal = result.Data;
-                    
+                    var kanalIslem = result.Data;
+
                     model = new KanalIslemFormModel
                     {
-                        KanalId = kanal.KanalId,
-                        HizmetBinasiId = kanal.HizmetBinasiId,
-                        KanalIslemAdi = kanal.KanalIslemAdi,
-                        Sira = kanal.Sira,
-                        Aktiflik = kanal.Aktiflik
+                        KanalId = kanalIslem.KanalId,
+                        HizmetBinasiId = kanalIslem.HizmetBinasiId,
+                        KanalIslemAdi = kanalIslem.KanalIslemAdi,
+                        BaslangicNumara = kanalIslem.BaslangicNumara,
+                        BitisNumara = kanalIslem.BitisNumara,
+                        Aktiflik = kanalIslem.Aktiflik
                     };
 
-                    isAktif = kanal.Aktiflik == Aktiflik.Aktif;
-                    eklenmeTarihi = kanal.EklenmeTarihi;
-                    duzenlenmeTarihi = kanal.DuzenlenmeTarihi;
+                    isAktif = kanalIslem.Aktiflik == Aktiflik.Aktif;
+                    eklenmeTarihi = kanalIslem.EklenmeTarihi;
+                    duzenlenmeTarihi = kanalIslem.DuzenlenmeTarihi;
                 }
                 else
                 {
                     await _toastService.ShowErrorAsync(result.Message ?? "Kanal işlem bulunamadı");
-                    _navigationManager.NavigateTo("/siramatik/kanal");
+                    _navigationManager.NavigateTo("/siramatik/kanalislem");
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Kanal işlem yüklenirken hata oluştu");
                 await _toastService.ShowErrorAsync("Kanal işlem yüklenirken bir hata oluştu");
-                _navigationManager.NavigateTo("/siramatik/kanal");
+                _navigationManager.NavigateTo("/siramatik/kanalislem");
             }
             finally
             {
@@ -129,7 +134,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             {
                 isSaving = true;
 
-                // Aktiflik durumunu modele aktar
                 model.Aktiflik = isAktif ? Aktiflik.Aktif : Aktiflik.Pasif;
 
                 if (IsEditMode)
@@ -154,13 +158,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
 
         private async Task CreateKanalIslem()
         {
-            // Form modelini KanalIslemCreateRequestDto'ya dönüştür
             var createDto = new KanalIslemCreateRequestDto
             {
                 KanalId = model.KanalId,
                 HizmetBinasiId = model.HizmetBinasiId,
-                KanalIslemAdi = model.KanalIslemAdi,
-                Sira = model.Sira,
+                BaslangicNumara = model.BaslangicNumara,
+                BitisNumara = model.BitisNumara,
                 Aktiflik = model.Aktiflik
             };
 
@@ -169,7 +172,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             if (result.Success)
             {
                 await _toastService.ShowSuccessAsync($"{model.KanalIslemAdi} başarıyla eklendi");
-                _navigationManager.NavigateTo("/siramatik/kanal");
+                _navigationManager.NavigateTo("/siramatik/kanalislem");
             }
             else
             {
@@ -179,13 +182,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
 
         private async Task UpdateKanalIslem()
         {
-            // Form modelini KanalIslemUpdateRequestDto'ya dönüştür
             var updateDto = new KanalIslemUpdateRequestDto
             {
                 KanalId = model.KanalId,
                 HizmetBinasiId = model.HizmetBinasiId,
-                KanalIslemAdi = model.KanalIslemAdi,
-                Sira = model.Sira,
+                BaslangicNumara = model.BaslangicNumara,
+                BitisNumara = model.BitisNumara,
                 Aktiflik = model.Aktiflik
             };
 
@@ -194,7 +196,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             if (result.Success)
             {
                 await _toastService.ShowSuccessAsync($"{model.KanalIslemAdi} başarıyla güncellendi");
-                _navigationManager.NavigateTo("/siramatik/kanal");
+                _navigationManager.NavigateTo("/siramatik/kanalislem");
             }
             else
             {
@@ -204,7 +206,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
 
         private void NavigateBack()
         {
-            _navigationManager.NavigateTo("/siramatik/kanal");
+            _navigationManager.NavigateTo("/siramatik/kanalislem");
         }
     }
 }

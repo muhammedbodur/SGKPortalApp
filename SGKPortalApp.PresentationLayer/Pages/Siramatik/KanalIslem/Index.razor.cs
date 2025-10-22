@@ -132,7 +132,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                     KanalId = kanal.KanalId,
                     HizmetBinasiId = kanal.HizmetBinasiId,
                     KanalIslemAdi = kanal.KanalIslemAdi,
-                    Sira = kanal.Sira,
+                    BaslangicNumara = kanal.BaslangicNumara,
+                    BitisNumara = kanal.BitisNumara,
                     Aktiflik = yeniAktiflik
                 };
 

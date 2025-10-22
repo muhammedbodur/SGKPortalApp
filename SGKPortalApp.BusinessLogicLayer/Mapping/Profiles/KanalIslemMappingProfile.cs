@@ -32,8 +32,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
             CreateMap<KanalIslem, KanalIslemResponseDto>()
                 .ForMember(dest => dest.KanalAdi,
                     opt => opt.MapFrom(src => src.Kanal != null ? src.Kanal.KanalAdi : string.Empty))
+                .ForMember(dest => dest.HizmetBinasiAdi,
+                    opt => opt.MapFrom(src => src.HizmetBinasi != null
+                        ? src.HizmetBinasi.HizmetBinasiAdi
+                        : string.Empty))
                 .ForMember(dest => dest.KanalAltIslemSayisi,
-                    opt => opt.MapFrom(src => src.KanalAltIslemleri != null ? src.KanalAltIslemleri.Count : 0));
+                    opt => opt.MapFrom(src => src.KanalAltIslemleri != null
+                        ? src.KanalAltIslemleri.Count
+                        : 0));
         }
     }
 }
