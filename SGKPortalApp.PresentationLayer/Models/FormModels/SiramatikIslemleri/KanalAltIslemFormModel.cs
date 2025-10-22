@@ -17,7 +17,7 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels.SiramatikIslemleri
         [Range(1, int.MaxValue, ErrorMessage = "Lütfen bir hizmet binası seçiniz")]
         public int HizmetBinasiId { get; set; }
 
-        public int Sira { get; set; }
+        public int? KioskIslemGrupId { get; set; }
         public Aktiflik Aktiflik { get; set; }
     }
 }

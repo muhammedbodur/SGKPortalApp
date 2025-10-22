@@ -14,8 +14,8 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramat
         Task<ServiceResult<List<KanalAltIslemResponseDto>>> GetEslestirmeYapilmamisAsync(int hizmetBinasiId);
         
         // CRUD Operations
-        Task<ServiceResult<KanalAltIslemResponseDto>> CreateAsync(KanalAltCreateRequestDto dto);
-        Task<ServiceResult<KanalAltIslemResponseDto>> UpdateAsync(int id, KanalAltUpdateRequestDto dto);
+        Task<ServiceResult<KanalAltIslemResponseDto>> CreateAsync(KanalAltIslemCreateRequestDto dto);
+        Task<ServiceResult<KanalAltIslemResponseDto>> UpdateAsync(int id, KanalAltIslemUpdateRequestDto dto);
         Task<ServiceResult<bool>> DeleteAsync(int id);
     }
 }

@@ -285,12 +285,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
 
         private async Task CreateKanalAltIslem()
         {
-            var createDto = new KanalAltCreateRequestDto
+            var createDto = new KanalAltIslemCreateRequestDto
             {
                 KanalAltId = model.KanalAltId,
                 KanalIslemId = model.KanalIslemId,
                 HizmetBinasiId = model.HizmetBinasiId,
-                Sira = model.Sira,
+                KioskIslemGrupId = model.KioskIslemGrupId,
                 Aktiflik = model.Aktiflik
             };
 
@@ -309,12 +309,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
 
         private async Task UpdateKanalAltIslem()
         {
-            var updateDto = new KanalAltUpdateRequestDto
+            var updateDto = new KanalAltIslemUpdateRequestDto
             {
                 KanalAltId = model.KanalAltId,
                 KanalIslemId = model.KanalIslemId,
                 HizmetBinasiId = model.HizmetBinasiId,
-                Sira = model.Sira,
+                KioskIslemGrupId = model.KioskIslemGrupId,
                 Aktiflik = model.Aktiflik
             };
 
