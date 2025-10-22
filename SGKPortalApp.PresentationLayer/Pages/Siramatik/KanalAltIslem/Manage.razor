@@ -70,6 +70,7 @@
 
                     <div class="card-body">
                         <EditForm Model="@model" OnValidSubmit="HandleSubmit">
+                            <ValidationSummary />
                             <DataAnnotationsValidator />
 
                             <!-- Hizmet Binası Seçimi -->
@@ -95,8 +96,9 @@
                                 <label class="form-label required">
                                     <i class="bx bx-list-ul me-1"></i>Kanal İşlem
                                 </label>
-                                <InputSelect @bind-Value="model.KanalIslemId" 
+                                <InputSelect @bind-Value="model.KanalIslemId"
                                              class="form-select"
+                                             @onchange="OnKanalIslemChanged"
                                              disabled="@(isSaving || selectedHizmetBinasiId == 0)">
                                     <option value="0">-- Kanal İşlem Seçin --</option>
                                     @foreach (var kanal in kanalIslemler)
@@ -106,6 +108,24 @@
                                 </InputSelect>
                                 <ValidationMessage For="@(() => model.KanalIslemId)" class="text-danger small mt-1" />
                                 <small class="text-muted">Seçili hizmet binasına ait kanal işlemler</small>
+                            </div>
+
+                            <!-- Alt İşlem Seçimi -->
+                            <div class="mb-3">
+                                <label class="form-label required">
+                                    <i class="bx bx-subdirectory-right me-1"></i>Alt İşlem
+                                </label>
+                                <InputSelect @bind-Value="model.KanalAltId"
+                                             class="form-select"
+                                             disabled="@(isSaving || model.KanalIslemId == 0)">
+                                    <option value="0">-- Alt İşlem Seçin --</option>
+                                    @foreach (var kanalAlt in kanalAltlar)
+                                    {
+                                        <option value="@kanalAlt.KanalAltId">@kanalAlt.KanalAltAdi</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => model.KanalAltId)" class="text-danger small mt-1" />
+                                <small class="text-muted">Seçili kanala ait alt işlemler</small>
                             </div>
 
                             <!-- Aktiflik -->

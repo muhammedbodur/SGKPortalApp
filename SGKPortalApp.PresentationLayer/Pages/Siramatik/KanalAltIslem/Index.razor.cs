@@ -248,7 +248,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                         ? $"{altIslem.KanalAltAdi} aktif hale getirildi"
                         : $"{altIslem.KanalAltAdi} pasif hale getirildi";
 
-                    await _toastService.ShowErrorAsync(mesaj);
+                    await _toastService.ShowSuccessAsync(mesaj);
                     ApplyFilters();
                 }
                 else
