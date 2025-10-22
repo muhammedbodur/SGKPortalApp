@@ -43,14 +43,14 @@
             <div class="row g-3">
                 <!-- Arama -->
                 <div class="col-md-5">
-                    <label class="form-label">Kanal İşlem Ara</label>
+                    <label class="form-label">Kanal Ara</label>
                     <div class="input-group">
                         <span class="input-group-text">
                             <i class="bx bx-search"></i>
                         </span>
                         <input type="text"
                                class="form-control"
-                               placeholder="Kanal işlem adı..."
+                               placeholder="Kanal adı, hizmet binası..."
                                @bind="searchText"
                                @bind:event="oninput"
                                @onkeyup="OnSearchChanged" />
@@ -142,7 +142,7 @@
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li>
-                                            <a class="dropdown-item" href="/siramatik/kanal/manage/@kanal.KanalIslemId">
+                                            <a class="dropdown-item" href="/siramatik/kanal-islem/manage/@kanal.KanalIslemId">
                                                 <i class="bx bx-edit me-2"></i>
                                                 Düzenle
                                             </a>
@@ -164,11 +164,17 @@
                                 </div>
                             </div>
 
-                            <h5 class="card-title mb-2">@kanal.KanalIslemAdi</h5>
+                            <h5 class="card-title mb-2">@kanal.KanalAdi</h5>
                             <div class="mb-2">
                                 <small class="text-muted">
-                                    <i class="bx bx-category me-1"></i>
-                                    Ana Kanal: <strong>@kanal.KanalAdi</strong>
+                                    <i class="bx bx-building me-1"></i>
+                                    Hizmet Binası: <strong>@kanal.HizmetBinasiAdi</strong>
+                                </small>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted">
+                                    <i class="bx bx-hash me-1"></i>
+                                    Sıra Aralığı: <strong>@kanal.BaslangicNumara - @kanal.BitisNumara</strong>
                                 </small>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -211,7 +217,7 @@
                         <p class="text-muted">@(string.IsNullOrEmpty(searchText) ? "Henüz kanal işlem eklenmemiş." : "Arama kriterlerine uygun sonuç bulunamadı.")</p>
                         @if (string.IsNullOrEmpty(searchText))
                         {
-                            <a href="/siramatik/kanal/manage" class="btn btn-primary mt-3">
+                            <a href="/siramatik/kanal-islem/manage" class="btn btn-primary mt-3">
                                 <i class="bx bx-plus me-1"></i>
                                 İlk Kanal İşlemi Ekle
                             </a>
@@ -238,7 +244,7 @@
                 </div>
                 <div class="modal-body">
                     <p class="mb-0">
-                        <strong>@selectedKanal?.KanalIslemAdi</strong> kanal işlemini silmek istediğinizden emin misiniz?
+                        <strong>@selectedKanal?.KanalAdi</strong> kanal işlemini silmek istediğinizden emin misiniz?
                     </p>
                     @if (selectedKanal?.KanalAltIslemSayisi > 0)
                     {

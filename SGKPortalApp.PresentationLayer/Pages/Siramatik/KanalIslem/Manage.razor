@@ -17,7 +17,7 @@
                 </a>
             </li>
             <li class="breadcrumb-item">
-                <a href="/siramatik/kanalislem">
+                <a href="/siramatik/kanal-islem">
                     Kanal İşlem Yönetimi
                 </a>
             </li>
@@ -128,6 +128,19 @@
                                     <ValidationMessage For="@(() => model.BitisNumara)" class="text-danger small mt-1" />
                                     <small class="text-muted">Sıra aralığının bitişi</small>
                                 </div>
+                            </div>
+
+                            <!-- Sıra -->
+                            <div class="mb-3">
+                                <label class="form-label required">
+                                    <i class="bx bx-sort me-1"></i>Gösterilme Sırası
+                                </label>
+                                <InputNumber @bind-Value="model.Sira"
+                                             class="form-control"
+                                             placeholder="1"
+                                             disabled="@isSaving" />
+                                <ValidationMessage For="@(() => model.Sira)" class="text-danger small mt-1" />
+                                <small class="text-muted">Kiosk ekranında gösterilme sırası (1-999)</small>
                             </div>
 
                             <!-- Aktiflik -->

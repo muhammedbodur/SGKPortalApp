@@ -17,10 +17,6 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         [InverseProperty("KanalIslemleri")]
         public required Kanal Kanal { get; set; }
 
-        [Required]
-        [StringLength(100)]
-        public string KanalIslemAdi { get; set; } = string.Empty;
-
         public int Sira { get; set; }
 
         public int HizmetBinasiId { get; set; }

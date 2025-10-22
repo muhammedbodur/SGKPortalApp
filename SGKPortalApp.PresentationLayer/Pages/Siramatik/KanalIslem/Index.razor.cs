@@ -96,7 +96,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 if (!string.IsNullOrEmpty(searchText))
                 {
                     var search = searchText.ToLowerInvariant();
-                    if (!k.KanalIslemAdi.ToLowerInvariant().Contains(search))
+                    if (!k.KanalAdi.ToLowerInvariant().Contains(search))
                     {
                         return false;
                     }
@@ -114,10 +114,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             // Sıralama
             filteredKanallar = sortBy switch
             {
-                "name-desc" => query.OrderByDescending(k => k.KanalIslemAdi).ToList(),
+                "name-desc" => query.OrderByDescending(k => k.KanalAdi).ToList(),
                 "date-newest" => query.OrderByDescending(k => k.EklenmeTarihi).ToList(),
                 "date-oldest" => query.OrderBy(k => k.EklenmeTarihi).ToList(),
-                _ => query.OrderBy(k => k.KanalIslemAdi).ToList() // name-asc (default)
+                _ => query.OrderBy(k => k.KanalAdi).ToList() // name-asc (default)
             };
         }
 
@@ -131,7 +131,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 {
                     KanalId = kanal.KanalId,
                     HizmetBinasiId = kanal.HizmetBinasiId,
-                    KanalIslemAdi = kanal.KanalIslemAdi,
                     BaslangicNumara = kanal.BaslangicNumara,
                     BitisNumara = kanal.BitisNumara,
                     Aktiflik = yeniAktiflik
@@ -145,8 +144,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                     kanal.DuzenlenmeTarihi = DateTime.Now;
 
                     var mesaj = yeniAktiflik == Aktiflik.Aktif
-                        ? $"{kanal.KanalIslemAdi} aktif hale getirildi"
-                        : $"{kanal.KanalIslemAdi} pasif hale getirildi";
+                        ? $"{kanal.KanalAdi} aktif hale getirildi"
+                        : $"{kanal.KanalAdi} pasif hale getirildi";
 
                     await _toastService.ShowSuccessAsync(mesaj);
                     ApplyFilters();
@@ -189,7 +188,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 {
                     allKanallar.Remove(selectedKanal);
                     ApplyFilters();
-                    await _toastService.ShowSuccessAsync($"{selectedKanal.KanalIslemAdi} başarıyla silindi");
+                    await _toastService.ShowSuccessAsync($"{selectedKanal.KanalAdi} başarıyla silindi");
                     HideDeleteConfirm();
                 }
                 else
@@ -245,11 +244,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 int row = 2;
                 foreach (var kanal in filteredKanallar)
                 {
-                    worksheet.Cell(row, 1).Value = kanal.KanalIslemAdi;
-                    worksheet.Cell(row, 2).Value = kanal.KanalAdi;
-                    worksheet.Cell(row, 3).Value = kanal.Sira;
-                    worksheet.Cell(row, 4).Value = kanal.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
-                    worksheet.Cell(row, 5).Value = kanal.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm");
+                    worksheet.Cell(row, 1).Value = kanal.KanalAdi;
+                    worksheet.Cell(row, 2).Value = kanal.Sira;
+                    worksheet.Cell(row, 3).Value = kanal.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
+                    worksheet.Cell(row, 4).Value = kanal.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm");
                     row++;
                 }
 
@@ -298,7 +296,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                             table.Header(header =>
                             {
                                 header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Kanal İşlem").Bold();
-                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Ana Kanal").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Kanal").Bold();
                                 header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Sıra").Bold();
                                 header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Durum").Bold();
                                 header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Eklenme").Bold();
@@ -306,7 +304,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
 
                             foreach (var kanal in filteredKanallar)
                             {
-                                table.Cell().Padding(4).Text(kanal.KanalIslemAdi);
                                 table.Cell().Padding(4).Text(kanal.KanalAdi);
                                 table.Cell().Padding(4).Text(kanal.Sira.ToString());
                                 table.Cell().Padding(4).Text(kanal.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif");

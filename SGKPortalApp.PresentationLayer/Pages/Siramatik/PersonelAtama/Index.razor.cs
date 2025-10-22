@@ -160,11 +160,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
         private void GroupKanalIslemler()
         {
             kanalIslemler = kanalAltIslemler
-                .GroupBy(x => new { x.KanalIslemId, x.KanalIslemAdi })
+                .GroupBy(x => new { x.KanalIslemId, x.KanalAdi })
                 .Select(g => new KanalIslemGroup
                 {
                     KanalIslemId = g.Key.KanalIslemId,
-                    KanalIslemAdi = g.Key.KanalIslemAdi,
+                    KanalIslemAdi = g.Key.KanalAdi,
                     AltIslemler = g.OrderBy(x => x.Sira).ToList()
                 })
                 .OrderBy(x => x.KanalIslemAdi)

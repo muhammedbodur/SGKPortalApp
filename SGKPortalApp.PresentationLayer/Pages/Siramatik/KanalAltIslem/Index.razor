@@ -50,7 +50,7 @@
                         <option value="0">Tümü</option>
                         @foreach (var kanal in kanalIslemler)
                         {
-                            <option value="@kanal.KanalIslemId">@kanal.KanalIslemAdi</option>
+                            <option value="@kanal.KanalIslemId">@kanal.KanalAdi</option>
                         }
                     </select>
                 </div>
@@ -151,7 +151,7 @@
                                             <td>
                                                 <span class="badge bg-label-info">
                                                     <i class="bx bx-list-ul me-1"></i>
-                                                    @altIslem.KanalIslemAdi
+                                                    @altIslem.KanalAdi
                                                 </span>
                                             </td>
                                             <td>

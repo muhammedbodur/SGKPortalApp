@@ -157,7 +157,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
 
                     return true;
                 })
-                .OrderBy(a => a.KanalIslemAdi)
+                .OrderBy(a => a.KanalAdi)
                 .ThenBy(a => a.Sira)
                 .ThenBy(a => a.KanalAltAdi)
                 .ToList();
@@ -271,11 +271,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                 foreach (var item in filteredAltIslemler)
                 {
                     worksheet.Cell(row, 1).Value = item.KanalAltAdi;
-                    worksheet.Cell(row, 2).Value = item.KanalAltAdi;
-                    worksheet.Cell(row, 3).Value = item.KanalIslemAdi;
-                    worksheet.Cell(row, 4).Value = item.Sira;
-                    worksheet.Cell(row, 5).Value = item.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
-                    worksheet.Cell(row, 6).Value = item.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm");
+                    worksheet.Cell(row, 2).Value = item.KanalAdi;
+                    worksheet.Cell(row, 3).Value = item.Sira;
+                    worksheet.Cell(row, 4).Value = item.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
+                    worksheet.Cell(row, 5).Value = item.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm");
                     row++;
                 }
 
@@ -336,7 +335,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                             {
                                 table.Cell().Padding(4).Text(item.KanalAltAdi);
                                 table.Cell().Padding(4).Text(item.KanalAltAdi);
-                                table.Cell().Padding(4).Text(item.KanalIslemAdi);
+                                table.Cell().Padding(4).Text(item.KanalAdi);
                                 table.Cell().Padding(4).Text(item.Sira.ToString());
                                 table.Cell().Padding(4).Text(item.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif");
                                 table.Cell().Padding(4).Text(item.EklenmeTarihi.ToString("dd.MM.yyyy"));

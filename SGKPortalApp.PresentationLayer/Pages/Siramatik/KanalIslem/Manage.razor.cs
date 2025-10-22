@@ -53,6 +53,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 {
                     BaslangicNumara = 0,
                     BitisNumara = 9999,
+                    Sira = 1,
                     Aktiflik = Aktiflik.Aktif
                 };
                 isAktif = true;
@@ -99,10 +100,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                     model = new KanalIslemFormModel
                     {
                         KanalId = kanalIslem.KanalId,
+                        KanalAdi = kanalIslem.KanalAdi,
                         HizmetBinasiId = kanalIslem.HizmetBinasiId,
-                        KanalIslemAdi = kanalIslem.KanalIslemAdi,
                         BaslangicNumara = kanalIslem.BaslangicNumara,
                         BitisNumara = kanalIslem.BitisNumara,
+                        Sira = kanalIslem.Sira,
                         Aktiflik = kanalIslem.Aktiflik
                     };
 
@@ -113,14 +115,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 else
                 {
                     await _toastService.ShowErrorAsync(result.Message ?? "Kanal işlem bulunamadı");
-                    _navigationManager.NavigateTo("/siramatik/kanalislem");
+                    _navigationManager.NavigateTo("/siramatik/kanal-islem");
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Kanal işlem yüklenirken hata oluştu");
                 await _toastService.ShowErrorAsync("Kanal işlem yüklenirken bir hata oluştu");
-                _navigationManager.NavigateTo("/siramatik/kanalislem");
+                _navigationManager.NavigateTo("/siramatik/kanal-islem");
             }
             finally
             {
@@ -164,6 +166,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 HizmetBinasiId = model.HizmetBinasiId,
                 BaslangicNumara = model.BaslangicNumara,
                 BitisNumara = model.BitisNumara,
+                Sira = model.Sira,
                 Aktiflik = model.Aktiflik
             };
 
@@ -171,8 +174,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
 
             if (result.Success)
             {
-                await _toastService.ShowSuccessAsync($"{model.KanalIslemAdi} başarıyla eklendi");
-                _navigationManager.NavigateTo("/siramatik/kanalislem");
+                await _toastService.ShowSuccessAsync("Kanal işlem başarıyla eklendi");
+                _navigationManager.NavigateTo("/siramatik/kanal-islem");
             }
             else
             {
@@ -188,6 +191,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 HizmetBinasiId = model.HizmetBinasiId,
                 BaslangicNumara = model.BaslangicNumara,
                 BitisNumara = model.BitisNumara,
+                Sira = model.Sira,
                 Aktiflik = model.Aktiflik
             };
 
@@ -195,8 +199,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
 
             if (result.Success)
             {
-                await _toastService.ShowSuccessAsync($"{model.KanalIslemAdi} başarıyla güncellendi");
-                _navigationManager.NavigateTo("/siramatik/kanalislem");
+                await _toastService.ShowSuccessAsync("Kanal işlem başarıyla güncellendi");
+                _navigationManager.NavigateTo("/siramatik/kanal-islem");
             }
             else
             {
@@ -206,7 +210,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
 
         private void NavigateBack()
         {
-            _navigationManager.NavigateTo("/siramatik/kanalislem");
+            _navigationManager.NavigateTo("/siramatik/kanal-islem");
         }
     }
 }

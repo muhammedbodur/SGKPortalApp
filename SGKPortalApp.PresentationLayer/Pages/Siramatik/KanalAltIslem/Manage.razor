@@ -83,7 +83,7 @@
                                     <option value="0">-- Kanal İşlem Seçin --</option>
                                     @foreach (var kanal in kanalIslemler)
                                     {
-                                        <option value="@kanal.KanalIslemId">@kanal.KanalIslemAdi</option>
+                                        <option value="@kanal.KanalIslemId">@kanal.KanalAdi</option>
                                     }
                                 </InputSelect>
                                 <ValidationMessage For="@(() => model.KanalIslemId)" class="text-danger small mt-1" />

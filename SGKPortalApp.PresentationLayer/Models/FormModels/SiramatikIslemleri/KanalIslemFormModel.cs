@@ -8,10 +8,7 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels.SiramatikIslemleri
         [Required(ErrorMessage = "Ana kanal seçimi zorunludur")]
         [Range(1, int.MaxValue, ErrorMessage = "Lütfen bir kanal seçiniz")]
         public int KanalId { get; set; }
-
-        [Required(ErrorMessage = "Kanal işlem adı zorunludur")]
-        [StringLength(100, MinimumLength = 2, ErrorMessage = "Kanal işlem adı 2-100 karakter arasında olmalıdır")]
-        public string KanalIslemAdi { get; set; } = string.Empty;
+        public string KanalAdi { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Hizmet binası seçimi zorunludur")]
         [Range(1, int.MaxValue, ErrorMessage = "Lütfen bir hizmet binası seçiniz")]
@@ -22,6 +19,9 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels.SiramatikIslemleri
 
         [Range(0, 9999, ErrorMessage = "Bitiş numarası 0 ile 9999 arasında olmalıdır")]
         public int BitisNumara { get; set; }
+
+        [Range(1, 999, ErrorMessage = "Sıra 1 ile 999 arasında olmalıdır")]
+        public int Sira { get; set; } = 1;
 
         public Aktiflik Aktiflik { get; set; }
     }

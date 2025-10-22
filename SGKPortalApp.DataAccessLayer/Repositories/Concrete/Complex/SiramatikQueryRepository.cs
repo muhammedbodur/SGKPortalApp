@@ -22,6 +22,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         {
             var query = from kai in _context.KanalAltIslemleri
                         join ka in _context.KanallarAlt on kai.KanalAltId equals ka.KanalAltId
+                        join k in _context.Kanallar on ka.KanalId equals k.KanalId
                         join ki in _context.KanalIslemleri on kai.KanalIslemId equals ki.KanalIslemId
                         select new KanalAltIslemResponseDto
                         {
@@ -29,7 +30,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             KanalAltId = kai.KanalAltId,
                             KanalAltAdi = ka.KanalAltAdi,
                             KanalIslemId = kai.KanalIslemId,
-                            KanalIslemAdi = ki.KanalIslemAdi,
+                            KanalAdi = k.KanalAdi,
                             Sira = kai.Sira,
                             Aktiflik = kai.Aktiflik,
                             EklenmeTarihi = kai.EklenmeTarihi,
@@ -45,6 +46,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         {
             var query = from kai in _context.KanalAltIslemleri
                         join ka in _context.KanallarAlt on kai.KanalAltId equals ka.KanalAltId
+                        join k in _context.Kanallar on ka.KanalId equals k.KanalId
                         join ki in _context.KanalIslemleri on kai.KanalIslemId equals ki.KanalIslemId
                         join hb in _context.HizmetBinalari on kai.HizmetBinasiId equals hb.HizmetBinasiId
                         where kai.HizmetBinasiId == hizmetBinasiId
@@ -54,7 +56,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             KanalAltId = kai.KanalAltId,
                             KanalAltAdi = ka.KanalAltAdi,
                             KanalIslemId = kai.KanalIslemId,
-                            KanalIslemAdi = ki.KanalIslemAdi,
+                            KanalAdi = k.KanalAdi,
                             Sira = kai.Sira,
                             Aktiflik = kai.Aktiflik,
                             EklenmeTarihi = kai.EklenmeTarihi,
@@ -70,6 +72,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         {
             var query = from kai in _context.KanalAltIslemleri
                         join ka in _context.KanallarAlt on kai.KanalAltId equals ka.KanalAltId
+                        join k in _context.Kanallar on ka.KanalId equals k.KanalId
                         join ki in _context.KanalIslemleri on kai.KanalIslemId equals ki.KanalIslemId
                         where kai.KanalAltIslemId == kanalAltIslemId
                         select new KanalAltIslemResponseDto
@@ -78,7 +81,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             KanalAltId = kai.KanalAltId,
                             KanalAltAdi = ka.KanalAltAdi,
                             KanalIslemId = kai.KanalIslemId,
-                            KanalIslemAdi = ki.KanalIslemAdi,
+                            KanalAdi = k.KanalAdi,
                             Sira = kai.Sira,
                             Aktiflik = kai.Aktiflik,
                             EklenmeTarihi = kai.EklenmeTarihi,
@@ -94,6 +97,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         {
             var query = from kai in _context.KanalAltIslemleri
                         join ka in _context.KanallarAlt on kai.KanalAltId equals ka.KanalAltId
+                        join k in _context.Kanallar on ka.KanalId equals k.KanalId
                         join ki in _context.KanalIslemleri on kai.KanalIslemId equals ki.KanalIslemId
                         where kai.KanalIslemId == kanalIslemId
                         select new KanalAltIslemResponseDto
@@ -102,7 +106,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             KanalAltId = kai.KanalAltId,
                             KanalAltAdi = ka.KanalAltAdi,
                             KanalIslemId = kai.KanalIslemId,
-                            KanalIslemAdi = ki.KanalIslemAdi,
+                            KanalAdi = k.KanalAdi,
                             Sira = kai.Sira,
                             Aktiflik = kai.Aktiflik,
                             EklenmeTarihi = kai.EklenmeTarihi,
@@ -129,7 +133,6 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             KanalIslemId = ki.KanalIslemId,
                             KanalId = ki.KanalId,
                             KanalAdi = k.KanalAdi,
-                            KanalIslemAdi = ki.KanalIslemAdi,
                             Sira = ki.Sira,
                             Aktiflik = ki.Aktiflik,
                             EklenmeTarihi = ki.EklenmeTarihi,
@@ -150,7 +153,6 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             KanalIslemId = ki.KanalIslemId,
                             KanalId = ki.KanalId,
                             KanalAdi = k.KanalAdi,
-                            KanalIslemAdi = ki.KanalIslemAdi,
                             Sira = ki.Sira,
                             Aktiflik = ki.Aktiflik,
                             EklenmeTarihi = ki.EklenmeTarihi,
@@ -235,6 +237,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         {
             var query = from kai in _context.KanalAltIslemleri
                         join ka in _context.KanallarAlt on kai.KanalAltId equals ka.KanalAltId
+                        join k in _context.Kanallar on ka.KanalId equals k.KanalId
                         join ki in _context.KanalIslemleri on kai.KanalIslemId equals ki.KanalIslemId
                         where kai.HizmetBinasiId == hizmetBinasiId &&
                               !_context.KanalPersonelleri.Any(kp => kp.KanalAltIslemId == kai.KanalAltIslemId && 
@@ -245,7 +248,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             KanalAltId = kai.KanalAltId,
                             KanalAltAdi = ka.KanalAltAdi,
                             KanalIslemId = kai.KanalIslemId,
-                            KanalIslemAdi = ki.KanalIslemAdi,
+                            KanalAdi = k.KanalAdi,
                             Sira = kai.Sira,
                             Aktiflik = kai.Aktiflik,
                             EklenmeTarihi = kai.EklenmeTarihi,

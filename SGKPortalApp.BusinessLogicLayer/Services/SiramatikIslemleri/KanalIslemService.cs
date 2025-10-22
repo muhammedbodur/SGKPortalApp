@@ -32,8 +32,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             try
             {
                 var kanalIslemRepo = _unitOfWork.GetRepository<IKanalIslemRepository>();
-                var kanalIslemler = await kanalIslemRepo.GetAllAsync();
-                
+                var kanalIslemler = await kanalIslemRepo.GetAllWithDetailsAsync();
+
                 var kanalIslemDtos = _mapper.Map<List<KanalIslemResponseDto>>(kanalIslemler);
 
                 return ApiResponseDto<List<KanalIslemResponseDto>>
@@ -84,10 +84,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             try
             {
                 // Validation
-                if (string.IsNullOrWhiteSpace(request.KanalIslemAdi))
+                if (request.KanalId <= 0)
                 {
                     return ApiResponseDto<KanalIslemResponseDto>
-                        .ErrorResult("Kanal işlem adı boş olamaz");
+                        .ErrorResult("Kanal seçimi zorunludur");
+                }
+
+                if (request.HizmetBinasiId <= 0)
+                {
+                    return ApiResponseDto<KanalIslemResponseDto>
+                        .ErrorResult("Hizmet binası seçimi zorunludur");
+                }
+
+                if (request.BaslangicNumara >= request.BitisNumara)
+                {
+                    return ApiResponseDto<KanalIslemResponseDto>
+                        .ErrorResult("Başlangıç numarası, bitiş numarasından küçük olmalıdır");
                 }
 
                 var kanalIslem = _mapper.Map<KanalIslem>(request);
@@ -99,15 +111,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 var kanalIslemDto = _mapper.Map<KanalIslemResponseDto>(kanalIslem);
 
-                _logger.LogInformation("Yeni kanal işlem oluşturuldu. ID: {KanalIslemId}, Ad: {KanalIslemAdi}", 
-                    kanalIslem.KanalIslemId, kanalIslem.KanalIslemAdi);
+                _logger.LogInformation("Yeni kanal işlem oluşturuldu. ID: {KanalIslemId}, KanalId: {KanalId}, HizmetBinasiId: {HizmetBinasiId}",
+                    kanalIslem.KanalIslemId, kanalIslem.KanalId, kanalIslem.HizmetBinasiId);
 
                 return ApiResponseDto<KanalIslemResponseDto>
                     .SuccessResult(kanalIslemDto, "Kanal işlem başarıyla oluşturuldu");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kanal işlem oluşturulurken hata oluştu. Ad: {KanalIslemAdi}", request.KanalIslemAdi);
+                _logger.LogError(ex, "Kanal işlem oluşturulurken hata oluştu. KanalId: {KanalId}", request.KanalId);
                 return ApiResponseDto<KanalIslemResponseDto>
                     .ErrorResult("Kanal işlem oluşturulurken bir hata oluştu", ex.Message);
             }
@@ -124,10 +136,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         .ErrorResult("Geçersiz kanal işlem ID");
                 }
 
-                if (string.IsNullOrWhiteSpace(request.KanalIslemAdi))
+                if (request.KanalId <= 0)
                 {
                     return ApiResponseDto<KanalIslemResponseDto>
-                        .ErrorResult("Kanal işlem adı boş olamaz");
+                        .ErrorResult("Kanal seçimi zorunludur");
+                }
+
+                if (request.HizmetBinasiId <= 0)
+                {
+                    return ApiResponseDto<KanalIslemResponseDto>
+                        .ErrorResult("Hizmet binası seçimi zorunludur");
+                }
+
+                if (request.BaslangicNumara >= request.BitisNumara)
+                {
+                    return ApiResponseDto<KanalIslemResponseDto>
+                        .ErrorResult("Başlangıç numarası, bitiş numarasından küçük olmalıdır");
                 }
 
                 var kanalIslemRepo = _unitOfWork.GetRepository<IKanalIslemRepository>();
@@ -142,6 +166,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 // Update
                 kanalIslem.KanalId = request.KanalId;
                 kanalIslem.HizmetBinasiId = request.HizmetBinasiId;
+                kanalIslem.BaslangicNumara = request.BaslangicNumara;
+                kanalIslem.BitisNumara = request.BitisNumara;
                 kanalIslem.Aktiflik = request.Aktiflik;
                 kanalIslem.DuzenlenmeTarihi = DateTime.Now;
 
@@ -150,8 +176,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 var kanalIslemDto = _mapper.Map<KanalIslemResponseDto>(kanalIslem);
 
-                _logger.LogInformation("Kanal işlem güncellendi. ID: {KanalIslemId}, Ad: {KanalIslemAdi}", 
-                    kanalIslem.KanalIslemId, kanalIslem.KanalIslemAdi);
+                _logger.LogInformation("Kanal işlem güncellendi. ID: {KanalIslemId}, KanalId: {KanalId}",
+                    kanalIslem.KanalIslemId, kanalIslem.KanalId);
 
                 return ApiResponseDto<KanalIslemResponseDto>
                     .SuccessResult(kanalIslemDto, "Kanal işlem başarıyla güncellendi");
@@ -215,7 +241,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 var kanalIslemRepo = _unitOfWork.GetRepository<IKanalIslemRepository>();
                 var kanalIslemler = await kanalIslemRepo.GetByKanalAsync(kanalId);
-                
+
                 var kanalIslemDtos = _mapper.Map<List<KanalIslemResponseDto>>(kanalIslemler);
 
                 return ApiResponseDto<List<KanalIslemResponseDto>>
@@ -241,7 +267,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 var kanalIslemRepo = _unitOfWork.GetRepository<IKanalIslemRepository>();
                 var kanalIslemler = await kanalIslemRepo.GetByHizmetBinasiAsync(hizmetBinasiId);
-                
+
                 var kanalIslemDtos = _mapper.Map<List<KanalIslemResponseDto>>(kanalIslemler);
 
                 return ApiResponseDto<List<KanalIslemResponseDto>>
@@ -261,7 +287,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             {
                 var kanalIslemRepo = _unitOfWork.GetRepository<IKanalIslemRepository>();
                 var kanalIslemler = await kanalIslemRepo.GetActiveAsync();
-                
+
                 var kanalIslemDtos = _mapper.Map<List<KanalIslemResponseDto>>(kanalIslemler);
 
                 return ApiResponseDto<List<KanalIslemResponseDto>>
