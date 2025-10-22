@@ -16,13 +16,6 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri
         [StringLength(100, ErrorMessage = "Kanal alt işlem adı en fazla 100 karakter olabilir")]
         public string KanalAltAdi { get; set; } = string.Empty;
 
-        [StringLength(500, ErrorMessage = "Açıklama en fazla 500 karakter olabilir")]
-        public string? Aciklama { get; set; }
-
-        [Required(ErrorMessage = "Sıra numarası zorunludur")]
-        [Range(1, int.MaxValue, ErrorMessage = "Sıra numarası 1'den büyük olmalıdır")]
-        public int Sira { get; set; }
-
         [Required(ErrorMessage = "Aktiflik durumu zorunludur")]
         public Aktiflik Aktiflik { get; set; }
     }

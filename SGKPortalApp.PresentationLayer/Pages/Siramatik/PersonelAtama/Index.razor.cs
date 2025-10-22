@@ -167,7 +167,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
                 {
                     KanalIslemId = g.Key.KanalIslemId,
                     KanalIslemAdi = g.Key.KanalAdi,
-                    AltIslemler = g.OrderBy(x => x.Sira).ToList()
+                    AltIslemler = g.OrderBy(x => x.KanalAltAdi).ToList()
                 })
                 .OrderBy(x => x.KanalIslemAdi)
                 .ToList();

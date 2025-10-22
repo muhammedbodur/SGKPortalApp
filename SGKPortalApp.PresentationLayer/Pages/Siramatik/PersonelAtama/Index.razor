@@ -117,7 +117,7 @@
                                 <th style="min-width: 200px; position: sticky; left: 0; background: #f8f9fa; z-index: 11;">
                                     <i class="bx bx-user me-1"></i>Personel
                                 </th>
-                                @foreach (var altIslem in kanalAltIslemler.OrderBy(x => x.KanalAdi).ThenBy(x => x.Sira))
+                                @foreach (var altIslem in kanalAltIslemler.OrderBy(x => x.KanalAdi))
                                 {
                                     <th class="text-center" 
                                         style="min-width: 100px; max-width: 120px; font-size: 0.75rem; padding: 0.5rem 0.2rem;"
@@ -145,7 +145,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    @foreach (var altIslem in kanalAltIslemler.OrderBy(x => x.KanalAdi).ThenBy(x => x.Sira))
+                                    @foreach (var altIslem in kanalAltIslemler.OrderBy(x => x.KanalAdi))
                                     {
                                         <td class="text-center p-1">
                                             @{

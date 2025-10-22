@@ -6,8 +6,10 @@ using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
@@ -16,6 +18,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
     {
         [Inject] private IKanalAltIslemApiService _kanalAltIslemService { get; set; } = default!;
         [Inject] private IKanalIslemApiService _kanalIslemService { get; set; } = default!;
+        [Inject] private IHizmetBinasiApiService _hizmetBinasiService { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
         [Inject] private ILogger<Index> _logger { get; set; } = default!;
         [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
@@ -29,21 +32,59 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
         private List<KanalAltIslemResponseDto> allAltIslemler = new();
         private List<KanalAltIslemResponseDto> filteredAltIslemler = new();
         private List<KanalIslemResponseDto> kanalIslemler = new();
+        private List<HizmetBinasiResponseDto> hizmetBinalari = new();
         private KanalAltIslemResponseDto? selectedAltIslem;
 
         // Filters
         private string searchText = string.Empty;
+        private int selectedHizmetBinasiId = 0;
         private int selectedKanalIslemId = 0;
         private Aktiflik? selectedAktiflik = null;
 
         protected override async Task OnInitializedAsync()
         {
             QuestPDF.Settings.License = LicenseType.Community;
-            await LoadData();
+            await LoadDropdownData();
+
+            // Geçici olarak: İlk hizmet binasını seç
+            if (hizmetBinalari.Any())
+            {
+                selectedHizmetBinasiId = hizmetBinalari.First().HizmetBinasiId;
+                await LoadData();
+            }
+        }
+
+        private async Task LoadDropdownData()
+        {
+            try
+            {
+                // Hizmet binalarını yükle
+                var binaResult = await _hizmetBinasiService.GetActiveAsync();
+                if (binaResult.Success && binaResult.Data != null)
+                {
+                    hizmetBinalari = binaResult.Data;
+                }
+                else
+                {
+                    hizmetBinalari = new List<HizmetBinasiResponseDto>();
+                    await _toastService.ShowWarningAsync("Aktif hizmet binası bulunamadı");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Dropdown verileri yüklenirken hata oluştu");
+                await _toastService.ShowErrorAsync("Veriler yüklenirken bir hata oluştu");
+            }
         }
 
         private async Task LoadData()
         {
+            if (selectedHizmetBinasiId <= 0)
+            {
+                await _toastService.ShowWarningAsync("Lütfen bir hizmet binası seçiniz");
+                return;
+            }
+
             try
             {
                 isLoading = true;
@@ -69,7 +110,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
 
         private async Task LoadAltIslemler()
         {
-            var result = await _kanalAltIslemService.GetAllAsync();
+            var result = await _kanalAltIslemService.GetByHizmetBinasiIdAsync(selectedHizmetBinasiId);
 
             if (result.Success && result.Data != null)
             {
@@ -78,13 +119,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
             else
             {
                 allAltIslemler = new();
-                await _toastService.ShowErrorAsync(result.Message ?? "Alt işlemler yüklenemedi");
+                await _toastService.ShowInfoAsync("Seçili hizmet binasında alt işlem bulunamadı");
             }
         }
 
         private async Task LoadKanalIslemler()
         {
-            var result = await _kanalIslemService.GetAllAsync();
+            var result = await _kanalIslemService.GetByHizmetBinasiIdAsync(selectedHizmetBinasiId);
 
             if (result.Success && result.Data != null)
             {
@@ -93,6 +134,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
             else
             {
                 kanalIslemler = new();
+            }
+        }
+
+        // Hizmet binası değiştiğinde tetiklenir
+        private async Task OnHizmetBinasiChanged(ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out int binaId))
+            {
+                selectedHizmetBinasiId = binaId;
+                selectedKanalIslemId = 0; // Kanal işlem filtresini sıfırla
+                await LoadData();
             }
         }
 
@@ -159,9 +211,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                     return true;
                 })
                 .OrderBy(a => a.KanalAdi)
-                .ThenBy(a => a.Sira)
                 .ThenBy(a => a.KanalAltAdi)
                 .ToList();
+        }
+
+        private void ClearFilters()
+        {
+            searchText = string.Empty;
+            selectedKanalIslemId = 0;
+            selectedAktiflik = null;
+            ApplyFilters();
         }
 
         private async Task ToggleAktiflik(KanalAltIslemResponseDto altIslem)
@@ -175,7 +234,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                     KanalAltId = altIslem.KanalAltId,
                     KanalIslemId = altIslem.KanalIslemId,
                     HizmetBinasiId = altIslem.HizmetBinasiId,
-                    Sira = altIslem.Sira,
                     Aktiflik = yeniAktiflik
                 };
 
@@ -258,13 +316,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                 var worksheet = workbook.Worksheets.Add("Kanal Alt İşlemler");
 
                 worksheet.Cell(1, 1).Value = "Alt İşlem Adı";
-                worksheet.Cell(1, 2).Value = "Alt Kanal";
-                worksheet.Cell(1, 3).Value = "Kanal İşlem";
-                worksheet.Cell(1, 4).Value = "Sıra";
-                worksheet.Cell(1, 5).Value = "Durum";
-                worksheet.Cell(1, 6).Value = "Eklenme Tarihi";
+                worksheet.Cell(1, 2).Value = "Kanal İşlem";
+                worksheet.Cell(1, 3).Value = "Durum";
+                worksheet.Cell(1, 4).Value = "Eklenme Tarihi";
 
-                var headerRange = worksheet.Range(1, 1, 1, 6);
+                var headerRange = worksheet.Range(1, 1, 1, 4);
                 headerRange.Style.Font.Bold = true;
                 headerRange.Style.Fill.BackgroundColor = XLColor.LightBlue;
 
@@ -273,9 +329,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                 {
                     worksheet.Cell(row, 1).Value = item.KanalAltAdi;
                     worksheet.Cell(row, 2).Value = item.KanalAdi;
-                    worksheet.Cell(row, 3).Value = item.Sira;
-                    worksheet.Cell(row, 4).Value = item.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
-                    worksheet.Cell(row, 5).Value = item.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm");
+                    worksheet.Cell(row, 3).Value = item.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
+                    worksheet.Cell(row, 4).Value = item.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm");
                     row++;
                 }
 
@@ -314,20 +369,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                         {
                             table.ColumnsDefinition(columns =>
                             {
-                                columns.RelativeColumn(3);
-                                columns.RelativeColumn(2);
-                                columns.RelativeColumn(3);
-                                columns.RelativeColumn(1);
-                                columns.RelativeColumn(2);
-                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(3); // Alt İşlem
+                                columns.RelativeColumn(2); // Kanal İşlem
+                                columns.RelativeColumn(1); // Durum
+                                columns.RelativeColumn(2); // Eklenme
                             });
 
                             table.Header(header =>
                             {
                                 header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Alt İşlem").Bold();
-                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Alt Kanal").Bold();
                                 header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Kanal İşlem").Bold();
-                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Sıra").Bold();
                                 header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Durum").Bold();
                                 header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Eklenme").Bold();
                             });
@@ -335,9 +386,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                             foreach (var item in filteredAltIslemler)
                             {
                                 table.Cell().Padding(4).Text(item.KanalAltAdi);
-                                table.Cell().Padding(4).Text(item.KanalAltAdi);
                                 table.Cell().Padding(4).Text(item.KanalAdi);
-                                table.Cell().Padding(4).Text(item.Sira.ToString());
                                 table.Cell().Padding(4).Text(item.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif");
                                 table.Cell().Padding(4).Text(item.EklenmeTarihi.ToString("dd.MM.yyyy"));
                             }

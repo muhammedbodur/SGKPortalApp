@@ -20,6 +20,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
         [Inject] private ILogger<Manage> _logger { get; set; } = default!;
 
         [Parameter] public int? KanalIslemId { get; set; }
+        
+        [Parameter]
+        [SupplyParameterFromQuery]
+        public int? HizmetBinasiId { get; set; }
 
         // State
         private bool isLoading = false;
@@ -33,6 +37,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
         // Dropdown Data
         private List<KanalResponseDto> anaKanallar = new();
         private List<HizmetBinasiResponseDto> hizmetBinalari = new();
+        
+        // Hizmet Binası Bilgisi
+        private int selectedHizmetBinasiId = 0;
+        private string hizmetBinasiAdi = string.Empty;
 
         // Edit Mode Data
         private DateTime eklenmeTarihi = DateTime.Now;
@@ -48,6 +56,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             }
             else
             {
+                // Yeni kayıt - URL'den hizmet binası kontrolü
+                if (HizmetBinasiId.HasValue && HizmetBinasiId.Value > 0)
+                {
+                    selectedHizmetBinasiId = HizmetBinasiId.Value;
+                    // Hizmet binası adını bul
+                    var bina = hizmetBinalari.FirstOrDefault(b => b.HizmetBinasiId == selectedHizmetBinasiId);
+                    hizmetBinasiAdi = bina?.HizmetBinasiAdi ?? "Bilinmeyen";
+                }
+                else
+                {
+                    // URL'de parametre yok - hata
+                    await _toastService.ShowErrorAsync("Hizmet binası seçilmeden kanal işlem eklenemez");
+                    _navigationManager.NavigateTo("/siramatik/kanal-islem");
+                    return;
+                }
+
                 // Yeni kayıt için varsayılan değerler
                 model = new KanalIslemFormModel
                 {
@@ -97,11 +121,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 {
                     var kanalIslem = result.Data;
 
+                    // HizmetBinasiId'yi DTO'dan al
+                    selectedHizmetBinasiId = kanalIslem.HizmetBinasiId;
+                    
+                    // Hizmet binası adını bul
+                    var bina = hizmetBinalari.FirstOrDefault(b => b.HizmetBinasiId == selectedHizmetBinasiId);
+                    hizmetBinasiAdi = bina?.HizmetBinasiAdi ?? kanalIslem.HizmetBinasiAdi;
+
                     model = new KanalIslemFormModel
                     {
                         KanalId = kanalIslem.KanalId,
                         KanalAdi = kanalIslem.KanalAdi,
-                        HizmetBinasiId = kanalIslem.HizmetBinasiId,
                         BaslangicNumara = kanalIslem.BaslangicNumara,
                         BitisNumara = kanalIslem.BitisNumara,
                         Sira = kanalIslem.Sira,
@@ -136,7 +166,23 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             {
                 isSaving = true;
 
+                // Debug log
+                _logger.LogInformation($"HandleSubmit başladı. IsEditMode: {IsEditMode}, HizmetBinasiId: {selectedHizmetBinasiId}");
+
                 model.Aktiflik = isAktif ? Aktiflik.Aktif : Aktiflik.Pasif;
+
+                // Validasyon
+                if (selectedHizmetBinasiId <= 0)
+                {
+                    await _toastService.ShowErrorAsync("Hizmet binası bilgisi eksik. Lütfen sayfayı yenileyin.");
+                    return;
+                }
+
+                if (model.KanalId <= 0)
+                {
+                    await _toastService.ShowErrorAsync("Lütfen bir kanal seçiniz");
+                    return;
+                }
 
                 if (IsEditMode)
                 {
@@ -150,7 +196,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Form gönderilirken hata oluştu");
-                await _toastService.ShowErrorAsync("İşlem sırasında bir hata oluştu");
+                await _toastService.ShowErrorAsync($"İşlem sırasında bir hata oluştu: {ex.Message}");
             }
             finally
             {
@@ -163,7 +209,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             var createDto = new KanalIslemCreateRequestDto
             {
                 KanalId = model.KanalId,
-                HizmetBinasiId = model.HizmetBinasiId,
+                HizmetBinasiId = selectedHizmetBinasiId,
                 BaslangicNumara = model.BaslangicNumara,
                 BitisNumara = model.BitisNumara,
                 Sira = model.Sira,
@@ -188,7 +234,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             var updateDto = new KanalIslemUpdateRequestDto
             {
                 KanalId = model.KanalId,
-                HizmetBinasiId = model.HizmetBinasiId,
+                HizmetBinasiId = selectedHizmetBinasiId,
                 BaslangicNumara = model.BaslangicNumara,
                 BitisNumara = model.BitisNumara,
                 Sira = model.Sira,

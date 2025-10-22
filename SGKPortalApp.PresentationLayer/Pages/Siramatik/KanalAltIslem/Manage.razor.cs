@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Models.FormModels.SiramatikIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
@@ -12,11 +14,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
     {
         [Inject] private IKanalAltIslemApiService _kanalAltIslemService { get; set; } = default!;
         [Inject] private IKanalIslemApiService _kanalIslemService { get; set; } = default!;
+        [Inject] private IHizmetBinasiApiService _hizmetBinasiService { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
         [Inject] private ILogger<Manage> _logger { get; set; } = default!;
 
         [Parameter] public int? KanalAltIslemId { get; set; }
+        
+        [Parameter]
+        [SupplyParameterFromQuery]
+        public int? HizmetBinasiId { get; set; }
 
         // State
         private bool isLoading = false;
@@ -28,8 +35,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
         private bool isAktif = true;
 
         // Lookup Data
+        private List<HizmetBinasiResponseDto> hizmetBinalari = new();
         private List<KanalIslemResponseDto> kanalIslemler = new();
         private List<KanalAltResponseDto> kanalAltlar = new();
+        private int selectedHizmetBinasiId = 0;
 
         // Edit Mode Data
         private DateTime eklenmeTarihi = DateTime.Now;
@@ -37,7 +46,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
 
         protected override async Task OnInitializedAsync()
         {
-            await LoadKanalIslemler();
+            await LoadDropdownData();
 
             if (IsEditMode)
             {
@@ -48,18 +57,46 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                 // Yeni kayıt için varsayılan değerler
                 model = new KanalAltIslemFormModel
                 {
-                    Sira = 1,
                     Aktiflik = Aktiflik.Aktif
                 };
                 isAktif = true;
             }
         }
 
-        private async Task LoadKanalIslemler()
+        private async Task LoadDropdownData()
         {
             try
             {
-                var result = await _kanalIslemService.GetAllAsync();
+                // Hizmet binalarını yükle
+                var binaResult = await _hizmetBinasiService.GetActiveAsync();
+                if (binaResult.Success && binaResult.Data != null)
+                {
+                    hizmetBinalari = binaResult.Data;
+                }
+                else
+                {
+                    hizmetBinalari = new();
+                    await _toastService.ShowWarningAsync("Hizmet binaları yüklenemedi");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Dropdown verileri yüklenirken hata oluştu");
+                await _toastService.ShowErrorAsync("Veriler yüklenirken bir hata oluştu");
+            }
+        }
+
+        private async Task LoadKanalIslemler()
+        {
+            if (selectedHizmetBinasiId <= 0)
+            {
+                kanalIslemler = new();
+                return;
+            }
+
+            try
+            {
+                var result = await _kanalIslemService.GetByHizmetBinasiIdAsync(selectedHizmetBinasiId);
 
                 if (result.Success && result.Data != null)
                 {
@@ -68,13 +105,23 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                 else
                 {
                     kanalIslemler = new();
-                    await _toastService.ShowWarningAsync("Kanal işlemler yüklenemedi");
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Kanal işlemler yüklenirken hata oluştu");
                 kanalIslemler = new();
+            }
+        }
+
+        private async Task OnHizmetBinasiChanged(ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out int binaId))
+            {
+                selectedHizmetBinasiId = binaId;
+                model.KanalIslemId = 0; // Kanal işlem seçimini sıfırla
+                await LoadKanalIslemler();
+                StateHasChanged();
             }
         }
 
@@ -94,9 +141,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                         KanalAltId = altIslem.KanalAltId,
                         KanalIslemId = altIslem.KanalIslemId,
                         HizmetBinasiId = altIslem.HizmetBinasiId,
-                        Sira = altIslem.Sira,
                         Aktiflik = altIslem.Aktiflik
                     };
+
+                    // Hizmet binasını seç ve kanal işlemleri yükle
+                    selectedHizmetBinasiId = altIslem.HizmetBinasiId;
+                    await LoadKanalIslemler();
 
                     isAktif = altIslem.Aktiflik == Aktiflik.Aktif;
                     eklenmeTarihi = altIslem.EklenmeTarihi;
@@ -130,11 +180,20 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                 model.Aktiflik = isAktif ? Aktiflik.Aktif : Aktiflik.Pasif;
 
                 // Validasyon
+                if (selectedHizmetBinasiId <= 0)
+                {
+                    await _toastService.ShowErrorAsync("Lütfen bir hizmet binası seçin");
+                    return;
+                }
+
                 if (model.KanalIslemId <= 0)
                 {
                     await _toastService.ShowErrorAsync("Lütfen bir kanal işlem seçin");
                     return;
                 }
+
+                // HizmetBinasiId'yi modele aktar
+                model.HizmetBinasiId = selectedHizmetBinasiId;
 
                 if (IsEditMode)
                 {
