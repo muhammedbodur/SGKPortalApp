@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using QuestPDF.Infrastructure;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
@@ -32,6 +33,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.AtanmaNedeni
 
         protected override async Task OnInitializedAsync()
         {
+            QuestPDF.Settings.License = LicenseType.Community;
             await LoadData();
         }
 

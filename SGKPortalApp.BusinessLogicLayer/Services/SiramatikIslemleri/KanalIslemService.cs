@@ -166,6 +166,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 // Update
                 kanalIslem.KanalId = request.KanalId;
                 kanalIslem.HizmetBinasiId = request.HizmetBinasiId;
+                kanalIslem.Sira = request.Sira;
                 kanalIslem.BaslangicNumara = request.BaslangicNumara;
                 kanalIslem.BitisNumara = request.BitisNumara;
                 kanalIslem.Aktiflik = request.Aktiflik;

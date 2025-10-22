@@ -36,6 +36,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kanal
 
         protected override async Task OnInitializedAsync()
         {
+            QuestPDF.Settings.License = LicenseType.Community;
             await LoadKanallar();
         }
 
