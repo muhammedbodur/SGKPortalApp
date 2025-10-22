@@ -75,6 +75,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 // Yeni kayıt için varsayılan değerler
                 model = new KanalIslemFormModel
                 {
+                    HizmetBinasiId = selectedHizmetBinasiId,
                     BaslangicNumara = 0,
                     BitisNumara = 9999,
                     Sira = 1,
@@ -136,6 +137,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                     {
                         KanalId = kanalIslem.KanalId,
                         KanalAdi = kanalIslem.KanalAdi,
+                        HizmetBinasiId = selectedHizmetBinasiId,
                         BaslangicNumara = kanalIslem.BaslangicNumara,
                         BitisNumara = kanalIslem.BitisNumara,
                         Sira = kanalIslem.Sira,
