@@ -83,7 +83,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         /// Yeni kanal alt işlem oluşturur
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] KanalAltCreateRequestDto request)
+        public async Task<IActionResult> Create([FromBody] KanalAltIslemCreateRequestDto request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -98,7 +98,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         /// Kanal alt işlem günceller
         /// </summary>
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, [FromBody] KanalAltUpdateRequestDto request)
+        public async Task<IActionResult> Update(int id, [FromBody] KanalAltIslemUpdateRequestDto request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

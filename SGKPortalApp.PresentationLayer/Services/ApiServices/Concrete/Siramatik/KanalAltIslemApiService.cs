@@ -222,7 +222,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             }
         }
 
-        public async Task<ServiceResult<KanalAltIslemResponseDto>> CreateAsync(KanalAltCreateRequestDto dto)
+        public async Task<ServiceResult<KanalAltIslemResponseDto>> CreateAsync(KanalAltIslemCreateRequestDto dto)
         {
             try
             {
@@ -256,7 +256,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             }
         }
 
-        public async Task<ServiceResult<KanalAltIslemResponseDto>> UpdateAsync(int id, KanalAltUpdateRequestDto dto)
+        public async Task<ServiceResult<KanalAltIslemResponseDto>> UpdateAsync(int id, KanalAltIslemUpdateRequestDto dto)
         {
             try
             {

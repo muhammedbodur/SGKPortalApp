@@ -10,7 +10,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
         public KanalAltMappingProfile()
         {
             // Request -> Entity
-            CreateMap<KanalAltCreateRequestDto, KanalAlt>()
+            CreateMap<KanalAltIslemCreateRequestDto, KanalAlt>()
                 .ForMember(dest => dest.KanalAltId, opt => opt.Ignore())
                 .ForMember(dest => dest.Aktiflik, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))

@@ -182,7 +182,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         }
 
         // CRUD Operations
-        public async Task<ApiResponseDto<KanalAltIslemResponseDto>> CreateAsync(KanalAltCreateRequestDto request)
+        public async Task<ApiResponseDto<KanalAltIslemResponseDto>> CreateAsync(KanalAltIslemCreateRequestDto request)
         {
             try
             {
@@ -221,7 +221,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
         }
 
-        public async Task<ApiResponseDto<KanalAltIslemResponseDto>> UpdateAsync(int kanalAltIslemId, KanalAltUpdateRequestDto request)
+        public async Task<ApiResponseDto<KanalAltIslemResponseDto>> UpdateAsync(int kanalAltIslemId, KanalAltIslemUpdateRequestDto request)
         {
             try
             {

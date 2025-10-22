@@ -7,8 +7,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
     public interface IKanalAltIslemService
     {
         // CRUD Operations
-        Task<ApiResponseDto<KanalAltIslemResponseDto>> CreateAsync(KanalAltCreateRequestDto request);
-        Task<ApiResponseDto<KanalAltIslemResponseDto>> UpdateAsync(int kanalAltIslemId, KanalAltUpdateRequestDto request);
+        Task<ApiResponseDto<KanalAltIslemResponseDto>> CreateAsync(KanalAltIslemCreateRequestDto request);
+        Task<ApiResponseDto<KanalAltIslemResponseDto>> UpdateAsync(int kanalAltIslemId, KanalAltIslemUpdateRequestDto request);
         Task<ApiResponseDto<bool>> DeleteAsync(int kanalAltIslemId);
         Task<ApiResponseDto<KanalAltIslemResponseDto>> GetByIdAsync(int kanalAltIslemId);
         
