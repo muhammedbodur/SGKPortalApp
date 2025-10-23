@@ -78,17 +78,17 @@
                                 <label class="form-label required">
                                     <i class="bx bx-building me-1"></i>Hizmet Binası
                                 </label>
-                                @if (IsEditMode)
+                                @if (IsEditMode || (selectedHizmetBinasiId > 0 && HizmetBinasiId.HasValue))
                                 {
-                                    <!-- Düzenleme modunda readonly -->
+                                    <!-- Düzenleme modunda veya URL'den parametre geldiyse readonly -->
                                     <input type="text" class="form-control"
-                                           value="@hizmetBinasiAdi"
+                                           value="@(hizmetBinalari.FirstOrDefault(b => b.HizmetBinasiId == selectedHizmetBinasiId)?.HizmetBinasiAdi ?? hizmetBinasiAdi)"
                                            disabled readonly />
-                                    <small class="text-muted">Düzenleme sırasında hizmet binası değiştirilemez</small>
+                                    <small class="text-muted">@(IsEditMode ? "Düzenleme sırasında hizmet binası değiştirilemez" : "Index sayfasından seçilen hizmet binası")</small>
                                 }
                                 else
                                 {
-                                    <!-- Ekleme modunda dropdown -->
+                                    <!-- Ekleme modunda dropdown (URL'den parametre yoksa) -->
                                     <select class="form-select"
                                             value="@selectedHizmetBinasiId"
                                             @onchange="OnHizmetBinasiChanged"

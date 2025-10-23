@@ -18,12 +18,33 @@
         </div>
 
         <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary" @onclick="ExportToExcel" disabled="@isLoading">
-                <i class="bx bx-file me-1"></i>Excel
+            <!-- Excel Export -->
+            <button class="btn btn-success" @onclick="ExportToExcel" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                else
+                {
+                    <i class="bx bx-download me-1"></i>
+                }
+                Excel
             </button>
-            <button class="btn btn-outline-secondary" @onclick="ExportToPdf" disabled="@isLoading">
-                <i class="bx bx-file-pdf me-1"></i>PDF
+
+            <!-- PDF Export -->
+            <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                else
+                {
+                    <i class="bx bxs-file-pdf me-1"></i>
+                }
+                PDF
             </button>
+
+            <!-- Yeni Alt Kanal -->
             <a href="/siramatik/alt-kanal/manage" class="btn btn-primary">
                 <i class="bx bx-plus me-1"></i>Yeni Alt Kanal
             </a>

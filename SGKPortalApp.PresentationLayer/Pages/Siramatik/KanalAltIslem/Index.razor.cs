@@ -316,10 +316,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                 using var workbook = new XLWorkbook();
                 var worksheet = workbook.Worksheets.Add("Kanal Alt İşlemler");
 
-                worksheet.Cell(1, 1).Value = "Alt İşlem Adı";
-                worksheet.Cell(1, 2).Value = "Kanal İşlem";
-                worksheet.Cell(1, 3).Value = "Durum";
-                worksheet.Cell(1, 4).Value = "Eklenme Tarihi";
+                worksheet.Cell(1, 1).Value = "Hizmet Binası Adı";
+                worksheet.Cell(1, 2).Value = "Alt İşlem Adı";
+                worksheet.Cell(1, 3).Value = "Kanal İşlem";
+                worksheet.Cell(1, 4).Value = "Durum";
+                worksheet.Cell(1, 5).Value = "Eklenme Tarihi";
 
                 var headerRange = worksheet.Range(1, 1, 1, 4);
                 headerRange.Style.Font.Bold = true;
@@ -328,10 +329,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                 int row = 2;
                 foreach (var item in filteredAltIslemler)
                 {
-                    worksheet.Cell(row, 1).Value = item.KanalAltAdi;
-                    worksheet.Cell(row, 2).Value = item.KanalAdi;
-                    worksheet.Cell(row, 3).Value = item.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
-                    worksheet.Cell(row, 4).Value = item.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm");
+                    worksheet.Cell(row, 1).Value = item.HizmetBinasiAdi;
+                    worksheet.Cell(row, 2).Value = item.KanalAltAdi;
+                    worksheet.Cell(row, 3).Value = item.KanalAdi;
+                    worksheet.Cell(row, 4).Value = item.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
+                    worksheet.Cell(row, 5).Value = item.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm");
                     row++;
                 }
 
@@ -370,6 +372,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                         {
                             table.ColumnsDefinition(columns =>
                             {
+                                columns.RelativeColumn(4); // Hizmet Binası Adı
                                 columns.RelativeColumn(3); // Alt İşlem
                                 columns.RelativeColumn(2); // Kanal İşlem
                                 columns.RelativeColumn(1); // Durum
@@ -378,6 +381,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
 
                             table.Header(header =>
                             {
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Hizmet Binası Adı").Bold();
                                 header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Alt İşlem").Bold();
                                 header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Kanal İşlem").Bold();
                                 header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Durum").Bold();
@@ -386,6 +390,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
 
                             foreach (var item in filteredAltIslemler)
                             {
+                                table.Cell().Padding(4).Text(item.HizmetBinasiAdi);
                                 table.Cell().Padding(4).Text(item.KanalAltAdi);
                                 table.Cell().Padding(4).Text(item.KanalAdi);
                                 table.Cell().Padding(4).Text(item.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif");

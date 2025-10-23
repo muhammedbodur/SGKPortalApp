@@ -55,6 +55,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             KanalAltId = kai.KanalAltId,
                             KanalAltAdi = ka.KanalAltAdi,
                             KanalIslemId = kai.KanalIslemId,
+                            HizmetBinasiId = hb.HizmetBinasiId,
+                            HizmetBinasiAdi = hb.HizmetBinasiAdi,
                             KanalAdi = k.KanalAdi,
                             Aktiflik = kai.Aktiflik,
                             EklenmeTarihi = kai.EklenmeTarihi,
@@ -72,19 +74,24 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                         join ka in _context.KanallarAlt on kai.KanalAltId equals ka.KanalAltId
                         join k in _context.Kanallar on ka.KanalId equals k.KanalId
                         join ki in _context.KanalIslemleri on kai.KanalIslemId equals ki.KanalIslemId
+                        join hb in _context.HizmetBinalari on kai.HizmetBinasiId equals hb.HizmetBinasiId
                         where kai.KanalAltIslemId == kanalAltIslemId
+                           && !kai.SilindiMi
                         select new KanalAltIslemResponseDto
                         {
                             KanalAltIslemId = kai.KanalAltIslemId,
                             KanalAltId = kai.KanalAltId,
                             KanalAltAdi = ka.KanalAltAdi,
+                            HizmetBinasiId = kai.HizmetBinasiId,
                             KanalIslemId = kai.KanalIslemId,
                             KanalAdi = k.KanalAdi,
                             Aktiflik = kai.Aktiflik,
                             EklenmeTarihi = kai.EklenmeTarihi,
                             DuzenlenmeTarihi = kai.DuzenlenmeTarihi,
                             PersonelSayisi = _context.KanalPersonelleri
-                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif)
+                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId
+                                          && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
+                                          && !kp.SilindiMi)
                         };
 
             return await query.AsNoTracking().FirstOrDefaultAsync();
