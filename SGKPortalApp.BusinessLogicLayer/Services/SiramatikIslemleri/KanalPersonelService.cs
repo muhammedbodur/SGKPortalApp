@@ -183,7 +183,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
         }
 
-        public async Task<ApiResponseDto<List<KanalPersonelResponseDto>>> GetByHizmetBinasiIdAsync(int hizmetBinasiId)
+        public async Task<ApiResponseDto<List<KanalPersonelResponseDto>>> GetPersonellerByHizmetBinasiIdAsync(int hizmetBinasiId)
         {
             try
             {
@@ -194,14 +194,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 }
 
                 var kanalPersonelRepo = _unitOfWork.GetRepository<IKanalPersonelRepository>();
-                var kanalPersoneller = await kanalPersonelRepo.GetAllWithDetailsAsync();
+                
+                // ✅ PERFORMANS: Repository'de hizmet binasına göre filtrelenmiş sorgu
+                var kanalPersoneller = await kanalPersonelRepo.GetByHizmetBinasiIdAsync(hizmetBinasiId);
 
-                // Hizmet binasına göre filtrele
-                var filteredList = kanalPersoneller
-                    .Where(kp => kp.Personel?.HizmetBinasiId == hizmetBinasiId)
-                    .ToList();
+                var kanalPersonelDtos = _mapper.Map<List<KanalPersonelResponseDto>>(kanalPersoneller);
 
-                var kanalPersonelDtos = _mapper.Map<List<KanalPersonelResponseDto>>(filteredList);
+                _logger.LogInformation(
+                    "Hizmet binası personel atamaları getirildi. HizmetBinasiId: {HizmetBinasiId}, Adet: {Count}",
+                    hizmetBinasiId,
+                    kanalPersonelDtos.Count);
 
                 return ApiResponseDto<List<KanalPersonelResponseDto>>
                     .SuccessResult(kanalPersonelDtos, "Personel atamaları başarıyla getirildi");
@@ -265,5 +267,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     .ErrorResult("Personel atamaları getirilirken bir hata oluştu", ex.Message);
             }
         }
+
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // ⚠️ DEPRECATED METHODS - Kullanılmamaktadır
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // 
+        // GetPersonelMatrixAsync() - Kullanılmıyor
+        // TogglePersonelUzmanlikAsync() - Kullanılmıyor
+        //
+        // Personel Atama sayfası manuel CRUD kullanır:
+        // - CreateAsync() - Yeni atama
+        // - UpdateAsync() - Uzmanlık güncelle
+        // - DeleteAsync() - Atamayı kaldır
+        // ═══════════════════════════════════════════════════════════════════════════════
     }
 }

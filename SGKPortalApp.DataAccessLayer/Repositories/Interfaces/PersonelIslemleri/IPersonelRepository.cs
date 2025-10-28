@@ -20,6 +20,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri
         Task<IEnumerable<Personel>> GetByDepartmanAsync(int departmanId);
         Task<IEnumerable<Personel>> GetByServisAsync(int servisId);
         Task<IEnumerable<Personel>> GetByUnvanAsync(int unvanId);
+        Task<IEnumerable<Personel>> GetByHizmetBinasiIdAsync(int hizmetBinasiId);
         Task<IEnumerable<Personel>> GetActivePersonelAsync();
         Task<IEnumerable<Personel>> GetActiveAsync();
         Task<IEnumerable<Personel>> GetAllWithDetailsAsync();

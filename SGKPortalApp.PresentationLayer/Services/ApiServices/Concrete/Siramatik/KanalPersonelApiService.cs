@@ -18,7 +18,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             _logger = logger;
         }
 
-        public async Task<ServiceResult<List<KanalPersonelResponseDto>>> GetByHizmetBinasiIdAsync(int hizmetBinasiId)
+        public async Task<ServiceResult<List<KanalPersonelResponseDto>>> GetPersonellerByHizmetBinasiIdAsync(int hizmetBinasiId)
         {
             try
             {
@@ -255,5 +255,11 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
                 return ServiceResult<bool>.Fail($"Hata: {ex.Message}");
             }
         }
+
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // ⚠️ DEPRECATED METHODS - Kullanılmamaktadır
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // GetPersonelMatrixAsync() - Kullanılmıyor
+        // TogglePersonelUzmanlikAsync() - Kullanılmıyor
     }
 }

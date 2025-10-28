@@ -7,6 +7,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -109,6 +110,20 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Personel>> GetByHizmetBinasiIdAsync(int hizmetBinasiId)
+        {
+            return await _dbSet
+                .Include(p => p.Departman)
+                .Include(p => p.Servis)
+                .Include(p => p.Unvan)
+                .AsNoTracking()
+                .Where(p => p.HizmetBinasiId == hizmetBinasiId &&
+                           !p.SilindiMi &&
+                           p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif)
+                .OrderBy(p => p.AdSoyad)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Personel>> GetActiveAsync()
         {
             return await _dbSet
@@ -126,6 +141,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                 .Include(p => p.Departman)
                 .Include(p => p.Servis)
                 .Include(p => p.Unvan)
+                .Include(p => p.HizmetBinasi)
                 .AsNoTracking()
                 .Where(p => !p.SilindiMi)
                 .OrderBy(p => p.AdSoyad)

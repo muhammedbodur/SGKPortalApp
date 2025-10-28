@@ -411,5 +411,39 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
                 return ServiceResult<List<PersonelResponseDto>>.Fail($"Hata: {ex.Message}");
             }
         }
+
+        public async Task<ServiceResult<List<PersonelResponseDto>>> GetPersonellerByHizmetBinasiIdAsync(int hizmetBinasiId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"personel/hizmet-binasi/{hizmetBinasiId}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetByHizmetBinasiIdAsync failed: {Error}", errorContent);
+                    return ServiceResult<List<PersonelResponseDto>>.Fail("Hizmet binası personelleri alınamadı.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<PersonelResponseDto>>>();
+
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return ServiceResult<List<PersonelResponseDto>>.Ok(
+                        apiResponse.Data,
+                        apiResponse.Message ?? "İşlem başarılı"
+                    );
+                }
+
+                return ServiceResult<List<PersonelResponseDto>>.Fail(
+                    apiResponse?.Message ?? "Hizmet binası personelleri alınamadı"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetByHizmetBinasiIdAsync Exception");
+                return ServiceResult<List<PersonelResponseDto>>.Fail($"Hata: {ex.Message}");
+            }
+        }
     }
 }

@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 
-namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
+namespace SGKPortalApp.ApiLayer.Controllers.Siramatik
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -19,82 +21,120 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
             _logger = logger;
         }
 
+        // ═══════════════════════════════════════════════════════
+        // CRUD OPERATIONS
+        // ═══════════════════════════════════════════════════════
+
         /// <summary>
-        /// Hizmet binasına göre kanal personel atamalarını getirir
+        /// Yeni personel ataması oluşturur
         /// </summary>
-        [HttpGet("hizmet-binasi/{hizmetBinasiId:int}")]
-        public async Task<IActionResult> GetByHizmetBinasiId(int hizmetBinasiId)
+        [HttpPost]
+        public async Task<ActionResult<ApiResponseDto<KanalPersonelResponseDto>>> Create(
+            [FromBody] KanalPersonelCreateRequestDto request)
         {
-            var result = await _kanalPersonelService.GetByHizmetBinasiIdAsync(hizmetBinasiId);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ApiResponseDto<KanalPersonelResponseDto>
+                    .ErrorResult("Geçersiz veri"));
+            }
+
+            var result = await _kanalPersonelService.CreateAsync(request);
+
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
         /// <summary>
-        /// Personele göre kanal atamalarını getirir
+        /// Personel ataması günceller
         /// </summary>
-        [HttpGet("personel/{tcKimlikNo}")]
-        public async Task<IActionResult> GetByPersonelTc(string tcKimlikNo)
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<ApiResponseDto<KanalPersonelResponseDto>>> Update(
+            int id,
+            [FromBody] KanalPersonelUpdateRequestDto request)
         {
-            var result = await _kanalPersonelService.GetByPersonelTcAsync(tcKimlikNo);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ApiResponseDto<KanalPersonelResponseDto>
+                    .ErrorResult("Geçersiz veri"));
+            }
+
+            var result = await _kanalPersonelService.UpdateAsync(id, request);
+
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
         /// <summary>
-        /// Kanal alt işlemine göre personel atamalarını getirir
+        /// Personel atamasını siler (soft delete)
         /// </summary>
-        [HttpGet("kanal-alt-islem/{kanalAltIslemId:int}")]
-        public async Task<IActionResult> GetByKanalAltIslemId(int kanalAltIslemId)
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult<ApiResponseDto<bool>>> Delete(int id)
         {
-            var result = await _kanalPersonelService.GetByKanalAltIslemIdAsync(kanalAltIslemId);
+            var result = await _kanalPersonelService.DeleteAsync(id);
+
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
         /// <summary>
-        /// ID'ye göre kanal personel atamasını getirir
+        /// ID'ye göre personel atamasını getirir
         /// </summary>
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<ActionResult<ApiResponseDto<KanalPersonelResponseDto>>> GetById(int id)
         {
             var result = await _kanalPersonelService.GetByIdAsync(id);
+
+            return result.Success ? Ok(result) : NotFound(result);
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // QUERY OPERATIONS
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Hizmet binasına göre personel atamalarını getirir
+        /// </summary>
+        [HttpGet("hizmet-binasi/{hizmetBinasiId:int}")]
+        public async Task<ActionResult<ApiResponseDto<List<KanalPersonelResponseDto>>>> GetByHizmetBinasiId(
+            int hizmetBinasiId)
+        {
+            var result = await _kanalPersonelService.GetPersonellerByHizmetBinasiIdAsync(hizmetBinasiId);
+
             return result.Success ? Ok(result) : NotFound(result);
         }
 
         /// <summary>
-        /// Yeni kanal personel ataması oluşturur
+        /// Personele göre atamalarını getirir
         /// </summary>
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] KanalPersonelCreateRequestDto request)
+        [HttpGet("personel/{tcKimlikNo}")]
+        public async Task<ActionResult<ApiResponseDto<List<KanalPersonelResponseDto>>>> GetByPersonelTc(
+            string tcKimlikNo)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var result = await _kanalPersonelService.GetByPersonelTcAsync(tcKimlikNo);
 
-            var result = await _kanalPersonelService.CreateAsync(request);
-            return result.Success 
-                ? CreatedAtAction(nameof(GetById), new { id = result.Data?.KanalPersonelId }, result) 
-                : BadRequest(result);
+            return result.Success ? Ok(result) : NotFound(result);
         }
 
         /// <summary>
-        /// Kanal personel atamasını günceller
+        /// Kanal alt işleme göre personelleri getirir
         /// </summary>
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> Update(int id, [FromBody] KanalPersonelUpdateRequestDto request)
+        [HttpGet("kanal-alt-islem/{kanalAltIslemId:int}")]
+        public async Task<ActionResult<ApiResponseDto<List<KanalPersonelResponseDto>>>> GetByKanalAltIslemId(
+            int kanalAltIslemId)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var result = await _kanalPersonelService.GetByKanalAltIslemIdAsync(kanalAltIslemId);
 
-            var result = await _kanalPersonelService.UpdateAsync(id, request);
-            return result.Success ? Ok(result) : BadRequest(result);
+            return result.Success ? Ok(result) : NotFound(result);
         }
 
-        /// <summary>
-        /// Kanal personel atamasını siler (soft delete)
-        /// </summary>
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var result = await _kanalPersonelService.DeleteAsync(id);
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
+        // ═══════════════════════════════════════════════════════════════
+        // ⚠️ DEPRECATED ENDPOINTS - Kullanılmamaktadır
+        // ═══════════════════════════════════════════════════════════════
+        //
+        // GET /api/kanalpersonel/matrix/{id} - Kullanılmıyor
+        // POST /api/kanalpersonel/toggle-uzmanlik - Kullanılmıyor
+        //
+        // Personel Atama sayfası standart CRUD endpoint'lerini kullanır:
+        // - POST /api/kanalpersonel - Yeni atama
+        // - PUT /api/kanalpersonel/{id} - Uzmanlık güncelle
+        // - DELETE /api/kanalpersonel/{id} - Atamayı kaldır
+        // ═══════════════════════════════════════════════════════════════
     }
 }

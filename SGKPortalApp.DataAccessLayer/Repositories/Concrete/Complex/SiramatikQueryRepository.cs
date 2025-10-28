@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
 
@@ -260,5 +262,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
 
             return await query.AsNoTracking().ToListAsync();
         }
+
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // ⚠️ DEPRECATED: GetPersonelAtamaMatrixAsync kullanılmamaktadır.
+        // Personel Atama sayfası 3 ayrı API çağrısı kullanır:
+        // 1. GetKanalPersonellerByHizmetBinasiIdAsync()
+        // 2. PersonelApiService.GetByHizmetBinasiAsync()
+        // 3. KanalAltIslemApiService.GetByHizmetBinasiIdAsync()
+        // ═══════════════════════════════════════════════════════════════════════════════
     }
 }
