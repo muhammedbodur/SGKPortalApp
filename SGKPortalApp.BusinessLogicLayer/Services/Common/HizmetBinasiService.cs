@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
@@ -33,20 +33,29 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 var hizmetBinasiRepo = _unitOfWork.GetRepository<IHizmetBinasiRepository>();
                 var entities = await hizmetBinasiRepo.GetAllAsync();
 
-                var dtos = entities.Select(hb => new HizmetBinasiResponseDto
+                var dtos = new List<HizmetBinasiResponseDto>();
+
+                foreach (var hb in entities)
                 {
-                    HizmetBinasiId = hb.HizmetBinasiId,
-                    HizmetBinasiAdi = hb.HizmetBinasiAdi,
-                    DepartmanId = hb.DepartmanId,
-                    DepartmanAdi = hb.Departman?.DepartmanAdi ?? string.Empty,
-                    Adres = hb.Adres,
-                    HizmetBinasiAktiflik = hb.HizmetBinasiAktiflik,
-                    PersonelSayisi = hb.Personeller?.Count ?? 0,
-                    BankoSayisi = hb.Bankolar?.Count ?? 0,
-                    TvSayisi = hb.Tvler?.Count ?? 0,
-                    EklenmeTarihi = hb.EklenmeTarihi,
-                    DuzenlenmeTarihi = hb.DuzenlenmeTarihi
-                }).ToList();
+                    var personelCount = await hizmetBinasiRepo.GetPersonelCountAsync(hb.HizmetBinasiId);
+                    var bankoCount = await hizmetBinasiRepo.GetBankoCountAsync(hb.HizmetBinasiId);
+                    var tvCount = await hizmetBinasiRepo.GetTvCountAsync(hb.HizmetBinasiId);
+
+                    dtos.Add(new HizmetBinasiResponseDto
+                    {
+                        HizmetBinasiId = hb.HizmetBinasiId,
+                        HizmetBinasiAdi = hb.HizmetBinasiAdi,
+                        DepartmanId = hb.DepartmanId,
+                        DepartmanAdi = hb.Departman?.DepartmanAdi ?? string.Empty,
+                        Adres = hb.Adres,
+                        HizmetBinasiAktiflik = hb.HizmetBinasiAktiflik,
+                        PersonelSayisi = personelCount,
+                        BankoSayisi = bankoCount,
+                        TvSayisi = tvCount,
+                        EklenmeTarihi = hb.EklenmeTarihi,
+                        DuzenlenmeTarihi = hb.DuzenlenmeTarihi
+                    });
+                }
 
                 return ApiResponseDto<List<HizmetBinasiResponseDto>>
                     .SuccessResult(dtos, "Hizmet binaları başarıyla getirildi");

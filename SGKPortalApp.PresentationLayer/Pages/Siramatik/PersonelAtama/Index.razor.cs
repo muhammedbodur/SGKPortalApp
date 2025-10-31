@@ -1,9 +1,16 @@
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
@@ -29,16 +36,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
         [Inject] private IKanalAltIslemApiService _kanalAltIslemService { get; set; } = default!;
         [Inject] private IKanalPersonelApiService _kanalPersonelService { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
+        [Inject] private ILogger<Index> _logger { get; set; } = default!;
+        [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
 
         private List<HizmetBinasiResponseDto> HizmetBinalari { get; set; } = new();
         
-        private List<KanalPersonelResponseDto> Personeller { get; set; } = new();
+        // Yeni Matrix Yapısı
+        private List<PersonelAtamaMatrixDto> PersonelMatrix { get; set; } = new();
         
         private List<KanalAltIslemResponseDto> KanalAltIslemler { get; set; } = new();
 
-
-        private Dictionary<string, KanalPersonelResponseDto> AtamalarDict { get; set; } = new();
+        // Hücre işlemleri için
+        private Dictionary<string, PersonelKanalAtamaDto> AtamalarDict { get; set; } = new();
         private HashSet<string> YuklenenHucreler { get; set; } = new();
 
 
@@ -51,15 +61,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
         private bool IsLoadingDropdowns { get; set; } = false;
         private bool IsLoadingMatrix { get; set; } = false;
 
-        private List<KanalPersonelResponseDto> FilteredPersoneller
+        private List<PersonelAtamaMatrixDto> FilteredPersoneller
         {
             get
             {
                 if (string.IsNullOrWhiteSpace(PersonelSearchTerm))
-                    return Personeller;
+                    return PersonelMatrix;
 
                 var searchLower = PersonelSearchTerm.ToLower().Trim();
-                return Personeller
+                return PersonelMatrix
                     .Where(p => p.PersonelAdSoyad.ToLower().Contains(searchLower) ||
                                 p.TcKimlikNo.Contains(searchLower))
                     .ToList();
@@ -73,11 +83,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
                 if (string.IsNullOrWhiteSpace(KanalAltIslemSearchTerm))
                     return KanalAltIslemler;
 
-                var searchLower = KanalAltIslemSearchTerm.ToLower().Trim();
-                return KanalAltIslemler
-                    .Where(kai => kai.KanalAltAdi.ToLower().Contains(searchLower) ||
-                                  kai.KanalAdi.ToLower().Contains(searchLower))
-                    .ToList();
+                // Select option'dan gelen ID'ye göre filtrele
+                if (int.TryParse(KanalAltIslemSearchTerm, out int selectedId))
+                {
+                    return KanalAltIslemler
+                        .Where(kai => kai.KanalAltIslemId == selectedId)
+                        .ToList();
+                }
+
+                return KanalAltIslemler;
             }
         }
 
@@ -87,6 +101,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
 
         protected override async Task OnInitializedAsync()
         {
+            QuestPDF.Settings.License = LicenseType.Community;
+            
             IsLoading = true;
             try
             {
@@ -120,7 +136,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
                     if (HizmetBinalari.Any() && SelectedHizmetBinasiId == 0)
                     {
                         SelectedHizmetBinasiId = HizmetBinalari.First().HizmetBinasiId;
-                        await OnHizmetBinasiChanged();
+                        await LoadMatrixData();
                     }
                 }
                 else
@@ -138,11 +154,21 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
             }
         }
 
-        private async Task OnHizmetBinasiChanged()
+        private async Task OnHizmetBinasiChanged(ChangeEventArgs e)
+        {
+            if (e.Value != null && int.TryParse(e.Value.ToString(), out int selectedId))
+            {
+                SelectedHizmetBinasiId = selectedId;
+            }
+            
+            await LoadMatrixData();
+        }
+
+        private async Task LoadMatrixData()
         {
             if (SelectedHizmetBinasiId == 0)
             {
-                Personeller.Clear();
+                PersonelMatrix.Clear();
                 KanalAltIslemler.Clear();
                 AtamalarDict.Clear();
                 return;
@@ -151,11 +177,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
             IsLoadingMatrix = true;
             try
             {
-                // 1. Personeller'i yükle (satırlar) - 
-                var personelResult = await _kanalPersonelService.GetPersonellerByHizmetBinasiIdAsync(SelectedHizmetBinasiId);
-                Personeller = personelResult.Success && personelResult.Data != null
-                    ? personelResult.Data
-                    : new List<KanalPersonelResponseDto>();
+                // 1. Personel Matrix'i yükle (personeller + kanal atamaları)
+                var matrixResult = await _kanalPersonelService.GetPersonelAtamaMatrixAsync(SelectedHizmetBinasiId);
+                PersonelMatrix = matrixResult.Success && matrixResult.Data != null
+                    ? matrixResult.Data
+                    : new List<PersonelAtamaMatrixDto>();
 
                 // 2. Kanal Alt İşlemleri yükle (sütunlar)
                 var kanalAltIslemResult = await _kanalAltIslemService.GetByHizmetBinasiIdAsync(SelectedHizmetBinasiId);
@@ -163,8 +189,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
                     ? kanalAltIslemResult.Data
                     : new List<KanalAltIslemResponseDto>();
 
-                // 3. Atamaları yükle
-                await LoadAtamalar();
+                // 3. Atamaları dictionary'e yükle (hızlı erişim için)
+                LoadAtamalariDictionary();
 
                 // Arama terimlerini temizle
                 PersonelSearchTerm = string.Empty;
@@ -180,26 +206,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
             }
         }
 
-        private async Task LoadAtamalar()
+        private void LoadAtamalariDictionary()
         {
-            try
+            AtamalarDict.Clear();
+
+            foreach (var personel in PersonelMatrix)
             {
-                var result = await _kanalPersonelService.GetPersonellerByHizmetBinasiIdAsync(SelectedHizmetBinasiId);
-
-                AtamalarDict.Clear();
-
-                if (result.Success && result.Data != null)
+                foreach (var atama in personel.KanalAtamalari)
                 {
-                    foreach (var atama in result.Data)
-                    {
-                        var key = GetHucreKey(atama.TcKimlikNo, atama.KanalAltIslemId);
-                        AtamalarDict[key] = atama;
-                    }
+                    var key = GetHucreKey(personel.TcKimlikNo, atama.KanalAltIslemId);
+                    AtamalarDict[key] = atama;
                 }
-            }
-            catch (Exception ex)
-            {
-                await _toastService.ShowErrorAsync($"Atamalar yüklenirken hata: {ex.Message}");
             }
         }
 
@@ -307,6 +324,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
                         if (deleteResult.Success)
                         {
                             AtamalarDict.Remove(key);
+                            // Matrix'ten de kaldır
+                            var personel = PersonelMatrix.FirstOrDefault(p => p.TcKimlikNo == personelTc);
+                            if (personel != null)
+                            {
+                                var atama = personel.KanalAtamalari.FirstOrDefault(a => a.KanalAltIslemId == kanalAltIslemId);
+                                if (atama != null)
+                                {
+                                    personel.KanalAtamalari.Remove(atama);
+                                }
+                            }
                             await _toastService.ShowSuccessAsync("Atama kaldırıldı");
                         }
                         else
@@ -314,31 +341,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
                             await _toastService.ShowErrorAsync(deleteResult.Message ?? "Silme işlemi başarısız");
                         }
                     }
-                }
-                else if (mevcutValue == PersonelUzmanlik.BilgisiYok && yeniValue != PersonelUzmanlik.BilgisiYok)
-                {
-                    // POST işlemi (yeni atama oluştur)
-                    var createRequest = new KanalPersonelCreateRequestDto
-                    {
-                        TcKimlikNo = personelTc,
-                        KanalAltIslemId = kanalAltIslemId,
-                        Uzmanlik = yeniValue
-                    };
-
-                    var createResult = await _kanalPersonelService.CreateAsync(createRequest);
-
-                    if (createResult.Success && createResult.Data != null)
-                    {
-                        var key = GetHucreKey(personelTc, kanalAltIslemId);
-                        AtamalarDict[key] = createResult.Data;
-                        await _toastService.ShowSuccessAsync("Atama oluşturuldu");
-                    }
-                    else
-                    {
-                        await _toastService.ShowErrorAsync(createResult.Message ?? "Oluşturma işlemi başarısız");
-                    }
-                }
-                else if (mevcutValue != PersonelUzmanlik.BilgisiYok && yeniValue != PersonelUzmanlik.BilgisiYok)
+                }else if (mevcutValue != PersonelUzmanlik.BilgisiYok && yeniValue != PersonelUzmanlik.BilgisiYok)
                 {
                     // PUT işlemi (uzmanlık değerini güncelle)
                     var key = GetHucreKey(personelTc, kanalAltIslemId);
@@ -354,7 +357,27 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
 
                         if (updateResult.Success && updateResult.Data != null)
                         {
-                            AtamalarDict[key] = updateResult.Data;
+                            var guncellenenAtama = new PersonelKanalAtamaDto
+                            {
+                                KanalPersonelId = updateResult.Data.KanalPersonelId,
+                                KanalAltIslemId = updateResult.Data.KanalAltIslemId,
+                                KanalAltIslemAdi = updateResult.Data.KanalAltIslemAdi,
+                                Uzmanlik = updateResult.Data.Uzmanlik,
+                                EklenmeTarihi = updateResult.Data.EklenmeTarihi,
+                                DuzenlenmeTarihi = updateResult.Data.DuzenlenmeTarihi
+                            };
+                            AtamalarDict[key] = guncellenenAtama;
+                            // Matrix'te de güncelle
+                            var personel = PersonelMatrix.FirstOrDefault(p => p.TcKimlikNo == personelTc);
+                            if (personel != null)
+                            {
+                                var atama = personel.KanalAtamalari.FirstOrDefault(a => a.KanalAltIslemId == kanalAltIslemId);
+                                if (atama != null)
+                                {
+                                    atama.Uzmanlik = yeniValue;
+                                    atama.DuzenlenmeTarihi = updateResult.Data.DuzenlenmeTarihi;
+                                }
+                            }
                             await _toastService.ShowSuccessAsync("Atama güncellendi");
                         }
                         else
@@ -363,6 +386,46 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
                         }
                     }
                 }
+                else if (mevcutValue == PersonelUzmanlik.BilgisiYok && yeniValue != PersonelUzmanlik.BilgisiYok)
+                {
+                    // POST işlemi (yeni atama oluştur)
+                    var createRequest = new KanalPersonelCreateRequestDto
+                    {
+                        TcKimlikNo = personelTc,
+                        KanalAltIslemId = kanalAltIslemId,
+                        Uzmanlik = yeniValue,
+                        Aktiflik = Aktiflik.Aktif
+                    };
+
+                    var createResult = await _kanalPersonelService.CreateAsync(createRequest);
+
+                    if (createResult.Success && createResult.Data != null)
+                    {
+                        var key = GetHucreKey(personelTc, kanalAltIslemId);
+                        var yeniAtama = new PersonelKanalAtamaDto
+                        {
+                            KanalPersonelId = createResult.Data.KanalPersonelId,
+                            KanalAltIslemId = createResult.Data.KanalAltIslemId,
+                            KanalAltIslemAdi = createResult.Data.KanalAltIslemAdi,
+                            Uzmanlik = createResult.Data.Uzmanlik,
+                            EklenmeTarihi = createResult.Data.EklenmeTarihi,
+                            DuzenlenmeTarihi = createResult.Data.DuzenlenmeTarihi
+                        };
+                        AtamalarDict[key] = yeniAtama;
+                        // Matrix'e de ekle
+                        var personel = PersonelMatrix.FirstOrDefault(p => p.TcKimlikNo == personelTc);
+                        if (personel != null)
+                        {
+                            personel.KanalAtamalari.Add(yeniAtama);
+                        }
+                        await _toastService.ShowSuccessAsync("Atama oluşturuldu");
+                    }
+                    else
+                    {
+                        await _toastService.ShowErrorAsync(createResult.Message ?? "Oluşturma işlemi başarısız");
+                    }
+                }
+                
             }
             catch (Exception ex)
             {
@@ -403,8 +466,76 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
             ExportType = "excel";
             try
             {
-                await Task.Delay(1000); // Simulated export
-                await _toastService.ShowInfoAsync("Excel export özelliği yakında eklenecek");
+                if (!PersonelMatrix.Any() || !KanalAltIslemler.Any())
+                {
+                    await _toastService.ShowWarningAsync("Export için veri bulunamadı");
+                    return;
+                }
+
+                using var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add("Personel Atama");
+
+                // Header - Personel bilgileri
+                worksheet.Cell(1, 1).Value = "Personel Ad Soyad";
+                worksheet.Cell(1, 2).Value = "TC Kimlik No";
+                
+                // Header - Kanal Alt İşlemler
+                int col = 3;
+                foreach (var kai in FilteredKanalAltIslemler)
+                {
+                    worksheet.Cell(1, col).Value = $"{kai.KanalAdi} - {kai.KanalAltAdi}";
+                    col++;
+                }
+
+                // Style header
+                var headerRange = worksheet.Range(1, 1, 1, col - 1);
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.LightBlue;
+                headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Data rows
+                int row = 2;
+                foreach (var personel in FilteredPersoneller)
+                {
+                    worksheet.Cell(row, 1).Value = personel.PersonelAdSoyad;
+                    worksheet.Cell(row, 2).Value = personel.TcKimlikNo;
+                    
+                    col = 3;
+                    foreach (var kai in FilteredKanalAltIslemler)
+                    {
+                        var uzmanlik = GetHucreValue(personel.TcKimlikNo, kai.KanalAltIslemId);
+                        var uzmanlikText = GetUzmanlikDisplayName(uzmanlik);
+                        var cell = worksheet.Cell(row, col);
+                        cell.Value = uzmanlikText;
+                        
+                        // Renklendirme
+                        if (uzmanlik == PersonelUzmanlik.Uzman)
+                            cell.Style.Fill.BackgroundColor = XLColor.LightGreen;
+                        else if (uzmanlik == PersonelUzmanlik.YrdUzman)
+                            cell.Style.Fill.BackgroundColor = XLColor.LightBlue;
+                        else
+                            cell.Style.Fill.BackgroundColor = XLColor.LightGray;
+                        
+                        cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                        col++;
+                    }
+                    row++;
+                }
+
+                worksheet.Columns().AdjustToContents();
+
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+                var fileName = $"PersonelAtama_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+                await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(content), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                await _toastService.ShowSuccessAsync("Excel dosyası başarıyla indirildi!");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Excel export hatası");
+                await _toastService.ShowErrorAsync($"Excel oluşturulurken hata: {ex.Message}");
             }
             finally
             {
@@ -419,8 +550,96 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
             ExportType = "pdf";
             try
             {
-                await Task.Delay(1000); // Simulated export
-                await _toastService.ShowInfoAsync("PDF export özelliği yakında eklenecek");
+                if (!PersonelMatrix.Any() || !KanalAltIslemler.Any())
+                {
+                    await _toastService.ShowWarningAsync("Export için veri bulunamadı");
+                    return;
+                }
+
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4.Landscape());
+                        page.Margin(1, Unit.Centimetre);
+                        page.DefaultTextStyle(x => x.FontSize(8));
+
+                        page.Header().Column(column =>
+                        {
+                            column.Item().Text("Personel Atama Matrix").FontSize(16).Bold();
+                            column.Item().Text($"Tarih: {DateTime.Now:dd.MM.yyyy HH:mm}").FontSize(9);
+                        });
+
+                        page.Content().Table(table =>
+                        {
+                            // Sütun tanımları
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(3); // Personel Ad Soyad
+                                columns.RelativeColumn(2); // TC Kimlik No
+                                
+                                // Her kanal alt işlem için sütun
+                                foreach (var _ in FilteredKanalAltIslemler)
+                                {
+                                    columns.RelativeColumn(2);
+                                }
+                            });
+
+                            // Header
+                            table.Header(header =>
+                            {
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("Personel").Bold().FontSize(8);
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("TC No").Bold().FontSize(8);
+                                
+                                foreach (var kai in FilteredKanalAltIslemler)
+                                {
+                                    header.Cell().Background(Colors.Grey.Lighten2).Padding(3)
+                                        .Text($"{kai.KanalAdi}\n{kai.KanalAltAdi}").Bold().FontSize(7);
+                                }
+                            });
+
+                            // Data rows
+                            foreach (var personel in FilteredPersoneller)
+                            {
+                                table.Cell().Padding(3).Text(personel.PersonelAdSoyad).FontSize(7);
+                                table.Cell().Padding(3).Text(personel.TcKimlikNo).FontSize(7);
+                                
+                                foreach (var kai in FilteredKanalAltIslemler)
+                                {
+                                    var uzmanlik = GetHucreValue(personel.TcKimlikNo, kai.KanalAltIslemId);
+                                    var uzmanlikText = GetUzmanlikDisplayName(uzmanlik);
+                                    
+                                    // Renklendirme - her cell için yeni chain
+                                    if (uzmanlik == PersonelUzmanlik.Uzman)
+                                        table.Cell().Background(Colors.Green.Lighten3).Padding(3).Text(uzmanlikText).FontSize(7);
+                                    else if (uzmanlik == PersonelUzmanlik.YrdUzman)
+                                        table.Cell().Background(Colors.Blue.Lighten3).Padding(3).Text(uzmanlikText).FontSize(7);
+                                    else
+                                        table.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text(uzmanlikText).FontSize(7);
+                                }
+                            }
+                        });
+
+                        page.Footer().AlignCenter().Text(text =>
+                        {
+                            text.Span("Sayfa ");
+                            text.CurrentPageNumber();
+                            text.Span(" / ");
+                            text.TotalPages();
+                        });
+                    });
+                });
+
+                var pdfBytes = document.GeneratePdf();
+                var fileName = $"PersonelAtama_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+
+                await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pdfBytes), "application/pdf");
+                await _toastService.ShowSuccessAsync("PDF dosyası başarıyla indirildi!");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "PDF export hatası");
+                await _toastService.ShowErrorAsync($"PDF oluşturulurken hata: {ex.Message}");
             }
             finally
             {

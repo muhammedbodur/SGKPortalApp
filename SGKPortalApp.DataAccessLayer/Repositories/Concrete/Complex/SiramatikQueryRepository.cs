@@ -311,5 +311,71 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                 .OrderBy(x => x.PersonelAdSoyad)
                 .ToListAsync();
         }
+
+        public async Task<List<PersonelAtamaMatrixDto>> GetPersonelAtamaMatrixByHizmetBinasiIdAsync(int hizmetBinasiId)
+        {
+            // 1. Hizmet binasındaki aktif personelleri getir
+            var personelQuery = from p in _context.Personeller
+                                where p.HizmetBinasiId == hizmetBinasiId
+                                   && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif
+                                   && !p.SilindiMi
+                                select new PersonelAtamaMatrixDto
+                                {
+                                    TcKimlikNo = p.TcKimlikNo,
+                                    SicilNo = p.SicilNo,
+                                    PersonelAdSoyad = p.AdSoyad,
+                                    Resim = p.Resim,
+                                    Aktiflik = (Aktiflik)p.PersonelAktiflikDurum,
+                                    KanalAtamalari = new List<PersonelKanalAtamaDto>()
+                                };
+
+            var personelList = await personelQuery
+                .AsNoTracking()
+                .OrderBy(x => x.PersonelAdSoyad)
+                .ToListAsync();
+
+            // 2. Bu personellerin kanal atamalarını getir
+            var tcKimlikNolar = personelList.Select(p => p.TcKimlikNo).ToList();
+
+            var atamaQuery = from kp in _context.KanalPersonelleri
+                             join kai in _context.KanalAltIslemleri on kp.KanalAltIslemId equals kai.KanalAltIslemId
+                             join ka in _context.KanallarAlt on kai.KanalAltId equals ka.KanalAltId
+                             join k in _context.Kanallar on ka.KanalId equals k.KanalId
+                             where tcKimlikNolar.Contains(kp.TcKimlikNo)
+                                && kai.HizmetBinasiId == hizmetBinasiId
+                                && kp.Aktiflik == Aktiflik.Aktif
+                                && !kp.SilindiMi
+                             select new
+                             {
+                                 kp.TcKimlikNo,
+                                 Atama = new PersonelKanalAtamaDto
+                                 {
+                                     KanalPersonelId = kp.KanalPersonelId,
+                                     KanalAltIslemId = kp.KanalAltIslemId,
+                                     KanalAltIslemAdi = $"{k.KanalAdi} - {ka.KanalAltAdi}",
+                                     Uzmanlik = kp.Uzmanlik,
+                                     EklenmeTarihi = kp.EklenmeTarihi,
+                                     DuzenlenmeTarihi = kp.DuzenlenmeTarihi
+                                 }
+                             };
+
+            var atamalar = await atamaQuery.AsNoTracking().ToListAsync();
+
+            // 3. Atamaları personellere grupla
+            var atamaGruplari = atamalar
+                .GroupBy(a => a.TcKimlikNo)
+                .ToDictionary(g => g.Key, g => g.Select(x => x.Atama).ToList());
+
+            // 4. Her personele atamalarını ekle
+            foreach (var personel in personelList)
+            {
+                if (atamaGruplari.ContainsKey(personel.TcKimlikNo))
+                {
+                    personel.KanalAtamalari = atamaGruplari[personel.TcKimlikNo];
+                }
+            }
+
+            return personelList;
+        }
     }
 }

@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
@@ -9,6 +10,7 @@ using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 {
@@ -50,18 +52,64 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 var kanalPersonelRepo = _unitOfWork.GetRepository<IKanalPersonelRepository>();
 
-                // Çakışma kontrolü
-                var hasConflict = await kanalPersonelRepo.HasConflictAsync(request.TcKimlikNo, request.KanalAltIslemId);
-                if (hasConflict)
+                // Önce ilişkili kayıtların varlığını kontrol et
+                var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
+                var personelExists = await personelRepo.GetByTcKimlikNoAsync(request.TcKimlikNo);
+                
+                if (personelExists == null)
+                {
+                    return ApiResponseDto<KanalPersonelResponseDto>
+                        .ErrorResult("Personel bulunamadı");
+                }
+
+                var kanalAltIslemRepo = _unitOfWork.GetRepository<IKanalAltIslemRepository>();
+                var kanalAltIslemExists = await kanalAltIslemRepo.GetByIdAsync(request.KanalAltIslemId);
+                
+                if (kanalAltIslemExists == null)
+                {
+                    return ApiResponseDto<KanalPersonelResponseDto>
+                        .ErrorResult("Kanal alt işlem bulunamadı");
+                }
+
+                // Aktif çakışma kontrolü
+                var hasActiveConflict = await kanalPersonelRepo.HasConflictAsync(request.TcKimlikNo, request.KanalAltIslemId);
+                if (hasActiveConflict)
                 {
                     return ApiResponseDto<KanalPersonelResponseDto>
                         .ErrorResult("Bu personel zaten bu kanal alt işlemine atanmış");
                 }
 
-                var kanalPersonel = _mapper.Map<KanalPersonel>(request);
-                kanalPersonel.Aktiflik = request.Aktiflik;
+                // Pasif kayıt var mı kontrol et
+                var inactiveRecord = await kanalPersonelRepo.GetInactiveRecordAsync(request.TcKimlikNo, request.KanalAltIslemId);
 
-                await kanalPersonelRepo.AddAsync(kanalPersonel);
+                KanalPersonel kanalPersonel;
+                
+                if (inactiveRecord != null)
+                {
+                    // Pasif kayıt varsa, onu aktif hale getir ve güncelle
+                    inactiveRecord.Aktiflik = request.Aktiflik;
+                    inactiveRecord.Uzmanlik = request.Uzmanlik;
+                    inactiveRecord.SilindiMi = false;
+                    kanalPersonelRepo.Update(inactiveRecord);
+                    kanalPersonel = inactiveRecord;
+                    
+                    _logger.LogInformation(
+                        "Pasif kayıt aktif hale getirildi. KanalPersonelId: {KanalPersonelId}, TcKimlikNo: {TcKimlikNo}, KanalAltIslemId: {KanalAltIslemId}",
+                        inactiveRecord.KanalPersonelId, request.TcKimlikNo, request.KanalAltIslemId);
+                }
+                else
+                {
+                    // Yeni kayıt oluştur
+                    kanalPersonel = new KanalPersonel
+                    {
+                        TcKimlikNo = request.TcKimlikNo,
+                        KanalAltIslemId = request.KanalAltIslemId,
+                        Uzmanlik = request.Uzmanlik,
+                        Aktiflik = request.Aktiflik
+                    };
+                    await kanalPersonelRepo.AddAsync(kanalPersonel);
+                }
+
                 await _unitOfWork.SaveChangesAsync();
 
                 // Detaylı veriyi getir
@@ -73,9 +121,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Personel ataması oluşturulurken hata oluştu");
+                _logger.LogError(ex, "Personel ataması oluşturulurken hata oluştu. TcKimlikNo: {TcKimlikNo}, KanalAltIslemId: {KanalAltIslemId}", 
+                    request.TcKimlikNo, request.KanalAltIslemId);
+                
+                var errorMessage = ex.InnerException != null 
+                    ? $"{ex.Message} - Inner: {ex.InnerException.Message}" 
+                    : ex.Message;
+                
                 return ApiResponseDto<KanalPersonelResponseDto>
-                    .ErrorResult("Personel ataması oluşturulurken bir hata oluştu", ex.Message);
+                    .ErrorResult("Personel ataması oluşturulurken bir hata oluştu", errorMessage);
             }
         }
 
@@ -217,8 +271,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 
                 var kanalPersoneller = await kanalPersonelRepo.GetByHizmetBinasiIdAsync(hizmetBinasiId);
 
-                var kanalPersonelDtos = _mapper.Map<List<KanalPersonelResponseDto>>(kanalPersoneller);
-
                 _logger.LogInformation(
                     "Hizmet binası personel atamaları getirildi. HizmetBinasiId: {HizmetBinasiId}, Adet: {Count}",
                     hizmetBinasiId,
@@ -290,6 +342,53 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 _logger.LogError(ex, "Kanal alt işlem personel atamaları getirilirken hata oluştu. KanalAltIslemId: {KanalAltIslemId}", kanalAltIslemId);
                 return ApiResponseDto<List<KanalPersonelResponseDto>>
                     .ErrorResult("Personel atamaları getirilirken bir hata oluştu", ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<List<PersonelAtamaMatrixDto>>> GetPersonelAtamaMatrixAsync(int hizmetBinasiId)
+        {
+            try
+            {
+                if (hizmetBinasiId <= 0)
+                {
+                    return ApiResponseDto<List<PersonelAtamaMatrixDto>>
+                        .ErrorResult("Geçersiz hizmet binası ID");
+                }
+
+                var matrixData = await _siramatikQueryRepository
+                    .GetPersonelAtamaMatrixByHizmetBinasiIdAsync(hizmetBinasiId);
+
+                if (!matrixData.Any())
+                {
+                    _logger.LogWarning(
+                        "Hizmet binasında personel bulunamadı. HizmetBinasiId: {HizmetBinasiId}",
+                        hizmetBinasiId);
+
+                    return ApiResponseDto<List<PersonelAtamaMatrixDto>>
+                        .SuccessResult(
+                            new List<PersonelAtamaMatrixDto>(),
+                            "Bu hizmet binasında personel bulunamadı");
+                }
+
+                _logger.LogInformation(
+                    "Personel atama matrix getirildi. HizmetBinasiId: {HizmetBinasiId}, Personel Sayısı: {Count}",
+                    hizmetBinasiId,
+                    matrixData.Count);
+
+                return ApiResponseDto<List<PersonelAtamaMatrixDto>>
+                    .SuccessResult(
+                        matrixData,
+                        $"{matrixData.Count} personel getirildi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Personel atama matrix getirilirken hata oluştu. HizmetBinasiId: {HizmetBinasiId}",
+                    hizmetBinasiId);
+
+                return ApiResponseDto<List<PersonelAtamaMatrixDto>>
+                    .ErrorResult("Personel atama matrix getirilirken bir hata oluştu", ex.Message);
             }
         }
     }

@@ -32,6 +32,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
         // Çakışma kontrolü yapar
         Task<bool> HasConflictAsync(string tcKimlikNo, int kanalAltIslemId);
 
+        // Pasif veya silinmiş kayıt var mı kontrol eder
+        Task<KanalPersonel?> GetInactiveRecordAsync(string tcKimlikNo, int kanalAltIslemId);
+
         // Uzmanlık bazında personelleri listeler
         Task<IEnumerable<KanalPersonel>> GetByUzmanlikAsync(PersonelUzmanlik uzmanlik);
     }

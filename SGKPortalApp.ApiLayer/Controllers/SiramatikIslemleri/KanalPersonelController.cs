@@ -124,17 +124,16 @@ namespace SGKPortalApp.ApiLayer.Controllers.Siramatik
             return result.Success ? Ok(result) : NotFound(result);
         }
 
-        // ═══════════════════════════════════════════════════════════════
-        // ⚠️ DEPRECATED ENDPOINTS - Kullanılmamaktadır
-        // ═══════════════════════════════════════════════════════════════
-        //
-        // GET /api/kanalpersonel/matrix/{id} - Kullanılmıyor
-        // POST /api/kanalpersonel/toggle-uzmanlik - Kullanılmıyor
-        //
-        // Personel Atama sayfası standart CRUD endpoint'lerini kullanır:
-        // - POST /api/kanalpersonel - Yeni atama
-        // - PUT /api/kanalpersonel/{id} - Uzmanlık güncelle
-        // - DELETE /api/kanalpersonel/{id} - Atamayı kaldır
-        // ═══════════════════════════════════════════════════════════════
+        /// <summary>
+        /// Personel Atama Matrix - Her personel bir satır, kanal atamaları collection olarak
+        /// </summary>
+        [HttpGet("matrix/{hizmetBinasiId:int}")]
+        public async Task<ActionResult<ApiResponseDto<List<PersonelAtamaMatrixDto>>>> GetPersonelAtamaMatrix(
+            int hizmetBinasiId)
+        {
+            var result = await _kanalPersonelService.GetPersonelAtamaMatrixAsync(hizmetBinasiId);
+
+            return result.Success ? Ok(result) : NotFound(result);
+        }
     }
 }

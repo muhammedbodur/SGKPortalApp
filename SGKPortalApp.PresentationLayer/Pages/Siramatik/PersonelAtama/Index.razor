@@ -119,7 +119,7 @@ else
                             <div class="d-flex gap-4 text-muted small">
                                 <span>
                                     <i class="bx bx-user text-primary"></i>
-                                    Personel: <strong>@Personeller.Count</strong>
+                                    Personel: <strong>@PersonelMatrix.Count</strong>
                                 </span>
                                 <span>
                                     <i class="bx bx-list-ul text-info"></i>
@@ -162,23 +162,23 @@ else
                                        @bind:event="oninput" />
                             </div>
                             <small class="text-muted d-block mt-1">
-                                @FilteredPersoneller.Count / @Personeller.Count personel gösteriliyor
+                                @FilteredPersoneller.Count / @PersonelMatrix.Count personel gösteriliyor
                             </small>
                         </div>
 
-                        <!-- Kanal Alt İşlem Arama -->
+                        <!-- Kanal Alt İşlem Filtrele -->
                         <div class="col-md-6">
-                            <label class="form-label">Kanal Alt İşlem Ara</label>
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="bx bx-search"></i>
-                                </span>
-                                <input type="text"
-                                       class="form-control"
-                                       placeholder="Kanal alt işlem adı..."
-                                       @bind="KanalAltIslemSearchTerm"
-                                       @bind:event="oninput" />
-                            </div>
+                            <label class="form-label">Kanal Alt İşlem Filtrele</label>
+                            <select class="form-select"
+                                    @bind="KanalAltIslemSearchTerm">
+                                <option value="">-- Tüm İşlemler --</option>
+                                @foreach (var kai in KanalAltIslemler)
+                                {
+                                    <option value="@kai.KanalAltIslemId">
+                                        @kai.KanalAdi - @kai.KanalAltAdi
+                                    </option>
+                                }
+                            </select>
                             <small class="text-muted d-block mt-1">
                                 @FilteredKanalAltIslemler.Count / @KanalAltIslemler.Count işlem gösteriliyor
                             </small>
@@ -226,7 +226,7 @@ else
                                         </th>
                                         @foreach (var kai in FilteredKanalAltIslemler)
                                         {
-                                            <th class="text-center bg-light" style="min-width: 140px; max-width: 140px;">
+                                            <th class="text-center bg-light" style="position: sticky; left: 0; z-index: 5; min-width: 140px; max-width: 140px;">
                                                 <strong>@kai.KanalAltAdi</strong>
                                             </th>
                                         }
@@ -330,7 +330,7 @@ else
         @* FOOTER INFO *@
         @* ═══════════════════════════════════════════════════════════════════════════════ *@
 
-        @if (SelectedHizmetBinasiId > 0 && !IsLoadingMatrix && Personeller.Any() && KanalAltIslemler.Any())
+        @if (SelectedHizmetBinasiId > 0 && !IsLoadingMatrix && PersonelMatrix.Any() && KanalAltIslemler.Any())
         {
             <div class="row mt-4">
                 <div class="col-12">

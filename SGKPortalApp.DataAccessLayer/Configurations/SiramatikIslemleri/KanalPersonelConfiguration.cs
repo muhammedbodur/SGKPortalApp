@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 
@@ -43,6 +43,12 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .HasForeignKey(kp => kp.TcKimlikNo)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_SIR_KanalPersonelleri_PER_Personeller");
+
+            builder.HasOne(kp => kp.KanalAltIslem)
+                .WithMany(kai => kai.KanalPersonelleri)
+                .HasForeignKey(kp => kp.KanalAltIslemId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_SIR_KanalPersonelleri_SIR_KanalAltIslemleri");
         }
     }
 }

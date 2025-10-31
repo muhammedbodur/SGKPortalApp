@@ -16,12 +16,12 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         public string TcKimlikNo { get; set; } = string.Empty;
         [ForeignKey("TcKimlikNo")]
         [InverseProperty("KanalPersonelleri")]
-        public required Personel Personel { get; set; }
+        public Personel? Personel { get; set; }
 
         public int KanalAltIslemId { get; set; }
         [ForeignKey("KanalAltIslemId")]
         [InverseProperty("KanalPersonelleri")]
-        public required KanalAltIslem KanalAltIslem { get; set; }
+        public KanalAltIslem? KanalAltIslem { get; set; }
 
         public PersonelUzmanlik Uzmanlik { get; set; }
         public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;

@@ -95,6 +95,16 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .AnyAsync(kp => kp.TcKimlikNo == tcKimlikNo && kp.KanalAltIslemId == kanalAltIslemId && kp.Aktiflik == Aktiflik.Aktif);
         }
 
+        // Pasif veya silinmiş kayıt var mı kontrol eder
+        public async Task<KanalPersonel?> GetInactiveRecordAsync(string tcKimlikNo, int kanalAltIslemId)
+        {
+            return await _dbSet
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(kp => kp.TcKimlikNo == tcKimlikNo 
+                                        && kp.KanalAltIslemId == kanalAltIslemId
+                                        && kp.Aktiflik == Aktiflik.Pasif);
+        }
+
         // Uzmanlık bazında personelleri listeler
         public async Task<IEnumerable<KanalPersonel>> GetByUzmanlikAsync(PersonelUzmanlik uzmanlik)
         {

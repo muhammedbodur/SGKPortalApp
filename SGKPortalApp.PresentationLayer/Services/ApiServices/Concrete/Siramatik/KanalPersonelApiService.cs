@@ -256,10 +256,38 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             }
         }
 
-        // ═══════════════════════════════════════════════════════════════════════════════
-        // ⚠️ DEPRECATED METHODS - Kullanılmamaktadır
-        // ═══════════════════════════════════════════════════════════════════════════════
-        // GetPersonelMatrixAsync() - Kullanılmıyor
-        // TogglePersonelUzmanlikAsync() - Kullanılmıyor
+        public async Task<ServiceResult<List<PersonelAtamaMatrixDto>>> GetPersonelAtamaMatrixAsync(int hizmetBinasiId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"kanalpersonel/matrix/{hizmetBinasiId}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetPersonelAtamaMatrixAsync failed: {Error}", errorContent);
+                    return ServiceResult<List<PersonelAtamaMatrixDto>>.Fail("Personel atama matrix alınamadı.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<PersonelAtamaMatrixDto>>>();
+
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return ServiceResult<List<PersonelAtamaMatrixDto>>.Ok(
+                        apiResponse.Data,
+                        apiResponse.Message ?? "İşlem başarılı"
+                    );
+                }
+
+                return ServiceResult<List<PersonelAtamaMatrixDto>>.Fail(
+                    apiResponse?.Message ?? "Personel atama matrix alınamadı"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetPersonelAtamaMatrixAsync Exception");
+                return ServiceResult<List<PersonelAtamaMatrixDto>>.Fail($"Hata: {ex.Message}");
+            }
+        }
     }
 }

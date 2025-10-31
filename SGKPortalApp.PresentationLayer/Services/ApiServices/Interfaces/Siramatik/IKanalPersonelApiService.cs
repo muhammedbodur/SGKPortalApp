@@ -16,8 +16,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramat
         Task<ServiceResult<KanalPersonelResponseDto>> UpdateAsync(int id, KanalPersonelUpdateRequestDto dto);
         Task<ServiceResult<bool>> DeleteAsync(int id);
 
-        // ⚠️ DEPRECATED: Matrix ve Toggle metodları kullanılmamaktadır
-        // Task<ServiceResult<PersonelAtamaMatrixResponseDto>> GetPersonelMatrixAsync(int hizmetBinasiId);
-        // Task<ServiceResult<UzmanlikInfo>> TogglePersonelUzmanlikAsync(string tcKimlikNo, int kanalAltIslemId);
+        // Personel Atama Matrix (Yeni Yapı)
+        Task<ServiceResult<List<PersonelAtamaMatrixDto>>> GetPersonelAtamaMatrixAsync(int hizmetBinasiId);
     }
 }

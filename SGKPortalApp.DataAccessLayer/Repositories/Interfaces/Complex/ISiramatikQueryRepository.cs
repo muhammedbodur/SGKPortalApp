@@ -23,5 +23,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex
         Task<List<KanalAltIslemResponseDto>> GetEslestirmeYapilmamisKanalAltIslemlerAsync(int hizmetBinasiId);
 
         Task<List<KanalPersonelResponseDto>> GetPersonelKanalAtamalarByHizmetBinasiIdAsync(int hizmetBinasiId);
+        
+        // Personel Atama Matrix Sorgusu (Yeni Yapı)
+        Task<List<PersonelAtamaMatrixDto>> GetPersonelAtamaMatrixByHizmetBinasiIdAsync(int hizmetBinasiId);
     }
 }
