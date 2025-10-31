@@ -13,8 +13,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
         Task<ApiResponseDto<KanalPersonelResponseDto>> GetByIdAsync(int kanalPersonelId);
         
         // Business Operations
-        Task<ApiResponseDto<List<KanalPersonelResponseDto>>> GetByHizmetBinasiIdAsync(int hizmetBinasiId);
+        Task<ApiResponseDto<List<KanalPersonelResponseDto>>> GetPersonellerByHizmetBinasiIdAsync(int hizmetBinasiId);
         Task<ApiResponseDto<List<KanalPersonelResponseDto>>> GetByPersonelTcAsync(string tcKimlikNo);
         Task<ApiResponseDto<List<KanalPersonelResponseDto>>> GetByKanalAltIslemIdAsync(int kanalAltIslemId);
+        
+        // ⚠️ DEPRECATED: Matrix ve Toggle metodları kullanılmamaktadır
+        // Task<ApiResponseDto<PersonelAtamaMatrixResponseDto>> GetPersonelMatrixAsync(int hizmetBinasiId);
+        // Task<ApiResponseDto<UzmanlikInfo>> TogglePersonelUzmanlikAsync(string tcKimlikNo, int kanalAltIslemId);
     }
 }

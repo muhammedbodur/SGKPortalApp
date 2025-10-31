@@ -8,13 +8,13 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri
     /// </summary>
     public enum PersonelUzmanlik : int
     {
-        [Display(Name = "Konusunda Uzman")]
+        [Display(Name = "Uzman")]
         Uzman = 1,
 
         [Display(Name = "Bilgisi Yok")]
         BilgisiYok = 0,
 
-        [Display(Name = "Konusunda Yrd. Uzman")]
+        [Display(Name = "Yrd. Uzman")]
         YrdUzman = 2
     }
 }

@@ -8,21 +8,25 @@ using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 {
     public class KanalPersonelService : IKanalPersonelService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ISiramatikQueryRepository _siramatikQueryRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<KanalPersonelService> _logger;
 
         public KanalPersonelService(
             IUnitOfWork unitOfWork,
+            ISiramatikQueryRepository siramatikQueryRepository,
             IMapper mapper,
             ILogger<KanalPersonelService> logger)
         {
             _unitOfWork = unitOfWork;
+            _siramatikQueryRepository = siramatikQueryRepository;
             _mapper = mapper;
             _logger = logger;
         }
@@ -183,7 +187,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
         }
 
-        public async Task<ApiResponseDto<List<KanalPersonelResponseDto>>> GetByHizmetBinasiIdAsync(int hizmetBinasiId)
+        public async Task<ApiResponseDto<List<KanalPersonelResponseDto>>> GetPersonellerByHizmetBinasiIdAsync(int hizmetBinasiId)
         {
             try
             {
@@ -193,22 +197,38 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         .ErrorResult("Geçersiz hizmet binası ID");
                 }
 
-                var kanalPersonelRepo = _unitOfWork.GetRepository<IKanalPersonelRepository>();
-                var kanalPersoneller = await kanalPersonelRepo.GetAllWithDetailsAsync();
+                var kanalPersonelDtos = await _siramatikQueryRepository
+                    .GetPersonelKanalAtamalarByHizmetBinasiIdAsync(hizmetBinasiId);
 
-                // Hizmet binasına göre filtrele
-                var filteredList = kanalPersoneller
-                    .Where(kp => kp.Personel?.HizmetBinasiId == hizmetBinasiId)
-                    .ToList();
+                if (!kanalPersonelDtos.Any())
+                {
+                    _logger.LogWarning(
+                        "Hizmet binasında personel bulunamadı. HizmetBinasiId: {HizmetBinasiId}",
+                        hizmetBinasiId);
 
-                var kanalPersonelDtos = _mapper.Map<List<KanalPersonelResponseDto>>(filteredList);
+                    return ApiResponseDto<List<KanalPersonelResponseDto>>
+                        .SuccessResult(
+                            new List<KanalPersonelResponseDto>(),
+                            "Bu hizmet binasında personel bulunamadı");
+                }
+
+                _logger.LogInformation(
+                    "Hizmet binası personel atamaları getirildi. HizmetBinasiId: {HizmetBinasiId}, Adet: {Count}",
+                    hizmetBinasiId,
+                    kanalPersonelDtos.Count);
 
                 return ApiResponseDto<List<KanalPersonelResponseDto>>
-                    .SuccessResult(kanalPersonelDtos, "Personel atamaları başarıyla getirildi");
+                    .SuccessResult(
+                        kanalPersonelDtos,
+                        $"{kanalPersonelDtos.Count} personel getirildi");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Hizmet binası personel atamaları getirilirken hata oluştu. HizmetBinasiId: {HizmetBinasiId}", hizmetBinasiId);
+                _logger.LogError(
+                    ex,
+                    "Hizmet binası personel atamaları getirilirken hata oluştu. HizmetBinasiId: {HizmetBinasiId}",
+                    hizmetBinasiId);
+
                 return ApiResponseDto<List<KanalPersonelResponseDto>>
                     .ErrorResult("Personel atamaları getirilirken bir hata oluştu", ex.Message);
             }

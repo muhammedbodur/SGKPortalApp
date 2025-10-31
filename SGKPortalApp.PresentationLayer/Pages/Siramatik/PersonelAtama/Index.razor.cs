@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Components;
-using QuestPDF.Infrastructure;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
@@ -9,367 +9,424 @@ using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
+using System.Reflection;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
 {
-    public partial class Index
+    /// <summary>
+    /// PersonelAtama - Kanal/Alt Kanal'a Personel Uzmanlık Atama Sayfası
+    /// 
+    /// AMAÇ:
+    /// - Excel benzeri matrix grid'de personel-kanal işlem atamalarını yönetir
+    /// - Her hücre toggle düğmesi gibi çalışır: 0 → 1 → 2 → 0 döngüsü
+    /// - Renkli gösterim: 1=Yeşil, 2=Mavi, 0=Gri
+    /// </summary>
+    public partial class Index : ComponentBase
     {
+
         [Inject] private IHizmetBinasiApiService _hizmetBinasiService { get; set; } = default!;
         [Inject] private IPersonelApiService _personelService { get; set; } = default!;
         [Inject] private IKanalAltIslemApiService _kanalAltIslemService { get; set; } = default!;
         [Inject] private IKanalPersonelApiService _kanalPersonelService { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
-        [Inject] private ILogger<Index> _logger { get; set; } = default!;
 
-        // State
-        private bool isLoading = false;
-        private HizmetBinasiResponseDto? selectedHizmetBinasi;
+
+        private List<HizmetBinasiResponseDto> HizmetBinalari { get; set; } = new();
         
-        // Computed Properties
-        private int toplamAtamaSayisi => personelAtamalari.Count(x => x.Uzmanlik != PersonelUzmanlik.BilgisiYok);
+        private List<KanalPersonelResponseDto> Personeller { get; set; } = new();
         
-        // Data Lists
-        private List<HizmetBinasiResponseDto> hizmetBinalari = new();
-        private List<PersonelResponseDto> personeller = new();
-        private List<KanalAltIslemResponseDto> kanalAltIslemler = new();
-        private List<KanalPersonelResponseDto> personelAtamalari = new();
-        
-        // Grouped Data
-        private List<KanalIslemGroup> kanalIslemler = new();
+        private List<KanalAltIslemResponseDto> KanalAltIslemler { get; set; } = new();
+
+
+        private Dictionary<string, KanalPersonelResponseDto> AtamalarDict { get; set; } = new();
+        private HashSet<string> YuklenenHucreler { get; set; } = new();
+
+
+        private int SelectedHizmetBinasiId { get; set; } = 0;
+        private string PersonelSearchTerm { get; set; } = string.Empty;
+        private string KanalAltIslemSearchTerm { get; set; } = string.Empty;
+
+
+        private bool IsLoading { get; set; } = true;
+        private bool IsLoadingDropdowns { get; set; } = false;
+        private bool IsLoadingMatrix { get; set; } = false;
+
+        private List<KanalPersonelResponseDto> FilteredPersoneller
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(PersonelSearchTerm))
+                    return Personeller;
+
+                var searchLower = PersonelSearchTerm.ToLower().Trim();
+                return Personeller
+                    .Where(p => p.PersonelAdSoyad.ToLower().Contains(searchLower) ||
+                                p.TcKimlikNo.Contains(searchLower))
+                    .ToList();
+            }
+        }
+
+        private List<KanalAltIslemResponseDto> FilteredKanalAltIslemler
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(KanalAltIslemSearchTerm))
+                    return KanalAltIslemler;
+
+                var searchLower = KanalAltIslemSearchTerm.ToLower().Trim();
+                return KanalAltIslemler
+                    .Where(kai => kai.KanalAltAdi.ToLower().Contains(searchLower) ||
+                                  kai.KanalAdi.ToLower().Contains(searchLower))
+                    .ToList();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // #7 LIFECYCLE METHODS
+        // ═══════════════════════════════════════════════════════════════════════════════
 
         protected override async Task OnInitializedAsync()
         {
-            QuestPDF.Settings.License = LicenseType.Community;
-            await LoadHizmetBinalari();
+            IsLoading = true;
+            try
+            {
+                await LoadHizmetBinalari();
+            }
+            catch (Exception ex)
+            {
+                await _toastService.ShowErrorAsync($"Sayfa yüklenmesinde hata: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
+
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // #8 DATA LOADING METHODS
+        // ═══════════════════════════════════════════════════════════════════════════════
 
         private async Task LoadHizmetBinalari()
         {
+            IsLoadingDropdowns = true;
             try
             {
-                isLoading = true;
                 var result = await _hizmetBinasiService.GetAllAsync();
-                
+
                 if (result.Success && result.Data != null)
                 {
-                    hizmetBinalari = result.Data;
-                }
-                else
-                {
-                    await _toastService.ShowErrorAsync(result.Message ?? "Hizmet binaları yüklenemedi");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Hizmet binaları yüklenirken hata oluştu");
-                await _toastService.ShowErrorAsync("Hizmet binaları yüklenirken bir hata oluştu");
-            }
-            finally
-            {
-                isLoading = false;
-            }
-        }
+                    HizmetBinalari = result.Data;
 
-        private async Task OnHizmetBinasiChanged(ChangeEventArgs e)
-        {
-            if (int.TryParse(e.Value?.ToString(), out int hizmetBinasiId) && hizmetBinasiId > 0)
-            {
-                selectedHizmetBinasi = hizmetBinalari.FirstOrDefault(x => x.HizmetBinasiId == hizmetBinasiId);
-                await LoadData(hizmetBinasiId);
-            }
-            else
-            {
-                selectedHizmetBinasi = null;
-                ClearData();
-            }
-        }
-
-        private async Task LoadData(int hizmetBinasiId)
-        {
-            try
-            {
-                isLoading = true;
-
-                // Paralel olarak tüm verileri yükle
-                var personelTask = LoadPersoneller(hizmetBinasiId);
-                var kanalAltIslemTask = LoadKanalAltIslemler(hizmetBinasiId);
-                var personelAtamaTask = LoadPersonelAtamalari(hizmetBinasiId);
-
-                await Task.WhenAll(personelTask, kanalAltIslemTask, personelAtamaTask);
-
-                // Kanal İşlem gruplarını oluştur
-                GroupKanalIslemler();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Veriler yüklenirken hata oluştu");
-                await _toastService.ShowErrorAsync("Veriler yüklenirken bir hata oluştu");
-            }
-            finally
-            {
-                isLoading = false;
-            }
-        }
-
-        private async Task LoadPersoneller(int hizmetBinasiId)
-        {
-            var personelResult = await _personelService.GetAllAsync();
-            
-            if (personelResult.Success && personelResult.Data != null)
-            {
-                // Hizmet binasına göre filtrele
-                personeller = personelResult.Data
-                    .Where(p => p.HizmetBinasiId == hizmetBinasiId)
-                    .ToList();
-            }
-            else
-            {
-                personeller = new();
-                await _toastService.ShowWarningAsync("Personel listesi yüklenemedi");
-            }
-        }
-
-        private async Task LoadKanalAltIslemler(int hizmetBinasiId)
-        {
-            var kanalAltIslemResult = await _kanalAltIslemService.GetByHizmetBinasiIdAsync(hizmetBinasiId);
-            
-            if (kanalAltIslemResult.Success && kanalAltIslemResult.Data != null)
-            {
-                kanalAltIslemler = kanalAltIslemResult.Data;
-            }
-            else
-            {
-                kanalAltIslemler = new();
-                await _toastService.ShowWarningAsync("Kanal alt işlemler yüklenemedi");
-            }
-        }
-
-        private async Task LoadPersonelAtamalari(int hizmetBinasiId)
-        {
-            var atamalarResult = await _kanalPersonelService.GetByHizmetBinasiIdAsync(hizmetBinasiId);
-            
-            if (atamalarResult.Success && atamalarResult.Data != null)
-            {
-                personelAtamalari = atamalarResult.Data;
-            }
-            else
-            {
-                personelAtamalari = new();
-                // Hata mesajı gösterme, boş liste normal bir durum olabilir
-            }
-        }
-
-        private void GroupKanalIslemler()
-        {
-            kanalIslemler = kanalAltIslemler
-                .GroupBy(x => new { x.KanalIslemId, x.KanalAdi })
-                .Select(g => new KanalIslemGroup
-                {
-                    KanalIslemId = g.Key.KanalIslemId,
-                    KanalIslemAdi = g.Key.KanalAdi,
-                    AltIslemler = g.OrderBy(x => x.KanalAltAdi).ToList()
-                })
-                .OrderBy(x => x.KanalIslemAdi)
-                .ToList();
-        }
-
-        private void ClearData()
-        {
-            personeller = new();
-            kanalAltIslemler = new();
-            personelAtamalari = new();
-            kanalIslemler = new();
-        }
-
-        private KanalPersonelResponseDto? GetPersonelAtama(string tcKimlikNo, int kanalAltIslemId)
-        {
-            return personelAtamalari.FirstOrDefault(x => 
-                x.TcKimlikNo == tcKimlikNo && 
-                x.KanalAltIslemId == kanalAltIslemId);
-        }
-
-        private async Task ToggleUzmanlik(string tcKimlikNo, int kanalAltIslemId)
-        {
-            try
-            {
-                var atama = GetPersonelAtama(tcKimlikNo, kanalAltIslemId);
-                PersonelUzmanlik yeniUzmanlik;
-
-                if (atama == null)
-                {
-                    // Yeni atama oluştur - Uzman olarak başlat
-                    yeniUzmanlik = PersonelUzmanlik.Uzman;
-                    await CreateAtama(tcKimlikNo, kanalAltIslemId, yeniUzmanlik);
-                }
-                else
-                {
-                    // Mevcut atamayı döngüsel olarak değiştir
-                    // BilgisiYok -> Uzman -> YrdUzman -> BilgisiYok
-                    yeniUzmanlik = atama.Uzmanlik switch
+                    if (HizmetBinalari.Any() && SelectedHizmetBinasiId == 0)
                     {
-                        PersonelUzmanlik.BilgisiYok => PersonelUzmanlik.Uzman,
-                        PersonelUzmanlik.Uzman => PersonelUzmanlik.YrdUzman,
-                        PersonelUzmanlik.YrdUzman => PersonelUzmanlik.BilgisiYok,
-                        _ => PersonelUzmanlik.Uzman
+                        SelectedHizmetBinasiId = HizmetBinalari.First().HizmetBinasiId;
+                        await OnHizmetBinasiChanged();
+                    }
+                }
+                else
+                {
+                    await _toastService.ShowErrorAsync(result.Message ?? "Hizmet binaları yüklenemedi!");
+                }
+            }
+            catch (Exception ex)
+            {
+                await _toastService.ShowErrorAsync($"Hizmet binaları yüklenirken hata: {ex.Message}");
+            }
+            finally
+            {
+                IsLoadingDropdowns = false;
+            }
+        }
+
+        private async Task OnHizmetBinasiChanged()
+        {
+            if (SelectedHizmetBinasiId == 0)
+            {
+                Personeller.Clear();
+                KanalAltIslemler.Clear();
+                AtamalarDict.Clear();
+                return;
+            }
+
+            IsLoadingMatrix = true;
+            try
+            {
+                // 1. Personeller'i yükle (satırlar) - 
+                var personelResult = await _kanalPersonelService.GetPersonellerByHizmetBinasiIdAsync(SelectedHizmetBinasiId);
+                Personeller = personelResult.Success && personelResult.Data != null
+                    ? personelResult.Data
+                    : new List<KanalPersonelResponseDto>();
+
+                // 2. Kanal Alt İşlemleri yükle (sütunlar)
+                var kanalAltIslemResult = await _kanalAltIslemService.GetByHizmetBinasiIdAsync(SelectedHizmetBinasiId);
+                KanalAltIslemler = kanalAltIslemResult.Success && kanalAltIslemResult.Data != null
+                    ? kanalAltIslemResult.Data
+                    : new List<KanalAltIslemResponseDto>();
+
+                // 3. Atamaları yükle
+                await LoadAtamalar();
+
+                // Arama terimlerini temizle
+                PersonelSearchTerm = string.Empty;
+                KanalAltIslemSearchTerm = string.Empty;
+            }
+            catch (Exception ex)
+            {
+                await _toastService.ShowErrorAsync($"Matrix verisi yüklenirken hata: {ex.Message}");
+            }
+            finally
+            {
+                IsLoadingMatrix = false;
+            }
+        }
+
+        private async Task LoadAtamalar()
+        {
+            try
+            {
+                var result = await _kanalPersonelService.GetPersonellerByHizmetBinasiIdAsync(SelectedHizmetBinasiId);
+
+                AtamalarDict.Clear();
+
+                if (result.Success && result.Data != null)
+                {
+                    foreach (var atama in result.Data)
+                    {
+                        var key = GetHucreKey(atama.TcKimlikNo, atama.KanalAltIslemId);
+                        AtamalarDict[key] = atama;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await _toastService.ShowErrorAsync($"Atamalar yüklenirken hata: {ex.Message}");
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // #9 MATRIX HELPER METHODS
+        // ═══════════════════════════════════════════════════════════════════════════════
+
+        private string GetHucreKey(string personelTc, int kanalAltIslemId)
+            => $"{personelTc}-{kanalAltIslemId}";
+
+        private PersonelUzmanlik GetHucreValue(string personelTc, int kanalAltIslemId)
+        {
+            var key = GetHucreKey(personelTc, kanalAltIslemId);
+            return AtamalarDict.ContainsKey(key)
+                ? AtamalarDict[key].Uzmanlik
+                : PersonelUzmanlik.BilgisiYok;
+        }
+
+        private string GetHucreId(string personelTc, int kanalAltIslemId)
+            => $"hucre-{personelTc}-{kanalAltIslemId}";
+
+        private bool IsHucreLoading(string personelTc, int kanalAltIslemId)
+        {
+            var key = GetHucreKey(personelTc, kanalAltIslemId);
+            return YuklenenHucreler.Contains(key);
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // #10 ENUM HELPER METHODS
+        // ═══════════════════════════════════════════════════════════════════════════════
+
+        private string GetUzmanlikDisplayName(PersonelUzmanlik uzmanlik)
+        {
+            var fieldInfo = uzmanlik.GetType().GetField(uzmanlik.ToString());
+            var displayAttribute = fieldInfo?
+                .GetCustomAttribute(typeof(System.ComponentModel.DataAnnotations.DisplayAttribute), false)
+                as System.ComponentModel.DataAnnotations.DisplayAttribute;
+
+            return displayAttribute?.GetName() ?? uzmanlik.ToString();
+        }
+
+        private string GetHucreButtonClass(PersonelUzmanlik uzmanlik)
+        {
+            return uzmanlik switch
+            {
+                PersonelUzmanlik.Uzman => "btn btn-success",
+                PersonelUzmanlik.YrdUzman => "btn btn-info",
+                PersonelUzmanlik.BilgisiYok => "btn btn-secondary", 
+                _ => "btn btn-secondary"
+            };
+        }
+
+        private PersonelUzmanlik GetNextUzmanlikValue(PersonelUzmanlik mevcutValue)
+        {
+            return mevcutValue switch
+            {
+                PersonelUzmanlik.BilgisiYok => PersonelUzmanlik.Uzman,
+                PersonelUzmanlik.Uzman => PersonelUzmanlik.YrdUzman,
+                PersonelUzmanlik.YrdUzman => PersonelUzmanlik.BilgisiYok, 
+                _ => PersonelUzmanlik.BilgisiYok
+            };
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // #11 TOGGLE/HÜCRE CLICK METHODS - ANA İŞLEV
+        // ═══════════════════════════════════════════════════════════════════════════════
+
+        private async Task OnHucreClicked(string personelTc, int kanalAltIslemId)
+        {
+            var key = GetHucreKey(personelTc, kanalAltIslemId);
+
+            if (YuklenenHucreler.Contains(key))
+                return;
+
+            YuklenenHucreler.Add(key);
+
+            try
+            {
+                var mevcutValue = GetHucreValue(personelTc, kanalAltIslemId);
+                var yeniValue = GetNextUzmanlikValue(mevcutValue);
+
+                await ToggleAtama(personelTc, kanalAltIslemId, mevcutValue, yeniValue);
+            }
+            finally
+            {
+                YuklenenHucreler.Remove(key);
+                StateHasChanged();
+            }
+        }
+
+        private async Task ToggleAtama(string personelTc, int kanalAltIslemId,
+            PersonelUzmanlik mevcutValue, PersonelUzmanlik yeniValue)
+        {
+            try
+            {
+                if (yeniValue == PersonelUzmanlik.BilgisiYok && mevcutValue != PersonelUzmanlik.BilgisiYok)
+                {
+                    // DELETE işlemi
+                    var key = GetHucreKey(personelTc, kanalAltIslemId);
+                    if (AtamalarDict.ContainsKey(key))
+                    {
+                        var kanalPersonelId = AtamalarDict[key].KanalPersonelId;
+                        var deleteResult = await _kanalPersonelService.DeleteAsync(kanalPersonelId);
+
+                        if (deleteResult.Success)
+                        {
+                            AtamalarDict.Remove(key);
+                            await _toastService.ShowSuccessAsync("Atama kaldırıldı");
+                        }
+                        else
+                        {
+                            await _toastService.ShowErrorAsync(deleteResult.Message ?? "Silme işlemi başarısız");
+                        }
+                    }
+                }
+                else if (mevcutValue == PersonelUzmanlik.BilgisiYok && yeniValue != PersonelUzmanlik.BilgisiYok)
+                {
+                    // POST işlemi (yeni atama oluştur)
+                    var createRequest = new KanalPersonelCreateRequestDto
+                    {
+                        TcKimlikNo = personelTc,
+                        KanalAltIslemId = kanalAltIslemId,
+                        Uzmanlik = yeniValue
                     };
 
-                    if (yeniUzmanlik == PersonelUzmanlik.BilgisiYok)
+                    var createResult = await _kanalPersonelService.CreateAsync(createRequest);
+
+                    if (createResult.Success && createResult.Data != null)
                     {
-                        // Atamayı sil
-                        await DeleteAtama(atama.KanalPersonelId);
+                        var key = GetHucreKey(personelTc, kanalAltIslemId);
+                        AtamalarDict[key] = createResult.Data;
+                        await _toastService.ShowSuccessAsync("Atama oluşturuldu");
                     }
                     else
                     {
-                        // Atamayı güncelle
-                        await UpdateAtama(atama.KanalPersonelId, yeniUzmanlik);
+                        await _toastService.ShowErrorAsync(createResult.Message ?? "Oluşturma işlemi başarısız");
+                    }
+                }
+                else if (mevcutValue != PersonelUzmanlik.BilgisiYok && yeniValue != PersonelUzmanlik.BilgisiYok)
+                {
+                    // PUT işlemi (uzmanlık değerini güncelle)
+                    var key = GetHucreKey(personelTc, kanalAltIslemId);
+                    if (AtamalarDict.ContainsKey(key))
+                    {
+                        var kanalPersonelId = AtamalarDict[key].KanalPersonelId;
+                        var updateRequest = new KanalPersonelUpdateRequestDto
+                        {
+                            Uzmanlik = yeniValue
+                        };
+
+                        var updateResult = await _kanalPersonelService.UpdateAsync(kanalPersonelId, updateRequest);
+
+                        if (updateResult.Success && updateResult.Data != null)
+                        {
+                            AtamalarDict[key] = updateResult.Data;
+                            await _toastService.ShowSuccessAsync("Atama güncellendi");
+                        }
+                        else
+                        {
+                            await _toastService.ShowErrorAsync(updateResult.Message ?? "Güncelleme işlemi başarısız");
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Uzmanlık seviyesi değiştirilirken hata oluştu");
-                await _toastService.ShowErrorAsync("İşlem sırasında bir hata oluştu");
+                await _toastService.ShowErrorAsync($"İşlem sırasında hata: {ex.Message}");
             }
         }
 
-        private async Task CreateAtama(string tcKimlikNo, int kanalAltIslemId, PersonelUzmanlik uzmanlik)
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // #12 FILTER METHODS
+        // ═══════════════════════════════════════════════════════════════════════════════
+
+        private void OnPersonelSearchChanged(ChangeEventArgs e)
         {
-            var createDto = new KanalPersonelCreateRequestDto
-            {
-                TcKimlikNo = tcKimlikNo,
-                KanalAltIslemId = kanalAltIslemId,
-                Uzmanlik = uzmanlik,
-                Aktiflik = BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
-            };
-
-            var result = await _kanalPersonelService.CreateAsync(createDto);
-
-            if (result.Success && result.Data != null)
-            {
-                personelAtamalari.Add(result.Data);
-                
-                var personel = personeller.FirstOrDefault(p => p.TcKimlikNo == tcKimlikNo);
-                var altIslem = kanalAltIslemler.FirstOrDefault(k => k.KanalAltIslemId == kanalAltIslemId);
-                
-                if (personel != null && altIslem != null)
-                {
-                    await _toastService.ShowSuccessAsync($"{personel.AdSoyad} - {altIslem.KanalAltAdi}: {GetUzmanlikText(uzmanlik)}");
-                }
-            }
-            else
-            {
-                await _toastService.ShowErrorAsync(result.Message ?? "Atama oluşturulamadı");
-            }
+            PersonelSearchTerm = e.Value?.ToString() ?? string.Empty;
         }
 
-        private async Task UpdateAtama(int kanalPersonelId, PersonelUzmanlik yeniUzmanlik)
+        private void OnKanalAltIslemSearchChanged(ChangeEventArgs e)
         {
-            var updateDto = new KanalPersonelUpdateRequestDto
-            {
-                Uzmanlik = yeniUzmanlik,
-                Aktiflik = BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
-            };
-
-            var result = await _kanalPersonelService.UpdateAsync(kanalPersonelId, updateDto);
-
-            if (result.Success)
-            {
-                var atama = personelAtamalari.FirstOrDefault(x => x.KanalPersonelId == kanalPersonelId);
-                
-                if (atama != null)
-                {
-                    atama.Uzmanlik = yeniUzmanlik;
-                    atama.DuzenlenmeTarihi = DateTime.Now;
-                    
-                    await _toastService.ShowSuccessAsync($"{atama.PersonelAdSoyad} - {atama.KanalAltIslemAdi}: {GetUzmanlikText(yeniUzmanlik)}");
-                }
-            }
-            else
-            {
-                await _toastService.ShowErrorAsync(result.Message ?? "Atama güncellenemedi");
-            }
+            KanalAltIslemSearchTerm = e.Value?.ToString() ?? string.Empty;
         }
 
-        private async Task DeleteAtama(int kanalPersonelId)
+        private void ClearAllFilters()
         {
-            var result = await _kanalPersonelService.DeleteAsync(kanalPersonelId);
-
-            if (result.Success)
-            {
-                var atama = personelAtamalari.FirstOrDefault(x => x.KanalPersonelId == kanalPersonelId);
-                
-                if (atama != null)
-                {
-                    personelAtamalari.Remove(atama);
-                    await _toastService.ShowInfoAsync($"{atama.PersonelAdSoyad} - {atama.KanalAltIslemAdi}: Atama kaldırıldı");
-                }
-            }
-            else
-            {
-                await _toastService.ShowErrorAsync(result.Message ?? "Atama silinemedi");
-            }
+            PersonelSearchTerm = string.Empty;
+            KanalAltIslemSearchTerm = string.Empty;
         }
 
-        private string GetUzmanlikButtonClass(PersonelUzmanlik uzmanlik)
-        {
-            return uzmanlik switch
-            {
-                PersonelUzmanlik.Uzman => "btn-success",
-                PersonelUzmanlik.YrdUzman => "btn-info",
-                PersonelUzmanlik.BilgisiYok => "btn-outline-secondary",
-                _ => "btn-outline-secondary"
-            };
-        }
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // #13 EXPORT METHODS - DEPARTMAN PATTERN
+        // ═══════════════════════════════════════════════════════════════════════════════
 
-        private string GetUzmanlikBadgeClass(PersonelUzmanlik uzmanlik)
-        {
-            return uzmanlik switch
-            {
-                PersonelUzmanlik.Uzman => "bg-label-success",
-                PersonelUzmanlik.YrdUzman => "bg-label-info",
-                PersonelUzmanlik.BilgisiYok => "bg-label-secondary",
-                _ => "bg-label-secondary"
-            };
-        }
-
-        private string GetUzmanlikIcon(PersonelUzmanlik uzmanlik)
-        {
-            return uzmanlik switch
-            {
-                PersonelUzmanlik.Uzman => "bx-star",
-                PersonelUzmanlik.YrdUzman => "bx-user",
-                PersonelUzmanlik.BilgisiYok => "bx-x",
-                _ => "bx-question-mark"
-            };
-        }
-
-        private string GetUzmanlikText(PersonelUzmanlik uzmanlik)
-        {
-            return uzmanlik switch
-            {
-                PersonelUzmanlik.Uzman => "Uzman",
-                PersonelUzmanlik.YrdUzman => "Yrd. Uzman",
-                PersonelUzmanlik.BilgisiYok => "Yok",
-                _ => "?"
-            };
-        }
+        private bool IsExporting { get; set; } = false;
+        private string ExportType { get; set; } = string.Empty;
 
         private async Task ExportToExcel()
         {
-            await _toastService.ShowInfoAsync("Personel atama export özelliği geliştirme aşamasındadır");
+            IsExporting = true;
+            ExportType = "excel";
+            try
+            {
+                await Task.Delay(1000); // Simulated export
+                await _toastService.ShowInfoAsync("Excel export özelliği yakında eklenecek");
+            }
+            finally
+            {
+                IsExporting = false;
+                ExportType = string.Empty;
+            }
         }
 
         private async Task ExportToPdf()
         {
-            await _toastService.ShowInfoAsync("Personel atama export özelliği geliştirme aşamasındadır");
-        }
-
-        // Helper class for grouping
-        private class KanalIslemGroup
-        {
-            public int KanalIslemId { get; set; }
-            public string KanalIslemAdi { get; set; } = string.Empty;
-            public List<KanalAltIslemResponseDto> AltIslemler { get; set; } = new();
+            IsExporting = true;
+            ExportType = "pdf";
+            try
+            {
+                await Task.Delay(1000); // Simulated export
+                await _toastService.ShowInfoAsync("PDF export özelliği yakında eklenecek");
+            }
+            finally
+            {
+                IsExporting = false;
+                ExportType = string.Empty;
+            }
         }
     }
 }

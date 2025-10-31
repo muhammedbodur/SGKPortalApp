@@ -255,6 +255,25 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             }
         }
 
+        public async Task<ApiResponseDto<List<PersonelResponseDto>>> GetByHizmetBinasiIdAsync(int hizmetBinasiId)
+        {
+            try
+            {
+                var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
+                var personeller = await personelRepo.GetByHizmetBinasiIdAsync(hizmetBinasiId);
+                var personelDtos = _mapper.Map<List<PersonelResponseDto>>(personeller);
+
+                return ApiResponseDto<List<PersonelResponseDto>>
+                    .SuccessResult(personelDtos, "Hizmet binası personelleri başarıyla getirildi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Hizmet binası personelleri getirilirken hata oluştu. HizmetBinasiId: {HizmetBinasiId}", hizmetBinasiId);
+                return ApiResponseDto<List<PersonelResponseDto>>
+                    .ErrorResult("Hizmet binası personelleri getirilirken bir hata oluştu", ex.Message);
+            }
+        }
+
         public async Task<ApiResponseDto<PersonelResponseDto>> CreateCompleteAsync(PersonelCompleteRequestDto request)
         {
             return await _unitOfWork.ExecuteInTransactionAsync(async () =>

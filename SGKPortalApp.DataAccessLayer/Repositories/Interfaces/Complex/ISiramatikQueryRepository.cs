@@ -21,5 +21,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex
         // İstatistik ve Dashboard Sorguları
         Task<Dictionary<int, int>> GetKanalAltIslemPersonelSayilariAsync(int hizmetBinasiId);
         Task<List<KanalAltIslemResponseDto>> GetEslestirmeYapilmamisKanalAltIslemlerAsync(int hizmetBinasiId);
+
+        Task<List<KanalPersonelResponseDto>> GetPersonelKanalAtamalarByHizmetBinasiIdAsync(int hizmetBinasiId);
     }
 }
