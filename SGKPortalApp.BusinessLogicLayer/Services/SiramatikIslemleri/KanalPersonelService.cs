@@ -197,6 +197,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         .ErrorResult("Geçersiz hizmet binası ID");
                 }
 
+
                 var kanalPersonelDtos = await _siramatikQueryRepository
                     .GetPersonelKanalAtamalarByHizmetBinasiIdAsync(hizmetBinasiId);
 
@@ -211,6 +212,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                             new List<KanalPersonelResponseDto>(),
                             "Bu hizmet binasında personel bulunamadı");
                 }
+
+                var kanalPersonelRepo = _unitOfWork.GetRepository<IKanalPersonelRepository>();
+                
+                var kanalPersoneller = await kanalPersonelRepo.GetByHizmetBinasiIdAsync(hizmetBinasiId);
+
+                var kanalPersonelDtos = _mapper.Map<List<KanalPersonelResponseDto>>(kanalPersoneller);
 
                 _logger.LogInformation(
                     "Hizmet binası personel atamaları getirildi. HizmetBinasiId: {HizmetBinasiId}, Adet: {Count}",
