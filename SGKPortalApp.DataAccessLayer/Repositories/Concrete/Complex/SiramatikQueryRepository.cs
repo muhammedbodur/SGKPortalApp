@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
 
@@ -263,12 +264,52 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             return await query.AsNoTracking().ToListAsync();
         }
 
-        // ═══════════════════════════════════════════════════════════════════════════════
-        // ⚠️ DEPRECATED: GetPersonelAtamaMatrixAsync kullanılmamaktadır.
-        // Personel Atama sayfası 3 ayrı API çağrısı kullanır:
-        // 1. GetKanalPersonellerByHizmetBinasiIdAsync()
-        // 2. PersonelApiService.GetByHizmetBinasiAsync()
-        // 3. KanalAltIslemApiService.GetByHizmetBinasiIdAsync()
-        // ═══════════════════════════════════════════════════════════════════════════════
+        public async Task<List<KanalPersonelResponseDto>> GetPersonelKanalAtamalarByHizmetBinasiIdAsync(int hizmetBinasiId)
+        {
+            var query = from personel in _context.Personeller
+                        join kanalPersonel in _context.KanalPersonelleri
+                            on personel.TcKimlikNo equals kanalPersonel.TcKimlikNo into kpGroup
+                        from kp in kpGroup.DefaultIfEmpty() 
+                        join kanalAltIslem in _context.KanalAltIslemleri
+                            on kp.KanalAltIslemId equals kanalAltIslem.KanalAltIslemId into kaiGroup
+                        from kai in kaiGroup.DefaultIfEmpty() 
+                        join kanalAlt in _context.KanallarAlt
+                            on kai.KanalAltId equals kanalAlt.KanalAltId into kaGroup
+                        from ka in kaGroup.DefaultIfEmpty() 
+                        join kanal in _context.Kanallar
+                            on ka.KanalId equals kanal.KanalId into kGroup
+                        from k in kGroup.DefaultIfEmpty() 
+                        where personel.HizmetBinasiId == hizmetBinasiId
+                           && personel.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif
+                        select new KanalPersonelResponseDto
+                        {
+                            // KanalPersonel bilgileri
+                            KanalPersonelId = kp != null ? kp.KanalPersonelId : 0,
+
+                            // Personel bilgileri
+                            TcKimlikNo = personel.TcKimlikNo,
+                            PersonelAdSoyad = personel.AdSoyad,
+
+                            // Kanal Alt İşlem bilgileri
+                            KanalAltIslemId = kp != null ? kp.KanalAltIslemId : 0,
+                            KanalAltIslemAdi = kai != null && ka != null && k != null
+                                ? $"{k.KanalAdi} - {ka.KanalAltAdi}"
+                                : "Atama Yapılmamış",
+
+                            // Uzmanlık ve Aktiflik
+                            Uzmanlik = kp != null ? kp.Uzmanlik : BusinessObjectLayer.Enums.SiramatikIslemleri.PersonelUzmanlik.BilgisiYok,
+                            Aktiflik = (Aktiflik)personel.PersonelAktiflikDurum,
+                            Resim = personel.Resim,
+
+                            // Tarihler (atanmış personeller için)
+                            EklenmeTarihi = kp != null ? kp.EklenmeTarihi : DateTime.MinValue,
+                            DuzenlenmeTarihi = kp != null ? kp.DuzenlenmeTarihi : DateTime.MinValue
+                        };
+
+            return await query
+                .AsNoTracking()
+                .OrderBy(x => x.PersonelAdSoyad)
+                .ToListAsync();
+        }
     }
 }

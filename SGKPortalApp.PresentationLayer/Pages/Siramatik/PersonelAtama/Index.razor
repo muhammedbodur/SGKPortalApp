@@ -244,19 +244,19 @@ else
                                                     @if (!string.IsNullOrEmpty(personel.Resim))
                                                     {
                                                         <img src="@personel.Resim"
-                                                             alt="@personel.AdSoyad"
+                                                             alt="@personel.PersonelAdSoyad"
                                                              class="avatar avatar-sm me-2" />
                                                     }
                                                     else
                                                     {
                                                         <div class="avatar avatar-sm me-2 bg-secondary text-white">
                                                             <span class="avatar-initial rounded-circle">
-                                                                @personel.AdSoyad[0]
+                                                                @personel.PersonelAdSoyad[0]
                                                             </span>
                                                         </div>
                                                     }
                                                     <div>
-                                                        <strong>@personel.AdSoyad</strong>
+                                                        <strong>@personel.PersonelAdSoyad</strong>
                                                         <br />
                                                         <small class="text-muted">@personel.TcKimlikNo</small>
                                                     </div>

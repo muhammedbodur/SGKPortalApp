@@ -22,8 +22,6 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex
         Task<Dictionary<int, int>> GetKanalAltIslemPersonelSayilariAsync(int hizmetBinasiId);
         Task<List<KanalAltIslemResponseDto>> GetEslestirmeYapilmamisKanalAltIslemlerAsync(int hizmetBinasiId);
 
-        // ⚠️ DEPRECATED: GetPersonelAtamaMatrixAsync kullanılmamaktadır.
-        // Personel Atama sayfası 3 ayrı API çağrısı kullanır.
-        // Task<List<PersonelAtamaMatrixDto>> GetPersonelAtamaMatrixAsync(int hizmetBinasiId);
+        Task<List<KanalPersonelResponseDto>> GetPersonelKanalAtamalarByHizmetBinasiIdAsync(int hizmetBinasiId);
     }
 }

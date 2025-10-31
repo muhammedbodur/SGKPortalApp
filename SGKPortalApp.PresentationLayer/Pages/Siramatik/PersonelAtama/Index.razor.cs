@@ -23,9 +23,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
     /// </summary>
     public partial class Index : ComponentBase
     {
-        // ═══════════════════════════════════════════════════════════════════════════════
-        // #1 DEPENDENCY INJECTION
-        // ═══════════════════════════════════════════════════════════════════════════════
 
         [Inject] private IHizmetBinasiApiService _hizmetBinasiService { get; set; } = default!;
         [Inject] private IPersonelApiService _personelService { get; set; } = default!;
@@ -33,42 +30,28 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
         [Inject] private IKanalPersonelApiService _kanalPersonelService { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
 
-        // ═══════════════════════════════════════════════════════════════════════════════
-        // #2 DROPDOWN DATA PROPERTIES
-        // ═══════════════════════════════════════════════════════════════════════════════
 
         private List<HizmetBinasiResponseDto> HizmetBinalari { get; set; } = new();
-        private List<PersonelResponseDto> Personeller { get; set; } = new();
+        
+        private List<KanalPersonelResponseDto> Personeller { get; set; } = new();
+        
         private List<KanalAltIslemResponseDto> KanalAltIslemler { get; set; } = new();
 
-        // ═══════════════════════════════════════════════════════════════════════════════
-        // #3 MATRIX DATA PROPERTIES
-        // ═══════════════════════════════════════════════════════════════════════════════
 
         private Dictionary<string, KanalPersonelResponseDto> AtamalarDict { get; set; } = new();
         private HashSet<string> YuklenenHucreler { get; set; } = new();
 
-        // ═══════════════════════════════════════════════════════════════════════════════
-        // #4 FILTER & SELECTION PROPERTIES
-        // ═══════════════════════════════════════════════════════════════════════════════
 
         private int SelectedHizmetBinasiId { get; set; } = 0;
         private string PersonelSearchTerm { get; set; } = string.Empty;
         private string KanalAltIslemSearchTerm { get; set; } = string.Empty;
 
-        // ═══════════════════════════════════════════════════════════════════════════════
-        // #5 UI STATE PROPERTIES
-        // ═══════════════════════════════════════════════════════════════════════════════
 
         private bool IsLoading { get; set; } = true;
         private bool IsLoadingDropdowns { get; set; } = false;
         private bool IsLoadingMatrix { get; set; } = false;
 
-        // ═══════════════════════════════════════════════════════════════════════════════
-        // #6 COMPUTED/FILTERED PROPERTIES
-        // ═══════════════════════════════════════════════════════════════════════════════
-
-        private List<PersonelResponseDto> FilteredPersoneller
+        private List<KanalPersonelResponseDto> FilteredPersoneller
         {
             get
             {
@@ -77,8 +60,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
 
                 var searchLower = PersonelSearchTerm.ToLower().Trim();
                 return Personeller
-                    .Where(p => p.AdSoyad.ToLower().Contains(searchLower) ||
-                                p.TcKimlikNo.Contains(searchLower))  // ✅ FİKS: searchTerm: kaldırıldı
+                    .Where(p => p.PersonelAdSoyad.ToLower().Contains(searchLower) ||
+                                p.TcKimlikNo.Contains(searchLower))
                     .ToList();
             }
         }
@@ -168,17 +151,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
             IsLoadingMatrix = true;
             try
             {
-                // 1. Personeller'i yükle (satırlar)
-                var personelResult = await _personelService.GetPersonellerByHizmetBinasiIdAsync(SelectedHizmetBinasiId);
+                // 1. Personeller'i yükle (satırlar) - 
+                var personelResult = await _kanalPersonelService.GetPersonellerByHizmetBinasiIdAsync(SelectedHizmetBinasiId);
                 Personeller = personelResult.Success && personelResult.Data != null
                     ? personelResult.Data
-                    : new();
+                    : new List<KanalPersonelResponseDto>();
 
                 // 2. Kanal Alt İşlemleri yükle (sütunlar)
                 var kanalAltIslemResult = await _kanalAltIslemService.GetByHizmetBinasiIdAsync(SelectedHizmetBinasiId);
                 KanalAltIslemler = kanalAltIslemResult.Success && kanalAltIslemResult.Data != null
                     ? kanalAltIslemResult.Data
-                    : new();
+                    : new List<KanalAltIslemResponseDto>();
 
                 // 3. Atamaları yükle
                 await LoadAtamalar();
@@ -264,7 +247,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
             {
                 PersonelUzmanlik.Uzman => "btn btn-success",
                 PersonelUzmanlik.YrdUzman => "btn btn-info",
-                PersonelUzmanlik.BilgisiYok => "btn btn-secondary",
+                PersonelUzmanlik.BilgisiYok => "btn btn-secondary", 
                 _ => "btn btn-secondary"
             };
         }
@@ -275,7 +258,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
             {
                 PersonelUzmanlik.BilgisiYok => PersonelUzmanlik.Uzman,
                 PersonelUzmanlik.Uzman => PersonelUzmanlik.YrdUzman,
-                PersonelUzmanlik.YrdUzman => PersonelUzmanlik.BilgisiYok,
+                PersonelUzmanlik.YrdUzman => PersonelUzmanlik.BilgisiYok, 
                 _ => PersonelUzmanlik.BilgisiYok
             };
         }

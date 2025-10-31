@@ -8,21 +8,25 @@ using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 {
     public class KanalPersonelService : IKanalPersonelService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ISiramatikQueryRepository _siramatikQueryRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<KanalPersonelService> _logger;
 
         public KanalPersonelService(
             IUnitOfWork unitOfWork,
+            ISiramatikQueryRepository siramatikQueryRepository,
             IMapper mapper,
             ILogger<KanalPersonelService> logger)
         {
             _unitOfWork = unitOfWork;
+            _siramatikQueryRepository = siramatikQueryRepository;
             _mapper = mapper;
             _logger = logger;
         }
@@ -193,9 +197,24 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         .ErrorResult("Geçersiz hizmet binası ID");
                 }
 
+
+                var kanalPersonelDtos = await _siramatikQueryRepository
+                    .GetPersonelKanalAtamalarByHizmetBinasiIdAsync(hizmetBinasiId);
+
+                if (!kanalPersonelDtos.Any())
+                {
+                    _logger.LogWarning(
+                        "Hizmet binasında personel bulunamadı. HizmetBinasiId: {HizmetBinasiId}",
+                        hizmetBinasiId);
+
+                    return ApiResponseDto<List<KanalPersonelResponseDto>>
+                        .SuccessResult(
+                            new List<KanalPersonelResponseDto>(),
+                            "Bu hizmet binasında personel bulunamadı");
+                }
+
                 var kanalPersonelRepo = _unitOfWork.GetRepository<IKanalPersonelRepository>();
                 
-                // ✅ PERFORMANS: Repository'de hizmet binasına göre filtrelenmiş sorgu
                 var kanalPersoneller = await kanalPersonelRepo.GetByHizmetBinasiIdAsync(hizmetBinasiId);
 
                 var kanalPersonelDtos = _mapper.Map<List<KanalPersonelResponseDto>>(kanalPersoneller);
@@ -206,11 +225,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     kanalPersonelDtos.Count);
 
                 return ApiResponseDto<List<KanalPersonelResponseDto>>
-                    .SuccessResult(kanalPersonelDtos, "Personel atamaları başarıyla getirildi");
+                    .SuccessResult(
+                        kanalPersonelDtos,
+                        $"{kanalPersonelDtos.Count} personel getirildi");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Hizmet binası personel atamaları getirilirken hata oluştu. HizmetBinasiId: {HizmetBinasiId}", hizmetBinasiId);
+                _logger.LogError(
+                    ex,
+                    "Hizmet binası personel atamaları getirilirken hata oluştu. HizmetBinasiId: {HizmetBinasiId}",
+                    hizmetBinasiId);
+
                 return ApiResponseDto<List<KanalPersonelResponseDto>>
                     .ErrorResult("Personel atamaları getirilirken bir hata oluştu", ex.Message);
             }
@@ -267,18 +292,5 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     .ErrorResult("Personel atamaları getirilirken bir hata oluştu", ex.Message);
             }
         }
-
-        // ═══════════════════════════════════════════════════════════════════════════════
-        // ⚠️ DEPRECATED METHODS - Kullanılmamaktadır
-        // ═══════════════════════════════════════════════════════════════════════════════
-        // 
-        // GetPersonelMatrixAsync() - Kullanılmıyor
-        // TogglePersonelUzmanlikAsync() - Kullanılmıyor
-        //
-        // Personel Atama sayfası manuel CRUD kullanır:
-        // - CreateAsync() - Yeni atama
-        // - UpdateAsync() - Uzmanlık güncelle
-        // - DeleteAsync() - Atamayı kaldır
-        // ═══════════════════════════════════════════════════════════════════════════════
     }
 }
