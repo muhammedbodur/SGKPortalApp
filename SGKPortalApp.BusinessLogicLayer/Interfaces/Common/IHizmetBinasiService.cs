@@ -1,5 +1,6 @@
 ﻿using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 
 namespace SGKPortalApp.BusinessLogicLayer.Interfaces.Common
 {
@@ -15,5 +16,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.Common
         Task<ApiResponseDto<List<HizmetBinasiResponseDto>>> GetByDepartmanAsync(int departmanId);
         Task<ApiResponseDto<int>> GetPersonelCountAsync(int hizmetBinasiId);
         Task<ApiResponseDto<bool>> ToggleStatusAsync(int id);
+        Task<ApiResponseDto<List<ServisResponseDto>>> GetServislerByHizmetBinasiIdAsync(int hizmetBinasiId);
     }
 }

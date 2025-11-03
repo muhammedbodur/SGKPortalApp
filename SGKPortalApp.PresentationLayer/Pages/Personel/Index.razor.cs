@@ -428,57 +428,99 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         {
             IsExporting = true;
             ExportType = "pdf";
+
             try
             {
+                // 1️⃣ Resimleri önceden yükle
+                var personelImages = new Dictionary<string, byte[]?>();
+                var tasks = FilteredPersoneller.Select(async p =>
+                {
+                    personelImages[p.TcKimlikNo] = await GetImageBytesAsync(p.Resim);
+                });
+                await Task.WhenAll(tasks);
+
+                // 2️⃣ PDF oluştur
                 var document = Document.Create(container =>
                 {
                     container.Page(page =>
                     {
                         page.Size(PageSizes.A4.Landscape());
                         page.Margin(2, Unit.Centimetre);
-                        page.Header().Text("Personel Listesi").FontSize(20).Bold();
+
+                        page.Header()
+                            .PaddingBottom(10)
+                            .AlignCenter()
+                            .Text("Personel Listesi")
+                            .FontSize(20)
+                            .Bold();
+
                         page.Content().Table(table =>
                         {
                             table.ColumnsDefinition(columns =>
                             {
-                                columns.ConstantColumn(100);
-                                columns.ConstantColumn(60);
-                                columns.RelativeColumn();
-                                columns.RelativeColumn();
-                                columns.RelativeColumn();
-                                columns.RelativeColumn();
-                                columns.ConstantColumn(60);
+                                columns.ConstantColumn(55);   // Resim
+                                columns.ConstantColumn(100);  // TC Kimlik
+                                columns.ConstantColumn(80);   // Sicil
+                                columns.RelativeColumn();     // Ad Soyad
+                                columns.RelativeColumn();     // Departman
+                                columns.RelativeColumn();     // Servis
+                                columns.RelativeColumn();     // Ünvan
+                                columns.ConstantColumn(70);   // Durum
                             });
 
+                            // Başlık satırı
                             table.Header(header =>
                             {
-                                header.Cell().Text("TC Kimlik").Bold();
-                                header.Cell().Text("Sicil").Bold();
-                                header.Cell().Text("Ad Soyad").Bold();
-                                header.Cell().Text("Departman").Bold();
-                                header.Cell().Text("Servis").Bold();
-                                header.Cell().Text("Ünvan").Bold();
-                                header.Cell().Text("Durum").Bold();
+                                AddHeaderCell(header, "Resim");
+                                AddHeaderCell(header, "TC Kimlik");
+                                AddHeaderCell(header, "Sicil");
+                                AddHeaderCell(header, "Ad Soyad");
+                                AddHeaderCell(header, "Departman");
+                                AddHeaderCell(header, "Servis");
+                                AddHeaderCell(header, "Ünvan");
+                                AddHeaderCell(header, "Durum");
                             });
 
+                            // Veri satırları
                             foreach (var personel in FilteredPersoneller)
                             {
-                                table.Cell().Text(personel.TcKimlikNo);
-                                table.Cell().Text(personel.SicilNo.ToString());
-                                table.Cell().Text(personel.AdSoyad);
-                                table.Cell().Text(personel.DepartmanAdi);
-                                table.Cell().Text(personel.ServisAdi);
-                                table.Cell().Text(personel.UnvanAdi);
-                                table.Cell().Text(personel.PersonelAktiflikDurum.ToString());
+                                var imageBytes = personelImages[personel.TcKimlikNo];
+
+                                // Resim hücresi
+                                table.Cell().Element(cell =>
+                                {
+                                    var img = cell
+                                        .Padding(2)
+                                        .AlignCenter()
+                                        .AlignMiddle()
+                                        .Height(45)
+                                        .Width(45);
+
+                                    if (imageBytes != null && imageBytes.Length > 0)
+                                        img.Image(imageBytes).FitArea();
+                                    else
+                                        img.Background(Colors.Grey.Lighten3)
+                                           .AlignCenter().AlignMiddle()
+                                           .Text("Yok").FontSize(7).Italic();
+                                });
+
+                                AddTextCell(table, personel.TcKimlikNo);
+                                AddTextCell(table, personel.SicilNo.ToString());
+                                AddTextCell(table, personel.AdSoyad);
+                                AddTextCell(table, personel.DepartmanAdi);
+                                AddTextCell(table, personel.ServisAdi);
+                                AddTextCell(table, personel.UnvanAdi);
+                                AddTextCell(table, personel.PersonelAktiflikDurum.ToString());
                             }
                         });
                     });
                 });
 
+                // 3️⃣ PDF'i indir
                 var pdfBytes = document.GeneratePdf();
                 var fileName = $"Personeller_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
-
                 await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pdfBytes), "application/pdf");
+
                 await _toastService.ShowSuccessAsync("PDF dosyası başarıyla indirildi!");
             }
             catch (Exception ex)
@@ -492,6 +534,61 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             }
         }
 
+        // 🔹 Hücre stillerini ayrı metotlar haline getirdik
+
+        private void AddHeaderCell(TableCellDescriptor header, string text)
+        {
+            header.Cell().Element(container =>
+                container
+                    .Background(Colors.Grey.Lighten2)
+                    .PaddingVertical(4)
+                    .AlignCenter()
+                    .AlignMiddle()
+                    .BorderBottom(1)
+                    .BorderColor(Colors.Grey.Darken2)
+                    .DefaultTextStyle(x => x.Bold().FontSize(10))
+                    .Text(text)
+            );
+        }
+
+        private void AddTextCell(TableDescriptor table, string text)
+        {
+            table.Cell().Element(container =>
+                container
+                    .PaddingVertical(4)
+                    .PaddingHorizontal(3)
+                    .BorderBottom(0.5f)
+                    .BorderColor(Colors.Grey.Lighten2)
+                    .AlignMiddle()
+                    .DefaultTextStyle(x => x.FontSize(9))
+                    .Text(text)
+            );
+        }
+
+        private async Task<byte[]?> GetImageBytesAsync(string imagePath)
+        {
+            if (string.IsNullOrWhiteSpace(imagePath))
+                return null;
+
+            try
+            {
+                var fullUrl = _navigationManager.BaseUri.TrimEnd('/') + imagePath;
+
+                using var httpClient = new HttpClient();
+                var response = await httpClient.GetAsync(fullUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadAsByteArrayAsync();
+                }
+            }
+            catch
+            {
+                // Hata olursa sessizce geç (veya logla)
+            }
+
+            return null;
+        }
         // ═══════════════════════════════════════════════════════
         // MODELS
         // ═══════════════════════════════════════════════════════

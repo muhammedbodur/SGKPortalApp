@@ -47,6 +47,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
         
         private List<KanalAltIslemResponseDto> KanalAltIslemler { get; set; } = new();
 
+        private List<ServisResponseDto> Servisler { get; set; } = new();
+        private int SelectedServisId { get; set; } = 0;
+
         // Hücre işlemleri için
         private Dictionary<string, PersonelKanalAtamaDto> AtamalarDict { get; set; } = new();
         private HashSet<string> YuklenenHucreler { get; set; } = new();
@@ -136,6 +139,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
                     if (HizmetBinalari.Any() && SelectedHizmetBinasiId == 0)
                     {
                         SelectedHizmetBinasiId = HizmetBinalari.First().HizmetBinasiId;
+                        await LoadServisler();
                         await LoadMatrixData();
                     }
                 }
@@ -160,7 +164,29 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
             {
                 SelectedHizmetBinasiId = selectedId;
             }
-            
+
+            SelectedServisId = 0;
+            Servisler.Clear();
+
+            if (SelectedHizmetBinasiId > 0)
+            {
+                await LoadServisler();
+            }
+
+            await LoadMatrixData();
+        }
+
+        private async Task OnServisChanged(ChangeEventArgs e)
+        {
+            if (e.Value != null && int.TryParse(e.Value.ToString(), out int selectedId))
+            {
+                SelectedServisId = selectedId;
+            }
+            else
+            {
+                SelectedServisId = 0;
+            }
+
             await LoadMatrixData();
         }
 
@@ -179,9 +205,21 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
             {
                 // 1. Personel Matrix'i yükle (personeller + kanal atamaları)
                 var matrixResult = await _kanalPersonelService.GetPersonelAtamaMatrixAsync(SelectedHizmetBinasiId);
-                PersonelMatrix = matrixResult.Success && matrixResult.Data != null
+                var allPersonelMatrix = matrixResult.Success && matrixResult.Data != null
                     ? matrixResult.Data
                     : new List<PersonelAtamaMatrixDto>();
+
+                // 🆕 Servise göre filtrele
+                if (SelectedServisId > 0)
+                {
+                    PersonelMatrix = allPersonelMatrix
+                        .Where(p => p.ServisId == SelectedServisId)
+                        .ToList();
+                }
+                else
+                {
+                    PersonelMatrix = allPersonelMatrix;
+                }
 
                 // 2. Kanal Alt İşlemleri yükle (sütunlar)
                 var kanalAltIslemResult = await _kanalAltIslemService.GetByHizmetBinasiIdAsync(SelectedHizmetBinasiId);
@@ -203,6 +241,31 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
             finally
             {
                 IsLoadingMatrix = false;
+            }
+        }
+
+        private async Task LoadServisler()
+        {
+            try
+            {
+                var result = await _hizmetBinasiService.GetServislerByHizmetBinasiIdAsync(SelectedHizmetBinasiId);
+
+                if (result.Success && result.Data != null)
+                {
+                    Servisler = result.Data;
+                    _logger.LogInformation($"✅ {Servisler.Count} servis yüklendi (Hizmet Binası ID: {SelectedHizmetBinasiId})");
+                }
+                else
+                {
+                    Servisler = new List<ServisResponseDto>();
+                    _logger.LogWarning("Seçili hizmet binasında personel servisi bulunamadı");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Servisler yüklenirken hata oluştu");
+                Servisler = new List<ServisResponseDto>();
+                await _toastService.ShowErrorAsync("Servisler yüklenirken hata oluştu");
             }
         }
 

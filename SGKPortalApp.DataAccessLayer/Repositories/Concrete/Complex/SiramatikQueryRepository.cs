@@ -324,6 +324,12 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                                     TcKimlikNo = p.TcKimlikNo,
                                     SicilNo = p.SicilNo,
                                     PersonelAdSoyad = p.AdSoyad,
+                                    DepartmanId = p.DepartmanId,
+                                    DepartmanAdi = p.Departman != null ? p.Departman.DepartmanAdi : "",
+                                    ServisId = p.ServisId,
+                                    ServisAdi = p.Servis != null ? p.Servis.ServisAdi : "",
+                                    HizmetBinasiId = p.HizmetBinasiId,
+                                    HizmetBinasiAdi = p.HizmetBinasi != null ? p.HizmetBinasi.HizmetBinasiAdi : "",
                                     Resim = p.Resim,
                                     Aktiflik = (Aktiflik)p.PersonelAktiflikDurum,
                                     KanalAtamalari = new List<PersonelKanalAtamaDto>()

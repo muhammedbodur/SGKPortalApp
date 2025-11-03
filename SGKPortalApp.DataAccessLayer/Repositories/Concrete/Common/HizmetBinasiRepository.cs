@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Generic;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
-using SGKPortalApp.BusinessObjectLayer.Entities.Common;
-using SGKPortalApp.BusinessObjectLayer.Enums.Common;
-using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
-using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 
 namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
 {

@@ -204,5 +204,21 @@ namespace SGKPortalApp.ApiLayer.Controllers.Common
 
             return Ok(result);
         }
+
+        /// <summary>
+        /// Hizmet Binasında çalışan personellerin servislerini getirir
+        /// </summary>
+        /// <param name="id">Hizmet Binası ID</param>
+        /// <returns>Servis listesi (PersonelSayisi dahil)</returns>
+        [HttpGet("{id:int}/servisler")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetServislerByHizmetBinasiId(int id)
+        {
+            _logger.LogInformation("GetServislerByHizmetBinasiId endpoint çağrıldı. Hizmet Binası ID: {Id}", id);
+            var result = await _hizmetBinasiService.GetServislerByHizmetBinasiIdAsync(id);
+            return Ok(result);
+        }
     }
 }

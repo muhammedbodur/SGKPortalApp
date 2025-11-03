@@ -12,10 +12,18 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
         public string TcKimlikNo { get; set; } = string.Empty;
         public int SicilNo { get; set; } = 0;
         public string PersonelAdSoyad { get; set; } = string.Empty;
+
+        public int DepartmanId { get; set; } = 0;
+        public string DepartmanAdi { get; set; } = string.Empty;
+        public int ServisId { get; set; } = 0;
+        public string ServisAdi { get; set; } = string.Empty;
+        public int HizmetBinasiId { get; set; } = 0;
+        public string HizmetBinasiAdi { get; set; } = string.Empty;
         public string Resim { get; set; } = string.Empty;
         public Aktiflik Aktiflik { get; set; }
 
         // Kanal Atama Bilgileri (Collection)
         public List<PersonelKanalAtamaDto> KanalAtamalari { get; set; } = new();
+        
     }
 }

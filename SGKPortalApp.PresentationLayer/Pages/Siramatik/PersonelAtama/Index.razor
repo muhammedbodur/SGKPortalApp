@@ -96,6 +96,58 @@ else
                                 Yükleniyor...
                             </small>
                         }
+                        else if (HizmetBinalari.Any())
+                        {
+                            <small class="text-success d-block mt-1">
+                                <i class="bx bx-check-circle me-1"></i>
+                                @HizmetBinalari.Count Hizmet binası mevcut
+                            </small>
+                        }
+                        else if (!HizmetBinalari.Any())
+                        {
+                            <small class="text-warning d-block mt-1">
+                                <i class="bx bx-info-circle me-1"></i>
+                                Hizmet binası bulunamadı
+                            </small>
+                        }
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">
+                            <i class="bx bx-filter me-2"></i>Servis Filtrele
+                        </label>
+                        <select class="form-select"
+                                value="@SelectedServisId"
+                                @onchange="OnServisChanged"
+                                disabled="@(IsLoadingMatrix || SelectedHizmetBinasiId == 0)">
+                            <option value="0">-- Tüm Servisler --</option>
+                            @foreach (var servis in Servisler)
+                            {
+                                <option value="@servis.ServisId">
+                                    @servis.ServisAdi (@servis.PersonelSayisi personel)
+                                </option>
+                            }
+                        </select>
+                        @if (SelectedHizmetBinasiId > 0 && Servisler.Any())
+                        {
+                            <small class="text-success d-block mt-1">
+                                <i class="bx bx-check-circle me-1"></i>
+                                @Servisler.Count servis mevcut
+                            </small>
+                        }
+                        else if (SelectedHizmetBinasiId > 0 && !Servisler.Any())
+                        {
+                            <small class="text-warning d-block mt-1">
+                                <i class="bx bx-info-circle me-1"></i>
+                                Bu binada personellere ait servis bulunamadı
+                            </small>
+                        }
+                        else
+                        {
+                            <small class="text-muted d-block mt-1">
+                                Önce hizmet binası seçiniz
+                            </small>
+                        }
                     </div>
 
                     <!-- Renk Açıklaması -->

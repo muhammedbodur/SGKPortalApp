@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using System.Net.Http.Json;
 
@@ -388,6 +389,40 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
             {
                 _logger.LogError(ex, "❌ ToggleStatusAsync Exception");
                 return ServiceResult<bool>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<List<ServisResponseDto>>> GetServislerByHizmetBinasiIdAsync(int hizmetBinasiId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"hizmetbinasi/{hizmetBinasiId}/servisler");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetServislerByHizmetBinasiIdAsync failed: {Error}", errorContent);
+                    return ServiceResult<List<ServisResponseDto>>.Fail("Hizmet binası servisleri alınamadı.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<ServisResponseDto>>>();
+
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return ServiceResult<List<ServisResponseDto>>.Ok(
+                        apiResponse.Data,
+                        apiResponse.Message ?? "İşlem başarılı"
+                    );
+                }
+
+                return ServiceResult<List<ServisResponseDto>>.Fail(
+                    apiResponse?.Message ?? "Hizmet binası servisleri alınamadı"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetServislerByHizmetBinasiIdAsync Exception. HizmetBinasiId: {Id}", hizmetBinasiId);
+                return ServiceResult<List<ServisResponseDto>>.Fail($"Hata: {ex.Message}");
             }
         }
     }

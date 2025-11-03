@@ -3,25 +3,30 @@ using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 {
     public class HizmetBinasiService : IHizmetBinasiService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICommonQueryRepository _commonQueryRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<HizmetBinasiService> _logger;
 
         public HizmetBinasiService(
             IUnitOfWork unitOfWork,
+            ICommonQueryRepository commonQueryRepository,
             IMapper mapper,
             ILogger<HizmetBinasiService> logger)
         {
             _unitOfWork = unitOfWork;
+            _commonQueryRepository = commonQueryRepository;
             _mapper = mapper;
             _logger = logger;
         }
@@ -314,6 +319,45 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 _logger.LogError(ex, "Hizmet binası durumu değiştirilirken hata oluştu. ID: {Id}", id);
                 return ApiResponseDto<bool>
                     .ErrorResult("Hizmet binası durumu değiştirilirken bir hata oluştu", ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<List<ServisResponseDto>>> GetServislerByHizmetBinasiIdAsync(int hizmetBinasiId)
+        {
+            try
+            {
+                if (hizmetBinasiId <= 0)
+                    return ApiResponseDto<List<ServisResponseDto>>
+                        .ErrorResult("Geçersiz hizmet binası ID");
+
+                // Repository'den Tuple olarak alıyorum
+                var servislerTuple = await _commonQueryRepository.GetServislerByHizmetBinasiIdAsync(hizmetBinasiId);
+
+                // Tuple'ları ServisResponseDto'ya dönüştürüyorum
+                var servisDtos = servislerTuple.Select(s => new ServisResponseDto
+                {
+                    ServisId = s.ServisId,
+                    ServisAdi = s.ServisAdi,
+                    PersonelSayisi = s.PersonelSayisi,
+                    ServisAktiflik = Aktiflik.Aktif, // Repository'den gelen veriler zaten aktif
+                    EklenmeTarihi = DateTime.Now,
+                    DuzenlenmeTarihi = DateTime.Now
+                }).ToList();
+
+                _logger.LogInformation(
+                    "Hizmet binası servisleri getirildi. Hizmet Binası ID: {HizmetBinasiId}, Servis Sayısı: {Count}",
+                    hizmetBinasiId,
+                    servisDtos.Count
+                );
+
+                return ApiResponseDto<List<ServisResponseDto>>
+                    .SuccessResult(servisDtos, "Hizmet binası servisleri başarıyla getirildi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Hizmet binası servisleri getirilirken hata oluştu. Hizmet Binası ID: {Id}", hizmetBinasiId);
+                return ApiResponseDto<List<ServisResponseDto>>
+                    .ErrorResult("Hizmet binası servisleri getirilirken bir hata oluştu", ex.Message);
             }
         }
     }
