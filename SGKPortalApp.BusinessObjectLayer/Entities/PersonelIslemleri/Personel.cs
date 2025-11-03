@@ -161,12 +161,9 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         [StringLength(255)]
         public string? Resim { get; set; }
 
-        [Required]
-        [StringLength(255)]
-        public string PassWord { get; set; } = string.Empty;
-
-        [StringLength(100)]
-        public string? SessionID { get; set; }
+        // User ile One-to-One ilişki (Dinamik veriler User tablosunda)
+        [InverseProperty("Personel")]
+        public User? User { get; set; }
 
         // Navigation Collections
         [InverseProperty("Personel")]
@@ -194,12 +191,5 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
 
         [InverseProperty("Personel")]
         public ICollection<PersonelEngel>? PersonelEngelleri { get; set; } = new List<PersonelEngel>();
-
-        public HubConnection? HubConnection { get; set; }
-
-        public Personel()
-        {
-            PassWord = TcKimlikNo ?? string.Empty;
-        }
     }
 }

@@ -25,16 +25,19 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
         {
             try
             {
-                // Kullanıcıyı TC Kimlik No ile bul (ilişkili tablolarla birlikte)
-                var personel = await _context.Personeller
-                    .Include(p => p.Departman)
-                    .Include(p => p.Servis)
-                    .Include(p => p.HizmetBinasi)
-                    .FirstOrDefaultAsync(p => p.TcKimlikNo == request.TcKimlikNo);
+                // 🆕 User tablosundan kullanıcıyı bul (Personel ile birlikte)
+                var user = await _context.Users
+                    .Include(u => u.Personel)
+                        .ThenInclude(p => p.Departman)
+                    .Include(u => u.Personel)
+                        .ThenInclude(p => p.Servis)
+                    .Include(u => u.Personel)
+                        .ThenInclude(p => p.HizmetBinasi)
+                    .FirstOrDefaultAsync(u => u.TcKimlikNo == request.TcKimlikNo);
 
-                if (personel == null)
+                if (user == null || user.Personel == null)
                 {
-                    _logger.LogWarning("Login başarısız: TC Kimlik No bulunamadı - {TcKimlikNo}", request.TcKimlikNo);
+                    _logger.LogWarning("Login başarısız: Kullanıcı bulunamadı - {TcKimlikNo}", request.TcKimlikNo);
                     return new LoginResponseDto
                     {
                         Success = false,
@@ -42,42 +45,88 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                     };
                 }
 
-                // Şifre kontrolü (düz metin karşılaştırması)
-                if (request.Password != personel.PassWord)
+                // Hesap aktif mi kontrol et
+                if (!user.AktifMi)
                 {
-                    _logger.LogWarning("Login başarısız: Hatalı şifre - {TcKimlikNo}", request.TcKimlikNo);
+                    _logger.LogWarning("Login başarısız: Hesap pasif - {TcKimlikNo}", request.TcKimlikNo);
                     return new LoginResponseDto
                     {
                         Success = false,
-                        Message = "TC Kimlik No veya şifre hatalı!"
+                        Message = "Hesabınız pasif durumda. Lütfen yöneticinizle iletişime geçin."
                     };
                 }
 
-                // Session ID oluştur
+                // Hesap kilitli mi kontrol et
+                if (user.HesapKilitTarihi.HasValue)
+                {
+                    _logger.LogWarning("Login başarısız: Hesap kilitli - {TcKimlikNo}", request.TcKimlikNo);
+                    return new LoginResponseDto
+                    {
+                        Success = false,
+                        Message = "Hesabınız kilitlenmiştir. Lütfen yöneticinizle iletişime geçin."
+                    };
+                }
+
+                // Şifre kontrolü
+                if (request.Password != user.PassWord)
+                {
+                    // Başarısız giriş sayısını artır
+                    user.BasarisizGirisSayisi++;
+                    
+                    // 5 başarısız denemeden sonra hesabı kilitle
+                    if (user.BasarisizGirisSayisi >= 5)
+                    {
+                        user.HesapKilitTarihi = DateTime.Now;
+                        user.AktifMi = false;
+                        await _context.SaveChangesAsync();
+                        
+                        _logger.LogWarning("Hesap kilitlendi (5 başarısız deneme) - {TcKimlikNo}", request.TcKimlikNo);
+                        return new LoginResponseDto
+                        {
+                            Success = false,
+                            Message = "5 başarısız giriş denemesi nedeniyle hesabınız kilitlenmiştir!"
+                        };
+                    }
+                    
+                    await _context.SaveChangesAsync();
+                    
+                    _logger.LogWarning("Login başarısız: Hatalı şifre ({Deneme}/5) - {TcKimlikNo}", 
+                        user.BasarisizGirisSayisi, request.TcKimlikNo);
+                    
+                    return new LoginResponseDto
+                    {
+                        Success = false,
+                        Message = $"TC Kimlik No veya şifre hatalı! ({user.BasarisizGirisSayisi}/5 deneme)"
+                    };
+                }
+
+                // Başarılı giriş - Session ID oluştur
                 var sessionId = Guid.NewGuid().ToString();
-
-                // Session ID'yi veritabanına kaydet
-                personel.SessionID = sessionId;
+                user.SessionID = sessionId;
+                user.SonGirisTarihi = DateTime.Now;
+                user.BasarisizGirisSayisi = 0; // Başarılı girişte sıfırla
+                
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Login başarılı - {TcKimlikNo} - {AdSoyad}", personel.TcKimlikNo, personel.AdSoyad);
+                _logger.LogInformation("Login başarılı - {TcKimlikNo} - {AdSoyad}", 
+                    user.TcKimlikNo, user.Personel.AdSoyad);
 
                 // Başarılı response
                 return new LoginResponseDto
                 {
                     Success = true,
                     Message = "Giriş başarılı!",
-                    TcKimlikNo = personel.TcKimlikNo,
-                    SicilNo = personel.SicilNo,
-                    AdSoyad = personel.AdSoyad,
-                    Email = personel.Email,
-                    DepartmanId = personel.DepartmanId,
-                    DepartmanAdi = personel.Departman?.DepartmanAdi ?? "",
-                    ServisId = personel.ServisId,
-                    ServisAdi = personel.Servis?.ServisAdi ?? "",
-                    HizmetBinasiId = personel.HizmetBinasiId,
-                    HizmetBinasiAdi = personel.HizmetBinasi?.HizmetBinasiAdi ?? "",
-                    Resim = personel.Resim,
+                    TcKimlikNo = user.Personel.TcKimlikNo,
+                    SicilNo = user.Personel.SicilNo,
+                    AdSoyad = user.Personel.AdSoyad,
+                    Email = user.Personel.Email, // Personel'den alınıyor
+                    DepartmanId = user.Personel.DepartmanId,
+                    DepartmanAdi = user.Personel.Departman?.DepartmanAdi ?? "",
+                    ServisId = user.Personel.ServisId,
+                    ServisAdi = user.Personel.Servis?.ServisAdi ?? "",
+                    HizmetBinasiId = user.Personel.HizmetBinasiId,
+                    HizmetBinasiAdi = user.Personel.HizmetBinasi?.HizmetBinasiAdi ?? "",
+                    Resim = user.Personel.Resim,
                     SessionId = sessionId
                 };
             }
@@ -139,17 +188,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
         {
             try
             {
-                var personel = await _context.Personeller
-                    .FirstOrDefaultAsync(p => p.TcKimlikNo == request.TcKimlikNo);
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.TcKimlikNo == request.TcKimlikNo);
 
-                if (personel == null)
+                if (user == null)
                 {
                     _logger.LogWarning("Şifre sıfırlama başarısız: Kullanıcı bulunamadı - {TcKimlikNo}", request.TcKimlikNo);
                     return false;
                 }
 
                 // Yeni şifreyi düz metin olarak kaydet
-                personel.PassWord = request.NewPassword;
+                user.PassWord = request.NewPassword;
                 await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Şifre başarıyla sıfırlandı - {TcKimlikNo}", request.TcKimlikNo);

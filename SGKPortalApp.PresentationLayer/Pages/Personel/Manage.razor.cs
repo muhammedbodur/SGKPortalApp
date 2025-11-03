@@ -581,61 +581,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             try
             {
                 // Toplu kayıt DTO'sunu hazırla
-                var completeRequest = new PersonelCompleteRequestDto
-                {
-                    Personel = MapToCreateDto(FormModel),
-                    Cocuklar = Cocuklar.Where(c => c.DogumTarihi.HasValue && !string.IsNullOrEmpty(c.Isim)).Select(c => new PersonelCocukCreateRequestDto
-                    {
-                        PersonelTcKimlikNo = FormModel.TcKimlikNo,
-                        CocukAdi = c.Isim,
-                        CocukDogumTarihi = DateOnly.FromDateTime(c.DogumTarihi!.Value),
-                        OgrenimDurumu = c.OgrenimDurumu
-                    }).ToList(),
-                    Hizmetler = Hizmetler.Where(h => h.BaslamaTarihi.HasValue && h.DepartmanId > 0 && h.ServisId > 0).Select(h => new PersonelHizmetCreateRequestDto
-                    {
-                        TcKimlikNo = FormModel.TcKimlikNo,
-                        DepartmanId = h.DepartmanId,
-                        ServisId = h.ServisId,
-                        GorevBaslamaTarihi = h.BaslamaTarihi!.Value,
-                        GorevAyrilmaTarihi = h.AyrilmaTarihi,
-                        Sebep = h.Sebep
-                    }).ToList(),
-                    Egitimler = Egitimler.Where(e => e.BaslangicTarihi.HasValue && !string.IsNullOrEmpty(e.EgitimAdi)).Select(e => new PersonelEgitimCreateRequestDto
-                    {
-                        TcKimlikNo = FormModel.TcKimlikNo,
-                        EgitimAdi = e.EgitimAdi!,
-                        EgitimBaslangicTarihi = e.BaslangicTarihi!.Value,
-                        EgitimBitisTarihi = e.BitisTarihi,
-                        Aciklama = null
-                    }).ToList(),
-                    ImzaYetkileri = Yetkiler.Where(y => y.ImzaYetkisiBaslamaTarihi.HasValue && y.DepartmanId > 0 && y.ServisId > 0).Select(y => new PersonelImzaYetkisiCreateRequestDto
-                    {
-                        TcKimlikNo = FormModel.TcKimlikNo,
-                        DepartmanId = y.DepartmanId,
-                        ServisId = y.ServisId,
-                        GorevDegisimSebebi = y.GorevDegisimSebebi,
-                        ImzaYetkisiBaslamaTarihi = y.ImzaYetkisiBaslamaTarihi!.Value,
-                        ImzaYetkisiBitisTarihi = y.ImzaYetkisiBitisTarihi,
-                        Aciklama = null
-                    }).ToList(),
-                    Cezalar = Cezalar.Where(c => c.CezaTarihi.HasValue && !string.IsNullOrEmpty(c.CezaSebebi)).Select(c => new PersonelCezaCreateRequestDto
-                    {
-                        TcKimlikNo = FormModel.TcKimlikNo,
-                        CezaSebebi = c.CezaSebebi!,
-                        AltBendi = c.AltBendi,
-                        CezaTarihi = c.CezaTarihi!.Value,
-                        Aciklama = null
-                    }).ToList(),
-                    Engeller = Engeller.Where(e => !string.IsNullOrEmpty(e.EngelNedeni1)).Select(e => new PersonelEngelCreateRequestDto
-                    {
-                        TcKimlikNo = FormModel.TcKimlikNo,
-                        EngelDerecesi = e.EngelDerecesi,
-                        EngelNedeni1 = e.EngelNedeni1,
-                        EngelNedeni2 = e.EngelNedeni2,
-                        EngelNedeni3 = e.EngelNedeni3,
-                        Aciklama = null
-                    }).ToList()
-                };
+                var completeRequest = MapToCompleteDto(FormModel);
 
                 Console.WriteLine($"🚀 API'ye gönderiliyor... HizmetBinasiId: {completeRequest.Personel.HizmetBinasiId}");
 
@@ -735,9 +681,64 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             return _mapper.Map<PersonelCreateRequestDto>(model);
         }
 
-        private PersonelUpdateRequestDto MapToUpdateDto(PersonelFormModel model)
+        private PersonelCompleteRequestDto MapToCompleteDto(PersonelFormModel model)
         {
-            return _mapper.Map<PersonelUpdateRequestDto>(model);
+            var completeDto = new PersonelCompleteRequestDto
+            {
+                Personel = MapToCreateDto(model),
+                Cocuklar = Cocuklar.Where(c => c.DogumTarihi.HasValue && !string.IsNullOrEmpty(c.Isim)).Select(c => new PersonelCocukCreateRequestDto
+                {
+                    PersonelTcKimlikNo = model.TcKimlikNo,
+                    CocukAdi = c.Isim,
+                    CocukDogumTarihi = DateOnly.FromDateTime(c.DogumTarihi!.Value),
+                    OgrenimDurumu = c.OgrenimDurumu
+                }).ToList(),
+                Hizmetler = Hizmetler.Where(h => h.BaslamaTarihi.HasValue && h.DepartmanId > 0 && h.ServisId > 0).Select(h => new PersonelHizmetCreateRequestDto
+                {
+                    TcKimlikNo = model.TcKimlikNo,
+                    DepartmanId = h.DepartmanId,
+                    ServisId = h.ServisId,
+                    GorevBaslamaTarihi = h.BaslamaTarihi!.Value,
+                    GorevAyrilmaTarihi = h.AyrilmaTarihi,
+                    Sebep = h.Sebep
+                }).ToList(),
+                Egitimler = Egitimler.Where(e => e.BaslangicTarihi.HasValue && !string.IsNullOrEmpty(e.EgitimAdi)).Select(e => new PersonelEgitimCreateRequestDto
+                {
+                    TcKimlikNo = model.TcKimlikNo,
+                    EgitimAdi = e.EgitimAdi!,
+                    EgitimBaslangicTarihi = e.BaslangicTarihi!.Value,
+                    EgitimBitisTarihi = e.BitisTarihi,
+                    Aciklama = null
+                }).ToList(),
+                ImzaYetkileri = Yetkiler.Where(y => y.ImzaYetkisiBaslamaTarihi.HasValue && y.DepartmanId > 0 && y.ServisId > 0).Select(y => new PersonelImzaYetkisiCreateRequestDto
+                {
+                    TcKimlikNo = model.TcKimlikNo,
+                    DepartmanId = y.DepartmanId,
+                    ServisId = y.ServisId,
+                    GorevDegisimSebebi = y.GorevDegisimSebebi,
+                    ImzaYetkisiBaslamaTarihi = y.ImzaYetkisiBaslamaTarihi!.Value,
+                    ImzaYetkisiBitisTarihi = y.ImzaYetkisiBitisTarihi,
+                    Aciklama = null
+                }).ToList(),
+                Cezalar = Cezalar.Where(c => c.CezaTarihi.HasValue && !string.IsNullOrEmpty(c.CezaSebebi)).Select(c => new PersonelCezaCreateRequestDto
+                {
+                    TcKimlikNo = model.TcKimlikNo,
+                    CezaSebebi = c.CezaSebebi!,
+                    AltBendi = c.AltBendi,
+                    CezaTarihi = c.CezaTarihi!.Value,
+                    Aciklama = null
+                }).ToList(),
+                Engeller = Engeller.Where(e => !string.IsNullOrEmpty(e.EngelNedeni1)).Select(e => new PersonelEngelCreateRequestDto
+                {
+                    TcKimlikNo = model.TcKimlikNo,
+                    EngelDerecesi = e.EngelDerecesi,
+                    EngelNedeni1 = e.EngelNedeni1,
+                    EngelNedeni2 = e.EngelNedeni2,
+                    EngelNedeni3 = e.EngelNedeni3,
+                    Aciklama = null
+                }).ToList()
+            };
+            return completeDto;
         }
 
         // ═══════════════════════════════════════════════════════
@@ -953,7 +954,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
                 if (IsEditMode)
                 {
-                    var updateDto = MapToUpdateDto(FormModel);
+                    var updateDto = _mapper.Map<PersonelUpdateRequestDto>(FormModel);
                     var response = await _personelApiService.UpdateAsync(FormModel.TcKimlikNo, updateDto);
                     if (response?.Success == true)
                     {
@@ -1112,7 +1113,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 //  HEMEN VERİTABANINDAN SİL
                 if (IsEditMode)
                 {
-                    var updateDto = MapToUpdateDto(FormModel);
+                    var updateDto = _mapper.Map<PersonelUpdateRequestDto>(FormModel);
                     var response = await _personelApiService.UpdateAsync(FormModel.TcKimlikNo, updateDto);
 
                     if (response?.Success == true)

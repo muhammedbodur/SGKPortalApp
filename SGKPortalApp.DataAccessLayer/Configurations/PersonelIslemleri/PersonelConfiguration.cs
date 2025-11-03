@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 
@@ -48,9 +48,6 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
                 .HasMaxLength(100);
 
             builder.Property(p => p.Resim)
-                .HasMaxLength(255);
-
-            builder.Property(p => p.PassWord)
                 .HasMaxLength(255);
 
             // Enum conversions

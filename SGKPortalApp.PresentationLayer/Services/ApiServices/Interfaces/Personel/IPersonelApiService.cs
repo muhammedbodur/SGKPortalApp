@@ -9,7 +9,6 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Persone
     {
         Task<ServiceResult<List<PersonelResponseDto>>> GetAllAsync();
         Task<ServiceResult<PersonelResponseDto>> GetByTcKimlikNoAsync(string tcKimlikNo);
-        Task<ServiceResult<PersonelResponseDto>> CreateAsync(PersonelCreateRequestDto dto);
         Task<ServiceResult<PersonelResponseDto>> UpdateAsync(string tcKimlikNo, PersonelUpdateRequestDto dto);
         Task<ServiceResult<bool>> DeleteAsync(string tcKimlikNo);
 

@@ -483,13 +483,19 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Property<string>("TcKimlikNo")
                         .HasMaxLength(11)
                         .HasColumnType("nvarchar(11)")
-                        .HasComment("TC Kimlik Numarası - Primary Key");
+                        .HasComment("TC Kimlik Numarası - Primary Key & Foreign Key to Personel");
 
                     b.Property<bool>("AktifMi")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasComment("Kullanıcı aktif mi?");
 
                     b.Property<int>("BasarisizGirisSayisi")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0)
+                        .HasComment("Başarısız giriş denemesi sayısı");
 
                     b.Property<DateTime>("DuzenlenmeTarihi")
                         .ValueGeneratedOnAdd()
@@ -507,22 +513,20 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Property<string>("EkleyenKullanici")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<DateTime?>("HesapKilitTarihi")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasComment("Hesap kilitlenme tarihi");
 
-                    b.Property<string>("KullaniciAdi")
+                    b.Property<string>("PassWord")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasComment("Şifre (hash'lenmiş)");
 
-                    b.Property<string>("SifreHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("SessionID")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasComment("Aktif oturum ID");
 
                     b.Property<string>("SilenKullanici")
                         .HasColumnType("nvarchar(max)");
@@ -536,23 +540,14 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("SonGirisTarihi")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("TelefonNo")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("datetime2")
+                        .HasComment("Son giriş tarihi");
 
                     b.HasKey("TcKimlikNo");
 
-                    b.HasIndex("Email")
-                        .IsUnique()
-                        .HasDatabaseName("IX_CMN_Users_Email")
-                        .HasFilter("[SilindiMi] = 0");
-
-                    b.HasIndex("KullaniciAdi")
-                        .IsUnique()
-                        .HasDatabaseName("IX_CMN_Users_KullaniciAdi")
-                        .HasFilter("[SilindiMi] = 0");
+                    b.HasIndex("SessionID")
+                        .HasDatabaseName("IX_CMN_Users_SessionID")
+                        .HasFilter("[SessionID] IS NOT NULL AND [SilindiMi] = 0");
 
                     b.HasIndex("TcKimlikNo")
                         .IsUnique()
@@ -861,11 +856,6 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Property<int>("OgrenimSuresi")
                         .HasColumnType("int");
 
-                    b.Property<string>("PassWord")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
                     b.Property<int>("PersonelAktiflikDurum")
                         .HasColumnType("int");
 
@@ -895,10 +885,6 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
 
                     b.Property<int>("ServisId")
                         .HasColumnType("int");
-
-                    b.Property<string>("SessionID")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("SicilNo")
                         .HasColumnType("int")
@@ -2819,6 +2805,18 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Navigation("ModulController");
                 });
 
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.Common.User", b =>
+                {
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Personel", "Personel")
+                        .WithOne("User")
+                        .HasForeignKey("SGKPortalApp.BusinessObjectLayer.Entities.Common.User", "TcKimlikNo")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_CMN_Users_PER_Personeller");
+
+                    b.Navigation("Personel");
+                });
+
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Personel", b =>
                 {
                     b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.AtanmaNedenleri", "AtanmaNedeni")
@@ -3123,14 +3121,14 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.HubConnection", b =>
                 {
-                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Personel", "Personel")
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.Common.User", "User")
                         .WithOne("HubConnection")
                         .HasForeignKey("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.HubConnection", "TcKimlikNo")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_SIR_HubConnections_PER_Personeller");
+                        .HasConstraintName("FK_SIR_HubConnections_CMN_Users");
 
-                    b.Navigation("Personel");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.HubTvConnection", b =>
@@ -3369,6 +3367,11 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Navigation("PersonelYetkileri");
                 });
 
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.Common.User", b =>
+                {
+                    b.Navigation("HubConnection");
+                });
+
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.AtanmaNedenleri", b =>
                 {
                     b.Navigation("Personeller");
@@ -3385,8 +3388,6 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                 {
                     b.Navigation("BankoKullanicilari");
 
-                    b.Navigation("HubConnection");
-
                     b.Navigation("KanalPersonelleri");
 
                     b.Navigation("PersonelCezalari");
@@ -3402,6 +3403,8 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Navigation("PersonelImzaYetkileri");
 
                     b.Navigation("PersonelYetkileri");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Sendika", b =>

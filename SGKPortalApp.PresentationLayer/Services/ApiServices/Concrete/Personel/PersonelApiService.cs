@@ -86,55 +86,6 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
             }
         }
 
-        public async Task<ServiceResult<PersonelResponseDto>> CreateAsync(PersonelCreateRequestDto dto)
-        {
-            try
-            {
-                _logger.LogInformation("🔵 CreateAsync çağrıldı: {@Request}", dto);
-
-                var response = await _httpClient.PostAsJsonAsync("personel", dto);
-                var responseContent = await response.Content.ReadAsStringAsync();
-
-                _logger.LogInformation("📡 Status: {Status}, Content: {Content}",
-                    response.StatusCode, responseContent);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    _logger.LogError("❌ API Hatası: {Error}", responseContent);
-                    return ServiceResult<PersonelResponseDto>.Fail(
-                        $"Personel eklenemedi. Detay: {responseContent}"
-                    );
-                }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<PersonelResponseDto>>();
-
-                if (apiResponse?.Success == true && apiResponse.Data != null)
-                {
-                    var successMessage = !string.IsNullOrWhiteSpace(apiResponse.Message)
-                        ? apiResponse.Message
-                        : "Personel başarıyla oluşturuldu!";
-
-                    _logger.LogInformation("✅ Personel oluşturuldu: {Message}", successMessage);
-
-                    return ServiceResult<PersonelResponseDto>.Ok(
-                        apiResponse.Data,
-                        successMessage
-                    );
-                }
-
-                var errorMessage = !string.IsNullOrWhiteSpace(apiResponse?.Message)
-                    ? apiResponse.Message
-                    : "Personel oluşturulamadı";
-
-                return ServiceResult<PersonelResponseDto>.Fail(errorMessage);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "❌ CreateAsync Exception");
-                return ServiceResult<PersonelResponseDto>.Fail($"Hata: {ex.Message}");
-            }
-        }
-
         public async Task<ServiceResult<PersonelResponseDto>> UpdateAsync(string tcKimlikNo, PersonelUpdateRequestDto dto)
         {
             try
@@ -212,7 +163,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("api/personel/complete", dto);
+                var response = await _httpClient.PostAsJsonAsync("personel/complete", dto);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -280,7 +231,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         {
             try
             {
-                var response = await _httpClient.GetAsync("api/personel/active");
+                var response = await _httpClient.GetAsync("personel/active");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -314,7 +265,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("api/personel/paged", filter);
+                var response = await _httpClient.PostAsJsonAsync("personel/paged", filter);
 
                 if (!response.IsSuccessStatusCode)
                 {

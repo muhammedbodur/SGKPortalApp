@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Generic;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
@@ -19,7 +19,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(hc => hc.Personel)
+                .Include(hc => hc.User)
+                    .ThenInclude(u => u.Personel)
                 .Where(hc => hc.TcKimlikNo == tcKimlikNo)
                 .ToListAsync();
         }
@@ -29,7 +30,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(hc => hc.Personel)
+                .Include(hc => hc.User)
+                    .ThenInclude(u => u.Personel)
                 .FirstOrDefaultAsync(hc => hc.ConnectionId == connectionId);
         }
 
@@ -38,7 +40,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(hc => hc.Personel)
+                .Include(hc => hc.User)
+                    .ThenInclude(u => u.Personel)
                 .Where(hc => hc.ConnectionStatus == ConnectionStatus.online)
                 .ToListAsync();
         }
@@ -48,7 +51,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(hc => hc.Personel)
+                .Include(hc => hc.User)
+                    .ThenInclude(u => u.Personel)
                 .FirstOrDefaultAsync(hc => hc.HubConnectionId == hubConnectionId);
         }
 
@@ -57,7 +61,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(hc => hc.Personel)
+                .Include(hc => hc.User)
+                    .ThenInclude(u => u.Personel)
                 .ToListAsync();
         }
     }

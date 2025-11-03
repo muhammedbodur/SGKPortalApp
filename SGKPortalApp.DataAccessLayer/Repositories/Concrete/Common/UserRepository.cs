@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Generic;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
@@ -26,32 +26,12 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
                 .FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo && !u.SilindiMi);
         }
 
-        public async Task<User?> GetByKullaniciAdiAsync(string kullaniciAdi)
-        {
-            if (string.IsNullOrWhiteSpace(kullaniciAdi))
-                return null;
-
-            return await _dbSet
-                .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.KullaniciAdi == kullaniciAdi && !u.SilindiMi);
-        }
-
-        public async Task<User?> GetByEmailAsync(string email)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-                return null;
-
-            return await _dbSet
-                .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Email == email && !u.SilindiMi);
-        }
-
         public async Task<IEnumerable<User>> GetActiveUsersAsync()
         {
             return await _dbSet
                 .AsNoTracking()
                 .Where(u => u.AktifMi && !u.SilindiMi)
-                .OrderBy(u => u.KullaniciAdi)
+                .OrderBy(u => u.TcKimlikNo)
                 .ToListAsync();
         }
 
@@ -60,7 +40,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
             return await _dbSet
                 .AsNoTracking()
                 .Where(u => u.HesapKilitTarihi.HasValue && !u.SilindiMi)
-                .OrderBy(u => u.KullaniciAdi)
+                .OrderBy(u => u.TcKimlikNo)
                 .ToListAsync();
         }
 
@@ -113,14 +93,5 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
             }
         }
 
-        public async Task<IEnumerable<(string TcKimlikNo, string KullaniciAdi)>> GetDropdownAsync()
-        {
-            return await _dbSet
-                .AsNoTracking()
-                .Where(u => u.AktifMi && !u.SilindiMi)
-                .OrderBy(u => u.KullaniciAdi)
-                .Select(u => new ValueTuple<string, string>(u.TcKimlikNo, u.KullaniciAdi))
-                .ToListAsync();
-        }
     }
 }

@@ -4,10 +4,13 @@ using SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Exceptions;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 using System.Text;
 using System.Text.Json;
@@ -76,42 +79,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             }
         }
 
-        public async Task<ApiResponseDto<PersonelResponseDto>> CreateAsync(PersonelCreateRequestDto request)
-        {
-            try
-            {
-                var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
-
-                // TC Kimlik No kontrolü
-                var existingPersonel = await personelRepo.GetByTcKimlikNoAsync(request.TcKimlikNo);
-                if (existingPersonel != null)
-                {
-                    return ApiResponseDto<PersonelResponseDto>
-                        .ErrorResult("Bu TC Kimlik No ile kayıtlı personel zaten mevcut");
-                }
-
-                var personel = _mapper.Map<Personel>(request);
-                await personelRepo.AddAsync(personel);
-                await _unitOfWork.SaveChangesAsync();
-
-                var personelDto = _mapper.Map<PersonelResponseDto>(personel);
-                return ApiResponseDto<PersonelResponseDto>
-                    .SuccessResult(personelDto, "Personel başarıyla oluşturuldu");
-            }
-            catch (DatabaseException ex)
-            {
-                _logger.LogWarning(ex, "Veritabanı kısıtlama hatası: {ErrorType}", ex.ErrorType);
-                return ApiResponseDto<PersonelResponseDto>
-                    .ErrorResult(ex.UserFriendlyMessage, ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Personel oluşturulurken hata oluştu");
-                return ApiResponseDto<PersonelResponseDto>
-                    .ErrorResult("Personel oluşturulurken bir hata oluştu", ex.Message);
-            }
-        }
-
         public async Task<ApiResponseDto<PersonelResponseDto>> UpdateAsync(string tcKimlikNo, PersonelUpdateRequestDto request)
         {
             try
@@ -127,6 +94,27 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
                 _mapper.Map(request, personel);
                 personelRepo.Update(personel);
+
+                // User kontrolü - yoksa oluştur, varsa aktiflik durumunu güncelle
+                var existingUser = await _unitOfWork.Repository<User>().GetByIdAsync(tcKimlikNo);
+                if (existingUser == null)
+                {
+                    var user = new User
+                    {
+                        TcKimlikNo = personel.TcKimlikNo,
+                        PassWord = personel.TcKimlikNo,
+                        AktifMi = personel.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif,
+                        BasarisizGirisSayisi = 0
+                    };
+                    await _unitOfWork.Repository<User>().AddAsync(user);
+                    _logger.LogInformation("UpdateAsync sırasında User kaydı oluşturuldu. TC: {TcKimlikNo}", tcKimlikNo);
+                }
+                else
+                {
+                    existingUser.AktifMi = personel.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif;
+                    _unitOfWork.Repository<User>().Update(existingUser);
+                }
+
                 await _unitOfWork.SaveChangesAsync();
 
                 var personelDto = _mapper.Map<PersonelResponseDto>(personel);
@@ -149,35 +137,101 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
         public async Task<ApiResponseDto<bool>> DeleteAsync(string tcKimlikNo)
         {
-            try
+            return await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
-                var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
-                var personel = await personelRepo.GetByTcKimlikNoAsync(tcKimlikNo);
-
-                if (personel == null)
+                try
                 {
+                    var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
+                    var personel = await personelRepo.GetByTcKimlikNoAsync(tcKimlikNo);
+
+                    if (personel == null)
+                    {
+                        return ApiResponseDto<bool>
+                            .ErrorResult("Personel bulunamadı");
+                    }
+
+                    // 1. İlişkili User kaydını sil
+                    var user = await _unitOfWork.Repository<User>().GetByIdAsync(tcKimlikNo);
+                    if (user != null)
+                    {
+                        _unitOfWork.Repository<User>().Delete(user);
+                        _logger.LogInformation("User kaydı silindi. TC: {TcKimlikNo}", tcKimlikNo);
+                    }
+
+                    // 2. İlişkili PersonelCocuk kayıtlarını sil
+                    var cocuklar = await _unitOfWork.Repository<PersonelCocuk>()
+                        .FindAsync(c => c.PersonelTcKimlikNo == tcKimlikNo);
+                    foreach (var cocuk in cocuklar)
+                    {
+                        _unitOfWork.Repository<PersonelCocuk>().Delete(cocuk);
+                    }
+
+                    // 3. İlişkili PersonelHizmet kayıtlarını sil
+                    var hizmetler = await _unitOfWork.Repository<PersonelHizmet>()
+                        .FindAsync(h => h.TcKimlikNo == tcKimlikNo);
+                    foreach (var hizmet in hizmetler)
+                    {
+                        _unitOfWork.Repository<PersonelHizmet>().Delete(hizmet);
+                    }
+
+                    // 4. İlişkili PersonelEgitim kayıtlarını sil
+                    var egitimler = await _unitOfWork.Repository<PersonelEgitim>()
+                        .FindAsync(e => e.TcKimlikNo == tcKimlikNo);
+                    foreach (var egitim in egitimler)
+                    {
+                        _unitOfWork.Repository<PersonelEgitim>().Delete(egitim);
+                    }
+
+                    // 5. İlişkili PersonelImzaYetkisi kayıtlarını sil
+                    var yetkiler = await _unitOfWork.Repository<PersonelImzaYetkisi>()
+                        .FindAsync(y => y.TcKimlikNo == tcKimlikNo);
+                    foreach (var yetki in yetkiler)
+                    {
+                        _unitOfWork.Repository<PersonelImzaYetkisi>().Delete(yetki);
+                    }
+
+                    // 6. İlişkili PersonelCeza kayıtlarını sil
+                    var cezalar = await _unitOfWork.Repository<PersonelCeza>()
+                        .FindAsync(c => c.TcKimlikNo == tcKimlikNo);
+                    foreach (var ceza in cezalar)
+                    {
+                        _unitOfWork.Repository<PersonelCeza>().Delete(ceza);
+                    }
+
+                    // 7. İlişkili PersonelEngel kayıtlarını sil
+                    var engeller = await _unitOfWork.Repository<PersonelEngel>()
+                        .FindAsync(e => e.TcKimlikNo == tcKimlikNo);
+                    foreach (var engel in engeller)
+                    {
+                        _unitOfWork.Repository<PersonelEngel>().Delete(engel);
+                    }
+
+                    // 8. Personel kaydını sil
+                    personelRepo.Delete(personel);
+
+                    // Tüm değişiklikleri kaydet
+                    await _unitOfWork.SaveChangesAsync();
+
+                    _logger.LogInformation(
+                        "Personel ve tüm ilişkili kayıtlar silindi. TC: {TcKimlikNo}, Ad Soyad: {AdSoyad}",
+                        tcKimlikNo, personel.AdSoyad);
+
                     return ApiResponseDto<bool>
-                        .ErrorResult("Personel bulunamadı");
+                        .SuccessResult(true, "Personel ve tüm ilişkili kayıtlar başarıyla silindi");
                 }
-
-                personelRepo.Delete(personel);
-                await _unitOfWork.SaveChangesAsync();
-
-                return ApiResponseDto<bool>
-                    .SuccessResult(true, "Personel başarıyla silindi");
-            }
-            catch (DatabaseException ex)
-            {
-                _logger.LogWarning(ex, "Veritabanı kısıtlama hatası: {ErrorType}", ex.ErrorType);
-                return ApiResponseDto<bool>
-                    .ErrorResult(ex.UserFriendlyMessage, ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Personel silinirken hata oluştu. TC: {TcKimlikNo}", tcKimlikNo);
-                return ApiResponseDto<bool>
-                    .ErrorResult("Personel silinirken bir hata oluştu", ex.Message);
-            }
+                catch (DatabaseException ex)
+                {
+                    _logger.LogWarning(ex, "Veritabanı kısıtlama hatası: {ErrorType}", ex.ErrorType);
+                    return ApiResponseDto<bool>
+                        .ErrorResult(ex.UserFriendlyMessage, ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Personel silinirken hata oluştu. TC: {TcKimlikNo}", tcKimlikNo);
+                    return ApiResponseDto<bool>
+                        .ErrorResult("Personel silinirken bir hata oluştu. Tüm işlemler geri alındı.", ex.Message);
+                }
+            });
         }
 
         public async Task<ApiResponseDto<List<PersonelResponseDto>>> GetActiveAsync()
@@ -287,7 +341,21 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
                     var tcKimlikNo = personel.TcKimlikNo;
 
-                    // 2. Çocukları kaydet
+                    // 2. User otomatik oluştur (One-to-One ilişki)
+                    var user = new User
+                    {
+                        TcKimlikNo = personel.TcKimlikNo,
+                        PassWord = personel.TcKimlikNo, // Varsayılan şifre: TC Kimlik No
+                        AktifMi = personel.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif,
+                        BasarisizGirisSayisi = 0
+                    };
+                    await _unitOfWork.Repository<User>().AddAsync(user);
+
+                    _logger.LogInformation(
+                        "Personel ve User kaydı oluşturuldu. TC: {TcKimlikNo}, Ad Soyad: {AdSoyad}",
+                        personel.TcKimlikNo, personel.AdSoyad);
+
+                    // 3. Çocukları kaydet
                     if (request.Cocuklar?.Any() == true)
                     {
                         foreach (var cocukDto in request.Cocuklar)
@@ -298,7 +366,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         }
                     }
 
-                    // 3. Hizmetleri kaydet
+                    // 4. Hizmetleri kaydet
                     if (request.Hizmetler?.Any() == true)
                     {
                         foreach (var hizmetDto in request.Hizmetler)
@@ -309,7 +377,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         }
                     }
 
-                    // 4. Eğitimleri kaydet
+                    // 5. Eğitimleri kaydet
                     if (request.Egitimler?.Any() == true)
                     {
                         foreach (var egitimDto in request.Egitimler)
@@ -320,7 +388,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         }
                     }
 
-                    // 5. İmza Yetkilerini kaydet
+                    // 6. İmza Yetkilerini kaydet
                     if (request.ImzaYetkileri?.Any() == true)
                     {
                         foreach (var yetkiDto in request.ImzaYetkileri)
@@ -331,7 +399,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         }
                     }
 
-                    // 6. Cezaları kaydet
+                    // 7. Cezaları kaydet
                     if (request.Cezalar?.Any() == true)
                     {
                         foreach (var cezaDto in request.Cezalar)
@@ -342,7 +410,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         }
                     }
 
-                    // 7. Engelleri kaydet
+                    // 8. Engelleri kaydet
                     if (request.Engeller?.Any() == true)
                     {
                         foreach (var engelDto in request.Engeller)
@@ -394,7 +462,33 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     _unitOfWork.Repository<Personel>().Update(personel);
                     await _unitOfWork.SaveChangesAsync();
 
-                    // 2. Mevcut alt kayıtları sil
+                    // 2. User kontrolü - yoksa oluştur
+                    var existingUser = await _unitOfWork.Repository<User>().GetByIdAsync(tcKimlikNo);
+                    if (existingUser == null)
+                    {
+                        var user = new User
+                        {
+                            TcKimlikNo = personel.TcKimlikNo,
+                            PassWord = personel.TcKimlikNo, // Varsayılan şifre: TC Kimlik No
+                            AktifMi = personel.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif,
+                            BasarisizGirisSayisi = 0
+                        };
+                        await _unitOfWork.Repository<User>().AddAsync(user);
+                        await _unitOfWork.SaveChangesAsync();
+
+                        _logger.LogInformation(
+                            "Personel güncelleme sırasında User kaydı oluşturuldu. TC: {TcKimlikNo}",
+                            personel.TcKimlikNo);
+                    }
+                    else
+                    {
+                        // Mevcut user'ı güncelle (aktiflik durumu)
+                        existingUser.AktifMi = personel.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif;
+                        _unitOfWork.Repository<User>().Update(existingUser);
+                        await _unitOfWork.SaveChangesAsync();
+                    }
+
+                    // 3. Mevcut alt kayıtları sil
                     var mevcutCocuklar = await _unitOfWork.Repository<PersonelCocuk>()
                         .FindAsync(c => c.PersonelTcKimlikNo == tcKimlikNo);
                     foreach (var cocuk in mevcutCocuklar)
@@ -427,7 +521,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
                     await _unitOfWork.SaveChangesAsync();
 
-                    // 3. Yeni kayıtları ekle (CreateCompleteAsync ile aynı mantık)
+                    // 4. Yeni kayıtları ekle
                     if (request.Cocuklar?.Any() == true)
                     {
                         foreach (var cocukDto in request.Cocuklar)

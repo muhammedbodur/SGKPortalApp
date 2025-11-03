@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 
 namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
 {
@@ -49,11 +50,12 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
 
             builder.HasQueryFilter(hc => !hc.SilindiMi);
 
-            builder.HasOne(hc => hc.Personel)
-                .WithOne(p => p.HubConnection)
+            // HubConnection artık User ile ilişkili (Personel değil)
+            builder.HasOne(hc => hc.User)
+                .WithOne(u => u.HubConnection)
                 .HasForeignKey<HubConnection>(hc => hc.TcKimlikNo)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_SIR_HubConnections_PER_Personeller");
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_SIR_HubConnections_CMN_Users");
         }
     }
 }

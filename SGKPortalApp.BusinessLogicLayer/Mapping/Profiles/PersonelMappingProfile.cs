@@ -155,8 +155,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
                 .ForMember(dest => dest.KartNoDuzenlenmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.KartNoGonderimTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.KartGonderimIslemBasari, opt => opt.Ignore())
-                .ForMember(dest => dest.PassWord, opt => opt.Ignore())
-                .ForMember(dest => dest.SessionID, opt => opt.Ignore())
 
                 // Navigation Properties
                 .ForMember(dest => dest.Departman, opt => opt.Ignore())
@@ -178,7 +176,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
                 .ForMember(dest => dest.PersonelImzaYetkileri, opt => opt.Ignore())
                 .ForMember(dest => dest.PersonelCezalari, opt => opt.Ignore())
                 .ForMember(dest => dest.PersonelEngelleri, opt => opt.Ignore())
-                .ForMember(dest => dest.HubConnection, opt => opt.Ignore());
+                .ForMember(dest => dest.User, opt => opt.Ignore());
 
 
             //  Update Request DTO → Entity
@@ -187,48 +185,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
                 .ForMember(dest => dest.TcKimlikNo, opt => opt.Ignore())
                 .ForMember(dest => dest.SicilNo, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
-                .ForMember(dest => dest.PassWord, opt => opt.Ignore())
-                .ForMember(dest => dest.SessionID, opt => opt.Ignore())
                 .ForMember(dest => dest.PersonelKayitNo, opt => opt.Ignore())
                 .ForMember(dest => dest.KartNo, opt => opt.Ignore())
                 .ForMember(dest => dest.KartNoAktiflikTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.KartNoDuzenlenmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.KartNoGonderimTarihi, opt => opt.Ignore())
-                .ForMember(dest => dest.KartGonderimIslemBasari, opt => opt.Ignore())
-                .ForMember(dest => dest.DogumTarihi, opt => opt.Ignore())
-                .ForMember(dest => dest.Cinsiyet, opt => opt.Ignore())
-                .ForMember(dest => dest.KanGrubu, opt => opt.Ignore())
-                .ForMember(dest => dest.PersonelTipi, opt => opt.Ignore())
-                .ForMember(dest => dest.OgrenimDurumu, opt => opt.Ignore())
-                .ForMember(dest => dest.BitirdigiOkul, opt => opt.Ignore())
-                .ForMember(dest => dest.BitirdigiBolum, opt => opt.Ignore())
-                .ForMember(dest => dest.OgrenimSuresi, opt => opt.Ignore())
-                .ForMember(dest => dest.Bransi, opt => opt.Ignore())
-                .ForMember(dest => dest.EmekliSicilNo, opt => opt.Ignore())
-                .ForMember(dest => dest.SehitYakinligi, opt => opt.Ignore())
-                .ForMember(dest => dest.EsininAdi, opt => opt.Ignore())
-                .ForMember(dest => dest.EsininIsDurumu, opt => opt.Ignore())
-                .ForMember(dest => dest.EsininUnvani, opt => opt.Ignore())
-                .ForMember(dest => dest.EsininIsAdresi, opt => opt.Ignore())
-                .ForMember(dest => dest.EsininIsSemt, opt => opt.Ignore())
-                .ForMember(dest => dest.EsininIsIlId, opt => opt.Ignore())
-                .ForMember(dest => dest.EsininIsIlceId, opt => opt.Ignore())
-                .ForMember(dest => dest.EvDurumu, opt => opt.Ignore())
-                .ForMember(dest => dest.UlasimServis1, opt => opt.Ignore())
-                .ForMember(dest => dest.UlasimServis2, opt => opt.Ignore())
-                .ForMember(dest => dest.Tabldot, opt => opt.Ignore())
-                .ForMember(dest => dest.HizmetBilgisi, opt => opt.Ignore())
-                .ForMember(dest => dest.EgitimBilgisi, opt => opt.Ignore())
-                .ForMember(dest => dest.ImzaYetkileri, opt => opt.Ignore())
-                .ForMember(dest => dest.CezaBilgileri, opt => opt.Ignore())
-                .ForMember(dest => dest.EngelBilgileri, opt => opt.Ignore())
-                .ForMember(dest => dest.Gorev, opt => opt.Ignore())
-                .ForMember(dest => dest.Uzmanlik, opt => opt.Ignore())
-                .ForMember(dest => dest.AtanmaNedeniId, opt => opt.Ignore())
-                .ForMember(dest => dest.HizmetBinasiId, opt => opt.Ignore())
-                .ForMember(dest => dest.IlId, opt => opt.Ignore())
-                .ForMember(dest => dest.IlceId, opt => opt.Ignore())
-                .ForMember(dest => dest.SendikaId, opt => opt.Ignore())
 
                 // ═══ AUDIT ═══
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
@@ -253,7 +214,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
                 .ForMember(dest => dest.PersonelImzaYetkileri, opt => opt.Ignore())
                 .ForMember(dest => dest.PersonelCezalari, opt => opt.Ignore())
                 .ForMember(dest => dest.PersonelEngelleri, opt => opt.Ignore())
-                .ForMember(dest => dest.HubConnection, opt => opt.Ignore());
+                .ForMember(dest => dest.User, opt => opt.Ignore());
 
 
             //  List Response
