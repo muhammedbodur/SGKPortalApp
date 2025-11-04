@@ -1,4 +1,4 @@
-﻿using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using System.Collections.Generic;
@@ -46,5 +46,14 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
 
         // Kat tipine göre bankoları listeler
         Task<IEnumerable<Banko>> GetByKatTipiAsync(KatTipi katTipi);
+
+        // Boş bankoları listeler (personel atanmamış)
+        Task<IEnumerable<Banko>> GetAvailableBankosAsync(int hizmetBinasiId);
+
+        // Bankoyu atanmış personel ile getirir
+        Task<Banko?> GetWithPersonelAsync(int bankoId);
+
+        // Bina bazlı kat gruplu bankoları getirir
+        Task<Dictionary<KatTipi, List<Banko>>> GetGroupedByKatAsync(int hizmetBinasiId);
     }
 }

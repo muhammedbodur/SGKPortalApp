@@ -1,5 +1,510 @@
-﻿<h3>Index</h3>
+@page "/siramatik/banko-yonetimi"
+@page "/siramatik/banko/list"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+@using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri
+@using SGKPortalApp.BusinessLogicLayer.Extensions
+@attribute [Authorize]
 
-@code {
+<PageTitle>Banko Yönetimi - SGK Portal</PageTitle>
 
+<div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="bx bx-desktop me-2"></i>Banko Yönetimi
+            </h4>
+            <p class="text-muted mb-0">
+                Tüm bankoları görüntüleyin ve yönetin
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <!-- Excel Export -->
+            <button class="btn btn-success" @onclick="ExportToExcel" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                else
+                {
+                    <i class="bx bx-download me-1"></i>
+                }
+                Excel
+            </button>
+
+            <!-- PDF Export -->
+            <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                else
+                {
+                    <i class="bx bxs-file-pdf me-1"></i>
+                }
+                PDF
+            </button>
+
+            <!-- Yeni Banko -->
+            <a href="@GetAddBankoUrl()" class="btn btn-primary">
+                <i class="bx bx-plus me-1"></i>Yeni Banko
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <!-- Hizmet Binası Seçimi -->
+                <div class="col-md-3">
+                    <label class="form-label">
+                        <i class="bx bx-building me-1"></i>Hizmet Binası
+                    </label>
+                    <select class="form-select" @onchange="OnHizmetBinasiChanged" value="@selectedHizmetBinasiId">
+                        <option value="0">-- Hizmet Binası Seçiniz --</option>
+                        @foreach (var bina in hizmetBinalari)
+                        {
+                            <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Kat Filtresi -->
+                <div class="col-md-2">
+                    <label class="form-label">
+                        <i class="bx bx-layer me-1"></i>Kat
+                    </label>
+                    <select class="form-select" @onchange="OnKatChanged" disabled="@(selectedHizmetBinasiId == 0)">
+                        <option value="">Tümü</option>
+                        @foreach (var kat in Enum.GetValues<KatTipi>())
+                        {
+                            <option value="@((int)kat)">@kat.GetDisplayName()</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Banko Tipi Filtresi -->
+                <div class="col-md-2">
+                    <label class="form-label">
+                        <i class="bx bx-category me-1"></i>Banko Tipi
+                    </label>
+                    <select class="form-select" @onchange="OnBankoTipiChanged" disabled="@(selectedHizmetBinasiId == 0)">
+                        <option value="">Tümü</option>
+                        @foreach (var tip in Enum.GetValues<BankoTipi>())
+                        {
+                            <option value="@((int)tip)">@tip.GetDisplayName()</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Arama -->
+                <div class="col-md-2">
+                    <label class="form-label">Ara</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bx bx-search"></i></span>
+                        <input type="text" class="form-control" placeholder="Banko no ile ara..."
+                               @bind="searchText" @bind:event="oninput" @onkeyup="OnSearchChanged" />
+                    </div>
+                </div>
+
+                <!-- Durum Filtresi -->
+                <div class="col-md-2">
+                    <label class="form-label">Durum</label>
+                    <select class="form-select" @onchange="OnAktiflikChanged">
+                        <option value="">Tümü</option>
+                        <option value="@((int)Aktiflik.Aktif)">Aktif</option>
+                        <option value="@((int)Aktiflik.Pasif)">Pasif</option>
+                    </select>
+                </div>
+
+                <!-- Temizle -->
+                <div class="col-md-1 d-flex align-items-end">
+                    <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters" title="Filtreleri Temizle">
+                        <i class="bx bx-reset"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- İstatistikler -->
+            <div class="row mt-3">
+                <div class="col">
+                    <div class="d-flex gap-4 text-muted small">
+                        <span><i class="bx bx-list-ul text-primary"></i> Toplam: <strong>@allBankolar.Count</strong></span>
+                        <span><i class="bx bx-check-circle text-success"></i> Aktif: <strong>@allBankolar.Count(b => b.BankoAktiflik == Aktiflik.Aktif)</strong></span>
+                        <span><i class="bx bx-x-circle text-danger"></i> Pasif: <strong>@allBankolar.Count(b => b.BankoAktiflik == Aktiflik.Pasif)</strong></span>
+                        <span><i class="bx bx-user-check text-info"></i> Atanmış: <strong>@allBankolar.Count(b => !b.BankoMusaitMi)</strong></span>
+                        <span><i class="bx bx-filter-alt text-warning"></i> Filtrelenen: <strong>@filteredBankolar.Count</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="mt-3 text-muted">Veriler yükleniyor...</p>
+        </div>
+    }
+    else if (selectedHizmetBinasiId == 0)
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bx bx-building" style="font-size: 4rem; color: #ddd;"></i>
+                <h5 class="mt-3 text-muted">Hizmet Binası Seçiniz</h5>
+                <p class="text-muted">Lütfen yukarıdan bir hizmet binası seçerek başlayın.</p>
+            </div>
+        </div>
+    }
+    else if (groupedBankolar.Any())
+    {
+        <!-- Kat Bazlı Accordion -->
+        <div class="accordion" id="bankoAccordion">
+            @foreach (var katGroup in groupedBankolar)
+            {
+                var katId = $"kat{(int)katGroup.KatTipi}";
+                var isFirst = katGroup == groupedBankolar.First();
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="@($"heading{katId}")">
+                        <button class="accordion-button @(isFirst ? "" : "collapsed")" type="button"
+                                data-bs-toggle="collapse" data-bs-target="@($"#collapse{katId}")"
+                                aria-expanded="@(isFirst ? "true" : "false")" aria-controls="@($"collapse{katId}")">
+                            <i class="bx bx-layer me-2"></i>
+                            <strong>@katGroup.KatTipiAdi</strong>
+                            <span class="badge bg-label-primary ms-2">@katGroup.Bankolar.Count Banko</span>
+                        </button>
+                    </h2>
+                    <div id="@($"collapse{katId}")" class="accordion-collapse collapse @(isFirst ? "show" : "")"
+                         aria-labelledby="@($"heading{katId}")" data-bs-parent="#bankoAccordion">
+                        <div class="accordion-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 80px;">Banko No</th>
+                                            <th>Banko Tipi</th>
+                                            <th>Açıklama</th>
+                                            <th>Atanmış Personel</th>
+                                            <th style="width: 100px;">Durum</th>
+                                            <th style="width: 150px;">İşlemler</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var banko in katGroup.Bankolar)
+                                        {
+                                            <tr class="@(banko.BankoAktiflik == Aktiflik.Pasif ? "table-danger" : "")">
+                                                <td>
+                                                    <strong class="text-primary">@banko.BankoNo</strong>
+                                                </td>
+                                                <td>
+                                                    <span class="badge @GetBankoTipiBadgeClass(banko.BankoTipi)">
+                                                        @banko.BankoTipiAdi
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <small class="text-muted">
+                                                        @(string.IsNullOrEmpty(banko.BankoAciklama) ? "-" : banko.BankoAciklama)
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    @if (banko.AtananPersonel != null)
+                                                    {
+                                                        <div class="d-flex align-items-center">
+                                                            @if (!string.IsNullOrEmpty(banko.AtananPersonel.Resim))
+                                                            {
+                                                                <div class="avatar avatar-sm me-2">
+                                                                    <img src="@banko.AtananPersonel.Resim" alt="@banko.AtananPersonel.AdSoyad" class="rounded-circle" />
+                                                                </div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="avatar avatar-sm me-2">
+                                                                    <span class="avatar-initial rounded-circle bg-label-primary">
+                                                                        @banko.AtananPersonel.AdSoyad?.Substring(0, 1)
+                                                                    </span>
+                                                                </div>
+                                                            }
+                                                            <div>
+                                                                <div class="fw-semibold">@banko.AtananPersonel.AdSoyad</div>
+                                                                <small class="text-muted">@banko.AtananPersonel.ServisAdi</small>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-label-warning">
+                                                            <i class="bx bx-user-x me-1"></i>Atanmamış
+                                                        </span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <span class="badge @(banko.BankoAktiflik == Aktiflik.Aktif ? "bg-label-success" : "bg-label-danger")">
+                                                        @(banko.BankoAktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif")
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex gap-1">
+                                                        <a href="@($"/siramatik/banko/manage/{banko.BankoId}")" 
+                                                           class="btn btn-sm btn-icon btn-outline-primary" 
+                                                           title="Düzenle">
+                                                            <i class="bx bx-edit"></i>
+                                                        </a>
+                                                        <button class="btn btn-sm btn-icon btn-outline-info" 
+                                                                @onclick="() => ShowPersonelAtamaModal(banko)" 
+                                                                title="Personel Ata">
+                                                            <i class="bx bx-user-plus"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-icon btn-outline-@(banko.BankoAktiflik == Aktiflik.Aktif ? "warning" : "success")" 
+                                                                @onclick="() => ToggleAktiflik(banko)" 
+                                                                title="@(banko.BankoAktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")">
+                                                            <i class="bx @(banko.BankoAktiflik == Aktiflik.Aktif ? "bx-x" : "bx-check")"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-icon btn-outline-danger" 
+                                                                @onclick="() => ShowDeleteConfirm(banko)" 
+                                                                title="Sil">
+                                                            <i class="bx bx-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bx bx-search" style="font-size: 4rem; color: #ddd;"></i>
+                <h5 class="mt-3 text-muted">Banko bulunamadı</h5>
+                <p class="text-muted">@(string.IsNullOrEmpty(searchText) ? "Henüz banko eklenmemiş." : "Arama kriterlerine uygun sonuç bulunamadı.")</p>
+                @if (string.IsNullOrEmpty(searchText))
+                {
+                    <button class="btn btn-primary mt-3" @onclick="ShowAddModal">
+                        <i class="bx bx-plus me-1"></i>
+                        İlk Bankoyu Ekle
+                    </button>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Add/Edit Modal -->
+@if (showManageModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bx @(isEditMode ? "bx-edit" : "bx-plus") me-2"></i>
+                        @(isEditMode ? "Banko Düzenle" : "Yeni Banko Ekle")
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="HideManageModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!isEditMode)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">Departman <span class="text-danger">*</span></label>
+                            <select class="form-select" @onchange="OnModalDepartmanChanged" value="@modalSelectedDepartmanId">
+                                <option value="0">-- Departman Seçiniz --</option>
+                                @foreach (var dept in departmanlar)
+                                {
+                                    <option value="@dept.DepartmanId">@dept.DepartmanAdi</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Hizmet Binası <span class="text-danger">*</span></label>
+                            <select class="form-select" @onchange="OnModalHizmetBinasiChanged" value="@currentBanko.HizmetBinasiId" disabled="@(modalSelectedDepartmanId == 0)">
+                                <option value="0">-- Hizmet Binası Seçiniz --</option>
+                                @foreach (var bina in modalHizmetBinalari)
+                                {
+                                    <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Kat <span class="text-danger">*</span></label>
+                            <select class="form-select" @bind="currentBanko.KatTipi" disabled="@(currentBanko.HizmetBinasiId == 0)">
+                                <option value="">-- Kat Seçiniz --</option>
+                                @foreach (var kat in Enum.GetValues<KatTipi>())
+                                {
+                                    <option value="@kat">@kat.GetDisplayName()</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Banko No <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" @bind="currentBanko.BankoNo" 
+                                   min="1"
+                                   placeholder="Kat içindeki banko numarası" disabled="@(currentBanko.HizmetBinasiId == 0)" />
+                            <small class="text-muted">
+                                Her katta 1'den başlayabilirsiniz. Örn: Zemin Kat 1,2,3 - 1. Kat 1,2,3 - 2. Kat 1,2,3
+                            </small>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">Kat <span class="text-danger">*</span></label>
+                            <select class="form-select" @bind="currentBanko.KatTipi">
+                                @foreach (var kat in Enum.GetValues<KatTipi>())
+                                {
+                                    <option value="@kat">@kat.GetDisplayName()</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Banko No <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" @bind="currentBanko.BankoNo" 
+                                   min="1"
+                                   placeholder="Kat içindeki banko numarası" />
+                            <small class="text-muted">
+                                Her katta 1'den başlayabilirsiniz. Örn: Zemin Kat 1,2,3 - 1. Kat 1,2,3 - 2. Kat 1,2,3
+                            </small>
+                        </div>
+                    }
+                    <div class="mb-3">
+                        <label class="form-label">Banko Tipi <span class="text-danger">*</span></label>
+                        <select class="form-select" @bind="currentBanko.BankoTipi">
+                            @foreach (var tip in Enum.GetValues<BankoTipi>())
+                            {
+                                <option value="@tip">@tip.GetDisplayName()</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Açıklama</label>
+                        <textarea class="form-control" @bind="currentBanko.BankoAciklama" 
+                                  rows="2" placeholder="Banko hakkında ek bilgi..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="HideManageModal">İptal</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveBanko" disabled="@isSaving">
+                        @if (isSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        else
+                        {
+                            <i class="bx bx-save me-1"></i>
+                        }
+                        Kaydet
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Personel Atama Modal -->
+@if (showPersonelAtamaModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bx bx-user-plus me-2"></i>
+                        Personel Ata - Banko @selectedBanko?.BankoNo
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="HidePersonelAtamaModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (selectedBanko?.AtananPersonel != null)
+                    {
+                        <div class="alert alert-info">
+                            <i class="bx bx-info-circle me-2"></i>
+                            <strong>Mevcut Personel:</strong> @selectedBanko.AtananPersonel.AdSoyad
+                            <button class="btn btn-sm btn-outline-danger float-end" @onclick="PersonelCikar">
+                                <i class="bx bx-user-x me-1"></i>Çıkar
+                            </button>
+                        </div>
+                    }
+                    <div class="mb-3">
+                        <label class="form-label">Personel Seç <span class="text-danger">*</span></label>
+                        <select class="form-select" @bind="selectedPersonelTcKimlikNo">
+                            <option value="">-- Personel Seçiniz --</option>
+                            @foreach (var personel in availablePersoneller)
+                            {
+                                <option value="@personel.TcKimlikNo">@personel.AdSoyad - @personel.ServisAdi</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="HidePersonelAtamaModal">İptal</button>
+                    <button type="button" class="btn btn-primary" @onclick="PersonelAta" disabled="@(string.IsNullOrEmpty(selectedPersonelTcKimlikNo) || isSaving)">
+                        @if (isSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        else
+                        {
+                            <i class="bx bx-check me-1"></i>
+                        }
+                        Ata
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bx bx-trash text-danger me-2"></i>
+                        Banko Sil
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="HideDeleteConfirm"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">
+                        <strong>Banko @selectedBanko?.BankoNo</strong> silmek istediğinizden emin misiniz?
+                    </p>
+                    <div class="alert alert-warning mt-3 mb-0">
+                        <i class="bx bx-error me-2"></i>
+                        <strong>Dikkat!</strong> Bu işlem geri alınamaz.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="HideDeleteConfirm">İptal</button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteBanko" disabled="@isDeleting">
+                        @if (isDeleting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        else
+                        {
+                            <i class="bx bx-trash me-1"></i>
+                        }
+                        Sil
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 }

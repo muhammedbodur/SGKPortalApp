@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.DataAccessLayer.Context;
@@ -22,6 +22,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .AsNoTracking()
                 .Include(bk => bk.Banko)
                 .Include(bk => bk.Personel)
+                .Where(bk => !bk.SilindiMi) // Explicit SilindiMi kontrolü
                 .FirstOrDefaultAsync(bk => bk.BankoId == bankoId);
         }
 
@@ -32,6 +33,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .AsNoTracking()
                 .Include(bk => bk.Banko)
                 .Include(bk => bk.Personel)
+                .Where(bk => !bk.SilindiMi) // Explicit SilindiMi kontrolü
                 .FirstOrDefaultAsync(bk => bk.TcKimlikNo == tcKimlikNo);
         }
 
@@ -81,6 +83,46 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .AsNoTracking()
                 .Where(bk => bk.EklenmeTarihi >= startDate && bk.EklenmeTarihi <= endDate)
                 .ToListAsync();
+        }
+
+        // Banko atanmış mı kontrol eder
+        public async Task<bool> IsBankoAssignedAsync(int bankoId)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .AnyAsync(bk => bk.BankoId == bankoId);
+        }
+
+        // Personel atanmış mı kontrol eder
+        public async Task<bool> IsPersonelAssignedAsync(string tcKimlikNo)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .AnyAsync(bk => bk.TcKimlikNo == tcKimlikNo);
+        }
+
+        // Personeli bankosundan çıkarır
+        public async Task UnassignPersonelAsync(string tcKimlikNo)
+        {
+            var assignment = await _dbSet
+                .FirstOrDefaultAsync(bk => bk.TcKimlikNo == tcKimlikNo);
+
+            if (assignment != null)
+            {
+                _dbSet.Remove(assignment);
+            }
+        }
+
+        // Bankoyu boşaltır
+        public async Task UnassignBankoAsync(int bankoId)
+        {
+            var assignment = await _dbSet
+                .FirstOrDefaultAsync(bk => bk.BankoId == bankoId);
+
+            if (assignment != null)
+            {
+                _dbSet.Remove(assignment);
+            }
         }
     }
 }

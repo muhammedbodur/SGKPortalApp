@@ -1,4 +1,4 @@
-﻿@page "/common/hizmetbinasi/detail/{id:int}"
+@page "/common/hizmetbinasi/detail/{id:int}"
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
 
@@ -272,8 +272,8 @@
                                         @foreach (var banko in HizmetBinasi.Bankolar)
                                         {
                                             <tr>
-                                                <td>@banko.BankoAdi</td>
-                                                <td>@banko.KatTipi</td>
+                                                <td>Banko @banko.BankoNo</td>
+                                                <td>@banko.KatTipiAdi</td>
                                                 <td>
                                                     @if (banko.BankoAktiflik == Aktiflik.Aktif)
                                                     {

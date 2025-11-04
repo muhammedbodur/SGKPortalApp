@@ -47,7 +47,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
         #region Sıramatik İşlemleri
         public DbSet<Banko> Bankolar { get; set; }
         public DbSet<BankoKullanici> BankoKullanicilari { get; set; }
-        public DbSet<BankoIslem> BankoIslemleri { get; set; }
+        public DbSet<BankoHareket> BankoHareketleri { get; set; }
         public DbSet<Kanal> Kanallar { get; set; }
         public DbSet<KanalAlt> KanallarAlt { get; set; }
         public DbSet<KanalIslem> KanalIslemleri { get; set; }
@@ -104,8 +104,8 @@ namespace SGKPortalApp.DataAccessLayer.Context
 
             // Sıramatik İşlemleri
             modelBuilder.ApplyConfiguration(new BankoConfiguration());
-            modelBuilder.ApplyConfiguration(new BankoIslemConfiguration());
             modelBuilder.ApplyConfiguration(new BankoKullaniciConfiguration());
+            modelBuilder.ApplyConfiguration(new BankoHareketConfiguration());
             modelBuilder.ApplyConfiguration(new KanalConfiguration());
             modelBuilder.ApplyConfiguration(new KanalAltConfiguration());
             modelBuilder.ApplyConfiguration(new KanalIslemConfiguration());

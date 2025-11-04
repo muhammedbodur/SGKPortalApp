@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
@@ -88,44 +88,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles
             // ═══════════════════════════════════════════════════════
             // BANKO MAPPING (Detail DTO için gerekli)
             // ═══════════════════════════════════════════════════════
-
-            CreateMap<Banko, BankoResponseDto>()
-                .ForMember(dest => dest.BankoId,
-                    opt => opt.MapFrom(src => src.BankoId))
-                .ForMember(dest => dest.BankoNo,
-                    opt => opt.MapFrom(src => src.BankoNo))
-                .ForMember(dest => dest.BankoAdi,
-                    opt => opt.MapFrom(src => $"Banko {src.BankoNo}")) // ✅ EKLEME - Dinamik oluşturma
-                .ForMember(dest => dest.BankoTipi,
-                    opt => opt.MapFrom(src => src.BankoTipi))
-                .ForMember(dest => dest.KatTipi,
-                    opt => opt.MapFrom(src => src.KatTipi))
-                .ForMember(dest => dest.BankoAktiflik,
-                    opt => opt.MapFrom(src => src.BankoAktiflik))
-                .ForMember(dest => dest.HizmetBinasiId,
-                    opt => opt.MapFrom(src => src.HizmetBinasiId))
-                .ForMember(dest => dest.HizmetBinasiAdi,
-                    opt => opt.MapFrom(src => src.HizmetBinasi != null ? src.HizmetBinasi.HizmetBinasiAdi : null))
-                .ForMember(dest => dest.TcKimlikNo,
-                    opt => opt.MapFrom(src => src.BankoKullanicilari != null && src.BankoKullanicilari.Any()
-                        ? src.BankoKullanicilari.FirstOrDefault()!.TcKimlikNo
-                        : null))
-                .ForMember(dest => dest.PersonelAdSoyad,
-                    opt => opt.MapFrom(src => src.BankoKullanicilari != null && src.BankoKullanicilari.Any()
-                        ? src.BankoKullanicilari.FirstOrDefault()!.Personel.AdSoyad
-                        : null))
-                .ForMember(dest => dest.PersonelResim,
-                    opt => opt.MapFrom(src => src.BankoKullanicilari != null && src.BankoKullanicilari.Any()
-                        ? src.BankoKullanicilari.FirstOrDefault()!.Personel.Resim
-                        : null))
-                .ForMember(dest => dest.BekleyenSiraSayisi,
-                    opt => opt.MapFrom(src => 0)) // TODO: Sıra sisteminden gelecek
-                .ForMember(dest => dest.TamamlananSiraSayisi,
-                    opt => opt.MapFrom(src => 0)) // TODO: Sıra sisteminden gelecek
-                .ForMember(dest => dest.EklenmeTarihi,
-                    opt => opt.MapFrom(src => src.EklenmeTarihi))
-                .ForMember(dest => dest.DuzenlenmeTarihi,
-                    opt => opt.MapFrom(src => src.DuzenlenmeTarihi));
+            // NOT: Banko -> BankoResponseDto mapping'i BankoMappingProfile'da tanımlı
 
             // ═══════════════════════════════════════════════════════
             // TV MAPPING (Detail DTO için gerekli)

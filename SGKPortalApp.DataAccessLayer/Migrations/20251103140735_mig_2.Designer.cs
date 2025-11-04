@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SGKPortalApp.DataAccessLayer.Context;
 
@@ -11,9 +12,11 @@ using SGKPortalApp.DataAccessLayer.Context;
 namespace SGKPortalApp.DataAccessLayer.Migrations
 {
     [DbContext(typeof(SGKDbContext))]
-    partial class SGKDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251103140735_mig_2")]
+    partial class mig_2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -366,7 +369,7 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
 
                     b.HasIndex("ModulId");
 
-                    b.ToTable("ModulAlt", (string)null);
+                    b.ToTable("ModulAlt");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.Common.ModulController", b =>
@@ -1828,9 +1831,9 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
 
                     b.HasIndex("HizmetBinasiId1");
 
-                    b.HasIndex("HizmetBinasiId", "KatTipi", "BankoNo")
+                    b.HasIndex("HizmetBinasiId", "BankoNo")
                         .IsUnique()
-                        .HasDatabaseName("IX_SIR_Bankolar_HizmetBinasi_Kat_BankoNo")
+                        .HasDatabaseName("IX_SIR_Bankolar_HizmetBinasi_BankoNo")
                         .HasFilter("[SilindiMi] = 0");
 
                     b.ToTable("SIR_Bankolar", "dbo");

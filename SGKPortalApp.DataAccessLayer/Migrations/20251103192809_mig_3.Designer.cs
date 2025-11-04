@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SGKPortalApp.DataAccessLayer.Context;
 
@@ -11,9 +12,11 @@ using SGKPortalApp.DataAccessLayer.Context;
 namespace SGKPortalApp.DataAccessLayer.Migrations
 {
     [DbContext(typeof(SGKDbContext))]
-    partial class SGKDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251103192809_mig_3")]
+    partial class mig_3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -366,7 +369,7 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
 
                     b.HasIndex("ModulId");
 
-                    b.ToTable("ModulAlt", (string)null);
+                    b.ToTable("ModulAlt");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.Common.ModulController", b =>

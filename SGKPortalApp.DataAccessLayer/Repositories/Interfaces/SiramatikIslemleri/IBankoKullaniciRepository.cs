@@ -1,4 +1,4 @@
-﻿using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using System;
 using System.Collections.Generic;
@@ -28,5 +28,17 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
 
         // Tarih aralığına göre atamaları listeler
         Task<IEnumerable<BankoKullanici>> GetByDateRangeAsync(DateTime startDate, DateTime endDate);
+
+        // Banko atanmış mı kontrol eder
+        Task<bool> IsBankoAssignedAsync(int bankoId);
+
+        // Personel atanmış mı kontrol eder
+        Task<bool> IsPersonelAssignedAsync(string tcKimlikNo);
+
+        // Personeli bankosundan çıkarır
+        Task UnassignPersonelAsync(string tcKimlikNo);
+
+        // Bankoyu boşaltır
+        Task UnassignBankoAsync(int bankoId);
     }
 }

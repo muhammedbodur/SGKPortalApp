@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
@@ -28,6 +28,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
+                .Include(b => b.HizmetBinasi)
+                .Include(b => b.BankoKullanicilari)
+                    .ThenInclude(bk => bk.Personel)
                 .Where(b => b.HizmetBinasiId == hizmetBinasiId)
                 .ToListAsync();
         }
@@ -129,6 +132,51 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .AsNoTracking()
                 .Where(b => b.KatTipi == katTipi)
                 .ToListAsync();
+        }
+
+        // Boş bankoları listeler (personel atanmamış)
+        public async Task<IEnumerable<Banko>> GetAvailableBankosAsync(int hizmetBinasiId)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Include(b => b.HizmetBinasi)
+                .Include(b => b.BankoKullanicilari)
+                .Where(b => b.HizmetBinasiId == hizmetBinasiId 
+                         && b.BankoAktiflik == Aktiflik.Aktif
+                         && (b.BankoKullanicilari == null || !b.BankoKullanicilari.Any()))
+                .OrderBy(b => b.KatTipi)
+                .ThenBy(b => b.BankoNo)
+                .ToListAsync();
+        }
+
+        // Bankoyu atanmış personel ile getirir
+        public async Task<Banko?> GetWithPersonelAsync(int bankoId)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Include(b => b.HizmetBinasi)
+                .Include(b => b.BankoKullanicilari!)
+                    .ThenInclude(bk => bk.Personel)
+                        .ThenInclude(p => p.Servis)
+                .FirstOrDefaultAsync(b => b.BankoId == bankoId);
+        }
+
+        // Bina bazlı kat gruplu bankoları getirir
+        public async Task<Dictionary<KatTipi, List<Banko>>> GetGroupedByKatAsync(int hizmetBinasiId)
+        {
+            var bankolar = await _dbSet
+                .AsNoTracking()
+                .Include(b => b.HizmetBinasi)
+                .Include(b => b.BankoKullanicilari!)
+                    .ThenInclude(bk => bk.Personel)
+                        .ThenInclude(p => p.Servis)
+                .Where(b => b.HizmetBinasiId == hizmetBinasiId)
+                .OrderBy(b => b.BankoNo)
+                .ToListAsync();
+
+            return bankolar
+                .GroupBy(b => b.KatTipi)
+                .ToDictionary(g => g.Key, g => g.ToList());
         }
     }
 }

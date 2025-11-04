@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
@@ -35,6 +35,15 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .HasDefaultValue(Aktiflik.Aktif)
                 .HasComment("Banko aktiflik durumu");
 
+            builder.Property(b => b.BankoAciklama)
+                .HasMaxLength(500)
+                .HasComment("Banko açıklaması (opsiyonel)");
+
+            builder.Property(b => b.BankoSira)
+                .IsRequired()
+                .HasDefaultValue(0)
+                .HasComment("Gösterim sırası");
+
             builder.Property(b => b.EklenmeTarihi)
                 .IsRequired()
                 .HasDefaultValueSql("GETDATE()");
@@ -48,9 +57,9 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .HasDefaultValue(false);
 
             // Indexes
-            builder.HasIndex(b => new { b.HizmetBinasiId, b.BankoNo })
+            builder.HasIndex(b => new { b.HizmetBinasiId, b.KatTipi, b.BankoNo })
                 .IsUnique()
-                .HasDatabaseName("IX_SIR_Bankolar_HizmetBinasi_BankoNo")
+                .HasDatabaseName("IX_SIR_Bankolar_HizmetBinasi_Kat_BankoNo")
                 .HasFilter("[SilindiMi] = 0");
 
             builder.HasIndex(b => b.BankoAktiflik)

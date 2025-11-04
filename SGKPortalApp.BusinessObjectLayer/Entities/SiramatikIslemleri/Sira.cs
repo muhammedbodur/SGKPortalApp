@@ -1,4 +1,4 @@
-﻿using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using System;
@@ -37,5 +37,35 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
 
         [NotMapped]
         public DateTime SiraAlisTarihi { get; set; } = DateTime.Now.Date;
+
+        // ═══════════════════════════════════════════════════════
+        // YÖNLENDİRME BİLGİLERİ
+        // ═══════════════════════════════════════════════════════
+
+        public bool YonlendirildiMi { get; set; } = false;
+
+        public int? YonlendirmeBankoId { get; set; }
+        [ForeignKey("YonlendirmeBankoId")]
+        public Banko? YonlendirmeBanko { get; set; }
+
+        [StringLength(11)]
+        public string? YonlendirenPersonelTc { get; set; }
+        [ForeignKey("YonlendirenPersonelTc")]
+        public Personel? YonlendirenPersonel { get; set; }
+
+        public int? HedefBankoId { get; set; }
+        [ForeignKey("HedefBankoId")]
+        public Banko? HedefBanko { get; set; }
+
+        public DateTime? YonlendirmeZamani { get; set; }
+
+        [StringLength(500)]
+        public string? YonlendirmeNedeni { get; set; }
+
+        public YonlendirmeTipi? YonlendirmeTipi { get; set; }
+
+        // Navigation Property
+        [InverseProperty("Sira")]
+        public ICollection<BankoHareket>? BankoHareketleri { get; set; } = new List<BankoHareket>();
     }
 }
