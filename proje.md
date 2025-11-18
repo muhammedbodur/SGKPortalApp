@@ -162,7 +162,7 @@ SGM (Departman)
 - **PER_**: Personel (Personel işlemleri) - Personel, Departman, Servis, Unvan
 - **SIR_**: Sıramatik (Sıra sistemi) - Kanal, Banko, Sıra, Tv, Hub
 - **PDK_**: PDKS (Personel devam kontrol) - İleride eklenecek
-- **ESH_**: Eshot (Ulaşım kartları) - İleride eklenecek
+- **ESH_**: Eshot (Ulaşım kartları) - İleride eklenecek 
 
 ---
 
