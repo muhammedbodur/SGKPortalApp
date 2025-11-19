@@ -12,6 +12,10 @@
     <Folder Include="Interfaces\PdksIslemleri\" />
     <Folder Include="Interfaces\SiramatikIslemleri\" />
     <Folder Include="Mapping\Extensions\" />
+    <Folder Include="Mapping\Profiles\DenetmenlikIslemleri\" />
+    <Folder Include="Mapping\Profiles\EshotIslemleri\" />
+    <Folder Include="Mapping\Profiles\RucuIslemleri\" />
+    <Folder Include="Mapping\Profiles\PdksIslemleri\" />
     <Folder Include="Mapping\Services\" />
     <Folder Include="Services\Auth\" />
     <Folder Include="Services\EshotIslemleri\" />
@@ -31,6 +35,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SGKPortalApp.BusinessObjectLayer\SGKPortalApp.BusinessObjectLayer.csproj" />
+    <ProjectReference Include="..\SGKPortalApp.Common\SGKPortalApp.Common.csproj" />
     <ProjectReference Include="..\SGKPortalApp.DataAccessLayer\SGKPortalApp.DataAccessLayer.csproj" />
   </ItemGroup>
 

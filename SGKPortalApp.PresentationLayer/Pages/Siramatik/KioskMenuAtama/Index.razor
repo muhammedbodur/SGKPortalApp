@@ -1,0 +1,187 @@
+@page "/siramatik/kiosk-menu-atama"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+@attribute [Authorize]
+
+<PageTitle>Kiosk Menü Ataması - SGK Portal</PageTitle>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="bx bx-link me-2"></i>Kiosk Menü Ataması
+            </h4>
+            <p class="text-muted mb-0">
+                Kiosk cihazlarına menü atayın ve yönetin
+            </p>
+        </div>
+        <a href="/siramatik/kiosk-menu-atama/manage" class="btn btn-primary">
+            <i class="bx bx-plus me-1"></i>Yeni Atama
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Hizmet Binası</label>
+                    <select class="form-select" @onchange="OnHizmetBinasiChanged" disabled="@isLoading">
+                        <option value="0">Tümü</option>
+                        @foreach (var bina in hizmetBinalari)
+                        {
+                            <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Kiosk</label>
+                    <select class="form-select" @onchange="OnKioskChanged" disabled="@isLoading">
+                        <option value="0">Tümü</option>
+                        @foreach (var kiosk in kiosklar)
+                        {
+                            <option value="@kiosk.KioskId">@kiosk.KioskAdi</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Durum</label>
+                    <select class="form-select" @onchange="OnAktiflikChanged" disabled="@isLoading">
+                        <option value="">Tümü</option>
+                        <option value="@((int)Aktiflik.Aktif)">Aktif</option>
+                        <option value="@((int)Aktiflik.Pasif)">Pasif</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="text-muted mt-2">Atamalar yükleniyor...</p>
+        </div>
+    }
+    else if (!filteredAtamalar.Any())
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bx bx-folder-open display-1 text-muted mb-3"></i>
+                <h5 class="text-muted">Henüz atama yok</h5>
+                <p class="text-muted mb-3">Kiosk cihazlarına menü atamak için yeni atama oluşturun</p>
+                <a href="/siramatik/kiosk-menu-atama/manage" class="btn btn-primary">
+                    <i class="bx bx-plus me-1"></i>İlk Atamayı Oluştur
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bx bx-list-ul me-2"></i>
+                    Menü Atamaları (@filteredAtamalar.Count)
+                </h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Kiosk</th>
+                            <th>Hizmet Binası</th>
+                            <th>Atanan Menü</th>
+                            <th>Atama Tarihi</th>
+                            <th width="100">Durum</th>
+                            <th width="150" class="text-end">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var atama in filteredAtamalar.OrderByDescending(a => a.AtamaTarihi))
+                        {
+                            <tr class="@(atama.Aktiflik == Aktiflik.Pasif ? "table-warning" : string.Empty)">
+                                <td>
+                                    <div class="fw-semibold">@atama.KioskAdi</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-label-info">@atama.HizmetBinasiAdi</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-label-primary">@atama.KioskMenuAdi</span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">@atama.AtamaTarihi.ToString("dd.MM.yyyy HH:mm")</small>
+                                </td>
+                                <td>
+                                    <span class="badge @(atama.Aktiflik == Aktiflik.Aktif ? "bg-label-success" : "bg-label-danger")">
+                                        @(atama.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif")
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <a class="btn btn-sm btn-icon btn-outline-primary" 
+                                           href="@($"/siramatik/kiosk-menu-atama/manage/{atama.KioskMenuAtamaId}")" 
+                                           title="Düzenle">
+                                            <i class="bx bx-edit"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-icon btn-outline-danger" 
+                                                @onclick="() => ShowDeleteConfirm(atama)" 
+                                                title="Sil">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteModal && selectedAtama != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bx bx-trash me-2"></i>Atamayı Sil
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="HideDeleteConfirm" disabled="@isDeleting"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">
+                        <strong>@selectedAtama.KioskAdi</strong> kiosk'unun 
+                        <strong>@selectedAtama.KioskMenuAdi</strong> menü atamasını silmek istediğinize emin misiniz?
+                    </p>
+                    <p class="text-muted mb-0 mt-2">
+                        <i class="bx bx-info-circle me-1"></i>Bu işlem geri alınamaz.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="HideDeleteConfirm" disabled="@isDeleting">
+                        İptal
+                    </button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteAtama" disabled="@isDeleting">
+                        @if (isDeleting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        else
+                        {
+                            <i class="bx bx-trash me-1"></i>
+                        }
+                        Sil
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

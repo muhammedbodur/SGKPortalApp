@@ -5,6 +5,8 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels.SiramatikIslemleri
 {
     public class BankoFormModel
     {
+        public int BankoId { get; set; }
+
         [Required(ErrorMessage = "Hizmet binası seçilmelidir")]
         [Range(1, int.MaxValue, ErrorMessage = "Hizmet binası seçilmelidir")]
         public int HizmetBinasiId { get; set; }

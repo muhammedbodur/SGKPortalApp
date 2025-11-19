@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using SGKPortalApp.Common.Extensions;
+using SGKPortalApp.BusinessLogicLayer.Extensions;
 using SGKPortalApp.DataAccessLayer.Context;
 using System.Text.Json.Serialization;
 
@@ -58,6 +59,9 @@ namespace SGKPortalApp.ApiLayer
             // 🎯 SGK PORTAL SERVİSLERİ
             // ═══════════════════════════════════════════════════════
             builder.Services.AddSGKPortalServices(builder.Configuration);
+
+            // Business Logic Layer
+            builder.Services.AddBusinessLogicLayer();
 
             // ═══════════════════════════════════════════════════════
             // 🔧 AUTOMAPPER

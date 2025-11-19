@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SGKPortalApp.BusinessLogicLayer\SGKPortalApp.BusinessLogicLayer.csproj" />
+    <ProjectReference Include="..\SGKPortalApp.BusinessObjectLayer\SGKPortalApp.BusinessObjectLayer.csproj" />
     <ProjectReference Include="..\SGKPortalApp.DataAccessLayer\SGKPortalApp.DataAccessLayer.csproj" />
   </ItemGroup>
 

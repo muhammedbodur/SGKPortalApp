@@ -4,17 +4,19 @@ using Microsoft.JSInterop;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using SGKPortalApp.BusinessLogicLayer.Extensions;
+using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
+using SGKPortalApp.PresentationLayer.Models.FormModels.SiramatikIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
+
 
 namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
 {
@@ -170,8 +172,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
             if (!string.IsNullOrWhiteSpace(searchText))
             {
                 filteredBankolar = filteredBankolar
-                    .Where(b => b.BankoNo.ToString().Contains(searchText) ||
-                               (b.BankoAciklama?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false))
+                    .Where(b => b.BankoNo.ToString().ContainsTurkish(searchText) ||
+                               (b.BankoAciklama?.ContainsTurkish(searchText, StringComparison.OrdinalIgnoreCase) ?? false))
                     .ToList();
             }
 
@@ -743,20 +745,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
                 return $"/siramatik/banko/manage?hizmetBinasiId={selectedHizmetBinasiId}";
             }
             return "/siramatik/banko/manage";
-        }
-
-        // ═══════════════════════════════════════════════════════
-        // FORM MODEL
-        // ═══════════════════════════════════════════════════════
-
-        private class BankoFormModel
-        {
-            public int BankoId { get; set; }
-            public int HizmetBinasiId { get; set; }
-            public int BankoNo { get; set; }
-            public KatTipi KatTipi { get; set; }
-            public BankoTipi BankoTipi { get; set; }
-            public string? BankoAciklama { get; set; }
         }
     }
 }

@@ -22,5 +22,8 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
 
         [InverseProperty("KanalAlt")]
         public ICollection<KanalAltIslem>? KanalAltIslemleri { get; set; } = new List<KanalAltIslem>();
+
+        [InverseProperty("KanalAlt")]
+        public ICollection<KioskMenuIslem>? KioskMenuIslemleri { get; set; } = new List<KioskMenuIslem>();
     }
 }

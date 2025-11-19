@@ -17,7 +17,7 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -366,7 +366,7 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
 
                     b.HasIndex("ModulId");
 
-                    b.ToTable("ModulAlt", (string)null);
+                    b.ToTable("ModulAlt");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.Common.ModulController", b =>
@@ -2265,9 +2265,6 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Property<int>("KanalIslemId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("KioskIslemGrupId")
-                        .HasColumnType("int");
-
                     b.Property<string>("SilenKullanici")
                         .HasColumnType("nvarchar(max)");
 
@@ -2284,8 +2281,6 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.HasIndex("HizmetBinasiId");
 
                     b.HasIndex("KanalIslemId");
-
-                    b.HasIndex("KioskIslemGrupId");
 
                     b.HasIndex("KanalAltId", "KanalIslemId")
                         .IsUnique()
@@ -2425,66 +2420,18 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.ToTable("SIR_KanalPersonelleri", "dbo");
                 });
 
-            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KioskGrup", b =>
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.Kiosk", b =>
                 {
-                    b.Property<int>("KioskGrupId")
+                    b.Property<int>("KioskId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("KioskGrupId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("KioskId"));
 
                     b.Property<int>("Aktiflik")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("DuzenlenmeTarihi")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<string>("DuzenleyenKullanici")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("EklenmeTarihi")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<string>("EkleyenKullanici")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("KioskGrupAdi")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("SilenKullanici")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("SilindiMi")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<DateTime?>("SilinmeTarihi")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("KioskGrupId");
-
-                    b.HasIndex("KioskGrupAdi")
-                        .IsUnique()
-                        .HasDatabaseName("IX_SIR_KioskGruplari_KioskGrupAdi")
-                        .HasFilter("[SilindiMi] = 0");
-
-                    b.ToTable("SIR_KioskGruplari", "dbo");
-                });
-
-            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KioskIslemGrup", b =>
-                {
-                    b.Property<int>("KioskIslemGrupId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("KioskIslemGrupId"));
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<DateTime>("DuzenlenmeTarihi")
                         .ValueGeneratedOnAdd()
@@ -2505,22 +2452,14 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Property<int>("HizmetBinasiId")
                         .HasColumnType("int");
 
-                    b.Property<int>("KanalAltId")
-                        .HasColumnType("int");
+                    b.Property<string>("KioskAdi")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("KioskGrupId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("KioskGrupId1")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KioskIslemGrupAktiflik")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1);
-
-                    b.Property<int>("KioskIslemGrupSira")
-                        .HasColumnType("int");
+                    b.Property<string>("KioskIp")
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
 
                     b.Property<string>("SilenKullanici")
                         .HasColumnType("nvarchar(max)");
@@ -2533,20 +2472,198 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Property<DateTime?>("SilinmeTarihi")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("KioskIslemGrupId");
+                    b.HasKey("KioskId");
 
-                    b.HasIndex("HizmetBinasiId");
-
-                    b.HasIndex("KanalAltId");
-
-                    b.HasIndex("KioskGrupId1");
-
-                    b.HasIndex("KioskGrupId", "KanalAltId")
+                    b.HasIndex("HizmetBinasiId", "KioskAdi")
                         .IsUnique()
-                        .HasDatabaseName("IX_SIR_KioskIslemGruplari_KioskGrup_KanalAlt")
+                        .HasDatabaseName("IX_SIR_KioskTanim_HizmetBinasi_KioskAdi")
                         .HasFilter("[SilindiMi] = 0");
 
-                    b.ToTable("SIR_KioskIslemGruplari", "dbo");
+                    b.ToTable("SIR_KioskTanim", "dbo");
+                });
+
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KioskMenu", b =>
+                {
+                    b.Property<int>("KioskMenuId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("KioskMenuId"));
+
+                    b.Property<string>("Aciklama")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Aktiflik")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<DateTime>("DuzenlenmeTarihi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("DuzenleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EklenmeTarihi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("EkleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MenuAdi")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("SilenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("SilindiMi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("SilinmeTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("KioskMenuId");
+
+                    b.HasIndex("MenuAdi")
+                        .IsUnique()
+                        .HasDatabaseName("IX_SIR_KioskMenuTanim_MenuAdi")
+                        .HasFilter("[SilindiMi] = 0");
+
+                    b.ToTable("SIR_KioskMenuTanim", "dbo");
+                });
+
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KioskMenuAtama", b =>
+                {
+                    b.Property<int>("KioskMenuAtamaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("KioskMenuAtamaId"));
+
+                    b.Property<int>("Aktiflik")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AtamaTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DuzenlenmeTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DuzenleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EklenmeTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EkleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("KioskId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KioskMenuId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SilenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("SilindiMi")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("SilinmeTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("KioskMenuAtamaId");
+
+                    b.HasIndex("KioskId")
+                        .HasDatabaseName("IX_SIR_KioskMenuAtama_KioskId");
+
+                    b.HasIndex("KioskMenuId")
+                        .HasDatabaseName("IX_SIR_KioskMenuAtama_KioskMenuId");
+
+                    b.HasIndex("SilindiMi")
+                        .HasDatabaseName("IX_SIR_KioskMenuAtama_SilindiMi")
+                        .HasFilter("[SilindiMi] = 0");
+
+                    b.HasIndex("KioskId", "Aktiflik")
+                        .IsUnique()
+                        .HasDatabaseName("IX_SIR_KioskMenuAtama_Kiosk_Aktif")
+                        .HasFilter("[Aktiflik] = 1 AND [SilindiMi] = 0");
+
+                    b.ToTable("SIR_KioskMenuAtama", (string)null);
+                });
+
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KioskMenuIslem", b =>
+                {
+                    b.Property<int>("KioskMenuIslemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("KioskMenuIslemId"));
+
+                    b.Property<int>("Aktiflik")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DuzenlenmeTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DuzenleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EklenmeTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EkleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IslemAdi")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("KanalAltId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KioskMenuId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MenuSira")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SilenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("SilindiMi")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("SilinmeTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("KioskMenuIslemId");
+
+                    b.HasIndex("KanalAltId")
+                        .HasDatabaseName("IX_SIR_KioskMenuIslem_KanalAltId");
+
+                    b.HasIndex("KioskMenuId")
+                        .HasDatabaseName("IX_SIR_KioskMenuIslem_KioskMenuId");
+
+                    b.HasIndex("SilindiMi")
+                        .HasDatabaseName("IX_SIR_KioskMenuIslem_SilindiMi")
+                        .HasFilter("[SilindiMi] = 0");
+
+                    b.HasIndex("KioskMenuId", "MenuSira")
+                        .HasDatabaseName("IX_SIR_KioskMenuIslem_Menu_Sira");
+
+                    b.ToTable("SIR_KioskMenuIslem", (string)null);
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.Sira", b =>
@@ -3285,19 +3402,11 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_SIR_KanalAltIslemleri_SIR_KanalIslemleri");
 
-                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KioskIslemGrup", "KioskIslemGrup")
-                        .WithMany("KanalAltIslemleri")
-                        .HasForeignKey("KioskIslemGrupId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("FK_SIR_KanalAltIslemleri_SIR_KioskIslemGruplari");
-
                     b.Navigation("HizmetBinasi");
 
                     b.Navigation("KanalAlt");
 
                     b.Navigation("KanalIslem");
-
-                    b.Navigation("KioskIslemGrup");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KanalIslem", b =>
@@ -3346,38 +3455,58 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Navigation("Personel");
                 });
 
-            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KioskIslemGrup", b =>
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.Kiosk", b =>
                 {
                     b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.Common.HizmetBinasi", "HizmetBinasi")
                         .WithMany()
                         .HasForeignKey("HizmetBinasiId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("FK_SIR_KioskIslemGruplari_CMN_HizmetBinalari");
+                        .HasConstraintName("FK_SIR_KioskTanim_CMN_HizmetBinalari");
 
+                    b.Navigation("HizmetBinasi");
+                });
+
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KioskMenuAtama", b =>
+                {
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.Kiosk", "Kiosk")
+                        .WithMany("MenuAtamalari")
+                        .HasForeignKey("KioskId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_SIR_KioskMenuAtama_SIR_Kiosk");
+
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KioskMenu", "KioskMenu")
+                        .WithMany("MenuAtamalari")
+                        .HasForeignKey("KioskMenuId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_SIR_KioskMenuAtama_SIR_KioskMenu");
+
+                    b.Navigation("Kiosk");
+
+                    b.Navigation("KioskMenu");
+                });
+
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KioskMenuIslem", b =>
+                {
                     b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KanalAlt", "KanalAlt")
-                        .WithMany()
+                        .WithMany("KioskMenuIslemleri")
                         .HasForeignKey("KanalAltId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("FK_SIR_KioskIslemGruplari_SIR_KanallarAlt");
+                        .HasConstraintName("FK_SIR_KioskMenuIslem_SIR_KanalAlt");
 
-                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KioskGrup", "KioskGrup")
-                        .WithMany()
-                        .HasForeignKey("KioskGrupId")
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KioskMenu", "KioskMenu")
+                        .WithMany("KioskMenuIslemler")
+                        .HasForeignKey("KioskMenuId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("FK_SIR_KioskIslemGruplari_SIR_KioskGruplari");
-
-                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KioskGrup", null)
-                        .WithMany("KioskIslemGruplari")
-                        .HasForeignKey("KioskGrupId1");
-
-                    b.Navigation("HizmetBinasi");
+                        .HasConstraintName("FK_SIR_KioskMenuIslem_SIR_KioskMenu");
 
                     b.Navigation("KanalAlt");
 
-                    b.Navigation("KioskGrup");
+                    b.Navigation("KioskMenu");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.Sira", b =>
@@ -3574,6 +3703,8 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KanalAlt", b =>
                 {
                     b.Navigation("KanalAltIslemleri");
+
+                    b.Navigation("KioskMenuIslemleri");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KanalAltIslem", b =>
@@ -3588,14 +3719,16 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Navigation("KanalAltIslemleri");
                 });
 
-            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KioskGrup", b =>
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.Kiosk", b =>
                 {
-                    b.Navigation("KioskIslemGruplari");
+                    b.Navigation("MenuAtamalari");
                 });
 
-            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KioskIslemGrup", b =>
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.KioskMenu", b =>
                 {
-                    b.Navigation("KanalAltIslemleri");
+                    b.Navigation("KioskMenuIslemler");
+
+                    b.Navigation("MenuAtamalari");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.Sira", b =>

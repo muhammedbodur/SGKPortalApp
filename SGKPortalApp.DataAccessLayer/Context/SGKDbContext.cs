@@ -53,8 +53,10 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<KanalIslem> KanalIslemleri { get; set; }
         public DbSet<KanalAltIslem> KanalAltIslemleri { get; set; }
         public DbSet<KanalPersonel> KanalPersonelleri { get; set; }
-        public DbSet<KioskGrup> KioskGruplari { get; set; }
-        public DbSet<KioskIslemGrup> KioskIslemGruplari { get; set; }
+        public DbSet<KioskMenu> KioskMenuler { get; set; }
+        public DbSet<KioskMenuIslem> KioskMenuIslemleri { get; set; }
+        public DbSet<Kiosk> Kiosklar { get; set; }
+        public DbSet<KioskMenuAtama> KioskMenuAtamalari { get; set; }
         public DbSet<Tv> Tvler { get; set; }
         public DbSet<TvBanko> TvBankolari { get; set; }
         public DbSet<Sira> Siralar { get; set; }
@@ -111,8 +113,10 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.ApplyConfiguration(new KanalIslemConfiguration());
             modelBuilder.ApplyConfiguration(new KanalAltIslemConfiguration());
             modelBuilder.ApplyConfiguration(new KanalPersonelConfiguration());
-            modelBuilder.ApplyConfiguration(new KioskGrupConfiguration());
-            modelBuilder.ApplyConfiguration(new KioskIslemGrupConfiguration());
+            modelBuilder.ApplyConfiguration(new KioskMenuConfiguration());
+            modelBuilder.ApplyConfiguration(new KioskMenuIslemConfiguration());
+            modelBuilder.ApplyConfiguration(new KioskConfiguration());
+            modelBuilder.ApplyConfiguration(new KioskMenuAtamaConfiguration());
             modelBuilder.ApplyConfiguration(new TvConfiguration());
             modelBuilder.ApplyConfiguration(new TvBankoConfiguration());
             modelBuilder.ApplyConfiguration(new SiraConfiguration());

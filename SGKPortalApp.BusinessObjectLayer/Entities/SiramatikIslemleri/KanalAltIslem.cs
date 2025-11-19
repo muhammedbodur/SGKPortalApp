@@ -25,10 +25,6 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         [InverseProperty("KanalAltIslemleri")]
         public required KanalIslem KanalIslem { get; set; }
 
-        public int? KioskIslemGrupId { get; set; }
-        [ForeignKey("KioskIslemGrupId")]
-        public KioskIslemGrup? KioskIslemGrup { get; set; }
-
         public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
 
         [InverseProperty("KanalAltIslem")]

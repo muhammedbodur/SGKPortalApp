@@ -6,7 +6,6 @@ using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using System.Reflection;
 using SGKPortalApp.DataAccessLayer.Repositories;
-using SGKPortalApp.BusinessLogicLayer.Extensions;
 
 namespace SGKPortalApp.Common.Extensions
 {
@@ -144,15 +143,6 @@ namespace SGKPortalApp.Common.Extensions
         }
 
         /// <summary>
-        /// Business Layer servisleri
-        /// </summary>
-        public static IServiceCollection AddBusinessLayer(this IServiceCollection services)
-        {
-            services.AddBusinessLogicLayer();
-            return services;
-        }
-
-        /// <summary>
         /// Tüm SGK Portal servislerini kaydet - ANA METOT
         /// </summary>
         public static IServiceCollection AddSGKPortalServices(
@@ -169,9 +159,6 @@ namespace SGKPortalApp.Common.Extensions
 
             // Data Access Layer
             services.AddDataAccessLayer(connectionString);
-
-            // Business Layer
-            services.AddBusinessLayer();
 
             Console.WriteLine("🎉 SGK Portal Services hazır!\n");
             return services;

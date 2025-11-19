@@ -17,9 +17,6 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
         // Kanal işlemi bazında işlemleri listeler
         Task<IEnumerable<KanalAltIslem>> GetByKanalIslemAsync(int kanalIslemId);
 
-        // Kiosk işlem grubu bazında işlemleri listeler
-        Task<IEnumerable<KanalAltIslem>> GetByKioskIslemGrupAsync(int kioskIslemGrupId);
-
         // Tarih aralığına göre işlemleri listeler
         Task<IEnumerable<KanalAltIslem>> GetByDateRangeAsync(DateTime startDate, DateTime endDate);
 

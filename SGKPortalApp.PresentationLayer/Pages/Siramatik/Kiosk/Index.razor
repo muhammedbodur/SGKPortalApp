@@ -1,5 +1,218 @@
-﻿<h3>Index</h3>
+﻿@page "/siramatik/kiosk-yonetimi"
+@page "/siramatik/kiosk/list"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+@attribute [Authorize]
 
-@code {
+<PageTitle>Kiosk Yönetimi - SGK Portal</PageTitle>
 
+<div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="bx bx-terminal me-2"></i>Kiosk Yönetimi
+            </h4>
+            <p class="text-muted mb-0">Kioskları yönetin, menü eşleşmelerini kontrol edin</p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary" @onclick="RefreshAsync" disabled="@isLoading">
+                <i class="bx bx-refresh"></i>
+            </button>
+            <a class="btn btn-primary" href="@GetManageUrl()">
+                <i class="bx bx-plus me-1"></i>Yeni Kiosk
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <!-- Hizmet Binası -->
+                <div class="col-md-4">
+                    <label class="form-label">
+                        <i class="bx bx-building me-1"></i>Hizmet Binası
+                    </label>
+                    <select class="form-select" @onchange="OnHizmetBinasiChanged" value="@selectedHizmetBinasiId">
+                        <option value="0">-- Hizmet Binası Seçiniz --</option>
+                        @foreach (var bina in hizmetBinalari)
+                        {
+                            <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Durum -->
+                <div class="col-md-3">
+                    <label class="form-label">
+                        <i class="bx bx-check-circle me-1"></i>Durum
+                    </label>
+                    <select class="form-select" @onchange="OnAktiflikChanged" disabled="@(selectedHizmetBinasiId == 0)">
+                        <option value="">Tümü</option>
+                        <option value="@((int)Aktiflik.Aktif)">Aktif</option>
+                        <option value="@((int)Aktiflik.Pasif)">Pasif</option>
+                    </select>
+                </div>
+
+                <!-- Arama -->
+                <div class="col-md-5">
+                    <label class="form-label">Ara</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bx bx-search"></i></span>
+                        <input type="text" class="form-control" placeholder="Kiosk adı / IP"
+                               @bind="searchText" @bind:event="oninput" @onkeyup="OnSearchChanged" disabled="@(selectedHizmetBinasiId == 0)" />
+                    </div>
+                </div>
+            </div>
+
+            @if (selectedHizmetBinasiId > 0)
+            {
+                <div class="row mt-3">
+                    <div class="col">
+                        <div class="d-flex gap-4 text-muted small flex-wrap">
+                            <span><i class="bx bx-list-ul text-primary"></i> Toplam: <strong>@allKiosklar.Count</strong></span>
+                            <span><i class="bx bx-check-circle text-success"></i> Aktif: <strong>@allKiosklar.Count(k => k.Aktiflik == Aktiflik.Aktif)</strong></span>
+                            <span><i class="bx bx-x-circle text-danger"></i> Pasif: <strong>@allKiosklar.Count(k => k.Aktiflik == Aktiflik.Pasif)</strong></span>
+                            <span><i class="bx bx-filter-alt text-warning"></i> Filtrelenen: <strong>@filteredKiosklar.Count</strong></span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="mt-3 text-muted">Veriler yükleniyor...</p>
+        </div>
+    }
+    else if (selectedHizmetBinasiId == 0)
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bx bx-building" style="font-size: 4rem; color: #ddd;"></i>
+                <h5 class="mt-3 text-muted">Hizmet Binası Seçiniz</h5>
+                <p class="text-muted">Kioskları görüntülemek için üstten bir hizmet binası seçin.</p>
+            </div>
+        </div>
+    }
+    else if (filteredKiosklar.Any())
+    {
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Kiosk Adı</th>
+                            <th>Hizmet Binası</th>
+                            <th>IP</th>
+                            <th>Atanan Menü</th>
+                            <th>Durum</th>
+                            <th class="text-end">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var kiosk in filteredKiosklar)
+                        {
+                            <tr class="@(kiosk.Aktiflik == Aktiflik.Pasif ? "table-warning" : string.Empty)">
+                                <td>
+                                    <div class="fw-semibold">@kiosk.KioskAdi</div>
+                                </td>
+                                <td>
+                                    <div>@kiosk.HizmetBinasiAdi</div>
+                                    @if (!string.IsNullOrWhiteSpace(kiosk.DepartmanAdi))
+                                    {
+                                        <small class="text-muted d-block">@kiosk.DepartmanAdi</small>
+                                    }
+                                </td>
+                                <td>
+                                    <code>@(string.IsNullOrEmpty(kiosk.KioskIp) ? "-" : kiosk.KioskIp)</code>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(kiosk.AtananKioskMenuAdi))
+                                    {
+                                        <span class="badge bg-label-primary">@kiosk.AtananKioskMenuAdi</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-label-secondary">Menü Atanmamış</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge @(kiosk.Aktiflik == Aktiflik.Aktif ? "bg-label-success" : "bg-label-danger")">
+                                        @(kiosk.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif")
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <a class="btn btn-sm btn-icon btn-outline-primary" href="@($"/siramatik/kiosk/manage/{kiosk.KioskId}")" title="Düzenle">
+                                            <i class="bx bx-edit"></i>
+                                        </a>
+                                        <a class="btn btn-sm btn-icon btn-outline-info" href="@($"/siramatik/kiosk/alt-kanal-eslestirme/{kiosk.KioskId}")" title="Alt Kanal Eşleştirme">
+                                            <i class="bx bx-git-branch"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-icon btn-outline-danger" @onclick="() => ShowDeleteConfirm(kiosk)" title="Sil">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bx bx-search" style="font-size: 4rem; color: #ddd;"></i>
+                <h5 class="mt-3 text-muted">Kiosk bulunamadı</h5>
+                <p class="text-muted">@((string.IsNullOrEmpty(searchText) && !selectedAktiflik.HasValue)
+                    ? "Seçili hizmet binasında kiosk bulunmuyor."
+                    : "Arama kriterlerine uygun sonuç bulunamadı.")</p>
+            </div>
+        </div>
+    }
+</div>
+
+@if (showDeleteModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bx bx-trash me-2"></i>Kiosk Sil
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="HideDeleteConfirm"></button>
+                </div>
+                <div class="modal-body">
+                    @if (selectedKiosk != null)
+                    {
+                        <p>
+                            <strong>@selectedKiosk.KioskAdi</strong> adlı kiosk silinecek. Devam etmek istediğinize emin misiniz?
+                        </p>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" @onclick="HideDeleteConfirm" disabled="@isDeleting">İptal</button>
+                    <button class="btn btn-danger" @onclick="DeleteKioskAsync" disabled="@isDeleting">
+                        @if (isDeleting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        Sil
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 }

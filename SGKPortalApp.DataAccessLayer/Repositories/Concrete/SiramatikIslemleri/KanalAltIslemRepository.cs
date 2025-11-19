@@ -45,16 +45,6 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .ToListAsync();
         }
 
-        // Kiosk işlem grubu bazında işlemleri listeler
-        public async Task<IEnumerable<KanalAltIslem>> GetByKioskIslemGrupAsync(int kioskIslemGrupId)
-        {
-            return await _dbSet
-                .AsNoTracking()
-                .Include(kai => kai.KioskIslemGrup)
-                .Where(kai => kai.KioskIslemGrupId == kioskIslemGrupId)
-                .ToListAsync();
-        }
-
         // Tarih aralığına göre işlemleri listeler
         public async Task<IEnumerable<KanalAltIslem>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
@@ -72,7 +62,6 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .Include(kai => kai.KanalAlt)
                 .Include(kai => kai.HizmetBinasi)
                 .Include(kai => kai.KanalIslem)
-                .Include(kai => kai.KioskIslemGrup)
                 .Include(kai => kai.Siralar)
                 .Include(kai => kai.KanalPersonelleri)
                 .FirstOrDefaultAsync(kai => kai.KanalAltIslemId == kanalAltIslemId);
@@ -86,7 +75,6 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .Include(kai => kai.KanalAlt)
                 .Include(kai => kai.HizmetBinasi)
                 .Include(kai => kai.KanalIslem)
-                .Include(kai => kai.KioskIslemGrup)
                 .Include(kai => kai.Siralar)
                 .Include(kai => kai.KanalPersonelleri)
                 .ToListAsync();

@@ -22,7 +22,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         {
             try
             {
-                var response = await _httpClient.GetAsync("kanalaltislem");
+                var response = await _httpClient.GetAsync("api/KanalAltIslem");
 
                 if (!response.IsSuccessStatusCode)
                 {
