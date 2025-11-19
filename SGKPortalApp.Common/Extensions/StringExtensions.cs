@@ -50,7 +50,7 @@ namespace SGKPortalApp.Common.Extensions
         /// Türkçe karakter duyarsız arama yapar
         /// "TİRE" içinde "tire" aratıldığında bulur
         /// </summary>
-        public static bool ContainsTurkish(this string source, string search)
+        public static bool ContainsTurkish(this string source, string search, StringComparison ordinalIgnoreCase)
         {
             if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(search))
                 return false;

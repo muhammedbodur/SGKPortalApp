@@ -7,6 +7,7 @@ using QuestPDF.Infrastructure;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
@@ -87,7 +88,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAlt
             // Arama filtresi
             if (!string.IsNullOrWhiteSpace(searchText))
             {
-                query = query.Where(k => k.KanalAltAdi.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+                query = query.Where(k => k.KanalAltAdi.ContainsTurkish(searchText, StringComparison.OrdinalIgnoreCase));
             }
 
             // Ana kanal filtresi
