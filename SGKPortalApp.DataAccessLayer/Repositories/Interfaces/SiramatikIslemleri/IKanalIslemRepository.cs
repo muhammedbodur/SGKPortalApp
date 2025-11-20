@@ -31,5 +31,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
 
         // Günlük işlem sayısını getirir
         Task<int> GetDailyIslemCountAsync(int kanalId, DateTime date);
+
+        // Kanal ve hizmet binası için maksimum sıra numarasını getirir
+        Task<int> GetMaxSiraByKanalAndBinaAsync(int kanalId, int hizmetBinasiId);
     }
 }

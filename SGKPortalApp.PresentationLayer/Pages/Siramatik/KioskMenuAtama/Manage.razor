@@ -59,7 +59,7 @@
                                 <label class="form-label">
                                     Kiosk <span class="text-danger">*</span>
                                 </label>
-                                <select class="form-select" @bind="model.KioskId" disabled="@isSaving">
+                                <select class="form-select" value="@model.KioskId" @onchange="OnKioskChanged" disabled="@isSaving">
                                     <option value="0">-- Kiosk Seçiniz --</option>
                                     @foreach (var kiosk in kiosklar)
                                     {
@@ -75,11 +75,18 @@
                                 </label>
                                 <select class="form-select" @bind="model.KioskMenuId" disabled="@isSaving">
                                     <option value="0">-- Menü Seçiniz --</option>
-                                    @foreach (var menu in kioskMenuleri)
+                                    @foreach (var menu in availableMenuleri)
                                     {
                                         <option value="@menu.KioskMenuId">@menu.MenuAdi</option>
                                     }
                                 </select>
+                                @if (model.KioskId > 0 && !availableMenuleri.Any())
+                                {
+                                    <div class="form-text text-warning">
+                                        <i class="bx bx-info-circle me-1"></i>
+                                        Bu kiosk için tüm menüler zaten atanmış. Yeni menü atamak için mevcut atamayı pasifleştirin.
+                                    </div>
+                                }
                                 <ValidationMessage For="@(() => model.KioskMenuId)" />
                             </div>
 
@@ -90,7 +97,7 @@
                                     <label class="form-check-label">@(isAktif ? "Aktif" : "Pasif")</label>
                                 </div>
                                 <div class="form-text">
-                                    Bir kiosk'a aynı anda sadece bir aktif menü atanabilir
+                                    Bir kiosk'a birden fazla menü atanabilir, ancak aynı menü tekrar atanamaz
                                 </div>
                             </div>
 

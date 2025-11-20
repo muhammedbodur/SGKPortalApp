@@ -45,6 +45,15 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .FirstOrDefaultAsync(kma => kma.KioskMenuAtamaId == kioskMenuAtamaId);
         }
 
+        public async Task<KioskMenuAtama?> GetByKioskAndMenuAsync(int kioskId, int kioskMenuId)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .FirstOrDefaultAsync(kma => kma.KioskId == kioskId 
+                    && kma.KioskMenuId == kioskMenuId 
+                    && kma.SilindiMi == false);
+        }
+
         public async Task<bool> HasActiveAtamaAsync(int kioskId)
         {
             return await _dbSet

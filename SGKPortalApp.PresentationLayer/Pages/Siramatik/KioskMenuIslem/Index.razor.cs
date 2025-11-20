@@ -38,7 +38,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuIslem
 
                 if (result.Success && result.Data != null)
                 {
-                    kioskMenuleri = result.Data;
+                    kioskMenuleri = result.Data
+                        .OrderBy(x => x.MenuSira)
+                        .ThenBy(x => x.MenuAdi)
+                        .ToList();
                 }
                 else
                 {

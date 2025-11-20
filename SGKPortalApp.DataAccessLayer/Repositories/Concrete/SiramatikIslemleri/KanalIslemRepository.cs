@@ -106,5 +106,16 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .AsNoTracking()
                 .CountAsync(ki => ki.KanalId == kanalId && ki.EklenmeTarihi.Date == date.Date);
         }
+
+        // Kanal ve hizmet binası için maksimum sıra numarasını getirir
+        public async Task<int> GetMaxSiraByKanalAndBinaAsync(int kanalId, int hizmetBinasiId)
+        {
+            var maxSira = await _dbSet
+                .AsNoTracking()
+                .Where(ki => ki.KanalId == kanalId && ki.HizmetBinasiId == hizmetBinasiId)
+                .MaxAsync(ki => (int?)ki.Sira);
+            
+            return maxSira ?? 0;
+        }
     }
 }

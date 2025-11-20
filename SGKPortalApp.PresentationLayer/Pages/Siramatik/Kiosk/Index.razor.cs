@@ -52,7 +52,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
                 var binaResult = await _hizmetBinasiService.GetActiveAsync();
                 if (binaResult.Success && binaResult.Data != null)
                 {
-                    hizmetBinalari = binaResult.Data;
+                    hizmetBinalari = binaResult.Data
+                        .OrderBy(x => x.HizmetBinasiAdi)
+                        .ToList();
                 }
             }
             catch (Exception ex)

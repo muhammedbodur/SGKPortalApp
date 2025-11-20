@@ -12,5 +12,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
         Task<KioskMenu?> GetWithKiosksAsync(int kioskMenuId);
 
         Task<bool> ExistsByNameAsync(string menuAdi);
+
+        Task<int> GetMaxSiraAsync();
     }
 }

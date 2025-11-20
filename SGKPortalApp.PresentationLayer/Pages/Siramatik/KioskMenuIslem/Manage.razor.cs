@@ -53,14 +53,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuIslem
                 var menuResult = await _kioskMenuService.GetAllAsync();
                 if (menuResult.Success && menuResult.Data != null)
                 {
-                    kioskMenuleri = menuResult.Data;
+                    kioskMenuleri = menuResult.Data
+                        .OrderBy(x => x.MenuAdi)
+                        .ToList();
                 }
 
                 // Load Kanal Altlar
                 var kanalAltResult = await _kanalAltService.GetAllAsync();
                 if (kanalAltResult.Success && kanalAltResult.Data != null)
                 {
-                    kanalAltlar = kanalAltResult.Data;
+                    kanalAltlar = kanalAltResult.Data
+                        .Where(x => x.Aktiflik == Aktiflik.Aktif)
+                        .OrderBy(x => x.KanalAltAdi)
+                        .ToList();
                 }
             }
             catch (Exception ex)

@@ -28,7 +28,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
 
         private List<HizmetBinasiResponseDto> hizmetBinalari = new();
         private List<KioskResponseDto> kiosklar = new();
-        private List<KioskMenuResponseDto> kioskMenuleri = new();
+        private List<KioskMenuResponseDto> allKioskMenuleri = new();
+        private List<KioskMenuResponseDto> availableMenuleri = new();
 
         private int selectedHizmetBinasiId;
         private KioskMenuAtamaFormModel model = new();
@@ -40,6 +41,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
             if (KioskMenuAtamaId.HasValue)
             {
                 await LoadKioskMenuAtamaAsync();
+            }
+            else
+            {
+                // Yeni kayıt için ilk hizmet binasını otomatik seç
+                if (hizmetBinalari.Any())
+                {
+                    selectedHizmetBinasiId = hizmetBinalari.First().HizmetBinasiId;
+                    await OnHizmetBinasiChanged(new ChangeEventArgs { Value = selectedHizmetBinasiId.ToString() });
+                }
             }
         }
 
@@ -53,14 +63,21 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
                 var binaResult = await _hizmetBinasiService.GetAllAsync();
                 if (binaResult.Success && binaResult.Data != null)
                 {
-                    hizmetBinalari = binaResult.Data;
+                    hizmetBinalari = binaResult.Data
+                        .Where(x => x.HizmetBinasiAktiflik == Aktiflik.Aktif)
+                        .OrderBy(x => x.HizmetBinasiAdi)
+                        .ToList();
                 }
 
                 // Load Kiosk Menüleri
                 var menuResult = await _kioskMenuService.GetAllAsync();
                 if (menuResult.Success && menuResult.Data != null)
                 {
-                    kioskMenuleri = menuResult.Data;
+                    allKioskMenuleri = menuResult.Data
+                        .Where(x => x.Aktiflik == Aktiflik.Aktif)
+                        .OrderBy(x => x.MenuAdi)
+                        .ToList();
+                    availableMenuleri = allKioskMenuleri;
                 }
             }
             catch (Exception ex)
@@ -85,7 +102,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
                     var result = await _kioskService.GetByHizmetBinasiAsync(binaId);
                     if (result.Success && result.Data != null)
                     {
-                        kiosklar = result.Data;
+                        kiosklar = result.Data
+                            .Where(x => x.Aktiflik == Aktiflik.Aktif)
+                            .OrderBy(x => x.KioskAdi)
+                            .ToList();
                     }
                 }
                 else
@@ -94,6 +114,54 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
                 }
 
                 model.KioskId = 0; // Reset kiosk selection
+                await FilterAvailableMenusAsync();
+            }
+        }
+
+        private async Task OnKioskChanged(ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out int kioskId))
+            {
+                model.KioskId = kioskId;
+                await FilterAvailableMenusAsync();
+            }
+        }
+
+        private async Task FilterAvailableMenusAsync()
+        {
+            if (model.KioskId <= 0)
+            {
+                availableMenuleri = allKioskMenuleri;
+                return;
+            }
+
+            try
+            {
+                // Seçili kiosk'a atanmış aktif menüleri al
+                var atamalarResult = await _kioskMenuAtamaService.GetByKioskAsync(model.KioskId);
+                
+                if (atamalarResult.Success && atamalarResult.Data != null)
+                {
+                    // Zaten atanmış menüleri filtrele (edit modda mevcut atamayı hariç tut)
+                    var atanmisMenuIdleri = atamalarResult.Data
+                        .Where(x => x.Aktiflik == Aktiflik.Aktif && (!KioskMenuAtamaId.HasValue || x.KioskMenuAtamaId != KioskMenuAtamaId.Value))
+                        .Select(x => x.KioskMenuId)
+                        .ToList();
+
+                    // Atanmamış menüleri göster (bir kiosk'a birden fazla menü atanabilir, ama aynı menü tekrar atanamaz)
+                    availableMenuleri = allKioskMenuleri
+                        .Where(m => !atanmisMenuIdleri.Contains(m.KioskMenuId))
+                        .ToList();
+                }
+                else
+                {
+                    availableMenuleri = allKioskMenuleri;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Menüler filtrelenirken hata oluştu");
+                availableMenuleri = allKioskMenuleri;
             }
         }
 
@@ -116,12 +184,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
                     };
                     isAktif = data.Aktiflik == Aktiflik.Aktif;
 
-                    // Load kiosklar for selected bina
-                    var kiosk = kiosklar.FirstOrDefault(k => k.KioskId == data.KioskId);
-                    if (kiosk != null)
+                    // Kiosk bilgisini al ve hizmet binasını seç
+                    var kioskResult = await _kioskService.GetByIdAsync(data.KioskId);
+                    if (kioskResult.Success && kioskResult.Data != null)
                     {
-                        selectedHizmetBinasiId = kiosk.HizmetBinasiId;
+                        selectedHizmetBinasiId = kioskResult.Data.HizmetBinasiId;
                         await OnHizmetBinasiChanged(new ChangeEventArgs { Value = selectedHizmetBinasiId.ToString() });
+                        
+                        // Menüleri filtrele (edit modda mevcut atamayı hariç tut)
+                        await FilterAvailableMenusAsync();
                     }
                 }
                 else

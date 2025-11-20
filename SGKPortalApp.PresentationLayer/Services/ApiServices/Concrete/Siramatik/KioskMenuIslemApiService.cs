@@ -21,8 +21,17 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         {
             try
             {
-                var response = await _httpClient.GetFromJsonAsync<ServiceResult<List<KioskMenuIslemResponseDto>>>($"api/kiosk-menu-islem/menu/{kioskMenuId}");
-                return response ?? ServiceResult<List<KioskMenuIslemResponseDto>>.Fail("Yanıt alınamadı");
+                var response = await _httpClient.GetAsync($"kiosk-menu-islem/menu/{kioskMenuId}");
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetByKioskMenuAsync failed: {Error}", errorContent);
+                    return ServiceResult<List<KioskMenuIslemResponseDto>>.Fail("Menü işlemleri alınamadı.");
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<List<KioskMenuIslemResponseDto>>>();
+                return result ?? ServiceResult<List<KioskMenuIslemResponseDto>>.Fail("Yanıt alınamadı");
             }
             catch (Exception ex)
             {
@@ -35,8 +44,17 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         {
             try
             {
-                var response = await _httpClient.GetFromJsonAsync<ServiceResult<KioskMenuIslemResponseDto>>($"api/kiosk-menu-islem/{kioskMenuIslemId}");
-                return response ?? ServiceResult<KioskMenuIslemResponseDto>.Fail("Yanıt alınamadı");
+                var response = await _httpClient.GetAsync($"kiosk-menu-islem/{kioskMenuIslemId}");
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetByIdAsync failed: {Error}", errorContent);
+                    return ServiceResult<KioskMenuIslemResponseDto>.Fail("Menü işlemi bulunamadı.");
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<KioskMenuIslemResponseDto>>();
+                return result ?? ServiceResult<KioskMenuIslemResponseDto>.Fail("Yanıt alınamadı");
             }
             catch (Exception ex)
             {
@@ -49,7 +67,15 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("api/kiosk-menu-islem", request);
+                var response = await _httpClient.PostAsJsonAsync("kiosk-menu-islem", request);
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("CreateAsync failed: {Error}", errorContent);
+                    return ServiceResult<KioskMenuIslemResponseDto>.Fail("Menü işlemi oluşturulamadı.");
+                }
+
                 var result = await response.Content.ReadFromJsonAsync<ServiceResult<KioskMenuIslemResponseDto>>();
                 return result ?? ServiceResult<KioskMenuIslemResponseDto>.Fail("Yanıt alınamadı");
             }
@@ -64,7 +90,15 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         {
             try
             {
-                var response = await _httpClient.PutAsJsonAsync("api/kiosk-menu-islem", request);
+                var response = await _httpClient.PutAsJsonAsync("kiosk-menu-islem", request);
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("UpdateAsync failed: {Error}", errorContent);
+                    return ServiceResult<KioskMenuIslemResponseDto>.Fail("Menü işlemi güncellenemedi.");
+                }
+
                 var result = await response.Content.ReadFromJsonAsync<ServiceResult<KioskMenuIslemResponseDto>>();
                 return result ?? ServiceResult<KioskMenuIslemResponseDto>.Fail("Yanıt alınamadı");
             }
@@ -79,7 +113,15 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"api/kiosk-menu-islem/{kioskMenuIslemId}");
+                var response = await _httpClient.DeleteAsync($"kiosk-menu-islem/{kioskMenuIslemId}");
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("DeleteAsync failed: {Error}", errorContent);
+                    return ServiceResult<bool>.Fail("Menü işlemi silinemedi.");
+                }
+
                 var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
                 return result ?? ServiceResult<bool>.Fail("Yanıt alınamadı");
             }
@@ -94,7 +136,15 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         {
             try
             {
-                var response = await _httpClient.PutAsync($"api/kiosk-menu-islem/{kioskMenuIslemId}/sira/{yeniSira}", null);
+                var response = await _httpClient.PutAsync($"kiosk-menu-islem/{kioskMenuIslemId}/sira/{yeniSira}", null);
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("UpdateSiraAsync failed: {Error}", errorContent);
+                    return ServiceResult<bool>.Fail("Sıra güncellenemedi.");
+                }
+
                 var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
                 return result ?? ServiceResult<bool>.Fail("Yanıt alınamadı");
             }

@@ -25,6 +25,7 @@
                 <div class="col-md-6">
                     <label class="form-label">Kiosk Menüsü Seçin</label>
                     <select class="form-select @(selectedKioskMenuId == 0 ? "border-primary" : "")" 
+                            value="@selectedKioskMenuId"
                             @onchange="OnKioskMenuChanged" 
                             disabled="@isLoading">
                         <option value="0">-- Menü Seçiniz --</option>
@@ -108,7 +109,7 @@
                                     <span class="badge bg-label-secondary">@islem.MenuSira</span>
                                 </td>
                                 <td>
-                                    <div class="fw-semibold">@islem.IslemAdi</div>
+                                    <div class="fw-semibold">@islem.KioskMenuAdi</div>
                                 </td>
                                 <td>
                                     <span class="badge bg-label-info">@islem.KanalAltAdi</span>
@@ -155,7 +156,7 @@
                 </div>
                 <div class="modal-body">
                     <p class="mb-0">
-                        <strong>@selectedIslem.IslemAdi</strong> işlemini silmek istediğinize emin misiniz?
+                        <strong>@selectedIslem.KanalAltAdi</strong> işlemini silmek istediğinize emin misiniz?
                     </p>
                     <p class="text-muted mb-0 mt-2">
                         <i class="bx bx-info-circle me-1"></i>Bu işlem geri alınamaz.

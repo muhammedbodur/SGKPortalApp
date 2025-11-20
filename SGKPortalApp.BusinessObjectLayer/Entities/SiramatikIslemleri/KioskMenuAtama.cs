@@ -18,12 +18,12 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         [Required]
         public int KioskId { get; set; }
         [ForeignKey(nameof(KioskId))]
-        public required Kiosk Kiosk { get; set; }
+        public Kiosk? Kiosk { get; set; }
 
         [Required]
         public int KioskMenuId { get; set; }
         [ForeignKey(nameof(KioskMenuId))]
-        public required KioskMenu KioskMenu { get; set; }
+        public KioskMenu? KioskMenu { get; set; }
 
         public DateTime AtamaTarihi { get; set; } = DateTime.Now;
 

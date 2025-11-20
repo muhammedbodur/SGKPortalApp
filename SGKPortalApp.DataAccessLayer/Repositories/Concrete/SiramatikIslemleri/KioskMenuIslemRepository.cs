@@ -16,6 +16,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
+                .Include(km => km.KioskMenuId)
                 .Include(kmi => kmi.KanalAlt)
                     .ThenInclude(ka => ka.Kanal)
                 .Where(kmi => kmi.KioskMenuId == kioskMenuId)

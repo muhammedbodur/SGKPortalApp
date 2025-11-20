@@ -82,6 +82,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         return ApiResponseDto<KioskMenuResponseDto>.ErrorResult("Bu menü adı zaten kullanılıyor");
                     }
 
+                    // Eğer sıra 0 veya belirtilmemişse, otomatik sıra ata
+                    if (request.MenuSira <= 0)
+                    {
+                        var maxSira = await repo.GetMaxSiraAsync();
+                        request.MenuSira = maxSira + 1;
+                    }
+
                     var entity = _mapper.Map<KioskMenu>(request);
                     entity.Aktiflik = request.Aktiflik;
 

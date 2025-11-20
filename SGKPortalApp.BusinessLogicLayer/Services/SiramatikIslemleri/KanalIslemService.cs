@@ -102,10 +102,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         .ErrorResult("Başlangıç numarası, bitiş numarasından küçük olmalıdır");
                 }
 
+                var kanalIslemRepo = _unitOfWork.GetRepository<IKanalIslemRepository>();
+
+                // Eğer sıra 0 veya belirtilmemişse, otomatik sıra ata
+                if (request.Sira <= 0)
+                {
+                    var maxSira = await kanalIslemRepo.GetMaxSiraByKanalAndBinaAsync(request.KanalId, request.HizmetBinasiId);
+                    request.Sira = maxSira + 1;
+                }
+
                 var kanalIslem = _mapper.Map<KanalIslem>(request);
                 kanalIslem.Aktiflik = Aktiflik.Aktif;
 
-                var kanalIslemRepo = _unitOfWork.GetRepository<IKanalIslemRepository>();
                 await kanalIslemRepo.AddAsync(kanalIslem);
                 await _unitOfWork.SaveChangesAsync();
 

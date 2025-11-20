@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
@@ -41,22 +42,23 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
             {
                 isLoading = true;
 
-                // Load Hizmet Binaları
+                // Tüm aktif hizmet binalarını al ve alfabetik sırala
                 var binaResult = await _hizmetBinasiService.GetAllAsync();
                 if (binaResult.Success && binaResult.Data != null)
                 {
-                    hizmetBinalari = binaResult.Data;
-                }
+                    hizmetBinalari = binaResult.Data
+                        .Where(x => x.HizmetBinasiAktiflik == Aktiflik.Aktif)
+                        .OrderBy(x => x.HizmetBinasiAdi)
+                        .ToList();
 
-                // Load Kiosklar
-                var kioskResult = await _kioskService.GetAllAsync();
-                if (kioskResult.Success && kioskResult.Data != null)
-                {
-                    kiosklar = kioskResult.Data;
+                    // İlk hizmet binasını otomatik seç (alfabetik sırayla)
+                    if (hizmetBinalari.Any())
+                    {
+                        selectedHizmetBinasiId = hizmetBinalari.First().HizmetBinasiId;
+                        await OnHizmetBinasiChangedAsync();
+                        // OnHizmetBinasiChangedAsync içinde LoadAtamalarAsync çağrılıyor
+                    }
                 }
-
-                // Load Atamalar
-                await LoadAtamalarAsync();
             }
             catch (Exception ex)
             {
@@ -73,16 +75,26 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
         {
             try
             {
-                var result = await _kioskMenuAtamaService.GetAllAsync();
-
-                if (result.Success && result.Data != null)
+                // Sadece seçili kiosk'a ait atamaları getir
+                if (selectedKioskId > 0)
                 {
-                    allAtamalar = result.Data;
-                    ApplyFilters();
+                    var result = await _kioskMenuAtamaService.GetByKioskAsync(selectedKioskId);
+
+                    if (result.Success && result.Data != null)
+                    {
+                        allAtamalar = result.Data;
+                        ApplyFilters();
+                    }
+                    else
+                    {
+                        allAtamalar = new();
+                        filteredAtamalar = new();
+                    }
                 }
                 else
                 {
-                    await _toastService.ShowErrorAsync(result.Message ?? "Atamalar yüklenemedi");
+                    allAtamalar = new();
+                    filteredAtamalar = new();
                 }
             }
             catch (Exception ex)
@@ -92,41 +104,55 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
             }
         }
 
+        private async Task OnHizmetBinasiChangedAsync()
+        {
+            try
+            {
+                selectedKioskId = 0;
+                kiosklar = new();
+
+                if (selectedHizmetBinasiId > 0)
+                {
+                    // Seçili binaya ait kiosları yükle ve alfabetik sırala
+                    var result = await _kioskService.GetByHizmetBinasiAsync(selectedHizmetBinasiId);
+                    if (result.Success && result.Data != null)
+                    {
+                        kiosklar = result.Data
+                            .Where(x => x.Aktiflik == Aktiflik.Aktif)
+                            .OrderBy(x => x.KioskAdi)
+                            .ToList();
+                        
+                        // İlk kiosku otomatik seç (alfabetik sırayla)
+                        if (kiosklar.Any())
+                        {
+                            selectedKioskId = kiosklar.First().KioskId;
+                            await LoadAtamalarAsync();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Kiosk listesi yüklenirken hata oluştu");
+                await _toastService.ShowErrorAsync("Kiosk listesi yüklenemedi");
+            }
+        }
+
         private async Task OnHizmetBinasiChanged(ChangeEventArgs e)
         {
             if (int.TryParse(e.Value?.ToString(), out int binaId))
             {
                 selectedHizmetBinasiId = binaId;
-                selectedKioskId = 0; // Reset kiosk filter
-
-                // Reload kiosklar for selected bina
-                if (binaId > 0)
-                {
-                    var result = await _kioskService.GetByHizmetBinasiAsync(binaId);
-                    if (result.Success && result.Data != null)
-                    {
-                        kiosklar = result.Data;
-                    }
-                }
-                else
-                {
-                    var result = await _kioskService.GetAllAsync();
-                    if (result.Success && result.Data != null)
-                    {
-                        kiosklar = result.Data;
-                    }
-                }
-
-                ApplyFilters();
+                await OnHizmetBinasiChangedAsync();
             }
         }
 
-        private void OnKioskChanged(ChangeEventArgs e)
+        private async Task OnKioskChanged(ChangeEventArgs e)
         {
             if (int.TryParse(e.Value?.ToString(), out int kioskId))
             {
                 selectedKioskId = kioskId;
-                ApplyFilters();
+                await LoadAtamalarAsync();
             }
         }
 
@@ -155,6 +181,37 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
             if (selectedAktiflik.HasValue)
             {
                 filteredAtamalar = filteredAtamalar.Where(a => a.Aktiflik == selectedAktiflik.Value).ToList();
+            }
+        }
+
+        private async Task ToggleAktiflik(KioskMenuAtamaResponseDto atama)
+        {
+            try
+            {
+                var updateDto = new KioskMenuAtamaUpdateRequestDto
+                {
+                    KioskMenuAtamaId = atama.KioskMenuAtamaId,
+                    KioskId = atama.KioskId,
+                    KioskMenuId = atama.KioskMenuId,
+                    Aktiflik = atama.Aktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif
+                };
+
+                var result = await _kioskMenuAtamaService.UpdateAsync(updateDto);
+                if (result.Success)
+                {
+                    atama.Aktiflik = updateDto.Aktiflik;
+                    await _toastService.ShowSuccessAsync($"Atama {(atama.Aktiflik == Aktiflik.Aktif ? "aktif" : "pasif")} yapıldı");
+                    ApplyFilters();
+                }
+                else
+                {
+                    await _toastService.ShowErrorAsync(result.Message ?? "Durum değiştirilemedi");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Atama aktiflik değiştirilemedi");
+                await _toastService.ShowErrorAsync("Durum değiştirilirken hata oluştu");
             }
         }
 
@@ -199,6 +256,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
             {
                 isDeleting = false;
             }
+        }
+
+        private async Task RefreshAsync()
+        {
+            await LoadDataAsync();
+            await _toastService.ShowSuccessAsync("Veriler yenilendi");
         }
     }
 }

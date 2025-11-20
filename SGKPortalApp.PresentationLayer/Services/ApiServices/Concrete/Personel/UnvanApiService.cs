@@ -213,7 +213,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         {
             try
             {
-                var response = await _httpClient.GetAsync("api/unvan/active");
+                var response = await _httpClient.GetAsync("unvan/active");
 
                 if (!response.IsSuccessStatusCode)
                 {

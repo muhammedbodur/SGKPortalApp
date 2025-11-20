@@ -18,6 +18,9 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         [StringLength(500)]
         public string? Aciklama { get; set; }
 
+        [Required]
+        public int MenuSira { get; set; }
+
         public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
 
         [InverseProperty("KioskMenu")]

@@ -15,10 +15,6 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
             builder.Property(kmi => kmi.KioskMenuIslemId)
                 .ValueGeneratedOnAdd();
 
-            builder.Property(kmi => kmi.IslemAdi)
-                .IsRequired()
-                .HasMaxLength(200);
-
             builder.Property(kmi => kmi.MenuSira)
                 .IsRequired();
 

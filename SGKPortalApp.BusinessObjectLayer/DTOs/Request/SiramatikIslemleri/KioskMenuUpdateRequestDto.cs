@@ -15,6 +15,10 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri
         [StringLength(500, ErrorMessage = "Açıklama en fazla 500 karakter olabilir")]
         public string? Aciklama { get; set; }
 
+        [Required(ErrorMessage = "Menü sırası zorunludur")]
+        [Range(1, int.MaxValue, ErrorMessage = "Menü sırası 1'den büyük olmalıdır")]
+        public int MenuSira { get; set; }
+
         [Required]
         public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
     }

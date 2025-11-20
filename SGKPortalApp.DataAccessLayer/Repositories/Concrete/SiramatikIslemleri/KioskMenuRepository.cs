@@ -38,5 +38,14 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .AsNoTracking()
                 .AnyAsync(menu => menu.MenuAdi == menuAdi);
         }
+
+        public async Task<int> GetMaxSiraAsync()
+        {
+            var maxSira = await _dbSet
+                .AsNoTracking()
+                .MaxAsync(menu => (int?)menu.MenuSira);
+            
+            return maxSira ?? 0;
+        }
     }
 }

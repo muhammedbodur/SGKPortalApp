@@ -63,7 +63,7 @@
                             <!-- Kanal Alt -->
                             <div class="mb-3">
                                 <label class="form-label">
-                                    Kanal Alt <span class="text-danger">*</span>
+                                    Alt Kanal <span class="text-danger">*</span>
                                 </label>
                                 <select class="form-select"
                                         @bind="model.KanalAltId"
@@ -78,7 +78,7 @@
                                 </select>
                                 <ValidationMessage For="@(() => model.KanalAltId)" />
                                 <div class="form-text">
-                                    Bu işlem hangi kanal altına yönlendirilecek (örn: 4/A, 4/B)
+                                    Bu işlem hangi menü altına yönlendirilecek (örn: 4/A, 4/B)
                                 </div>
                             </div>
 
@@ -144,18 +144,6 @@
                             <i class="bx bx-info-circle me-2"></i>Bilgilendirme
                         </h6>
                         <div class="text-muted small">
-                            <p class="mb-2">
-                                <i class="bx bx-check text-success me-1"></i>
-                                Her menü için farklı işlemler tanımlayabilirsiniz
-                            </p>
-                            <p class="mb-2">
-                                <i class="bx bx-check text-success me-1"></i>
-                                İşlem adı kiosk ekranında görünecektir
-                            </p>
-                            <p class="mb-2">
-                                <i class="bx bx-check text-success me-1"></i>
-                                Sıra numarası ile görünüm sırasını belirleyin
-                            </p>
                             <p class="mb-0">
                                 <i class="bx bx-check text-success me-1"></i>
                                 Alt kanal backend işlemini belirler

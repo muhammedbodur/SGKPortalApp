@@ -45,8 +45,29 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
             CreateMap<KioskUpdateRequestDto, Kiosk>();
             CreateMap<KioskMenuIslemCreateRequestDto, KioskMenuIslem>();
             CreateMap<KioskMenuIslemUpdateRequestDto, KioskMenuIslem>();
-            CreateMap<KioskMenuAtamaCreateRequestDto, KioskMenuAtama>();
-            CreateMap<KioskMenuAtamaUpdateRequestDto, KioskMenuAtama>();
+            CreateMap<KioskMenuAtamaCreateRequestDto, KioskMenuAtama>()
+                .ForMember(dest => dest.Kiosk, opt => opt.Ignore())
+                .ForMember(dest => dest.KioskMenu, opt => opt.Ignore())
+                .ForMember(dest => dest.KioskMenuAtamaId, opt => opt.Ignore())
+                .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.Ignore())
+                .ForMember(dest => dest.EkleyenKullanici, opt => opt.Ignore())
+                .ForMember(dest => dest.DuzenleyenKullanici, opt => opt.Ignore())
+                .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
+                .ForMember(dest => dest.SilinmeTarihi, opt => opt.Ignore())
+                .ForMember(dest => dest.SilenKullanici, opt => opt.Ignore());
+            
+            CreateMap<KioskMenuAtamaUpdateRequestDto, KioskMenuAtama>()
+                .ForMember(dest => dest.Kiosk, opt => opt.Ignore())
+                .ForMember(dest => dest.KioskMenu, opt => opt.Ignore())
+                .ForMember(dest => dest.AtamaTarihi, opt => opt.Ignore())
+                .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.Ignore())
+                .ForMember(dest => dest.EkleyenKullanici, opt => opt.Ignore())
+                .ForMember(dest => dest.DuzenleyenKullanici, opt => opt.Ignore())
+                .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
+                .ForMember(dest => dest.SilinmeTarihi, opt => opt.Ignore())
+                .ForMember(dest => dest.SilenKullanici, opt => opt.Ignore());
         }
     }
 }

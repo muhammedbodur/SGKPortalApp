@@ -22,7 +22,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         {
             try
             {
-                var response = await _httpClient.GetAsync("api/KanalAlt");
+                var response = await _httpClient.GetAsync("KanalAlt");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -56,7 +56,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/KanalAlt/{id}");
+                var response = await _httpClient.GetAsync($"KanalAlt/{id}");
 
                 if (!response.IsSuccessStatusCode)
                 {

@@ -111,14 +111,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 {
                     var repo = _unitOfWork.GetRepository<IKioskMenuAtamaRepository>();
 
-                    // Eğer yeni atama aktif ise, diğer atamaları pasifleştir
-                    if (request.Aktiflik == Aktiflik.Aktif)
+                    // Aynı kiosk'a aynı menünün tekrar atanmasını engelle
+                    var existingAtama = await repo.GetByKioskAndMenuAsync(request.KioskId, request.KioskMenuId);
+                    if (existingAtama != null && existingAtama.Aktiflik == Aktiflik.Aktif)
                     {
-                        var hasActive = await repo.HasActiveAtamaAsync(request.KioskId);
-                        if (hasActive)
-                        {
-                            return ApiResponseDto<KioskMenuAtamaResponseDto>.ErrorResult("Bu kiosk için zaten aktif bir menü ataması var. Önce onu pasifleştirin.");
-                        }
+                        return ApiResponseDto<KioskMenuAtamaResponseDto>.ErrorResult("Bu menü zaten bu kiosk'a atanmış.");
                     }
 
                     var entity = _mapper.Map<KioskMenuAtama>(request);
@@ -132,8 +129,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Menü ataması oluşturulamadı");
-                    return ApiResponseDto<KioskMenuAtamaResponseDto>.ErrorResult("Menü ataması oluşturulamadı", ex.Message);
+                    _logger.LogError(ex, "Menü ataması oluşturulamadı. Inner: {Inner}", ex.InnerException?.Message);
+                    var errorMessage = ex.InnerException?.Message ?? ex.Message;
+                    return ApiResponseDto<KioskMenuAtamaResponseDto>.ErrorResult("Menü ataması oluşturulamadı", errorMessage);
                 }
             });
         }
@@ -152,10 +150,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         return ApiResponseDto<KioskMenuAtamaResponseDto>.ErrorResult("Menü ataması bulunamadı");
                     }
 
-                    // Eğer aktif yapılıyorsa, diğer atamaları pasifleştir
-                    if (request.Aktiflik == Aktiflik.Aktif && entity.Aktiflik != Aktiflik.Aktif)
+                    // Aynı menünün başka bir kiosk'a atanıp atanmadığını kontrol et
+                    if (request.KioskId != entity.KioskId || request.KioskMenuId != entity.KioskMenuId)
                     {
-                        await repo.DeactivateOtherAtamasAsync(request.KioskId, request.KioskMenuAtamaId);
+                        var existingAtama = await repo.GetByKioskAndMenuAsync(request.KioskId, request.KioskMenuId);
+                        if (existingAtama != null && existingAtama.KioskMenuAtamaId != request.KioskMenuAtamaId && existingAtama.Aktiflik == Aktiflik.Aktif)
+                        {
+                            return ApiResponseDto<KioskMenuAtamaResponseDto>.ErrorResult("Bu menü zaten bu kiosk'a atanmış.");
+                        }
                     }
 
                     _mapper.Map(request, entity);
@@ -169,8 +171,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Menü ataması güncellenemedi. Id: {Id}", request.KioskMenuAtamaId);
-                    return ApiResponseDto<KioskMenuAtamaResponseDto>.ErrorResult("Menü ataması güncellenemedi", ex.Message);
+                    _logger.LogError(ex, "Menü ataması güncellenemedi. Id: {Id}, Inner: {Inner}", request.KioskMenuAtamaId, ex.InnerException?.Message);
+                    var errorMessage = ex.InnerException?.Message ?? ex.Message;
+                    return ApiResponseDto<KioskMenuAtamaResponseDto>.ErrorResult("Menü ataması güncellenemedi", errorMessage);
                 }
             });
         }

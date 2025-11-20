@@ -57,11 +57,14 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Update([FromBody] KioskMenuAtamaUpdateRequestDto request)
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Update(int id, [FromBody] KioskMenuAtamaUpdateRequestDto request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            if (id != request.KioskMenuAtamaId)
+                return BadRequest("ID mismatch");
 
             var result = await _kioskMenuAtamaService.UpdateAsync(request);
             return result.Success ? Ok(result) : BadRequest(result);

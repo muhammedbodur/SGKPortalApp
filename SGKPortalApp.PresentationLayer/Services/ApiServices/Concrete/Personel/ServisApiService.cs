@@ -213,7 +213,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
         {
             try
             {
-                var response = await _httpClient.GetAsync("api/servis/active");
+                var response = await _httpClient.GetAsync("servis/active");
 
                 if (!response.IsSuccessStatusCode)
                 {

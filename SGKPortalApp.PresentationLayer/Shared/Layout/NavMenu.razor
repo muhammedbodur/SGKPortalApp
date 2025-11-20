@@ -376,11 +376,6 @@
                                 <div>Kiosk Menüleri</div>
                             </a>
                         </li>
-                        <li class="menu-item @(IsActive("/siramatik/kiosk-menu-islem") ? "active" : "")">
-                            <a href="/siramatik/kiosk-menu-islem" class="menu-link">
-                                <div>Menü Alt Kanal İşlemleri</div>
-                            </a>
-                        </li>
                         <li class="menu-item @(IsActive("/siramatik/kiosk-yonetimi") || IsActive("/siramatik/kiosk/list") ? "active" : "")">
                             <a href="/siramatik/kiosk-yonetimi" class="menu-link">
                                 <div>Kiosk Cihazları</div>
@@ -389,6 +384,11 @@
                         <li class="menu-item @(IsActive("/siramatik/kiosk-menu-atama") ? "active" : "")">
                             <a href="/siramatik/kiosk-menu-atama" class="menu-link">
                                 <div>Kiosk Menü Ataması</div>
+                            </a>
+                        </li>
+                        <li class="menu-item @(IsActive("/siramatik/kiosk-menu-islem") ? "active" : "")">
+                            <a href="/siramatik/kiosk-menu-islem" class="menu-link">
+                                <div>Menü Alt Kanal İşlemleri</div>
                             </a>
                         </li>
                     </ul>

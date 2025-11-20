@@ -73,11 +73,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 {
                     var repo = _unitOfWork.GetRepository<IKioskMenuIslemRepository>();
 
-                    // Sıra kontrolü
-                    var siraExists = await repo.ExistsByMenuAndSiraAsync(request.KioskMenuId, request.MenuSira);
-                    if (siraExists)
+                    // Eğer sıra 0 veya belirtilmemişse, otomatik sıra ata
+                    if (request.MenuSira <= 0)
                     {
-                        return ApiResponseDto<KioskMenuIslemResponseDto>.ErrorResult("Bu sıra numarası zaten kullanılıyor");
+                        var maxSira = await repo.GetMaxSiraByMenuAsync(request.KioskMenuId);
+                        request.MenuSira = maxSira + 1;
+                    }
+                    else
+                    {
+                        // Sıra kontrolü
+                        var siraExists = await repo.ExistsByMenuAndSiraAsync(request.KioskMenuId, request.MenuSira);
+                        if (siraExists)
+                        {
+                            return ApiResponseDto<KioskMenuIslemResponseDto>.ErrorResult("Bu sıra numarası zaten kullanılıyor");
+                        }
                     }
 
                     var entity = _mapper.Map<KioskMenuIslem>(request);

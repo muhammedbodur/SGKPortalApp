@@ -226,7 +226,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
         {
             try
             {
-                var response = await _httpClient.GetAsync("api/ilce/dropdown");
+                var response = await _httpClient.GetAsync("ilce/dropdown");
 
                 if (!response.IsSuccessStatusCode)
                 {

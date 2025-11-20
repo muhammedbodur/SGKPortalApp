@@ -41,9 +41,9 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
             builder.HasIndex(kma => kma.KioskMenuId)
                 .HasDatabaseName("IX_SIR_KioskMenuAtama_KioskMenuId");
 
-            // Unique constraint: Bir kiosk'a aynı anda sadece bir aktif menü atanabilir
-            builder.HasIndex(kma => new { kma.KioskId, kma.Aktiflik })
-                .HasDatabaseName("IX_SIR_KioskMenuAtama_Kiosk_Aktif")
+            // Unique constraint: Aynı menü aynı kiosk'a tekrar atanamaz
+            builder.HasIndex(kma => new { kma.KioskId, kma.KioskMenuId })
+                .HasDatabaseName("IX_SIR_KioskMenuAtama_Kiosk_Menu")
                 .IsUnique()
                 .HasFilter("[Aktiflik] = 1 AND [SilindiMi] = 0");
 

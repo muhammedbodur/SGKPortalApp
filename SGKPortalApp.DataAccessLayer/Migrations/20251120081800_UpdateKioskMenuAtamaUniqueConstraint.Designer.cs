@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SGKPortalApp.DataAccessLayer.Context;
 
@@ -11,9 +12,11 @@ using SGKPortalApp.DataAccessLayer.Context;
 namespace SGKPortalApp.DataAccessLayer.Migrations
 {
     [DbContext(typeof(SGKDbContext))]
-    partial class SGKDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251120081800_UpdateKioskMenuAtamaUniqueConstraint")]
+    partial class UpdateKioskMenuAtamaUniqueConstraint
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2519,9 +2522,6 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
-
-                    b.Property<int>("MenuSira")
-                        .HasColumnType("int");
 
                     b.Property<string>("SilenKullanici")
                         .HasColumnType("nvarchar(max)");
