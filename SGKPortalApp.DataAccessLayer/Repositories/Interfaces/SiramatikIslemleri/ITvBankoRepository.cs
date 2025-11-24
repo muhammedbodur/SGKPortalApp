@@ -21,5 +21,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
 
         // Aktif eşleştirmeleri listeler
         Task<IEnumerable<TvBanko>> GetActiveAsync();
+
+        // Belirli TV ve Banko için eşleştirme getirir
+        Task<TvBanko?> GetByTvAndBankoAsync(int tvId, int bankoId);
     }
 }

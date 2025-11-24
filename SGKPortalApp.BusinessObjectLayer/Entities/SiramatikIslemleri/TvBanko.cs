@@ -19,13 +19,13 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         public int TvId { get; set; }
         [ForeignKey("TvId")]
         [InverseProperty("TvBankolar")]
-        public required Tv Tv { get; set; }
+        public Tv? Tv { get; set; }
 
         // Foreign Key - Banko ile ilişki
         public int BankoId { get; set; }
         [ForeignKey("BankoId")]
         [InverseProperty("TvBankolar")]
-        public required Banko Banko { get; set; }
+        public Banko? Banko { get; set; }
 
         public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
     }

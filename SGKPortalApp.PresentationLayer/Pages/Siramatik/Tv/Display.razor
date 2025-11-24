@@ -1,0 +1,578 @@
+@page "/siramatik/tv/display/{tvId:int}"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+@layout TvLayout
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGK Portal TV - @TvId</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .tv-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tv-header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 40px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .tv-logo {
+            max-height: 80px;
+        }
+        
+        .tv-title {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .tv-subtitle {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            margin: 0;
+        }
+        
+        .tv-content {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        .sira-panel {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #siraListe {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex: 1;
+            justify-content: space-evenly;
+        }
+        
+        .sira-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .sira-panel::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .sira-panel::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+        
+        .banko-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            flex: 1;
+            min-height: 0;
+        }
+        
+        .banko-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+        }
+        
+        .banko-card.new-sira {
+            animation: pulse 1s ease-in-out;
+        }
+        
+        @@keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .banko-info {
+            flex: 1;
+            text-align: center;
+            border-right: 2px solid rgba(255,255,255,0.3);
+            padding-right: 20px;
+        }
+        
+        .banko-label {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .banko-no {
+            font-size: clamp(2rem, 4vw, 4rem);
+            font-weight: bold;
+            line-height: 1;
+        }
+        
+        .banko-kat {
+            font-size: clamp(0.8rem, 1.5vw, 1.5rem);
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        .sira-info {
+            flex: 1;
+            text-align: center;
+            padding-left: 20px;
+        }
+        
+        .sira-label {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .sira-no {
+            font-size: clamp(2.5rem, 6vw, 6rem);
+            font-weight: bold;
+            line-height: 1;
+        }
+        
+        .duyuru-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .duyuru-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            flex: 1;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .duyuru-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .duyuru-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .hizmet-binasi {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .marquee-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .marquee-text {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .video-container {
+            border-radius: 15px;
+            overflow: hidden;
+            flex: 1;
+            background: #000;
+        }
+        
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .clock-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .clock-time {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .clock-date {
+            font-size: 2rem;
+            color: #764ba2;
+            font-weight: 600;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+        
+        .empty-state i {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        /* Responsive Design - 720p (1280x720) */
+        @@media (max-width: 1366px) {
+            .tv-header {
+                padding: 15px 30px;
+            }
+            
+            .tv-logo {
+                max-height: 60px;
+            }
+            
+            .tv-title {
+                font-size: 2.5rem;
+            }
+            
+            .tv-subtitle {
+                font-size: 1rem;
+            }
+            
+            .banko-no {
+                font-size: 3.5vw;
+            }
+            
+            .sira-no {
+                font-size: 5vw;
+            }
+            
+            .clock-time {
+                font-size: 3rem;
+            }
+            
+            .clock-date {
+                font-size: 1.5rem;
+            }
+            
+            .marquee-text {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Responsive Design - Small Screens (PC Monitor) */
+        @@media (max-width: 1024px) {
+            .tv-content {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .tv-header {
+                padding: 10px 20px;
+            }
+            
+            .tv-logo {
+                max-height: 50px;
+            }
+            
+            .tv-title {
+                font-size: 2rem;
+            }
+            
+            .tv-subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .sira-panel {
+                padding: 20px;
+                max-height: 50vh;
+            }
+            
+            .duyuru-panel {
+                max-height: 45vh;
+            }
+            
+            .banko-card {
+                padding: 15px;
+                margin-bottom: 10px;
+            }
+            
+            .banko-no {
+                font-size: 3rem;
+            }
+            
+            .sira-no {
+                font-size: 4rem;
+            }
+            
+            .clock-time {
+                font-size: 2.5rem;
+            }
+            
+            .clock-date {
+                font-size: 1.2rem;
+            }
+            
+            .marquee-text {
+                font-size: 1.2rem;
+            }
+            
+            .duyuru-title {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* 1080p Optimization (1920x1080) */
+        @@media (min-width: 1920px) {
+            .tv-title {
+                font-size: 3.5rem;
+            }
+            
+            .tv-subtitle {
+                font-size: 1.5rem;
+            }
+            
+            .banko-no {
+                font-size: 3.5vw;
+            }
+            
+            .sira-no {
+                font-size: 5.5vw;
+            }
+            
+            .clock-time {
+                font-size: 5rem;
+            }
+            
+            .clock-date {
+                font-size: 2.5rem;
+            }
+            
+            .marquee-text {
+                font-size: 2.5rem;
+            }
+        }
+        
+        /* Landscape Orientation */
+        @@media (orientation: landscape) {
+            .tv-content {
+                flex-direction: row;
+            }
+        }
+        
+        /* Portrait Orientation */
+        @@media (orientation: portrait) {
+            .tv-content {
+                flex-direction: column;
+            }
+            
+            .sira-panel {
+                max-height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tv-container">
+        <!-- Header -->
+        <div class="tv-header d-flex justify-content-between align-items-center">
+            <img src="/img/logos/sgk_logo.svg" alt="SGK" class="tv-logo">
+            <div class="text-center flex-grow-1">
+                <h1 class="tv-title">@hizmetBinasiAdi</h1>
+                <p class="tv-subtitle">İzmir Sosyal Güvenlik İl Müdürlüğü</p>
+            </div>
+            <div class="text-end">
+                <small class="text-muted">TV: @TvId | @katTipi</small>
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div class="tv-content">
+            <!-- Sol Panel - Sıralar -->
+            <div class="sira-panel">
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="empty-state">
+                        <i class="bx bx-error-circle text-danger"></i>
+                        <p class="fs-4 text-danger">@errorMessage</p>
+                    </div>
+                }
+                else if (isLoading)
+                {
+                    <div class="empty-state">
+                        <div class="spinner-border text-primary" style="width: 4rem; height: 4rem;" role="status">
+                            <span class="visually-hidden">Yükleniyor...</span>
+                        </div>
+                        <p class="mt-3 fs-4">Sıralar yükleniyor...</p>
+                    </div>
+                }
+                else if (!siralar.Any())
+                {
+                    <div class="empty-state">
+                        <i class="bx bx-info-circle"></i>
+                        <p class="fs-4">Henüz sıra bulunmuyor</p>
+                    </div>
+                }
+                else
+                {
+                    <div id="siraListe">
+                        @foreach (var sira in siralar.Take(5))
+                        {
+                            <div class="banko-card" id="banko_@sira.BankoId">
+                                <div class="banko-info">
+                                    <div class="banko-label">BANKO</div>
+                                    <div class="banko-no">@sira.BankoNo</div>
+                                    <div class="banko-kat">@sira.KatTipi</div>
+                                </div>
+                                <div class="sira-info">
+                                    <div class="sira-label">SIRA NO</div>
+                                    <div class="sira-no">@sira.SiraNo</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+            
+            <!-- Sağ Panel - Duyuru & Saat -->
+            <div class="duyuru-panel">
+                <!-- Duyuru -->
+                <div class="duyuru-card">
+                    <div class="duyuru-header">
+                        <h3 class="duyuru-title">DUYURU</h3>
+                        <span class="hizmet-binasi">@hizmetBinasiAdi</span>
+                    </div>
+                    <div class="marquee-container">
+                        <marquee behavior="scroll" direction="left" scrollamount="3">
+                            <p class="marquee-text" id="duyuruText">@tvAciklama</p>
+                        </marquee>
+                    </div>
+                    <div class="video-container">
+                        <video id="tvVideo" autoplay loop muted playsinline>
+                            <source src="/videos/sgk-tanitim.mp4" type="video/mp4">
+                            Tarayıcınız video oynatmayı desteklemiyor.
+                        </video>
+                    </div>
+                </div>
+                
+                <!-- Saat -->
+                <div class="clock-card">
+                    <div class="clock-time" id="saat">00:00:00</div>
+                    <div class="clock-date" id="tarih">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <audio id="dingDongSound" src="/sounds/dingdong.mp3" preload="auto"></audio>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+    <script>
+        // Saat ve Tarih
+        function startTime() {
+            const today = new Date();
+            let h = today.getHours();
+            let m = today.getMinutes();
+            let s = today.getSeconds();
+            const day = today.toLocaleDateString("tr-TR", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+            
+            h = checkTime(h);
+            m = checkTime(m);
+            s = checkTime(s);
+            document.getElementById("saat").innerHTML = h + ":" + m + ":" + s;
+            document.getElementById("tarih").innerHTML = day;
+            setTimeout(startTime, 1000);
+        }
+        
+        function checkTime(i) {
+            if (i < 10) { i = "0" + i; }
+            return i;
+        }
+        
+        // Video otomatik başlat
+        document.addEventListener('DOMContentLoaded', function () {
+            const video = document.getElementById('tvVideo');
+            if (video) {
+                video.play().catch(e => console.log('Video autoplay failed:', e));
+            }
+            startTime();
+        });
+        
+        // SignalR Connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/tv")
+            .withAutomaticReconnect()
+            .build();
+        
+        connection.on("ReceiveSiraUpdate", function (data) {
+            console.log("Sıra güncellendi:", data);
+            
+            // Ses çal
+            const sound = document.getElementById('dingDongSound');
+            if (sound) {
+                sound.play().catch(e => console.log('Sound play failed:', e));
+            }
+            
+            // Sayfayı yenile (gerçek zamanlı güncelleme için)
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        });
+        
+        connection.start()
+            .then(() => {
+                console.log("SignalR bağlantısı kuruldu");
+                // TV ID'yi gruba ekle
+                connection.invoke("JoinTvGroup", @TvId);
+            })
+            .catch(err => console.error("SignalR bağlantı hatası:", err));
+        
+        // Bağlantı koptuğunda yeniden bağlan
+        connection.onreconnected(() => {
+            console.log("SignalR yeniden bağlandı");
+            connection.invoke("JoinTvGroup", @TvId);
+        });
+    </script>
+</body>
+</html>

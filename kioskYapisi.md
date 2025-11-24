@@ -1,110 +1,296 @@
-# 🏷️ Kiosk Yapısı – Yol Haritası
+# 🏷️ Kiosk Yapısı – Güncel Durum ve Dokümantasyon
 ---
-## 1. Hedefler
+## 1. Genel Bakış
 
-1. Vatandaşın ilk gördüğü **ana menü** (Ekran 2) için merkezi tanım ve sürükle-bırak yönetim arayüzü kurmak.
-2. Her **departman / hizmet binası / kiosk** kombinasyonu için hangi menü öğelerinin gösterileceğini ve sırasını belirlemek.
-3. Ana menüler ile mevcut `SIR_KanalAltIslemleri` arasındaki bağı tanımlayıp tekrar kullanılabilir hale getirmek.
-4. Mevcut EF/DTO/Service pattern’ini bozmayacak şekilde yeni tabloları BusinessObjectLayer’a eklemek.
-
----
-
-## 2. Mevcut Yapının Temizliği
-
-1. `KioskGrup`, `KioskIslemGrup` ve bunlara bağlı repository/DTO/service katmanlarını doğrudan kaldır (deprecated işaretlemeden). Migration’ı kullanıcı alacağı için sadece kod/ref dosyalarını temizle.
-2. Migration’a hazırlık için bu tabloların verilerini yedekleme ihtiyacını değerlendir (gerekirse script). Yeni yapıya geçerken hangi verilerin taşınacağına karar ver.
-3. `KanalAltIslem` içindeki `KioskIslemGrupId` kolonunu yeni modeldeki karşılığı (`KioskKanalAltIslem`) devreye girdiğinde kaldırılacak şekilde planla.
+✅ **Tamamlanan Hedefler:**
+1. Vatandaşın ilk gördüğü **ana menü** için merkezi tanım ve yönetim arayüzü kuruldu.
+2. Her **hizmet binası / kiosk** kombinasyonu için hangi menülerin gösterileceği ve sırası belirleniyor.
+3. Ana menüler ile mevcut `SIR_KanalAltIslemleri` arasındaki bağ `KioskMenuIslem` tablosu ile sağlandı.
+4. Mevcut EF/DTO/Service pattern'i korunarak yeni tablolar BusinessObjectLayer'a eklendi.
+5. Otomatik sıra yönetimi tüm modüllerde (KioskMenu, KioskMenuIslem, KanalIslem) uygulandı.
 
 ---
 
-## 3. Yeni Veri Modeli
+## 2. ✅ Tamamlanan Yapı Değişiklikleri
 
-### 3.1. Ana Menü Şablonu
-
-| Tablo | Açıklama |
-| --- | --- |
-| **`SIR_KioskMenu`** | Ana menü şablonu başlığı. Alanlar: `KioskMenuId`, `MenuAdi`, `Aciklama`, `Aktiflik`. Kart görselleri/ikon gibi veriler backend’de tutulmayacak, masaüstü uygulaması kendi default setini kullanacak. |
-
-### 3.2. Kiosk Tanımı ve Bina Eşlemesi
-
-| Tablo | Açıklama |
-| --- | --- |
-| **`SIR_Kiosk`** | Hizmet binasına bağlı fiziksel veya mantıksal kiosk kaydı. Alanlar: `KioskId`, `HizmetBinasiId`, `KioskAdi`, `KioskMenuId`, `KioskIp`, `Aktiflik`. |
-| **`SIR_KioskIslemleri`** | Kioska atanacak menü öğelerinin listesi. Alanlar: `KioskIslemId`, `KioskId`, `KioskMenuId` (veya ilgili şablon referansı), `MenuSira`, `Aktiflik`. `MenuSira` kioska özel sıralamayı sağlar. |
-
-### 3.3. Menü → Alt Kanal Köprüsü
-
-| Tablo | Açıklama |
-| --- | --- |
-| **`SIR_KioskKanalAltIslem`** | (Kiosk içindeki menü öğesi → KanalAltIslem) eşleştirmesi. Alanlar: `KioskKanalAltIslemId`, `KioskIslemId`, `KanalAltIslemId`, `Aktiflik`. Bu sayede Ekran 3’teki liste otomatik oluşur.
-
-> Not: Tablo isimleri kullanıcı tarafından önerildi: `KioskMenu`, `Kiosk`, `KioskIslemleri`, `KioskKanalAltIslem`. EF tarafında sınıf isimlerini de buna göre belirleyeceğiz. Menüler için ayrı `KioskMenuOge` tablosu olmayacak; kart görselleri/ikonları masaüstü uygulamasının kendi konfigürasyonunda tutulacak.
+1. ✅ Eski `KioskGrup`, `KioskIslemGrup` tabloları kaldırıldı.
+2. ✅ Yeni yapı tamamen devreye alındı ve çalışır durumda.
+3. ✅ Tüm entity'ler, DTO'lar, repository'ler ve servisler oluşturuldu.
+4. ✅ UI katmanı tamamlandı ve aktif olarak kullanılıyor.
 
 ---
 
-## 4. Katmanlara Eklenmesi Gerekenler
+## 3. ✅ Mevcut Veri Modeli (Uygulanmış)
 
-1. **Entities (BusinessObjectLayer/Entities/SiramatikIslemleri)**
-   - `KioskMenu`, `Kiosk`, `KioskIslemleri`, `KioskKanalAltIslem` sınıflarını AuditableEntity’den türet.
-   - Navigation property’leri `[InverseProperty]` ile tanımla.
+### 3.1. Ana Menü Tanımı
 
-2. **DTO’lar**
-   - Request (Create/Update) DTO’ları `DTOs/Request/SiramatikIslemleri` altına ekle.
-   - Response DTO’ları `DTOs/Response/SiramatikIslemleri` altına ekle (liste ve detay varyantları).
+| Tablo | Açıklama | Alanlar |
+| --- | --- | --- |
+| **`SIR_KioskMenuTanim`** | Ana menü tanımı. | `KioskMenuId`, `MenuAdi`, `Aciklama`, `MenuSira` (otomatik), `Aktiflik`, `EklenmeTarihi`, `DuzenlenmeTarihi`, `SilindiMi` |
 
-3. **Repositories**
-   - Her entity için `I...Repository` interface ve `...Repository` concrete (GenericRepository’den türeyen) oluştur.
-   - Özel sorgu ihtiyaçları: departman/bina bazlı menü listesi, kioska göre aktif menü öğeleri vb.
+**Özellikler:**
+- ✅ `MenuSira` otomatik hesaplanıyor (max + 1)
+- ✅ Soft delete desteği
+- ✅ Aktif/Pasif durum yönetimi
 
-4. **Services**
-   - `IKioskMenuService`, `IKioskManagementService` gibi arabirimler; BusinessLogicLayer’da uygulamaları.
-   - Servisler repository’leri DI üzerinden kullanmalı.
+### 3.2. Kiosk Tanımı
 
-5. **Presentation Layer**
-   - Sol nav: “Kiosk Tanımları”, “Kiosk İşlemleri”, “Bina Bazlı Menü İçerikleri” sayfaları.
-   - UI bileşenleri: Kart grid (Alt Kanal Yönetimi ekranına benzer), modal form’lar, sürükle-bırak sıralama opsiyonu.
-   - `Pages` klasöründe her ekran için `.razor` + `.razor.cs` (code-behind) yapısı korunacak; mevcut component/service injection pattern’iyle uyumlu kalınacak.
+| Tablo | Açıklama | Alanlar |
+| --- | --- | --- |
+| **`SIR_KioskTanim`** | Hizmet binasına bağlı kiosk cihazı. | `KioskId`, `HizmetBinasiId`, `KioskAdi`, `KioskKodu`, `KioskIp`, `Konum`, `Aktiflik`, `EklenmeTarihi`, `DuzenlenmeTarihi`, `SilindiMi` |
 
----
+**Özellikler:**
+- ✅ Hizmet binası bazlı filtreleme
+- ✅ IP ve konum bilgisi
+- ✅ Unique kiosk kodu
 
-## 5. İş Akışı
+### 3.3. Menü → Alt Kanal Eşleştirmesi
 
-1. **Kiosk Menü Tanımı Oluşturma**
-   - `KioskMenu` sadece layout/grid ve hangi kart kodlarının kullanılacağını belirler; kart içeriği masaüstü uygulamasındaki konfigürasyondan okunur.
-   - Backend, masaüstü uygulamasının “kart kodu” listesine referans verir; görsel ve ikon tarafı masaüstü uygulamasında güncellenir.
+| Tablo | Açıklama | Alanlar |
+| --- | --- | --- |
+| **`SIR_KioskMenuIslemleri`** | Menüye atanan alt kanal işlemleri. | `KioskMenuIslemId`, `KioskMenuId`, `KanalAltId`, `MenuSira` (otomatik), `Aktiflik`, `EklenmeTarihi`, `DuzenlenmeTarihi`, `SilindiMi` |
 
-2. **Kiosk Tanımı**
-   - Departman + Hizmet Binasi için kiosk kaydı açılır; hangi menü şablonunu kullanacağı seçilir.
-   - İsteğe göre cihaz bilgileri (IP, kiosk kodu) girilir.
+**Özellikler:**
+- ✅ `MenuSira` otomatik hesaplanıyor (menü bazında max + 1)
+- ✅ Duplicate kontrolü (aynı alt kanal aynı menüye tekrar eklenemez)
+- ✅ Navigation properties: `KioskMenu`, `KanalAlt`
 
-3. **Kiosk İşlemleri Yönetimi**
-   - `KioskIslemleri` kayıtlarında seçilen menü şablonundaki öğeler kioska atanır, `MenuSira` değeri kioska özel tutulur.
+### 3.4. Kiosk → Menü Ataması
 
-4. **Menü → Alt Kanal Eşleştirmesi**
-   - `KioskKanalAltIslem` ekranında ilgili `KioskIslem` kaydı seçilir; hangi `KanalAltIslemleri` açacağı belirlenir. Eşleştirme yapılırken `KanalAltIslem.HizmetBinasiId` ile kioskun bağlı olduğu bina eşleşmesi doğrulanır.
-   - Ekstra display metni/sırası tutmaya gerek yoktur; sunum logic’i mevcut kanal adlarını kullanır.
+| Tablo | Açıklama | Alanlar |
+| --- | --- | --- |
+| **`SIR_KioskMenuAtama`** | Kiosk cihazlarına menü ataması. | `KioskMenuAtamaId`, `KioskId`, `KioskMenuId`, `AtamaTarihi`, `Aktiflik`, `EklenmeTarihi`, `DuzenlenmeTarihi`, `SilindiMi` |
 
-5. **Kiosk Masaüstü Uygulaması**
-   - API’den `Kiosk` ve `KioskIslemleri` verilerini çekip Ekran 2’yi oluşturur.
-   - Vatandaş butona bastığında `KioskKanalAltIslem` kayıtlarına göre Ekran 3 listesi render edilir.
-
----
-
-## 6. Migration & Geçiş Planı
-
-1. Yeni tablolar için migration hazırlarken mevcut kiosk tablolarını kaldır.
-2. Gerekirse eski tablolardan veri taşımak için script yaz (örneğin KioskGrup → KioskMenu dönüşümü).
-3. API/Service katmanında yeni endpoint’ler eklenene kadar eski endpoint’leri kapatma; iki yapı paralel çalışabilir.
-4. Masaüstü kiosk uygulaması yeni API’yi tüketmeye hazır olduğunda eski tablo referansları temizlenir.
+**Özellikler:**
+- ✅ Bir kiosk'a birden fazla menü atanabilir
+- ✅ Aynı menü aynı kiosk'a tekrar atanamaz (unique constraint)
+- ✅ Aktif/Pasif toggle özelliği
+- ✅ Card grid UI ile görselleştirilmiş yönetim
 
 ---
 
-## 7. Açık Konular
+## 4. ✅ Katman Yapısı (Tamamlanmış)
 
-1. `LayoutJson` yapısı nasıl olacak? (Örn. 3x4 grid vs responsive). Tasarım onayı bekleniyor.
-2. Çoklu dil desteği: `DisplayText` alanlarını culture bazlı hale getirmek gerekiyor mu?
-3. Offline mod senaryosu: Masaüstü uygulaması veriyi ne sıklıkta cache’leyecek?
+### 4.1. Entities (BusinessObjectLayer/Entities/SiramatikIslemleri)
+✅ **Tamamlandı:**
+- `KioskMenu` - AuditableEntity'den türetildi
+- `Kiosk` - AuditableEntity'den türetildi
+- `KioskMenuIslem` - AuditableEntity'den türetildi
+- `KioskMenuAtama` - AuditableEntity'den türetildi
+- Navigation property'ler `[InverseProperty]` ile tanımlandı
+- `MenuSira` alanları eklendi ve otomatik yönetiliyor
+
+### 4.2. DTO'lar
+✅ **Request DTO'lar:**
+- `KioskMenuCreateRequestDto`, `KioskMenuUpdateRequestDto`
+- `KioskCreateRequestDto`, `KioskUpdateRequestDto`
+- `KioskMenuIslemCreateRequestDto`, `KioskMenuIslemUpdateRequestDto`
+- `KioskMenuAtamaCreateRequestDto`, `KioskMenuAtamaUpdateRequestDto`
+
+✅ **Response DTO'lar:**
+- `KioskMenuResponseDto`
+- `KioskResponseDto`
+- `KioskMenuIslemResponseDto`
+- `KioskMenuAtamaResponseDto`
+- `KioskSummaryDto` (ayrı dosyada)
+
+### 4.3. Repositories
+✅ **Interface ve Implementation:**
+- `IKioskMenuRepository` / `KioskMenuRepository`
+  - `GetActiveAsync()`, `GetWithKiosksAsync()`, `ExistsByNameAsync()`, `GetMaxSiraAsync()`
+- `IKioskRepository` / `KioskRepository`
+  - `GetByHizmetBinasiAsync()`, `GetWithDetailsAsync()`, `ExistsByKodAsync()`
+- `IKioskMenuIslemRepository` / `KioskMenuIslemRepository`
+  - `GetByKioskMenuAsync()`, `ExistsByMenuAndSiraAsync()`, `GetMaxSiraByMenuAsync()`
+- `IKioskMenuAtamaRepository` / `KioskMenuAtamaRepository`
+  - `GetByKioskAsync()`, `GetByKioskAndMenuAsync()`, `GetWithDetailsAsync()`
+
+### 4.4. Services
+✅ **Business Logic Layer:**
+- `IKioskMenuService` / `KioskMenuService`
+  - CRUD operasyonları, otomatik sıra hesaplama
+- `IKioskService` / `KioskService`
+  - CRUD operasyonları, hizmet binası bazlı filtreleme
+- `IKioskMenuIslemService` / `KioskMenuIslemService`
+  - CRUD operasyonları, otomatik sıra hesaplama, duplicate kontrolü
+- `IKioskMenuAtamaService` / `KioskMenuAtamaService`
+  - CRUD operasyonları, duplicate kontrolü, aktif/pasif toggle
+
+### 4.5. Presentation Layer
+✅ **Sayfalar:**
+- `/siramatik/kiosk-menu` - Menü tanımlama (Index, Manage)
+- `/siramatik/kiosk` - Kiosk tanımlama (Index, Manage)
+- `/siramatik/kiosk-menu-islem` - Menü işlem ataması (Index, Manage)
+- `/siramatik/kiosk-menu-atama` - Kiosk menü ataması (Index, Manage)
+
+✅ **UI Özellikleri:**
+- Card grid layout (responsive)
+- Modal form'lar
+- Dropdown filtreleme (hizmet binası, kiosk, menü)
+- Aktif/Pasif toggle
+- Refresh butonları
+- İstatistik göstergeleri
+- Toast bildirimleri
 
 ---
 
-Bu plan onaylandığında entity/DTO/repository/service dosyaları oluşturularak development’a geçilebilir.
+## 5. ✅ İş Akışı (Mevcut Uygulama)
+
+### 5.1. Kiosk Menü Tanımı Oluşturma
+1. `/siramatik/kiosk-menu` sayfasından "Yeni Menü" butonu ile form açılır
+2. Menü adı ve açıklama girilir
+3. `MenuSira` otomatik hesaplanır (kullanıcı değiştirebilir)
+4. Aktif/Pasif durumu seçilir
+5. Kaydet → Menü oluşturulur
+
+### 5.2. Menüye Alt Kanal İşlemi Ekleme
+1. `/siramatik/kiosk-menu-islem` sayfasından menü seçilir
+2. "Yeni İşlem Ekle" butonu ile form açılır
+3. Alt kanal dropdown'dan seçilir (alfabetik sıralı)
+4. `MenuSira` otomatik hesaplanır (menü bazında)
+5. Duplicate kontrolü yapılır
+6. Kaydet → İşlem menüye eklenir
+
+### 5.3. Kiosk Tanımı
+1. `/siramatik/kiosk` sayfasından "Yeni Kiosk" butonu ile form açılır
+2. Hizmet binası seçilir (dropdown)
+3. Kiosk adı, kodu, IP ve konum bilgileri girilir
+4. Aktif/Pasif durumu seçilir
+5. Kaydet → Kiosk oluşturulur
+
+### 5.4. Kiosk'a Menü Atama
+1. `/siramatik/kiosk-menu-atama` sayfası açılır
+2. Hizmet binası seçilir → Kiosk'lar otomatik yüklenir
+3. Kiosk seçilir → O kiosk'un mevcut atamaları gösterilir
+4. "Yeni Atama" butonu ile form açılır
+5. Menü seçilir (dropdown)
+6. Duplicate kontrolü yapılır (aynı menü tekrar atanamaz)
+7. Kaydet → Atama oluşturulur
+8. Card grid'de aktif/pasif toggle yapılabilir
+
+### 5.5. Kiosk Masaüstü Uygulaması (Planlanan)
+1. API'den kiosk bilgileri ve atanan menüler çekilir
+2. Her menü için `KioskMenuIslem` kayıtları çekilir
+3. Vatandaş menü seçtiğinde ilgili alt kanal işlemleri gösterilir
+4. Sıralama `MenuSira` alanına göre yapılır
+
+---
+
+## 6. ✅ Migration Geçmişi
+
+### Uygulanan Migration'lar:
+1. ✅ `AddKioskEntities` - İlk kiosk tabloları oluşturuldu
+2. ✅ `UpdateKioskMenuAtamaUniqueConstraint` - Unique constraint düzeltildi
+3. ✅ `AddMenuSiraToKioskMenu` - MenuSira alanı eklendi
+
+### Database Yapısı:
+- ✅ Tüm tablolar `SIR_` prefix'i ile oluşturuldu
+- ✅ Foreign key'ler tanımlandı
+- ✅ Unique constraint'ler eklendi
+- ✅ Soft delete filter'ları aktif
+- ✅ Audit alanları (EklenmeTarihi, DuzenlenmeTarihi, SilindiMi) tüm tablolarda mevcut
+
+---
+
+## 7. 🎯 Özellikler ve İyileştirmeler
+
+### Otomatik Sıra Yönetimi
+✅ **Tüm modüllerde uygulandı:**
+- `KioskMenu.MenuSira` - Global sıra (max + 1)
+- `KioskMenuIslem.MenuSira` - Menü bazında sıra (max + 1)
+- `KanalIslem.Sira` - Kanal + Hizmet binası bazında sıra (max + 1)
+
+**Mantık:**
+- Sıra girilmezse (0) → Otomatik hesaplanır
+- Sıra girilirse → Kullanıcının girdiği değer kullanılır
+- Duplicate kontrolü yapılır
+
+### UI/UX İyileştirmeleri
+✅ **Tamamlandı:**
+- Card grid layout (responsive, 3 kolon)
+- Dropdown otomatik sıralama (MenuSira, alfabetik)
+- Aktif/Pasif toggle (tek tıkla)
+- Refresh butonları
+- İstatistik göstergeleri (toplam, aktif, pasif, filtrelenen)
+- Toast bildirimleri (başarı, hata)
+- Loading state'leri
+- Empty state mesajları
+
+### Validasyon ve Kontroller
+✅ **Uygulandı:**
+- Required field kontrolü
+- Duplicate kontrolü (menü adı, kiosk kodu, atamalar)
+- ID mismatch kontrolü (update işlemlerinde)
+- Navigation property null kontrolü
+- Inner exception logging
+
+---
+
+## 8. 📋 Sonraki Adımlar
+
+### Kısa Vadeli
+1. ⏳ Kiosk masaüstü uygulaması API entegrasyonu
+2. ⏳ BankoIslem ve Banko için otomatik sıra yönetimi (isteğe bağlı)
+3. ⏳ Toplu işlem özellikleri (çoklu atama, kopyalama)
+
+### Orta Vadeli
+1. ⏳ Sürükle-bırak sıralama UI'ı
+2. ⏳ Menü önizleme özelliği
+3. ⏳ Raporlama ve istatistikler
+
+### Uzun Vadeli
+1. ⏳ Çoklu dil desteği
+2. ⏳ Offline mod desteği (masaüstü uygulama)
+3. ⏳ Kiosk kullanım analitiği
+
+---
+
+## 9. 📊 Teknik Detaylar
+
+### API Endpoints
+```
+GET    /api/KioskMenu
+GET    /api/KioskMenu/{id}
+POST   /api/KioskMenu
+PUT    /api/KioskMenu/{id}
+DELETE /api/KioskMenu/{id}
+
+GET    /api/Kiosk
+GET    /api/Kiosk/{id}
+GET    /api/Kiosk/byhizmetbinasi/{hizmetBinasiId}
+POST   /api/Kiosk
+PUT    /api/Kiosk/{id}
+DELETE /api/Kiosk/{id}
+
+GET    /api/KioskMenuIslem/bymenu/{kioskMenuId}
+POST   /api/KioskMenuIslem
+PUT    /api/KioskMenuIslem/{id}
+DELETE /api/KioskMenuIslem/{id}
+
+GET    /api/KioskMenuAtama/bykiosk/{kioskId}
+POST   /api/KioskMenuAtama
+PUT    /api/KioskMenuAtama/{id}
+DELETE /api/KioskMenuAtama/{id}
+```
+
+### Navigation Menu
+```
+Sıramatik İşlemleri
+├── Kiosk Menü Tanımları (/siramatik/kiosk-menu)
+├── Kiosk Tanımları (/siramatik/kiosk)
+├── Menü Alt Kanal İşlemleri (/siramatik/kiosk-menu-islem)
+└── Kiosk Menü Ataması (/siramatik/kiosk-menu-atama)
+```
+
+### Önemli Notlar
+- ✅ `IslemAdi` alanı kaldırıldı, yerine `KanalAltAdi` kullanılıyor
+- ✅ Menü seçimi manuel yapılıyor (otomatik seçim kaldırıldı)
+- ✅ Tüm dropdown'lar `MenuSira` ve alfabetik sıraya göre listeleniyor
+- ✅ Repository'lerde `Include(kmi => kmi.KioskMenu)` eklendi
+- ✅ Tüm modüllerde inner exception logging aktif
+
+---
+
+**Son Güncelleme:** 20 Kasım 2025  
+**Durum:** ✅ Aktif ve Çalışır Durumda  
+**Versiyon:** 1.0

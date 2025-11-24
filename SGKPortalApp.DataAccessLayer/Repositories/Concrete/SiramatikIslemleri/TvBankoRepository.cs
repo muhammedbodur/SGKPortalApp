@@ -66,5 +66,12 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .Where(tb => tb.Aktiflik == Aktiflik.Aktif)
                 .ToListAsync();
         }
+
+        // Belirli TV ve Banko için eşleştirme getirir
+        public async Task<TvBanko?> GetByTvAndBankoAsync(int tvId, int bankoId)
+        {
+            return await _dbSet
+                .FirstOrDefaultAsync(tb => tb.TvId == tvId && tb.BankoId == bankoId && tb.SilindiMi == false);
+        }
     }
 }
