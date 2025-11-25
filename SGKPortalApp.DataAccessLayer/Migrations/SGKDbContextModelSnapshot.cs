@@ -17,7 +17,7 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.10")
+                .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -140,6 +140,99 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                         .HasFilter("[SilindiMi] = 0");
 
                     b.ToTable("CMN_HizmetBinalari", "dbo");
+                });
+
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.Common.HubConnection", b =>
+                {
+                    b.Property<int>("HubConnectionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HubConnectionId"));
+
+                    b.Property<DateTime>("ConnectedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()")
+                        .HasComment("Bağlantı kurulma zamanı");
+
+                    b.Property<string>("ConnectionId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasComment("SignalR ConnectionId - Unique");
+
+                    b.Property<string>("ConnectionStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("ConnectionType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("MainLayout")
+                        .HasComment("Bağlantı Tipi: MainLayout, TvDisplay, BankoMode, Monitoring");
+
+                    b.Property<DateTime>("DuzenlenmeTarihi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("DuzenleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EklenmeTarihi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("EkleyenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("IslemZamani")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("LastActivityAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()")
+                        .HasComment("Son aktivite zamanı");
+
+                    b.Property<string>("SilenKullanici")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("SilindiMi")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime?>("SilinmeTarihi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TcKimlikNo")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)")
+                        .HasComment("User TcKimlikNo - ZORUNLU (Personel veya TV User) - Bir kullanıcının birden fazla bağlantısı olabilir");
+
+                    b.HasKey("HubConnectionId");
+
+                    b.HasIndex("ConnectionId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_CMN_HubConnections_ConnectionId")
+                        .HasFilter("[SilindiMi] = 0");
+
+                    b.HasIndex("ConnectionStatus")
+                        .HasDatabaseName("IX_CMN_HubConnections_Status")
+                        .HasFilter("[SilindiMi] = 0");
+
+                    b.HasIndex("TcKimlikNo", "ConnectionType", "ConnectionStatus")
+                        .HasDatabaseName("IX_CMN_HubConnections_Tc_Type_Status")
+                        .HasFilter("[SilindiMi] = 0");
+
+                    b.ToTable("CMN_HubConnections", "dbo");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.Common.Il", b =>
@@ -483,13 +576,27 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Property<string>("TcKimlikNo")
                         .HasMaxLength(11)
                         .HasColumnType("nvarchar(11)")
-                        .HasComment("TC Kimlik Numarası - Primary Key & Foreign Key to Personel");
+                        .HasComment("TC Kimlik Numarası - Primary Key & Foreign Key to Personel or TV User ID");
+
+                    b.Property<int?>("AktifBankoId")
+                        .HasColumnType("int")
+                        .HasComment("Aktif banko ID (banko modundaysa)");
 
                     b.Property<bool>("AktifMi")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true)
                         .HasComment("Kullanıcı aktif mi?");
+
+                    b.Property<bool>("BankoModuAktif")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasComment("Kullanıcı banko modunda mı? (true ise sadece sıra çağırma kullanılabilir)");
+
+                    b.Property<DateTime?>("BankoModuBaslangic")
+                        .HasColumnType("datetime2")
+                        .HasComment("Banko moduna geçiş zamanı");
 
                     b.Property<int>("BasarisizGirisSayisi")
                         .ValueGeneratedOnAdd()
@@ -517,6 +624,9 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                         .HasColumnType("datetime2")
                         .HasComment("Hesap kilitlenme tarihi");
 
+                    b.Property<int?>("HubConnectionId")
+                        .HasColumnType("int");
+
                     b.Property<string>("PassWord")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -543,7 +653,17 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                         .HasColumnType("datetime2")
                         .HasComment("Son giriş tarihi");
 
+                    b.Property<string>("UserType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Personel")
+                        .HasComment("Kullanıcı tipi: Personel veya TvUser");
+
                     b.HasKey("TcKimlikNo");
+
+                    b.HasIndex("HubConnectionId");
 
                     b.HasIndex("SessionID")
                         .HasDatabaseName("IX_CMN_Users_SessionID")
@@ -552,6 +672,10 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.HasIndex("TcKimlikNo")
                         .IsUnique()
                         .HasDatabaseName("IX_CMN_Users_TcKimlikNo")
+                        .HasFilter("[SilindiMi] = 0");
+
+                    b.HasIndex("UserType")
+                        .HasDatabaseName("IX_CMN_Users_UserType")
                         .HasFilter("[SilindiMi] = 0");
 
                     b.ToTable("CMN_Users", "dbo");
@@ -1989,23 +2113,33 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.ToTable("SIR_BankoKullanicilari", "dbo");
                 });
 
-            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.HubConnection", b =>
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.HubBankoConnection", b =>
                 {
-                    b.Property<int>("HubConnectionId")
+                    b.Property<int>("HubBankoConnectionId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HubConnectionId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HubBankoConnectionId"));
 
-                    b.Property<string>("ConnectionId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<int>("BankoId")
+                        .HasColumnType("int")
+                        .HasComment("Banko ID - UNIQUE (Bir bankoya sadece 1 personel)");
 
-                    b.Property<string>("ConnectionStatus")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                    b.Property<bool>("BankoModuAktif")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true)
+                        .HasComment("Banko modu aktif mi?");
+
+                    b.Property<DateTime>("BankoModuBaslangic")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()")
+                        .HasComment("Banko moduna giriş zamanı");
+
+                    b.Property<DateTime?>("BankoModuBitis")
+                        .HasColumnType("datetime2")
+                        .HasComment("Banko modundan çıkış zamanı (nullable)");
 
                     b.Property<DateTime>("DuzenlenmeTarihi")
                         .ValueGeneratedOnAdd()
@@ -2022,6 +2156,10 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
 
                     b.Property<string>("EkleyenKullanici")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("HubConnectionId")
+                        .HasColumnType("int")
+                        .HasComment("HubConnection ID - ZORUNLU (Personel olmak zorunda)");
 
                     b.Property<DateTime>("IslemZamani")
                         .HasColumnType("datetime2");
@@ -2040,19 +2178,27 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Property<string>("TcKimlikNo")
                         .IsRequired()
                         .HasMaxLength(11)
-                        .HasColumnType("nvarchar(11)");
+                        .HasColumnType("nvarchar(11)")
+                        .HasComment("Personel TcKimlikNo - UNIQUE (Bir personel aynı anda sadece 1 bankoda)");
 
-                    b.HasKey("HubConnectionId");
+                    b.HasKey("HubBankoConnectionId");
+
+                    b.HasIndex("BankoId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_SIR_HubBankoConnections_BankoId")
+                        .HasFilter("[SilindiMi] = 0 AND [BankoModuAktif] = 1");
+
+                    b.HasIndex("HubConnectionId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_SIR_HubBankoConnections_HubConnectionId")
+                        .HasFilter("[SilindiMi] = 0");
 
                     b.HasIndex("TcKimlikNo")
                         .IsUnique()
-                        .HasDatabaseName("IX_SIR_HubConnections_TcKimlikNo")
-                        .HasFilter("[SilindiMi] = 0");
+                        .HasDatabaseName("IX_SIR_HubBankoConnections_TcKimlikNo")
+                        .HasFilter("[SilindiMi] = 0 AND [BankoModuAktif] = 1");
 
-                    b.HasIndex("TcKimlikNo", "ConnectionId", "ConnectionStatus")
-                        .HasDatabaseName("IX_SIR_HubConnections_Tc_ConnId_Status");
-
-                    b.ToTable("SIR_HubConnections", "dbo");
+                    b.ToTable("SIR_HubBankoConnections", "dbo");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.HubTvConnection", b =>
@@ -2062,16 +2208,6 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HubTvConnectionId"));
-
-                    b.Property<string>("ConnectionId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("ConnectionStatus")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime>("DuzenlenmeTarihi")
                         .ValueGeneratedOnAdd()
@@ -2089,6 +2225,10 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Property<string>("EkleyenKullanici")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("HubConnectionId")
+                        .HasColumnType("int")
+                        .HasComment("HubConnection ID - ZORUNLU (TV User veya Personel)");
+
                     b.Property<DateTime>("IslemZamani")
                         .HasColumnType("datetime2");
 
@@ -2104,17 +2244,19 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("TvId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasComment("TV ID - Birden fazla kullanıcı aynı TV'yi izleyebilir");
 
                     b.HasKey("HubTvConnectionId");
 
-                    b.HasIndex("TvId")
+                    b.HasIndex("HubConnectionId")
                         .IsUnique()
-                        .HasDatabaseName("IX_SIR_HubTvConnections_TvId")
+                        .HasDatabaseName("IX_SIR_HubTvConnections_HubConnectionId")
                         .HasFilter("[SilindiMi] = 0");
 
-                    b.HasIndex("TvId", "ConnectionId", "ConnectionStatus")
-                        .HasDatabaseName("IX_SIR_HubTvConnections_Tv_ConnId_Status");
+                    b.HasIndex("TvId")
+                        .HasDatabaseName("IX_SIR_HubTvConnections_TvId")
+                        .HasFilter("[SilindiMi] = 0");
 
                     b.ToTable("SIR_HubTvConnections", "dbo");
                 });
@@ -2832,6 +2974,11 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Property<DateTime?>("SilinmeTarihi")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("TcKimlikNo")
+                        .HasMaxLength(11)
+                        .HasColumnType("nvarchar(11)")
+                        .HasComment("TV için oluşturulan User'ın TcKimlikNo'su (FK)");
+
                     b.Property<string>("TvAciklama")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -2853,6 +3000,11 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.HasIndex("HizmetBinasiId");
 
                     b.HasIndex("HizmetBinasiId1");
+
+                    b.HasIndex("TcKimlikNo")
+                        .IsUnique()
+                        .HasDatabaseName("IX_SIR_Tvler_TcKimlikNo")
+                        .HasFilter("[TcKimlikNo] IS NOT NULL AND [SilindiMi] = 0");
 
                     b.HasIndex("TvAdi")
                         .IsUnique()
@@ -2933,6 +3085,18 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Navigation("Departman");
                 });
 
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.Common.HubConnection", b =>
+                {
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.Common.User", "User")
+                        .WithMany("HubConnections")
+                        .HasForeignKey("TcKimlikNo")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_CMN_HubConnections_CMN_Users");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.Common.Ilce", b =>
                 {
                     b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.Common.Il", "Il")
@@ -2982,14 +3146,11 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.Common.User", b =>
                 {
-                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Personel", "Personel")
-                        .WithOne("User")
-                        .HasForeignKey("SGKPortalApp.BusinessObjectLayer.Entities.Common.User", "TcKimlikNo")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_CMN_Users_PER_Personeller");
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.Common.HubConnection", "HubConnection")
+                        .WithMany()
+                        .HasForeignKey("HubConnectionId");
 
-                    b.Navigation("Personel");
+                    b.Navigation("HubConnection");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Personel", b =>
@@ -3050,6 +3211,11 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_PER_Personeller_PER_Servisler");
 
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.Common.User", "User")
+                        .WithOne("Personel")
+                        .HasForeignKey("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Personel", "TcKimlikNo")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Unvan", "Unvan")
                         .WithMany("Personeller")
                         .HasForeignKey("UnvanId")
@@ -3076,6 +3242,8 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Navigation("Servis");
 
                     b.Navigation("Unvan");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.PersonelCeza", b =>
@@ -3342,26 +3510,44 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Navigation("Personel");
                 });
 
-            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.HubConnection", b =>
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.HubBankoConnection", b =>
                 {
-                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.Common.User", "User")
-                        .WithOne("HubConnection")
-                        .HasForeignKey("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.HubConnection", "TcKimlikNo")
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.Banko", "Banko")
+                        .WithOne("HubBankoConnection")
+                        .HasForeignKey("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.HubBankoConnection", "BankoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_SIR_HubBankoConnections_SIR_Bankolar");
+
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.Common.HubConnection", "HubConnection")
+                        .WithOne("HubBankoConnection")
+                        .HasForeignKey("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.HubBankoConnection", "HubConnectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK_SIR_HubConnections_CMN_Users");
+                        .HasConstraintName("FK_SIR_HubBankoConnections_CMN_HubConnections");
 
-                    b.Navigation("User");
+                    b.Navigation("Banko");
+
+                    b.Navigation("HubConnection");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.HubTvConnection", b =>
                 {
-                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.Tv", "Tv")
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.Common.HubConnection", "HubConnection")
                         .WithOne("HubTvConnection")
-                        .HasForeignKey("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.HubTvConnection", "TvId")
+                        .HasForeignKey("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.HubTvConnection", "HubConnectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_SIR_HubTvConnections_CMN_HubConnections");
+
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.Tv", "Tv")
+                        .WithMany("HubTvConnections")
+                        .HasForeignKey("TvId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_SIR_HubTvConnections_SIR_Tvler");
+
+                    b.Navigation("HubConnection");
 
                     b.Navigation("Tv");
                 });
@@ -3565,7 +3751,15 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                         .WithMany("Tvler")
                         .HasForeignKey("HizmetBinasiId1");
 
+                    b.HasOne("SGKPortalApp.BusinessObjectLayer.Entities.Common.User", "User")
+                        .WithOne("Tv")
+                        .HasForeignKey("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.Tv", "TcKimlikNo")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_CMN_Users_SIR_Tvler");
+
                     b.Navigation("HizmetBinasi");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.TvBanko", b =>
@@ -3598,6 +3792,13 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Navigation("Tvler");
                 });
 
+            modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.Common.HubConnection", b =>
+                {
+                    b.Navigation("HubBankoConnection");
+
+                    b.Navigation("HubTvConnection");
+                });
+
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.Common.Il", b =>
                 {
                     b.Navigation("Ilceler");
@@ -3622,7 +3823,11 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.Common.User", b =>
                 {
-                    b.Navigation("HubConnection");
+                    b.Navigation("HubConnections");
+
+                    b.Navigation("Personel");
+
+                    b.Navigation("Tv");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.AtanmaNedenleri", b =>
@@ -3656,8 +3861,6 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Navigation("PersonelImzaYetkileri");
 
                     b.Navigation("PersonelYetkileri");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Sendika", b =>
@@ -3687,6 +3890,8 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
                     b.Navigation("BankoHareketleri");
 
                     b.Navigation("BankoKullanicilari");
+
+                    b.Navigation("HubBankoConnection");
 
                     b.Navigation("TvBankolar");
                 });
@@ -3736,7 +3941,7 @@ namespace SGKPortalApp.DataAccessLayer.Migrations
 
             modelBuilder.Entity("SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri.Tv", b =>
                 {
-                    b.Navigation("HubTvConnection");
+                    b.Navigation("HubTvConnections");
 
                     b.Navigation("TvBankolar");
                 });

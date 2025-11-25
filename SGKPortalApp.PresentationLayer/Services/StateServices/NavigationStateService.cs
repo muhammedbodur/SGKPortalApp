@@ -1,4 +1,6 @@
-﻿namespace SGKPortalApp.PresentationLayer.Services.StateServices
+﻿using SGKPortalApp.PresentationLayer.Models.ViewModels;
+
+namespace SGKPortalApp.PresentationLayer.Services.StateServices
 {
     /// <summary>
     /// Navigasyon durumu ve breadcrumb yönetimi
@@ -31,11 +33,5 @@
         }
 
         private void NotifyStateChanged() => OnChange?.Invoke();
-    }
-
-    public class BreadcrumbItem
-    {
-        public string Text { get; set; } = string.Empty;
-        public string? Url { get; set; }
     }
 }

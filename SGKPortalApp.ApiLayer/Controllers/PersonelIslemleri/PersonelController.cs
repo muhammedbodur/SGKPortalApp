@@ -78,6 +78,13 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        [HttpGet("hizmet-binasi/{hizmetBinasiId:int}")]
+        public async Task<IActionResult> GetByHizmetBinasi(int hizmetBinasiId)
+        {
+            var result = await _personelService.GetByHizmetBinasiIdAsync(hizmetBinasiId);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
         // Toplu kayıt endpoint'leri (Transaction)
         [HttpPost("complete")]
         public async Task<IActionResult> CreateComplete([FromBody] PersonelCompleteRequestDto request)

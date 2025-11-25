@@ -26,6 +26,9 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
         public PersonelAtamaDto? AtananPersonel { get; set; }
         public bool BankoMusaitMi { get; set; }
 
+        // Bağlantı Durumu
+        public bool IsConnected { get; set; }
+
         // Audit Fields
         public DateTime EklenmeTarihi { get; set; }
         public DateTime DuzenlenmeTarihi { get; set; }

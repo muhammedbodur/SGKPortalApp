@@ -26,5 +26,11 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth
         
         // JWT Token (API çağrıları için)
         public string? JwtToken { get; set; }
+        
+        // Kullanıcı tipi (Personel | TvUser)
+        public string? UserType { get; set; }
+        
+        // Yönlendirme URL'i
+        public string? RedirectUrl { get; set; }
     }
 }

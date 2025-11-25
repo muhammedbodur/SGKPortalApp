@@ -24,5 +24,8 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramat
         // TV-Banko İlişkileri
         Task<ApiResponseDto<bool>> AddBankoToTvAsync(int tvId, int bankoId);
         Task<ApiResponseDto<bool>> RemoveBankoFromTvAsync(int tvId, int bankoId);
+        
+        // TV Sıra Görüntüleme
+        Task<ApiResponseDto<List<TvSiraDto>>> GetActiveSiralarByTvIdAsync(int tvId);
     }
 }

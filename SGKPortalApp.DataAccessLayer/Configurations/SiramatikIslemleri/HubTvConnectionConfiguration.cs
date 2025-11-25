@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 
 namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
@@ -15,13 +16,13 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
             builder.Property(htc => htc.HubTvConnectionId)
                 .ValueGeneratedOnAdd();
 
-            builder.Property(htc => htc.ConnectionId)
+            builder.Property(htc => htc.TvId)
                 .IsRequired()
-                .HasMaxLength(100);
+                .HasComment("TV ID - Birden fazla kullanıcı aynı TV'yi izleyebilir");
 
-            builder.Property(htc => htc.ConnectionStatus)
-                .HasConversion<string>()
-                .HasMaxLength(20);
+            builder.Property(htc => htc.HubConnectionId)
+                .IsRequired()
+                .HasComment("HubConnection ID - ZORUNLU (TV User veya Personel)");
 
             builder.Property(htc => htc.EklenmeTarihi)
                 .IsRequired()
@@ -35,20 +36,34 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .IsRequired()
                 .HasDefaultValue(false);
 
-            builder.HasIndex(htc => new { htc.TvId, htc.ConnectionId, htc.ConnectionStatus })
-                .HasDatabaseName("IX_SIR_HubTvConnections_Tv_ConnId_Status");
-
-            builder.HasIndex(htc => htc.TvId)
+            // Index'ler
+            // HubConnectionId unique (Her bağlantı sadece 1 TV'ye bağlı)
+            builder.HasIndex(htc => htc.HubConnectionId)
                 .IsUnique()
+                .HasDatabaseName("IX_SIR_HubTvConnections_HubConnectionId")
+                .HasFilter("[SilindiMi] = 0");
+
+            // TvId index (Birden fazla bağlantı aynı TV'yi izleyebilir - UNIQUE DEĞİL)
+            builder.HasIndex(htc => htc.TvId)
                 .HasDatabaseName("IX_SIR_HubTvConnections_TvId")
                 .HasFilter("[SilindiMi] = 0");
 
             builder.HasQueryFilter(htc => !htc.SilindiMi);
 
+            // HubConnection ile One-to-One ilişki
+            builder.HasOne(htc => htc.HubConnection)
+                .WithOne(hc => hc.HubTvConnection)
+                .HasForeignKey<HubTvConnection>(htc => htc.HubConnectionId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired(true)
+                .HasConstraintName("FK_SIR_HubTvConnections_CMN_HubConnections");
+
+            // TV ile Many-to-One ilişki (Birden fazla bağlantı aynı TV'yi izleyebilir)
             builder.HasOne(htc => htc.Tv)
-                .WithOne(t => t.HubTvConnection)
-                .HasForeignKey<HubTvConnection>(htc => htc.TvId)
+                .WithMany(t => t.HubTvConnections)
+                .HasForeignKey(htc => htc.TvId)
                 .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(true)
                 .HasConstraintName("FK_SIR_HubTvConnections_SIR_Tvler");
         }
     }

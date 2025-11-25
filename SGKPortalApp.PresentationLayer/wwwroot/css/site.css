@@ -369,3 +369,23 @@ html.layout-menu-fixed:not(.layout-menu-collapsed) .layout-menu-toggle .bx-chevr
         padding: 0 !important;
     }
 }
+
+/* ============================================================
+   BANKO MODE STYLES
+   ============================================================ */
+
+/* Banko modunda menü gizlenince content genişlesin */
+.banko-mode-active .layout-page {
+    margin-left: 0 !important;
+    width: 100% !important;
+}
+
+/* Banko modunda navbar gizlenince content yukarı çıksın */
+.banko-mode-active .content-wrapper {
+    padding-top: 0 !important;
+}
+
+/* Banko modu aktif göstergesi */
+.banko-mode-active {
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%);
+}

@@ -62,6 +62,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<Sira> Siralar { get; set; }
         public DbSet<HubConnection> HubConnections { get; set; }
         public DbSet<HubTvConnection> HubTvConnections { get; set; }
+        public DbSet<HubBankoConnection> HubBankoConnections { get; set; }
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -122,6 +123,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.ApplyConfiguration(new SiraConfiguration());
             modelBuilder.ApplyConfiguration(new HubConnectionConfiguration());
             modelBuilder.ApplyConfiguration(new HubTvConnectionConfiguration());
+            modelBuilder.ApplyConfiguration(new HubBankoConnectionConfiguration());
         }
         #endregion
 

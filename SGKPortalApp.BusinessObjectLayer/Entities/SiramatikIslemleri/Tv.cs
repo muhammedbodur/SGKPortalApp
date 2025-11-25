@@ -18,7 +18,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         public int HizmetBinasiId { get; set; }
         [ForeignKey(nameof(HizmetBinasiId))]
         [InverseProperty("Tvler")]
-        public required HizmetBinasi HizmetBinasi { get; set; }
+        public HizmetBinasi? HizmetBinasi { get; set; }
 
         public KatTipi KatTipi { get; set; }
         public Aktiflik TvAktiflik { get; set; } = Aktiflik.Aktif;
@@ -27,7 +27,17 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         public string? TvAciklama { get; set; }
 
         public DateTime IslemZamani { get; set; } = DateTime.Now;
-        public HubTvConnection? HubTvConnection { get; set; }
+
+        // User ile One-to-One ilişki (TV için otomatik oluşturulan kullanıcı)
+        [StringLength(11)]
+        public string? TcKimlikNo { get; set; }
+        [ForeignKey(nameof(TcKimlikNo))]
+        [InverseProperty("Tv")]
+        public User? User { get; set; }
+
+        // SignalR bağlantı bilgileri (Birden fazla kullanıcı aynı TV'yi izleyebilir)
+        [InverseProperty("Tv")]
+        public ICollection<HubTvConnection> HubTvConnections { get; set; } = new List<HubTvConnection>();
 
         [InverseProperty("Tv")]
         public ICollection<TvBanko>? TvBankolar { get; set; } = new List<TvBanko>();

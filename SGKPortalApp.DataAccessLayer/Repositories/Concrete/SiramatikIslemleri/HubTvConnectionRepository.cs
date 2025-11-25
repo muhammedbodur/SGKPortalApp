@@ -20,6 +20,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(htc => htc.Tv)
+                .Include(htc => htc.HubConnection)
                 .Where(htc => htc.TvId == tvId)
                 .ToListAsync();
         }
@@ -30,7 +31,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(htc => htc.Tv)
-                .FirstOrDefaultAsync(htc => htc.ConnectionId == connectionId);
+                .Include(htc => htc.HubConnection)
+                .FirstOrDefaultAsync(htc => htc.HubConnection != null && htc.HubConnection.ConnectionId == connectionId);
         }
 
         // Aktif TV bağlantılarını listeler
@@ -39,7 +41,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(htc => htc.Tv)
-                .Where(htc => htc.ConnectionStatus == ConnectionStatus.online)
+                .Include(htc => htc.HubConnection)
+                .Where(htc => htc.HubConnection != null && htc.HubConnection.ConnectionStatus == ConnectionStatus.online)
                 .ToListAsync();
         }
 
@@ -49,6 +52,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(htc => htc.Tv)
+                .Include(htc => htc.HubConnection)
                 .FirstOrDefaultAsync(htc => htc.HubTvConnectionId == hubTvConnectionId);
         }
 
@@ -58,6 +62,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(htc => htc.Tv)
+                .Include(htc => htc.HubConnection)
                 .ToListAsync();
         }
     }

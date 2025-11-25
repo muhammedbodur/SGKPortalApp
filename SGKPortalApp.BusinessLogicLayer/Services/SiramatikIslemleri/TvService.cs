@@ -3,11 +3,13 @@ using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
 using System;
 using System.Collections.Generic;
@@ -44,6 +46,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 var createdTv = await tvRepo.AddAsync(tv);
                 await _unitOfWork.SaveChangesAsync();
 
+                // TV için User oluştur
+                await CreateTvUserAsync(createdTv.TvId);
+
                 var response = _mapper.Map<TvResponseDto>(createdTv);
 
                 _logger.LogInformation($"TV oluşturuldu: {createdTv.TvId} - {createdTv.TvAdi}");
@@ -73,6 +78,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 tvRepo.Update(existingTv);
                 await _unitOfWork.SaveChangesAsync();
+
+                // Eğer TV için User yoksa oluştur
+                if (string.IsNullOrEmpty(existingTv.TcKimlikNo))
+                {
+                    await CreateTvUserAsync(existingTv.TvId);
+                }
 
                 var response = _mapper.Map<TvResponseDto>(existingTv);
 
@@ -146,7 +157,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     if (entity != null)
                     {
                         tv.BankoSayisi = entity.TvBankolar?.Count(tb => tb.Aktiflik == Aktiflik.Aktif) ?? 0;
-                        tv.IsConnected = entity.HubTvConnection != null && entity.HubTvConnection.ConnectionStatus == ConnectionStatus.online;
+                        tv.IsConnected = entity.HubTvConnections?.Any(htc => 
+                                         htc.HubConnection != null && 
+                                         htc.HubConnection.ConnectionStatus == ConnectionStatus.online) ?? false;
                     }
                 }
                 
@@ -175,7 +188,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     if (entity != null)
                     {
                         tv.BankoSayisi = entity.TvBankolar?.Count(tb => tb.Aktiflik == Aktiflik.Aktif) ?? 0;
-                        tv.IsConnected = entity.HubTvConnection != null && entity.HubTvConnection.ConnectionStatus == ConnectionStatus.online;
+                        tv.IsConnected = entity.HubTvConnections?.Any(htc => 
+                                         htc.HubConnection != null && 
+                                         htc.HubConnection.ConnectionStatus == ConnectionStatus.online) ?? false;
                     }
                 }
                 return ApiResponseDto<List<TvResponseDto>>.SuccessResult(response);
@@ -203,7 +218,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     if (entity != null)
                     {
                         tv.BankoSayisi = entity.TvBankolar?.Count(tb => tb.Aktiflik == Aktiflik.Aktif) ?? 0;
-                        tv.IsConnected = entity.HubTvConnection != null && entity.HubTvConnection.ConnectionStatus == ConnectionStatus.online;
+                        tv.IsConnected = entity.HubTvConnections?.Any(htc => 
+                                         htc.HubConnection != null && 
+                                         htc.HubConnection.ConnectionStatus == ConnectionStatus.online) ?? false;
                     }
                 }
                 
@@ -232,7 +249,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     if (entity != null)
                     {
                         tv.BankoSayisi = entity.TvBankolar?.Count(tb => tb.Aktiflik == Aktiflik.Aktif) ?? 0;
-                        tv.IsConnected = entity.HubTvConnection != null && entity.HubTvConnection.ConnectionStatus == ConnectionStatus.online;
+                        tv.IsConnected = entity.HubTvConnections?.Any(htc => 
+                                         htc.HubConnection != null && 
+                                         htc.HubConnection.ConnectionStatus == ConnectionStatus.online) ?? false;
                     }
                 }
                 
@@ -267,9 +286,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     .Select(tb => tb.BankoId)
                     .ToList() ?? new List<int>();
                 
-                // Bağlantı durumunu kontrol et
-                response.IsConnected = tv.HubTvConnection != null && 
-                                      tv.HubTvConnection.ConnectionStatus == ConnectionStatus.online;
+                // Bağlantı durumunu kontrol et (En az 1 online bağlantı varsa connected)
+                response.IsConnected = tv.HubTvConnections?.Any(htc => 
+                                      htc.HubConnection != null && 
+                                      htc.HubConnection.ConnectionStatus == ConnectionStatus.online) ?? false;
 
                 return ApiResponseDto<TvResponseDto>.SuccessResult(response);
             }
@@ -393,5 +413,145 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 return ApiResponseDto<bool>.ErrorResult($"Banko kaldırılırken bir hata oluştu: {ex.Message}");
             }
         }
+
+        // ═══════════════════════════════════════════════════════
+        // PUBLIC UTILITY METHODS
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Tüm mevcut TV'ler için User oluşturur (Migration sonrası kullanım için)
+        /// </summary>
+        public async Task<ApiResponseDto<int>> CreateUsersForAllTvsAsync()
+        {
+            try
+            {
+                _logger.LogInformation("🔄 Tüm TV'ler için User oluşturma başladı...");
+                
+                var tvRepo = _unitOfWork.GetRepository<ITvRepository>();
+                var allTvs = await tvRepo.GetAllAsync();
+                
+                int createdCount = 0;
+                int skippedCount = 0;
+                int errorCount = 0;
+
+                // Her TV için ayrı transaction kullan
+                // Böylece bir TV'de hata olursa diğerleri etkilenmez
+                foreach (var tv in allTvs)
+                {
+                    try
+                    {
+                        // TcKimlikNo zaten varsa atla
+                        if (!string.IsNullOrEmpty(tv.TcKimlikNo))
+                        {
+                            _logger.LogInformation($"⏭️ TV#{tv.TvId} zaten User'a sahip: {tv.TcKimlikNo}");
+                            skippedCount++;
+                            continue;
+                        }
+
+                        // User oluştur (kendi transaction'ı içinde)
+                        await CreateTvUserAsync(tv.TvId);
+                        createdCount++;
+                        
+                        _logger.LogInformation($"✅ TV#{tv.TvId} için User oluşturuldu");
+                    }
+                    catch (Exception ex)
+                    {
+                        errorCount++;
+                        _logger.LogError(ex, $"❌ TV#{tv.TvId} için User oluşturulamadı - Rollback yapıldı");
+                        // Bu TV için rollback yapıldı, diğer TV'ler etkilenmedi
+                    }
+                }
+
+                var message = $"Toplam: {allTvs.Count()} TV | Oluşturulan: {createdCount} | Atlanan: {skippedCount} | Hata: {errorCount}";
+                _logger.LogInformation($"✅ {message}");
+                
+                return ApiResponseDto<int>.SuccessResult(createdCount, message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Toplu TV User oluşturma hatası");
+                return ApiResponseDto<int>.ErrorResult($"Toplu User oluşturma hatası: {ex.Message}");
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // PRIVATE HELPER METHODS
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// TV için otomatik User oluşturur
+        /// TcKimlikNo: TV{TvId:D7} formatında (örn: TV0000001)
+        /// Password: TV{TvId} formatında (örn: TV1)
+        /// </summary>
+        private async Task CreateTvUserAsync(int tvId)
+        {
+            // Transaction kullan - ya hepsi başarılı olur, ya hiçbiri
+            using var transaction = await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var tvRepo = _unitOfWork.GetRepository<ITvRepository>();
+                var userRepo = _unitOfWork.GetRepository<IUserRepository>();
+
+                // TV'yi bul
+                var tv = await tvRepo.GetByIdAsync(tvId);
+                if (tv == null)
+                {
+                    _logger.LogWarning($"TV bulunamadı: {tvId}");
+                    return;
+                }
+
+                // TcKimlikNo oluştur: TV0000001
+                var tcKimlikNo = $"TV{tvId:D7}";
+
+                // User zaten var mı kontrol et
+                var existingUser = await userRepo.GetByTcKimlikNoAsync(tcKimlikNo);
+                if (existingUser != null)
+                {
+                    _logger.LogInformation($"TV User zaten mevcut: {tcKimlikNo}");
+                    
+                    // TV'ye bağla
+                    tv.TcKimlikNo = tcKimlikNo;
+                    tvRepo.Update(tv);
+                    await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.CommitTransactionAsync(transaction);
+                    return;
+                }
+
+                // Şifre: TV1 (düz metin)
+                var password = $"TV{tvId}";
+
+                // User oluştur
+                var tvUser = new User
+                {
+                    TcKimlikNo = tcKimlikNo,
+                    UserType = UserType.TvUser,
+                    PassWord = password, // Düz metin şifre
+                    AktifMi = true,
+                    EklenmeTarihi = DateTime.Now,
+                    DuzenlenmeTarihi = DateTime.Now
+                };
+
+                // ÖNEMLİ: User'ı önce kaydet (FK constraint için gerekli)
+                await userRepo.AddAsync(tvUser);
+                await _unitOfWork.SaveChangesAsync();
+
+                // User kaydedildikten SONRA TV'yi bağla
+                tv.TcKimlikNo = tcKimlikNo;
+                tvRepo.Update(tv);
+                await _unitOfWork.SaveChangesAsync();
+
+                // Transaction başarılı - commit et
+                await _unitOfWork.CommitTransactionAsync(transaction);
+
+                _logger.LogInformation($"✅ TV User oluşturuldu ve bağlandı: {tcKimlikNo} (Şifre: {password})");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ TV User oluşturulurken hata: TvId={tvId} - Transaction rollback yapılıyor");
+                // Transaction otomatik rollback olacak (using block)
+                throw; // Hatayı üst katmana ilet
+            }
+        }
+
     }
 }

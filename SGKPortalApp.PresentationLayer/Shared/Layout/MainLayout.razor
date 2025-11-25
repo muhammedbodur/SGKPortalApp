@@ -1,11 +1,17 @@
 @inherits LayoutComponentBase
 @using SGKPortalApp.PresentationLayer.Components.Siramatik
 
-<div class="layout-wrapper layout-content-navbar @(siraPanelAcik ? "sira-panel-open" : "")">
+<div class="layout-wrapper layout-content-navbar @(siraPanelAcik ? "sira-panel-open" : "") @(BankoModeState.IsInBankoMode ? "banko-mode-active" : "")">
     <div class="layout-container">
-        <NavMenu />
+        @if (!BankoModeState.IsInBankoMode)
+        {
+            <NavMenu />
+        }
         <div class="layout-page">
-            <TopBar />
+            @if (!BankoModeState.IsInBankoMode)
+            {
+                <TopBar />
+            }
             <div class="content-wrapper">
                 <div class="container-xxl flex-grow-1 container-p-y">
                     @Body
@@ -23,3 +29,56 @@
 
 @* Sıra Çağırma Paneli - Fixed Position Overlay *@
 <SiraCagirmaPanel SiraListesi="@siraListesi" OnSiraCagir="@HandleSiraCagir" OnPanelStateChanged="@HandlePanelStateChanged" />
+
+@* SignalR Bağlantısı - Authenticated kullanıcılar için HubConnection oluşturur *@
+@* NOT: TV Display sayfası kendi SignalR'ını yönetir, bu sadece MainLayout için *@
+<script src="/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+<script src="/js/banko-mode.js"></script>
+<script>
+    (function() {
+        // MainLayout için SignalR bağlantısı
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/siramatik")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.start()
+            .then(() => {
+                console.log("✅ MainLayout - SignalR bağlantısı kuruldu");
+                
+                // Banko modu için bağlantıyı set et
+                window.bankoMode.setConnection(connection);
+            })
+            .catch(err => {
+                console.error("❌ MainLayout - SignalR bağlantı hatası:", err);
+            });
+
+        connection.onreconnected(() => {
+            console.log("✅ MainLayout - SignalR yeniden bağlandı");
+        });
+
+        connection.onclose(() => {
+            console.log("🔴 MainLayout - SignalR bağlantısı koptu");
+        });
+
+        // ForceLogout event handler (Yeni login = Eski logout)
+        connection.on("ForceLogout", (message) => {
+            console.warn("⚠️ ForceLogout alındı:", message);
+            
+            // Kullanıcıya bilgi ver
+            alert(message);
+            
+            // LocalStorage ve SessionStorage temizle
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Cookie'leri temizle
+            document.cookie.split(";").forEach((c) => {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+            
+            // Login sayfasına yönlendir
+            window.location.href = "/Account/Login";
+        });
+    })();
+</script>

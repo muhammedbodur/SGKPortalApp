@@ -126,5 +126,19 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
             var result = await _tvService.RemoveBankoFromTvAsync(tvId, bankoId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
+
+        // ═══════════════════════════════════════════════════════
+        // UTILITY ENDPOINTS
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Tüm mevcut TV'ler için User oluşturur (Migration sonrası kullanım için)
+        /// </summary>
+        [HttpPost("create-users-for-all")]
+        public async Task<IActionResult> CreateUsersForAllTvs()
+        {
+            var result = await _tvService.CreateUsersForAllTvsAsync();
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
     }
 }

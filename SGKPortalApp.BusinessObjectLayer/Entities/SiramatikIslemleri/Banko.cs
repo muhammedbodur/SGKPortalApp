@@ -46,5 +46,8 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
 
         [InverseProperty("Banko")]
         public ICollection<BankoHareket>? BankoHareketleri { get; set; } = new List<BankoHareket>();
+
+        [InverseProperty("Banko")]
+        public HubBankoConnection? HubBankoConnection { get; set; }
     }
 }

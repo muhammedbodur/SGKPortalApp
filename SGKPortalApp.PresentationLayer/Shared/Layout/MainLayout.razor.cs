@@ -2,20 +2,69 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
+using SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces;
+using SGKPortalApp.PresentationLayer.Services.State;
 
 namespace SGKPortalApp.PresentationLayer.Shared.Layout
 {
-    public partial class MainLayout
+    public partial class MainLayout : IAsyncDisposable, IDisposable
     {
         [Inject] private IJSRuntime JS { get; set; } = default!;
+        [Inject] private IBankoModeService? BankoModeService { get; set; }
+        [Inject] private IHttpContextAccessor? HttpContextAccessor { get; set; }
+        [Inject] private BankoModeStateService BankoModeState { get; set; } = default!;
+        [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
         private List<SiraCagirmaResponseDto> siraListesi = new();
         private bool siraPanelAcik = false;
+        private DotNetObjectReference<MainLayout>? dotNetHelper;
 
         protected override void OnInitialized()
         {
             // TODO: Gerçek uygulamada service/SignalR'dan gelecek
             OrnekSiraVerileriYukle();
+            
+            // URL değişikliklerini dinle (Banko modu kontrolü için)
+            NavigationManager.LocationChanged += OnLocationChanged;
+            
+            // Banko modu state değişikliklerini dinle
+            BankoModeState.OnBankoModeChanged += OnBankoModeStateChanged;
+            
+            // İlk yüklemede kontrol et
+            CheckBankoModeAccess();
+        }
+        
+        private void OnBankoModeStateChanged()
+        {
+            // State değiştiğinde UI'ı güncelle
+            InvokeAsync(StateHasChanged);
+        }
+
+        private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+        {
+            CheckBankoModeAccess();
+        }
+
+        private void CheckBankoModeAccess()
+        {
+            var currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+            var tcKimlikNo = HttpContextAccessor?.HttpContext?.User.FindFirst("TcKimlikNo")?.Value;
+            
+            // Banko modunda mı?
+            if (BankoModeState.IsInBankoMode && !string.IsNullOrEmpty(tcKimlikNo))
+            {
+                // Bu personel banko modunda mı?
+                if (BankoModeState.IsPersonelInBankoMode(tcKimlikNo))
+                {
+                    // Dashboard dışında bir sayfaya gitmeye çalışıyor mu?
+                    if (!currentUrl.Equals("", StringComparison.OrdinalIgnoreCase) && 
+                        !currentUrl.Equals("siramatik/dashboard", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // İzin yok, Dashboard'a geri yönlendir
+                        NavigationManager.NavigateTo("/siramatik/dashboard", forceLoad: true);
+                    }
+                }
+            }
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -27,6 +76,10 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                 try
                 {
                     await JS.InvokeVoidAsync("initSneatMenu");
+                    
+                    // SignalR event handler'larını kur
+                    dotNetHelper = DotNetObjectReference.Create(this);
+                    await JS.InvokeVoidAsync("bankoMode.setupEventHandlers", dotNetHelper);
                 }
                 catch (Exception ex)
                 {
@@ -75,6 +128,95 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         {
             siraPanelAcik = isVisible;
             StateHasChanged();
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // BANKO MODE - JavaScript'ten çağrılacak metodlar
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Banko moduna geç (C# tarafından çağrılır)
+        /// </summary>
+        public async Task<bool> EnterBankoModeAsync(int bankoId)
+        {
+            try
+            {
+                var tcKimlikNo = HttpContextAccessor?.HttpContext?.User.FindFirst("TcKimlikNo")?.Value;
+                if (string.IsNullOrEmpty(tcKimlikNo))
+                {
+                    Console.WriteLine("❌ Kullanıcı bilgisi bulunamadı");
+                    return false;
+                }
+
+                // 1. Kontroller (C# tarafında)
+                if (BankoModeService != null)
+                {
+                    var bankoInUse = await BankoModeService.IsBankoInUseAsync(bankoId);
+                    if (bankoInUse)
+                    {
+                        var activePersonel = await BankoModeService.GetBankoActivePersonelNameAsync(bankoId);
+                        Console.WriteLine($"❌ Banko#{bankoId} kullanımda: {activePersonel}");
+                        return false;
+                    }
+                }
+
+                // NOT: Bu metod artık kullanılmıyor
+                // BankoModeWidget direkt C# ile işlem yapıyor
+                Console.WriteLine("⚠️ EnterBankoModeAsync çağrıldı ama artık kullanılmıyor");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ EnterBankoModeAsync hatası: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Banko modundan çık (C# tarafından çağrılır)
+        /// </summary>
+        public async Task<bool> ExitBankoModeAsync()
+        {
+            // NOT: Bu metod artık kullanılmıyor
+            // BankoModeWidget direkt C# ile işlem yapıyor
+            Console.WriteLine("⚠️ ExitBankoModeAsync çağrıldı ama artık kullanılmıyor");
+            await Task.CompletedTask;
+            return false;
+        }
+
+        /// <summary>
+        /// JavaScript'ten çağrılır: Banko modu aktif oldu
+        /// </summary>
+        [JSInvokable]
+        public async Task OnBankoModeActivated(int bankoId)
+        {
+            Console.WriteLine($"✅ MainLayout - Banko modu aktif: Banko#{bankoId}");
+            await Task.CompletedTask;
+            // UI güncellemesi gerekirse StateHasChanged() çağrılabilir
+        }
+
+        /// <summary>
+        /// JavaScript'ten çağrılır: Banko modu deaktif oldu
+        /// </summary>
+        [JSInvokable]
+        public async Task OnBankoModeDeactivated()
+        {
+            Console.WriteLine("✅ MainLayout - Banko modu deaktif");
+            await Task.CompletedTask;
+            // UI güncellemesi gerekirse StateHasChanged() çağrılabilir
+        }
+
+        public void Dispose()
+        {
+            NavigationManager.LocationChanged -= OnLocationChanged;
+            BankoModeState.OnBankoModeChanged -= OnBankoModeStateChanged;
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            dotNetHelper?.Dispose();
+            Dispose();
+            await Task.CompletedTask;
         }
     }
 }

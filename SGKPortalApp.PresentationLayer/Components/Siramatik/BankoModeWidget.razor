@@ -1,0 +1,47 @@
+@if (assignedBanko != null)
+{
+    <div class="banko-mode-widget">
+        @if (isInBankoMode)
+        {
+            <!-- Banko Modunda -->
+            <div class="alert alert-success d-flex align-items-center">
+                <i class="bx bx-desktop fs-4 me-2"></i>
+                <div class="flex-grow-1">
+                    <strong>Banko Modu Aktif</strong>
+                    <br />
+                    <small>Banko #@assignedBanko.BankoNo - @assignedBanko.BankoTipiAdi</small>
+                </div>
+                <button class="btn btn-sm btn-danger" @onclick="ExitBankoMode" disabled="@isLoading">
+                    <i class="bx bx-log-out"></i> Çıkış
+                </button>
+            </div>
+        }
+        else
+        {
+            <!-- Normal Mod -->
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="bx bx-desktop"></i> Atanmış Banko
+                    </h6>
+                    <p class="mb-2">
+                        <strong>Banko #@assignedBanko.BankoNo</strong><br />
+                        <small class="text-muted">@assignedBanko.BankoTipiAdi - @assignedBanko.KatTipiAdi</small>
+                    </p>
+                    
+                    @if (bankoInUse)
+                    {
+                        <div class="alert alert-warning alert-sm mb-2">
+                            <i class="bx bx-error-circle"></i>
+                            Bu banko şu anda <strong>@activePersonelName</strong> tarafından kullanılıyor.
+                        </div>
+                    }
+                    
+                    <button class="btn btn-primary w-100" @onclick="EnterBankoMode" disabled="@(isLoading || bankoInUse)">
+                        <i class="bx bx-log-in"></i> Banko Moduna Geç
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+}

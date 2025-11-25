@@ -43,6 +43,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 var bankoDtos = _mapper.Map<List<BankoResponseDto>>(bankolar);
 
+                // IsConnected durumunu set et
+                foreach (var bankoDto in bankoDtos)
+                {
+                    var entity = bankolar.FirstOrDefault(b => b.BankoId == bankoDto.BankoId);
+                    if (entity != null)
+                    {
+                        bankoDto.IsConnected = entity.HubBankoConnection != null && 
+                                              entity.HubBankoConnection.HubConnection != null && 
+                                              entity.HubBankoConnection.HubConnection.ConnectionStatus == ConnectionStatus.online;
+                    }
+                }
+
                 return ApiResponseDto<List<BankoResponseDto>>
                     .SuccessResult(bankoDtos, "Bankolar başarıyla getirildi");
             }

@@ -5,6 +5,7 @@ using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.PresentationLayer.Extensions;
 using SGKPortalApp.PresentationLayer.Helpers;
+using SGKPortalApp.PresentationLayer.Middleware;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -81,6 +82,17 @@ builder.Services.AddDbContext<SGKDbContext>(options =>
 });
 
 // ═══════════════════════════════════════════════════════
+// 🌐 HTTP CLIENT (API çağrıları için)
+// ═══════════════════════════════════════════════════════
+builder.Services.AddHttpClient("ApiClient", client =>
+{
+    client.BaseAddress = new Uri(apiUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
+Console.WriteLine($"✅ HttpClient configured - BaseAddress: {apiUrl}");
+
+// ═══════════════════════════════════════════════════════
 // ⭐ KATMAN SERVİSLERİ ⭐
 // ═══════════════════════════════════════════════════════
 // 1. Data Access Layer + Business Logic Layer (Shared connection string kullanıyor)
@@ -114,6 +126,35 @@ builder.Services.AddCors(options =>
 builder.Services.AddMemoryCache();
 
 // ═══════════════════════════════════════════════════════
+// 📡 SIGNALR HUBS
+// ═══════════════════════════════════════════════════════
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+    options.KeepAliveInterval = TimeSpan.FromSeconds(10);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+    options.MaximumReceiveMessageSize = 32 * 1024; // 32KB
+});
+
+// Hub Connection API Service (Layered Architecture)
+builder.Services.AddScoped<SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.SignalR.IHubConnectionApiService,
+    SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR.HubConnectionApiService>();
+
+// Hub Connection Service (API kullanarak)
+builder.Services.AddScoped<SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces.IHubConnectionService,
+    SGKPortalApp.PresentationLayer.Services.Hubs.Concrete.HubConnectionService>();
+
+// Banko Mode Service
+builder.Services.AddScoped<SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces.IBankoModeService,
+    SGKPortalApp.PresentationLayer.Services.Hubs.Concrete.BankoModeService>();
+
+// Banko Mode State Service (Singleton - Tüm uygulama boyunca tek instance)
+builder.Services.AddSingleton<SGKPortalApp.PresentationLayer.Services.State.BankoModeStateService>();
+
+Console.WriteLine("✅ SignalR Hub servisleri kaydedildi");
+
+// ═══════════════════════════════════════════════════════
 // 🔧 AUTOMAPPER
 // ═══════════════════════════════════════════════════════
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -132,15 +173,53 @@ builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.C
         options.LoginPath = "/auth/login";
         options.LogoutPath = "/auth/logout";
         options.AccessDeniedPath = "/auth/access-denied";
-        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.ExpireTimeSpan = TimeSpan.FromHours(8); // Personel için 8 saat
         options.SlidingExpiration = true;
         options.Cookie.Name = "SGKPortal.Auth";
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // HTTPS ve HTTP için uyumlu
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         options.Cookie.SameSite = SameSiteMode.Lax;
+        
+        // TV kullanıcıları için oturum süresini maksimum yap
+        options.Events.OnSigningIn = context =>
+        {
+            var userTypeClaim = context.Principal?.FindFirst("UserType");
+            if (userTypeClaim?.Value == "TvUser")
+            {
+                // TV için 365 gün (1 yıl) oturum süresi
+                context.Properties.ExpiresUtc = DateTimeOffset.UtcNow.AddDays(365);
+                context.Properties.IsPersistent = true; // Tarayıcı kapansa bile oturum açık kalsın
+            }
+            return Task.CompletedTask;
+        };
     });
 
-builder.Services.AddAuthorization();
+// Authorization Handlers
+builder.Services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationHandler,
+    SGKPortalApp.PresentationLayer.Authorization.TvUserAuthorizationHandler>();
+
+builder.Services.AddAuthorization(options =>
+{
+    // Personel Policy - Sadece Personel tipindeki kullanıcılar
+    options.AddPolicy("PersonelOnly", policy =>
+        policy.RequireClaim("UserType", "Personel"));
+
+    // TV Policy - Sadece TV tipindeki kullanıcılar
+    options.AddPolicy("TvOnly", policy =>
+        policy.RequireClaim("UserType", "TvUser"));
+
+    // Banko Modu Policy - Banko modunda olmayan kullanıcılar
+    options.AddPolicy("NotInBankoMode", policy =>
+        policy.RequireAssertion(context =>
+        {
+            var bankoModuClaim = context.User.FindFirst("BankoModuAktif");
+            return bankoModuClaim == null || bankoModuClaim.Value != "true";
+        }));
+
+    // TV User Restriction Policy - TV User'lar sadece kendi Display sayfasına erişebilir
+    options.AddPolicy("TvUserRestriction", policy =>
+        policy.Requirements.Add(new SGKPortalApp.PresentationLayer.Authorization.TvUserRequirement()));
+});
 
 // ═══════════════════════════════════════════════════════
 // 🌍 LOCALİZATİON (Yerelleştirme)
@@ -203,6 +282,10 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// TV User Restriction Middleware
+// TV User'ların sadece kendi Display sayfalarına erişmesini sağlar
+app.UseTvUserRestriction();
+
 // ═══════════════════════════════════════════════════════
 // 🔌 BLAZOR HUB & ROUTING
 // ═══════════════════════════════════════════════════════
@@ -211,6 +294,13 @@ app.MapBlazorHub(options =>
     options.ApplicationMaxBufferSize = 32768; // 32KB
     options.TransportMaxBufferSize = 32768;
 }).AllowAnonymous();
+
+// ═══════════════════════════════════════════════════════
+// 📡 SIGNALR HUB ENDPOINTS
+// ═══════════════════════════════════════════════════════
+app.MapHub<SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub>("/hubs/siramatik");
+app.MapHub<SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub>("/hubs/tv"); // TV Display için backward compatibility
+Console.WriteLine("✅ SignalR Hub endpoints: /hubs/siramatik, /hubs/tv");
 
 app.MapRazorPages();
 app.MapFallbackToPage("/_Host");

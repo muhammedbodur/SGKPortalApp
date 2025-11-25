@@ -1,14 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Generic;
-using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
-using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 
-namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
+namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
 {
     public class HubConnectionRepository : GenericRepository<HubConnection>, IHubConnectionRepository
     {

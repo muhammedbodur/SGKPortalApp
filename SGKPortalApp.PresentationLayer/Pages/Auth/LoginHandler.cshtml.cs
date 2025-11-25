@@ -53,22 +53,28 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                 var claims = new List<Claim>
                 {
                     new Claim("TcKimlikNo", loginResponse.TcKimlikNo),
-                    new Claim("SicilNo", loginResponse.SicilNo.ToString()),
                     new Claim("AdSoyad", loginResponse.AdSoyad),
                     new Claim(ClaimTypes.Name, loginResponse.AdSoyad),
-                    new Claim(ClaimTypes.Email, loginResponse.Email),
-                    new Claim("DepartmanId", loginResponse.DepartmanId.ToString()),
-                    new Claim("DepartmanAdi", loginResponse.DepartmanAdi),
-                    new Claim("ServisId", loginResponse.ServisId.ToString()),
-                    new Claim("ServisAdi", loginResponse.ServisAdi),
-                    new Claim("HizmetBinasiId", loginResponse.HizmetBinasiId.ToString()),
-                    new Claim("HizmetBinasiAdi", loginResponse.HizmetBinasiAdi),
-                    new Claim("SessionID", loginResponse.SessionId)
+                    new Claim("SessionID", loginResponse.SessionId),
+                    new Claim("UserType", loginResponse.UserType ?? "Personel") // TV veya Personel
                 };
 
-                if (!string.IsNullOrEmpty(loginResponse.Resim))
+                // Personel için ek claim'ler
+                if (loginResponse.UserType != "TvUser")
                 {
-                    claims.Add(new Claim("Resim", loginResponse.Resim));
+                    claims.Add(new Claim("SicilNo", loginResponse.SicilNo.ToString()));
+                    claims.Add(new Claim(ClaimTypes.Email, loginResponse.Email ?? ""));
+                    claims.Add(new Claim("DepartmanId", loginResponse.DepartmanId.ToString()));
+                    claims.Add(new Claim("DepartmanAdi", loginResponse.DepartmanAdi ?? ""));
+                    claims.Add(new Claim("ServisId", loginResponse.ServisId.ToString()));
+                    claims.Add(new Claim("ServisAdi", loginResponse.ServisAdi ?? ""));
+                    claims.Add(new Claim("HizmetBinasiId", loginResponse.HizmetBinasiId.ToString()));
+                    claims.Add(new Claim("HizmetBinasiAdi", loginResponse.HizmetBinasiAdi ?? ""));
+                    
+                    if (!string.IsNullOrEmpty(loginResponse.Resim))
+                    {
+                        claims.Add(new Claim("Resim", loginResponse.Resim));
+                    }
                 }
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -84,13 +90,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                     new ClaimsPrincipal(claimsIdentity),
                     authProperties);
 
-                _logger.LogInformation("✅ Kullanıcı giriş yaptı: {AdSoyad} ({TcKimlikNo})",
-                    loginResponse.AdSoyad, loginResponse.TcKimlikNo);
+                _logger.LogInformation("✅ Kullanıcı giriş yaptı: {AdSoyad} ({TcKimlikNo}) - {UserType}",
+                    loginResponse.AdSoyad, loginResponse.TcKimlikNo, loginResponse.UserType);
 
+                // RedirectUrl varsa oraya yönlendir, yoksa ana sayfaya
+                var redirectUrl = loginResponse.RedirectUrl ?? "/";
+                _logger.LogDebug("🔵 Redirect yapılıyor: {RedirectUrl}", redirectUrl);
                 
-                _logger.LogDebug("🔵 Ana sayfaya redirect yapılıyor: /");
-                
-                return Redirect("/");
+                return Redirect(redirectUrl);
             }
             catch (Exception ex)
             {

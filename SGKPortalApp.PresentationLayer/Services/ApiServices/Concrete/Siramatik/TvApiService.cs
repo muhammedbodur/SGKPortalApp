@@ -207,5 +207,19 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
                 return ApiResponseDto<bool>.ErrorResult($"API çağrısı başarısız: {ex.Message}");
             }
         }
+
+        public async Task<ApiResponseDto<List<TvSiraDto>>> GetActiveSiralarByTvIdAsync(int tvId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{BaseEndpoint}/{tvId}/siralar");
+                return await response.Content.ReadFromJsonAsync<ApiResponseDto<List<TvSiraDto>>>()
+                    ?? ApiResponseDto<List<TvSiraDto>>.ErrorResult("Yanıt alınamadı");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponseDto<List<TvSiraDto>>.ErrorResult($"API çağrısı başarısız: {ex.Message}");
+            }
+        }
     }
 }

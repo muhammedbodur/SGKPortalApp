@@ -18,6 +18,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Proje Mimarisi", "Proje Mimarisi", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
 		bankoYapisi.md = bankoYapisi.md
+		DeploymentRehberi.md = DeploymentRehberi.md
 		proje.md = proje.md
 		sablon.txt = sablon.txt
 		SiramatikIsleyis.txt = SiramatikIsleyis.txt

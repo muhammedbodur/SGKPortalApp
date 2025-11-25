@@ -1,10 +1,10 @@
-﻿using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
-using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 
-namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri
+namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common
 {
     public interface IHubConnectionRepository : IGenericRepository<HubConnection>
     {

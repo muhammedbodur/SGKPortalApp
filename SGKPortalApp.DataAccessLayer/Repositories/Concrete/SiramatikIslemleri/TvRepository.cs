@@ -31,7 +31,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(tv => tv.HizmetBinasi)
-                .Include(tv => tv.HubTvConnection)
+                .Include(tv => tv.HubTvConnections)
                 .Include(tv => tv.TvBankolar)
                 .FirstOrDefaultAsync(tv => tv.TvId == tvId);
         }
@@ -42,7 +42,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(tv => tv.HizmetBinasi)
-                .Include(tv => tv.HubTvConnection)
+                .Include(tv => tv.HubTvConnections)
                 .Include(tv => tv.TvBankolar)
                 .ToListAsync();
         }

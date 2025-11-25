@@ -31,6 +31,10 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .HasDefaultValue(Aktiflik.Aktif)
                 .HasComment("TV aktiflik durumu");
 
+            builder.Property(t => t.TcKimlikNo)
+                .HasMaxLength(11)
+                .HasComment("TV için oluşturulan User'ın TcKimlikNo'su (FK)");
+
             builder.Property(t => t.EklenmeTarihi)
                 .IsRequired()
                 .HasDefaultValueSql("GETDATE()");
@@ -50,6 +54,11 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
 
             builder.HasIndex(t => t.TvAktiflik)
                 .HasDatabaseName("IX_SIR_Tvler_Aktiflik");
+
+            builder.HasIndex(t => t.TcKimlikNo)
+                .IsUnique()
+                .HasDatabaseName("IX_SIR_Tvler_TcKimlikNo")
+                .HasFilter("[TcKimlikNo] IS NOT NULL AND [SilindiMi] = 0");
 
             builder.HasQueryFilter(t => !t.SilindiMi);
 
