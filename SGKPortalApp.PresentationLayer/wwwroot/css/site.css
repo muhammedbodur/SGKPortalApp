@@ -389,3 +389,165 @@ html.layout-menu-fixed:not(.layout-menu-collapsed) .layout-menu-toggle .bx-chevr
 .banko-mode-active {
     background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%);
 }
+
+/* ============================================
+   DASHBOARD ADAPTIVE GRID LAYOUT
+   ============================================ */
+
+/* Dashboard top section grid */
+.dashboard-top-grid {
+    display: grid;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* Mobile: Stack vertically */
+@media (max-width: 767px) {
+    .dashboard-top-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Tablet: 50-50 split when widget visible */
+@media (min-width: 768px) and (max-width: 991px) {
+    /* Widget görünürse 50-50 */
+    .dashboard-top-grid:has(.banko-mode-widget:not(:empty)) {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    /* Widget gizliyse full width */
+    .dashboard-top-grid:not(:has(.banko-mode-widget:not(:empty))) {
+        grid-template-columns: 1fr;
+    }
+
+        /* Widget yoksa welcome column'ı gizle */
+        .dashboard-top-grid:not(:has(.banko-mode-widget:not(:empty))) .dashboard-widget-col {
+            display: none;
+        }
+}
+
+/* Desktop: Optimal layout */
+@media (min-width: 992px) {
+    /* Widget VARSA: 33% - 67% */
+    .dashboard-top-grid:has(.banko-mode-widget:not(:empty)) {
+        grid-template-columns: minmax(300px, 400px) 1fr;
+    }
+
+    /* Widget YOKSA: 100% */
+    .dashboard-top-grid:not(:has(.banko-mode-widget:not(:empty))) {
+        grid-template-columns: 1fr;
+    }
+
+        /* Widget yoksa widget column'ı gizle */
+        .dashboard-top-grid:not(:has(.banko-mode-widget:not(:empty))) .dashboard-widget-col {
+            display: none;
+        }
+}
+
+/* Large Desktop: Daha geniş widget */
+@media (min-width: 1400px) {
+    .dashboard-top-grid:has(.banko-mode-widget:not(:empty)) {
+        grid-template-columns: 420px 1fr;
+    }
+}
+
+/* ============================================
+   WIDGET COLUMN STYLING
+   ============================================ */
+
+.dashboard-widget-col {
+    min-width: 0; /* Flexbox overflow fix */
+}
+
+    /* Widget boşsa column'ı gizle */
+    .dashboard-widget-col:has(.banko-mode-widget:empty),
+    .dashboard-widget-col:not(:has(.banko-mode-widget)) {
+        display: none;
+    }
+
+/* ============================================
+   WELCOME CARD COLUMN
+   ============================================ */
+
+.dashboard-welcome-col {
+    min-width: 0; /* Flexbox overflow fix */
+}
+
+/* ============================================
+   SMOOTH TRANSITIONS
+   ============================================ */
+
+.dashboard-top-grid,
+.dashboard-widget-col,
+.dashboard-welcome-col {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   BANKO WIDGET ENHANCED STYLING
+   ============================================ */
+
+.banko-mode-widget {
+    animation: fadeInDown 0.5s ease;
+}
+
+    /* Widget boşsa gizle */
+    .banko-mode-widget:empty {
+        display: none;
+    }
+
+    .banko-mode-widget .card {
+        border-top: 3px solid #696cff;
+        box-shadow: 0 2px 6px 0 rgba(67, 89, 113, 0.12);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .banko-mode-widget .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px 0 rgba(67, 89, 113, 0.18);
+        }
+
+/* ============================================
+   FADE IN ANIMATION
+   ============================================ */
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   WELCOME CARD RESPONSIVE IMAGE
+   ============================================ */
+
+.dashboard-welcome-col img {
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 575px) {
+    .dashboard-welcome-col img {
+        height: 100px;
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    .dashboard-widget-col {
+        display: none !important;
+    }
+
+    .dashboard-top-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
