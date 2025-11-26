@@ -35,6 +35,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
         Task<ApiResponseDto<BankoResponseDto>> GetPersonelCurrentBankoAsync(string tcKimlikNo);
 
         // ═══════════════════════════════════════════════════════
+        // MAINTENANCE OPERATIONS
+        // ═══════════════════════════════════════════════════════
+
+        Task<ApiResponseDto<int>> CleanupInconsistentBankoAssignmentsAsync();
+
+        // ═══════════════════════════════════════════════════════
         // AKTIFLIK OPERATIONS
         // ═══════════════════════════════════════════════════════
 

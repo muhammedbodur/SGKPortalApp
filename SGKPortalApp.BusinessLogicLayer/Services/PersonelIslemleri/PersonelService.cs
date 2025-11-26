@@ -101,20 +101,26 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 _mapper.Map(request, personel);
                 personelRepo.Update(personel);
 
-                // ⭐ YENİ: Hizmet binası değiştiyse, eski banko atamasını temizle
+                // ⭐ YENİ: Hizmet binası VEYA departman değiştiyse, eski banko atamasını temizle
                 // BankoKullanici'da HizmetBinasiId olduğu için artık database constraint ile garanti ediliyor
                 // Ama yine de eski atamaları temizlemek gerekiyor
-                if (eskiHizmetBinasiId != request.HizmetBinasiId)
+                // ⭐ GÜNCELLEME: Departman değişikliği de kontrol ediliyor
+                if (eskiHizmetBinasiId != request.HizmetBinasiId || eskiDepartmanId != request.DepartmanId)
                 {
                     var bankoKullaniciRepo = _unitOfWork.GetRepository<IBankoKullaniciRepository>();
                     var eskiBankoAtamasi = await bankoKullaniciRepo.GetByPersonelAsync(tcKimlikNo);
-                    
+
                     if (eskiBankoAtamasi != null)
                     {
                         bankoKullaniciRepo.Delete(eskiBankoAtamasi);
+
+                        var degisiklikTipi = eskiHizmetBinasiId != request.HizmetBinasiId
+                            ? $"hizmet binası ({eskiHizmetBinasiId} -> {request.HizmetBinasiId})"
+                            : $"departman ({eskiDepartmanId} -> {request.DepartmanId})";
+
                         _logger.LogInformation(
-                            "Personelin hizmet binası değişti ({EskiBina} -> {YeniBina}). Eski banko ataması temizlendi. TC: {TcKimlikNo}", 
-                            eskiHizmetBinasiId, request.HizmetBinasiId, tcKimlikNo);
+                            "Personelin {DegisiklikTipi} değişti. Eski banko ataması temizlendi. TC: {TcKimlikNo}",
+                            degisiklikTipi, tcKimlikNo);
                     }
 
                     // Banko modundaysa çıkar
@@ -125,7 +131,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         user.AktifBankoId = null;
                         user.BankoModuBaslangic = null;
                         _unitOfWork.Repository<User>().Update(user);
-                        _logger.LogInformation("Personel hizmet binası değiştiği için banko modundan çıkarıldı. TC: {TcKimlikNo}", tcKimlikNo);
+                        _logger.LogInformation("Personel hizmet binası/departman değiştiği için banko modundan çıkarıldı. TC: {TcKimlikNo}", tcKimlikNo);
                     }
                 }
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
 using System;
@@ -117,7 +118,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Generic
         }
 
         /// <summary>
-        /// Entity'yi hard delete yapar
+        /// Entity'yi siler (AuditableEntity ise soft delete, değilse hard delete)
         /// </summary>
         public virtual void Delete(T entity)
         {
@@ -130,18 +131,36 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Generic
                 _dbSet.Attach(entity);
             }
 
-            _dbSet.Remove(entity);
+            // ⭐ SOFT DELETE: AuditableEntity ise SilindiMi = true yap
+            if (entity is AuditableEntity auditableEntity)
+            {
+                auditableEntity.SilindiMi = true;
+                auditableEntity.SilinmeTarihi = DateTime.Now;
+                // TODO: HttpContextAccessor ile kullanıcı bilgisi alınabilir
+                // auditableEntity.SilenKullanici = _currentUser?.TcKimlikNo;
+
+                _context.Entry(entity).State = EntityState.Modified;
+            }
+            else
+            {
+                // Normal entity ise hard delete
+                _dbSet.Remove(entity);
+            }
         }
 
         /// <summary>
-        /// Birden fazla entity'yi toplu siler
+        /// Birden fazla entity'yi toplu siler (AuditableEntity ise soft delete, değilse hard delete)
         /// </summary>
         public virtual void DeleteRange(IEnumerable<T> entities)
         {
             if (entities == null || !entities.Any())
                 throw new ArgumentException("Entities cannot be null or empty", nameof(entities));
 
-            _dbSet.RemoveRange(entities);
+            // ⭐ SOFT DELETE: Her entity için Delete metodunu çağır
+            foreach (var entity in entities)
+            {
+                Delete(entity);
+            }
         }
 
         /// <summary>
