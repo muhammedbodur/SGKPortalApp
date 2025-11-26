@@ -151,11 +151,12 @@ else
                     </div>
 
                     <!-- Renk Açıklaması -->
-                    <div class="col-md-6">
+                    <div class="col-md-8">
                         <label class="form-label fw-bold">
                             <i class="bx bx-info-circle me-2"></i>Uzmanlık Seviyeleri
                         </label>
                         <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <span class="badge bg-danger p-2">Şef</span>
                             <span class="badge bg-success p-2">Konusunda Uzman</span>
                             <span class="badge bg-info p-2">Konusunda Yrd. Uzman</span>
                             <span class="badge bg-secondary p-2">Bilgisi Yok</span>
@@ -330,7 +331,7 @@ else
                                                             @onclick="() => OnHucreClicked(personel.TcKimlikNo, kai.KanalAltIslemId)"
                                                             disabled="@isLoading"
                                                             id="@hucreId"
-                                                            title="Tıkla: Bilgisi Yok → Uzman → Yrd. Uzman → Bilgisi Yok">
+                                                            title="Tıkla: Bilgisi Yok → Şef → Uzman → Yrd. Uzman → Bilgisi Yok">
 
                                                         @if (isLoading)
                                                         {

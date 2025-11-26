@@ -21,8 +21,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Proje Mimarisi", "Proje Mim
 		DeploymentRehberi.md = DeploymentRehberi.md
 		proje.md = proje.md
 		sablon.txt = sablon.txt
-		SiramatikIsleyis.txt = SiramatikIsleyis.txt
 		SiramatikAkilliTabMimarisi.md = SiramatikAkilliTabMimarisi.md
+		SiramatikIsleyis.txt = SiramatikIsleyis.txt
+		yetkilendirme.md = yetkilendirme.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
