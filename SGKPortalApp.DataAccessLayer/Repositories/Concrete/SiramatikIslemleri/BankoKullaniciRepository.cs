@@ -27,13 +27,16 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         }
 
         // Personele atanmış banko kullanıcısını getirir
+        // ⭐ ÖNEMLİ: HizmetBinasiId'ye bakmadan TÜM kayıtları getir
+        // Çünkü personel hizmet binası değiştirdiğinde ESKİ kaydı bulmamız gerekiyor
         public async Task<BankoKullanici?> GetByPersonelAsync(string tcKimlikNo)
         {
             return await _dbSet
-                .AsNoTracking()
+                .IgnoreQueryFilters() // ⭐ Query filter'ı devre dışı bırak (SilindiMi kontrolü manuel yapılacak)
                 .Include(bk => bk.Banko)
                 .Include(bk => bk.Personel)
                 .Where(bk => !bk.SilindiMi) // Explicit SilindiMi kontrolü
+                .OrderByDescending(bk => bk.EklenmeTarihi) // En son eklenen kayıt
                 .FirstOrDefaultAsync(bk => bk.TcKimlikNo == tcKimlikNo);
         }
 

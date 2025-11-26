@@ -31,14 +31,19 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .IsRequired()
                 .HasDefaultValue(false);
 
+            builder.Property(bk => bk.HizmetBinasiId)
+                .IsRequired();
+
+            // UNIQUE: Bir banko sadece bir personele atanabilir (1-to-1)
             builder.HasIndex(bk => bk.BankoId)
                 .IsUnique()
                 .HasDatabaseName("IX_SIR_BankoKullanicilari_BankoId")
                 .HasFilter("[SilindiMi] = 0");
 
-            builder.HasIndex(bk => bk.TcKimlikNo)
+            // UNIQUE: Bir personel sadece bir hizmet binasında bir bankoya atanabilir (1-to-1)
+            builder.HasIndex(bk => new { bk.TcKimlikNo, bk.HizmetBinasiId })
                 .IsUnique()
-                .HasDatabaseName("IX_SIR_BankoKullanicilari_TcKimlikNo")
+                .HasDatabaseName("IX_SIR_BankoKullanicilari_TcKimlik_HizmetBinasi")
                 .HasFilter("[SilindiMi] = 0");
 
             builder.HasQueryFilter(bk => !bk.SilindiMi);
@@ -54,6 +59,12 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .HasForeignKey(bk => bk.BankoId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_SIR_BankoKullanicilari_SIR_Bankolar");
+
+            builder.HasOne(bk => bk.HizmetBinasi)
+                .WithMany()
+                .HasForeignKey(bk => bk.HizmetBinasiId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_SIR_BankoKullanicilari_CMN_HizmetBinalari");
         }
     }
 }

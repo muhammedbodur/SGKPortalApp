@@ -375,15 +375,24 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     await _unitOfWork.SaveChangesAsync();
                 }
 
+                // ⭐ YENİ: HizmetBinasiId kontrolü - Personel ve Banko aynı hizmet binasında olmalı
+                if (personelExists.HizmetBinasiId != bankoExists.HizmetBinasiId)
+                {
+                    return ApiResponseDto<bool>.ErrorResult(
+                        $"Personel ({personelExists.HizmetBinasi?.HizmetBinasiAdi}) ve Banko ({bankoExists.HizmetBinasi?.HizmetBinasiAdi}) farklı hizmet binalarında. Atama yapılamaz.");
+                }
+
                 // Yeni atama yap
                 var bankoKullanici = new BankoKullanici
                 {
                     BankoId = request.BankoId,
                     TcKimlikNo = request.TcKimlikNo,
+                    HizmetBinasiId = personelExists.HizmetBinasiId, // ⭐ YENİ: HizmetBinasiId eklendi
                     EklenmeTarihi = DateTime.Now,
                     DuzenlenmeTarihi = DateTime.Now,
                     Banko = null!,
-                    Personel = null!
+                    Personel = null!,
+                    HizmetBinasi = null! // ⭐ YENİ: HizmetBinasi navigation property
                 };
 
                 await bankoKullaniciRepo.AddAsync(bankoKullanici);

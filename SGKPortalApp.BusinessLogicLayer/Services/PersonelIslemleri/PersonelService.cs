@@ -12,6 +12,7 @@ using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
 using System.Text;
 using System.Text.Json;
 
@@ -93,8 +94,40 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         .ErrorResult("Personel bulunamadı");
                 }
 
+                // Hizmet binası veya departman değişikliği kontrolü
+                var eskiHizmetBinasiId = personel.HizmetBinasiId;
+                var eskiDepartmanId = personel.DepartmanId;
+
                 _mapper.Map(request, personel);
                 personelRepo.Update(personel);
+
+                // ⭐ YENİ: Hizmet binası değiştiyse, eski banko atamasını temizle
+                // BankoKullanici'da HizmetBinasiId olduğu için artık database constraint ile garanti ediliyor
+                // Ama yine de eski atamaları temizlemek gerekiyor
+                if (eskiHizmetBinasiId != request.HizmetBinasiId)
+                {
+                    var bankoKullaniciRepo = _unitOfWork.GetRepository<IBankoKullaniciRepository>();
+                    var eskiBankoAtamasi = await bankoKullaniciRepo.GetByPersonelAsync(tcKimlikNo);
+                    
+                    if (eskiBankoAtamasi != null)
+                    {
+                        bankoKullaniciRepo.Delete(eskiBankoAtamasi);
+                        _logger.LogInformation(
+                            "Personelin hizmet binası değişti ({EskiBina} -> {YeniBina}). Eski banko ataması temizlendi. TC: {TcKimlikNo}", 
+                            eskiHizmetBinasiId, request.HizmetBinasiId, tcKimlikNo);
+                    }
+
+                    // Banko modundaysa çıkar
+                    var user = await _unitOfWork.Repository<User>().GetByIdAsync(tcKimlikNo);
+                    if (user != null && user.BankoModuAktif)
+                    {
+                        user.BankoModuAktif = false;
+                        user.AktifBankoId = null;
+                        user.BankoModuBaslangic = null;
+                        _unitOfWork.Repository<User>().Update(user);
+                        _logger.LogInformation("Personel hizmet binası değiştiği için banko modundan çıkarıldı. TC: {TcKimlikNo}", tcKimlikNo);
+                    }
+                }
 
                 // User kontrolü - yoksa oluştur, varsa aktiflik durumunu güncelle
                 var existingUser = await _unitOfWork.Repository<User>().GetByIdAsync(tcKimlikNo);

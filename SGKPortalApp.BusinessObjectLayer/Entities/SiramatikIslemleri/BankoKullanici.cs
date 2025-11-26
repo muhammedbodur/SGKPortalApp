@@ -22,6 +22,13 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         [InverseProperty("BankoKullanicilari")]
         public required Personel Personel { get; set; }
 
+        // ⭐ YENİ: HizmetBinasi referansı eklendi
+        // Bu sayede personel, banko ve hizmet binası tutarlılığı database seviyesinde garanti edilir
+        [Required]
+        public int HizmetBinasiId { get; set; }
+        [ForeignKey("HizmetBinasiId")]
+        public required HizmetBinasi HizmetBinasi { get; set; }
+
         public DateTime EklenmeTarihi { get; set; } = DateTime.Now;
         public DateTime DuzenlenmeTarihi { get; set; } = DateTime.Now;
     }

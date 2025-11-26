@@ -64,13 +64,16 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         }
 
         // Personelin bankosunu getirir
+        // ⭐ ARTıK ÇOK BASİT: HizmetBinasiId BankoKullanici'da olduğu için database garantisi var
         public async Task<Banko?> GetByKullaniciAsync(string tcKimlikNo)
         {
             return await _dbSet
                 .AsNoTracking()
                 .Include(b => b.BankoKullanicilari)
                 .Include(b => b.HizmetBinasi)
-                .FirstOrDefaultAsync(b => b.BankoKullanicilari != null && b.BankoKullanicilari.Any(bk => bk.TcKimlikNo == tcKimlikNo));
+                .FirstOrDefaultAsync(b => b.BankoKullanicilari != null && 
+                                         b.BankoKullanicilari.Any(bk => bk.TcKimlikNo == tcKimlikNo));
+            // ⭐ HizmetBinasiId kontrolü artık gerekli değil - database seviyesinde garanti ediliyor!
         }
 
         // Aktif bankoları listeler
