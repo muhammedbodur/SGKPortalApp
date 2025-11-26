@@ -47,6 +47,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .AsNoTracking()
                 .Include(bk => bk.Banko)
                 .Include(bk => bk.Personel)
+                .Where(bk => !bk.SilindiMi)
                 .FirstOrDefaultAsync(bk => bk.BankoKullaniciId == bankoKullaniciId);
         }
 
@@ -57,6 +58,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .AsNoTracking()
                 .Include(bk => bk.Banko)
                 .Include(bk => bk.Personel)
+                .Where(bk => !bk.SilindiMi)
                 .ToListAsync();
         }
 
@@ -67,7 +69,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .AsNoTracking()
                 .Include(bk => bk.Banko)
                 .Include(bk => bk.Personel)
-                .Where(bk => bk.Banko.BankoAktiflik == Aktiflik.Aktif)
+                .Where(bk => !bk.SilindiMi && bk.Banko.BankoAktiflik == Aktiflik.Aktif)
                 .ToListAsync();
         }
 
@@ -76,6 +78,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
+                .Where(bk => !bk.SilindiMi)
                 .ToListAsync();
         }
 
@@ -84,7 +87,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Where(bk => bk.EklenmeTarihi >= startDate && bk.EklenmeTarihi <= endDate)
+                .Where(bk => !bk.SilindiMi && bk.EklenmeTarihi >= startDate && bk.EklenmeTarihi <= endDate)
                 .ToListAsync();
         }
 
@@ -93,6 +96,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
+                .Where(bk => !bk.SilindiMi)
                 .AnyAsync(bk => bk.BankoId == bankoId);
         }
 
@@ -101,6 +105,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
+                .Where(bk => !bk.SilindiMi)
                 .AnyAsync(bk => bk.TcKimlikNo == tcKimlikNo);
         }
 
@@ -108,6 +113,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         public async Task UnassignPersonelAsync(string tcKimlikNo)
         {
             var assignment = await _dbSet
+                .Where(bk => !bk.SilindiMi)
                 .FirstOrDefaultAsync(bk => bk.TcKimlikNo == tcKimlikNo);
 
             if (assignment != null)
@@ -120,6 +126,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         public async Task UnassignBankoAsync(int bankoId)
         {
             var assignment = await _dbSet
+                .Where(bk => !bk.SilindiMi)
                 .FirstOrDefaultAsync(bk => bk.BankoId == bankoId);
 
             if (assignment != null)

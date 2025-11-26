@@ -29,7 +29,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(b => b.HizmetBinasi)
-                .Include(b => b.BankoKullanicilari)
+                .Include(b => b.BankoKullanicilari.Where(bk => !bk.SilindiMi))
                     .ThenInclude(bk => bk.Personel)
                 .Where(b => b.HizmetBinasiId == hizmetBinasiId)
                 .ToListAsync();
@@ -58,8 +58,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(b => b.BankoKullanicilari)
-                .Where(b => b.BankoKullanicilari != null && b.BankoKullanicilari.Any())
+                .Include(b => b.BankoKullanicilari.Where(bk => !bk.SilindiMi))
+                .Where(b => b.BankoKullanicilari != null && b.BankoKullanicilari.Any(bk => !bk.SilindiMi))
                 .ToListAsync();
         }
 
@@ -69,10 +69,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(b => b.BankoKullanicilari)
+                .Include(b => b.BankoKullanicilari.Where(bk => !bk.SilindiMi))
                 .Include(b => b.HizmetBinasi)
-                .FirstOrDefaultAsync(b => b.BankoKullanicilari != null && 
-                                         b.BankoKullanicilari.Any(bk => bk.TcKimlikNo == tcKimlikNo));
+                .FirstOrDefaultAsync(b => b.BankoKullanicilari != null &&
+                                         b.BankoKullanicilari.Any(bk => bk.TcKimlikNo == tcKimlikNo && !bk.SilindiMi));
             // ⭐ HizmetBinasiId kontrolü artık gerekli değil - database seviyesinde garanti ediliyor!
         }
 
@@ -144,8 +144,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(b => b.HizmetBinasi)
-                .Include(b => b.BankoKullanicilari)
-                .Where(b => b.HizmetBinasiId == hizmetBinasiId 
+                .Include(b => b.BankoKullanicilari.Where(bk => !bk.SilindiMi))
+                .Where(b => b.HizmetBinasiId == hizmetBinasiId
                          && b.BankoAktiflik == Aktiflik.Aktif
                          && (b.BankoKullanicilari == null || !b.BankoKullanicilari.Any()))
                 .OrderBy(b => b.KatTipi)
@@ -159,7 +159,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(b => b.HizmetBinasi)
-                .Include(b => b.BankoKullanicilari!)
+                .Include(b => b.BankoKullanicilari!.Where(bk => !bk.SilindiMi))
                     .ThenInclude(bk => bk.Personel)
                         .ThenInclude(p => p.Servis)
                 .FirstOrDefaultAsync(b => b.BankoId == bankoId);
@@ -171,7 +171,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             var bankolar = await _dbSet
                 .AsNoTracking()
                 .Include(b => b.HizmetBinasi)
-                .Include(b => b.BankoKullanicilari!)
+                .Include(b => b.BankoKullanicilari!.Where(bk => !bk.SilindiMi))
                     .ThenInclude(bk => bk.Personel)
                         .ThenInclude(p => p.Servis)
                 .Where(b => b.HizmetBinasiId == hizmetBinasiId)
