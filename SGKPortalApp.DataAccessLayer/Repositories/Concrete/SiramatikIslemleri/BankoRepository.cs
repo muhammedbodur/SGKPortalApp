@@ -69,6 +69,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(b => b.BankoKullanicilari)
+                .Include(b => b.HizmetBinasi)
                 .FirstOrDefaultAsync(b => b.BankoKullanicilari != null && b.BankoKullanicilari.Any(bk => bk.TcKimlikNo == tcKimlikNo));
         }
 

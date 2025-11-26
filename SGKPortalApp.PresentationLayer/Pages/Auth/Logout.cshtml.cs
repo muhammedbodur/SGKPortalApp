@@ -26,37 +26,46 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                 var userName = User?.FindFirst("AdSoyad")?.Value ?? "Bilinmeyen Kullanıcı";
                 var tcKimlikNo = User?.FindFirst("TcKimlikNo")?.Value;
                 
-                _logger.LogInformation($"Logout: {userName} çıkış yapıyor...");
+                _logger.LogInformation($"🔄 Logout: {userName} çıkış yapıyor...");
 
-                // Banko modundan çık (eğer aktifse)
+                // Server-side temizlik işlemleri
                 if (!string.IsNullOrEmpty(tcKimlikNo))
                 {
                     try
                     {
+                        // 1. Banko modundan çık (eğer aktifse)
                         var isBankoMode = await _bankoModeService.IsPersonelInBankoModeAsync(tcKimlikNo);
                         if (isBankoMode)
                         {
                             await _bankoModeService.ExitBankoModeAsync(tcKimlikNo);
-                            _logger.LogInformation($"Logout: {userName} banko modundan çıkarıldı");
+                            _logger.LogInformation($"✅ Logout: {userName} banko modundan çıkarıldı");
                         }
+
+                        // 2. SignalR bağlantılarını temizle (OnDisconnectedAsync otomatik çağrılacak)
+                        // HubConnection'lar SignalR tarafından otomatik temizlenecek
+                        
+                        _logger.LogInformation($"✅ Logout: {userName} için server-side temizlik tamamlandı");
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Logout: Banko modundan çıkış hatası");
+                        _logger.LogError(ex, "❌ Logout: Server-side temizlik hatası");
                     }
                 }
 
-                // Cookie'yi sil
+                // 3. Authentication Cookie'yi sil
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-                _logger.LogInformation($"Logout: {userName} başarıyla çıkış yaptı");
+                // 4. Session'ı temizle
+                HttpContext.Session.Clear();
 
-                // Login sayfasına yönlendir (Blazor route kullan)
+                _logger.LogInformation($"✅ Logout: {userName} başarıyla çıkış yaptı");
+
+                // Login sayfasına yönlendir
                 return Redirect("/auth/login");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Logout: Hata oluştu");
+                _logger.LogError(ex, "❌ Logout: Hata oluştu");
                 return Redirect("/auth/login");
             }
         }

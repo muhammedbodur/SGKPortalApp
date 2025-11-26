@@ -113,6 +113,50 @@
 }
 
 <script>
+    // Login sayfası yüklendiğinde tüm client-side verileri temizle
+    (function() {
+        console.log('🧹 Login: Client-side temizlik başlatılıyor...');
+        
+        try {
+            // 1. LocalStorage temizle
+            localStorage.removeItem('callPanelIsPinned');
+            localStorage.removeItem('callPanelIsVisible');
+            localStorage.removeItem('bankoMode');
+            localStorage.removeItem('activeBankoId');
+            console.log('✅ LocalStorage temizlendi');
+            
+            // 2. SessionStorage temizle
+            sessionStorage.clear();
+            console.log('✅ SessionStorage temizlendi');
+            
+            // 3. Sıra Çağırma Paneli'ni temizle (varsa)
+            if (typeof SiraCagirmaPanel !== 'undefined') {
+                try {
+                    SiraCagirmaPanel.setPin(false);
+                    SiraCagirmaPanel.closePanel();
+                    SiraCagirmaPanel.destroy();
+                    console.log('✅ Sıra Çağırma Paneli temizlendi');
+                } catch (e) {
+                    console.warn('⚠️ Sıra Çağırma Paneli temizlenirken hata:', e);
+                }
+            }
+            
+            // 4. Banko Mode state'ini temizle (varsa)
+            if (typeof BankoMode !== 'undefined') {
+                try {
+                    BankoMode.cleanup();
+                    console.log('✅ Banko Mode temizlendi');
+                } catch (e) {
+                    console.warn('⚠️ Banko Mode temizlenirken hata:', e);
+                }
+            }
+            
+            console.log('✅ Login: Client-side temizlik tamamlandı');
+        } catch (error) {
+            console.error('❌ Login temizlik hatası:', error);
+        }
+    })();
+
     window.submitLoginForm = async function(loginDataJson) {
         console.log('🔵 7. submitLoginForm çağrıldı');
         

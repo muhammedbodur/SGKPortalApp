@@ -9,7 +9,9 @@
                 <div class="flex-grow-1">
                     <strong>Banko Modu Aktif</strong>
                     <br />
-                    <small>Banko #@assignedBanko.BankoNo - @assignedBanko.BankoTipiAdi</small>
+                    <small>@assignedBanko.HizmetBinasiAdi - @assignedBanko.KatTipiAdi</small>
+                    <br />
+                    <small>Banko #@assignedBanko.BankoNo - @assignedBanko.BankoTipiAdi Banko</small>
                 </div>
                 <button class="btn btn-sm btn-danger" @onclick="ExitBankoMode" disabled="@isLoading">
                     <i class="bx bx-log-out"></i> Çıkış
@@ -25,8 +27,9 @@
                         <i class="bx bx-desktop"></i> Atanmış Banko
                     </h6>
                     <p class="mb-2">
+                        <strong>@assignedBanko.HizmetBinasiAdi</strong><br />
                         <strong>Banko #@assignedBanko.BankoNo</strong><br />
-                        <small class="text-muted">@assignedBanko.BankoTipiAdi - @assignedBanko.KatTipiAdi</small>
+                        <small class="text-muted">@assignedBanko.BankoTipiAdi Banko - @assignedBanko.KatTipiAdi</small>
                     </p>
                     
                     @if (bankoInUse)

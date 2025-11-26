@@ -136,7 +136,19 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
                     return;
                 }
 
-                // Banko modundan çık
+                // 1. Sıra Çağırma Paneli'nin pin'ini kaldır ve paneli kapat
+                try
+                {
+                    await JSRuntime.InvokeVoidAsync("SiraCagirmaPanel.setPin", false);
+                    await JSRuntime.InvokeVoidAsync("SiraCagirmaPanel.closePanel");
+                    Logger.LogInformation("📌 Sıra Çağırma Paneli pin'i kaldırıldı ve kapatıldı");
+                }
+                catch (Exception jsEx)
+                {
+                    Logger.LogWarning(jsEx, "⚠️ Sıra Çağırma Paneli kapatılırken hata (panel yüklenmemiş olabilir)");
+                }
+
+                // 2. Banko modundan çık
                 var success = await BankoModeService.ExitBankoModeAsync(tcKimlikNo);
                 
                 if (success)

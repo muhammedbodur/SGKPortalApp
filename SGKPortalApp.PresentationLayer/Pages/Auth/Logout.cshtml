@@ -3,3 +3,64 @@
 @{
     Layout = null;
 }
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Çıkış Yapılıyor...</title>
+</head>
+<body>
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
+        <div style="text-align: center;">
+            <h2>Çıkış yapılıyor...</h2>
+            <p>Lütfen bekleyin...</p>
+        </div>
+    </div>
+
+    <script>
+        // Logout işlemi sırasında tüm client-side verileri temizle
+        (function() {
+            console.log('🔄 Logout: Client-side temizlik başlatılıyor...');
+            
+            try {
+                // 1. LocalStorage temizle
+                localStorage.removeItem('callPanelIsPinned');
+                localStorage.removeItem('callPanelIsVisible');
+                localStorage.removeItem('bankoMode');
+                localStorage.removeItem('activeBankoId');
+                console.log('✅ LocalStorage temizlendi');
+                
+                // 2. SessionStorage temizle
+                sessionStorage.clear();
+                console.log('✅ SessionStorage temizlendi');
+                
+                // 3. Sıra Çağırma Paneli'ni temizle (varsa)
+                if (typeof SiraCagirmaPanel !== 'undefined') {
+                    try {
+                        SiraCagirmaPanel.setPin(false);
+                        SiraCagirmaPanel.closePanel();
+                        SiraCagirmaPanel.destroy();
+                        console.log('✅ Sıra Çağırma Paneli temizlendi');
+                    } catch (e) {
+                        console.warn('⚠️ Sıra Çağırma Paneli temizlenirken hata:', e);
+                    }
+                }
+                
+                // 4. Banko Mode state'ini temizle (varsa)
+                if (typeof BankoMode !== 'undefined') {
+                    try {
+                        BankoMode.cleanup();
+                        console.log('✅ Banko Mode temizlendi');
+                    } catch (e) {
+                        console.warn('⚠️ Banko Mode temizlenirken hata:', e);
+                    }
+                }
+                
+                console.log('✅ Logout: Client-side temizlik tamamlandı');
+            } catch (error) {
+                console.error('❌ Logout temizlik hatası:', error);
+            }
+        })();
+    </script>
+</body>
+</html>
