@@ -33,16 +33,6 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
             return result.Success ? Ok(result) : NotFound(result);
         }
 
-        [HttpPut("{tcKimlikNo}")]
-        public async Task<IActionResult> Update(string tcKimlikNo, [FromBody] PersonelUpdateRequestDto request)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var result = await _personelService.UpdateAsync(tcKimlikNo, request);
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
-
         [HttpDelete("{tcKimlikNo}")]
         public async Task<IActionResult> Delete(string tcKimlikNo)
         {
