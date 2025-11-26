@@ -1,4 +1,3 @@
-// Sıra Çağırma Paneli
 var SiraCagirmaPanel = (function () {
     var isPinned = false;
     var panelHeader = null;
@@ -6,38 +5,47 @@ var SiraCagirmaPanel = (function () {
     var button = null;
     var body = document.body;
     var dotNetHelper = null;
+    var isInitialized = false;
+    var initRetryCount = 0;
+    var maxRetries = 10;
 
     function init(dotNetReference) {
+        console.log('🔄 SiraCagirmaPanel.init (Deneme: ' + (initRetryCount + 1) + ')');
+
         dotNetHelper = dotNetReference;
-        
-        // Elementleri bul
+
         panelHeader = document.getElementById('panel-header');
         panel = document.getElementById('template-customizer');
         button = document.getElementById('callPanelToggleCustomizerButton');
 
         if (!panel || !button || !panelHeader) {
-            console.warn('SiraCagirmaPanel: Gerekli elementler bulunamadı', {
-                panel: !!panel,
-                button: !!button,
-                panelHeader: !!panelHeader
-            });
+            console.warn('⚠️ Elementler henüz yüklenmedi');
+
+            if (initRetryCount < maxRetries) {
+                initRetryCount++;
+                setTimeout(function () {
+                    init(dotNetReference);
+                }, 200);
+            }
             return;
         }
 
-        // LocalStorage'dan durumu yükle
+        console.log('✅ Elementler bulundu');
+        initRetryCount = 0;
+
+        if (!isInitialized) {
+            document.addEventListener('click', handleClickOutside);
+            isInitialized = true;
+        }
+
         loadState();
-
-        // Click-outside detection
-        document.addEventListener('click', handleClickOutside);
-
-        console.log('SiraCagirmaPanel initialized');
+        console.log('✅ Panel başlatıldı');
     }
 
     function handleClickOutside(event) {
-        if (!panel || !button) return;
+        if (!panel || !button || isPinned) return;
 
-        // Eğer tıklanan yer panelin dışı ve toggle butonu değilse ve panel sabitlenmemişse
-        if (!panel.contains(event.target) && !button.contains(event.target) && !isPinned) {
+        if (!panel.contains(event.target) && !button.contains(event.target)) {
             closePanel();
         }
     }
@@ -50,6 +58,7 @@ var SiraCagirmaPanel = (function () {
         body.classList.add('layout-shifted');
 
         saveState(true);
+        notifyBlazor(true, isPinned);
     }
 
     function closePanel() {
@@ -61,9 +70,12 @@ var SiraCagirmaPanel = (function () {
 
         saveState(false);
 
-        // Blazor'a bildir
         if (dotNetHelper) {
-            dotNetHelper.invokeMethodAsync('CloseFromJS');
+            try {
+                dotNetHelper.invokeMethodAsync('CloseFromJS');
+            } catch (e) {
+                console.error('❌ CloseFromJS error:', e);
+            }
         }
     }
 
@@ -79,52 +91,92 @@ var SiraCagirmaPanel = (function () {
 
     function setPin(pinned) {
         isPinned = pinned;
-        localStorage.setItem('isPinned', isPinned.toString());
-        updatePanelHeaderBackground();
+        localStorage.setItem('callPanelIsPinned', isPinned.toString());
+        saveState(panel.classList.contains('show'));
+        console.log('📌 Pin:', isPinned);
     }
 
     function loadState() {
-        var isPinnedFromStorage = localStorage.getItem('isPinned');
-        var isPanelVisibleFromStorage = localStorage.getItem('isPanelVisible');
+        try {
+            var storedPinned = localStorage.getItem('callPanelIsPinned');
+            var storedVisible = localStorage.getItem('callPanelIsVisible');
 
-        if (isPinnedFromStorage === 'true') {
-            isPinned = true;
-        } else {
-            isPinned = false;
-        }
+            isPinned = storedPinned === 'true';
+            var shouldBeVisible = storedVisible === 'true';
 
-        updatePanelHeaderBackground();
+            if (panel && button && body) {
+                if (shouldBeVisible) {
+                    panel.classList.add('show');
+                    button.classList.add('hide');
+                    body.classList.add('layout-shifted');
+                } else {
+                    panel.classList.remove('show');
+                    button.classList.remove('hide');
+                    body.classList.remove('layout-shifted');
+                }
 
-        if (isPanelVisibleFromStorage === 'true') {
-            panel.classList.add('show');
-            button.classList.add('hide');
-            body.classList.add('layout-shifted');
-        } else {
-            panel.classList.remove('show');
-            button.classList.remove('hide');
-            body.classList.remove('layout-shifted');
+                console.log('✅ Durum yüklendi:', { isPinned: isPinned, isVisible: shouldBeVisible });
+            }
+        } catch (e) {
+            console.error('❌ loadState error:', e);
         }
     }
 
     function saveState(isVisible) {
-        localStorage.setItem('isPanelVisible', isVisible.toString());
+        try {
+            localStorage.setItem('callPanelIsVisible', isVisible.toString());
+            localStorage.setItem('callPanelIsPinned', isPinned.toString());
+            notifyBlazor(isVisible, isPinned);
+            console.log('💾 Kaydedildi:', { isVisible: isVisible, isPinned: isPinned });
+        } catch (e) {
+            console.error('❌ saveState error:', e);
+        }
     }
 
-    function updatePanelHeaderBackground() {
-        if (panelHeader) {
-            if (isPinned) {
-                panelHeader.style.backgroundColor = '#696bff';
-            } else {
-                panelHeader.style.backgroundColor = '#d2e2fc';
+    function notifyBlazor(isVisible, isPinned) {
+        if (dotNetHelper) {
+            try {
+                dotNetHelper.invokeMethodAsync('UpdateStateFromJS', isVisible, isPinned);
+            } catch (e) {
+                // Silent fail - Blazor hazır olmayabilir
             }
         }
     }
+
+    function destroy() {
+        if (isInitialized) {
+            document.removeEventListener('click', handleClickOutside);
+            isInitialized = false;
+        }
+    }
+
+    // Test fonksiyonları
+    window.testCallPanel = {
+        getState: function () {
+            return {
+                isPinned: isPinned,
+                isVisible: panel ? panel.classList.contains('show') : false,
+                localStorage: {
+                    pinned: localStorage.getItem('callPanelIsPinned'),
+                    visible: localStorage.getItem('callPanelIsVisible')
+                }
+            };
+        },
+        reset: function () {
+            localStorage.removeItem('callPanelIsPinned');
+            localStorage.removeItem('callPanelIsVisible');
+            console.log('🗑️ Temizlendi');
+        }
+    };
 
     return {
         init: init,
         openPanel: openPanel,
         closePanel: closePanel,
         togglePanel: togglePanel,
-        setPin: setPin
+        setPin: setPin,
+        destroy: destroy
     };
 })();
+
+console.log('✅ SiraCagirmaPanel yüklendi');

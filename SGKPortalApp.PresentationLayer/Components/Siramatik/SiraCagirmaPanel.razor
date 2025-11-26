@@ -1,26 +1,27 @@
-@* Banko Sıra Çağırma Paneli - Sneat Template Customizer Versiyonu *@
+@* Banko Sıra Çağırma Paneli *@
 
-<!-- Panel Container - Sneat'in template-customizer ID'sini kullan -->
-<div id="template-customizer" class="@(IsVisible ? "show" : "")" style="width: 300px; height: 100vh; background-color: #f9f9f9; position: fixed; top: 0; right: 0; z-index: 2000; transition: transform 0.3s ease; transform: @(IsVisible ? "translateX(0)" : "translateX(100%)"); box-shadow: -2px 0 5px rgba(0,0,0,0.1);">
-    
+<!-- Panel Container -->
+<div id="template-customizer" class="call-panel">
+
     <!-- Panel Header -->
-    <div id="panel-header" class="template-customizer-header" 
-         style="padding: 20px; background-color: @(IsPinned ? "#696bff" : "#d2e2fc"); color: white; font-size: 18px; font-weight: bold; display: flex; align-items: center; justify-content: space-between; position: relative; cursor: pointer; transition: background-color 0.3s ease;" 
+    <div id="panel-header" class="panel-header"
+         style="background: @HeaderBackground;"
          @onclick="TogglePin"
          title="@(IsPinned ? "Sabitlemeyi Kaldır" : "Sabitle")">
-        <span id="pin-icon" style="font-size: 24px; cursor: pointer; color: white; position: absolute; top: 50%; right: -40px; transform: translateY(-50%); background-color: @(IsPinned ? "#696bff" : "#d2e2fc"); padding: 10px; border-radius: 50%; box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2); transition: right 0.3s ease, background-color 0.3s ease;">
+        <span class="pin-icon"
+              style="background: @HeaderBackground;">
             <i class="bx @(IsPinned ? "bx-pin" : "bx-pin-off")"></i>
         </span>
         Banko Sıra Çağırma Paneli
     </div>
 
     <!-- Panel Body -->
-    <div class="template-customizer-inner" style="padding: 20px;">
-        
+    <div class="panel-body">
+
         <!-- Çağırma Butonu -->
         <div class="px-4 mb-4">
-            <button type="button" 
-                    class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" 
+            <button type="button"
+                    class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
                     @onclick="SiradakiCagir"
                     disabled="@(!SiraListesi.Any())">
                 <i class="bx bx-phone-outgoing"></i>
@@ -38,8 +39,7 @@
 
                 @foreach (var sira in SiraListesi)
                 {
-                    <div class="card mb-2 @(sira.BeklemeDurum == BeklemeDurum.Cagrildi ? "border-primary" : "")" 
-                         style="transition: all 0.2s ease; cursor: pointer;"
+                    <div class="card mb-2 @(sira.BeklemeDurum == BeklemeDurum.Cagrildi ? "border-primary" : "")"
                          @onclick="() => SiraSecildi(sira)">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center justify-content-between">
@@ -81,7 +81,7 @@
             }
         </div>
 
-        <!-- Panel Footer (Optional - İstatistikler) -->
+        <!-- Panel Footer -->
         @if (SiraListesi.Any())
         {
             <div class="px-4 py-3 mt-3 border-top">
@@ -100,11 +100,10 @@
     </div>
 </div>
 
-<!-- Toggle Button - Panel Kapalıyken Görünür -->
-<button id="callPanelToggleCustomizerButton" 
-        type="button" 
-        class="@(IsVisible ? "hide" : "")"
-        style="position: fixed; top: 50%; right: @(IsVisible ? "-100px" : "0"); transform: translateY(-50%); background-color: #696bff; color: white; padding: 30px 20px; border: none; border-radius: 5px 0 0 5px; cursor: pointer; z-index: 2001; transition: right 0.3s ease, background-color 0.3s ease; font-size: 24px; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);"
+<!-- Toggle Button -->
+<button id="callPanelToggleCustomizerButton"
+        type="button"
+        class="panel-toggle-btn"
         @onclick="TogglePanel"
         title="Sıra Çağırma Paneli">
     <i class="bx bx-phone-call"></i>
