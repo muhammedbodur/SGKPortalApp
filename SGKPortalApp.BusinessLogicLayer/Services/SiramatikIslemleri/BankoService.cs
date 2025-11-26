@@ -387,12 +387,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 {
                     BankoId = request.BankoId,
                     TcKimlikNo = request.TcKimlikNo,
-                    HizmetBinasiId = personelExists.HizmetBinasiId, // ⭐ YENİ: HizmetBinasiId eklendi
+                    // ⭐ ÖNEMLİ: Banko'nun HizmetBinasiId'si kullanılmalı (personel'in değil)
+                    // Çünkü bu field "Bu banko hangi hizmet binasında?" sorusunu cevaplar
+                    HizmetBinasiId = bankoExists.HizmetBinasiId,
                     EklenmeTarihi = DateTime.Now,
                     DuzenlenmeTarihi = DateTime.Now,
                     Banko = null!,
                     Personel = null!,
-                    HizmetBinasi = null! // ⭐ YENİ: HizmetBinasi navigation property
+                    HizmetBinasi = null!
                 };
 
                 await bankoKullaniciRepo.AddAsync(bankoKullanici);
@@ -483,6 +485,92 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 return ApiResponseDto<BankoResponseDto>
                     .ErrorResult("Personel bankosu getirilirken bir hata oluştu", ex.Message);
             }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // MAINTENANCE OPERATIONS
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Tutarsız BankoKullanici kayıtlarını tespit eder ve temizler
+        /// Personel.HizmetBinasiId != BankoKullanici.HizmetBinasiId olan kayıtlar
+        /// </summary>
+        public async Task<ApiResponseDto<int>> CleanupInconsistentBankoAssignmentsAsync()
+        {
+            return await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                try
+                {
+                    var bankoKullaniciRepo = _unitOfWork.GetRepository<IBankoKullaniciRepository>();
+                    var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
+
+                    // Tüm aktif banko kullanıcılarını getir
+                    var allAssignments = await bankoKullaniciRepo.GetAllWithDetailsAsync();
+
+                    int cleanedCount = 0;
+
+                    foreach (var assignment in allAssignments)
+                    {
+                        // Personel bilgisini al
+                        var personel = await personelRepo.GetByTcKimlikNoAsync(assignment.TcKimlikNo);
+
+                        if (personel == null)
+                        {
+                            _logger.LogWarning(
+                                "BankoKullanici kaydı var ama personel bulunamadı. TC: {TcKimlikNo}, BankoKullaniciId: {Id}",
+                                assignment.TcKimlikNo, assignment.BankoKullaniciId);
+                            continue;
+                        }
+
+                        // Tutarsızlık kontrolü: Personel.HizmetBinasiId != BankoKullanici.HizmetBinasiId
+                        if (personel.HizmetBinasiId != assignment.HizmetBinasiId)
+                        {
+                            _logger.LogWarning(
+                                "Tutarsız kayıt tespit edildi. TC: {TcKimlikNo}, " +
+                                "Personel HizmetBinasi: {PersonelHizmetBinasi}, " +
+                                "BankoKullanici HizmetBinasi: {BankoKullaniciHizmetBinasi}",
+                                assignment.TcKimlikNo,
+                                personel.HizmetBinasiId,
+                                assignment.HizmetBinasiId);
+
+                            // Soft delete
+                            bankoKullaniciRepo.Delete(assignment);
+                            cleanedCount++;
+
+                            // Eğer kullanıcı banko modundaysa, çıkar
+                            var user = await _unitOfWork.Repository<User>().GetByIdAsync(assignment.TcKimlikNo);
+                            if (user != null && user.BankoModuAktif)
+                            {
+                                user.BankoModuAktif = false;
+                                user.AktifBankoId = null;
+                                user.BankoModuBaslangic = null;
+                                _unitOfWork.Repository<User>().Update(user);
+
+                                _logger.LogInformation(
+                                    "Tutarsız kayıt nedeniyle kullanıcı banko modundan çıkarıldı. TC: {TcKimlikNo}",
+                                    assignment.TcKimlikNo);
+                            }
+                        }
+                    }
+
+                    await _unitOfWork.SaveChangesAsync();
+
+                    _logger.LogInformation(
+                        "Tutarsız banko atama temizleme işlemi tamamlandı. Temizlenen kayıt sayısı: {Count}",
+                        cleanedCount);
+
+                    return ApiResponseDto<int>.SuccessResult(
+                        cleanedCount,
+                        $"{cleanedCount} tutarsız kayıt başarıyla temizlendi");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Tutarsız kayıt temizleme işlemi sırasında hata oluştu");
+                    return ApiResponseDto<int>.ErrorResult(
+                        "Tutarsız kayıt temizleme işlemi başarısız oldu",
+                        ex.Message);
+                }
+            });
         }
 
         // ═══════════════════════════════════════════════════════
