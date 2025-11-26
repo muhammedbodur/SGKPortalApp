@@ -392,7 +392,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 }
             });
         }
-
+        
         public async Task<ApiResponseDto<PersonelResponseDto>> UpdateCompleteAsync(string tcKimlikNo, PersonelCompleteRequestDto request)
         {
             return await _unitOfWork.ExecuteInTransactionAsync(async () =>
