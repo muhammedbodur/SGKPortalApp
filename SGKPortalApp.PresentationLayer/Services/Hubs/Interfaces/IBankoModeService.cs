@@ -30,7 +30,8 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces
         /// <summary>
         /// Banko moduna geç (Tam C# implementasyonu)
         /// </summary>
-        Task<bool> EnterBankoModeAsync(string tcKimlikNo, int bankoId);
+        /// <param name="currentConnectionId">Aktif tab'ın ConnectionId'si (bu tab kapatılmayacak)</param>
+        Task<bool> EnterBankoModeAsync(string tcKimlikNo, int bankoId, string? currentConnectionId = null);
 
         /// <summary>
         /// Banko modundan çık (Tam C# implementasyonu)

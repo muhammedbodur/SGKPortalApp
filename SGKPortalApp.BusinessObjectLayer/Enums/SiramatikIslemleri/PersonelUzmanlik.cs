@@ -15,6 +15,9 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri
         BilgisiYok = 0,
 
         [Display(Name = "Yrd. Uzman")]
-        YrdUzman = 2
+        YrdUzman = 2,
+
+        [Display(Name = "Şef")]
+        Sef = 3
     }
 }

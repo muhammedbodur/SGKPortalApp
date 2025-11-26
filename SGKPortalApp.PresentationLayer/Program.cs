@@ -141,6 +141,9 @@ builder.Services.AddSignalR(options =>
 builder.Services.AddScoped<SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.SignalR.IHubConnectionApiService,
     SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR.HubConnectionApiService>();
 
+// NOT: UserApiService otomatik olarak AddPresentationServices içinde RegisterApiServices ile kaydediliyor
+// Common modülündeki tüm API servisleri otomatik kayıt ediliyor
+
 // Hub Connection Service (API kullanarak)
 builder.Services.AddScoped<SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces.IHubConnectionService,
     SGKPortalApp.PresentationLayer.Services.Hubs.Concrete.HubConnectionService>();
@@ -281,6 +284,10 @@ app.UseCors();
 // ÖNEMLİ: UseAuthentication, UseRouting'den SONRA olmalı
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Session Validation Middleware
+// Her request'te session ID kontrolü yapar, farklı cihazdan login varsa logout eder
+app.UseMiddleware<SessionValidationMiddleware>();
 
 // TV User Restriction Middleware
 // TV User'ların sadece kendi Display sayfalarına erişmesini sağlar

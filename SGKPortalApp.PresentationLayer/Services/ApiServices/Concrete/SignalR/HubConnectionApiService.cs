@@ -1,6 +1,6 @@
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SignalR;
-using SGKPortalApp.BusinessObjectLayer.Entities.Common;
-using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SignalR;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.SignalR;
 using System.Net.Http.Json;
 
@@ -55,19 +55,19 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
             }
         }
 
-        public async Task<List<HubConnection>> GetActiveConnectionsByTcKimlikNoAsync(string tcKimlikNo)
+        public async Task<List<HubConnectionResponseDto>> GetActiveConnectionsByTcKimlikNoAsync(string tcKimlikNo)
         {
             try
             {
-                var response = await _httpClient.GetFromJsonAsync<List<HubConnection>>(
+                var response = await _httpClient.GetFromJsonAsync<List<HubConnectionResponseDto>>(
                     $"api/hub-connections/active/{tcKimlikNo}");
                 
-                return response ?? new List<HubConnection>();
+                return response ?? new List<HubConnectionResponseDto>();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "GetActiveConnectionsByTcKimlikNoAsync hatası");
-                return new List<HubConnection>();
+                return new List<HubConnectionResponseDto>();
             }
         }
 
@@ -142,32 +142,17 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
             }
         }
 
-        public async Task<HubBankoConnection?> GetPersonelActiveBankoAsync(string tcKimlikNo)
+        public async Task<HubBankoConnectionResponseDto?> GetPersonelActiveBankoAsync(string tcKimlikNo)
         {
             try
             {
-                var response = await _httpClient.GetFromJsonAsync<HubBankoConnection>(
+                var response = await _httpClient.GetFromJsonAsync<HubBankoConnectionResponseDto>(
                     $"api/hub-connections/personel/{tcKimlikNo}/active-banko");
                 return response;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "GetPersonelActiveBankoAsync hatası");
-                return null;
-            }
-        }
-
-        public async Task<User?> GetBankoActivePersonelAsync(int bankoId)
-        {
-            try
-            {
-                var response = await _httpClient.GetFromJsonAsync<User>(
-                    $"api/hub-connections/banko/{bankoId}/active-personel");
-                return response;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "GetBankoActivePersonelAsync hatası");
                 return null;
             }
         }
@@ -219,13 +204,19 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
             }
         }
 
-        public async Task<HubConnection?> GetByConnectionIdAsync(string connectionId)
+        public async Task<HubConnectionResponseDto?> GetByConnectionIdAsync(string connectionId)
         {
             try
             {
-                var response = await _httpClient.GetFromJsonAsync<HubConnection>(
+                var response = await _httpClient.GetFromJsonAsync<HubConnectionResponseDto>(
                     $"api/hub-connections/{connectionId}");
                 return response;
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                // 404 normal - bağlantı bulunamadı (zaten silinmiş olabilir)
+                _logger.LogDebug("Connection bulunamadı: {ConnectionId}", connectionId);
+                return null;
             }
             catch (Exception ex)
             {
@@ -233,5 +224,101 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
                 return null;
             }
         }
+
+        public async Task<bool> CreateBankoConnectionAsync(int hubConnectionId, int bankoId, string tcKimlikNo)
+        {
+            try
+            {
+                var request = new
+                {
+                    HubConnectionId = hubConnectionId,
+                    BankoId = bankoId,
+                    TcKimlikNo = tcKimlikNo
+                };
+
+                var response = await _httpClient.PostAsJsonAsync("api/hub-connections/banko", request);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "CreateBankoConnectionAsync hatası");
+                return false;
+            }
+        }
+
+        public async Task<bool> DeactivateBankoConnectionByHubConnectionIdAsync(int hubConnectionId)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"api/hub-connections/banko/{hubConnectionId}");
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DeactivateBankoConnectionByHubConnectionIdAsync hatası");
+                return false;
+            }
+        }
+
+        public async Task<List<HubConnectionResponseDto>> GetNonBankoConnectionsByTcKimlikNoAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var response = await _httpClient.GetFromJsonAsync<List<HubConnectionResponseDto>>(
+                    $"api/hub-connections/non-banko/{tcKimlikNo}");
+                return response ?? new List<HubConnectionResponseDto>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetNonBankoConnectionsByTcKimlikNoAsync hatası");
+                return new List<HubConnectionResponseDto>();
+            }
+        }
+
+        public async Task<HubBankoConnectionResponseDto?> GetBankoConnectionByHubConnectionIdAsync(int hubConnectionId)
+        {
+            try
+            {
+                var response = await _httpClient.GetFromJsonAsync<HubBankoConnectionResponseDto>(
+                    $"api/hub-connections/banko-connection/{hubConnectionId}");
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetBankoConnectionByHubConnectionIdAsync hatası");
+                return null;
+            }
+        }
+
+        public async Task<HubTvConnectionResponseDto?> GetTvConnectionByHubConnectionIdAsync(int hubConnectionId)
+        {
+            try
+            {
+                var response = await _httpClient.GetFromJsonAsync<HubTvConnectionResponseDto>(
+                    $"api/hub-connections/tv-connection/{hubConnectionId}");
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetTvConnectionByHubConnectionIdAsync hatası");
+                return null;
+            }
+        }
+
+        public async Task<UserResponseDto?> GetBankoActivePersonelAsync(int bankoId)
+        {
+            try
+            {
+                var response = await _httpClient.GetFromJsonAsync<UserResponseDto>(
+                    $"api/hub-connections/banko/{bankoId}/active-personel");
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetBankoActivePersonelAsync hatası");
+                return null;
+            }
+        }
     }
 }
+

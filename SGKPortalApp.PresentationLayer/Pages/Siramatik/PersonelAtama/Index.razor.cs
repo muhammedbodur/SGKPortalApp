@@ -327,6 +327,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
             {
                 PersonelUzmanlik.Uzman => "btn btn-success",
                 PersonelUzmanlik.YrdUzman => "btn btn-info",
+                PersonelUzmanlik.Sef => "btn btn-danger",
                 PersonelUzmanlik.BilgisiYok => "btn btn-secondary", 
                 _ => "btn btn-secondary"
             };
@@ -336,10 +337,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
         {
             return mevcutValue switch
             {
-                PersonelUzmanlik.BilgisiYok => PersonelUzmanlik.Uzman,
                 PersonelUzmanlik.Uzman => PersonelUzmanlik.YrdUzman,
-                PersonelUzmanlik.YrdUzman => PersonelUzmanlik.BilgisiYok, 
-                _ => PersonelUzmanlik.BilgisiYok
+                PersonelUzmanlik.YrdUzman => PersonelUzmanlik.BilgisiYok,
+                PersonelUzmanlik.BilgisiYok => PersonelUzmanlik.Sef,
+                PersonelUzmanlik.Sef => PersonelUzmanlik.Uzman,
+                _ => PersonelUzmanlik.Uzman
             };
         }
 
@@ -576,6 +578,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
                             cell.Style.Fill.BackgroundColor = XLColor.LightGreen;
                         else if (uzmanlik == PersonelUzmanlik.YrdUzman)
                             cell.Style.Fill.BackgroundColor = XLColor.LightBlue;
+                        else if (uzmanlik == PersonelUzmanlik.Sef)
+                            cell.Style.Fill.BackgroundColor = XLColor.LightCoral;
                         else
                             cell.Style.Fill.BackgroundColor = XLColor.LightGray;
                         
@@ -677,6 +681,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
                                         table.Cell().Background(Colors.Green.Lighten3).Padding(3).Text(uzmanlikText).FontSize(7);
                                     else if (uzmanlik == PersonelUzmanlik.YrdUzman)
                                         table.Cell().Background(Colors.Blue.Lighten3).Padding(3).Text(uzmanlikText).FontSize(7);
+                                    else if (uzmanlik == PersonelUzmanlik.Sef)
+                                        table.Cell().Background(Colors.Red.Lighten3).Padding(3).Text(uzmanlikText).FontSize(7);
                                     else
                                         table.Cell().Background(Colors.Grey.Lighten3).Padding(3).Text(uzmanlikText).FontSize(7);
                                 }

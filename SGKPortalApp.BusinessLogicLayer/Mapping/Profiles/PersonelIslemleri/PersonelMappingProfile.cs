@@ -97,7 +97,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.AtanmaNedeniAdi,
                     opt => opt.MapFrom(src => src.AtanmaNedeni != null ? src.AtanmaNedeni.AtanmaNedeni : ""))
                 .ForMember(dest => dest.HizmetBinasiAdi,
-                    opt => opt.MapFrom(src => src.HizmetBinasi != null ? src.HizmetBinasi.HizmetBinasiAdi : ""))
+                    opt => opt.MapFrom(src => src.HizmetBinasi != null ? src.HizmetBinasi.HizmetBinasiAdi : "Hizmet Binası Yok"))
                 .ForMember(dest => dest.SendikaAdi,
                 opt => opt.MapFrom(src => src.Sendika != null ? src.Sendika.SendikaAdi : ""))
 

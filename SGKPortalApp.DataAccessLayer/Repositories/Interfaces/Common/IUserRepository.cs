@@ -20,5 +20,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common
         Task ResetFailedLoginAsync(string tcKimlikNo);
         Task LockUserAsync(string tcKimlikNo);
         Task UnlockUserAsync(string tcKimlikNo);
+
+        // Banko Modu işlemleri
+        Task<bool> ActivateBankoModeAsync(string tcKimlikNo, int bankoId);
+        Task<bool> DeactivateBankoModeAsync(string tcKimlikNo);
+        Task<bool> IsBankoModeActiveAsync(string tcKimlikNo);
+        Task<int?> GetActiveBankoIdAsync(string tcKimlikNo);
     }
 }

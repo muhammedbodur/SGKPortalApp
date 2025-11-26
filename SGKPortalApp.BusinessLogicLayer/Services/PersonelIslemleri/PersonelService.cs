@@ -39,6 +39,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             {
                 var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
                 var personeller = await personelRepo.GetAllWithDetailsAsync();
+                
                 var personelDtos = _mapper.Map<List<PersonelResponseDto>>(personeller);
 
                 return ApiResponseDto<List<PersonelResponseDto>>

@@ -1,5 +1,6 @@
-using SGKPortalApp.BusinessObjectLayer.Entities.Common;
-using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SignalR;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.SignalR;
 using SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces;
@@ -38,12 +39,12 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
             return await _apiService.DisconnectAsync(connectionId);
         }
 
-        public async Task<List<HubConnection>> GetActiveConnectionsByTcKimlikNoAsync(string tcKimlikNo)
+        public async Task<List<HubConnectionResponseDto>> GetActiveConnectionsByTcKimlikNoAsync(string tcKimlikNo)
         {
             return await _apiService.GetActiveConnectionsByTcKimlikNoAsync(tcKimlikNo);
         }
 
-        public async Task<HubConnection?> GetByConnectionIdAsync(string connectionId)
+        public async Task<HubConnectionResponseDto?> GetByConnectionIdAsync(string connectionId)
         {
             return await _apiService.GetByConnectionIdAsync(connectionId);
         }
@@ -99,14 +100,9 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
             return await _apiService.IsBankoInUseAsync(bankoId);
         }
 
-        public async Task<HubBankoConnection?> GetPersonelActiveBankoAsync(string tcKimlikNo)
+        public async Task<HubBankoConnectionResponseDto?> GetPersonelActiveBankoAsync(string tcKimlikNo)
         {
             return await _apiService.GetPersonelActiveBankoAsync(tcKimlikNo);
-        }
-
-        public async Task<User?> GetBankoActivePersonelAsync(int bankoId)
-        {
-            return await _apiService.GetBankoActivePersonelAsync(bankoId);
         }
 
         public Task<int?> GetBankoIdByConnectionIdAsync(string connectionId)
@@ -127,11 +123,6 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
             throw new NotImplementedException("API endpoint eklenecek");
         }
 
-        public Task<HubBankoConnection?> GetBankoConnectionByHubConnectionIdAsync(int hubConnectionId)
-        {
-            _logger.LogWarning("GetBankoConnectionByHubConnectionIdAsync - API endpoint henüz implement edilmedi");
-            throw new NotImplementedException("API endpoint eklenecek");
-        }
 
         // ═══════════════════════════════════════════════════════
         // TV CONNECTION MANAGEMENT
@@ -188,15 +179,68 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
             throw new NotImplementedException("API endpoint eklenecek");
         }
 
-        public Task<HubTvConnection?> GetTvConnectionByHubConnectionIdAsync(int hubConnectionId)
-        {
-            _logger.LogWarning("GetTvConnectionByHubConnectionIdAsync - API endpoint henüz implement edilmedi");
-            throw new NotImplementedException("API endpoint eklenecek");
-        }
 
         public async Task<bool> UpdateConnectionStatusAsync(string connectionId, ConnectionStatus status)
         {
             return await _apiService.SetConnectionStatusAsync(connectionId, status.ToString());
         }
+
+        public async Task<bool> CreateBankoConnectionAsync(int hubConnectionId, int bankoId, string tcKimlikNo)
+        {
+            try
+            {
+                var result = await _apiService.CreateBankoConnectionAsync(hubConnectionId, bankoId, tcKimlikNo);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"CreateBankoConnectionAsync hatası: HubConnectionId={hubConnectionId}, BankoId={bankoId}");
+                return false;
+            }
+        }
+
+        public async Task<bool> DeactivateBankoConnectionByHubConnectionIdAsync(int hubConnectionId)
+        {
+            try
+            {
+                var result = await _apiService.DeactivateBankoConnectionByHubConnectionIdAsync(hubConnectionId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"DeactivateBankoConnectionByHubConnectionIdAsync hatası: HubConnectionId={hubConnectionId}");
+                return false;
+            }
+        }
+
+        public async Task<List<HubConnectionResponseDto>> GetNonBankoConnectionsByTcKimlikNoAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var result = await _apiService.GetNonBankoConnectionsByTcKimlikNoAsync(tcKimlikNo);
+                return result ?? new List<HubConnectionResponseDto>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"GetNonBankoConnectionsByTcKimlikNoAsync hatası: {tcKimlikNo}");
+                return new List<HubConnectionResponseDto>();
+            }
+        }
+
+        public async Task<HubBankoConnectionResponseDto?> GetBankoConnectionByHubConnectionIdAsync(int hubConnectionId)
+        {
+            return await _apiService.GetBankoConnectionByHubConnectionIdAsync(hubConnectionId);
+        }
+
+        public async Task<HubTvConnectionResponseDto?> GetTvConnectionByHubConnectionIdAsync(int hubConnectionId)
+        {
+            return await _apiService.GetTvConnectionByHubConnectionIdAsync(hubConnectionId);
+        }
+
+        public async Task<UserResponseDto?> GetBankoActivePersonelAsync(int bankoId)
+        {
+            return await _apiService.GetBankoActivePersonelAsync(bankoId);
+        }
     }
 }
+

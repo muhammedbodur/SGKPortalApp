@@ -15,10 +15,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
         [Inject] private NavigationManager Navigation { get; set; } = default!;
         [Inject] private IJSRuntime JS { get; set; } = default!;
 
+        [Parameter]
+        [SupplyParameterFromQuery(Name = "sessionExpired")]
+        public bool SessionExpired { get; set; }
+
         private LoginRequestDto loginModel = new();
         private bool showPassword = false;
         private bool isLoading = false;
         private string? errorMessage;
+
+        protected override void OnParametersSet()
+        {
+            if (SessionExpired)
+            {
+                errorMessage = "⚠️ Oturumunuz sonlandırıldı. Hesabınıza başka bir cihaz veya tarayıcıdan giriş yapıldı.";
+            }
+        }
 
         private void TogglePasswordVisibility()
         {

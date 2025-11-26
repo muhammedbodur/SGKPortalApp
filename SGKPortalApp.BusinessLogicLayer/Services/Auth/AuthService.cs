@@ -25,7 +25,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
         {
             try
             {
-                // 🆕 User tablosundan kullanıcıyı bul (Personel ile birlikte)
+                // 🆕 User tablosundan kullanıcıyı bul (Personel ile birlikte - opsiyonel)
                 var user = await _context.Users
                     .Include(u => u.Personel)
                         .ThenInclude(p => p.Departman)
@@ -35,7 +35,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                         .ThenInclude(p => p.HizmetBinasi)
                     .FirstOrDefaultAsync(u => u.TcKimlikNo == request.TcKimlikNo);
 
-                if (user == null || user.Personel == null)
+                if (user == null)
                 {
                     _logger.LogWarning("Login başarısız: Kullanıcı bulunamadı - {TcKimlikNo}", request.TcKimlikNo);
                     return new LoginResponseDto
@@ -72,14 +72,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                 {
                     // Başarısız giriş sayısını artır
                     user.BasarisizGirisSayisi++;
-                    
+
                     // 5 başarısız denemeden sonra hesabı kilitle
                     if (user.BasarisizGirisSayisi >= 5)
                     {
                         user.HesapKilitTarihi = DateTime.Now;
                         user.AktifMi = false;
                         await _context.SaveChangesAsync();
-                        
+
                         _logger.LogWarning("Hesap kilitlendi (5 başarısız deneme) - {TcKimlikNo}", request.TcKimlikNo);
                         return new LoginResponseDto
                         {
@@ -87,12 +87,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                             Message = "5 başarısız giriş denemesi nedeniyle hesabınız kilitlenmiştir!"
                         };
                     }
-                    
+
                     await _context.SaveChangesAsync();
-                    
-                    _logger.LogWarning("Login başarısız: Hatalı şifre ({Deneme}/5) - {TcKimlikNo}", 
+
+                    _logger.LogWarning("Login başarısız: Hatalı şifre ({Deneme}/5) - {TcKimlikNo}",
                         user.BasarisizGirisSayisi, request.TcKimlikNo);
-                    
+
                     return new LoginResponseDto
                     {
                         Success = false,
@@ -101,34 +101,64 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                 }
 
                 // Başarılı giriş - Session ID oluştur
+                var oldSessionId = user.SessionID; // Eski session ID'yi sakla
                 var sessionId = Guid.NewGuid().ToString();
                 user.SessionID = sessionId;
                 user.SonGirisTarihi = DateTime.Now;
                 user.BasarisizGirisSayisi = 0; // Başarılı girişte sıfırla
-                
+
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Login başarılı - {TcKimlikNo} - {AdSoyad}", 
-                    user.TcKimlikNo, user.Personel.AdSoyad);
-
-                // Başarılı response
-                return new LoginResponseDto
+                // 🔥 Eski oturum varsa loglayalım (farklı cihazdan login uyarısı için)
+                if (!string.IsNullOrEmpty(oldSessionId) && oldSessionId != sessionId)
                 {
-                    Success = true,
-                    Message = "Giriş başarılı!",
-                    TcKimlikNo = user.Personel.TcKimlikNo,
-                    SicilNo = user.Personel.SicilNo,
-                    AdSoyad = user.Personel.AdSoyad,
-                    Email = user.Personel.Email, // Personel'den alınıyor
-                    DepartmanId = user.Personel.DepartmanId,
-                    DepartmanAdi = user.Personel.Departman?.DepartmanAdi ?? "",
-                    ServisId = user.Personel.ServisId,
-                    ServisAdi = user.Personel.Servis?.ServisAdi ?? "",
-                    HizmetBinasiId = user.Personel.HizmetBinasiId,
-                    HizmetBinasiAdi = user.Personel.HizmetBinasi?.HizmetBinasiAdi ?? "",
-                    Resim = user.Personel.Resim,
-                    SessionId = sessionId
-                };
+                    _logger.LogWarning("⚠️ Kullanıcı farklı bir cihazdan/tarayıcıdan giriş yaptı - TcKimlikNo: {TcKimlikNo}, Eski SessionID: {OldSessionId}, Yeni SessionID: {NewSessionId}",
+                        user.TcKimlikNo, oldSessionId, sessionId);
+                }
+
+                // 🔥 TV login mi yoksa Personel login mi?
+                if (user.Personel == null)
+                {
+                    // TV Login
+                    _logger.LogInformation("TV Login başarılı - {TcKimlikNo}", user.TcKimlikNo);
+
+                    return new LoginResponseDto
+                    {
+                        Success = true,
+                        Message = "TV girişi başarılı!",
+                        TcKimlikNo = user.TcKimlikNo,
+                        AdSoyad = "TV Kullanıcısı",
+                        SessionId = sessionId,
+                        UserType = "TvUser", // 🎯 TV kullanıcısı
+                        RedirectUrl = "/tv/display" // TV ekranına yönlendir
+                    };
+                }
+                else
+                {
+                    // Personel Login
+                    _logger.LogInformation("Login başarılı - {TcKimlikNo} - {AdSoyad}",
+                        user.TcKimlikNo, user.Personel.AdSoyad);
+
+                    return new LoginResponseDto
+                    {
+                        Success = true,
+                        Message = "Giriş başarılı!",
+                        TcKimlikNo = user.Personel.TcKimlikNo,
+                        SicilNo = user.Personel.SicilNo,
+                        AdSoyad = user.Personel.AdSoyad,
+                        Email = user.Personel.Email,
+                        DepartmanId = user.Personel.DepartmanId,
+                        DepartmanAdi = user.Personel.Departman?.DepartmanAdi ?? "",
+                        ServisId = user.Personel.ServisId,
+                        ServisAdi = user.Personel.Servis?.ServisAdi ?? "",
+                        HizmetBinasiId = user.Personel.HizmetBinasiId,
+                        HizmetBinasiAdi = user.Personel.HizmetBinasi?.HizmetBinasiAdi ?? "",
+                        Resim = user.Personel.Resim,
+                        SessionId = sessionId,
+                        UserType = "Personel", // 🎯 Personel kullanıcısı
+                        RedirectUrl = "/" // Ana dashboard'a yönlendir
+                    };
+                }
             }
             catch (Exception ex)
             {

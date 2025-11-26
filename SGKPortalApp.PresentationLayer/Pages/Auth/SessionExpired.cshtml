@@ -1,0 +1,91 @@
+@page
+@model SGKPortalApp.PresentationLayer.Pages.Auth.SessionExpiredModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Oturum Sonlandı - SGK Portal</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/assets/vendor/fonts/boxicons.css" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Public Sans', sans-serif;
+        }
+        .session-expired-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 3rem;
+            max-width: 500px;
+            text-align: center;
+        }
+        .icon-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+        }
+        .icon-container i {
+            font-size: 3rem;
+            color: white;
+        }
+        h1 {
+            color: #333;
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        p {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="session-expired-container">
+        <div class="icon-container">
+            <i class='bx bx-error-circle'></i>
+        </div>
+        <h1>Oturumunuz Sonlandırıldı</h1>
+        <p>
+            Hesabınıza başka bir cihaz veya tarayıcıdan giriş yapıldı. 
+            Güvenlik nedeniyle bu oturum sonlandırıldı.
+        </p>
+        <p class="text-muted small">
+            <i class='bx bx-info-circle'></i> 
+            Aynı anda sadece bir cihazdan giriş yapabilirsiniz.
+        </p>
+        <a href="/auth/login" class="btn btn-primary">
+            <i class='bx bx-log-in me-2'></i>Tekrar Giriş Yap
+        </a>
+    </div>
+</body>
+</html>

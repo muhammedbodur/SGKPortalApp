@@ -4,6 +4,8 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.State;
+using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 
 namespace SGKPortalApp.PresentationLayer.Shared.Layout
 {
@@ -14,6 +16,8 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         [Inject] private IHttpContextAccessor? HttpContextAccessor { get; set; }
         [Inject] private BankoModeStateService BankoModeState { get; set; } = default!;
         [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+        [Inject] private IUserInfoService UserInfoService { get; set; } = default!;
+        [Inject] private IUserApiService UserApiService { get; set; } = default!;
 
         private List<SiraCagirmaResponseDto> siraListesi = new();
         private bool siraPanelAcik = false;
@@ -43,6 +47,49 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
         {
             CheckBankoModeAccess();
+            InvokeAsync(CheckSessionValidityAsync); // Session kontrolü yap (async olarak)
+        }
+
+        private async Task CheckSessionValidityAsync()
+        {
+            try
+            {
+                var currentSessionId = UserInfoService.GetSessionId();
+                var tcKimlikNo = UserInfoService.GetTcKimlikNo();
+
+                if (string.IsNullOrEmpty(currentSessionId) || string.IsNullOrEmpty(tcKimlikNo))
+                    return;
+
+                // Database'den kullanıcının aktif session ID'sini al
+                var userResult = await UserApiService.GetByTcKimlikNoAsync(tcKimlikNo);
+
+                if (userResult.Success && userResult.Data != null)
+                {
+                    var dbSessionId = userResult.Data.SessionID;
+
+                    // Session ID'ler farklıysa başka bir cihazdan login olunmuş demektir
+                    if (!string.IsNullOrEmpty(dbSessionId) && dbSessionId != currentSessionId)
+                    {
+                        Console.WriteLine($"⚠️ Session uyuşmazlığı! Cookie: {currentSessionId}, DB: {dbSessionId}");
+                        
+                        // Hem Blazor hem JavaScript ile yönlendir (çift güvence)
+                        NavigationManager.NavigateTo("/auth/login?sessionExpired=true", forceLoad: true);
+                        
+                        // JavaScript ile de yönlendir (fallback)
+                        try
+                        {
+                            await JS.InvokeVoidAsync("eval", "setTimeout(() => window.location.href = '/auth/login?sessionExpired=true', 100);");
+                        }
+                        catch { /* Ignore JS errors */ }
+                        
+                        return; // Metodu sonlandır
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Session kontrolü hatası: {ex.Message}");
+            }
         }
 
         private void CheckBankoModeAccess()

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.State;
 
@@ -15,6 +16,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
         private readonly IBankoApiService _bankoApiService;
         private readonly IHubContext<SiramatikHub> _hubContext;
         private readonly BankoModeStateService _stateService;
+        private readonly IUserApiService _userApiService;
         private readonly ILogger<BankoModeService> _logger;
 
         public BankoModeService(
@@ -22,12 +24,14 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
             IBankoApiService bankoApiService,
             IHubContext<SiramatikHub> hubContext,
             BankoModeStateService stateService,
+            IUserApiService userApiService,
             ILogger<BankoModeService> logger)
         {
             _connectionService = connectionService;
             _bankoApiService = bankoApiService;
             _hubContext = hubContext;
             _stateService = stateService;
+            _userApiService = userApiService;
             _logger = logger;
         }
 
@@ -50,14 +54,14 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
         }
 
         /// <summary>
-        /// Personel banko modunda mı?
+        /// Personel banko modunda mı? (User tablosundan kontrol - API üzerinden)
         /// </summary>
         public async Task<bool> IsPersonelInBankoModeAsync(string tcKimlikNo)
         {
             try
             {
-                var bankoConnection = await _connectionService.GetPersonelActiveBankoAsync(tcKimlikNo);
-                return bankoConnection != null;
+                var result = await _userApiService.IsBankoModeActiveAsync(tcKimlikNo);
+                return result.Success && result.Data;
             }
             catch (Exception ex)
             {
@@ -90,7 +94,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
             try
             {
                 var user = await _connectionService.GetBankoActivePersonelAsync(bankoId);
-                return user?.Personel?.AdSoyad;
+                return user?.PersonelAdSoyad;
             }
             catch (Exception ex)
             {
@@ -102,11 +106,11 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
         /// <summary>
         /// Banko moduna geç (Tam C# implementasyonu)
         /// </summary>
-        public async Task<bool> EnterBankoModeAsync(string tcKimlikNo, int bankoId)
+        public async Task<bool> EnterBankoModeAsync(string tcKimlikNo, int bankoId, string? currentConnectionId = null)
         {
             try
             {
-                _logger.LogInformation($"🏦 Banko moduna geçiliyor: {tcKimlikNo} -> Banko#{bankoId}");
+                _logger.LogInformation($"🏦 Banko moduna geçiliyor: {tcKimlikNo} -> Banko#{bankoId} | Aktif ConnectionId: {currentConnectionId}");
 
                 // 1. Bu banko başka personel tarafından kullanılıyor mu?
                 var bankoInUse = await IsBankoInUseAsync(bankoId);
@@ -117,39 +121,65 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
                     return false;
                 }
 
-                // 2. Bu personel başka bankoda mı?
-                var existingBanko = await _connectionService.GetPersonelActiveBankoAsync(tcKimlikNo);
-                if (existingBanko != null && existingBanko.BankoId != bankoId)
+                // 2. Bu personel başka bankoda mı? (User tablosundan kontrol - API üzerinden)
+                var activeBankoResult = await _userApiService.GetActiveBankoIdAsync(tcKimlikNo);
+                if (activeBankoResult.Success && activeBankoResult.Data.HasValue && activeBankoResult.Data.Value != bankoId)
                 {
-                    _logger.LogWarning($"❌ {tcKimlikNo} zaten Banko#{existingBanko.BankoId}'de aktif");
+                    _logger.LogWarning($"❌ {tcKimlikNo} zaten Banko#{activeBankoResult.Data.Value}'de aktif");
                     return false;
                 }
 
-                // 3. Bu personelin tüm aktif bağlantılarını al
-                var activeConnections = await _connectionService.GetActiveConnectionsByTcKimlikNoAsync(tcKimlikNo);
-                
-                if (activeConnections.Any())
+                // 3. State'i güncelle (ÖNCE!)
+                _stateService.ActivateBankoMode(bankoId, tcKimlikNo);
+
+                // 4. User tablosunda banko modunu aktif et (API üzerinden)
+                var activateResult = await _userApiService.ActivateBankoModeAsync(tcKimlikNo, bankoId);
+                if (!activateResult.Success)
                 {
-                    // 4. Diğer tab'ları kapat (ForceLogout)
-                    foreach (var conn in activeConnections)
-                    {
-                        await _hubContext.Clients.Client(conn.ConnectionId)
-                            .SendAsync("ForceLogout", "Banko moduna geçildi. Diğer sekmeler kapatılıyor.");
-                        
-                        await _connectionService.DisconnectAsync(conn.ConnectionId);
-                        
-                        _logger.LogInformation($"⚠️ Diğer tab kapatıldı: {conn.ConnectionId}");
-                    }
+                    _logger.LogError($"❌ User tablosunda banko modu aktif edilemedi: {tcKimlikNo}");
+                    _stateService.DeactivateBankoMode(); // Rollback
+                    return false;
                 }
 
-                // 5. Yeni bağlantı oluştur (BankoMode)
-                // NOT: Blazor Server'da ConnectionId'yi alamıyoruz, bu yüzden
-                // personel banko sayfasına gittiğinde OnConnectedAsync'de oluşturulacak
-                
-                // 6. State'i güncelle
-                _stateService.ActivateBankoMode(bankoId, tcKimlikNo);
-                
                 _logger.LogInformation($"✅ Banko modu aktif: {tcKimlikNo} -> Banko#{bankoId}");
+                
+                // 5. Arka planda HubBankoConnection OLMAYAN bağlantıları kapat (await etme!)
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        // Aktif tab'ın yenilenmesi ve HubBankoConnection oluşturması için gecikme
+                        await Task.Delay(1000);
+                        
+                        // HubBankoConnection olmayan (normal) bağlantıları al (DTO)
+                        var nonBankoConnectionDtos = await _connectionService.GetNonBankoConnectionsByTcKimlikNoAsync(tcKimlikNo);
+
+                        if (nonBankoConnectionDtos.Any())
+                        {
+                            _logger.LogInformation($"🔄 {nonBankoConnectionDtos.Count} adet eski bağlantı kapatılıyor...");
+                            
+                            // Eski bağlantıları kapat (ForceLogout)
+                            foreach (var connDto in nonBankoConnectionDtos)
+                            {
+                                await _hubContext.Clients.Client(connDto.ConnectionId)
+                                    .SendAsync("ForceLogout", "Banko moduna geçildi. Diğer sekmeler kapatılıyor.");
+
+                                await _connectionService.DisconnectAsync(connDto.ConnectionId);
+
+                                _logger.LogInformation($"⚠️ Eski bağlantı kapatıldı: {connDto.ConnectionId}");
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogInformation($"✅ Kapatılacak eski bağlantı yok - Banko modu bağlantısı başarıyla oluşturuldu");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Eski bağlantıları kapatma hatası");
+                    }
+                });
+                
                 return true;
             }
             catch (Exception ex)
@@ -168,18 +198,22 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
             {
                 _logger.LogInformation($"🚪 Banko modundan çıkılıyor: {tcKimlikNo}");
 
-                // 1. Personelin aktif banko oturumunu kapat
-                var success = await _connectionService.DeactivateBankoConnectionAsync(tcKimlikNo);
-                
-                if (success)
+                // 1. User tablosunda banko modunu deaktif et (API üzerinden) - ÖNCELİKLE!
+                var deactivateResult = await _userApiService.DeactivateBankoModeAsync(tcKimlikNo);
+                if (!deactivateResult.Success)
                 {
-                    // 2. State'i güncelle
-                    _stateService.DeactivateBankoMode();
-                    
-                    _logger.LogInformation($"✅ Banko modundan çıkıldı: {tcKimlikNo}");
+                    _logger.LogError($"❌ User tablosunda banko modu deaktif edilemedi: {tcKimlikNo}");
+                    return false;
                 }
-                
-                return success;
+
+                // 2. Personelin aktif banko oturumunu kapat
+                await _connectionService.DeactivateBankoConnectionAsync(tcKimlikNo);
+
+                // 3. State'i güncelle
+                _stateService.DeactivateBankoMode();
+
+                _logger.LogInformation($"✅ Banko modundan çıkıldı: {tcKimlikNo}");
+                return true;
             }
             catch (Exception ex)
             {

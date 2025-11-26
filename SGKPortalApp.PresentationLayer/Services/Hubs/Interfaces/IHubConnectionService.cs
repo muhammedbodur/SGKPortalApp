@@ -1,5 +1,5 @@
-using SGKPortalApp.BusinessObjectLayer.Entities.Common;
-using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SignalR;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -92,7 +92,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces
         /// <summary>
         /// Kullanıcının tüm aktif bağlantılarını getir (TcKimlikNo bazında)
         /// </summary>
-        Task<List<HubConnection>> GetActiveConnectionsByTcKimlikNoAsync(string tcKimlikNo);
+        Task<List<HubConnectionResponseDto>> GetActiveConnectionsByTcKimlikNoAsync(string tcKimlikNo);
 
         /// <summary>
         /// Banko başka personel tarafından kullanılıyor mu?
@@ -102,7 +102,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces
         /// <summary>
         /// Personelin aktif banko oturumunu getir
         /// </summary>
-        Task<HubBankoConnection?> GetPersonelActiveBankoAsync(string tcKimlikNo);
+        Task<HubBankoConnectionResponseDto?> GetPersonelActiveBankoAsync(string tcKimlikNo);
 
         /// <summary>
         /// Banko oturumu oluştur (Fiziksel bankoya geçiş)
@@ -127,7 +127,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces
         /// <summary>
         /// ConnectionId ile HubConnection getir
         /// </summary>
-        Task<HubConnection?> GetByConnectionIdAsync(string connectionId);
+        Task<HubConnectionResponseDto?> GetByConnectionIdAsync(string connectionId);
 
         /// <summary>
         /// Bağlantıyı tamamen kapat ve sil
@@ -144,24 +144,43 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces
         /// </summary>
         Task<bool> IsTvInUseByTvUserAsync(int tvId);
 
-        /// <summary>
-        /// HubConnectionId ile HubBankoConnection getir
-        /// </summary>
-        Task<HubBankoConnection?> GetBankoConnectionByHubConnectionIdAsync(int hubConnectionId);
 
-        /// <summary>
-        /// HubConnectionId ile HubTvConnection getir
-        /// </summary>
-        Task<HubTvConnection?> GetTvConnectionByHubConnectionIdAsync(int hubConnectionId);
 
-        /// <summary>
-        /// Bankodaki aktif personeli getir
-        /// </summary>
-        Task<User?> GetBankoActivePersonelAsync(int bankoId);
 
         /// <summary>
         /// Kullanıcı için yeni bağlantı oluştur (ConnectionType ile)
         /// </summary>
         Task<bool> RegisterUserConnectionAsync(string connectionId, string tcKimlikNo, string connectionType);
+
+        /// <summary>
+        /// Banko modu için HubBankoConnection oluştur
+        /// </summary>
+        Task<bool> CreateBankoConnectionAsync(int hubConnectionId, int bankoId, string tcKimlikNo);
+
+        /// <summary>
+        /// HubConnectionId'ye göre HubBankoConnection'ı deaktif et ve User tablosunu temizle
+        /// </summary>
+        Task<bool> DeactivateBankoConnectionByHubConnectionIdAsync(int hubConnectionId);
+
+        /// <summary>
+        /// HubBankoConnection olmayan (normal) bağlantıları getir
+        /// </summary>
+        Task<List<HubConnectionResponseDto>> GetNonBankoConnectionsByTcKimlikNoAsync(string tcKimlikNo);
+
+        /// <summary>
+        /// HubConnectionId ile HubBankoConnection getir
+        /// </summary>
+        Task<HubBankoConnectionResponseDto?> GetBankoConnectionByHubConnectionIdAsync(int hubConnectionId);
+
+        /// <summary>
+        /// HubConnectionId ile HubTvConnection getir
+        /// </summary>
+        Task<HubTvConnectionResponseDto?> GetTvConnectionByHubConnectionIdAsync(int hubConnectionId);
+
+        /// <summary>
+        /// Bankodaki aktif personeli getir
+        /// </summary>
+        Task<UserResponseDto?> GetBankoActivePersonelAsync(int bankoId);
     }
 }
+

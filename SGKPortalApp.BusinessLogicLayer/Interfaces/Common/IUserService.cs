@@ -27,5 +27,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.Common
         // Session Management
         Task<ApiResponseDto<bool>> ClearSessionAsync(string tcKimlikNo);
         Task<ApiResponseDto<UserResponseDto>> GetBySessionIdAsync(string sessionId);
+
+        // Banko Mode Management
+        Task<ApiResponseDto<bool>> ActivateBankoModeAsync(string tcKimlikNo, int bankoId);
+        Task<ApiResponseDto<bool>> DeactivateBankoModeAsync(string tcKimlikNo);
+        Task<ApiResponseDto<bool>> IsBankoModeActiveAsync(string tcKimlikNo);
+        Task<ApiResponseDto<int?>> GetActiveBankoIdAsync(string tcKimlikNo);
     }
 }

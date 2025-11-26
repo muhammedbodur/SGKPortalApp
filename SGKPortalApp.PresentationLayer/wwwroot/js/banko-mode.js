@@ -17,6 +17,16 @@ window.bankoMode = {
         console.log('✅ Banko modu SignalR bağlantısı ayarlandı');
     },
 
+    // Aktif tab'ın ConnectionId'sini al
+    getCurrentConnectionId: function () {
+        const connection = this.getConnection();
+        if (!connection) {
+            console.error('❌ SignalR bağlantısı bulunamadı!');
+            return null;
+        }
+        return connection.connectionId;
+    },
+
     // Banko moduna geç
     enter: async function (bankoId) {
         const connection = this.getConnection();

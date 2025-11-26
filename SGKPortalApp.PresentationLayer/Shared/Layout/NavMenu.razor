@@ -28,351 +28,354 @@
             </a>
         </li>
 
-        <!-- ================ ORTAK TANIMLAR ================ -->
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Ortak Tanımlar</span>
-        </li>
+        @if (!IsBankoMode)
+        {
+            <!-- ================ ORTAK TANIMLAR ================ -->
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Ortak Tanımlar</span>
+            </li>
 
-        <!-- Hizmet Binaları -->
-        <li class="menu-item @(IsSectionActive("/common") ? "active open" : "")">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-cog"></i>
-                <div>Ortak Tanımlar</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item @(IsActive("/common/hizmetbinasi") && !Navigation.Uri.Contains("/manage") && !Navigation.Uri.Contains("/detail") ? "active" : "")">
-                    <a href="/common/hizmetbinasi" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-building"></i>
-                        <div>Hizmet Binaları</div>
-                    </a>
-                </li>
-            </ul>
-            <ul class="menu-sub">
-                <li class="menu-item @(IsSectionActive("/common/il") ? "active" : "")">
-                    <a href="/common/il" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-map"></i>
-                        <div>İller</div>
-                    </a>
-                </li>
-            </ul>
-            <ul class="menu-sub">
-                <li class="menu-item @(IsSectionActive("/common/ilce") ? "active" : "")">
-                    <a href="/common/ilce" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-map-pin"></i>
-                        <div>İlçeler</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+            <!-- Hizmet Binaları -->
+            <li class="menu-item @(IsSectionActive("/common") ? "active open" : "")">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-cog"></i>
+                    <div>Ortak Tanımlar</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item @(IsActive("/common/hizmetbinasi") && !Navigation.Uri.Contains("/manage") && !Navigation.Uri.Contains("/detail") ? "active" : "")">
+                        <a href="/common/hizmetbinasi" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-building"></i>
+                            <div>Hizmet Binaları</div>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="menu-sub">
+                    <li class="menu-item @(IsSectionActive("/common/il") ? "active" : "")">
+                        <a href="/common/il" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-map"></i>
+                            <div>İller</div>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="menu-sub">
+                    <li class="menu-item @(IsSectionActive("/common/ilce") ? "active" : "")">
+                        <a href="/common/ilce" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-map-pin"></i>
+                            <div>İlçeler</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
 
-        <!-- ================ PERSONEL İŞLEMLERİ ================ -->
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Personel İşlemleri</span>
-        </li>
+            <!-- ================ PERSONEL İŞLEMLERİ ================ -->
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Personel İşlemleri</span>
+            </li>
 
-        <li class="menu-item @(IsSectionActive("/personel") ? "active open" : "")">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-user"></i>
-                <div>Personel</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item @(IsActive("/personel") && !Navigation.Uri.Contains("/departman") && !Navigation.Uri.Contains("/servis") && !Navigation.Uri.Contains("/unvan") ? "active" : "")">
-                    <a href="/personel" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-user"></i>
-                        <div>Personel Listesi</div>
-                    </a>
-                </li>
-                <li class="menu-item @(IsActive("/personel/manage") ? "active" : "")">
-                    <a href="/personel/manage" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-user-plus"></i>
-                        <div>Yeni Personel</div>
-                    </a>
-                </li>
-                <li class="menu-item @(IsSectionActive("/personel/departman") ? "active" : "")">
-                    <a href="/personel/departman" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-git-branch"></i>
-                        <div>Departmanlar</div>
-                    </a>
-                </li>
-                <li class="menu-item @(IsSectionActive("/personel/servis") ? "active" : "")">
-                    <a href="/personel/servis" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-group"></i>
-                        <div>Servisler</div>
-                    </a>
-                </li>
-                <li class="menu-item @(IsSectionActive("/personel/unvan") ? "active" : "")">
-                    <a href="/personel/unvan" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-id-card"></i>
-                        <div>Unvanlar</div>
-                    </a>
-                </li>
-                <li class="menu-item @(IsSectionActive("/personel/sendika") ? "active" : "")">
-                    <a href="/personel/sendika" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-unite"></i>
-                        <div>Sendikalar</div>
-                    </a>
-                </li>
-                <li class="menu-item @(IsSectionActive("/personel/atanma-nedeni") ? "active" : "")">
-                    <a href="/personel/atanma-nedeni" class="menu-link">
-                        <i class="menu-icon tf-icons bx bx-file"></i>
-                        <div>Atanma Nedenleri</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+            <li class="menu-item @(IsSectionActive("/personel") ? "active open" : "")">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-user"></i>
+                    <div>Personel</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item @(IsActive("/personel") && !Navigation.Uri.Contains("/departman") && !Navigation.Uri.Contains("/servis") && !Navigation.Uri.Contains("/unvan") ? "active" : "")">
+                        <a href="/personel" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-user"></i>
+                            <div>Personel Listesi</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(IsActive("/personel/manage") ? "active" : "")">
+                        <a href="/personel/manage" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-user-plus"></i>
+                            <div>Yeni Personel</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(IsSectionActive("/personel/departman") ? "active" : "")">
+                        <a href="/personel/departman" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-git-branch"></i>
+                            <div>Departmanlar</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(IsSectionActive("/personel/servis") ? "active" : "")">
+                        <a href="/personel/servis" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-group"></i>
+                            <div>Servisler</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(IsSectionActive("/personel/unvan") ? "active" : "")">
+                        <a href="/personel/unvan" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-id-card"></i>
+                            <div>Unvanlar</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(IsSectionActive("/personel/sendika") ? "active" : "")">
+                        <a href="/personel/sendika" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-unite"></i>
+                            <div>Sendikalar</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(IsSectionActive("/personel/atanma-nedeni") ? "active" : "")">
+                        <a href="/personel/atanma-nedeni" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-file"></i>
+                            <div>Atanma Nedenleri</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
 
-        <!-- ================ SIRAMATİK İŞLEMLERİ ================ -->
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Sıramatik İşlemleri</span>
-        </li>
+            <!-- ================ SIRAMATİK İŞLEMLERİ ================ -->
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Sıramatik İşlemleri</span>
+            </li>
 
-        <li class="menu-item @(IsSectionActive("/siramatik") ? "active open" : "")">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-desktop"></i>
-                <div>Sıramatik</div>
-            </a>
-            <ul class="menu-sub">
-                <!-- Bankolar -->
-                <li class="menu-item @(IsSectionActive("/siramatik/banko") ? "active open" : "")">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <div>Bankolar</div>
-                    </a>
-                    <ul class="menu-sub">
-                        <li class="menu-item @(IsActive("/siramatik/banko-yonetimi") || IsActive("/siramatik/banko/list") ? "active" : "")">
-                            <a href="/siramatik/banko/list" class="menu-link">
-                                <div>Banko Listesi</div>
-                            </a>
-                        </li>
-                        <li class="menu-item @(IsActive("/siramatik/banko/manage") ? "active" : "")">
-                            <a href="/siramatik/banko/manage" class="menu-link">
-                                <div>Yeni Banko Ekle</div>
-                            </a>
-                        </li>
-                        <li class="menu-item @(IsActive("/siramatik/banko-personel-atama") ? "active" : "")">
-                            <a href="/siramatik/banko-personel-atama" class="menu-link">
-                                <div>Personel Atama</div>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+            <li class="menu-item @(IsSectionActive("/siramatik") ? "active open" : "")">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-desktop"></i>
+                    <div>Sıramatik</div>
+                </a>
+                <ul class="menu-sub">
+                    <!-- Bankolar -->
+                    <li class="menu-item @(IsSectionActive("/siramatik/banko") ? "active open" : "")">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                            <div>Bankolar</div>
+                        </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item @(IsActive("/siramatik/banko-yonetimi") || IsActive("/siramatik/banko/list") ? "active" : "")">
+                                <a href="/siramatik/banko/list" class="menu-link">
+                                    <div>Banko Listesi</div>
+                                </a>
+                            </li>
+                            <li class="menu-item @(IsActive("/siramatik/banko/manage") ? "active" : "")">
+                                <a href="/siramatik/banko/manage" class="menu-link">
+                                    <div>Yeni Banko Ekle</div>
+                                </a>
+                            </li>
+                            <li class="menu-item @(IsActive("/siramatik/banko-personel-atama") ? "active" : "")">
+                                <a href="/siramatik/banko-personel-atama" class="menu-link">
+                                    <div>Personel Atama</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
 
-                <!-- Ana Kanal -->
-                <li class="menu-item @(IsSectionActive("/siramatik/kanal") || IsSectionActive("/siramatik/alt-kanal") || IsSectionActive("/siramatik/kanal") || IsSectionActive("/siramatik/personel-atama") ? "active open" : "")">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <div>Kanal Yönetimi</div>
-                    </a>
-                    <ul class="menu-sub">
-                        <li class="menu-item @(IsActive("/siramatik/kanal") && !Navigation.Uri.Contains("/manage") ? "active" : "")">
-                            <a href="/siramatik/kanal" class="menu-link">
-                                <div>Kanallar</div>
-                            </a>
-                        </li>
-                        @* <li class="menu-item @(IsActive("/siramatik/kanal/manage") ? "active" : "")">
-                            <a href="/siramatik/kanal/manage" class="menu-link">
-                                <div>Yeni Kanal</div>
-                            </a>
-                        </li> *@
-                        <li class="menu-item @(IsActive("/siramatik/alt-kanal") && !Navigation.Uri.Contains("/manage") ? "active" : "")">
-                            <a href="/siramatik/alt-kanal" class="menu-link">
-                                <div>Alt Kanallar</div>
-                            </a>
-                        </li>
-                        @* <li class="menu-item @(IsActive("/siramatik/alt-kanal/manage") ? "active" : "")">
-                            <a href="/siramatik/alt-kanal/manage" class="menu-link">
-                                <div>Yeni Alt Kanal</div>
-                            </a>
-                        </li> *@
-                        <li class="menu-item @(IsActive("/siramatik/kanal-islem") && !Navigation.Uri.Contains("/manage") ? "active" : "")">
-                            <a href="/siramatik/kanal-islem" class="menu-link">
-                                <div>Kanal İşlemleri</div>
-                            </a>
-                        </li>
-                        @* <li class="menu-item @(IsActive("/siramatik/kanal/manage") ? "active" : "")">
-                            <a href="/siramatik/kanal/manage" class="menu-link">
-                                <div>Yeni Kanal İşlem</div>
-                            </a>
-                        </li> *@
-                        <li class="menu-item @(IsActive("/siramatik/kanal-alt-islem") && !Navigation.Uri.Contains("/manage") ? "active" : "")">
-                            <a href="/siramatik/kanal-alt-islem" class="menu-link">
-                                <div>Alt Kanal İşlemleri</div>
-                            </a>
-                        </li>
-                        @* <li class="menu-item @(IsActive("/siramatik/kanal-alt-islem/manage") ? "active" : "")">
-                            <a href="/siramatik/kanal-alt-islem/manage" class="menu-link">
-                                <div>Yeni Alt İşlem</div>
-                            </a>
-                        </li> *@
-                        <li class="menu-item @(IsActive("/siramatik/personel-atama") ? "active" : "")">
-                            <a href="/siramatik/personel-atama" class="menu-link">
-                                <div>Personel Atama</div>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+                    <!-- Ana Kanal -->
+                    <li class="menu-item @(IsSectionActive("/siramatik/kanal") || IsSectionActive("/siramatik/alt-kanal") || IsSectionActive("/siramatik/kanal") || IsSectionActive("/siramatik/personel-atama") ? "active open" : "")">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                            <div>Kanal Yönetimi</div>
+                        </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item @(IsActive("/siramatik/kanal") && !Navigation.Uri.Contains("/manage") ? "active" : "")">
+                                <a href="/siramatik/kanal" class="menu-link">
+                                    <div>Kanallar</div>
+                                </a>
+                            </li>
+                            @* <li class="menu-item @(IsActive("/siramatik/kanal/manage") ? "active" : "")">
+                                <a href="/siramatik/kanal/manage" class="menu-link">
+                                    <div>Yeni Kanal</div>
+                                </a>
+                            </li> *@
+                            <li class="menu-item @(IsActive("/siramatik/alt-kanal") && !Navigation.Uri.Contains("/manage") ? "active" : "")">
+                                <a href="/siramatik/alt-kanal" class="menu-link">
+                                    <div>Alt Kanallar</div>
+                                </a>
+                            </li>
+                            @* <li class="menu-item @(IsActive("/siramatik/alt-kanal/manage") ? "active" : "")">
+                                <a href="/siramatik/alt-kanal/manage" class="menu-link">
+                                    <div>Yeni Alt Kanal</div>
+                                </a>
+                            </li> *@
+                            <li class="menu-item @(IsActive("/siramatik/kanal-islem") && !Navigation.Uri.Contains("/manage") ? "active" : "")">
+                                <a href="/siramatik/kanal-islem" class="menu-link">
+                                    <div>Kanal İşlemleri</div>
+                                </a>
+                            </li>
+                            @* <li class="menu-item @(IsActive("/siramatik/kanal/manage") ? "active" : "")">
+                                <a href="/siramatik/kanal/manage" class="menu-link">
+                                    <div>Yeni Kanal İşlem</div>
+                                </a>
+                            </li> *@
+                            <li class="menu-item @(IsActive("/siramatik/kanal-alt-islem") && !Navigation.Uri.Contains("/manage") ? "active" : "")">
+                                <a href="/siramatik/kanal-alt-islem" class="menu-link">
+                                    <div>Alt Kanal İşlemleri</div>
+                                </a>
+                            </li>
+                            @* <li class="menu-item @(IsActive("/siramatik/kanal-alt-islem/manage") ? "active" : "")">
+                                <a href="/siramatik/kanal-alt-islem/manage" class="menu-link">
+                                    <div>Yeni Alt İşlem</div>
+                                </a>
+                            </li> *@
+                            <li class="menu-item @(IsActive("/siramatik/personel-atama") ? "active" : "")">
+                                <a href="/siramatik/personel-atama" class="menu-link">
+                                    <div>Personel Atama</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
 
-                <!-- Kiosk Yönetimi -->
-                <li class="menu-item @(IsSectionActive("/siramatik/kiosk") ? "active open" : "")">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <div>Kiosk Yönetimi</div>
-                    </a>
-                    <ul class="menu-sub">
-                        <li class="menu-item @(IsActive("/siramatik/kiosk-menu") ? "active" : "")">
-                            <a href="/siramatik/kiosk-menu" class="menu-link">
-                                <div>Kiosk Menüleri</div>
-                            </a>
-                        </li>
-                        <li class="menu-item @(IsActive("/siramatik/kiosk-yonetimi") || IsActive("/siramatik/kiosk/list") ? "active" : "")">
-                            <a href="/siramatik/kiosk-yonetimi" class="menu-link">
-                                <div>Kiosk Cihazları</div>
-                            </a>
-                        </li>
-                        <li class="menu-item @(IsActive("/siramatik/kiosk-menu-atama") ? "active" : "")">
-                            <a href="/siramatik/kiosk-menu-atama" class="menu-link">
-                                <div>Kiosk Menü Ataması</div>
-                            </a>
-                        </li>
-                        <li class="menu-item @(IsActive("/siramatik/kiosk-menu-islem") ? "active" : "")">
-                            <a href="/siramatik/kiosk-menu-islem" class="menu-link">
-                                <div>Menü Alt Kanal İşlemleri</div>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+                    <!-- Kiosk Yönetimi -->
+                    <li class="menu-item @(IsSectionActive("/siramatik/kiosk") ? "active open" : "")">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                            <div>Kiosk Yönetimi</div>
+                        </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item @(IsActive("/siramatik/kiosk-menu") ? "active" : "")">
+                                <a href="/siramatik/kiosk-menu" class="menu-link">
+                                    <div>Kiosk Menüleri</div>
+                                </a>
+                            </li>
+                            <li class="menu-item @(IsActive("/siramatik/kiosk-yonetimi") || IsActive("/siramatik/kiosk/list") ? "active" : "")">
+                                <a href="/siramatik/kiosk-yonetimi" class="menu-link">
+                                    <div>Kiosk Cihazları</div>
+                                </a>
+                            </li>
+                            <li class="menu-item @(IsActive("/siramatik/kiosk-menu-atama") ? "active" : "")">
+                                <a href="/siramatik/kiosk-menu-atama" class="menu-link">
+                                    <div>Kiosk Menü Ataması</div>
+                                </a>
+                            </li>
+                            <li class="menu-item @(IsActive("/siramatik/kiosk-menu-islem") ? "active" : "")">
+                                <a href="/siramatik/kiosk-menu-islem" class="menu-link">
+                                    <div>Menü Alt Kanal İşlemleri</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
 
-                <!-- TV'ler -->
-                <li class="menu-item @(IsSectionActive("/siramatik/tv") ? "active open" : "")">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <div>TV'ler</div>
-                    </a>
-                    <ul class="menu-sub">
-                        <li class="menu-item @(IsActive("/siramatik/tv") ? "active" : "")">
-                            <a href="/siramatik/tv" class="menu-link">
-                                <div>TV Listesi</div>
-                            </a>
-                        </li>
-                        <li class="menu-item @(IsActive("/siramatik/tv/manage") ? "active" : "")">
-                            <a href="/siramatik/tv/manage" class="menu-link">
-                                <div>Yeni TV Ekle</div>
-                            </a>
-                        </li>
-                        <li class="menu-item @(IsActive("/siramatik/tv/banko-eslestirme") ? "active" : "")">
-                            <a href="/siramatik/tv/banko-eslestirme" class="menu-link">
-                                <div>Banko Eşleştirme</div>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </li>
+                    <!-- TV'ler -->
+                    <li class="menu-item @(IsSectionActive("/siramatik/tv") ? "active open" : "")">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                            <div>TV'ler</div>
+                        </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item @(IsActive("/siramatik/tv") ? "active" : "")">
+                                <a href="/siramatik/tv" class="menu-link">
+                                    <div>TV Listesi</div>
+                                </a>
+                            </li>
+                            <li class="menu-item @(IsActive("/siramatik/tv/manage") ? "active" : "")">
+                                <a href="/siramatik/tv/manage" class="menu-link">
+                                    <div>Yeni TV Ekle</div>
+                                </a>
+                            </li>
+                            <li class="menu-item @(IsActive("/siramatik/tv/banko-eslestirme") ? "active" : "")">
+                                <a href="/siramatik/tv/banko-eslestirme" class="menu-link">
+                                    <div>Banko Eşleştirme</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
 
-        <!-- ================ PDKS İŞLEMLERİ ================ -->
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">PDKS İşlemleri</span>
-        </li>
+            <!-- ================ PDKS İŞLEMLERİ ================ -->
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">PDKS İşlemleri</span>
+            </li>
 
-        <li class="menu-item @(IsSectionActive("/pdks") ? "active open" : "")">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-time-five"></i>
-                <div>PDKS</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item @(IsSectionActive("/pdks/giris-cikis") ? "active" : "")">
-                    <a href="/pdks/giris-cikis" class="menu-link">
-                        <div>Giriş/Çıkış</div>
-                    </a>
-                </li>
-                <li class="menu-item @(IsSectionActive("/pdks/izin") ? "active open" : "")">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <div>İzin Yönetimi</div>
-                    </a>
-                    <ul class="menu-sub">
-                        <li class="menu-item @(IsActive("/pdks/izin/taleplerim") ? "active" : "")">
-                            <a href="/pdks/izin/taleplerim" class="menu-link">
-                                <div>Taleplerim</div>
-                            </a>
-                        </li>
-                        <li class="menu-item @(IsActive("/pdks/izin/yeni-talep") ? "active" : "")">
-                            <a href="/pdks/izin/yeni-talep" class="menu-link">
-                                <div>Yeni Talep</div>
-                            </a>
-                        </li>
-                        <li class="menu-item @(IsActive("/pdks/izin/onay-bekleyenler") ? "active" : "")">
-                            <a href="/pdks/izin/onay-bekleyenler" class="menu-link">
-                                <div>Onay Bekleyenler</div>
-                            </a>
-                        </li>
-                        <li class="menu-item @(IsActive("/pdks/izin/sorumlu-atama") ? "active" : "")">
-                            <a href="/pdks/izin/sorumlu-atama" class="menu-link">
-                                <div>Sorumlu Atama</div>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="menu-item @(IsSectionActive("/pdks/mesai") ? "active" : "")">
-                    <a href="/pdks/mesai/calisma-gunleri" class="menu-link">
-                        <div>Mesai Yönetimi</div>
-                    </a>
-                </li>
-                <li class="menu-item @(IsSectionActive("/pdks/raporlar") ? "active" : "")">
-                    <a href="/pdks/raporlar/personel-mesai" class="menu-link">
-                        <div>Raporlar</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+            <li class="menu-item @(IsSectionActive("/pdks") ? "active open" : "")">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-time-five"></i>
+                    <div>PDKS</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item @(IsSectionActive("/pdks/giris-cikis") ? "active" : "")">
+                        <a href="/pdks/giris-cikis" class="menu-link">
+                            <div>Giriş/Çıkış</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(IsSectionActive("/pdks/izin") ? "active open" : "")">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                            <div>İzin Yönetimi</div>
+                        </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item @(IsActive("/pdks/izin/taleplerim") ? "active" : "")">
+                                <a href="/pdks/izin/taleplerim" class="menu-link">
+                                    <div>Taleplerim</div>
+                                </a>
+                            </li>
+                            <li class="menu-item @(IsActive("/pdks/izin/yeni-talep") ? "active" : "")">
+                                <a href="/pdks/izin/yeni-talep" class="menu-link">
+                                    <div>Yeni Talep</div>
+                                </a>
+                            </li>
+                            <li class="menu-item @(IsActive("/pdks/izin/onay-bekleyenler") ? "active" : "")">
+                                <a href="/pdks/izin/onay-bekleyenler" class="menu-link">
+                                    <div>Onay Bekleyenler</div>
+                                </a>
+                            </li>
+                            <li class="menu-item @(IsActive("/pdks/izin/sorumlu-atama") ? "active" : "")">
+                                <a href="/pdks/izin/sorumlu-atama" class="menu-link">
+                                    <div>Sorumlu Atama</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="menu-item @(IsSectionActive("/pdks/mesai") ? "active" : "")">
+                        <a href="/pdks/mesai/calisma-gunleri" class="menu-link">
+                            <div>Mesai Yönetimi</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(IsSectionActive("/pdks/raporlar") ? "active" : "")">
+                        <a href="/pdks/raporlar/personel-mesai" class="menu-link">
+                            <div>Raporlar</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
 
-        <!-- ================ ESHOT İŞLEMLERİ ================ -->
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Eshot İşlemleri</span>
-        </li>
+            <!-- ================ ESHOT İŞLEMLERİ ================ -->
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Eshot İşlemleri</span>
+            </li>
 
-        <li class="menu-item @(IsSectionActive("/eshot") ? "active open" : "")">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-bus"></i>
-                <div>Eshot</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item @(IsSectionActive("/eshot/hareketler") ? "active" : "")">
-                    <a href="/eshot/hareketler" class="menu-link">
-                        <div>Hareketler</div>
-                    </a>
-                </li>
-                <li class="menu-item @(IsSectionActive("/eshot/kullanim-hakki") ? "active" : "")">
-                    <a href="/eshot/kullanim-hakki" class="menu-link">
-                        <div>Kullanım Hakkı</div>
-                    </a>
-                </li>
-                <li class="menu-item @(IsSectionActive("/eshot/ucret-bilgisi") ? "active" : "")">
-                    <a href="/eshot/ucret-bilgisi" class="menu-link">
-                        <div>Ücret Bilgisi</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+            <li class="menu-item @(IsSectionActive("/eshot") ? "active open" : "")">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-bus"></i>
+                    <div>Eshot</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item @(IsSectionActive("/eshot/hareketler") ? "active" : "")">
+                        <a href="/eshot/hareketler" class="menu-link">
+                            <div>Hareketler</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(IsSectionActive("/eshot/kullanim-hakki") ? "active" : "")">
+                        <a href="/eshot/kullanim-hakki" class="menu-link">
+                            <div>Kullanım Hakkı</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(IsSectionActive("/eshot/ucret-bilgisi") ? "active" : "")">
+                        <a href="/eshot/ucret-bilgisi" class="menu-link">
+                            <div>Ücret Bilgisi</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
 
-        <!-- ================ HESAP YÖNETİMİ ================ -->
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Hesap Yönetimi</span>
-        </li>
+            <!-- ================ HESAP YÖNETİMİ ================ -->
+            <li class="menu-header small text-uppercase">
+                <span class="menu-header-text">Hesap Yönetimi</span>
+            </li>
 
-        <li class="menu-item @(IsSectionActive("/account") ? "active open" : "")">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons bx bx-cog"></i>
-                <div>Hesap Ayarları</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item @(IsActive("/account/profile") ? "active" : "")">
-                    <a href="/account/profile" class="menu-link">
-                        <div>Profil</div>
-                    </a>
-                </li>
-                <li class="menu-item @(IsActive("/account/change-password") ? "active" : "")">
-                    <a href="/account/change-password" class="menu-link">
-                        <div>Şifre Değiştir</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
+            <li class="menu-item @(IsSectionActive("/account") ? "active open" : "")">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-cog"></i>
+                    <div>Hesap Ayarları</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item @(IsActive("/account/profile") ? "active" : "")">
+                        <a href="/account/profile" class="menu-link">
+                            <div>Profil</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(IsActive("/account/change-password") ? "active" : "")">
+                        <a href="/account/change-password" class="menu-link">
+                            <div>Şifre Değiştir</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        }
 
     </ul>
 </aside>
@@ -380,6 +383,9 @@
 @implements IDisposable
 
 @code {
+    [Parameter]
+    public bool IsBankoMode { get; set; } = false;
+
     /// <summary>
     /// Tam URL eşleşmesi kontrol eder
     /// </summary>

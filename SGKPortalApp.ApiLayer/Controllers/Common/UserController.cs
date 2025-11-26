@@ -231,5 +231,57 @@ namespace SGKPortalApp.ApiLayer.Controllers.Common
             
             return Ok(result);
         }
+
+        // ═══════════════════════════════════════════════════════════════════════════════
+        // 🏦 BANKO MODU YÖNETİMİ
+        // ═══════════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Banko modunu aktif et
+        /// </summary>
+        [HttpPost("{tcKimlikNo}/banko-mode/activate")]
+        public async Task<IActionResult> ActivateBankoMode(string tcKimlikNo, [FromBody] int bankoId)
+        {
+            var result = await _userService.ActivateBankoModeAsync(tcKimlikNo, bankoId);
+            
+            if (!result.Success)
+                return BadRequest(result);
+            
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Banko modunu deaktif et
+        /// </summary>
+        [HttpPost("{tcKimlikNo}/banko-mode/deactivate")]
+        public async Task<IActionResult> DeactivateBankoMode(string tcKimlikNo)
+        {
+            var result = await _userService.DeactivateBankoModeAsync(tcKimlikNo);
+            
+            if (!result.Success)
+                return BadRequest(result);
+            
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Banko modu aktif mi kontrol et
+        /// </summary>
+        [HttpGet("{tcKimlikNo}/banko-mode/is-active")]
+        public async Task<IActionResult> IsBankoModeActive(string tcKimlikNo)
+        {
+            var result = await _userService.IsBankoModeActiveAsync(tcKimlikNo);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Aktif banko ID'sini getir
+        /// </summary>
+        [HttpGet("{tcKimlikNo}/banko-mode/active-banko-id")]
+        public async Task<IActionResult> GetActiveBankoId(string tcKimlikNo)
+        {
+            var result = await _userService.GetActiveBankoIdAsync(tcKimlikNo);
+            return Ok(result);
+        }
     }
 }

@@ -14,12 +14,15 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
     public class SiramatikHub : BaseHub
     {
         private readonly IHubConnectionService _connectionService;
+        private readonly IBankoModeService _bankoModeService;
 
         public SiramatikHub(
             ILogger<SiramatikHub> logger,
-            IHubConnectionService connectionService) : base(logger)
+            IHubConnectionService connectionService,
+            IBankoModeService bankoModeService) : base(logger)
         {
             _connectionService = connectionService;
+            _bankoModeService = bankoModeService;
         }
 
         #region Connection Management
@@ -40,37 +43,85 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
             {
                 try
                 {
-                    // 1. Bu kullanıcının aktif bağlantılarını kontrol et
-                    var existingConnections = await _connectionService.GetActiveConnectionsByTcKimlikNoAsync(tcKimlikNo);
+                    // 1. Bu kullanıcının mevcut bağlantılarını kontrol et
+                    var existingConnectionDtos = await _connectionService.GetActiveConnectionsByTcKimlikNoAsync(tcKimlikNo);
+                    var existingConnections = existingConnectionDtos; // DTO listesi
                     
-                    if (existingConnections.Any())
+                    // 2. Banko modu kontrolü yap
+                    var isBankoModeActive = await _bankoModeService.IsPersonelInBankoModeAsync(tcKimlikNo);
+                    
+                    if (isBankoModeActive && existingConnections.Any())
                     {
-                        // 2. Eski bağlantıları zorla kapat (Yeni login = Eski logout)
-                        foreach (var oldConnection in existingConnections)
-                        {
-                            await Clients.Client(oldConnection.ConnectionId)
-                                .SendAsync("ForceLogout", "Başka bir cihazdan giriş yapıldı. Oturumunuz sonlandırıldı.");
-                            
-                            await _connectionService.DisconnectAsync(oldConnection.ConnectionId);
-                            
-                            _logger.LogWarning($"⚠️ Eski bağlantı kapatıldı: {oldConnection.ConnectionId} (Yeni login: {info.ConnectionId})");
-                        }
+                        // Banko modunda VE zaten bağlantısı var - yeni tab'a izin verme
+                        _logger.LogWarning($"⚠️ Banko modu aktif - yeni tab kapatılıyor: {info.ConnectionId} | TC: {tcKimlikNo}");
+                        
+                        await Clients.Client(info.ConnectionId)
+                            .SendAsync("ForceLogout", "Banko modu aktif. Bu sekme kapatılıyor.");
+                        
+                        return; // Bağlantı oluşturma
                     }
                     
-                    // 3. Yeni bağlantı oluştur (ConnectionType = MainLayout)
+                    // 3. Bağlantı tipini belirle
+                    string connectionType = isBankoModeActive ? "BankoMode" : "MainLayout";
+                    
+                    // 4. Yeni bağlantı oluştur
                     var success = await _connectionService.RegisterUserConnectionAsync(
                         info.ConnectionId, 
                         tcKimlikNo, 
-                        "MainLayout"
+                        connectionType
                     );
                     
-                    if (success)
-                    {
-                        _logger.LogInformation($"✅ Yeni bağlantı oluşturuldu: {info.ConnectionId} | TC: {tcKimlikNo} | Type: MainLayout | IP: {info.IpAddress}");
-                    }
-                    else
+                    if (!success)
                     {
                         _logger.LogWarning($"⚠️ Bağlantı oluşturulamadı: {info.ConnectionId} | TC: {tcKimlikNo}");
+                        return;
+                    }
+                    
+                    _logger.LogInformation($"✅ Yeni bağlantı oluşturuldu: {info.ConnectionId} | TC: {tcKimlikNo} | Type: {connectionType} | IP: {info.IpAddress}");
+                    
+                    // 5. Eğer banko modundaysa, HubBankoConnection oluştur
+                    if (isBankoModeActive)
+                    {
+                        // HubConnection ID'sini al
+                        var hubConnection = await _connectionService.GetByConnectionIdAsync(info.ConnectionId);
+                        if (hubConnection == null)
+                        {
+                            _logger.LogError($"❌ HubConnection bulunamadı: {info.ConnectionId}");
+                            await Clients.Client(info.ConnectionId)
+                                .SendAsync("ForceLogout", "Banko modu bağlantısı oluşturulamadı.");
+                            return;
+                        }
+                        
+                        // Aktif banko ID'sini al
+                        var activeBankoResult = await _bankoModeService.GetPersonelAssignedBankoAsync(tcKimlikNo);
+                        if (activeBankoResult == null)
+                        {
+                            _logger.LogError($"❌ Aktif banko bulunamadı: {tcKimlikNo}");
+                            await Clients.Client(info.ConnectionId)
+                                .SendAsync("ForceLogout", "Banko bilgisi bulunamadı.");
+                            return;
+                        }
+                        
+                        // HubBankoConnection oluştur
+                        var bankoConnectionSuccess = await _connectionService.CreateBankoConnectionAsync(
+                            hubConnection.HubConnectionId,
+                            activeBankoResult.BankoId,
+                            tcKimlikNo
+                        );
+                        
+                        if (!bankoConnectionSuccess)
+                        {
+                            _logger.LogError($"❌ HubBankoConnection oluşturulamadı - İşlem geri alınıyor: {info.ConnectionId}");
+                            
+                            // Rollback: HubConnection'ı sil
+                            await _connectionService.DisconnectAsync(info.ConnectionId);
+                            
+                            await Clients.Client(info.ConnectionId)
+                                .SendAsync("ForceLogout", "Banko modu bağlantısı oluşturulamadı. Lütfen tekrar deneyin.");
+                            return;
+                        }
+                        
+                        _logger.LogInformation($"✅ HubBankoConnection oluşturuldu: Banko#{activeBankoResult.BankoId} | {tcKimlikNo}");
                     }
                 }
                 catch (Exception ex)
@@ -108,9 +159,19 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                             var bankoConnection = await _connectionService.GetBankoConnectionByHubConnectionIdAsync(hubConnection.HubConnectionId);
                             if (bankoConnection != null)
                             {
-                                await _connectionService.DeactivateBankoConnectionAsync(hubConnection.TcKimlikNo);
+                                // HubBankoConnection'ı deaktif et VE User tablosunu temizle
+                                var deactivateSuccess = await _connectionService.DeactivateBankoConnectionByHubConnectionIdAsync(hubConnection.HubConnectionId);
+                                
+                                if (deactivateSuccess)
+                                {
+                                    _logger.LogWarning($"⚠️ Banko#{bankoConnection.BankoId} bağlantısı koptu - Banko modundan otomatik çıkış yapıldı: {hubConnection.TcKimlikNo}");
+                                }
+                                else
+                                {
+                                    _logger.LogError($"❌ Banko modundan çıkış başarısız: {hubConnection.TcKimlikNo}");
+                                }
+                                
                                 await Groups.RemoveFromGroupAsync(connectionId, $"BANKO_{bankoConnection.BankoId}");
-                                _logger.LogWarning($"⚠️ Banko#{bankoConnection.BankoId} bağlantısı koptu: {hubConnection.TcKimlikNo}");
                             }
                             break;
                             
@@ -268,7 +329,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                 if (bankoInUse)
                 {
                     var activePerson = await _connectionService.GetBankoActivePersonelAsync(bankoId);
-                    throw new HubException($"Banko#{bankoId} şu anda {activePerson?.Personel.AdSoyad ?? "başka bir personel"} tarafından kullanılıyor!");
+                    throw new HubException($"Banko#{bankoId} şu anda {activePerson?.PersonelAdSoyad ?? "başka bir personel"} tarafından kullanılıyor!");
                 }
                 
                 // 2. Bu personel başka bankoda mı?

@@ -3,10 +3,7 @@
 
 <div class="layout-wrapper layout-content-navbar @(siraPanelAcik ? "sira-panel-open" : "") @(BankoModeState.IsInBankoMode ? "banko-mode-active" : "")">
     <div class="layout-container">
-        @if (!BankoModeState.IsInBankoMode)
-        {
-            <NavMenu />
-        }
+        <NavMenu IsBankoMode="@BankoModeState.IsInBankoMode" />
         <div class="layout-page">
             @if (!BankoModeState.IsInBankoMode)
             {

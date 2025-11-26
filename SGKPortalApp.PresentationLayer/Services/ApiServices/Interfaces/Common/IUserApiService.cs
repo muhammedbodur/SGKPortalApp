@@ -1,0 +1,17 @@
+using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+
+namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
+{
+    public interface IUserApiService
+    {
+        // User Sorgulama
+        Task<ServiceResult<UserResponseDto>> GetByTcKimlikNoAsync(string tcKimlikNo);
+        
+        // Banko Modu İşlemleri
+        Task<ServiceResult<bool>> ActivateBankoModeAsync(string tcKimlikNo, int bankoId);
+        Task<ServiceResult<bool>> DeactivateBankoModeAsync(string tcKimlikNo);
+        Task<ServiceResult<bool>> IsBankoModeActiveAsync(string tcKimlikNo);
+        Task<ServiceResult<int?>> GetActiveBankoIdAsync(string tcKimlikNo);
+    }
+}

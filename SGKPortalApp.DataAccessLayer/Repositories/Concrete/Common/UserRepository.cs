@@ -93,5 +93,48 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
             }
         }
 
+        public async Task<bool> ActivateBankoModeAsync(string tcKimlikNo, int bankoId)
+        {
+            var user = await _dbSet.FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo);
+            if (user == null)
+                return false;
+
+            user.BankoModuAktif = true;
+            user.AktifBankoId = bankoId;
+            user.BankoModuBaslangic = DateTime.Now;
+
+            return true;
+        }
+
+        public async Task<bool> DeactivateBankoModeAsync(string tcKimlikNo)
+        {
+            var user = await _dbSet.FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo);
+            if (user == null)
+                return false;
+
+            user.BankoModuAktif = false;
+            user.AktifBankoId = null;
+            // BankoModuBaslangic'i null yapma - log için sakla
+
+            return true;
+        }
+
+        public async Task<bool> IsBankoModeActiveAsync(string tcKimlikNo)
+        {
+            var user = await _dbSet
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo && !u.SilindiMi);
+
+            return user?.BankoModuAktif ?? false;
+        }
+
+        public async Task<int?> GetActiveBankoIdAsync(string tcKimlikNo)
+        {
+            var user = await _dbSet
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo && !u.SilindiMi);
+
+            return user?.AktifBankoId;
+        }
     }
 }

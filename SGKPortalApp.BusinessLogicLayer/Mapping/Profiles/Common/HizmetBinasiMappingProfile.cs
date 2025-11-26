@@ -115,68 +115,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
                     opt => opt.MapFrom(src => src.DuzenlenmeTarihi));
 
             // ═══════════════════════════════════════════════════════
-            // PERSONEL MAPPING (Detail DTO için gerekli)
+            // PERSONEL MAPPING - KALDIRILDI
             // ═══════════════════════════════════════════════════════
-
-            CreateMap<Personel, PersonelResponseDto>()
-                .ForMember(dest => dest.TcKimlikNo,
-                    opt => opt.MapFrom(src => src.TcKimlikNo))
-                .ForMember(dest => dest.SicilNo,
-                    opt => opt.MapFrom(src => src.SicilNo))
-                .ForMember(dest => dest.AdSoyad,
-                    opt => opt.MapFrom(src => src.AdSoyad))
-                .ForMember(dest => dest.NickName,
-                    opt => opt.MapFrom(src => src.NickName))
-                .ForMember(dest => dest.Email,
-                    opt => opt.MapFrom(src => src.Email))
-                .ForMember(dest => dest.DepartmanId,
-                    opt => opt.MapFrom(src => src.DepartmanId))
-                .ForMember(dest => dest.DepartmanAdi,
-                    opt => opt.MapFrom(src => src.Departman != null ? src.Departman.DepartmanAdi : string.Empty))
-                .ForMember(dest => dest.ServisId,
-                    opt => opt.MapFrom(src => src.ServisId))
-                .ForMember(dest => dest.ServisAdi,
-                    opt => opt.MapFrom(src => src.Servis != null ? src.Servis.ServisAdi : string.Empty))
-                .ForMember(dest => dest.UnvanId,
-                    opt => opt.MapFrom(src => src.UnvanId))
-                .ForMember(dest => dest.UnvanAdi,
-                    opt => opt.MapFrom(src => src.Unvan != null ? src.Unvan.UnvanAdi : string.Empty))
-                .ForMember(dest => dest.Dahili,
-                    opt => opt.MapFrom(src => src.Dahili))
-                .ForMember(dest => dest.CepTelefonu,
-                    opt => opt.MapFrom(src => src.CepTelefonu))
-                .ForMember(dest => dest.CepTelefonu2,
-                    opt => opt.MapFrom(src => src.CepTelefonu2))
-                .ForMember(dest => dest.EvTelefonu,
-                    opt => opt.MapFrom(src => src.EvTelefonu))
-                .ForMember(dest => dest.Adres,
-                    opt => opt.MapFrom(src => src.Adres))
-                .ForMember(dest => dest.Semt,
-                    opt => opt.MapFrom(src => src.Semt))
-                .ForMember(dest => dest.DogumTarihi,
-                    opt => opt.MapFrom(src => src.DogumTarihi))
-                .ForMember(dest => dest.Cinsiyet,
-                    opt => opt.MapFrom(src => src.Cinsiyet))
-                .ForMember(dest => dest.MedeniDurumu,
-                    opt => opt.MapFrom(src => src.MedeniDurumu))
-                .ForMember(dest => dest.KanGrubu,
-                    opt => opt.MapFrom(src => src.KanGrubu))
-                .ForMember(dest => dest.PersonelTipi,
-                    opt => opt.MapFrom(src => src.PersonelTipi))
-                .ForMember(dest => dest.PersonelAktiflikDurum,
-                    opt => opt.MapFrom(src => src.PersonelAktiflikDurum))
-                .ForMember(dest => dest.OgrenimDurumu,
-                    opt => opt.MapFrom(src => src.OgrenimDurumu))
-                .ForMember(dest => dest.BitirdigiOkul,
-                    opt => opt.MapFrom(src => src.BitirdigiOkul))
-                .ForMember(dest => dest.BitirdigiBolum,
-                    opt => opt.MapFrom(src => src.BitirdigiBolum))
-                .ForMember(dest => dest.Resim,
-                    opt => opt.MapFrom(src => src.Resim))
-                .ForMember(dest => dest.EklenmeTarihi,
-                    opt => opt.MapFrom(src => src.EklenmeTarihi))
-                .ForMember(dest => dest.DuzenlenmeTarihi,
-                    opt => opt.MapFrom(src => src.DuzenlenmeTarihi));
+            // NOT: Personel -> PersonelResponseDto mapping'i PersonelMappingProfile.cs'de tanımlı
+            // Bu profildeki mapping override ediyordu ve HizmetBinasiAdi'yi map etmiyordu!
 
             // ═══════════════════════════════════════════════════════
             // REQUEST DTO -> ENTITY (Create)

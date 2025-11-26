@@ -97,6 +97,16 @@ StyleCopReport.xml
 *.pidb
 *.svclog
 *.scc
+*.jpeg
+*.jpg
+*.png
+*.txt
+*.md
+
+
+# Migration dosyalarını engelle
+**/Migrations/
+Migrations/
 
 # Chutzpah Test files
 _Chutzpah*

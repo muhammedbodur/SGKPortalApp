@@ -17,6 +17,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
         public int? SicilNo { get; set; }
         public string? DepartmanAdi { get; set; }
         public string? ServisAdi { get; set; }
+        public string? SessionID { get; set; }
         
         public DateTime EklenmeTarihi { get; set; }
         public DateTime DuzenlenmeTarihi { get; set; }

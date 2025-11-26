@@ -369,5 +369,87 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     .ErrorResult("Kullanıcı getirilirken bir hata oluştu", ex.Message);
             }
         }
+
+        public async Task<ApiResponseDto<bool>> ActivateBankoModeAsync(string tcKimlikNo, int bankoId)
+        {
+            try
+            {
+                var userRepo = _unitOfWork.GetRepository<IUserRepository>();
+                var success = await userRepo.ActivateBankoModeAsync(tcKimlikNo, bankoId);
+
+                if (!success)
+                    return ApiResponseDto<bool>.ErrorResult("Kullanıcı bulunamadı");
+
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("Banko modu aktif edildi. TC: {TcKimlikNo}, BankoId: {BankoId}", tcKimlikNo, bankoId);
+
+                return ApiResponseDto<bool>.SuccessResult(true, "Banko modu başarıyla aktif edildi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Banko modu aktif edilirken hata oluştu. TC: {TcKimlikNo}", tcKimlikNo);
+                return ApiResponseDto<bool>
+                    .ErrorResult("Banko modu aktif edilirken bir hata oluştu", ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<bool>> DeactivateBankoModeAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var userRepo = _unitOfWork.GetRepository<IUserRepository>();
+                var success = await userRepo.DeactivateBankoModeAsync(tcKimlikNo);
+
+                if (!success)
+                    return ApiResponseDto<bool>.ErrorResult("Kullanıcı bulunamadı");
+
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("Banko modu deaktif edildi. TC: {TcKimlikNo}", tcKimlikNo);
+
+                return ApiResponseDto<bool>.SuccessResult(true, "Banko modu başarıyla deaktif edildi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Banko modu deaktif edilirken hata oluştu. TC: {TcKimlikNo}", tcKimlikNo);
+                return ApiResponseDto<bool>
+                    .ErrorResult("Banko modu deaktif edilirken bir hata oluştu", ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<bool>> IsBankoModeActiveAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var userRepo = _unitOfWork.GetRepository<IUserRepository>();
+                var isActive = await userRepo.IsBankoModeActiveAsync(tcKimlikNo);
+
+                return ApiResponseDto<bool>.SuccessResult(isActive, "Banko modu durumu başarıyla getirildi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Banko modu durumu kontrol edilirken hata oluştu. TC: {TcKimlikNo}", tcKimlikNo);
+                return ApiResponseDto<bool>
+                    .ErrorResult("Banko modu durumu kontrol edilirken bir hata oluştu", ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<int?>> GetActiveBankoIdAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var userRepo = _unitOfWork.GetRepository<IUserRepository>();
+                var bankoId = await userRepo.GetActiveBankoIdAsync(tcKimlikNo);
+
+                return ApiResponseDto<int?>.SuccessResult(bankoId, "Aktif banko ID başarıyla getirildi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Aktif banko ID getirilirken hata oluştu. TC: {TcKimlikNo}", tcKimlikNo);
+                return ApiResponseDto<int?>
+                    .ErrorResult("Aktif banko ID getirilirken bir hata oluştu", ex.Message);
+            }
+        }
     }
 }
