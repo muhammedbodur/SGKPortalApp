@@ -94,15 +94,13 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                         else
                         {
                             // ⭐ Henüz banko bağlantısı yok ama banko modunda
-                            // Sadece banko sayfasına izin ver
+                            // Bağlantıya izin ver - LoginHandler ve MainLayout gerekli yönlendirmeyi yapacak
                             if (connectionType != "BankoMode")
                             {
-                                _logger.LogWarning($"⚠️ Banko modu aktif - banko sayfası dışında sayfa açılamaz: {info.ConnectionId} | TC: {tcKimlikNo}");
-                                
-                                await Clients.Client(info.ConnectionId)
-                                    .SendAsync("ForceLogout", "Banko modu aktif. Lütfen önce banko sayfasına gidin.");
-                                
-                                return; // Bağlantı oluşturma
+                                _logger.LogInformation($"ℹ️ Banko modu aktif - kullanıcı henüz banko sayfasında değil, bağlantıya izin veriliyor: {info.ConnectionId} | TC: {tcKimlikNo}");
+                                // LoginHandler kullanıcıyı /siramatik/dashboard'a yönlendirecek
+                                // MainLayout.CheckBankoModeAccess() banko sayfası dışındaki erişimleri engelleyecek
+                                // Bağlantı oluşturmaya devam et
                             }
                         }
                     }
