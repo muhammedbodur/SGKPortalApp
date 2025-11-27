@@ -128,6 +128,16 @@ class SignalRConnectionManager {
             await this.start();
         }
 
+        // ⭐ Banko heartbeat gönder (her zaman, server tarafında kontrol edilir)
+        if (state === 'Connected') {
+            try {
+                await this.connection.invoke('BankoHeartbeat');
+                console.log('💓 Banko heartbeat gönderildi');
+            } catch (error) {
+                console.warn('⚠️ Banko heartbeat hatası:', error);
+            }
+        }
+
         this.triggerEvent('statusChecked', state);
     }
 

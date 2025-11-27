@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
+using SGKPortalApp.PresentationLayer.Services.Hubs;
 using System.Threading.Tasks;
 
 namespace SGKPortalApp.PresentationLayer.Middleware
@@ -9,6 +11,7 @@ namespace SGKPortalApp.PresentationLayer.Middleware
     /// <summary>
     /// Her request'te kullanıcının session ID'sini kontrol eder
     /// Eğer başka bir cihazdan login olunmuşsa (SessionID değişmişse) logout yapar
+    /// VE SignalR ile ForceLogout event'i gönderir!
     /// </summary>
     public class SessionValidationMiddleware
     {
@@ -21,13 +24,18 @@ namespace SGKPortalApp.PresentationLayer.Middleware
             _logger = logger;
         }
 
-        public async Task InvokeAsync(HttpContext context, IUserInfoService userInfoService, IUserApiService userApiService)
+        public async Task InvokeAsync(
+            HttpContext context,
+            IUserInfoService userInfoService,
+            IUserApiService userApiService,
+            IHubContext<SiramatikHub> hubContext) // ✅ SignalR Hub inject edildi
         {
             // Session expired sayfasını ve login sayfasını kontrol dışında tut
             var path = context.Request.Path.Value?.ToLower() ?? "";
-            if (path.Contains("/auth/session-expired") || 
-                path.Contains("/auth/login") || 
-                path.Contains("/auth/logout"))
+            if (path.Contains("/auth/session-expired") ||
+                path.Contains("/auth/login") ||
+                path.Contains("/auth/logout") ||
+                path.Contains("/_blazor")) // ✅ Blazor SignalR endpoint'lerini de atla
             {
                 await _next(context);
                 return;
@@ -40,8 +48,8 @@ namespace SGKPortalApp.PresentationLayer.Middleware
                 {
                     var currentSessionId = userInfoService.GetSessionId();
                     var tcKimlikNo = userInfoService.GetTcKimlikNo();
-                    
-                    _logger.LogInformation("🔍 Session kontrolü yapılıyor - TcKimlikNo: {TcKimlikNo}, Cookie SessionID: {SessionId}", 
+
+                    _logger.LogDebug("🔍 Session kontrolü - TcKimlikNo: {TcKimlikNo}, Cookie SessionID: {SessionId}",
                         tcKimlikNo, currentSessionId);
 
                     if (!string.IsNullOrEmpty(currentSessionId) && !string.IsNullOrEmpty(tcKimlikNo))
@@ -52,30 +60,47 @@ namespace SGKPortalApp.PresentationLayer.Middleware
                         if (userResult.Success && userResult.Data != null)
                         {
                             var dbSessionId = userResult.Data.SessionID;
-                            
-                            _logger.LogInformation("✅ DB SessionID: {DbSessionId}", dbSessionId);
 
                             // Session ID'ler farklıysa başka bir cihazdan login olunmuş demektir
                             if (!string.IsNullOrEmpty(dbSessionId) && dbSessionId != currentSessionId)
                             {
-                                _logger.LogWarning("⚠️ Session ID uyuşmazlığı tespit edildi! TcKimlikNo: {TcKimlikNo}, Cookie SessionID: {CookieSessionId}, DB SessionID: {DbSessionId}",
+                                _logger.LogWarning("⚠️ Session uyuşmazlığı tespit edildi! " +
+                                    "TcKimlikNo: {TcKimlikNo}, Cookie SessionID: {CookieSessionId}, DB SessionID: {DbSessionId}",
                                     tcKimlikNo, currentSessionId, dbSessionId);
 
-                                // Kullanıcıyı logout et ve login sayfasına yönlendir
+                                // ✅ 1. SignalR ile ForceLogout event'i gönder
+                                try
+                                {
+                                    var adSoyad = context.User.FindFirst("AdSoyad")?.Value ?? "Kullanıcı";
+                                    var message = $"{adSoyad}, hesabınıza başka bir cihazdan giriş yapıldı. Oturumunuz sonlandırılıyor.";
+
+                                    // TcKimlikNo'ya özel grup varsa oraya gönder
+                                    await hubContext.Clients.Group($"USER_{tcKimlikNo}")
+                                        .SendAsync("ForceLogout", message);
+
+                                    _logger.LogInformation("📡 ForceLogout SignalR event'i gönderildi: {TcKimlikNo}", tcKimlikNo);
+                                }
+                                catch (Exception signalREx)
+                                {
+                                    _logger.LogError(signalREx, "❌ SignalR ForceLogout gönderimi hatası");
+                                    // SignalR hatası olsa bile devam et
+                                }
+
+                                // ✅ 2. HTTP response logout
                                 await context.SignOutAsync();
                                 context.Response.Redirect("/auth/login?sessionExpired=true");
                                 return;
                             }
                             else
                             {
-                                _logger.LogInformation("✅ Session ID eşleşti - Kullanıcı geçerli");
+                                _logger.LogDebug("✅ Session ID eşleşti - Kullanıcı geçerli");
                             }
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Session validation sırasında hata oluştu");
+                    _logger.LogError(ex, "❌ Session validation sırasında hata oluştu");
                     // Hata durumunda devam et, kullanıcıyı logout etme
                 }
             }

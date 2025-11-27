@@ -23,6 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Proje Mimarisi", "Proje Mim
 		sablon.txt = sablon.txt
 		SiramatikAkilliTabMimarisi.md = SiramatikAkilliTabMimarisi.md
 		SiramatikIsleyis.txt = SiramatikIsleyis.txt
+		YetkiKontrol.md = YetkiKontrol.md
 		yetkilendirme.md = yetkilendirme.md
 	EndProjectSection
 EndProject

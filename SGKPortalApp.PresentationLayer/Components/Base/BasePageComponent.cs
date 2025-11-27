@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
@@ -8,10 +9,13 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
     /// <summary>
     /// Tüm sayfa component'leri için base class
     /// Select2, Flatpickr gibi JS kütüphanelerini otomatik initialize eder
+    /// ⭐ Authentication kontrolü yapar
     /// </summary>
     public abstract class BasePageComponent : ComponentBase
     {
         [Inject] protected IJSRuntime JSRuntime { get; set; } = default!;
+        [Inject] protected NavigationManager NavigationManager { get; set; } = default!;
+        [Inject] protected AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
 
         /// <summary>
         /// Component'i yeniden render et
@@ -19,6 +23,40 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         protected new void StateHasChanged()
         {
             base.StateHasChanged();
+        }
+
+        /// <summary>
+        /// ⭐ Sayfa yüklenmeden önce authentication kontrolü yap
+        /// </summary>
+        protected override async Task OnInitializedAsync()
+        {
+            await base.OnInitializedAsync();
+            
+            // Authentication kontrolü
+            await CheckAuthenticationAsync();
+        }
+
+        /// <summary>
+        /// ⭐ Authentication durumunu kontrol et
+        /// </summary>
+        protected virtual async Task CheckAuthenticationAsync()
+        {
+            try
+            {
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                var user = authState.User;
+
+                if (user?.Identity?.IsAuthenticated != true)
+                {
+                    // Kullanıcı logout olmuş, login sayfasına yönlendir
+                    NavigationManager.NavigateTo("/auth/login", forceLoad: true);
+                }
+            }
+            catch (Exception)
+            {
+                // Hata durumunda login sayfasına yönlendir
+                NavigationManager.NavigateTo("/auth/login", forceLoad: true);
+            }
         }
 
         /// <summary>

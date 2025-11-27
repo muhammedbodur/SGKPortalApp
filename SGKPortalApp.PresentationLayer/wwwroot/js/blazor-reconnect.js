@@ -106,6 +106,20 @@
                                 reconnectState.isReconnecting = true;
                                 reconnectState.currentRetry = 0;
                                 showCustomReconnectModal('connecting');
+                                
+                                // ⭐ Banko modundaysa otomatik çıkış yap
+                                const isBankoDashboard = window.location.pathname.toLowerCase().includes('/siramatik/dashboard');
+                                if (isBankoDashboard) {
+                                    console.warn('🚨 Banko modunda bağlantı koptu - 5 saniye içinde login sayfasına yönlendirilecek');
+                                    
+                                    // 5 saniye bekle, bağlantı düzelmezse login'e yönlendir
+                                    setTimeout(() => {
+                                        if (reconnectState.isReconnecting) {
+                                            console.warn('🚨 Bağlantı düzelmedi - login sayfasına yönlendiriliyor');
+                                            window.location.href = '/auth/login?reason=connection-lost';
+                                        }
+                                    }, 5000);
+                                }
                             },
                             onConnectionUp: () => {
                                 console.log('🟢 Blazor bağlantısı yeniden kuruldu');

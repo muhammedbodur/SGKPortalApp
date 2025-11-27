@@ -50,19 +50,62 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                     // 2. Banko modu kontrolü yap
                     var isBankoModeActive = await _bankoModeService.IsPersonelInBankoModeAsync(tcKimlikNo);
                     
-                    if (isBankoModeActive && existingConnections.Any())
+                    // 3. ⭐ Bağlantı tipini belirle (URL'den)
+                    var httpContext = Context.GetHttpContext();
+                    var refererUrl = httpContext?.Request.Headers["Referer"].ToString() ?? "";
+                    var isBankoDashboardPage = refererUrl.Contains("/siramatik/dashboard", StringComparison.OrdinalIgnoreCase);
+                    
+                    string connectionType;
+                    if (isBankoModeActive && isBankoDashboardPage)
                     {
-                        // Banko modunda VE zaten bağlantısı var - yeni tab'a izin verme
-                        _logger.LogWarning($"⚠️ Banko modu aktif - yeni tab kapatılıyor: {info.ConnectionId} | TC: {tcKimlikNo}");
-                        
-                        await Clients.Client(info.ConnectionId)
-                            .SendAsync("ForceLogout", "Banko modu aktif. Bu sekme kapatılıyor.");
-                        
-                        return; // Bağlantı oluşturma
+                        connectionType = "BankoMode";
+                    }
+                    else
+                    {
+                        connectionType = "MainLayout";
                     }
                     
-                    // 3. Bağlantı tipini belirle
-                    string connectionType = isBankoModeActive ? "BankoMode" : "MainLayout";
+                    // 4. ⭐ Banko modunda çoklu tab kontrolü
+                    if (isBankoModeActive)
+                    {
+                        // Mevcut bağlantılardan banko modu bağlantısı var mı kontrol et
+                        var hasBankoConnection = existingConnections.Any(c => c.ConnectionType == "BankoMode");
+                        
+                        if (hasBankoConnection)
+                        {
+                            // ⭐ Yeni bağlantı da BankoMode ise izin ver (sayfa yenileme veya aynı sayfa)
+                            if (connectionType == "BankoMode")
+                            {
+                                _logger.LogInformation($"✅ Banko modu - banko sayfası yenileniyor: {info.ConnectionId} | TC: {tcKimlikNo}");
+                                // Eski banko bağlantısını kapat, yenisine izin ver
+                                // (Devam et, bağlantı oluşturulacak)
+                            }
+                            else
+                            {
+                                // Banko modunda başka sayfa açmaya çalışıyor - engelle
+                                _logger.LogWarning($"⚠️ Banko modu aktif - yeni tab kapatılıyor: {info.ConnectionId} | TC: {tcKimlikNo}");
+                                
+                                await Clients.Client(info.ConnectionId)
+                                    .SendAsync("ForceLogout", "Banko modu aktif. Sadece banko sayfası açık olabilir.");
+                                
+                                return; // Bağlantı oluşturma
+                            }
+                        }
+                        else
+                        {
+                            // ⭐ Henüz banko bağlantısı yok ama banko modunda
+                            // Sadece banko sayfasına izin ver
+                            if (connectionType != "BankoMode")
+                            {
+                                _logger.LogWarning($"⚠️ Banko modu aktif - banko sayfası dışında sayfa açılamaz: {info.ConnectionId} | TC: {tcKimlikNo}");
+                                
+                                await Clients.Client(info.ConnectionId)
+                                    .SendAsync("ForceLogout", "Banko modu aktif. Lütfen önce banko sayfasına gidin.");
+                                
+                                return; // Bağlantı oluşturma
+                            }
+                        }
+                    }
                     
                     // 4. Yeni bağlantı oluştur
                     var success = await _connectionService.RegisterUserConnectionAsync(
@@ -79,9 +122,19 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                     
                     _logger.LogInformation($"✅ Yeni bağlantı oluşturuldu: {info.ConnectionId} | TC: {tcKimlikNo} | Type: {connectionType} | IP: {info.IpAddress}");
                     
-                    // 5. Eğer banko modundaysa, HubBankoConnection oluştur
-                    if (isBankoModeActive)
+                    // 5. ⭐ Eğer banko modundaysa VE banko sayfasındaysa, HubBankoConnection oluştur
+                    if (connectionType == "BankoMode")
                     {
+                        // ⭐ Önce eski banko bağlantılarını temizle (sayfa yenileme durumu)
+                        if (existingConnections.Any(c => c.ConnectionType == "BankoMode"))
+                        {
+                            foreach (var oldConnection in existingConnections.Where(c => c.ConnectionType == "BankoMode"))
+                            {
+                                _logger.LogInformation($"🔄 Eski banko bağlantısı temizleniyor: {oldConnection.ConnectionId}");
+                                await _connectionService.DisconnectAsync(oldConnection.ConnectionId);
+                            }
+                        }
+                        
                         // HubConnection ID'sini al
                         var hubConnection = await _connectionService.GetByConnectionIdAsync(info.ConnectionId);
                         if (hubConnection == null)
@@ -703,6 +756,71 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
             catch (Exception ex)
             {
                 _logger.LogError(ex, "❌ Admin grubundan ayrılma hatası");
+            }
+        }
+
+        #endregion
+
+        #region Banko Heartbeat
+
+        /// <summary>
+        /// ⭐ Banko bağlantısı heartbeat - Her 10 saniyede bir çağrılır
+        /// Bağlantı koptuğunda otomatik banko modundan çıkar
+        /// </summary>
+        public async Task BankoHeartbeat()
+        {
+            try
+            {
+                var tcKimlikNo = Context.User?.FindFirst("TcKimlikNo")?.Value;
+                if (string.IsNullOrEmpty(tcKimlikNo))
+                    return;
+
+                var connectionId = Context.ConnectionId;
+                
+                // Banko modunda mı kontrol et
+                var isBankoMode = await _bankoModeService.IsPersonelInBankoModeAsync(tcKimlikNo);
+                if (!isBankoMode)
+                {
+                    // Banko modunda değil, heartbeat gerekli değil
+                    return;
+                }
+                
+                // HubConnection var mı kontrol et
+                var hubConnection = await _connectionService.GetByConnectionIdAsync(connectionId);
+                if (hubConnection == null)
+                {
+                    _logger.LogWarning($"⚠️ Heartbeat: HubConnection bulunamadı - {connectionId}");
+                    
+                    // Banko modundan çık
+                    await _bankoModeService.ExitBankoModeAsync(tcKimlikNo);
+                    _logger.LogWarning($"🚨 Heartbeat: Bağlantı koptu, banko modundan çıkıldı - {tcKimlikNo}");
+                    
+                    await Clients.Client(connectionId)
+                        .SendAsync("ForceLogout", "Bağlantı koptu. Banko modundan çıkıldı.");
+                    return;
+                }
+
+                // HubBankoConnection var mı kontrol et
+                var bankoConnection = await _connectionService.GetBankoConnectionByHubConnectionIdAsync(hubConnection.HubConnectionId);
+                if (bankoConnection == null)
+                {
+                    _logger.LogWarning($"⚠️ Heartbeat: HubBankoConnection bulunamadı - {connectionId}");
+                    
+                    // Banko modundan çık
+                    await _bankoModeService.ExitBankoModeAsync(tcKimlikNo);
+                    _logger.LogWarning($"🚨 Heartbeat: Banko bağlantısı yok, banko modundan çıkıldı - {tcKimlikNo}");
+                    
+                    await Clients.Client(connectionId)
+                        .SendAsync("ForceLogout", "Banko bağlantısı koptu. Banko modundan çıkıldı.");
+                    return;
+                }
+
+                // ✅ Her şey normal
+                _logger.LogDebug($"💓 Heartbeat: OK - Banko#{bankoConnection.BankoId} | {tcKimlikNo}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ BankoHeartbeat hatası");
             }
         }
 

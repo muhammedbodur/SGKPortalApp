@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
+using SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -14,10 +15,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
     public class LoginHandlerModel : PageModel
     {
         private readonly ILogger<LoginHandlerModel> _logger;
+        private readonly IBankoModeService _bankoModeService;
 
-        public LoginHandlerModel(ILogger<LoginHandlerModel> logger)
+        public LoginHandlerModel(
+            ILogger<LoginHandlerModel> logger,
+            IBankoModeService bankoModeService)
         {
             _logger = logger;
+            _bankoModeService = bankoModeService;
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -92,6 +97,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
 
                 _logger.LogInformation("✅ Kullanıcı giriş yaptı: {AdSoyad} ({TcKimlikNo}) - {UserType}",
                     loginResponse.AdSoyad, loginResponse.TcKimlikNo, loginResponse.UserType);
+
+                // ⭐ Banko modu kontrolü - Personel ise
+                if (loginResponse.UserType != "TvUser")
+                {
+                    var isBankoMode = await _bankoModeService.IsPersonelInBankoModeAsync(loginResponse.TcKimlikNo);
+                    if (isBankoMode)
+                    {
+                        _logger.LogInformation("🏦 Kullanıcı banko modunda - banko sayfasına yönlendiriliyor: {TcKimlikNo}", loginResponse.TcKimlikNo);
+                        return Redirect("/siramatik/dashboard");
+                    }
+                }
 
                 // RedirectUrl varsa oraya yönlendir, yoksa ana sayfaya
                 var redirectUrl = loginResponse.RedirectUrl ?? "/";

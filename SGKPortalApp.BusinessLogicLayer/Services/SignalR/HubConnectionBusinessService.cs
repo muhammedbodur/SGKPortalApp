@@ -351,12 +351,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             {
                 var repo = _unitOfWork.Repository<HubConnection>();
                 
-                // TcKimlikNo'ya ait tüm bağlantıları al
-                var allConnections = await repo.GetAllAsync(x => x.TcKimlikNo == tcKimlikNo);
+                // TcKimlikNo'ya ait tüm bağlantıları al (HubBankoConnection navigation property ile)
+                var allConnections = await repo.GetAllAsync(x => x.HubBankoConnection);
                 
-                // HubBankoConnection olmayan bağlantıları filtrele
+                // TcKimlikNo'ya göre filtrele ve HubBankoConnection olmayan bağlantıları al
                 var nonBankoConnections = allConnections
-                    .Where(x => x.HubBankoConnection == null || !x.HubBankoConnection.BankoModuAktif)
+                    .Where(x => x.TcKimlikNo == tcKimlikNo && 
+                               (x.HubBankoConnection == null || !x.HubBankoConnection.BankoModuAktif))
                     .ToList();
                 
                 return nonBankoConnections;

@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.PresentationLayer.Extensions;
 using SGKPortalApp.PresentationLayer.Helpers;
 using SGKPortalApp.PresentationLayer.Middleware;
+using SGKPortalApp.PresentationLayer.Services.Hubs;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -128,6 +130,8 @@ builder.Services.AddMemoryCache();
 // ═══════════════════════════════════════════════════════
 // 📡 SIGNALR HUBS
 // ═══════════════════════════════════════════════════════
+builder.Services.AddSingleton<IUserIdProvider, TcKimlikNoUserIdProvider>();
+
 builder.Services.AddSignalR(options =>
 {
     options.EnableDetailedErrors = builder.Environment.IsDevelopment();
