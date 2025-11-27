@@ -132,7 +132,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
             try
             {
                 var response = await _httpClient.GetFromJsonAsync<bool>(
-                    $"api/hub-connections/banko/{bankoId}/in-use");
+                    $"api/hub-connections/banko/{bankoId}/is-in-use");
                 return response;
             }
             catch (Exception ex)
@@ -146,9 +146,15 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
         {
             try
             {
-                var response = await _httpClient.GetFromJsonAsync<HubBankoConnectionResponseDto>(
-                    $"api/hub-connections/personel/{tcKimlikNo}/active-banko");
-                return response;
+                var response = await _httpClient.GetAsync($"api/hub-connections/personel/{tcKimlikNo}/active-banko");
+
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return null;
+                }
+
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<HubBankoConnectionResponseDto>();
             }
             catch (Exception ex)
             {
@@ -309,9 +315,15 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
         {
             try
             {
-                var response = await _httpClient.GetFromJsonAsync<UserResponseDto>(
-                    $"api/hub-connections/banko/{bankoId}/active-personel");
-                return response;
+                var response = await _httpClient.GetAsync($"api/hub-connections/banko/{bankoId}/active-personel");
+
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return null;
+                }
+
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<UserResponseDto>();
             }
             catch (Exception ex)
             {

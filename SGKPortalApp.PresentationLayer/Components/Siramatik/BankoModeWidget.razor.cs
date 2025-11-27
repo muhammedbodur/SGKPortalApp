@@ -25,13 +25,14 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
         {
             // State değişikliklerini dinle
             BankoModeState.OnBankoModeChanged += OnBankoModeStateChanged;
-            
+            isInBankoMode = BankoModeState.IsInBankoMode;
             await LoadData();
         }
         
         private void OnBankoModeStateChanged()
         {
             // State değiştiğinde UI'ı güncelle
+            isInBankoMode = BankoModeState.IsInBankoMode;
             InvokeAsync(StateHasChanged);
         }
         
@@ -56,10 +57,25 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
                 if (assignedBanko != null)
                 {
                     // Banko modunda mı kontrol et (User tablosundan - sayfa yenilendiğinde de çalışır)
-                    isInBankoMode = await BankoModeService.IsPersonelInBankoModeAsync(tcKimlikNo);
-                    
+                    var wasInBankoMode = await BankoModeService.IsPersonelInBankoModeAsync(tcKimlikNo);
+                    isInBankoMode = wasInBankoMode;
+
                     Logger.LogInformation($"🔍 BankoModeWidget LoadData: {tcKimlikNo} - Banko Modu: {isInBankoMode}");
-                    
+
+                    if (wasInBankoMode)
+                    {
+                        // SignalR state'i de güncel tut
+                        BankoModeState.ActivateBankoMode(assignedBanko.BankoId, tcKimlikNo);
+                        if (!BankoModeState.IsInBankoMode)
+                        {
+                            await BankoModeService.EnterBankoModeAsync(tcKimlikNo, assignedBanko.BankoId);
+                        }
+                    }
+                    else if (BankoModeState.IsInBankoMode)
+                    {
+                        BankoModeState.DeactivateBankoMode();
+                    }
+                
                     // Banko kullanımda mı kontrol et
                     if (!isInBankoMode)
                     {
@@ -86,28 +102,12 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
                 isLoading = true;
                 StateHasChanged();
 
-                var tcKimlikNo = HttpContextAccessor.HttpContext?.User.FindFirst("TcKimlikNo")?.Value;
-                if (string.IsNullOrEmpty(tcKimlikNo))
-                {
-                    Logger.LogError("Kullanıcı bilgisi bulunamadı");
-                    return;
-                }
-
-                // 1. Banko moduna geç
-                var success = await BankoModeService.EnterBankoModeAsync(tcKimlikNo, assignedBanko.BankoId);
+                // ⭐ YENİ: SignalR Hub üzerinden banko moduna geç (Sayfa yenileme YOK!)
+                await JSRuntime.InvokeVoidAsync("bankoMode.enter", assignedBanko.BankoId);
                 
-                if (success)
-                {
-                    Logger.LogInformation("✅ Banko moduna geçildi. Banko: {BankoNo} - Sayfa yenileniyor...", assignedBanko.BankoNo);
-                    
-                    // 2. Sayfa yenileniyor - yeni ConnectionId ile banko modunda açılacak
-                    // Eski bağlantılar otomatik kapatılacak
-                    NavigationManager.NavigateTo("/", forceLoad: true);
-                }
-                else
-                {
-                    Logger.LogWarning("❌ Banko moduna geçilemedi");
-                }
+                Logger.LogInformation("✅ Banko moduna geçiş isteği gönderildi: Banko#{BankoNo}", assignedBanko.BankoNo);
+                
+                // UI güncellemesi SignalR event'i ile gelecek (BankoModeActivated)
             }
             catch (Exception ex)
             {
@@ -148,22 +148,12 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
                     Logger.LogWarning(jsEx, "⚠️ Sıra Çağırma Paneli kapatılırken hata (panel yüklenmemiş olabilir)");
                 }
 
-                // 2. Banko modundan çık
-                var success = await BankoModeService.ExitBankoModeAsync(tcKimlikNo);
+                // 2. ⭐ YENİ: SignalR Hub üzerinden banko modundan çık
+                await JSRuntime.InvokeVoidAsync("bankoMode.exit");
                 
-                if (success)
-                {
-                    isInBankoMode = false;
-                    BankoModeState.DeactivateBankoMode();
-                    Logger.LogInformation("✅ Banko modundan çıkıldı - User tablosu güncellendi");
-                    
-                    // Banko kullanım durumunu yeniden kontrol et
-                    await LoadData();
-                }
-                else
-                {
-                    Logger.LogWarning("❌ Banko modundan çıkılamadı");
-                }
+                Logger.LogInformation("✅ Banko modundan çıkış isteği gönderildi");
+                
+                // UI güncellemesi SignalR event'i ile gelecek (BankoModeDeactivated)
             }
             catch (Exception ex)
             {

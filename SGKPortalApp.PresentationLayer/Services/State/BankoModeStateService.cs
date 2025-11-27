@@ -73,6 +73,7 @@ namespace SGKPortalApp.PresentationLayer.Services.State
                 "/",
                 "/siramatik/banko/",
                 "/account/logout",
+                "/auth/logout",
                 "/_framework/",
                 "/_content/",
                 "/lib/",

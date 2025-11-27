@@ -3,12 +3,9 @@
 
 <div class="layout-wrapper layout-content-navbar @(siraPanelAcik ? "sira-panel-open" : "") @(BankoModeState.IsInBankoMode ? "banko-mode-active" : "")">
     <div class="layout-container">
-        <NavMenu IsBankoMode="@BankoModeState.IsInBankoMode" />
+        <NavMenu />
         <div class="layout-page">
-            @if (!BankoModeState.IsInBankoMode)
-            {
-                <TopBar />
-            }
+            <TopBar />
             <div class="content-wrapper">
                 <div class="container-xxl flex-grow-1 container-p-y">
                     @Body

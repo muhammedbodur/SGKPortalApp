@@ -108,7 +108,7 @@
                                 showCustomReconnectModal('connecting');
                                 
                                 // ⭐ Banko modundaysa otomatik çıkış yap
-                                const isBankoDashboard = window.location.pathname.toLowerCase().includes('/siramatik/dashboard');
+                                const isBankoDashboard = window.location.pathname.toLowerCase().includes('/siramatik/banko');
                                 if (isBankoDashboard) {
                                     console.warn('🚨 Banko modunda bağlantı koptu - 5 saniye içinde login sayfasına yönlendirilecek');
                                     

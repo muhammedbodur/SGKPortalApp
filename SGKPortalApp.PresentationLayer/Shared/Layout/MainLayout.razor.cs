@@ -242,32 +242,6 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                 Logger.LogError(ex, "❌ Session kontrolü hatası");
                 // Hata durumunda güvenli tarafta kal
                 NavigationManager.NavigateTo("/auth/login?error=true", forceLoad: true);
-            }
-        }
-
-        private void CheckBankoModeAccess()
-        {
-            var currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-            var tcKimlikNo = HttpContextAccessor?.HttpContext?.User.FindFirst("TcKimlikNo")?.Value;
-
-            if (BankoModeState.IsInBankoMode && !string.IsNullOrEmpty(tcKimlikNo))
-            {
-                if (BankoModeState.IsPersonelInBankoMode(tcKimlikNo))
-                {
-                    if (!currentUrl.Equals("", StringComparison.OrdinalIgnoreCase) &&
-                        !currentUrl.Equals("siramatik/dashboard", StringComparison.OrdinalIgnoreCase))
-                    {
-                        Logger.LogWarning("⚠️ Banko modunda başka sayfaya erişim engellendi");
-                        NavigationManager.NavigateTo("/siramatik/dashboard", forceLoad: true);
-                    }
-                }
-            }
-        }
-
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            if (firstRender)
-            {
                 await Task.Delay(500);
 
                 try
@@ -282,9 +256,29 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
 
                     Logger.LogDebug("✅ MainLayout JS initialization tamamlandı");
                 }
-                catch (Exception ex)
+                catch (Exception jsEx)
                 {
-                    Logger.LogError(ex, "❌ MainLayout JS initialization hatası");
+                    Logger.LogError(jsEx, "❌ MainLayout JS initialization hatası");
+                }
+            }
+        }
+
+        private void CheckBankoModeAccess()
+        {
+            var currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+            var relativeUrl = string.IsNullOrEmpty(currentUrl) ? "/" : $"/{currentUrl}";
+            var tcKimlikNo = HttpContextAccessor?.HttpContext?.User.FindFirst("TcKimlikNo")?.Value;
+
+            if (BankoModeState.IsInBankoMode && !string.IsNullOrEmpty(tcKimlikNo))
+            {
+                if (BankoModeState.IsPersonelInBankoMode(tcKimlikNo))
+                {
+                    // ⭐ Banko modunda yalnız whitelist URL'lere izin ver
+                    if (!BankoModeState.IsUrlAllowedInBankoMode(relativeUrl))
+                    {
+                        Logger.LogWarning("⚠️ Banko modunda yasaklı URL: {Url} - ana sayfaya yönlendiriliyor", relativeUrl);
+                        NavigationManager.NavigateTo("/", forceLoad: true);
+                    }
                 }
             }
         }

@@ -38,13 +38,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                 {
                     try
                     {
-                        // 1. Banko modundan çık (eğer aktifse)
-                        var isBankoMode = await _bankoModeService.IsPersonelInBankoModeAsync(tcKimlikNo);
-                        if (isBankoMode)
-                        {
-                            await _bankoModeService.ExitBankoModeAsync(tcKimlikNo);
-                            _logger.LogInformation($"✅ Logout: {userName} banko modundan çıkarıldı");
-                        }
+
+                        await _bankoModeService.ExitBankoModeAsync(tcKimlikNo);
+                        _logger.LogInformation($"✅ Logout: {userName} banko modundan çıkarıldı");
 
                         // 2. SignalR bağlantılarını temizle (OnDisconnectedAsync otomatik çağrılacak)
                         // HubConnection'lar SignalR tarafından otomatik temizlenecek
@@ -80,11 +76,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                 }
 
                 // 6. ⭐ Blazor Circuit'i tamamen kapat (SPA cache'i temizle)
-                Response.Headers.Add("Clear-Site-Data", "\"cache\", \"cookies\", \"storage\"");
+                Response.Headers["Clear-Site-Data"] = "\"cache\", \"cookies\", \"storage\"";
                 
                 // 7. ⭐ Tarayıcıyı zorla yenile (Circuit'i kapat)
-                Response.Headers.Add("Cache-Control", "no-store, no-cache, must-revalidate");
-                Response.Headers.Add("Pragma", "no-cache");
+                Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate";
+                Response.Headers["Pragma"] = "no-cache";
 
                 // Login sayfasına yönlendir
                 return Redirect("/auth/login");

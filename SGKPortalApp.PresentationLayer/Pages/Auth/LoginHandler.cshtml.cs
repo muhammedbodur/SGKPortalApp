@@ -104,16 +104,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                     var isBankoMode = await _bankoModeService.IsPersonelInBankoModeAsync(loginResponse.TcKimlikNo);
                     if (isBankoMode)
                     {
-                        _logger.LogInformation("🏦 Kullanıcı banko modunda - banko sayfasına yönlendiriliyor: {TcKimlikNo}", loginResponse.TcKimlikNo);
-                        return Redirect("/siramatik/dashboard");
+                        // Login olurken banko modundan çık (eski bağlantıları temizle)
+                        await _bankoModeService.ExitBankoModeAsync(loginResponse.TcKimlikNo);
+                        _logger.LogInformation("🏦 Login sırasında banko modundan çıkıldı: {TcKimlikNo}", loginResponse.TcKimlikNo);
                     }
                 }
 
-                // RedirectUrl varsa oraya yönlendir, yoksa ana sayfaya
-                var redirectUrl = loginResponse.RedirectUrl ?? "/";
-                _logger.LogDebug("🔵 Redirect yapılıyor: {RedirectUrl}", redirectUrl);
-                
-                return Redirect(redirectUrl);
+                // Ana sayfaya yönlendir
+                _logger.LogDebug("🔵 Ana sayfaya yönlendiriliyor");
+                return Redirect("/");
             }
             catch (Exception ex)
             {

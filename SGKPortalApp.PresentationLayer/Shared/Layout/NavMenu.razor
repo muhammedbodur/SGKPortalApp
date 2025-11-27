@@ -1,4 +1,5 @@
 @inject NavigationManager Navigation
+@inject SGKPortalApp.PresentationLayer.Services.State.BankoModeStateService BankoModeState
 
 <!-- Layout menu -->
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
@@ -28,13 +29,8 @@
             </a>
         </li>
 
-        @if (!IsBankoMode)
+        @if (!BankoModeState.IsInBankoMode)
         {
-            <!-- ================ ORTAK TANIMLAR ================ -->
-            <li class="menu-header small text-uppercase">
-                <span class="menu-header-text">Ortak Tanımlar</span>
-            </li>
-
             <!-- Hizmet Binaları -->
             <li class="menu-item @(IsSectionActive("/common") ? "active open" : "")">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -383,9 +379,6 @@
 @implements IDisposable
 
 @code {
-    [Parameter]
-    public bool IsBankoMode { get; set; } = false;
-
     /// <summary>
     /// Tam URL eşleşmesi kontrol eder
     /// </summary>
@@ -408,6 +401,7 @@
     protected override void OnInitialized()
     {
         Navigation.LocationChanged += OnLocationChanged;
+        BankoModeState.OnBankoModeChanged += OnBankoModeChanged;
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -415,8 +409,14 @@
         InvokeAsync(StateHasChanged);
     }
 
+    private void OnBankoModeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
     public void Dispose()
     {
         Navigation.LocationChanged -= OnLocationChanged;
+        BankoModeState.OnBankoModeChanged -= OnBankoModeChanged;
     }
 }

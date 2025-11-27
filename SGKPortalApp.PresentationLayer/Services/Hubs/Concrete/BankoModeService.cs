@@ -143,42 +143,10 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
 
                 _logger.LogInformation($"✅ Banko modu aktif: {tcKimlikNo} -> Banko#{bankoId}");
                 
-                // 5. Arka planda HubBankoConnection OLMAYAN bağlantıları kapat (await etme!)
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        // Aktif tab'ın yenilenmesi ve HubBankoConnection oluşturması için gecikme
-                        await Task.Delay(1000);
-                        
-                        // HubBankoConnection olmayan (normal) bağlantıları al (DTO)
-                        var nonBankoConnectionDtos = await _connectionService.GetNonBankoConnectionsByTcKimlikNoAsync(tcKimlikNo);
-
-                        if (nonBankoConnectionDtos.Any())
-                        {
-                            _logger.LogInformation($"🔄 {nonBankoConnectionDtos.Count} adet eski bağlantı kapatılıyor...");
-                            
-                            // Eski bağlantıları kapat (ForceLogout)
-                            foreach (var connDto in nonBankoConnectionDtos)
-                            {
-                                await _hubContext.Clients.Client(connDto.ConnectionId)
-                                    .SendAsync("ForceLogout", "Banko moduna geçildi. Diğer sekmeler kapatılıyor.");
-
-                                await _connectionService.DisconnectAsync(connDto.ConnectionId);
-
-                                _logger.LogInformation($"⚠️ Eski bağlantı kapatıldı: {connDto.ConnectionId}");
-                            }
-                        }
-                        else
-                        {
-                            _logger.LogInformation($"✅ Kapatılacak eski bağlantı yok - Banko modu bağlantısı başarıyla oluşturuldu");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Eski bağlantıları kapatma hatası");
-                    }
-                });
+                // 5. ⭐ Eski bağlantılar otomatik kapanacak
+                // Widget sayfa yenilediğinde (forceLoad: true) eski connection otomatik disconnect olur
+                // OnDisconnectedAsync zaten temizlik yapacak, burada bir şey yapmaya gerek yok
+                _logger.LogInformation($"✅ Banko modu aktif edildi. Sayfa yenilendiğinde eski bağlantılar otomatik kapanacak.");
                 
                 return true;
             }

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
@@ -103,10 +104,34 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         {
             try
             {
+                // 1. HubConnection'ı bul
+                var hubConnectionRepo = _unitOfWork.Repository<HubConnection>();
+                var hubConnection = await hubConnectionRepo.FirstOrDefaultAsync(
+                    h => h.ConnectionId == connectionId && h.ConnectionStatus == ConnectionStatus.online && h.SilindiMi == false);
+                
+                if (hubConnection == null)
+                {
+                    _logger.LogError($"HubConnection bulunamadı: {connectionId}");
+                    return false;
+                }
+                
                 var repo = _unitOfWork.Repository<HubBankoConnection>();
                 
+                // 2. ⭐ Bu banko veya personel için var olan tüm kayıtları fiziksel olarak sil
+                var recordsToDelete = (await repo.FindAsync(
+                    b => b.BankoId == bankoId || b.TcKimlikNo == tcKimlikNo)).ToList();
+                
+                if (recordsToDelete.Any())
+                {
+                    repo.DeleteRange(recordsToDelete);
+                    await _unitOfWork.SaveChangesAsync();
+                    _logger.LogWarning($"⚠️ {recordsToDelete.Count} eski HubBankoConnection kaydı silindi (Banko#{bankoId}, TC#{tcKimlikNo})");
+                }
+                
+                // 3. Yeni HubBankoConnection oluştur
                 var bankoConnection = new HubBankoConnection
                 {
+                    HubConnectionId = hubConnection.HubConnectionId,
                     BankoId = bankoId,
                     TcKimlikNo = tcKimlikNo,
                     BankoModuAktif = true,
@@ -118,6 +143,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
 
                 await repo.AddAsync(bankoConnection);
                 await _unitOfWork.SaveChangesAsync();
+                
+                _logger.LogInformation($"✅ Banko bağlantısı oluşturuldu: Banko#{bankoId}, TC#{tcKimlikNo}");
                 return true;
             }
             catch (Exception ex)
