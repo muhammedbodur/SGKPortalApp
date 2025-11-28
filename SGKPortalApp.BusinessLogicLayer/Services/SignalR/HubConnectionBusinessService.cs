@@ -190,17 +190,49 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         {
             try
             {
-                var repo = _unitOfWork.Repository<HubTvConnection>();
-                
-                var tvConnection = new HubTvConnection
-                {
-                    TvId = tvId,
-                    IslemZamani = DateTime.Now,
-                    EklenmeTarihi = DateTime.Now,
-                    DuzenlenmeTarihi = DateTime.Now
-                };
+                // 1. HubConnection'ı bul
+                var hubConnectionRepo = _unitOfWork.Repository<HubConnection>();
+                var hubConnection = await hubConnectionRepo.FirstOrDefaultAsync(
+                    h => h.ConnectionId == connectionId && h.ConnectionStatus == ConnectionStatus.online && h.SilindiMi == false);
 
-                await repo.AddAsync(tvConnection);
+                if (hubConnection == null)
+                {
+                    _logger.LogError($"HubConnection bulunamadı: {connectionId}");
+                    return false;
+                }
+
+                var repo = _unitOfWork.Repository<HubTvConnection>();
+
+                // 2. ⚠️ TV için eski kayıtları silmeye GEREK YOK (TvId unique değil, birden fazla kullanıcı aynı TV'yi izleyebilir)
+                // Ama aynı HubConnectionId için varsa güncelle (örneğin sayfa yenileme)
+                var existingTvConnection = await repo.FirstOrDefaultAsync(
+                    t => t.HubConnectionId == hubConnection.HubConnectionId && !t.SilindiMi);
+
+                if (existingTvConnection != null)
+                {
+                    // Mevcut kaydı güncelle
+                    existingTvConnection.TvId = tvId;
+                    existingTvConnection.IslemZamani = DateTime.Now;
+                    existingTvConnection.DuzenlenmeTarihi = DateTime.Now;
+                    repo.Update(existingTvConnection);
+                    _logger.LogInformation($"✅ Mevcut TV bağlantısı güncellendi: TV#{tvId}, HubConnectionId={hubConnection.HubConnectionId}");
+                }
+                else
+                {
+                    // 3. Yeni HubTvConnection oluştur
+                    var tvConnection = new HubTvConnection
+                    {
+                        HubConnectionId = hubConnection.HubConnectionId, // ⭐ KRİTİK FİX!
+                        TvId = tvId,
+                        IslemZamani = DateTime.Now,
+                        EklenmeTarihi = DateTime.Now,
+                        DuzenlenmeTarihi = DateTime.Now
+                    };
+
+                    await repo.AddAsync(tvConnection);
+                    _logger.LogInformation($"✅ TV bağlantısı oluşturuldu: TV#{tvId}, HubConnectionId={hubConnection.HubConnectionId}");
+                }
+
                 await _unitOfWork.SaveChangesAsync();
                 return true;
             }
@@ -533,6 +565,242 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             {
                 _logger.LogError(ex, "TransferBankoConnectionAsync hatası");
                 return false;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // TV MODE METHODS (mirroring Banko pattern)
+        // ═══════════════════════════════════════════════════════
+
+        public async Task<bool> CreateTvConnectionAsync(int hubConnectionId, int tvId, string tcKimlikNo)
+        {
+            try
+            {
+                var repo = _unitOfWork.Repository<HubTvConnection>();
+
+                // TV için eski kayıtları silmeye gerek yok (birden fazla kullanıcı aynı TV'yi izleyebilir)
+                // Sadece yeni kayıt oluştur
+                var tvConnection = new HubTvConnection
+                {
+                    HubConnectionId = hubConnectionId,
+                    TvId = tvId,
+                    IslemZamani = DateTime.Now,
+                    EklenmeTarihi = DateTime.Now,
+                    DuzenlenmeTarihi = DateTime.Now
+                };
+
+                await repo.AddAsync(tvConnection);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation($"✅ HubTvConnection oluşturuldu: HubConnectionId={hubConnectionId}, TvId={tvId}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "CreateTvConnectionAsync hatası");
+                return false;
+            }
+        }
+
+        public async Task<bool> DeactivateTvConnectionByHubConnectionIdAsync(int hubConnectionId)
+        {
+            try
+            {
+                var tvRepo = _unitOfWork.Repository<HubTvConnection>();
+
+                // HubTvConnection'ı bul
+                var tvConnection = await tvRepo.FirstOrDefaultAsync(
+                    x => x.HubConnectionId == hubConnectionId && !x.SilindiMi);
+
+                if (tvConnection == null)
+                {
+                    _logger.LogWarning($"⚠️ HubTvConnection bulunamadı: HubConnectionId={hubConnectionId}");
+                    return false;
+                }
+
+                // TV için User tablosu güncellemesi YOK (Banko'dan fark)
+                // Sadece HubTvConnection'ı soft delete yap
+                tvConnection.SilindiMi = true;
+                tvConnection.SilinmeTarihi = DateTime.Now;
+                tvConnection.SilenKullanici = "TvDisconnect";
+                tvConnection.DuzenlenmeTarihi = DateTime.Now;
+                tvRepo.Update(tvConnection);
+
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation($"✅ TV bağlantısı kapatıldı: HubConnectionId={hubConnectionId} | TV#{tvConnection.TvId}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DeactivateTvConnectionByHubConnectionIdAsync hatası");
+                return false;
+            }
+        }
+
+        public async Task<HubTvConnection?> GetActiveTvByTcKimlikNoAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var tvRepo = _unitOfWork.Repository<HubTvConnection>();
+                var connectionRepo = _unitOfWork.Repository<HubConnection>();
+
+                // TcKimlikNo'ya ait aktif HubConnection'ları bul
+                var activeConnections = await connectionRepo.FindAsync(
+                    c => c.TcKimlikNo == tcKimlikNo &&
+                         c.ConnectionStatus == ConnectionStatus.online &&
+                         !c.SilindiMi);
+
+                if (!activeConnections.Any())
+                    return null;
+
+                // Bu connection'lardan TV bağlantısı olanı bul
+                var hubConnectionIds = activeConnections.Select(c => c.HubConnectionId).ToList();
+
+                var tvConnection = await tvRepo.FirstOrDefaultAsync(
+                    t => hubConnectionIds.Contains(t.HubConnectionId) && !t.SilindiMi,
+                    t => t.HubConnection,
+                    t => t.Tv);
+
+                return tvConnection;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetActiveTvByTcKimlikNoAsync hatası");
+                return null;
+            }
+        }
+
+        public async Task<User?> GetTvActiveUserAsync(int tvId)
+        {
+            try
+            {
+                var tvRepo = _unitOfWork.Repository<HubTvConnection>();
+                var userRepo = _unitOfWork.Repository<User>();
+
+                // TV'deki aktif bağlantıları bul
+                var activeTvConnections = await tvRepo.FindAsync(
+                    t => t.TvId == tvId && !t.SilindiMi,
+                    t => t.HubConnection);
+
+                if (!activeTvConnections.Any())
+                    return null;
+
+                // İlk aktif kullanıcıyı döndür (TV'de birden fazla kullanıcı olabilir)
+                var firstConnection = activeTvConnections
+                    .Where(t => t.HubConnection != null && t.HubConnection.ConnectionStatus == ConnectionStatus.online)
+                    .FirstOrDefault();
+
+                if (firstConnection?.HubConnection == null)
+                    return null;
+
+                var user = await userRepo.FirstOrDefaultAsync(
+                    u => u.TcKimlikNo == firstConnection.HubConnection.TcKimlikNo,
+                    u => u.Personel);
+
+                return user;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetTvActiveUserAsync hatası");
+                return null;
+            }
+        }
+
+        public async Task<bool> TransferTvConnectionAsync(string tcKimlikNo, string newConnectionId)
+        {
+            try
+            {
+                var connectionRepo = _unitOfWork.Repository<HubConnection>();
+                var tvRepo = _unitOfWork.Repository<HubTvConnection>();
+
+                var newConnection = await connectionRepo.FirstOrDefaultAsync(
+                    c => c.ConnectionId == newConnectionId && !c.SilindiMi);
+
+                if (newConnection == null)
+                {
+                    _logger.LogWarning("TransferTvConnectionAsync: Yeni connection bulunamadı ({ConnectionId})", newConnectionId);
+                    return false;
+                }
+
+                // TcKimlikNo'ya ait aktif TV bağlantısını bul
+                var tvConnection = await GetActiveTvByTcKimlikNoAsync(tcKimlikNo);
+
+                if (tvConnection == null)
+                {
+                    _logger.LogWarning("TransferTvConnectionAsync: Aktif TV bağlantısı bulunamadı ({TcKimlikNo})", tcKimlikNo);
+                    return false;
+                }
+
+                if (tvConnection.HubConnectionId == newConnection.HubConnectionId)
+                {
+                    return true; // Zaten aynı connection
+                }
+
+                // Eski connection'ı soft delete yap
+                var oldConnection = await connectionRepo.FirstOrDefaultAsync(
+                    c => c.HubConnectionId == tvConnection.HubConnectionId && !c.SilindiMi);
+
+                if (oldConnection != null)
+                {
+                    oldConnection.ConnectionStatus = ConnectionStatus.offline;
+                    oldConnection.LastActivityAt = DateTime.Now;
+                    oldConnection.IslemZamani = DateTime.Now;
+                    oldConnection.DuzenlenmeTarihi = DateTime.Now;
+                    oldConnection.SilindiMi = true;
+                    oldConnection.SilinmeTarihi = DateTime.Now;
+                    oldConnection.SilenKullanici = "TvTransfer";
+                    connectionRepo.Update(oldConnection);
+                }
+
+                // HubTvConnection'ı yeni HubConnectionId'ye bağla
+                tvConnection.HubConnectionId = newConnection.HubConnectionId;
+                tvConnection.IslemZamani = DateTime.Now;
+                tvConnection.DuzenlenmeTarihi = DateTime.Now;
+                tvRepo.Update(tvConnection);
+
+                // Yeni connection'ı TvDisplay tipine çevir
+                newConnection.ConnectionType = "TvDisplay";
+                newConnection.ConnectionStatus = ConnectionStatus.online;
+                newConnection.LastActivityAt = DateTime.Now;
+                newConnection.IslemZamani = DateTime.Now;
+                newConnection.DuzenlenmeTarihi = DateTime.Now;
+                connectionRepo.Update(newConnection);
+
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("✅ TV bağlantısı devredildi: {TcKimlikNo} -> HubConnection#{HubConnectionId} | TV#{TvId}",
+                    tcKimlikNo, newConnection.HubConnectionId, tvConnection.TvId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "TransferTvConnectionAsync hatası");
+                return false;
+            }
+        }
+
+        public async Task<List<HubConnection>> GetNonTvConnectionsByTcKimlikNoAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var repo = _unitOfWork.Repository<HubConnection>();
+
+                // TcKimlikNo'ya ait tüm bağlantıları al (HubTvConnection navigation property ile)
+                var allConnections = await repo.GetAllAsync(x => x.HubTvConnection);
+
+                // TcKimlikNo'ya göre filtrele ve HubTvConnection olmayan bağlantıları al
+                var nonTvConnections = allConnections
+                    .Where(x => x.TcKimlikNo == tcKimlikNo &&
+                               (x.HubTvConnection == null || x.HubTvConnection.SilindiMi))
+                    .ToList();
+
+                return nonTvConnections;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetNonTvConnectionsByTcKimlikNoAsync hatası");
+                return new List<HubConnection>();
             }
         }
     }

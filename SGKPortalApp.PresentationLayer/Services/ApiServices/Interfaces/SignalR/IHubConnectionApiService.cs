@@ -37,5 +37,13 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.SignalR
         Task<HubTvConnectionResponseDto?> GetTvConnectionByHubConnectionIdAsync(int hubConnectionId);
         Task<UserResponseDto?> GetBankoActivePersonelAsync(int bankoId);
         Task<bool> TransferBankoConnectionAsync(string tcKimlikNo, string connectionId);
+
+        // New TV Mode Methods (mirroring Banko pattern)
+        Task<bool> CreateTvConnectionAsync(int hubConnectionId, int tvId, string tcKimlikNo);
+        Task<bool> DeactivateTvConnectionByHubConnectionIdAsync(int hubConnectionId);
+        Task<List<HubConnectionResponseDto>> GetNonTvConnectionsByTcKimlikNoAsync(string tcKimlikNo);
+        Task<HubTvConnectionResponseDto?> GetActiveTvByTcKimlikNoAsync(string tcKimlikNo);
+        Task<UserResponseDto?> GetTvActiveUserAsync(int tvId);
+        Task<bool> TransferTvConnectionAsync(string tcKimlikNo, string connectionId);
     }
 }

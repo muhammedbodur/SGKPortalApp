@@ -245,6 +245,131 @@ namespace SGKPortalApp.ApiLayer.Controllers.SignalR
             var isInUse = await _hubConnectionService.IsBankoInUseAsync(bankoId);
             return Ok(isInUse);
         }
+
+        // ═══════════════════════════════════════════════════════
+        // TV MODE ENDPOINTS (mirroring Banko pattern)
+        // ═══════════════════════════════════════════════════════
+
+        [HttpPost("tv")]
+        public async Task<IActionResult> CreateTvConnection([FromBody] CreateTvConnectionRequest request)
+        {
+            var result = await _hubConnectionService.CreateTvConnectionAsync(
+                request.HubConnectionId,
+                request.TvId,
+                request.TcKimlikNo);
+
+            return result ? Ok() : BadRequest("HubTvConnection oluşturulamadı");
+        }
+
+        [HttpDelete("tv/{hubConnectionId}")]
+        public async Task<IActionResult> DeactivateTvConnectionByHubConnectionId(int hubConnectionId)
+        {
+            var result = await _hubConnectionService.DeactivateTvConnectionByHubConnectionIdAsync(hubConnectionId);
+            return result ? Ok() : BadRequest("TV bağlantısı kapatılamadı");
+        }
+
+        [HttpPost("tv/transfer")]
+        public async Task<IActionResult> TransferTvConnection([FromBody] TvConnectionTransferRequestDto request)
+        {
+            var result = await _hubConnectionService.TransferTvConnectionAsync(request.TcKimlikNo, request.ConnectionId);
+            return result ? Ok() : BadRequest("TV bağlantısı devredilemedi");
+        }
+
+        [HttpGet("personel/{tcKimlikNo}/active-tv")]
+        public async Task<IActionResult> GetPersonelActiveTv(string tcKimlikNo)
+        {
+            var tvConnection = await _hubConnectionService.GetActiveTvByTcKimlikNoAsync(tcKimlikNo);
+
+            if (tvConnection == null)
+                return NotFound();
+
+            // Entity'den DTO'ya dönüştür
+            var dto = new HubTvConnectionResponseDto
+            {
+                HubTvConnectionId = tvConnection.HubTvConnectionId,
+                HubConnectionId = tvConnection.HubConnectionId,
+                TvId = tvConnection.TvId,
+                TcKimlikNo = tvConnection.HubConnection?.TcKimlikNo ?? string.Empty
+            };
+
+            return Ok(dto);
+        }
+
+        [HttpGet("tv/{tvId}/active-user")]
+        public async Task<IActionResult> GetTvActiveUser(int tvId)
+        {
+            var user = await _hubConnectionService.GetTvActiveUserAsync(tvId);
+
+            if (user == null)
+                return NotFound();
+
+            // Entity'den DTO'ya dönüştür
+            var dto = new UserResponseDto
+            {
+                TcKimlikNo = user.TcKimlikNo,
+                AktifMi = user.AktifMi,
+                SonGirisTarihi = user.SonGirisTarihi,
+                BasarisizGirisSayisi = user.BasarisizGirisSayisi,
+                HesapKilitTarihi = user.HesapKilitTarihi,
+                PersonelAdSoyad = user.Personel?.AdSoyad,
+                Email = user.Personel?.Email,
+                CepTelefonu = user.Personel?.CepTelefonu,
+                SicilNo = user.Personel?.SicilNo,
+                DepartmanAdi = user.Personel?.Departman?.DepartmanAdi,
+                ServisAdi = user.Personel?.Servis?.ServisAdi,
+                EklenmeTarihi = user.EklenmeTarihi,
+                DuzenlenmeTarihi = user.DuzenlenmeTarihi
+            };
+
+            return Ok(dto);
+        }
+
+        [HttpGet("tv/{tvId}/is-in-use")]
+        public async Task<IActionResult> IsTvInUse(int tvId)
+        {
+            var isInUse = await _hubConnectionService.IsTvInUseByTvUserAsync(tvId);
+            return Ok(isInUse);
+        }
+
+        [HttpGet("non-tv/{tcKimlikNo}")]
+        public async Task<IActionResult> GetNonTvConnections(string tcKimlikNo)
+        {
+            var connections = await _hubConnectionService.GetNonTvConnectionsByTcKimlikNoAsync(tcKimlikNo);
+
+            // Entity'den DTO'ya dönüştür
+            var dtos = connections.Select(c => new HubConnectionResponseDto
+            {
+                HubConnectionId = c.HubConnectionId,
+                TcKimlikNo = c.TcKimlikNo,
+                ConnectionId = c.ConnectionId,
+                ConnectionType = c.ConnectionType,
+                ConnectionStatus = c.ConnectionStatus,
+                ConnectedAt = c.ConnectedAt,
+                LastActivityAt = c.LastActivityAt
+            }).ToList();
+
+            return Ok(dtos);
+        }
+
+        [HttpGet("tv-connection/{hubConnectionId}")]
+        public async Task<IActionResult> GetTvConnectionByHubConnectionId(int hubConnectionId)
+        {
+            var tvConnection = await _hubConnectionService.GetTvConnectionByHubConnectionIdAsync(hubConnectionId);
+
+            if (tvConnection == null)
+                return NotFound();
+
+            // Entity'den DTO'ya dönüştür
+            var dto = new HubTvConnectionResponseDto
+            {
+                HubTvConnectionId = tvConnection.HubTvConnectionId,
+                HubConnectionId = tvConnection.HubConnectionId,
+                TvId = tvConnection.TvId,
+                TcKimlikNo = tvConnection.HubConnection?.TcKimlikNo ?? string.Empty
+            };
+
+            return Ok(dto);
+        }
     }
 
     // Request DTOs
@@ -252,6 +377,14 @@ namespace SGKPortalApp.ApiLayer.Controllers.SignalR
     {
         public int HubConnectionId { get; set; }
         public int BankoId { get; set; }
+        public string TcKimlikNo { get; set; } = string.Empty;
+    }
+
+    // TV Request DTOs
+    public class CreateTvConnectionRequest
+    {
+        public int HubConnectionId { get; set; }
+        public int TvId { get; set; }
         public string TcKimlikNo { get; set; } = string.Empty;
     }
 }

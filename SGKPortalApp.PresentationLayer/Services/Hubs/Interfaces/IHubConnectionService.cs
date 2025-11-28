@@ -186,5 +186,39 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces
         /// Banko bağlantısını transfer et
         /// </summary>
         Task<bool> TransferBankoConnectionAsync(string tcKimlikNo, string connectionId);
+
+        // ═══════════════════════════════════════════════════════
+        // TV MODE METHODS (mirroring Banko pattern)
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// TV modu için HubTvConnection oluştur
+        /// </summary>
+        Task<bool> CreateTvConnectionAsync(int hubConnectionId, int tvId, string tcKimlikNo);
+
+        /// <summary>
+        /// HubConnectionId'ye göre HubTvConnection'ı deaktif et
+        /// </summary>
+        Task<bool> DeactivateTvConnectionByHubConnectionIdAsync(int hubConnectionId);
+
+        /// <summary>
+        /// HubTvConnection olmayan bağlantıları getir
+        /// </summary>
+        Task<List<HubConnectionResponseDto>> GetNonTvConnectionsByTcKimlikNoAsync(string tcKimlikNo);
+
+        /// <summary>
+        /// Personelin aktif TV bağlantısını getir
+        /// </summary>
+        Task<HubTvConnectionResponseDto?> GetActiveTvByTcKimlikNoAsync(string tcKimlikNo);
+
+        /// <summary>
+        /// TV'deki aktif kullanıcıyı getir
+        /// </summary>
+        Task<UserResponseDto?> GetTvActiveUserAsync(int tvId);
+
+        /// <summary>
+        /// TV bağlantısını transfer et
+        /// </summary>
+        Task<bool> TransferTvConnectionAsync(string tcKimlikNo, string connectionId);
     }
 }

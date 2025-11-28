@@ -142,6 +142,45 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                             }
                         }
                     }
+                    else
+                    {
+                        // ⭐ TV modunda mı kontrol et (Banko modunda değilse)
+                        var activeTv = await _connectionService.GetActiveTvByTcKimlikNoAsync(tcKimlikNo);
+
+                        if (activeTv != null)
+                        {
+                            _logger.LogInformation($"🔍 Aktif TV bulundu: TV#{activeTv.TvId}");
+
+                            // TV için tab kontrolü YOK - birden fazla kullanıcı aynı TV'yi izleyebilir
+                            // Sadece kendi connection'larını devret (sayfa yenileme durumu)
+                            var transferred = await _connectionService.TransferTvConnectionAsync(tcKimlikNo, info.ConnectionId);
+
+                            if (transferred)
+                            {
+                                await _connectionService.UpdateConnectionTypeAsync(info.ConnectionId, "TvDisplay");
+
+                                // Eski connection'ları kapat (aynı kullanıcının eski bağlantıları)
+                                foreach (var conn in existingConnections.Where(c => c.ConnectionId != info.ConnectionId))
+                                {
+                                    await Clients.Client(conn.ConnectionId)
+                                        .SendAsync("ForceLogout", "TV görüntüleme yenilendi. Bu sekme kapatılıyor.");
+
+                                    await _connectionService.DisconnectAsync(conn.ConnectionId);
+                                    ConnectionTabSessions.TryRemove(conn.ConnectionId, out _);
+                                }
+
+                                // SignalR grubuna katıl
+                                await Groups.AddToGroupAsync(info.ConnectionId, $"TV_{activeTv.TvId}");
+
+                                await SendToCallerAsync("TvModeActivated", new { tvId = activeTv.TvId });
+                                _logger.LogInformation($"♻️ TV bağlantısı yenilendi: {tcKimlikNo} -> TV#{activeTv.TvId} | HubConnection#{info.ConnectionId}");
+                            }
+                            else
+                            {
+                                _logger.LogWarning($"⚠️ TV bağlantısı yeni connection'a devredilemedi: {tcKimlikNo}");
+                            }
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -309,10 +348,14 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
             {
                 var groupName = $"TV_{tvId}";
                 await LeaveGroupAsync(groupName);
-                
-                // Bağlantıyı kaldır
-                await _connectionService.UnregisterTvConnectionAsync(tvId, Context.ConnectionId);
-                
+
+                // Bağlantıyı kaldır (Yeni yapı - HubConnectionId üzerinden)
+                var hubConnection = await _connectionService.GetByConnectionIdAsync(Context.ConnectionId);
+                if (hubConnection != null)
+                {
+                    await _connectionService.DeactivateTvConnectionByHubConnectionIdAsync(hubConnection.HubConnectionId);
+                }
+
                 _logger.LogInformation($"➖ TV gruptan ayrıldı: TV#{tvId}");
             }
             catch (Exception ex)

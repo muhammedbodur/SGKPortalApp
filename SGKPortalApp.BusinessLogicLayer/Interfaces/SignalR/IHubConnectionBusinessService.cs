@@ -19,7 +19,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR
         Task<HubBankoConnection?> GetPersonelActiveBankoAsync(string tcKimlikNo);
         Task<bool> UpdateConnectionTypeAsync(string connectionId, string connectionType);
         Task<bool> SetConnectionStatusAsync(string connectionId, string status);
-        
+
         // New Banko Mode Methods
         Task<bool> CreateBankoConnectionAsync(int hubConnectionId, int bankoId, string tcKimlikNo);
         Task<bool> DeactivateBankoConnectionByHubConnectionIdAsync(int hubConnectionId);
@@ -29,6 +29,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR
         Task<HubTvConnection?> GetTvConnectionByHubConnectionIdAsync(int hubConnectionId);
         Task<User?> GetBankoActivePersonelAsync(int bankoId);
         Task<bool> TransferBankoConnectionAsync(string tcKimlikNo, string newConnectionId);
+
+        // TV Mode Methods (mirroring Banko pattern)
+        Task<bool> CreateTvConnectionAsync(int hubConnectionId, int tvId, string tcKimlikNo);
+        Task<bool> DeactivateTvConnectionByHubConnectionIdAsync(int hubConnectionId);
+        Task<HubTvConnection?> GetActiveTvByTcKimlikNoAsync(string tcKimlikNo);
+        Task<User?> GetTvActiveUserAsync(int tvId);
+        Task<bool> TransferTvConnectionAsync(string tcKimlikNo, string newConnectionId);
+        Task<bool> IsTvInUseByTvUserAsync(int tvId);
+        Task<List<HubConnection>> GetNonTvConnectionsByTcKimlikNoAsync(string tcKimlikNo);
     }
 }
 

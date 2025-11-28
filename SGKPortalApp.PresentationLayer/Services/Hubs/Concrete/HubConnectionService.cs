@@ -246,6 +246,40 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
         {
             return await _apiService.TransferBankoConnectionAsync(tcKimlikNo, connectionId);
         }
+
+        // ═══════════════════════════════════════════════════════
+        // TV MODE METHODS (mirroring Banko pattern)
+        // ═══════════════════════════════════════════════════════
+
+        public async Task<bool> CreateTvConnectionAsync(int hubConnectionId, int tvId, string tcKimlikNo)
+        {
+            return await _apiService.CreateTvConnectionAsync(hubConnectionId, tvId, tcKimlikNo);
+        }
+
+        public async Task<bool> DeactivateTvConnectionByHubConnectionIdAsync(int hubConnectionId)
+        {
+            return await _apiService.DeactivateTvConnectionByHubConnectionIdAsync(hubConnectionId);
+        }
+
+        public async Task<List<HubConnectionResponseDto>> GetNonTvConnectionsByTcKimlikNoAsync(string tcKimlikNo)
+        {
+            return await _apiService.GetNonTvConnectionsByTcKimlikNoAsync(tcKimlikNo);
+        }
+
+        public async Task<HubTvConnectionResponseDto?> GetActiveTvByTcKimlikNoAsync(string tcKimlikNo)
+        {
+            return await _apiService.GetActiveTvByTcKimlikNoAsync(tcKimlikNo);
+        }
+
+        public async Task<UserResponseDto?> GetTvActiveUserAsync(int tvId)
+        {
+            return await _apiService.GetTvActiveUserAsync(tvId);
+        }
+
+        public async Task<bool> TransferTvConnectionAsync(string tcKimlikNo, string connectionId)
+        {
+            return await _apiService.TransferTvConnectionAsync(tcKimlikNo, connectionId);
+        }
     }
 }
 

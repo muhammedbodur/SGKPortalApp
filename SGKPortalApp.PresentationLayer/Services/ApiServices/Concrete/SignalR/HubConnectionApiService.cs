@@ -351,6 +351,122 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
                 return false;
             }
         }
+
+        // ═══════════════════════════════════════════════════════
+        // TV MODE METHODS (mirroring Banko pattern)
+        // ═══════════════════════════════════════════════════════
+
+        public async Task<bool> CreateTvConnectionAsync(int hubConnectionId, int tvId, string tcKimlikNo)
+        {
+            try
+            {
+                var request = new
+                {
+                    HubConnectionId = hubConnectionId,
+                    TvId = tvId,
+                    TcKimlikNo = tcKimlikNo
+                };
+
+                var response = await _httpClient.PostAsJsonAsync("api/hub-connections/tv", request);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "CreateTvConnectionAsync hatası");
+                return false;
+            }
+        }
+
+        public async Task<bool> DeactivateTvConnectionByHubConnectionIdAsync(int hubConnectionId)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"api/hub-connections/tv/{hubConnectionId}");
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DeactivateTvConnectionByHubConnectionIdAsync hatası");
+                return false;
+            }
+        }
+
+        public async Task<List<HubConnectionResponseDto>> GetNonTvConnectionsByTcKimlikNoAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var response = await _httpClient.GetFromJsonAsync<List<HubConnectionResponseDto>>(
+                    $"api/hub-connections/non-tv/{tcKimlikNo}");
+                return response ?? new List<HubConnectionResponseDto>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetNonTvConnectionsByTcKimlikNoAsync hatası");
+                return new List<HubConnectionResponseDto>();
+            }
+        }
+
+        public async Task<HubTvConnectionResponseDto?> GetActiveTvByTcKimlikNoAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"api/hub-connections/personel/{tcKimlikNo}/active-tv");
+
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return null;
+                }
+
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<HubTvConnectionResponseDto>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetActiveTvByTcKimlikNoAsync hatası");
+                return null;
+            }
+        }
+
+        public async Task<UserResponseDto?> GetTvActiveUserAsync(int tvId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"api/hub-connections/tv/{tvId}/active-user");
+
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    return null;
+                }
+
+                response.EnsureSuccessStatusCode();
+                return await response.Content.ReadFromJsonAsync<UserResponseDto>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetTvActiveUserAsync hatası");
+                return null;
+            }
+        }
+
+        public async Task<bool> TransferTvConnectionAsync(string tcKimlikNo, string connectionId)
+        {
+            try
+            {
+                var request = new TvConnectionTransferRequestDto
+                {
+                    TcKimlikNo = tcKimlikNo,
+                    ConnectionId = connectionId
+                };
+
+                var response = await _httpClient.PostAsJsonAsync("api/hub-connections/tv/transfer", request);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "TransferTvConnectionAsync hatası");
+                return false;
+            }
+        }
     }
 }
 
