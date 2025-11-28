@@ -8,6 +8,18 @@ if (typeof SignalRConnectionManager !== 'undefined') {
     console.warn('⚠️ SignalRConnectionManager zaten tanımlı, tekrar yükleme atlanıyor');
 } else {
 
+const TAB_SESSION_STORAGE_KEY = "portal.tabSessionId";
+
+function ensureTabSessionId() {
+    let tabId = sessionStorage.getItem(TAB_SESSION_STORAGE_KEY);
+    if (!tabId) {
+        tabId = crypto.randomUUID();
+        sessionStorage.setItem(TAB_SESSION_STORAGE_KEY, tabId);
+    }
+    window.currentTabSessionId = tabId;
+    return tabId;
+}
+
 class SignalRConnectionManager {
     constructor(hubUrl, reconnectIntervals = [0, 2000, 5000, 10000, 30000]) {
         this.hubUrl = hubUrl;
@@ -29,8 +41,12 @@ class SignalRConnectionManager {
         }
 
         try {
+            const tabId = ensureTabSessionId();
             this.connection = new signalR.HubConnectionBuilder()
-                .withUrl(this.hubUrl)
+                .withUrl(`${this.hubUrl}?tabSessionId=${encodeURIComponent(tabId)}`, {
+                    accessTokenFactory: () => null,
+                    transport: signalR.HttpTransportType.WebSockets,
+                })
                 .withAutomaticReconnect(this.reconnectIntervals)
                 .configureLogging(signalR.LogLevel.Information)
                 .build();

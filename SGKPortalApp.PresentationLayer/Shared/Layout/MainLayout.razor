@@ -30,52 +30,61 @@
 @* SignalR Bağlantısı - Authenticated kullanıcılar için HubConnection oluşturur *@
 @* NOT: TV Display sayfası kendi SignalR'ını yönetir, bu sadece MainLayout için *@
 <script src="/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+<script src="/js/signalr-connection-manager.js"></script>
 <script src="/js/banko-mode.js"></script>
 <script>
     (function() {
-        // MainLayout için SignalR bağlantısı
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/hubs/siramatik")
-            .withAutomaticReconnect()
-            .build();
+        // MainLayout için merkezi SignalR yöneticisini başlat
+        const manager = initializeSignalR('/hubs/siramatik');
+        manager.initialize();
 
-        connection.start()
-            .then(() => {
-                console.log("✅ MainLayout - SignalR bağlantısı kuruldu");
-                
-                // Banko modu için bağlantıyı set et
-                window.bankoMode.setConnection(connection);
-            })
-            .catch(err => {
-                console.error("❌ MainLayout - SignalR bağlantı hatası:", err);
+        let forceLogoutBound = false;
+
+        function attachForceLogoutHandler(connection) {
+            if (!connection || forceLogoutBound) {
+                return;
+            }
+
+            forceLogoutBound = true;
+
+            connection.on("ForceLogout", (message) => {
+                console.warn("⚠️ ForceLogout alındı:", message);
+
+                // Kullanıcıya bilgi ver
+                alert(message);
+
+                // LocalStorage temizle (tab kimliğini korumak için sessionStorage'ı silme)
+                localStorage.clear();
+
+                // Cookie'leri temizle
+                document.cookie.split(";").forEach((c) => {
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                });
+
+                // Login sayfasına yönlendir
+                window.location.href = "/Account/Login";
             });
+        }
 
-        connection.onreconnected(() => {
-            console.log("✅ MainLayout - SignalR yeniden bağlandı");
+        manager.addEventListener('connected', () => {
+            console.log('✅ MainLayout - SignalR bağlantısı kuruldu');
+            const connection = manager.connection;
+            window.bankoMode.setConnection(connection);
+            attachForceLogoutHandler(connection);
         });
 
-        connection.onclose(() => {
-            console.log("🔴 MainLayout - SignalR bağlantısı koptu");
+        manager.addEventListener('reconnected', () => {
+            console.log('✅ MainLayout - SignalR yeniden bağlandı');
+            const connection = manager.connection;
+            window.bankoMode.setConnection(connection);
+            attachForceLogoutHandler(connection);
         });
 
-        // ForceLogout event handler (Yeni login = Eski logout)
-        connection.on("ForceLogout", (message) => {
-            console.warn("⚠️ ForceLogout alındı:", message);
-            
-            // Kullanıcıya bilgi ver
-            alert(message);
-            
-            // LocalStorage ve SessionStorage temizle
-            localStorage.clear();
-            sessionStorage.clear();
-            
-            // Cookie'leri temizle
-            document.cookie.split(";").forEach((c) => {
-                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-            });
-            
-            // Login sayfasına yönlendir
-            window.location.href = "/Account/Login";
+        manager.addEventListener('statusChecked', (state) => {
+            if (state === 'Disconnected') {
+                console.log('🔴 MainLayout - SignalR bağlantısı koptu');
+            }
         });
+
     })();
 </script>

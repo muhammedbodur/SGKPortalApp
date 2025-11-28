@@ -331,6 +331,26 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
                 return null;
             }
         }
+
+        public async Task<bool> TransferBankoConnectionAsync(string tcKimlikNo, string connectionId)
+        {
+            try
+            {
+                var request = new BankoConnectionTransferRequestDto
+                {
+                    TcKimlikNo = tcKimlikNo,
+                    ConnectionId = connectionId
+                };
+
+                var response = await _httpClient.PostAsJsonAsync("api/hub-connections/banko/transfer", request);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "TransferBankoConnectionAsync hatası");
+                return false;
+            }
+        }
     }
 }
 

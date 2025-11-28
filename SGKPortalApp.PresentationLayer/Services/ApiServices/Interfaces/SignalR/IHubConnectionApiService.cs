@@ -36,5 +36,6 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.SignalR
         Task<HubBankoConnectionResponseDto?> GetBankoConnectionByHubConnectionIdAsync(int hubConnectionId);
         Task<HubTvConnectionResponseDto?> GetTvConnectionByHubConnectionIdAsync(int hubConnectionId);
         Task<UserResponseDto?> GetBankoActivePersonelAsync(int bankoId);
+        Task<bool> TransferBankoConnectionAsync(string tcKimlikNo, string connectionId);
     }
 }

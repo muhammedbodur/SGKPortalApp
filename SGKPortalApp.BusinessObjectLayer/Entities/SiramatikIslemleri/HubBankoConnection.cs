@@ -20,8 +20,8 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         // HubConnection ile 1-1 ilişki (Zorunlu - Personel olmak zorunda)
         [Required]
         public int HubConnectionId { get; set; }
-        [ForeignKey("HubConnectionId")]
-        [InverseProperty("HubBankoConnection")]
+        [ForeignKey(nameof(HubConnectionId))]
+        [InverseProperty(nameof(HubConnection.HubBankoConnection))]
         public HubConnection? HubConnection { get; set; }
 
         // Banko ile 1-1 ilişki (Zorunlu, Unique - Bir bankoya sadece 1 personel)

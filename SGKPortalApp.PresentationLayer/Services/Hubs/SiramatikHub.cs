@@ -4,6 +4,8 @@ using SGKPortalApp.PresentationLayer.Services.Hubs.Base;
 using SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.State;
 using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SGKPortalApp.PresentationLayer.Services.Hubs
@@ -17,6 +19,8 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
         private readonly IHubConnectionService _connectionService;
         private readonly IBankoModeService _bankoModeService;
         private readonly BankoModeStateService _stateService;
+        private static readonly ConcurrentDictionary<string, string> ConnectionTabSessions = new();
+        private static readonly ConcurrentDictionary<string, string> PersonelBankoTabSessions = new();
 
         public SiramatikHub(
             ILogger<SiramatikHub> logger,
@@ -40,6 +44,17 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
             await base.OnConnectedAsync();
             
             var info = GetConnectionInfo();
+            var httpContext = Context.GetHttpContext();
+            var tabSessionId = httpContext?.Request.Query["tabSessionId"].ToString();
+            if (string.IsNullOrEmpty(tabSessionId))
+            {
+                tabSessionId = httpContext?.Request.Headers["x-tab-session-id"].ToString();
+            }
+            if (string.IsNullOrEmpty(tabSessionId))
+            {
+                tabSessionId = Guid.NewGuid().ToString();
+            }
+            ConnectionTabSessions[info.ConnectionId] = tabSessionId;
             var tcKimlikNo = Context.User?.FindFirst("TcKimlikNo")?.Value;
             var userType = Context.User?.FindFirst("UserType")?.Value;
             
@@ -54,14 +69,6 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                     var existingConnectionDtos = await _connectionService.GetActiveConnectionsByTcKimlikNoAsync(tcKimlikNo);
                     var existingConnections = existingConnectionDtos; // DTO listesi
                     
-                    if (isBankoMode && existingConnections.Any())
-                    {
-                        _logger.LogWarning($"⚠️ Banko modundayken yeni sekme tespit edildi: {tcKimlikNo}");
-                        await Clients.Caller.SendAsync("ForceLogout", "Banko modundayken yeni sekme açamazsınız!");
-                        Context.Abort();
-                        return;
-                    }
-                    
                     // 3. ⭐ Sadece normal bağlantı oluştur
                     // Banko modu SignalR Hub.EnterBankoMode() ile ayrıca aktif edilir
                     string connectionType = "MainLayout";
@@ -75,11 +82,58 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                     
                     if (!success)
                     {
+                        ConnectionTabSessions.TryRemove(info.ConnectionId, out _);
                         _logger.LogWarning($"⚠️ Bağlantı oluşturulamadı: {info.ConnectionId} | TC: {tcKimlikNo}");
                         return;
                     }
                     
                     _logger.LogInformation($"✅ Yeni bağlantı oluşturuldu: {info.ConnectionId} | TC: {tcKimlikNo} | Type: {connectionType} | IP: {info.IpAddress}");
+
+                    if (isBankoMode)
+                    {
+                        var activeBanko = await _connectionService.GetPersonelActiveBankoAsync(tcKimlikNo);
+
+                        if (activeBanko != null)
+                        {
+                            var expectedTabId = PersonelBankoTabSessions.GetOrAdd(tcKimlikNo, tabSessionId);
+                            if (!string.Equals(expectedTabId, tabSessionId, StringComparison.Ordinal))
+                            {
+                                _logger.LogWarning($"⚠️ Banko modundayken yeni tab denemesi: {tcKimlikNo}");
+                                await Clients.Caller.SendAsync("ForceLogout", "Banko modundayken yeni sekme açamazsınız!");
+                                ConnectionTabSessions.TryRemove(info.ConnectionId, out _);
+                                Context.Abort();
+                                return;
+                            }
+
+                            var transferred = await _connectionService.TransferBankoConnectionAsync(tcKimlikNo, info.ConnectionId);
+
+                            if (transferred)
+                            {
+                                PersonelBankoTabSessions[tcKimlikNo] = tabSessionId;
+                                _stateService.ActivateBankoMode(activeBanko.BankoId, tcKimlikNo);
+                                await _connectionService.UpdateConnectionTypeAsync(info.ConnectionId, "BankoMode");
+
+                                foreach (var conn in existingConnections.Where(c => c.ConnectionId != info.ConnectionId))
+                                {
+                                    await Clients.Client(conn.ConnectionId)
+                                        .SendAsync("ForceLogout", "Banko modu yenilendi. Bu sekme kapatılıyor.");
+
+                                    await _connectionService.DisconnectAsync(conn.ConnectionId);
+                                    ConnectionTabSessions.TryRemove(conn.ConnectionId, out _);
+                                }
+
+                                await SendToCallerAsync("BankoModeActivated", new { bankoId = activeBanko.BankoId });
+                                _logger.LogInformation($"♻️ Banko bağlantısı yenilendi: {tcKimlikNo} -> HubConnection#{info.ConnectionId}");
+                            }
+                            else
+                            {
+                                _logger.LogWarning($"⚠️ Banko bağlantısı yeni connection'a devredilemedi: {tcKimlikNo}");
+                                await Clients.Caller.SendAsync("ForceLogout", "Banko modu oturumu yenilenirken hata oluştu. Lütfen tekrar giriş yapın.");
+                                ConnectionTabSessions.TryRemove(info.ConnectionId, out _);
+                                Context.Abort();
+                            }
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -100,6 +154,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
         {
             var connectionId = Context.ConnectionId;
             var tcKimlikNo = Context.User?.FindFirst("TcKimlikNo")?.Value;
+            ConnectionTabSessions.TryRemove(connectionId, out _);
             
             try
             {
@@ -129,6 +184,10 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                                 }
                                 
                                 await Groups.RemoveFromGroupAsync(connectionId, $"BANKO_{bankoConnection.BankoId}");
+                                if (!string.IsNullOrEmpty(tcKimlikNo))
+                                {
+                                    PersonelBankoTabSessions.TryRemove(tcKimlikNo, out _);
+                                }
                             }
                             break;
                             
@@ -308,10 +367,26 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                         await Clients.Client(conn.ConnectionId)
                             .SendAsync("ForceLogout", "Banko moduna geçildi. Diğer sekmeler kapatılıyor.");
                         
+                        await Clients.Client(conn.ConnectionId)
+                            .SendAsync("BankoModeDeactivated", new { reason = "forceLogout" });
+
                         await _connectionService.DisconnectAsync(conn.ConnectionId);
+                        await _connectionService.DisconnectAsync(conn.ConnectionId);
+                        ConnectionTabSessions.TryRemove(conn.ConnectionId, out _);
                         
                         _logger.LogWarning($"⚠️ Banko moduna geçiş: Diğer tab kapatıldı ({conn.ConnectionId})");
                     }
+                }
+
+                // 3.5 Aktif tab için HubConnection kaydını garanti altına al
+                var ensuredConnection = await _connectionService.CreateOrUpdateUserConnectionAsync(connectionId, tcKimlikNo);
+                if (!ensuredConnection)
+                {
+                    throw new HubException("Aktif bağlantı kaydı güncellenemedi. Lütfen sayfayı yenileyin.");
+                }
+                if (ConnectionTabSessions.TryGetValue(connectionId, out var currentTabId))
+                {
+                    PersonelBankoTabSessions[tcKimlikNo] = currentTabId;
                 }
                 
                 // 4. ⭐ User tablosunu güncelle (BankoModeService içinde API çağrısı var)
@@ -376,6 +451,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                 {
                     throw new HubException("Banko modundan çıkış işlemi tamamlanamadı.");
                 }
+                PersonelBankoTabSessions.TryRemove(tcKimlikNo, out _);
 
                 // 3. SignalR grubundan çıkar (varsa)
                 if (bankoConnection != null)

@@ -63,6 +63,13 @@ namespace SGKPortalApp.ApiLayer.Controllers.SignalR
             return result ? Ok() : BadRequest();
         }
 
+        [HttpPost("banko/transfer")]
+        public async Task<IActionResult> TransferBankoConnection([FromBody] BankoConnectionTransferRequestDto request)
+        {
+            var result = await _hubConnectionService.TransferBankoConnectionAsync(request.TcKimlikNo, request.ConnectionId);
+            return result ? Ok() : BadRequest("Banko bağlantısı devredilemedi");
+        }
+
         [HttpGet("personel/{tcKimlikNo}/active-banko")]
         public async Task<IActionResult> GetPersonelActiveBanko(string tcKimlikNo)
         {

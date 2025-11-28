@@ -27,15 +27,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             try
             {
                 var repo = _unitOfWork.Repository<HubConnection>();
-                
-                var connection = await repo.FirstOrDefaultAsync(c => c.TcKimlikNo == tcKimlikNo);
+
+                // Bağlantıları ConnectionId bazında yönet (aynı kullanıcı birden fazla sekme açabilir)
+                var connection = await repo.FirstOrDefaultAsync(c => c.ConnectionId == connectionId);
 
                 if (connection != null)
                 {
-                    connection.ConnectionId = connectionId;
                     connection.ConnectionStatus = BusinessObjectLayer.Enums.SiramatikIslemleri.ConnectionStatus.online;
                     connection.IslemZamani = DateTime.Now;
                     connection.DuzenlenmeTarihi = DateTime.Now;
+                    connection.SilindiMi = false;
+                    connection.SilinmeTarihi = null;
+                    connection.SilenKullanici = null;
                     repo.Update(connection);
                 }
                 else
@@ -67,11 +70,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             try
             {
                 var repo = _unitOfWork.Repository<HubConnection>();
-                var connection = await repo.FirstOrDefaultAsync(c => c.ConnectionId == connectionId);
+                var connection = await repo.FirstOrDefaultAsync(c => c.ConnectionId == connectionId && !c.SilindiMi);
 
                 if (connection != null)
                 {
-                    repo.Delete(connection);
+                    connection.ConnectionStatus = BusinessObjectLayer.Enums.SiramatikIslemleri.ConnectionStatus.offline;
+                    connection.IslemZamani = DateTime.Now;
+                    connection.DuzenlenmeTarihi = DateTime.Now;
+                    connection.LastActivityAt = DateTime.Now;
+                    connection.SilindiMi = true;
+                    connection.SilinmeTarihi = DateTime.Now;
+                    connection.SilenKullanici = "SignalR_Disconnect";
+                    repo.Update(connection);
                     await _unitOfWork.SaveChangesAsync();
                 }
 
@@ -90,7 +100,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             {
                 var repo = _unitOfWork.Repository<HubConnection>();
                 var connections = await repo.FindAsync(c => c.TcKimlikNo == tcKimlikNo && 
-                    c.ConnectionStatus == BusinessObjectLayer.Enums.SiramatikIslemleri.ConnectionStatus.online);
+                    c.ConnectionStatus == BusinessObjectLayer.Enums.SiramatikIslemleri.ConnectionStatus.online && !c.SilindiMi);
                 return connections;
             }
             catch (Exception ex)
@@ -453,6 +463,76 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             {
                 _logger.LogError(ex, "GetBankoActivePersonelAsync hatası");
                 return null;
+            }
+        }
+
+        public async Task<bool> TransferBankoConnectionAsync(string tcKimlikNo, string newConnectionId)
+        {
+            try
+            {
+                var connectionRepo = _unitOfWork.Repository<HubConnection>();
+                var bankoRepo = _unitOfWork.Repository<HubBankoConnection>();
+
+                var newConnection = await connectionRepo.FirstOrDefaultAsync(
+                    c => c.ConnectionId == newConnectionId && !c.SilindiMi);
+
+                if (newConnection == null)
+                {
+                    _logger.LogWarning("TransferBankoConnectionAsync: Yeni connection bulunamadı ({ConnectionId})", newConnectionId);
+                    return false;
+                }
+
+                var bankoConnection = await bankoRepo.FirstOrDefaultAsync(
+                    b => b.TcKimlikNo == tcKimlikNo && b.BankoModuAktif);
+
+                if (bankoConnection == null)
+                {
+                    _logger.LogWarning("TransferBankoConnectionAsync: Aktif banko oturumu bulunamadı ({TcKimlikNo})", tcKimlikNo);
+                    return false;
+                }
+
+                if (bankoConnection.HubConnectionId == newConnection.HubConnectionId)
+                {
+                    return true;
+                }
+
+                // Eski connection'ı soft delete yap
+                var oldConnection = await connectionRepo.FirstOrDefaultAsync(
+                    c => c.HubConnectionId == bankoConnection.HubConnectionId && !c.SilindiMi);
+
+                if (oldConnection != null)
+                {
+                    oldConnection.ConnectionStatus = ConnectionStatus.offline;
+                    oldConnection.LastActivityAt = DateTime.Now;
+                    oldConnection.IslemZamani = DateTime.Now;
+                    oldConnection.DuzenlenmeTarihi = DateTime.Now;
+                    oldConnection.SilindiMi = true;
+                    oldConnection.SilinmeTarihi = DateTime.Now;
+                    oldConnection.SilenKullanici = "BankoTransfer";
+                    connectionRepo.Update(oldConnection);
+                }
+
+                bankoConnection.HubConnectionId = newConnection.HubConnectionId;
+                bankoConnection.IslemZamani = DateTime.Now;
+                bankoConnection.DuzenlenmeTarihi = DateTime.Now;
+                bankoRepo.Update(bankoConnection);
+
+                newConnection.ConnectionType = "BankoMode";
+                newConnection.ConnectionStatus = ConnectionStatus.online;
+                newConnection.LastActivityAt = DateTime.Now;
+                newConnection.IslemZamani = DateTime.Now;
+                newConnection.DuzenlenmeTarihi = DateTime.Now;
+                connectionRepo.Update(newConnection);
+
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("✅ Banko bağlantısı devredildi: {TcKimlikNo} -> HubConnection#{HubConnectionId}", tcKimlikNo, newConnection.HubConnectionId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "TransferBankoConnectionAsync hatası");
+                return false;
             }
         }
     }

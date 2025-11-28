@@ -181,6 +181,10 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces
         /// Bankodaki aktif personeli getir
         /// </summary>
         Task<UserResponseDto?> GetBankoActivePersonelAsync(int bankoId);
+
+        /// <summary>
+        /// Banko bağlantısını transfer et
+        /// </summary>
+        Task<bool> TransferBankoConnectionAsync(string tcKimlikNo, string connectionId);
     }
 }
-

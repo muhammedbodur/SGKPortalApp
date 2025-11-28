@@ -241,6 +241,11 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
         {
             return await _apiService.GetBankoActivePersonelAsync(bankoId);
         }
+
+        public async Task<bool> TransferBankoConnectionAsync(string tcKimlikNo, string connectionId)
+        {
+            return await _apiService.TransferBankoConnectionAsync(tcKimlikNo, connectionId);
+        }
     }
 }
 
