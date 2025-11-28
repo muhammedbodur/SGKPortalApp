@@ -196,17 +196,18 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                             break;
                             
                         case "TvDisplay":
-                            // TV Display'den çıkış (Banko'dan farklı - soft delete yapılır)
+                            // TV Display'den çıkış
                             var tvConnection = await _connectionService.GetTvConnectionByHubConnectionIdAsync(hubConnection.HubConnectionId);
                             if (tvConnection != null)
                             {
                                 await Groups.RemoveFromGroupAsync(connectionId, $"TV_{tvConnection.TvId}");
 
-                                // ⭐ TV için transfer mantığı YOK, bu yüzden soft delete yap
-                                // Böylece sayfa yenileme durumunda eski kayıtlar kalmaz
-                                await _connectionService.DeactivateTvConnectionByHubConnectionIdAsync(hubConnection.HubConnectionId);
+                                // ⚠️ TV için soft delete YAPMA!
+                                // Çünkü: Birden fazla tab açılabilir, her tab kapandığında soft delete yaparsak
+                                // sadece son tab'ın HubTvConnection'ı kalır.
+                                // HubTvConnection sadece LeaveTvGroup içinde silinmeli (explicit çıkış).
 
-                                _logger.LogInformation($"ℹ️ TV#{tvConnection.TvId} bağlantısı koptu ve temizlendi");
+                                _logger.LogInformation($"ℹ️ TV#{tvConnection.TvId} bağlantısı koptu (HubTvConnection korundu)");
                             }
                             break;
                             
