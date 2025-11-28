@@ -3,11 +3,6 @@
  * Tüm proje için merkezi SignalR bağlantı yönetimi
  */
 
-// Eğer zaten tanımlıysa, tekrar tanımlama
-if (typeof SignalRConnectionManager !== 'undefined') {
-    console.warn('⚠️ SignalRConnectionManager zaten tanımlı, tekrar yükleme atlanıyor');
-} else {
-
 const TAB_SESSION_STORAGE_KEY = "portal.tabSessionId";
 
 function ensureTabSessionId() {
@@ -42,8 +37,13 @@ class SignalRConnectionManager {
 
         try {
             const tabId = ensureTabSessionId();
+            
+            // Page lifecycle bilgisini ekle
+            const isRefresh = window.pageLifecycle?.isPageRefresh() || false;
+            const isNewTab = window.pageLifecycle?.isNewTabOpen() || false;
+            
             this.connection = new signalR.HubConnectionBuilder()
-                .withUrl(`${this.hubUrl}?tabSessionId=${encodeURIComponent(tabId)}`, {
+                .withUrl(`${this.hubUrl}?tabSessionId=${encodeURIComponent(tabId)}&isRefresh=${isRefresh}&isNewTab=${isNewTab}`, {
                     accessTokenFactory: () => null,
                     transport: signalR.HttpTransportType.WebSockets,
                 })
@@ -167,10 +167,11 @@ class SignalRConnectionManager {
             0: 'Disconnected',
             1: 'Connected',
             2: 'Connecting',
+            3: 'Disconnecting',
             4: 'Reconnecting'
         };
 
-        return stateMap[this.connection.state] || 'Unknown';
+        return stateMap[this.connection.state] || `Unknown(${this.connection.state})`;
     }
 
     /**
@@ -279,12 +280,25 @@ window.signalRManager = null;
  * SignalR Manager'ı başlat
  */
 function initializeSignalR(hubUrl = '/hubs/tv') {
-    if (window.signalRManager) {
-        console.warn('SignalR Manager zaten başlatılmış');
+    // Eğer mevcut manager varsa ve addEventListener metodu varsa, onu döndür
+    if (window.signalRManager && typeof window.signalRManager.addEventListener === 'function') {
+        console.warn('✅ SignalR Manager zaten başlatılmış, mevcut instance kullanılıyor');
         return window.signalRManager;
     }
 
+    // Eski veya bozuk instance varsa temizle
+    if (window.signalRManager) {
+        console.warn('⚠️ Eski SignalR Manager bulundu, yenisi oluşturuluyor');
+        try {
+            window.signalRManager.stop();
+        } catch (e) {
+            console.warn('Eski manager durdurulurken hata:', e);
+        }
+    }
+
+    // Yeni instance oluştur
     window.signalRManager = new SignalRConnectionManager(hubUrl);
+    console.log('✅ Yeni SignalR Manager oluşturuldu');
     
     // Sayfa kapatılırken temizle
     window.addEventListener('beforeunload', () => {
@@ -295,8 +309,6 @@ function initializeSignalR(hubUrl = '/hubs/tv') {
 
     return window.signalRManager;
 }
-
-} // SignalRConnectionManager tanımlama sonu
 
 // Export
 if (typeof module !== 'undefined' && module.exports) {
