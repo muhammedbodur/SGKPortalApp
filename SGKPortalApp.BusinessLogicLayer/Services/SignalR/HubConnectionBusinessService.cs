@@ -327,9 +327,44 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         {
             try
             {
-                var repo = _unitOfWork.Repository<HubTvConnection>();
-                var connection = await repo.FirstOrDefaultAsync(c => c.TvId == tvId);
-                return connection != null;
+                var tvRepo = _unitOfWork.Repository<HubTvConnection>();
+                var connectionRepo = _unitOfWork.Repository<HubConnection>();
+                var userRepo = _unitOfWork.Repository<User>();
+
+                // 1. Bu TV'deki tüm aktif HubTvConnection'ları al
+                var activeTvConnections = await tvRepo.FindAsync(
+                    t => t.TvId == tvId && !t.SilindiMi);
+
+                if (!activeTvConnections.Any())
+                    return false; // Kimse kullanmıyor
+
+                // 2. Her HubTvConnection için User'ı kontrol et
+                foreach (var tvConn in activeTvConnections)
+                {
+                    // HubConnection'ı al
+                    var hubConnection = await connectionRepo.FirstOrDefaultAsync(
+                        h => h.HubConnectionId == tvConn.HubConnectionId &&
+                             h.ConnectionStatus == ConnectionStatus.online &&
+                             !h.SilindiMi);
+
+                    if (hubConnection != null)
+                    {
+                        // User'ı al
+                        var user = await userRepo.FirstOrDefaultAsync(
+                            u => u.TcKimlikNo == hubConnection.TcKimlikNo);
+
+                        // ⭐ Sadece başka bir TvUser kullanıyorsa true dön
+                        if (user != null && user.UserType == UserType.TvUser)
+                        {
+                            _logger.LogInformation($"✅ TV#{tvId} başka bir TvUser tarafından kullanılıyor: {user.TcKimlikNo}");
+                            return true;
+                        }
+                    }
+                }
+
+                // Personel kullanıyor veya kimse kullanmıyor
+                _logger.LogDebug($"✅ TV#{tvId} TvUser tarafından kullanılmıyor (Personel kullanabilir)");
+                return false;
             }
             catch (Exception ex)
             {

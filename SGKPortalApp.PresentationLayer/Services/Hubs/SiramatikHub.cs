@@ -252,23 +252,11 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                     {
                         throw new HubException("Bu TV'yi görüntüleme yetkiniz yok!");
                     }
-                    
-                    // 2. Bu TV User'ın başka aktif bağlantısı var mı? (Sadece 1 tab)
-                    var existingConnections = await _connectionService.GetActiveConnectionsByTcKimlikNoAsync(tcKimlikNo!);
-                    if (existingConnections.Any(c => c.ConnectionId != connectionId))
-                    {
-                        // Eski tab'ı kapat
-                        foreach (var old in existingConnections.Where(c => c.ConnectionId != connectionId))
-                        {
-                            await Clients.Client(old.ConnectionId)
-                                .SendAsync("ForceLogout", "Başka bir sekmede TV açıldı. Bu sekme kapatılıyor.");
-                            
-                            await _connectionService.DisconnectAsync(old.ConnectionId);
-                            
-                            _logger.LogWarning($"⚠️ TV User {tcKimlikNo} yeni tab açtı. Eski tab kapatıldı.");
-                        }
-                    }
-                    
+
+                    // 2. ⚠️ TAB KONTROLÜ KALDIRILDI!
+                    // Aynı TvUser birden fazla ekranda (3 monitör) aynı TV'yi açabilir.
+                    // Her ekran ayrı bir HubTvConnection oluşturur ve aynı SignalR grubuna katılır.
+
                     // 3. Bu TV başka bir TV User tarafından kullanılıyor mu?
                     var tvInUse = await _connectionService.IsTvInUseByTvUserAsync(tvId);
                     if (tvInUse)
