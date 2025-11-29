@@ -292,7 +292,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                 }
                 
                 // 5. HubTvConnection oluştur
-                var success = await _connectionService.RegisterTvConnectionAsync(tvId, connectionId);
+                var success = await _connectionService.RegisterTvConnectionAsync(tvId, connectionId, tcKimlikNo!);
                 
                 if (success)
                 {
