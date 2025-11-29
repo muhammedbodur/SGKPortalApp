@@ -202,12 +202,13 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                             {
                                 await Groups.RemoveFromGroupAsync(connectionId, $"TV_{tvConnection.TvId}");
 
-                                // ⚠️ TV için soft delete YAPMA!
-                                // Çünkü: Birden fazla tab açılabilir, her tab kapandığında soft delete yaparsak
-                                // sadece son tab'ın HubTvConnection'ı kalır.
-                                // HubTvConnection sadece LeaveTvGroup içinde silinmeli (explicit çıkış).
+                                // ⭐ TV için soft delete YAP!
+                                // Çünkü: Her ekran ayrı bir HubTvConnection oluşturur.
+                                // Ekran kapandığında (tab kapama, tarayıcı kapama) o kaydı temizlemeliyiz.
+                                // Birden fazla ekran açıksa, her biri kendi HubTvConnection'ına sahiptir.
+                                await _connectionService.DeactivateTvConnectionByHubConnectionIdAsync(hubConnection.HubConnectionId);
 
-                                _logger.LogInformation($"ℹ️ TV#{tvConnection.TvId} bağlantısı koptu (HubTvConnection korundu)");
+                                _logger.LogInformation($"ℹ️ TV#{tvConnection.TvId} bağlantısı koptu ve temizlendi");
                             }
                             break;
                             

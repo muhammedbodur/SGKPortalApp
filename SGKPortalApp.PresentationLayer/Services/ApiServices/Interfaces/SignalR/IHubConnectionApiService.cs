@@ -45,5 +45,6 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.SignalR
         Task<HubTvConnectionResponseDto?> GetActiveTvByTcKimlikNoAsync(string tcKimlikNo);
         Task<UserResponseDto?> GetTvActiveUserAsync(int tvId);
         Task<bool> TransferTvConnectionAsync(string tcKimlikNo, string connectionId);
+        Task<bool> IsTvInUseByOtherTvUserAsync(int tvId, string currentTcKimlikNo);
     }
 }

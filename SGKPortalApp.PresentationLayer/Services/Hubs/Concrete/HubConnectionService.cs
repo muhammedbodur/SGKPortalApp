@@ -280,6 +280,11 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
         {
             return await _apiService.TransferTvConnectionAsync(tcKimlikNo, connectionId);
         }
+
+        public async Task<bool> IsTvInUseByOtherTvUserAsync(int tvId, string currentTcKimlikNo)
+        {
+            return await _apiService.IsTvInUseByOtherTvUserAsync(tvId, currentTcKimlikNo);
+        }
     }
 }
 
