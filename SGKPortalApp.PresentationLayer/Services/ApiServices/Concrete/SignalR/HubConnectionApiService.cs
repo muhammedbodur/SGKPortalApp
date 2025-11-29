@@ -467,6 +467,24 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
                 return false;
             }
         }
+
+        public async Task<bool> IsTvInUseByOtherTvUserAsync(int tvId, string currentTcKimlikNo)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"api/hub-connections/tv/{tvId}/is-in-use-by-other/{currentTcKimlikNo}");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadFromJsonAsync<bool>();
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"IsTvInUseByOtherTvUserAsync hatası: TvId={tvId}, CurrentTcKimlikNo={currentTcKimlikNo}");
+                return false;
+            }
+        }
     }
 }
 

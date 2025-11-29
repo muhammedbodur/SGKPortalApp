@@ -350,6 +350,13 @@ namespace SGKPortalApp.ApiLayer.Controllers.SignalR
 
             return Ok(dto);
         }
+
+        [HttpGet("tv/{tvId}/is-in-use-by-other/{currentTcKimlikNo}")]
+        public async Task<IActionResult> IsTvInUseByOtherTvUser(int tvId, string currentTcKimlikNo)
+        {
+            var isInUse = await _hubConnectionService.IsTvInUseByOtherTvUserAsync(tvId, currentTcKimlikNo);
+            return Ok(isInUse);
+        }
     }
 
     // Request DTOs
