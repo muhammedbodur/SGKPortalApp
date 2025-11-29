@@ -189,27 +189,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.SignalR
             
             return Ok(dto);
         }
-
-        [HttpGet("tv-connection/{hubConnectionId}")]
-        public async Task<IActionResult> GetTvConnectionByHubConnectionId(int hubConnectionId)
-        {
-            var tvConnection = await _hubConnectionService.GetTvConnectionByHubConnectionIdAsync(hubConnectionId);
-            
-            if (tvConnection == null)
-                return NotFound();
-            
-            // Entity'den DTO'ya dönüştür
-            var dto = new HubTvConnectionResponseDto
-            {
-                HubTvConnectionId = tvConnection.HubTvConnectionId,
-                HubConnectionId = tvConnection.HubConnectionId,
-                TvId = tvConnection.TvId,
-                TcKimlikNo = tvConnection.HubConnection?.TcKimlikNo ?? string.Empty
-            };
-            
-            return Ok(dto);
-        }
-
+        
         [HttpGet("banko/{bankoId}/active-personel")]
         public async Task<IActionResult> GetBankoActivePersonel(int bankoId)
         {
