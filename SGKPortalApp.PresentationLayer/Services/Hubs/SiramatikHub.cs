@@ -142,45 +142,9 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                             }
                         }
                     }
-                    else
-                    {
-                        // ⭐ TV modunda mı kontrol et (Banko modunda değilse)
-                        var activeTv = await _connectionService.GetActiveTvByTcKimlikNoAsync(tcKimlikNo);
-
-                        if (activeTv != null)
-                        {
-                            _logger.LogInformation($"🔍 Aktif TV bulundu: TV#{activeTv.TvId}");
-
-                            // TV için tab kontrolü YOK - birden fazla kullanıcı aynı TV'yi izleyebilir
-                            // Sadece kendi connection'larını devret (sayfa yenileme durumu)
-                            var transferred = await _connectionService.TransferTvConnectionAsync(tcKimlikNo, info.ConnectionId);
-
-                            if (transferred)
-                            {
-                                await _connectionService.UpdateConnectionTypeAsync(info.ConnectionId, "TvDisplay");
-
-                                // Eski connection'ları kapat (aynı kullanıcının eski bağlantıları)
-                                foreach (var conn in existingConnections.Where(c => c.ConnectionId != info.ConnectionId))
-                                {
-                                    await Clients.Client(conn.ConnectionId)
-                                        .SendAsync("ForceLogout", "TV görüntüleme yenilendi. Bu sekme kapatılıyor.");
-
-                                    await _connectionService.DisconnectAsync(conn.ConnectionId);
-                                    ConnectionTabSessions.TryRemove(conn.ConnectionId, out _);
-                                }
-
-                                // SignalR grubuna katıl
-                                await Groups.AddToGroupAsync(info.ConnectionId, $"TV_{activeTv.TvId}");
-
-                                await SendToCallerAsync("TvModeActivated", new { tvId = activeTv.TvId });
-                                _logger.LogInformation($"♻️ TV bağlantısı yenilendi: {tcKimlikNo} -> TV#{activeTv.TvId} | HubConnection#{info.ConnectionId}");
-                            }
-                            else
-                            {
-                                _logger.LogWarning($"⚠️ TV bağlantısı yeni connection'a devredilemedi: {tcKimlikNo}");
-                            }
-                        }
-                    }
+                    // ⚠️ TV transfer mantığı KALDIRILDI!
+                    // Çünkü: TV modunda birden fazla tab açılabilir.
+                    // Transfer mantığı JoinTvGroup içinde çalışacak (sayfa yenileme için).
                 }
                 catch (Exception ex)
                 {
@@ -237,7 +201,13 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                             if (tvConnection != null)
                             {
                                 await Groups.RemoveFromGroupAsync(connectionId, $"TV_{tvConnection.TvId}");
-                                _logger.LogInformation($"ℹ️ TV#{tvConnection.TvId} bağlantısı koptu");
+
+                                // ⚠️ TV için soft delete YAPMA!
+                                // Çünkü: Birden fazla tab açılabilir, her tab kapandığında soft delete yaparsak
+                                // sadece son tab'ın HubTvConnection'ı kalır.
+                                // HubTvConnection sadece LeaveTvGroup içinde silinmeli (explicit çıkış).
+
+                                _logger.LogInformation($"ℹ️ TV#{tvConnection.TvId} bağlantısı koptu (HubTvConnection korundu)");
                             }
                             break;
                             
@@ -283,31 +253,16 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                     {
                         throw new HubException("Bu TV'yi görüntüleme yetkiniz yok!");
                     }
-                    
-                    // 2. Bu TV User'ın başka aktif bağlantısı var mı? (Sadece 1 tab)
-                    var existingConnections = await _connectionService.GetActiveConnectionsByTcKimlikNoAsync(tcKimlikNo!);
-                    if (existingConnections.Any(c => c.ConnectionId != connectionId))
-                    {
-                        // Eski tab'ı kapat
-                        foreach (var old in existingConnections.Where(c => c.ConnectionId != connectionId))
-                        {
-                            await Clients.Client(old.ConnectionId)
-                                .SendAsync("ForceLogout", "Başka bir sekmede TV açıldı. Bu sekme kapatılıyor.");
-                            
-                            await _connectionService.DisconnectAsync(old.ConnectionId);
-                            
-                            _logger.LogWarning($"⚠️ TV User {tcKimlikNo} yeni tab açtı. Eski tab kapatıldı.");
-                        }
-                    }
-                    
-                    // 3. Bu TV başka bir TV User tarafından kullanılıyor mu?
-                    var tvInUse = await _connectionService.IsTvInUseByTvUserAsync(tvId);
-                    if (tvInUse)
-                    {
-                        throw new HubException($"TV#{tvId} zaten başka bir TV kullanıcısı tarafından kullanılıyor!");
-                    }
+
+                    // 2. ⚠️ TAB VE KULLANICI KONTROLÜ KALDIRILDI!
+                    // Çünkü:
+                    // - Aynı TvUser birden fazla fiziksel ekranda (3 monitör) aynı TV'yi açabilmeli
+                    // - Farklı TvUser'lar da aynı TV'yi izleyebilir (sorun değil, sadece gösterim amaçlı)
+                    // - Her ekran ayrı bir HubTvConnection oluşturur
+                    // - Tümü aynı SignalR grubuna (TV_{tvId}) katılır
+                    // - Sıra çağrıldığında TÜM ekranlara gider
                 }
-                // Personel için kontrol yok, istediği TV'yi izleyebilir
+                // Personel için de kontrol yok, istediği TV'yi izleyebilir
                 
                 // 4. ConnectionType'ı güncelle
                 await _connectionService.UpdateConnectionTypeAsync(connectionId, "TvDisplay");

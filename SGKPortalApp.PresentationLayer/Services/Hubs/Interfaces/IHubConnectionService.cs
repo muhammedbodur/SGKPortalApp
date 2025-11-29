@@ -220,5 +220,10 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces
         /// TV bağlantısını transfer et
         /// </summary>
         Task<bool> TransferTvConnectionAsync(string tcKimlikNo, string connectionId);
+
+        /// <summary>
+        /// TV BAŞKA bir TvUser tarafından kullanılıyor mu? (kendisi hariç)
+        /// </summary>
+        Task<bool> IsTvInUseByOtherTvUserAsync(int tvId, string currentTcKimlikNo);
     }
 }
