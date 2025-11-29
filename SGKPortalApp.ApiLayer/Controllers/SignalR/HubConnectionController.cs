@@ -144,6 +144,13 @@ namespace SGKPortalApp.ApiLayer.Controllers.SignalR
             return Ok(dtos);
         }
 
+        [HttpPut("{connectionId}/type")]
+        public async Task<IActionResult> UpdateConnectionType(string connectionId, [FromBody] UpdateConnectionTypeRequest request)
+        {
+            var result = await _hubConnectionService.UpdateConnectionTypeAsync(connectionId, request.ConnectionType);
+            return result ? Ok() : BadRequest("ConnectionType güncellenemedi");
+        }
+
         [HttpGet("{connectionId}")]
         public async Task<IActionResult> GetByConnectionId(string connectionId)
         {

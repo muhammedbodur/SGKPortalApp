@@ -151,6 +151,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
                     // TV Display JavaScript fonksiyonlarını başlat
                     await JSRuntime.InvokeVoidAsync("tvDisplay.startClock");
                     await JSRuntime.InvokeVoidAsync("tvDisplay.startVideo");
+                    
+                    // ÖNCE ConnectionType'ı güncelle, SONRA TV grubuna katıl
+                    await JSRuntime.InvokeVoidAsync("tvDisplay.updateConnectionTypeToTvMode");
                     await JSRuntime.InvokeVoidAsync("tvDisplay.initializeSignalR", TvId);
                     
                     StateHasChanged();

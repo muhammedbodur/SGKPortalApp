@@ -61,7 +61,19 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
 
         public async Task<bool> RegisterUserConnectionAsync(string connectionId, string tcKimlikNo, string connectionType)
         {
-            return await _apiService.CreateOrUpdateUserConnectionAsync(connectionId, tcKimlikNo);
+            // İlk olarak connection oluştur
+            var created = await _apiService.CreateOrUpdateUserConnectionAsync(connectionId, tcKimlikNo);
+            
+            if (!created)
+                return false;
+            
+            // Eğer connectionType MainLayout değilse, güncelle
+            if (connectionType != "MainLayout")
+            {
+                return await _apiService.UpdateConnectionTypeAsync(connectionId, connectionType);
+            }
+            
+            return true;
         }
 
         // ═══════════════════════════════════════════════════════

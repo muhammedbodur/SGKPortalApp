@@ -187,7 +187,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             }
         }
 
-        public async Task<bool> RegisterTvConnectionAsync(int tvId, string connectionId, string tcKimlikNo)
+        /// <summary>
+        /// TV bağlantısını kaydet (2 parametreli - HubConnection'dan tcKimlikNo alır)
+        /// </summary>
+        public async Task<bool> RegisterTvConnectionAsync(int tvId, string connectionId)
         {
             try
             {
@@ -216,7 +219,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     existingTvConnection.IslemZamani = DateTime.Now;
                     existingTvConnection.DuzenlenmeTarihi = DateTime.Now;
                     repo.Update(existingTvConnection);
-                    _logger.LogInformation($"✅ Mevcut TV bağlantısı güncellendi: TV#{tvId}, HubConnectionId={hubConnection.HubConnectionId}");
+                    _logger.LogInformation($"✅ Mevcut TV bağlantısı güncellendi: TV#{tvId}, HubConnectionId={hubConnection.HubConnectionId}, TcKimlikNo={hubConnection.TcKimlikNo}");
                 }
                 else
                 {
@@ -231,7 +234,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     };
 
                     await repo.AddAsync(tvConnection);
-                    _logger.LogInformation($"✅ TV bağlantısı oluşturuldu: TV#{tvId}, HubConnectionId={hubConnection.HubConnectionId}");
+                    _logger.LogInformation($"✅ TV bağlantısı oluşturuldu: TV#{tvId}, HubConnectionId={hubConnection.HubConnectionId}, TcKimlikNo={hubConnection.TcKimlikNo}");
                 }
 
                 await _unitOfWork.SaveChangesAsync();
@@ -242,6 +245,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 _logger.LogError(ex, "RegisterTvConnectionAsync hatası");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// TV bağlantısını kaydet (3 parametreli - backward compatibility)
+        /// </summary>
+        public async Task<bool> RegisterTvConnectionAsync(int tvId, string connectionId, string tcKimlikNo)
+        {
+            // tcKimlikNo parametresi kullanılmıyor, HubConnection'dan alınıyor
+            return await RegisterTvConnectionAsync(tvId, connectionId);
         }
 
         public async Task<bool> IsBankoInUseAsync(int bankoId)

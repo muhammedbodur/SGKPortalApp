@@ -14,6 +14,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR
         Task<IEnumerable<HubConnection>> GetActiveConnectionsByTcKimlikNoAsync(string tcKimlikNo);
         Task<bool> RegisterBankoConnectionAsync(int bankoId, string connectionId, string tcKimlikNo);
         Task<bool> DeactivateBankoConnectionAsync(string tcKimlikNo);
+        Task<bool> RegisterTvConnectionAsync(int tvId, string connectionId);
         Task<bool> RegisterTvConnectionAsync(int tvId, string connectionId, string tcKimlikNo);
         Task<bool> IsBankoInUseAsync(int bankoId);
         Task<HubBankoConnection?> GetPersonelActiveBankoAsync(string tcKimlikNo);

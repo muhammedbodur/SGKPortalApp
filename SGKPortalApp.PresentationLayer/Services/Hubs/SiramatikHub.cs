@@ -59,7 +59,8 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
             // Page lifecycle bilgisini oku
             var isRefresh = bool.TryParse(httpContext?.Request.Query["isRefresh"].ToString(), out var refresh) && refresh;
             var isNewTab = bool.TryParse(httpContext?.Request.Query["isNewTab"].ToString(), out var newTab) && newTab;
-            _logger.LogInformation($"🔍 Page Lifecycle: isRefresh={isRefresh}, isNewTab={isNewTab}, tabSessionId={tabSessionId}");
+            var isTvDisplay = bool.TryParse(httpContext?.Request.Query["isTvDisplay"].ToString(), out var tvDisplay) && tvDisplay;
+            _logger.LogInformation($"🔍 Page Lifecycle: isRefresh={isRefresh}, isNewTab={isNewTab}, isTvDisplay={isTvDisplay}, tabSessionId={tabSessionId}");
             var tcKimlikNo = Context.User?.FindFirst("TcKimlikNo")?.Value;
             var userType = Context.User?.FindFirst("UserType")?.Value;
             
@@ -74,9 +75,10 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                     var existingConnectionDtos = await _connectionService.GetActiveConnectionsByTcKimlikNoAsync(tcKimlikNo);
                     var existingConnections = existingConnectionDtos; // DTO listesi
                     
-                    // 3. ⭐ Sadece normal bağlantı oluştur
+                    // 3. ⭐ ConnectionType'ı belirle
+                    // TV Display sayfasında ise hemen "TvMode" yap
                     // Banko modu SignalR Hub.EnterBankoMode() ile ayrıca aktif edilir
-                    string connectionType = "MainLayout";
+                    string connectionType = isTvDisplay ? "TvMode" : "MainLayout";
                     
                     // 4. Yeni bağlantı oluştur
                     var success = await _connectionService.RegisterUserConnectionAsync(
@@ -195,20 +197,35 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                             }
                             break;
                             
-                        case "TvDisplay":
+                        case "TvMode":
                             // TV Display'den çıkış
+                            _logger.LogInformation($"🔍 TvMode disconnect başladı: ConnectionId={connectionId}, HubConnectionId={hubConnection.HubConnectionId}");
+                            
                             var tvConnection = await _connectionService.GetTvConnectionByHubConnectionIdAsync(hubConnection.HubConnectionId);
                             if (tvConnection != null)
                             {
+                                _logger.LogInformation($"🔍 HubTvConnection bulundu: TvId={tvConnection.TvId}, HubTvConnectionId={tvConnection.HubTvConnectionId}");
+                                
                                 await Groups.RemoveFromGroupAsync(connectionId, $"TV_{tvConnection.TvId}");
 
                                 // ⭐ TV için soft delete YAP!
                                 // Çünkü: Her ekran ayrı bir HubTvConnection oluşturur.
                                 // Ekran kapandığında (tab kapama, tarayıcı kapama) o kaydı temizlemeliyiz.
                                 // Birden fazla ekran açıksa, her biri kendi HubTvConnection'ına sahiptir.
-                                await _connectionService.DeactivateTvConnectionByHubConnectionIdAsync(hubConnection.HubConnectionId);
-
-                                _logger.LogInformation($"ℹ️ TV#{tvConnection.TvId} bağlantısı koptu ve temizlendi");
+                                var deactivated = await _connectionService.DeactivateTvConnectionByHubConnectionIdAsync(hubConnection.HubConnectionId);
+                                
+                                if (deactivated)
+                                {
+                                    _logger.LogInformation($"✅ TV#{tvConnection.TvId} bağlantısı koptu ve HubTvConnection soft-delete yapıldı");
+                                }
+                                else
+                                {
+                                    _logger.LogError($"❌ TV#{tvConnection.TvId} HubTvConnection soft-delete BAŞARISIZ!");
+                                }
+                            }
+                            else
+                            {
+                                _logger.LogWarning($"⚠️ HubTvConnection bulunamadı: HubConnectionId={hubConnection.HubConnectionId}");
                             }
                             break;
                             
@@ -265,8 +282,14 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                 }
                 // Personel için de kontrol yok, istediği TV'yi izleyebilir
                 
-                // 4. ConnectionType'ı güncelle
-                await _connectionService.UpdateConnectionTypeAsync(connectionId, "TvDisplay");
+                // 4. ConnectionType zaten "TvMode" (OnConnectedAsync'te ayarlandı)
+                // Ama emin olmak için kontrol edelim ve gerekirse güncelleyelim
+                var hubConnection = await _connectionService.GetByConnectionIdAsync(connectionId);
+                if (hubConnection?.ConnectionType != "TvMode")
+                {
+                    await _connectionService.UpdateConnectionTypeAsync(connectionId, "TvMode");
+                    _logger.LogWarning($"⚠️ ConnectionType 'TvMode' değildi, güncellendi: {connectionId}");
+                }
                 
                 // 5. HubTvConnection oluştur
                 var success = await _connectionService.RegisterTvConnectionAsync(tvId, connectionId);
@@ -278,7 +301,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                     await JoinGroupAsync(groupName);
                     
                     _logger.LogInformation($"✅ {tcKimlikNo} ({userType}) -> TV#{tvId} grubuna katıldı");
-                    await SendToCallerAsync("ConnectionConfirmed", new { tvId, status = "connected" });
+                    // ConnectionConfirmed event'i kaldırıldı (client-side handler yok)
                 }
                 else
                 {
@@ -290,6 +313,34 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
             {
                 _logger.LogError(ex, $"❌ TV gruba katılma hatası: TV#{tvId}");
                 await SendToCallerAsync("ConnectionError", new { tvId, error = ex.Message });
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// ConnectionType'ı güncelle (TV Display sayfası için)
+        /// </summary>
+        public async Task UpdateConnectionType(string connectionType)
+        {
+            var connectionId = Context.ConnectionId;
+            _logger.LogInformation($"🔄 UpdateConnectionType çağrıldı: {connectionId} -> {connectionType}");
+            
+            try
+            {
+                var result = await _connectionService.UpdateConnectionTypeAsync(connectionId, connectionType);
+                
+                if (result)
+                {
+                    _logger.LogInformation($"✅ ConnectionType güncellendi: {connectionId} -> {connectionType}");
+                }
+                else
+                {
+                    _logger.LogWarning($"⚠️ ConnectionType güncellenemedi (result=false): {connectionId} -> {connectionType}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ ConnectionType güncelleme hatası: {connectionId} -> {connectionType}");
                 throw;
             }
         }

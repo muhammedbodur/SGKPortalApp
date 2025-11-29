@@ -182,9 +182,10 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
         {
             try
             {
+                var request = new { ConnectionType = connectionType };
                 var response = await _httpClient.PutAsJsonAsync(
                     $"api/hub-connections/{connectionId}/type", 
-                    connectionType);
+                    request);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)

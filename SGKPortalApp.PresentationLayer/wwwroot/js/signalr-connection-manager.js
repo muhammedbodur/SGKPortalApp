@@ -42,8 +42,20 @@ class SignalRConnectionManager {
             const isRefresh = window.pageLifecycle?.isPageRefresh() || false;
             const isNewTab = window.pageLifecycle?.isNewTabOpen() || false;
             
+            // TV Display sayfası mı kontrol et
+            // Blazor routing: /siramatik/tv/display/1 veya /siramatik/tv/display
+            const pathname = window.location.pathname.toLowerCase();
+            const href = window.location.href.toLowerCase();
+            const isTvDisplay = pathname.includes('/tv/display') || href.includes('/tv/display');
+            
+            console.log('🔍 SignalR Connection URL Check:', {
+                pathname: window.location.pathname,
+                href: window.location.href,
+                isTvDisplay: isTvDisplay
+            });
+            
             this.connection = new signalR.HubConnectionBuilder()
-                .withUrl(`${this.hubUrl}?tabSessionId=${encodeURIComponent(tabId)}&isRefresh=${isRefresh}&isNewTab=${isNewTab}`, {
+                .withUrl(`${this.hubUrl}?tabSessionId=${encodeURIComponent(tabId)}&isRefresh=${isRefresh}&isNewTab=${isNewTab}&isTvDisplay=${isTvDisplay}`, {
                     accessTokenFactory: () => null,
                     transport: signalR.HttpTransportType.WebSockets,
                 })

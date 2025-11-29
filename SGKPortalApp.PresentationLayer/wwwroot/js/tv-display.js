@@ -1,4 +1,5 @@
 // TV Display JavaScript Functions
+console.log('📺 tv-display.js yüklendi');
 
 window.tvDisplay = {
     // Saat ve Tarih
@@ -60,55 +61,85 @@ window.tvDisplay = {
         }
     },
 
-    // SignalR bağlantısı kur
-    initializeSignalR: function (tvId) {
-        if (typeof signalR === 'undefined') {
-            console.error('❌ SignalR kütüphanesi yüklenmemiş!');
+    // ConnectionType'ı TvMode'a güncelle
+    updateConnectionTypeToTvMode: function () {
+        console.log('🔄 ConnectionType TvMode olarak güncelleniyor...');
+        
+        if (!window.signalRManager || !window.signalRManager.connection) {
+            console.error('❌ SignalR Manager bulunamadı!');
             return;
         }
 
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/hubs/tv")
-            .withAutomaticReconnect()
-            .build();
+        const connection = window.signalRManager.connection;
+        
+        if (connection.state === signalR.HubConnectionState.Connected) {
+            connection.invoke("UpdateConnectionType", "TvMode")
+                .then(() => {
+                    console.log('✅ ConnectionType TvMode olarak güncellendi');
+                })
+                .catch(err => {
+                    console.error('❌ ConnectionType güncelleme hatası:', err);
+                });
+        } else {
+            console.warn('⚠️ SignalR henüz bağlı değil, ConnectionType güncellenemedi');
+        }
+    },
 
-        // Bağlantı kurulduğunda
-        connection.start()
-            .then(() => {
-                console.log('✅ TV ekranı SignalR bağlantısı kuruldu');
-                return connection.invoke("JoinTvGroup", tvId);
-            })
-            .then(() => {
-                console.log('✅ TV grubuna katıldı: TV#' + tvId);
-            })
-            .catch(err => {
-                console.error('❌ SignalR bağlantı hatası:', err);
-            });
+    // SignalR bağlantısı kur
+    initializeSignalR: function (tvId) {
+        console.log('📺 TV Display SignalR başlatılıyor, TV#' + tvId);
 
-        // Yeniden bağlantı
+        // Global SignalR Manager'ı kullan (zaten _Host.cshtml'de başlatılmış)
+        if (!window.signalRManager || !window.signalRManager.connection) {
+            console.error('❌ Global SignalR Manager bulunamadı! Sayfa yenileniyor...');
+            setTimeout(() => location.reload(), 2000);
+            return;
+        }
+
+        const connection = window.signalRManager.connection;
+
+        // Bağlantı zaten kurulu, sadece TV grubuna katıl
+        if (connection.state === signalR.HubConnectionState.Connected) {
+            console.log('✅ SignalR zaten bağlı, TV grubuna katılıyor...');
+            connection.invoke("JoinTvGroup", tvId)
+                .then(() => {
+                    console.log('✅ TV grubuna katıldı: TV#' + tvId);
+                })
+                .catch(err => {
+                    console.error('❌ TV grubuna katılma hatası:', err);
+                });
+        } else {
+            // Bağlantı henüz kurulmamış, kurulmasını bekle
+            console.log('⏳ SignalR bağlantısı bekleniyor...');
+            const checkInterval = setInterval(() => {
+                if (connection.state === signalR.HubConnectionState.Connected) {
+                    clearInterval(checkInterval);
+                    console.log('✅ SignalR bağlandı, TV grubuna katılıyor...');
+                    connection.invoke("JoinTvGroup", tvId)
+                        .then(() => {
+                            console.log('✅ TV grubuna katıldı: TV#' + tvId);
+                        })
+                        .catch(err => {
+                            console.error('❌ TV grubuna katılma hatası:', err);
+                        });
+                }
+            }, 500);
+
+            // 10 saniye sonra timeout
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                if (connection.state !== signalR.HubConnectionState.Connected) {
+                    console.error('❌ SignalR bağlantısı kurulamadı, sayfa yenileniyor...');
+                    location.reload();
+                }
+            }, 10000);
+        }
+
+        // Yeniden bağlantı event'i
         connection.onreconnected(() => {
-            console.log('✅ TV ekranı yeniden bağlandı');
-            connection.invoke("JoinTvGroup", tvId);
-        });
-
-        // ForceLogout event handler (TV User sadece 1 tab)
-        connection.on("ForceLogout", function (message) {
-            console.warn("⚠️ ForceLogout alındı:", message);
-            
-            // Kullanıcıya bilgi ver
-            alert(message);
-            
-            // LocalStorage ve SessionStorage temizle
-            localStorage.clear();
-            sessionStorage.clear();
-            
-            // Cookie'leri temizle
-            document.cookie.split(";").forEach((c) => {
-                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-            });
-            
-            // Login sayfasına yönlendir
-            window.location.href = "/Account/Login";
+            console.log('✅ TV ekranı yeniden bağlandı, TV grubuna tekrar katılıyor...');
+            connection.invoke("JoinTvGroup", tvId)
+                .catch(err => console.error('❌ Yeniden bağlantıda TV grubuna katılma hatası:', err));
         });
 
         // Sıra güncelleme event'i
