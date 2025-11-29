@@ -373,6 +373,60 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             }
         }
 
+        public async Task<bool> IsTvInUseByOtherTvUserAsync(int tvId, string currentTcKimlikNo)
+        {
+            try
+            {
+                var tvRepo = _unitOfWork.Repository<HubTvConnection>();
+                var connectionRepo = _unitOfWork.Repository<HubConnection>();
+                var userRepo = _unitOfWork.Repository<User>();
+
+                // 1. Bu TV'deki tüm aktif HubTvConnection'ları al
+                var activeTvConnections = await tvRepo.FindAsync(
+                    t => t.TvId == tvId && !t.SilindiMi);
+
+                if (!activeTvConnections.Any())
+                    return false; // Kimse kullanmıyor
+
+                // 2. Her HubTvConnection için User'ı kontrol et
+                foreach (var tvConn in activeTvConnections)
+                {
+                    // HubConnection'ı al
+                    var hubConnection = await connectionRepo.FirstOrDefaultAsync(
+                        h => h.HubConnectionId == tvConn.HubConnectionId &&
+                             h.ConnectionStatus == ConnectionStatus.online &&
+                             !h.SilindiMi);
+
+                    if (hubConnection != null)
+                    {
+                        // ⭐ Kendi TcKimlikNo'yu atla (aynı kullanıcının diğer ekranları)
+                        if (hubConnection.TcKimlikNo == currentTcKimlikNo)
+                            continue;
+
+                        // User'ı al
+                        var user = await userRepo.FirstOrDefaultAsync(
+                            u => u.TcKimlikNo == hubConnection.TcKimlikNo);
+
+                        // ⭐ Sadece BAŞKA bir TvUser kullanıyorsa true dön
+                        if (user != null && user.UserType == UserType.TvUser)
+                        {
+                            _logger.LogInformation($"✅ TV#{tvId} BAŞKA bir TvUser tarafından kullanılıyor: {user.TcKimlikNo} (mevcut: {currentTcKimlikNo})");
+                            return true;
+                        }
+                    }
+                }
+
+                // Sadece kendisi kullanıyor, Personel kullanıyor veya kimse kullanmıyor
+                _logger.LogDebug($"✅ TV#{tvId} başka bir TvUser tarafından kullanılmıyor (mevcut: {currentTcKimlikNo})");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "IsTvInUseByOtherTvUserAsync hatası");
+                return false;
+            }
+        }
+
         public async Task<bool> CreateBankoConnectionAsync(int hubConnectionId, int bankoId, string tcKimlikNo)
         {
             try

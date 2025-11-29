@@ -37,6 +37,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR
         Task<User?> GetTvActiveUserAsync(int tvId);
         Task<bool> TransferTvConnectionAsync(string tcKimlikNo, string newConnectionId);
         Task<bool> IsTvInUseByTvUserAsync(int tvId);
+        Task<bool> IsTvInUseByOtherTvUserAsync(int tvId, string currentTcKimlikNo);
         Task<List<HubConnection>> GetNonTvConnectionsByTcKimlikNoAsync(string tcKimlikNo);
     }
 }

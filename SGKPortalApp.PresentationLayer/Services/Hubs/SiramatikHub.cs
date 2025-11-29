@@ -254,18 +254,15 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                         throw new HubException("Bu TV'yi görüntüleme yetkiniz yok!");
                     }
 
-                    // 2. ⚠️ TAB KONTROLÜ KALDIRILDI!
-                    // Aynı TvUser birden fazla ekranda (3 monitör) aynı TV'yi açabilir.
-                    // Her ekran ayrı bir HubTvConnection oluşturur ve aynı SignalR grubuna katılır.
-
-                    // 3. Bu TV başka bir TV User tarafından kullanılıyor mu?
-                    var tvInUse = await _connectionService.IsTvInUseByTvUserAsync(tvId);
-                    if (tvInUse)
-                    {
-                        throw new HubException($"TV#{tvId} zaten başka bir TV kullanıcısı tarafından kullanılıyor!");
-                    }
+                    // 2. ⚠️ TAB VE KULLANICI KONTROLÜ KALDIRILDI!
+                    // Çünkü:
+                    // - Aynı TvUser birden fazla fiziksel ekranda (3 monitör) aynı TV'yi açabilmeli
+                    // - Farklı TvUser'lar da aynı TV'yi izleyebilir (sorun değil, sadece gösterim amaçlı)
+                    // - Her ekran ayrı bir HubTvConnection oluşturur
+                    // - Tümü aynı SignalR grubuna (TV_{tvId}) katılır
+                    // - Sıra çağrıldığında TÜM ekranlara gider
                 }
-                // Personel için kontrol yok, istediği TV'yi izleyebilir
+                // Personel için de kontrol yok, istediği TV'yi izleyebilir
                 
                 // 4. ConnectionType'ı güncelle
                 await _connectionService.UpdateConnectionTypeAsync(connectionId, "TvDisplay");
