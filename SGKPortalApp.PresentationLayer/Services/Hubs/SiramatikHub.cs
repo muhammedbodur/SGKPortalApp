@@ -267,9 +267,9 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                 
                 // 4. ConnectionType'ı güncelle
                 await _connectionService.UpdateConnectionTypeAsync(connectionId, "TvDisplay");
-                
+
                 // 5. HubTvConnection oluştur
-                var success = await _connectionService.RegisterTvConnectionAsync(tvId, connectionId);
+                var success = await _connectionService.RegisterTvConnectionAsync(tvId, connectionId, tcKimlikNo!);
                 
                 if (success)
                 {
