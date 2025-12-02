@@ -34,7 +34,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
 
             var result = await _siraYonlendirmeService.YonlendirSiraAsync(request);
 
-            if (result.IsSuccess)
+            if (result.Success)
             {
                 return Ok(result);
             }
@@ -52,7 +52,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         {
             var result = await _siraYonlendirmeService.GetYonlendirilmisSiraCountAsync(bankoId);
 
-            if (result.IsSuccess)
+            if (result.Success)
             {
                 return Ok(result);
             }

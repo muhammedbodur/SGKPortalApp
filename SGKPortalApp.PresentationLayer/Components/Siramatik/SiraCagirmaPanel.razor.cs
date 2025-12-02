@@ -303,7 +303,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
 
                 var result = await YonlendirmeApiService.YonlendirSiraAsync(request);
 
-                if (result.IsSuccess)
+                if (result.Success)
                 {
                     Console.WriteLine($"✅ Sıra başarıyla yönlendirildi: #{yonlendirmeIcinSecilenSira.SiraNo}");
                     CloseYonlendirmeModal();
