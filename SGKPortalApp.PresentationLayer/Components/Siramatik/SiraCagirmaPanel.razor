@@ -127,72 +127,84 @@
                     <button type="button" class="btn-close" @onclick="CloseYonlendirmeModal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="form-label">Yönlendirme Tipi</label>
-                            <select class="form-select" @bind="selectedYonlendirmeTipiValue">
-                                <option value="">Yönlendirme tipini seçin</option>
-                                @foreach (var tip in yonlendirmeTipiOptions)
-                                {
-                                    <option value="@tip.Value">@tip.Label</option>
-                                }
-                            </select>
+                    @if (isLoadingOptions)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary mb-3" role="status">
+                                <span class="visually-hidden">Yükleniyor...</span>
+                            </div>
+                            <p class="text-muted mb-0">Yönlendirme seçenekleri yükleniyor...</p>
                         </div>
-
-                        @if (SelectedYonlendirmeTipi == YonlendirmeTipi.BaskaBanko)
-                        {
+                    }
+                    else
+                    {
+                        <div class="row g-3">
                             <div class="col-12">
-                                <label class="form-label">Hedef Banko</label>
-                                <select class="form-select" @bind="selectedBankoId">
-                                    <option value="">Banko seçin</option>
-                                    @foreach (var banko in bankoOptions)
+                                <label class="form-label">Yönlendirme Tipi</label>
+                                <select class="form-select" @bind="selectedYonlendirmeTipiValue" disabled="@isYonlendirmeSubmitting">
+                                    <option value="">Yönlendirme tipini seçin</option>
+                                    @foreach (var tip in yonlendirmeTipiOptions)
                                     {
-                                        <option value="@banko.Value">@banko.Label</option>
+                                        <option value="@tip.Value">@tip.Label</option>
                                     }
                                 </select>
                             </div>
-                        }
-                        else if (SelectedYonlendirmeTipi == YonlendirmeTipi.UzmanPersonel)
-                        {
-                            <div class="col-12">
-                                <div class="alert alert-info mb-0">
-                                    Genel uzman havuzuna yönlendirme yapılacaktır. Ek seçim gerekmiyor.
-                                </div>
-                            </div>
-                        }
-                        else if (SelectedYonlendirmeTipi == YonlendirmeTipi.Sef)
-                        {
-                            <div class="col-12">
-                                <div class="alert alert-info mb-0">
-                                    Şef/Yetkili masasına yönlendirme yapılacaktır. Ek seçim gerekmiyor.
-                                </div>
-                            </div>
-                        }
 
-                        <div class="col-12">
-                            <label class="form-label">Yönlendirme Notu (Opsiyonel)</label>
-                            <textarea class="form-control"
-                                      rows="3"
-                                      maxlength="500"
-                                      @bind="yonlendirmeNotu"
-                                      placeholder="Vatandaşı neden yönlendirmek istediğinizi yazabilirsiniz."
-                                      disabled="@isYonlendirmeSubmitting"></textarea>
+                            @if (SelectedYonlendirmeTipi == YonlendirmeTipi.BaskaBanko)
+                            {
+                                <div class="col-12">
+                                    <label class="form-label">Hedef Banko</label>
+                                    <select class="form-select" @bind="selectedBankoId" disabled="@isYonlendirmeSubmitting">
+                                        <option value="">Banko seçin</option>
+                                        @foreach (var banko in bankoOptions)
+                                        {
+                                            <option value="@banko.Value">@banko.Label</option>
+                                        }
+                                    </select>
+                                </div>
+                            }
+                            else if (SelectedYonlendirmeTipi == YonlendirmeTipi.UzmanPersonel)
+                            {
+                                <div class="col-12">
+                                    <div class="alert alert-info mb-0">
+                                        Genel uzman havuzuna yönlendirme yapılacaktır. Ek seçim gerekmiyor.
+                                    </div>
+                                </div>
+                            }
+                            else if (SelectedYonlendirmeTipi == YonlendirmeTipi.Sef)
+                            {
+                                <div class="col-12">
+                                    <div class="alert alert-info mb-0">
+                                        Şef/Yetkili masasına yönlendirme yapılacaktır. Ek seçim gerekmiyor.
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="col-12">
+                                <label class="form-label">Yönlendirme Notu (Opsiyonel)</label>
+                                <textarea class="form-control"
+                                          rows="3"
+                                          maxlength="500"
+                                          @bind="yonlendirmeNotu"
+                                          placeholder="Vatandaşı neden yönlendirmek istediğinizi yazabilirsiniz."
+                                          disabled="@isYonlendirmeSubmitting"></textarea>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(yonlendirmeErrorMessage))
+                            {
+                                <div class="col-12">
+                                    <div class="alert alert-danger mb-0" role="alert">
+                                        <i class="bx bx-error-circle me-2"></i>
+                                        @yonlendirmeErrorMessage
+                                    </div>
+                                </div>
+                            }
                         </div>
-
-                        @if (!string.IsNullOrWhiteSpace(yonlendirmeErrorMessage))
-                        {
-                            <div class="col-12">
-                                <div class="alert alert-danger mb-0" role="alert">
-                                    <i class="bx bx-error-circle me-2"></i>
-                                    @yonlendirmeErrorMessage
-                                </div>
-                            </div>
-                        }
-                    </div>
+                    }
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseYonlendirmeModal" disabled="@isYonlendirmeSubmitting">Vazgeç</button>
-                    <button type="button" class="btn btn-primary" disabled="@(!CanSubmitYonlendirme || isYonlendirmeSubmitting)" @onclick="SubmitYonlendirmeAsync">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseYonlendirmeModal" disabled="@(isYonlendirmeSubmitting || isLoadingOptions)">Vazgeç</button>
+                    <button type="button" class="btn btn-primary" disabled="@(!CanSubmitYonlendirme || isYonlendirmeSubmitting || isLoadingOptions)" @onclick="SubmitYonlendirmeAsync">
                         @if (isYonlendirmeSubmitting)
                         {
                             <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
