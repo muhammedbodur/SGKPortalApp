@@ -1,5 +1,6 @@
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
 using System.Net.Http.Json;
 
@@ -51,6 +52,21 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             {
                 Console.WriteLine($"API Hatası - GetYonlendirilmisSiraCountAsync: {ex.Message}");
                 return ApiResponseDto<int>.ErrorResult($"API çağrısı sırasında hata oluştu: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiResponseDto<YonlendirmeSecenekleriResponseDto>> GetYonlendirmeSecenekleriAsync(int siraId, int kaynakBankoId)
+        {
+            try
+            {
+                var response = await _httpClient.GetFromJsonAsync<ApiResponseDto<YonlendirmeSecenekleriResponseDto>>(
+                    $"{BaseUrl}/secenekler/{siraId}/{kaynakBankoId}");
+                return response ?? ApiResponseDto<YonlendirmeSecenekleriResponseDto>.ErrorResult("Yanıt alınamadı");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"API Hatası - GetYonlendirmeSecenekleriAsync: {ex.Message}");
+                return ApiResponseDto<YonlendirmeSecenekleriResponseDto>.ErrorResult($"API çağrısı sırasında hata oluştu: {ex.Message}");
             }
         }
     }

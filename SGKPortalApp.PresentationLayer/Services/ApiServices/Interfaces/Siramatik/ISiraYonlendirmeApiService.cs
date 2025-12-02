@@ -1,5 +1,6 @@
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik
 {
@@ -17,5 +18,10 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramat
         /// Belirtilen bankoya yönlendirilmiş sıra sayısını getirir
         /// </summary>
         Task<ApiResponseDto<int>> GetYonlendirilmisSiraCountAsync(int bankoId);
+
+        /// <summary>
+        /// Sıra için kullanılabilir yönlendirme seçeneklerini getirir
+        /// </summary>
+        Task<ApiResponseDto<YonlendirmeSecenekleriResponseDto>> GetYonlendirmeSecenekleriAsync(int siraId, int kaynakBankoId);
     }
 }
