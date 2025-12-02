@@ -24,7 +24,7 @@
                     class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
                     @onclick="SiradakiCagir"
                     disabled="@(!SiraListesi.Any())">
-                <i class="bx bx-phone-outgoing"></i>
+                <i class="bx bx-bell bx-tada bx-sm"></i>
                 <span>Sıradaki Vatandaşı Çağır</span>
             </button>
         </div>
@@ -34,36 +34,42 @@
             @if (SiraListesi != null && SiraListesi.Any())
             {
                 <div class="mb-2">
-                    <small class="text-muted">Bekleyen @SiraListesi.Count sıra</small>
+                    <small class="text-muted">Bekleyen @SiraListesi.Count sıra var</small>
                 </div>
 
                 @foreach (var sira in SiraListesi)
                 {
-                    <div class="card mb-2 @(sira.BeklemeDurum == BeklemeDurum.Cagrildi ? "border-primary" : "")"
+                    <div class="card mb-2 @(sira.BeklemeDurum == BeklemeDurum.Cagrildi ? "border-primary alert-success" : "")"
                          @onclick="() => SiraSecildi(sira)">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="flex-grow-1">
-                                    <h6 class="mb-1 fw-bold text-primary">Sıra @sira.SiraNo</h6>
-                                    <small class="text-muted d-block">
+                                    <div class="position-relative mb-1" style="min-height: 36px;">
+                                        <span class="badge bg-label-primary text-uppercase position-absolute start-0 top-50 translate-middle-y">Sıra</span>
+                                        <span class="fs-4 fw-bold text-dark d-block text-center">@sira.SiraNo</span>
+                                    </div>
+                                    <div class="text-uppercase small fw-semibold text-secondary mb-1">
                                         <i class="bx bx-user me-1"></i>@sira.KanalAltAdi
-                                    </small>
-                                    <small class="text-muted d-block">
-                                        <i class="bx bx-time me-1"></i>@sira.SiraAlisZamani.ToString("HH:mm")
-                                    </small>
-                                </div>
-                                <div class="text-end">
-                                    @if (sira.BeklemeDurum == BeklemeDurum.Cagrildi)
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <small class="text-muted d-block">
+                                            <i class="bx bx-time me-1"></i>@sira.SiraAlisZamani.ToString("HH:mm")
+                                        </small>
+                                        @if (sira.BeklemeDurum == BeklemeDurum.Cagrildi)
+                                        {
+                                            <span class="badge text-uppercase text-bg-success">Çağırıldı</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-uppercase text-bg-info">Bekliyor</span>
+                                        }
+                                    </div>
+                                    @if (sira.YonlendirildiMi && !string.IsNullOrWhiteSpace(sira.YonlendirmeAciklamasi))
                                     {
-                                        <span class="badge bg-label-primary">
-                                            <i class="bx bx-phone"></i> Çağrıldı
-                                        </span>
-                                    }
-                                    else if (sira.BeklemeDurum == BeklemeDurum.Beklemede)
-                                    {
-                                        <span class="badge bg-label-warning">
-                                            <i class="bx bx-time"></i> Bekliyor
-                                        </span>
+                                        <div class="mt-2 small text-warning d-flex align-items-center">
+                                            <i class="bx bx-info-circle me-1"></i>
+                                            <span>@sira.YonlendirmeAciklamasi</span>
+                                        </div>
                                     }
                                 </div>
                             </div>
@@ -106,5 +112,5 @@
         class="panel-toggle-btn"
         @onclick="TogglePanel"
         title="Sıra Çağırma Paneli">
-    <i class="bx bx-phone-call"></i>
+    <i class="bx bx-bell bx-tada bx-md"></i>
 </button>

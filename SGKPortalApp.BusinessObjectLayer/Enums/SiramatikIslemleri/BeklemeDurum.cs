@@ -11,6 +11,9 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri
         Cagrildi = 1,
 
         [Display(Name = "İşlem Bitti")]
-        Bitti = 2
+        Bitti = 2,
+
+        [Display(Name = "İşlem Yönlendirildi")]
+        Yonlendirildi = 3
     }
 }

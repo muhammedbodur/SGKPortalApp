@@ -17,5 +17,12 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
         public string? PersonelAdSoyad { get; set; }
         public int HizmetBinasiId { get; set; }
         public string HizmetBinasiAdi { get; set; } = string.Empty;
+
+        // Yönlendirme bilgileri (Banko panelinde bilgilendirici metin göstermek için)
+        public bool YonlendirildiMi { get; set; }
+        public string? YonlendirenPersonelTc { get; set; }
+        public string? YonlendirenPersonelAdSoyad { get; set; }
+        public YonlendirmeTipi? YonlendirmeTipi { get; set; }
+        public string? YonlendirmeAciklamasi { get; set; }
     }
 }

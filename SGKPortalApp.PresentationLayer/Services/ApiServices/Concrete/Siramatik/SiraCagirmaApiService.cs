@@ -87,5 +87,19 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
                 return false;
             }
         }
+
+        public async Task<List<SiraCagirmaResponseDto>> GetBankoPanelSiralarAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var response = await _httpClient.GetFromJsonAsync<List<SiraCagirmaResponseDto>>($"{BaseUrl}/banko-panel/{tcKimlikNo}");
+                return response ?? new List<SiraCagirmaResponseDto>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"API Hatası - GetBankoPanelSiralarAsync: {ex.Message}");
+                return new List<SiraCagirmaResponseDto>();
+            }
+        }
     }
 }

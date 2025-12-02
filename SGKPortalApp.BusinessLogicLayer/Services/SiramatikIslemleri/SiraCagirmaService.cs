@@ -3,6 +3,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 {
@@ -12,11 +13,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
     public class SiraCagirmaService : ISiraCagirmaService
     {
         private readonly ISiraRepository _siraRepository;
+        private readonly ISiramatikQueryRepository _siramatikQueryRepository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public SiraCagirmaService(ISiraRepository siraRepository, IUnitOfWork unitOfWork)
+        public SiraCagirmaService(
+            ISiraRepository siraRepository,
+            ISiramatikQueryRepository siramatikQueryRepository,
+            IUnitOfWork unitOfWork)
         {
             _siraRepository = siraRepository;
+            _siramatikQueryRepository = siramatikQueryRepository;
             _unitOfWork = unitOfWork;
         }
 
@@ -119,6 +125,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             _siraRepository.Update(sira);
             await _unitOfWork.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<List<SiraCagirmaResponseDto>> GetBankoPanelSiralarAsync(string tcKimlikNo)
+        {
+            return await _siramatikQueryRepository.GetBankoPanelBekleyenSiralarAsync(tcKimlikNo);
         }
     }
 }

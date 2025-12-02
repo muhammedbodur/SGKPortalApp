@@ -31,5 +31,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
         /// Sırayı iptal eder
         /// </summary>
         Task<bool> SiraIptalAsync(int siraId, string iptalNedeni);
+
+        /// <summary>
+        /// Banko paneli için personelin uzmanlığına uygun bekleyen sıraları getirir
+        /// </summary>
+        Task<List<SiraCagirmaResponseDto>> GetBankoPanelSiralarAsync(string tcKimlikNo);
     }
 }

@@ -26,5 +26,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex
         
         // Personel Atama Matrix Sorgusu (Yeni Yapı)
         Task<List<PersonelAtamaMatrixDto>> GetPersonelAtamaMatrixByHizmetBinasiIdAsync(int hizmetBinasiId);
+
+        // Banko Sıra Çağırma Paneli
+        Task<List<SiraCagirmaResponseDto>> GetBankoPanelBekleyenSiralarAsync(string tcKimlikNo);
     }
 }

@@ -7,6 +7,8 @@ using SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.State;
 using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
+
 using System;
 using System.Threading;
 
@@ -21,6 +23,8 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         [Inject] private NavigationManager NavigationManager { get; set; } = default!;
         [Inject] private IUserInfoService UserInfoService { get; set; } = default!;
         [Inject] private IUserApiService UserApiService { get; set; } = default!;
+        [Inject] private ISiraCagirmaApiService SiraCagirmaApiService { get; set; } = default!;
+
         [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
         [Inject] private ILogger<MainLayout> Logger { get; set; } = default!;
 
@@ -58,8 +62,8 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                 // 2. İlk session kontrolü
                 await CheckSessionValidityThrottledAsync();
 
-                // 3. Diğer initialization'lar
-                OrnekSiraVerileriYukle();
+                // 3. Panel verisini yalnızca banko modundaysa yükle
+                await LoadBankoPanelSiralarAsync();
 
                 // 4. Event listener'ları kaydet
                 NavigationManager.LocationChanged += OnLocationChanged;
@@ -120,7 +124,11 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
 
         private void OnBankoModeStateChanged()
         {
-            InvokeAsync(StateHasChanged);
+            _ = InvokeAsync(async () =>
+            {
+                await LoadBankoPanelSiralarAsync();
+                StateHasChanged();
+            });
         }
 
         /// <summary>
@@ -290,20 +298,42 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         public void HandleForceLogout(string message)
         {
             Logger.LogWarning($"🚨 ForceLogout event alındı: {message}");
-            
+
             // Tam sayfa yenileme ile login'e yönlendir
             NavigationManager.NavigateTo("/auth/login", forceLoad: true);
         }
 
-        private void OrnekSiraVerileriYukle()
+        private async Task LoadBankoPanelSiralarAsync()
         {
-            siraListesi = new List<SiraCagirmaResponseDto>
+            try
             {
-                new() { SiraId = 1, SiraNo = 1, KanalAltAdi = "Emeklilik İşlemleri", BeklemeDurum = BeklemeDurum.Beklemede, SiraAlisZamani = DateTime.Now, HizmetBinasiId = 1, HizmetBinasiAdi = "İzmir SGK" },
-                new() { SiraId = 2, SiraNo = 2, KanalAltAdi = "SGK Kayıt", BeklemeDurum = BeklemeDurum.Beklemede, SiraAlisZamani = DateTime.Now, HizmetBinasiId = 1, HizmetBinasiAdi = "İzmir SGK" },
-                new() { SiraId = 3, SiraNo = 3, KanalAltAdi = "Sağlık Raporu", BeklemeDurum = BeklemeDurum.Beklemede, SiraAlisZamani = DateTime.Now, HizmetBinasiId = 1, HizmetBinasiAdi = "İzmir SGK" },
-                new() { SiraId = 4, SiraNo = 4, KanalAltAdi = "Borç Sorgulama", BeklemeDurum = BeklemeDurum.Beklemede, SiraAlisZamani = DateTime.Now, HizmetBinasiId = 1, HizmetBinasiAdi = "İzmir SGK" }
-            };
+                var tcKimlikNo = HttpContextAccessor?.HttpContext?.User.FindFirst("TcKimlikNo")?.Value
+                    ?? UserInfoService.GetTcKimlikNo();
+
+                if (string.IsNullOrWhiteSpace(tcKimlikNo))
+                {
+                    Logger.LogWarning("⚠️ TcKimlikNo bulunamadı, banko panel verisi yüklenemedi");
+                    siraListesi = new();
+                    return;
+                }
+
+                var bankoModundaMi = BankoModeState.IsInBankoMode && BankoModeState.IsPersonelInBankoMode(tcKimlikNo);
+                if (!bankoModundaMi)
+                {
+                    Logger.LogDebug("ℹ️ Banko modu aktif değil, panel verisi yüklenmedi");
+                    siraListesi = new();
+                    return;
+                }
+
+                var response = await SiraCagirmaApiService.GetBankoPanelSiralarAsync(tcKimlikNo);
+                siraListesi = response;
+                Logger.LogInformation("✅ Banko panel sıraları yüklendi: {Count}", siraListesi.Count);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "❌ Banko panel sıraları yüklenemedi, fallback kullanılacak");
+                siraListesi = new();
+            }
         }
 
         private void HandleSiraCagir(int siraId)
