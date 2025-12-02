@@ -43,7 +43,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
         protected override void OnInitialized()
         {
             base.OnInitialized();
-            // Options will be loaded dynamically when modal opens
+            // Seçenekler modal açıldığında dinamik olarak yüklenecek
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -177,6 +177,10 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
             _ => true
         };
 
+        /// <summary>
+        /// Yönlendirme modalını açar ve mevcut seçenekleri API'den dinamik olarak çeker
+        /// Bu sayede sadece aktif durumda olan personel/bankolar gösterilir
+        /// </summary>
         private async Task OpenYonlendirmeModal(SiraCagirmaResponseDto sira)
         {
             yonlendirmeIcinSecilenSira = sira;
@@ -189,7 +193,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
             isLoadingOptions = true;
             isYonlendirmeModalOpen = true;
 
-            // Clear previous options
+            // Önceki seçenekleri temizle
             yonlendirmeTipiOptions.Clear();
             bankoOptions.Clear();
 
@@ -197,14 +201,14 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
 
             try
             {
-                // Fetch available redirection options from API
+                // API'den mevcut yönlendirme seçeneklerini çek
                 var optionsResult = await YonlendirmeApiService.GetYonlendirmeSecenekleriAsync(sira.SiraId, AktifBankoId);
 
                 if (optionsResult.IsSuccess && optionsResult.Data != null)
                 {
                     var options = optionsResult.Data;
 
-                    // Populate yonlendirme tipi options based on available types
+                    // Mevcut tiplere göre yönlendirme tipi seçeneklerini doldur
                     yonlendirmeTipiOptions = options.AvailableTypes
                         .Select(y => new SelectOption
                         {
@@ -219,7 +223,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
                         })
                         .ToList();
 
-                    // Populate banko options
+                    // Banko seçeneklerini doldur
                     bankoOptions = options.Bankolar
                         .Select(b => new SelectOption
                         {
@@ -228,7 +232,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
                         })
                         .ToList();
 
-                    // Check if no options are available
+                    // Hiç seçenek yoksa kullanıcıya bildir
                     if (!yonlendirmeTipiOptions.Any())
                     {
                         yonlendirmeErrorMessage = "Bu sıra için yönlendirme seçeneği bulunmuyor. Aktif personel/banko bulunamadı.";
