@@ -177,6 +177,10 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
             _ => true
         };
 
+        /// <summary>
+        /// Opens the redirection modal and dynamically fetches available options from API
+        /// This ensures only active personnel/banks are shown based on real-time status
+        /// </summary>
         private async Task OpenYonlendirmeModal(SiraCagirmaResponseDto sira)
         {
             yonlendirmeIcinSecilenSira = sira;
