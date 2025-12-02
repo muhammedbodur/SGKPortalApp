@@ -25,6 +25,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
         // Yönlendirme modal state
         private bool isYonlendirmeModalOpen;
         private bool isYonlendirmeSubmitting;
+        private bool isLoadingOptions;
         private string? yonlendirmeErrorMessage;
         private SiraCagirmaResponseDto? yonlendirmeIcinSecilenSira;
         private string? selectedYonlendirmeTipiValue;
@@ -34,7 +35,6 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
 
         private List<SelectOption> yonlendirmeTipiOptions = new();
         private List<SelectOption> bankoOptions = new();
-        private List<SelectOption> uzmanPersonelOptions = new();
 
         private string HeaderBackground => IsPinned
             ? "linear-gradient(135deg, #696cff 0%, #5f61e6 100%)"
@@ -43,35 +43,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
         protected override void OnInitialized()
         {
             base.OnInitialized();
-
-            yonlendirmeTipiOptions = Enum.GetValues(typeof(YonlendirmeTipi))
-                .Cast<YonlendirmeTipi>()
-                .Where(e => e != YonlendirmeTipi.UzmanPersonel)
-                .Select(y => new SelectOption
-                {
-                    Label = y switch
-                    {
-                        YonlendirmeTipi.BaskaBanko => "Başka Bankoya",
-                        YonlendirmeTipi.Sef => "Şef / Yetkili Masasına",
-                        YonlendirmeTipi.UzmanPersonel => "Uzman Personel",
-                        _ => y.ToString()
-                    },
-                    Value = ((int)y).ToString()
-                })
-                .ToList();
-
-            // TODO: Servislerden gerçek veriler bağlanacak. Şimdilik dummy değerler.
-            bankoOptions = new List<SelectOption>
-            {
-                new SelectOption { Label = "Banko 1 - Ahmet Yılmaz", Value = "1" },
-                new SelectOption { Label = "Banko 2 - Ayşe Demir", Value = "2" }
-            };
-
-            uzmanPersonelOptions = new List<SelectOption>
-            {
-                new SelectOption { Label = "Uzman - Mehmet Kaya", Value = "11111111111" },
-                new SelectOption { Label = "Uzman - Elif Çetin", Value = "22222222222" }
-            };
+            // Options will be loaded dynamically when modal opens
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -205,7 +177,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
             _ => true
         };
 
-        private void OpenYonlendirmeModal(SiraCagirmaResponseDto sira)
+        private async Task OpenYonlendirmeModal(SiraCagirmaResponseDto sira)
         {
             yonlendirmeIcinSecilenSira = sira;
             selectedYonlendirmeTipiValue = null;
@@ -214,8 +186,72 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
             yonlendirmeNotu = string.Empty;
             yonlendirmeErrorMessage = null;
             isYonlendirmeSubmitting = false;
+            isLoadingOptions = true;
             isYonlendirmeModalOpen = true;
+
+            // Clear previous options
+            yonlendirmeTipiOptions.Clear();
+            bankoOptions.Clear();
+
             StateHasChanged();
+
+            try
+            {
+                // Fetch available redirection options from API
+                var optionsResult = await YonlendirmeApiService.GetYonlendirmeSecenekleriAsync(sira.SiraId, AktifBankoId);
+
+                if (optionsResult.IsSuccess && optionsResult.Data != null)
+                {
+                    var options = optionsResult.Data;
+
+                    // Populate yonlendirme tipi options based on available types
+                    yonlendirmeTipiOptions = options.AvailableTypes
+                        .Select(y => new SelectOption
+                        {
+                            Label = y switch
+                            {
+                                YonlendirmeTipi.BaskaBanko => "Başka Bankoya",
+                                YonlendirmeTipi.Sef => "Şef / Yetkili Masasına",
+                                YonlendirmeTipi.UzmanPersonel => "Uzman Personel",
+                                _ => y.ToString()
+                            },
+                            Value = ((int)y).ToString()
+                        })
+                        .ToList();
+
+                    // Populate banko options
+                    bankoOptions = options.Bankolar
+                        .Select(b => new SelectOption
+                        {
+                            Label = b.DisplayText,
+                            Value = b.BankoId.ToString()
+                        })
+                        .ToList();
+
+                    // Check if no options are available
+                    if (!yonlendirmeTipiOptions.Any())
+                    {
+                        yonlendirmeErrorMessage = "Bu sıra için yönlendirme seçeneği bulunmuyor. Aktif personel/banko bulunamadı.";
+                    }
+
+                    Console.WriteLine($"✅ Yönlendirme seçenekleri yüklendi - {yonlendirmeTipiOptions.Count} tip, {bankoOptions.Count} banko");
+                }
+                else
+                {
+                    yonlendirmeErrorMessage = optionsResult.Message ?? "Yönlendirme seçenekleri yüklenemedi";
+                    Console.WriteLine($"❌ Yönlendirme seçenekleri hatası: {yonlendirmeErrorMessage}");
+                }
+            }
+            catch (Exception ex)
+            {
+                yonlendirmeErrorMessage = $"Seçenekler yüklenirken hata oluştu: {ex.Message}";
+                Console.WriteLine($"❌ Yönlendirme seçenekleri exception: {ex.Message}");
+            }
+            finally
+            {
+                isLoadingOptions = false;
+                StateHasChanged();
+            }
         }
 
         private void CloseYonlendirmeModal()
