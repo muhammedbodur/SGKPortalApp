@@ -56,5 +56,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
 
         // Yönlendirme işlemleri için sıraları tracking ile getirir
         Task<Sira?> GetSiraForYonlendirmeAsync(int siraId);
+
+        // Sırayı yönlendir
+        Task<bool> YonlendirSiraAsync(int siraId, int yonlendirmeBankoId, int hedefBankoId, string yonlendirenPersonelTc, YonlendirmeTipi yonlendirmeTipi, string? yonlendirmeNedeni);
     }
 }

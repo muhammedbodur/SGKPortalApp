@@ -1,16 +1,22 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
 
 namespace SGKPortalApp.PresentationLayer.Components.Siramatik
 {
     public partial class SiraCagirmaPanel : IDisposable
     {
         [Inject] private IJSRuntime JS { get; set; } = default!;
+        [Inject] private ISiraYonlendirmeApiService YonlendirmeApiService { get; set; } = default!;
+
         [Parameter] public List<SiraCagirmaResponseDto> SiraListesi { get; set; } = new();
         [Parameter] public EventCallback<int> OnSiraCagir { get; set; }
         [Parameter] public EventCallback<bool> OnPanelStateChanged { get; set; }
+        [Parameter] public int AktifBankoId { get; set; }
+        [Parameter] public string PersonelTcKimlikNo { get; set; } = string.Empty;
 
         private DotNetObjectReference<SiraCagirmaPanel>? dotNetReference;
         private bool IsVisible { get; set; } = false;
@@ -18,6 +24,8 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
 
         // Yönlendirme modal state
         private bool isYonlendirmeModalOpen;
+        private bool isYonlendirmeSubmitting;
+        private string? yonlendirmeErrorMessage;
         private SiraCagirmaResponseDto? yonlendirmeIcinSecilenSira;
         private string? selectedYonlendirmeTipiValue;
         private string? selectedBankoId;
@@ -204,6 +212,8 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
             selectedBankoId = null;
             selectedUzmanPersonelTc = null;
             yonlendirmeNotu = string.Empty;
+            yonlendirmeErrorMessage = null;
+            isYonlendirmeSubmitting = false;
             isYonlendirmeModalOpen = true;
             StateHasChanged();
         }
@@ -217,16 +227,70 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
 
         private async Task SubmitYonlendirmeAsync()
         {
-            if (!CanSubmitYonlendirme || yonlendirmeIcinSecilenSira == null)
+            if (!CanSubmitYonlendirme || yonlendirmeIcinSecilenSira == null || SelectedYonlendirmeTipi == null)
             {
                 return;
             }
 
-            // TODO: Servise bağlanacak. Şimdilik loglayıp kapatıyoruz.
-            Console.WriteLine($"Yonlendirme isteği gönderildi: Sıra #{yonlendirmeIcinSecilenSira.SiraNo}, Tip: {SelectedYonlendirmeTipi}, Banko: {selectedBankoId}, Uzman: {selectedUzmanPersonelTc}, Not: {yonlendirmeNotu}");
+            isYonlendirmeSubmitting = true;
+            yonlendirmeErrorMessage = null;
+            StateHasChanged();
 
-            await Task.Delay(100); // UI feedback için küçük gecikme
-            CloseYonlendirmeModal();
+            try
+            {
+                // Hedef banko ID'yi belirle
+                int hedefBankoId;
+                if (SelectedYonlendirmeTipi == YonlendirmeTipi.BaskaBanko)
+                {
+                    if (!int.TryParse(selectedBankoId, out hedefBankoId))
+                    {
+                        yonlendirmeErrorMessage = "Geçersiz banko seçimi";
+                        return;
+                    }
+                }
+                else
+                {
+                    // Şef veya Uzman Personel için hedef banko ID şimdilik 0
+                    // TODO: Gerçek senaryoda Şef/Uzman masalarının banko ID'leri kullanılabilir
+                    hedefBankoId = AktifBankoId;
+                }
+
+                var request = new SiraYonlendirmeDto
+                {
+                    SiraId = yonlendirmeIcinSecilenSira.SiraId,
+                    YonlendirenPersonelTc = PersonelTcKimlikNo,
+                    YonlendirmeBankoId = AktifBankoId,
+                    HedefBankoId = hedefBankoId,
+                    YonlendirmeTipi = SelectedYonlendirmeTipi.Value,
+                    YonlendirmeNedeni = string.IsNullOrWhiteSpace(yonlendirmeNotu) ? null : yonlendirmeNotu
+                };
+
+                var result = await YonlendirmeApiService.YonlendirSiraAsync(request);
+
+                if (result.IsSuccess)
+                {
+                    Console.WriteLine($"✅ Sıra başarıyla yönlendirildi: #{yonlendirmeIcinSecilenSira.SiraNo}");
+                    CloseYonlendirmeModal();
+
+                    // Parent component'i güncelle (sıra listesini yenile)
+                    await OnPanelStateChanged.InvokeAsync(true);
+                }
+                else
+                {
+                    yonlendirmeErrorMessage = result.Message ?? "Yönlendirme işlemi başarısız oldu";
+                    Console.WriteLine($"❌ Yönlendirme hatası: {yonlendirmeErrorMessage}");
+                }
+            }
+            catch (Exception ex)
+            {
+                yonlendirmeErrorMessage = $"Beklenmeyen bir hata oluştu: {ex.Message}";
+                Console.WriteLine($"❌ Yönlendirme exception: {ex.Message}");
+            }
+            finally
+            {
+                isYonlendirmeSubmitting = false;
+                StateHasChanged();
+            }
         }
 
         private class SelectOption

@@ -175,14 +175,34 @@
                                       rows="3"
                                       maxlength="500"
                                       @bind="yonlendirmeNotu"
-                                      placeholder="Vatandaşı neden yönlendirmek istediğinizi yazabilirsiniz."></textarea>
+                                      placeholder="Vatandaşı neden yönlendirmek istediğinizi yazabilirsiniz."
+                                      disabled="@isYonlendirmeSubmitting"></textarea>
                         </div>
+
+                        @if (!string.IsNullOrWhiteSpace(yonlendirmeErrorMessage))
+                        {
+                            <div class="col-12">
+                                <div class="alert alert-danger mb-0" role="alert">
+                                    <i class="bx bx-error-circle me-2"></i>
+                                    @yonlendirmeErrorMessage
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseYonlendirmeModal">Vazgeç</button>
-                    <button type="button" class="btn btn-primary" disabled="@(!CanSubmitYonlendirme)" @onclick="SubmitYonlendirmeAsync">
-                        <i class="bx bx-send me-1"></i> Yönlendirmeyi Kaydet
+                    <button type="button" class="btn btn-secondary" @onclick="CloseYonlendirmeModal" disabled="@isYonlendirmeSubmitting">Vazgeç</button>
+                    <button type="button" class="btn btn-primary" disabled="@(!CanSubmitYonlendirme || isYonlendirmeSubmitting)" @onclick="SubmitYonlendirmeAsync">
+                        @if (isYonlendirmeSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <span>Yönlendiriliyor...</span>
+                        }
+                        else
+                        {
+                            <i class="bx bx-send me-1"></i>
+                            <span>Yönlendirmeyi Kaydet</span>
+                        }
                     </button>
                 </div>
             </div>
