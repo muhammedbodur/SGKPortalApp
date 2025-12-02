@@ -464,6 +464,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                         -- 2. Çağrılmış EN SON Sıra (Sadece bu personele ait)
                         OR (s.BeklemeDurum = 1 
                             AND s.TcKimlikNo = @TcKimlikNo
+                            AND s.YonlendirildiMi = 0
                             AND s.SiraId = (
                                 SELECT TOP 1 s2.SiraId
                                 FROM SIR_Siralar s2 WITH (NOLOCK)
@@ -518,6 +519,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                 from s in _context.Siralar
                 where s.TcKimlikNo == tcKimlikNo
                    && s.BeklemeDurum == BeklemeDurum.Cagrildi
+                   && !s.YonlendirildiMi
                    && s.SiraAlisZamani.Date == today
                    && !s.SilindiMi
                 orderby s.SiraNo descending

@@ -179,5 +179,14 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .AsNoTracking()
                 .CountAsync(s => s.BeklemeDurum == BeklemeDurum.Bitti && s.SiraAlisZamani.Date == date.Date);
         }
+
+        // Yönlendirme işlemleri için sıraları tracking ile getirir
+        public async Task<Sira?> GetSiraForYonlendirmeAsync(int siraId)
+        {
+            return await _dbSet
+                .Include(s => s.YonlendirmeBanko)
+                .Include(s => s.HedefBanko)
+                .FirstOrDefaultAsync(s => s.SiraId == siraId && !s.SilindiMi);
+        }
     }
 }

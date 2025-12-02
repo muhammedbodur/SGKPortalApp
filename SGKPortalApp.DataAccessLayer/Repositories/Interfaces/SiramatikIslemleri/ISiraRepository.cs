@@ -53,5 +53,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
 
         // Tamamlanmış sıra sayısını getirir
         Task<int> GetCompletedSiraCountAsync(DateTime date);
+
+        // Yönlendirme işlemleri için sıraları tracking ile getirir
+        Task<Sira?> GetSiraForYonlendirmeAsync(int siraId);
     }
 }
