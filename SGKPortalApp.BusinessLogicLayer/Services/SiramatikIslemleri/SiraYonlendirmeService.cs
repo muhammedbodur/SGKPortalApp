@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
@@ -326,6 +327,126 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             {
                 _logger.LogError(ex, "Yönlendirilmiş sıra sayısı getirilirken hata oluştu. BankoId: {BankoId}", bankoId);
                 return ApiResponseDto<int>.ErrorResult("Yönlendirilmiş sıra sayısı getirilirken bir hata oluştu", ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<YonlendirmeSecenekleriResponseDto>> GetYonlendirmeSecenekleriAsync(int siraId, int kaynakBankoId)
+        {
+            try
+            {
+                // Sırayı getir
+                var sira = await _siraRepository.GetSiraForYonlendirmeAsync(siraId);
+                if (sira == null)
+                {
+                    return ApiResponseDto<YonlendirmeSecenekleriResponseDto>.ErrorResult("Sıra bulunamadı");
+                }
+
+                var result = new YonlendirmeSecenekleriResponseDto();
+
+                // ═══════════════════════════════════════════════════════
+                // ŞEF KONTROLÜ
+                // ═══════════════════════════════════════════════════════
+                var kanalPersoneller = await _kanalPersonelRepository.GetByKanalAltIslemAsync(sira.KanalAltIslemId);
+                var sefPersoneller = kanalPersoneller
+                    .Where(kp => kp.Uzmanlik == PersonelUzmanlik.Sef &&
+                                 kp.Aktiflik == Aktiflik.Aktif &&
+                                 !kp.SilindiMi)
+                    .ToList();
+
+                int aktifSefCount = 0;
+                foreach (var sefPersonel in sefPersoneller)
+                {
+                    var user = await _userRepository.GetByTcKimlikNoAsync(sefPersonel.TcKimlikNo);
+                    if (user != null && user.BankoModuAktif && user.AktifBankoId.HasValue && user.AktifBankoId.Value > 0)
+                    {
+                        aktifSefCount++;
+                    }
+                }
+
+                if (aktifSefCount > 0)
+                {
+                    result.AvailableTypes.Add(YonlendirmeTipi.Sef);
+                }
+                result.SefPersonelCount = aktifSefCount;
+
+                // ═══════════════════════════════════════════════════════
+                // UZMAN KONTROLÜ
+                // ═══════════════════════════════════════════════════════
+                var uzmanPersoneller = kanalPersoneller
+                    .Where(kp => kp.Uzmanlik == PersonelUzmanlik.Uzman &&
+                                 kp.Aktiflik == Aktiflik.Aktif &&
+                                 !kp.SilindiMi)
+                    .ToList();
+
+                int aktifUzmanCount = 0;
+                foreach (var uzmanPersonel in uzmanPersoneller)
+                {
+                    var user = await _userRepository.GetByTcKimlikNoAsync(uzmanPersonel.TcKimlikNo);
+                    if (user != null && user.BankoModuAktif && user.AktifBankoId.HasValue && user.AktifBankoId.Value > 0)
+                    {
+                        aktifUzmanCount++;
+                    }
+                }
+
+                if (aktifUzmanCount > 0)
+                {
+                    result.AvailableTypes.Add(YonlendirmeTipi.UzmanPersonel);
+                }
+                result.UzmanPersonelCount = aktifUzmanCount;
+
+                // ═══════════════════════════════════════════════════════
+                // AKTİF BANKOLAR (BaskaBanko için)
+                // ═══════════════════════════════════════════════════════
+                var tumBankolar = await _bankoRepository.GetAllAsync();
+                var aktifBankolar = new List<BankoOptionDto>();
+
+                foreach (var banko in tumBankolar.Where(b => !b.SilindiMi && b.BankoAktiflik == Aktiflik.Aktif))
+                {
+                    // Kaynak banko hariç (aynı bankoya yönlendirme yapılmaz)
+                    if (banko.BankoId == kaynakBankoId)
+                        continue;
+
+                    // Bankonun personeli var mı?
+                    var bankoKullanici = await _bankoKullaniciRepository.GetByBankoAsync(banko.BankoId);
+                    if (bankoKullanici == null)
+                        continue;
+
+                    // Personel aktif mi?
+                    var user = await _userRepository.GetByTcKimlikNoAsync(bankoKullanici.TcKimlikNo);
+                    if (user == null || !user.BankoModuAktif || user.AktifBankoId != banko.BankoId)
+                        continue;
+
+                    // Aktif banko bulundu
+                    aktifBankolar.Add(new BankoOptionDto
+                    {
+                        BankoId = banko.BankoId,
+                        BankoNo = banko.BankoNo,
+                        PersonelAdi = user.Personel?.AdSoyad ?? bankoKullanici.TcKimlikNo,
+                        KatAdi = banko.KatTipi.GetDisplayName()
+                    });
+                }
+
+                result.Bankolar = aktifBankolar;
+
+                // En az 1 aktif banko varsa BaskaBanko tipini ekle
+                if (aktifBankolar.Any())
+                {
+                    result.AvailableTypes.Add(YonlendirmeTipi.BaskaBanko);
+                }
+
+                _logger.LogInformation(
+                    "Yönlendirme seçenekleri hazırlandı. SiraId: {SiraId}, AvailableTypes: {Count}, Bankolar: {BankoCount}, Şef: {SefCount}, Uzman: {UzmanCount}",
+                    siraId, result.AvailableTypes.Count, result.Bankolar.Count, aktifSefCount, aktifUzmanCount);
+
+                return ApiResponseDto<YonlendirmeSecenekleriResponseDto>.SuccessResult(
+                    result,
+                    $"{result.AvailableTypes.Count} yönlendirme seçeneği mevcut");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Yönlendirme seçenekleri getirilirken hata oluştu. SiraId: {SiraId}", siraId);
+                return ApiResponseDto<YonlendirmeSecenekleriResponseDto>.ErrorResult(
+                    "Yönlendirme seçenekleri getirilirken bir hata oluştu", ex.Message);
             }
         }
     }

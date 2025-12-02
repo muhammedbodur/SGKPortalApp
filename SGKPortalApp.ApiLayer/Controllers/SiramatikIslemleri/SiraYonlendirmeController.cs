@@ -59,5 +59,25 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
 
             return BadRequest(result);
         }
+
+        /// <summary>
+        /// Sıra için kullanılabilir yönlendirme seçeneklerini getirir.
+        /// Sadece aktif personel/banko olan seçenekleri döner.
+        /// </summary>
+        /// <param name="siraId">Sıra ID</param>
+        /// <param name="kaynakBankoId">Kaynak Banko ID</param>
+        /// <returns>Kullanılabilir yönlendirme seçenekleri</returns>
+        [HttpGet("secenekler/{siraId:int}/{kaynakBankoId:int}")]
+        public async Task<IActionResult> GetYonlendirmeSecenekleriAsync(int siraId, int kaynakBankoId)
+        {
+            var result = await _siraYonlendirmeService.GetYonlendirmeSecenekleriAsync(siraId, kaynakBankoId);
+
+            if (result.IsSuccess)
+            {
+                return Ok(result);
+            }
+
+            return BadRequest(result);
+        }
     }
 }
