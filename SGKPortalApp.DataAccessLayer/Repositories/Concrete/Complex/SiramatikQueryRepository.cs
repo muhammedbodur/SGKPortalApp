@@ -506,7 +506,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                     -- 3. Şef'e Yönlendirilmiş  DEĞİŞTİRİLDİ
                     OR (s.BeklemeDurum = 3 
                         AND s.YonlendirildiMi = 1 
-                        AND s.YonlendirmeTipi = 2 
+                        AND s.YonlendirmeTipi = 2
+                        AND s.TcKimlikNo != @TcKimlikNo
                         AND s.HedefBankoId IS NULL 
                         AND psm.Sef = 1)  --  Genel şef yetkisi kontrolü
 
@@ -614,6 +615,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                                 || (s.BeklemeDurum == BeklemeDurum.Yonlendirildi
                                     && s.YonlendirildiMi
                                     && s.YonlendirmeTipi == YonlendirmeTipi.Sef
+                                    && s.TcKimlikNo != tcKimlikNo
                                     && s.HedefBankoId == null
                                     && personelSefMi)  //  Önceden hesaplanmış değer
 
@@ -621,12 +623,14 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                                 || (s.BeklemeDurum == BeklemeDurum.Yonlendirildi
                                     && s.YonlendirildiMi
                                     && s.YonlendirmeTipi == YonlendirmeTipi.BaskaBanko
+                                    && s.TcKimlikNo != tcKimlikNo
                                     && s.HedefBankoId == bk.BankoId)
 
                                 // 5. Genel Uzmana Yönlendirilmiş  DEĞİŞTİRİLDİ
                                 || (s.BeklemeDurum == BeklemeDurum.Yonlendirildi
                                     && s.YonlendirildiMi
                                     && s.YonlendirmeTipi == YonlendirmeTipi.UzmanPersonel
+                                    && s.TcKimlikNo != tcKimlikNo
                                     && s.HedefBankoId == null
                                     && personelUzmanMi)  //  Önceden hesaplanmış değer
                               )
