@@ -7,6 +7,8 @@ using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
+using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.Common.Extensions;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 {
@@ -74,7 +76,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     }
 
                     // Kaynak banko kontrolü
-                    var kaynakBanko = await _bankoRepository.GetByIdAsync(request.YonlendirmeBankoId);
+                    var kaynakBanko = await _bankoRepository.GetByIdAsync(request.YonlendirenBankoId);
                     if (kaynakBanko == null)
                     {
                         return ApiResponseDto<bool>.ErrorResult("Kaynak banko bulunamadı");
@@ -132,7 +134,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     // ═══════════════════════════════════════════════════════
                     var result = await _siraRepository.YonlendirSiraAsync(
                         request.SiraId,
-                        request.YonlendirmeBankoId,
+                        request.YonlendirenBankoId,
                         hedefBankoId,
                         request.YonlendirenPersonelTc,
                         request.YonlendirmeTipi,
@@ -148,7 +150,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                     _logger.LogInformation(
                         "Sıra yönlendirildi. SiraId: {SiraId}, SiraNo: {SiraNo}, Kaynak: {KaynakBankoId}, Hedef: {HedefBankoId}, Tip: {YonlendirmeTipi}",
-                        sira.SiraId, sira.SiraNo, request.YonlendirmeBankoId, hedefBankoId, request.YonlendirmeTipi);
+                        sira.SiraId, sira.SiraNo, request.YonlendirenBankoId, hedefBankoId, request.YonlendirmeTipi);
 
                     return ApiResponseDto<bool>.SuccessResult(true, "Sıra başarıyla yönlendirildi");
                 }
@@ -176,7 +178,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 }
 
                 // Aynı bankoya yönlendirme kontrolü
-                if (request.YonlendirmeBankoId == request.HedefBankoId)
+                if (request.YonlendirenBankoId == request.HedefBankoId)
                 {
                     _logger.LogWarning("Aynı bankoya yönlendirme denemesi. BankoId: {BankoId}", request.HedefBankoId);
                     return -1;
@@ -421,7 +423,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     {
                         BankoId = banko.BankoId,
                         BankoNo = banko.BankoNo,
-                        PersonelAdi = user.Personel?.AdSoyad ?? bankoKullanici.TcKimlikNo,
+                        PersonelAdi = user.Personel?.AdSoyad ?? string.Empty,
+                        PersonelTc = bankoKullanici.TcKimlikNo,
                         KatAdi = banko.KatTipi.GetDisplayName()
                     });
                 }

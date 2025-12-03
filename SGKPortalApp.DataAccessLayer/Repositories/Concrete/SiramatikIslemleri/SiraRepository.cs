@@ -184,13 +184,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         public async Task<Sira?> GetSiraForYonlendirmeAsync(int siraId)
         {
             return await _dbSet
-                .Include(s => s.YonlendirmeBanko)
+                .Include(s => s.YonlendirenBanko)
                 .Include(s => s.HedefBanko)
                 .FirstOrDefaultAsync(s => s.SiraId == siraId && !s.SilindiMi);
         }
 
         // Sırayı yönlendir
-        public async Task<bool> YonlendirSiraAsync(int siraId, int yonlendirmeBankoId, int hedefBankoId, string yonlendirenPersonelTc, YonlendirmeTipi yonlendirmeTipi, string? yonlendirmeNedeni)
+        public async Task<bool> YonlendirSiraAsync(int siraId, int yonlendirenBankoId, int hedefBankoId, string yonlendirenPersonelTc, YonlendirmeTipi yonlendirmeTipi, string? yonlendirmeNedeni)
         {
             var sira = await GetSiraForYonlendirmeAsync(siraId);
             if (sira == null)
@@ -201,7 +201,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             // Sıra durumunu yönlendirildi olarak güncelle
             sira.BeklemeDurum = BeklemeDurum.Yonlendirildi;
             sira.YonlendirildiMi = true;
-            sira.YonlendirmeBankoId = yonlendirmeBankoId;
+            sira.YonlendirenBankoId = yonlendirenBankoId;
             sira.HedefBankoId = hedefBankoId;
             sira.YonlendirenPersonelTc = yonlendirenPersonelTc;
             sira.YonlendirmeTipi = yonlendirmeTipi;

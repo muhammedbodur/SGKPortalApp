@@ -23,6 +23,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
 
             return await _dbSet
                 .AsNoTracking()
+                .Include(u => u.Personel)
                 .FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo && !u.SilindiMi);
         }
 

@@ -36,9 +36,9 @@ window.signalRManager = {
             return;
         }
 
-        // ForceLogout event listener'ı ekle
-        this.connection.on('ForceLogout', (message) => {
-            console.warn('🚨 ForceLogout event alındı:', message);
+        // ⭐ Event adı: camelCase (SignalREvents.cs ile uyumlu)
+        this.connection.on('forceLogout', (message) => {
+            console.warn('🚨 forceLogout event alındı:', message);
             
             // Alert göster
             alert(message || 'Oturumunuz sonlandırıldı. Lütfen tekrar giriş yapın.');
@@ -52,6 +52,6 @@ window.signalRManager = {
             }
         });
 
-        console.log('✅ ForceLogout event listener kaydedildi');
+        console.log('✅ forceLogout event listener kaydedildi');
     }
 };

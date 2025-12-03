@@ -1,44 +1,73 @@
+using System.Collections.Concurrent;
+
 namespace SGKPortalApp.PresentationLayer.Services.State
 {
     /// <summary>
     /// Banko modu state yönetimi
-    /// Singleton olarak çalışır, tüm uygulama boyunca banko modu durumunu tutar
+    /// Singleton olarak çalışır, kullanıcı bazlı banko modu durumunu tutar
     /// </summary>
     public class BankoModeStateService
     {
-        private bool _isInBankoMode = false;
-        private int? _activeBankoId = null;
-        private string? _personelTcKimlikNo = null;
+        // Kullanıcı bazlı state (TcKimlikNo -> BankoId)
+        private readonly ConcurrentDictionary<string, int> _userBankoStates = new();
+        
+        // Event'ler kullanıcı bazlı (TcKimlikNo -> Event)
+        private readonly ConcurrentDictionary<string, Action?> _userEvents = new();
+
+        // Mevcut kullanıcı context'i (Scoped olarak set edilmeli)
+        private string? _currentUserTc;
 
         /// <summary>
-        /// Banko modu aktif mi?
+        /// Mevcut kullanıcıyı set et (Her request başında çağrılmalı)
         /// </summary>
-        public bool IsInBankoMode => _isInBankoMode;
+        public void SetCurrentUser(string tcKimlikNo)
+        {
+            _currentUserTc = tcKimlikNo;
+        }
 
         /// <summary>
-        /// Aktif banko ID
+        /// Banko modu aktif mi? (Mevcut kullanıcı için)
         /// </summary>
-        public int? ActiveBankoId => _activeBankoId;
+        public bool IsInBankoMode => !string.IsNullOrEmpty(_currentUserTc) && _userBankoStates.ContainsKey(_currentUserTc);
 
         /// <summary>
-        /// Banko modundaki personel TC Kimlik No
+        /// Aktif banko ID (Mevcut kullanıcı için)
         /// </summary>
-        public string? PersonelTcKimlikNo => _personelTcKimlikNo;
+        public int? ActiveBankoId => !string.IsNullOrEmpty(_currentUserTc) && _userBankoStates.TryGetValue(_currentUserTc, out var bankoId) ? bankoId : null;
 
         /// <summary>
-        /// Banko modu değişiklik event'i
+        /// Banko modundaki personel TC Kimlik No (Mevcut kullanıcı için)
         /// </summary>
-        public event Action? OnBankoModeChanged;
+        public string? PersonelTcKimlikNo => IsInBankoMode ? _currentUserTc : null;
+
+        /// <summary>
+        /// Banko modu değişiklik event'i (Mevcut kullanıcı için)
+        /// </summary>
+        public event Action? OnBankoModeChanged
+        {
+            add
+            {
+                if (!string.IsNullOrEmpty(_currentUserTc))
+                {
+                    _userEvents.AddOrUpdate(_currentUserTc, value, (_, existing) => existing + value);
+                }
+            }
+            remove
+            {
+                if (!string.IsNullOrEmpty(_currentUserTc) && _userEvents.TryGetValue(_currentUserTc, out var existing))
+                {
+                    _userEvents[_currentUserTc] = existing - value;
+                }
+            }
+        }
 
         /// <summary>
         /// Banko modunu aktif et
         /// </summary>
         public void ActivateBankoMode(int bankoId, string tcKimlikNo)
         {
-            _isInBankoMode = true;
-            _activeBankoId = bankoId;
-            _personelTcKimlikNo = tcKimlikNo;
-            OnBankoModeChanged?.Invoke();
+            _userBankoStates[tcKimlikNo] = bankoId;
+            NotifyUser(tcKimlikNo);
         }
 
         /// <summary>
@@ -46,10 +75,20 @@ namespace SGKPortalApp.PresentationLayer.Services.State
         /// </summary>
         public void DeactivateBankoMode()
         {
-            _isInBankoMode = false;
-            _activeBankoId = null;
-            _personelTcKimlikNo = null;
-            OnBankoModeChanged?.Invoke();
+            if (!string.IsNullOrEmpty(_currentUserTc))
+            {
+                _userBankoStates.TryRemove(_currentUserTc, out _);
+                NotifyUser(_currentUserTc);
+            }
+        }
+
+        /// <summary>
+        /// Belirli bir kullanıcının banko modunu deaktif et
+        /// </summary>
+        public void DeactivateBankoMode(string tcKimlikNo)
+        {
+            _userBankoStates.TryRemove(tcKimlikNo, out _);
+            NotifyUser(tcKimlikNo);
         }
 
         /// <summary>
@@ -57,7 +96,23 @@ namespace SGKPortalApp.PresentationLayer.Services.State
         /// </summary>
         public bool IsPersonelInBankoMode(string tcKimlikNo)
         {
-            return _isInBankoMode && _personelTcKimlikNo == tcKimlikNo;
+            return _userBankoStates.ContainsKey(tcKimlikNo);
+        }
+
+        /// <summary>
+        /// Belirli bir kullanıcının aktif banko ID'sini getir
+        /// </summary>
+        public int? GetUserActiveBankoId(string tcKimlikNo)
+        {
+            return _userBankoStates.TryGetValue(tcKimlikNo, out var bankoId) ? bankoId : null;
+        }
+
+        private void NotifyUser(string tcKimlikNo)
+        {
+            if (_userEvents.TryGetValue(tcKimlikNo, out var handler))
+            {
+                handler?.Invoke();
+            }
         }
 
         /// <summary>
@@ -65,7 +120,7 @@ namespace SGKPortalApp.PresentationLayer.Services.State
         /// </summary>
         public bool IsUrlAllowedInBankoMode(string url)
         {
-            if (!_isInBankoMode) return true;
+            if (!IsInBankoMode) return true;
 
             // Banko modunda sadece bu URL'lere izin var
             var allowedUrls = new[]

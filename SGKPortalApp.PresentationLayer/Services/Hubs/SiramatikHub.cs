@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.PresentationLayer.Services.Hubs.Base;
+using SGKPortalApp.PresentationLayer.Services.Hubs.Constants;
 using SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.State;
 using System;
@@ -109,7 +110,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                             if (!string.Equals(expectedTabId, tabSessionId, StringComparison.Ordinal))
                             {
                                 _logger.LogWarning($"⚠️ Banko modundayken yeni tab denemesi: {tcKimlikNo}");
-                                await Clients.Caller.SendAsync("ForceLogout", "Banko modundayken yeni sekme açamazsınız!");
+                                await Clients.Caller.SendAsync(SignalREvents.ForceLogout, "Banko modundayken yeni sekme açamazsınız!");
                                 ConnectionTabSessions.TryRemove(info.ConnectionId, out _);
                                 Context.Abort();
                                 return;
@@ -126,19 +127,19 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                                 foreach (var conn in existingConnections.Where(c => c.ConnectionId != info.ConnectionId))
                                 {
                                     await Clients.Client(conn.ConnectionId)
-                                        .SendAsync("ForceLogout", "Banko modu yenilendi. Bu sekme kapatılıyor.");
+                                        .SendAsync(SignalREvents.ForceLogout, "Banko modu yenilendi. Bu sekme kapatılıyor.");
 
                                     await _connectionService.DisconnectAsync(conn.ConnectionId);
                                     ConnectionTabSessions.TryRemove(conn.ConnectionId, out _);
                                 }
 
-                                await SendToCallerAsync("BankoModeActivated", new { bankoId = activeBanko.BankoId });
+                                await SendToCallerAsync(SignalREvents.BankoModeActivated, new { bankoId = activeBanko.BankoId });
                                 _logger.LogInformation($"♻️ Banko bağlantısı yenilendi: {tcKimlikNo} -> HubConnection#{info.ConnectionId}");
                             }
                             else
                             {
                                 _logger.LogWarning($"⚠️ Banko bağlantısı yeni connection'a devredilemedi: {tcKimlikNo}");
-                                await Clients.Caller.SendAsync("ForceLogout", "Banko modu oturumu yenilenirken hata oluştu. Lütfen tekrar giriş yapın.");
+                                await Clients.Caller.SendAsync(SignalREvents.ForceLogout, "Banko modu oturumu yenilenirken hata oluştu. Lütfen tekrar giriş yapın.");
                                 ConnectionTabSessions.TryRemove(info.ConnectionId, out _);
                                 Context.Abort();
                             }
@@ -396,7 +397,12 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                 if (bankoInUse)
                 {
                     var activePerson = await _connectionService.GetBankoActivePersonelAsync(bankoId);
-                    throw new HubException($"Banko#{bankoId} şu anda {activePerson?.PersonelAdSoyad ?? "başka bir personel"} tarafından kullanılıyor!");
+                    // Eğer bankodaki kişi kendisi ise devam et (sayfa yenileme durumu)
+                    if (activePerson != null && activePerson.TcKimlikNo != tcKimlikNo)
+                    {
+                        throw new HubException($"Banko#{bankoId} şu anda {activePerson.PersonelAdSoyad ?? "başka bir personel"} tarafından kullanılıyor!");
+                    }
+                    _logger.LogInformation($"✅ Banko#{bankoId} zaten {tcKimlikNo} tarafından kullanılıyor, devam ediliyor...");
                 }
                 
                 // 2. Bu personel başka bankoda mı?
@@ -416,10 +422,10 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                     foreach (var conn in otherConnections)
                     {
                         await Clients.Client(conn.ConnectionId)
-                            .SendAsync("ForceLogout", "Banko moduna geçildi. Diğer sekmeler kapatılıyor.");
+                            .SendAsync(SignalREvents.ForceLogout, "Banko moduna geçildi. Diğer sekmeler kapatılıyor.");
                         
                         await Clients.Client(conn.ConnectionId)
-                            .SendAsync("BankoModeDeactivated", new { reason = "forceLogout" });
+                            .SendAsync(SignalREvents.BankoModeDeactivated, new { reason = "forceLogout" });
 
                         await _connectionService.DisconnectAsync(conn.ConnectionId);
                         await _connectionService.DisconnectAsync(conn.ConnectionId);
@@ -463,7 +469,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                     await JoinGroupAsync(groupName);
                     
                     _logger.LogInformation($"✅ {tcKimlikNo} -> Banko#{bankoId} moduna girdi (Fiziksel)");
-                    await SendToCallerAsync("BankoModeActivated", new { bankoId });
+                    await SendToCallerAsync(SignalREvents.BankoModeActivated, new { bankoId });
                 }
                 else
                 {
@@ -473,7 +479,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"❌ Banko moduna giriş hatası: Banko#{bankoId}");
-                await SendToCallerAsync("BankoModeError", new { bankoId, error = ex.Message });
+                await SendToCallerAsync(SignalREvents.BankoModeError, new { bankoId, error = ex.Message });
                 throw;
             }
         }
@@ -515,12 +521,12 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                 // 4. ConnectionType'ı geri MainLayout yap
                 await _connectionService.UpdateConnectionTypeAsync(connectionId, "MainLayout");
                 
-                await SendToCallerAsync("BankoModeDeactivated", new { });
+                await SendToCallerAsync(SignalREvents.BankoModeDeactivated, new { });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "❌ Banko modundan çıkış hatası");
-                await SendToCallerAsync("BankoModeError", new { error = ex.Message });
+                await SendToCallerAsync(SignalREvents.BankoModeError, new { error = ex.Message });
                 throw;
             }
         }
@@ -556,7 +562,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
             try
             {
                 var groupName = $"TV_{tvId}";
-                await SendToGroupAsync(groupName, "ReceiveSiraUpdate", siraData);
+                await SendToGroupAsync(groupName, SignalREvents.ReceiveSiraUpdate, siraData);
                 
                 _logger.LogInformation($"📤 Sıra güncellemesi gönderildi: TV#{tvId}");
             }
@@ -575,7 +581,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
         {
             try
             {
-                await BroadcastAsync("ReceiveSiraUpdate", siraData);
+                await BroadcastAsync(SignalREvents.ReceiveSiraUpdate, siraData);
                 _logger.LogInformation("📢 Sıra güncellemesi broadcast edildi");
             }
             catch (Exception ex)
@@ -685,7 +691,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
             try
             {
                 var groupName = $"Banko_{bankoId}";
-                await SendToGroupAsync(groupName, "ReceiveSiraNotification", siraData);
+                await SendToGroupAsync(groupName, "receiveSiraNotification", siraData);
                 
                 _logger.LogInformation($"📤 Sıra bildirimi Banko'ya gönderildi: Banko#{bankoId}");
             }
@@ -843,7 +849,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                     _logger.LogWarning($"🚨 Heartbeat: Bağlantı koptu, banko modundan çıkıldı - {tcKimlikNo}");
                     
                     await Clients.Client(connectionId)
-                        .SendAsync("ForceLogout", "Bağlantı koptu. Banko modundan çıkıldı.");
+                        .SendAsync(SignalREvents.ForceLogout, "Bağlantı koptu. Banko modundan çıkıldı.");
                     return;
                 }
 
@@ -858,7 +864,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs
                     _logger.LogWarning($"🚨 Heartbeat: Banko bağlantısı yok, banko modundan çıkıldı - {tcKimlikNo}");
                     
                     await Clients.Client(connectionId)
-                        .SendAsync("ForceLogout", "Banko bağlantısı koptu. Banko modundan çıkıldı.");
+                        .SendAsync(SignalREvents.ForceLogout, "Banko bağlantısı koptu. Banko modundan çıkıldı.");
                     return;
                 }
 

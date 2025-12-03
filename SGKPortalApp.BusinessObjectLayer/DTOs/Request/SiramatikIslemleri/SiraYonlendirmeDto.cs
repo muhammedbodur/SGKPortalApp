@@ -13,7 +13,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri
         public string YonlendirenPersonelTc { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Kaynak banko bilgisi gereklidir")]
-        public int YonlendirmeBankoId { get; set; }
+        public int YonlendirenBankoId { get; set; }
 
         [Required(ErrorMessage = "Hedef banko seçilmelidir")]
         public int HedefBankoId { get; set; }

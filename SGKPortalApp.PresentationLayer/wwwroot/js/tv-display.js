@@ -142,8 +142,9 @@ window.tvDisplay = {
                 .catch(err => console.error('❌ Yeniden bağlantıda TV grubuna katılma hatası:', err));
         });
 
+        // ⭐ Event adları: camelCase (SignalREvents.cs ile uyumlu)
         // Sıra güncelleme event'i
-        connection.on("ReceiveSiraUpdate", function (data) {
+        connection.on("receiveSiraUpdate", function (data) {
             console.log("🔔 Yeni sıra çağrıldı:", data);
             
             // Ses çal
@@ -161,7 +162,7 @@ window.tvDisplay = {
         });
 
         // Duyuru güncelleme event'i
-        connection.on("ReceiveDuyuruUpdate", function (duyuru) {
+        connection.on("receiveDuyuruUpdate", function (duyuru) {
             console.log("📢 Duyuru güncellendi:", duyuru);
             const duyuruText = document.getElementById('duyuruText');
             if (duyuruText) {

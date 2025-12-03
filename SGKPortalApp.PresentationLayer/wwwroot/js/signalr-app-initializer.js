@@ -60,12 +60,13 @@
 
             this.isAttached = true;
 
-            connection.on("ForceLogout", (message) => {
-                Logger.warn("ForceLogout event alındı:", message);
+            // ⭐ Event adı: camelCase (SignalREvents.cs ile uyumlu)
+            connection.on("forceLogout", (message) => {
+                Logger.warn("forceLogout event alındı:", message);
                 this.handleForceLogout(message);
             });
 
-            Logger.success("ForceLogout handler bağlandı");
+            Logger.success("forceLogout handler bağlandı");
         }
 
         handleForceLogout(message) {

@@ -137,7 +137,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
                 if (!activateResult.Success)
                 {
                     _logger.LogError($"❌ User tablosunda banko modu aktif edilemedi: {tcKimlikNo}");
-                    _stateService.DeactivateBankoMode(); // Rollback
+                    _stateService.DeactivateBankoMode(tcKimlikNo); // Rollback
                     return false;
                 }
 
@@ -178,7 +178,7 @@ namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
                 await _connectionService.DeactivateBankoConnectionAsync(tcKimlikNo);
 
                 // 3. State'i güncelle
-                _stateService.DeactivateBankoMode();
+                _stateService.DeactivateBankoMode(tcKimlikNo);
 
                 _logger.LogInformation($"✅ Banko modundan çıkıldı: {tcKimlikNo}");
                 return true;

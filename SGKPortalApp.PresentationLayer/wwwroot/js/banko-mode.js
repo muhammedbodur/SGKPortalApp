@@ -68,33 +68,45 @@ window.bankoMode = {
     },
 
     // Event handler'ları kur
+    // ⭐ Event adları: camelCase formatında (SignalREvents.cs ile uyumlu)
     setupEventHandlers: function (dotNetHelper) {
         const connection = this.getConnection();
         if (!connection) return;
 
         // Banko modu aktif oldu
-        connection.on("BankoModeActivated", (data) => {
-            console.log('✅ BankoModeActivated:', data);
+        connection.on("bankoModeActivated", (data) => {
+            console.log('✅ bankoModeActivated:', data);
             if (dotNetHelper) {
                 dotNetHelper.invokeMethodAsync('OnBankoModeActivated', data.bankoId);
             }
+            // UI'ı güncelle - sayfa yenile
+            window.location.reload();
         });
 
         // Banko modu deaktif oldu
-        connection.on("BankoModeDeactivated", (data) => {
-            console.log('✅ BankoModeDeactivated');
+        connection.on("bankoModeDeactivated", (data) => {
+            console.log('✅ bankoModeDeactivated');
             if (dotNetHelper) {
                 dotNetHelper.invokeMethodAsync('OnBankoModeDeactivated');
             }
+            // UI'ı güncelle - sayfa yenile
+            window.location.reload();
         });
 
         // Banko modu hatası
-        connection.on("BankoModeError", (data) => {
-            console.error('❌ BankoModeError:', data);
+        connection.on("bankoModeError", (data) => {
+            console.error('❌ bankoModeError:', data);
             alert(data.error || 'Banko modu hatası!');
         });
 
-        console.log('✅ Banko modu event handlerlari kuruldu');
+        // Force logout
+        connection.on("forceLogout", (message) => {
+            console.warn('🚨 forceLogout:', message);
+            alert(message || 'Oturumunuz sonlandırıldı!');
+            window.location.href = '/auth/login';
+        });
+
+        console.log('✅ Banko modu event handlerlari kuruldu (camelCase)');
     },
 
     // Sayfa yüklendiğinde banko modu kontrolü

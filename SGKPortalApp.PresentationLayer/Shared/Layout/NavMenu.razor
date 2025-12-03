@@ -1,5 +1,6 @@
 @inject NavigationManager Navigation
 @inject SGKPortalApp.PresentationLayer.Services.State.BankoModeStateService BankoModeState
+@inject IHttpContextAccessor HttpContextAccessor
 
 <!-- Layout menu -->
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
@@ -400,6 +401,13 @@
 
     protected override void OnInitialized()
     {
+        // ⭐ BankoModeState için mevcut kullanıcıyı set et
+        var tcKimlikNo = HttpContextAccessor.HttpContext?.User.FindFirst("TcKimlikNo")?.Value;
+        if (!string.IsNullOrEmpty(tcKimlikNo))
+        {
+            BankoModeState.SetCurrentUser(tcKimlikNo);
+        }
+
         Navigation.LocationChanged += OnLocationChanged;
         BankoModeState.OnBankoModeChanged += OnBankoModeChanged;
     }

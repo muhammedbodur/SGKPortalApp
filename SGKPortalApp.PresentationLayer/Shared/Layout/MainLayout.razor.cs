@@ -59,6 +59,28 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                     return;
                 }
 
+                // 1.5 ⭐ BankoModeState için mevcut kullanıcıyı set et
+                var tcKimlikNo = HttpContextAccessor?.HttpContext?.User.FindFirst("TcKimlikNo")?.Value;
+                if (!string.IsNullOrEmpty(tcKimlikNo))
+                {
+                    BankoModeState.SetCurrentUser(tcKimlikNo);
+                    
+                    // Kullanıcı zaten banko modunda mı kontrol et ve state'i senkronize et
+                    if (BankoModeService != null)
+                    {
+                        var isInBankoMode = await BankoModeService.IsPersonelInBankoModeAsync(tcKimlikNo);
+                        if (isInBankoMode)
+                        {
+                            var assignedBanko = await BankoModeService.GetPersonelAssignedBankoAsync(tcKimlikNo);
+                            if (assignedBanko != null)
+                            {
+                                BankoModeState.ActivateBankoMode(assignedBanko.BankoId, tcKimlikNo);
+                                Logger.LogInformation("✅ MainLayout - Banko modu state senkronize edildi: Banko#{BankoId}", assignedBanko.BankoId);
+                            }
+                        }
+                    }
+                }
+
                 // 2. İlk session kontrolü
                 await CheckSessionValidityThrottledAsync();
 

@@ -51,6 +51,9 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
                     return;
                 }
 
+                // ⭐ BankoModeState için mevcut kullanıcıyı set et
+                BankoModeState.SetCurrentUser(tcKimlikNo);
+
                 // Personelin atanmış bankosunu getir
                 assignedBanko = await BankoModeService.GetPersonelAssignedBankoAsync(tcKimlikNo);
                 
@@ -73,7 +76,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
                     }
                     else if (BankoModeState.IsInBankoMode)
                     {
-                        BankoModeState.DeactivateBankoMode();
+                        BankoModeState.DeactivateBankoMode(tcKimlikNo);
                     }
                 
                     // Banko kullanımda mı kontrol et

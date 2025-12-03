@@ -44,9 +44,9 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
 
         public bool YonlendirildiMi { get; set; } = false;
 
-        public int? YonlendirmeBankoId { get; set; }
-        [ForeignKey("YonlendirmeBankoId")]
-        public Banko? YonlendirmeBanko { get; set; }
+        public int? YonlendirenBankoId { get; set; }
+        [ForeignKey("YonlendirenBankoId")]
+        public Banko? YonlendirenBanko { get; set; }
 
         [StringLength(11)]
         public string? YonlendirenPersonelTc { get; set; }

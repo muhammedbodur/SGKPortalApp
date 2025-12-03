@@ -72,7 +72,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         {
             var result = await _siraYonlendirmeService.GetYonlendirmeSecenekleriAsync(siraId, kaynakBankoId);
 
-            if (result.IsSuccess)
+            if (result.Success)
             {
                 return Ok(result);
             }

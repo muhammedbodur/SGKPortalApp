@@ -175,6 +175,15 @@ class SignalRConnectionManager {
     getConnectionState() {
         if (!this.connection) return 'NotInitialized';
 
+        // SignalR JS client state'i string olarak döner
+        const state = this.connection.state;
+        
+        // Eğer zaten string ise direkt döndür
+        if (typeof state === 'string') {
+            return state;
+        }
+
+        // Numeric değer ise map'le (eski versiyon uyumluluğu)
         const stateMap = {
             0: 'Disconnected',
             1: 'Connected',
@@ -183,7 +192,7 @@ class SignalRConnectionManager {
             4: 'Reconnecting'
         };
 
-        return stateMap[this.connection.state] || `Unknown(${this.connection.state})`;
+        return stateMap[state] || `Unknown(${state})`;
     }
 
     /**

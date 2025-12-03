@@ -204,7 +204,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
                 // API'den mevcut yönlendirme seçeneklerini çek
                 var optionsResult = await YonlendirmeApiService.GetYonlendirmeSecenekleriAsync(sira.SiraId, AktifBankoId);
 
-                if (optionsResult.IsSuccess && optionsResult.Data != null)
+                if (optionsResult.Success && optionsResult.Data != null)
                 {
                     var options = optionsResult.Data;
 
@@ -299,7 +299,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
                 {
                     SiraId = yonlendirmeIcinSecilenSira.SiraId,
                     YonlendirenPersonelTc = PersonelTcKimlikNo,
-                    YonlendirmeBankoId = AktifBankoId,
+                    YonlendirenBankoId = AktifBankoId,
                     HedefBankoId = hedefBankoId,
                     YonlendirmeTipi = SelectedYonlendirmeTipi.Value,
                     YonlendirmeNedeni = string.IsNullOrWhiteSpace(yonlendirmeNotu) ? null : yonlendirmeNotu
