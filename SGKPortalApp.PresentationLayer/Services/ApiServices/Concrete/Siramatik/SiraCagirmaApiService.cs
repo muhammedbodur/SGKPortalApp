@@ -45,11 +45,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             }
         }
 
-        public async Task<SiraCagirmaResponseDto?> SiradakiCagirAsync(int siraId)
+        public async Task<SiraCagirmaResponseDto?> SiradakiCagirAsync(int siraId, string personelTcKimlikNo, int? firstCallableSiraId)
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/siradaki-cagir/{siraId}", new { });
+                var query = $"personelTcKimlikNo={personelTcKimlikNo}" + (firstCallableSiraId.HasValue ? $"&firstCallableSiraId={firstCallableSiraId.Value}" : string.Empty);
+                var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/siradaki-cagir/{siraId}?{query}", new { });
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadFromJsonAsync<SiraCagirmaResponseDto>();
             }

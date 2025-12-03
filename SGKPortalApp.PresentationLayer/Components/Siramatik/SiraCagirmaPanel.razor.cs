@@ -4,6 +4,8 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
+using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
+using System.Linq;
 
 namespace SGKPortalApp.PresentationLayer.Components.Siramatik
 {
@@ -11,6 +13,8 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
     {
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private ISiraYonlendirmeApiService YonlendirmeApiService { get; set; } = default!;
+        [Inject] private ISiraCagirmaApiService SiraCagirmaApiService { get; set; } = default!;
+        [Inject] private IToastService ToastService { get; set; } = default!;
 
         [Parameter] public List<SiraCagirmaResponseDto> SiraListesi { get; set; } = new();
         [Parameter] public EventCallback<int> OnSiraCagir { get; set; }
@@ -35,6 +39,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
 
         private List<SelectOption> yonlendirmeTipiOptions = new();
         private List<SelectOption> bankoOptions = new();
+        private bool isCallingNext;
 
         private string HeaderBackground => IsPinned
             ? "linear-gradient(135deg, #696cff 0%, #5f61e6 100%)"
@@ -42,11 +47,17 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
 
         private static string GetUzmanlikBadgeClass(PersonelUzmanlik uzmanlik) => uzmanlik switch
         {
-            PersonelUzmanlik.Sef => "bg-danger text-white",
-            PersonelUzmanlik.Uzman => "bg-success text-white",
-            PersonelUzmanlik.YrdUzman => "bg-info text-white",
+            PersonelUzmanlik.Sef => "bg-danger-subtle text-white",
+            PersonelUzmanlik.Uzman => "bg-success-subtle text-white",
+            PersonelUzmanlik.YrdUzman => "bg-info-subtle text-white",
             _ => "bg-secondary text-white"
         };
+
+        private SiraCagirmaResponseDto? FirstCallableSira => SiraListesi.FirstOrDefault(IsCallableSira);
+        private int? FirstCallableSiraId => FirstCallableSira?.SiraId;
+
+        private static bool IsCallableSira(SiraCagirmaResponseDto? sira)
+            => sira != null && (sira.BeklemeDurum == BeklemeDurum.Yonlendirildi || sira.BeklemeDurum == BeklemeDurum.Beklemede);
 
         protected override void OnInitialized()
         {
@@ -152,10 +163,58 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
 
         private async Task SiradakiCagir()
         {
-            var siradaki = SiraListesi.FirstOrDefault(x => x.BeklemeDurum == BeklemeDurum.Beklemede);
-            if (siradaki != null)
+            if (isCallingNext)
             {
-                await OnSiraCagir.InvokeAsync(siradaki.SiraId);
+                return;
+            }
+
+            var siradaki = FirstCallableSira;
+
+            if (siradaki == null)
+            {
+                await ToastService.ShowInfoAsync("Çağrılacak bekleyen sıra bulunamadı.", "Sıra Çağırma");
+                return;
+            }
+
+            if (!FirstCallableSiraId.HasValue || FirstCallableSiraId.Value != siradaki.SiraId)
+            {
+                await ToastService.ShowWarningAsync("Sıra listesi güncellendi. Lütfen paneli yenileyip tekrar deneyin.", "Sıra Çağırma");
+                return;
+            }
+
+            isCallingNext = true;
+            StateHasChanged();
+
+            try
+            {
+                var response = await SiraCagirmaApiService.SiradakiCagirAsync(siradaki.SiraId, PersonelTcKimlikNo, FirstCallableSiraId);
+
+                if (response != null)
+                {
+                    await OnSiraCagir.InvokeAsync(siradaki.SiraId);
+                    await ToastService.ShowSuccessAsync($"Sıra {response.SiraNo} çağrıldı.", "Sıra Çağırma");
+                }
+                else
+                {
+                    await ToastService.ShowErrorAsync("Sıra çağırma işlemi başarısız oldu.", "Sıra Çağırma");
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                var message = string.IsNullOrWhiteSpace(ex.Message)
+                    ? "Sıra listesi güncellendi. Lütfen paneli yenileyip tekrar deneyin."
+                    : ex.Message;
+                await ToastService.ShowWarningAsync(message, "Sıra Çağırma");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ SiradakiCagir error: {ex.Message}");
+                await ToastService.ShowErrorAsync("Sıra çağırılırken beklenmeyen bir hata oluştu.", "Sıra Çağırma");
+            }
+            finally
+            {
+                isCallingNext = false;
+                StateHasChanged();
             }
         }
 

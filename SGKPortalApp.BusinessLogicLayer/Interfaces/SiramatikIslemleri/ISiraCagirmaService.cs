@@ -20,7 +20,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
         /// <summary>
         /// Sıradaki vatandaşı çağırır
         /// </summary>
-        Task<SiraCagirmaResponseDto?> SiradakiCagirAsync(int siraId, string personelTcKimlikNo);
+        Task<SiraCagirmaResponseDto?> SiradakiCagirAsync(int siraId, string personelTcKimlikNo, int? firstCallableSiraId = null);
 
         /// <summary>
         /// Sırayı tamamlar

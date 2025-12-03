@@ -20,7 +20,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramat
         /// <summary>
         /// Sıradaki vatandaşı çağırır
         /// </summary>
-        Task<SiraCagirmaResponseDto?> SiradakiCagirAsync(int siraId);
+        Task<SiraCagirmaResponseDto?> SiradakiCagirAsync(int siraId, string personelTcKimlikNo, int? firstCallableSiraId);
 
         /// <summary>
         /// Sırayı tamamlar

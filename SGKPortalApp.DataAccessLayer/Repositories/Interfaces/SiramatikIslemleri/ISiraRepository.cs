@@ -18,6 +18,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
         // Personelin aktif sırasını getirir
         Task<Sira?> GetActiveByPersonelAsync(string tcKimlikNo);
 
+        // Personelin çağırdığı ve henüz tamamlanmamış sırayı getirir
+        Task<Sira?> GetCalledByPersonelAsync(string tcKimlikNo);
+
         // Hizmet binası bazında sıraları listeler
         Task<IEnumerable<Sira>> GetByHizmetBinasiAsync(int hizmetBinasiId);
 

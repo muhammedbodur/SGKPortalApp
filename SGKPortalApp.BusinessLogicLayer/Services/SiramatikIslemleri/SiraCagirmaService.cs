@@ -4,6 +4,7 @@ using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
+using System.Linq;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 {
@@ -63,10 +64,28 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }).ToList();
         }
 
-        public async Task<SiraCagirmaResponseDto?> SiradakiCagirAsync(int siraId, string personelTcKimlikNo)
+        public async Task<SiraCagirmaResponseDto?> SiradakiCagirAsync(int siraId, string personelTcKimlikNo, int? firstCallableSiraId = null)
         {
+            if (firstCallableSiraId.HasValue)
+            {
+                var actualFirstCallableId = await GetFirstCallableSiraIdAsync(personelTcKimlikNo);
+
+                if (!actualFirstCallableId.HasValue || actualFirstCallableId.Value != firstCallableSiraId.Value)
+                {
+                    throw new InvalidOperationException("Sıra listesi güncellendi. Lütfen paneli yenileyip tekrar deneyin.");
+                }
+            }
+
+            var onceCagrilanSira = await _siraRepository.GetCalledByPersonelAsync(personelTcKimlikNo);
+            if (onceCagrilanSira != null && onceCagrilanSira.SiraId != siraId)
+            {
+                onceCagrilanSira.BeklemeDurum = BeklemeDurum.Bitti;
+                onceCagrilanSira.IslemBitisZamani = DateTime.Now;
+                _siraRepository.Update(onceCagrilanSira);
+            }
+
             var sira = await _siraRepository.GetByIdAsync(siraId);
-            if (sira == null || sira.BeklemeDurum != BeklemeDurum.Beklemede)
+            if (sira == null || (sira.BeklemeDurum != BeklemeDurum.Beklemede && sira.BeklemeDurum != BeklemeDurum.Yonlendirildi))
             {
                 return null;
             }
@@ -91,6 +110,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 HizmetBinasiId = sira.HizmetBinasiId,
                 HizmetBinasiAdi = sira.HizmetBinasi?.HizmetBinasiAdi ?? "Bilinmiyor"
             };
+        }
+
+        private async Task<int?> GetFirstCallableSiraIdAsync(string personelTcKimlikNo)
+        {
+            var siralar = await _siramatikQueryRepository.GetBankoPanelBekleyenSiralarAsync(personelTcKimlikNo);
+            var firstCallable = siralar.FirstOrDefault(s => s.BeklemeDurum == BeklemeDurum.Yonlendirildi || s.BeklemeDurum == BeklemeDurum.Beklemede);
+            return firstCallable?.SiraId;
         }
 
         public async Task<bool> SiraTamamlaAsync(int siraId)

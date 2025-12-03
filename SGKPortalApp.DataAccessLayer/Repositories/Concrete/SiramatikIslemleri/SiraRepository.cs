@@ -49,6 +49,16 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .FirstOrDefaultAsync(s => s.TcKimlikNo == tcKimlikNo && s.BeklemeDurum == BeklemeDurum.Beklemede);
         }
 
+        // Personelin çağırdığı ve henüz tamamlanmamış sırayı getirir
+        public async Task<Sira?> GetCalledByPersonelAsync(string tcKimlikNo)
+        {
+            return await _dbSet
+                .Include(s => s.KanalAltIslem)
+                .Include(s => s.HizmetBinasi)
+                .Include(s => s.Personel)
+                .FirstOrDefaultAsync(s => s.TcKimlikNo == tcKimlikNo && s.BeklemeDurum == BeklemeDurum.Cagrildi);
+        }
+
         // Hizmet binası bazında sıraları listeler
         public async Task<IEnumerable<Sira>> GetByHizmetBinasiAsync(int hizmetBinasiId)
         {

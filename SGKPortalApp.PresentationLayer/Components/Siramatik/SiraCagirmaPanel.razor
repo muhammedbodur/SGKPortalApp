@@ -39,9 +39,13 @@
 
                 @foreach (var sira in SiraListesi)
                 {
-                    <div class="card mb-2 position-relative @(sira.BeklemeDurum == BeklemeDurum.Cagrildi ? "border-primary alert-success" : "")">
+                    var isFirstCallable = FirstCallableSiraId.HasValue && FirstCallableSiraId.Value == sira.SiraId;
+                    <div class="card mb-2 position-relative @(sira.BeklemeDurum == BeklemeDurum.Cagrildi ? "border-primary alert-success" : "")"
+                         data-sira-id="@sira.SiraId"
+                         data-callable="@IsCallableSira(sira)"
+                         data-first-callable="@isFirstCallable">
 
-                        @if (sira.BeklemeDurum == BeklemeDurum.Cagrildi)
+                        @if (sira.BeklemeDurum == BeklemeDurum.Cagrildi && sira.YonlendirildiMi == false)
                         {
                             <button type="button"
                                     class="btn btn-icon btn-sm btn-outline-primary position-absolute top-0 end-0 m-2"
@@ -55,8 +59,12 @@
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="flex-grow-1">
                                     <div class="position-relative mb-1" style="min-height: 36px;">
-                                        <span class="badge text-uppercase position-absolute start-0 top-50 translate-middle-y @GetUzmanlikBadgeClass(sira.Uzmanlik)">Sıra</span>
-                                        <span class="fs-4 fw-bold text-dark d-block text-center">@sira.SiraNo</span>
+                                        <span class="badge text-uppercase text-black-50 position-absolute start-0 top-50 translate-middle-y @GetUzmanlikBadgeClass(sira.Uzmanlik)">
+                                            Sıra
+                                        </span>
+                                        <span class="fs-3 fw-bold text-dark d-block text-center">
+                                            @sira.SiraNo
+                                        </span>
                                     </div>
                                     <div class="text-uppercase small fw-semibold text-secondary mb-1">
                                         <i class="bx bx-user me-1"></i>@sira.KanalAltAdi
@@ -66,10 +74,6 @@
                                             <i class="bx bx-time me-1"></i>@sira.SiraAlisZamani.ToString("HH:mm")
                                         </small>
                                         @if (sira.BeklemeDurum == BeklemeDurum.Cagrildi)
-                                        {
-                                            <span class="badge text-uppercase text-bg-success">Çağırıldı</span>
-                                        }
-                                        else if (sira.BeklemeDurum == BeklemeDurum.Cagrildi)
                                         {
                                             <span class="badge text-uppercase text-bg-success">Çağırıldı</span>
                                         }

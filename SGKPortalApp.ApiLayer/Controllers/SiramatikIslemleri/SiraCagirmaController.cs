@@ -52,15 +52,22 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         /// Sıradaki vatandaşı çağırır.
         /// </summary>
         [HttpPost("siradaki-cagir/{siraId:int}")]
-        public async Task<IActionResult> SiradakiCagirAsync(int siraId, [FromQuery] string personelTcKimlikNo)
+        public async Task<IActionResult> SiradakiCagirAsync(int siraId, [FromQuery] string personelTcKimlikNo, [FromQuery] int? firstCallableSiraId)
         {
             if (string.IsNullOrWhiteSpace(personelTcKimlikNo))
             {
                 return BadRequest("personelTcKimlikNo zorunludur.");
             }
 
-            var result = await _siraCagirmaService.SiradakiCagirAsync(siraId, personelTcKimlikNo);
-            return result != null ? Ok(result) : NotFound();
+            try
+            {
+                var result = await _siraCagirmaService.SiradakiCagirAsync(siraId, personelTcKimlikNo, firstCallableSiraId);
+                return result != null ? Ok(result) : NotFound();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
         }
 
         /// <summary>
