@@ -40,6 +40,14 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
             ? "linear-gradient(135deg, #696cff 0%, #5f61e6 100%)"
             : "linear-gradient(135deg, #8b8dff 0%, #7f81f6 100%)";
 
+        private static string GetUzmanlikBadgeClass(PersonelUzmanlik uzmanlik) => uzmanlik switch
+        {
+            PersonelUzmanlik.Sef => "bg-danger text-white",
+            PersonelUzmanlik.Uzman => "bg-success text-white",
+            PersonelUzmanlik.YrdUzman => "bg-info text-white",
+            _ => "bg-secondary text-white"
+        };
+
         protected override void OnInitialized()
         {
             base.OnInitialized();
@@ -149,11 +157,6 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
             {
                 await OnSiraCagir.InvokeAsync(siradaki.SiraId);
             }
-        }
-
-        private async Task SiraSecildi(SiraCagirmaResponseDto sira)
-        {
-            await OnSiraCagir.InvokeAsync(sira.SiraId);
         }
 
         private YonlendirmeTipi? SelectedYonlendirmeTipi

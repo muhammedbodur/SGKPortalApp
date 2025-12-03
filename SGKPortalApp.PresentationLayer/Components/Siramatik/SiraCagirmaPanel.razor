@@ -39,8 +39,8 @@
 
                 @foreach (var sira in SiraListesi)
                 {
-                    <div class="card mb-2 position-relative @(sira.BeklemeDurum == BeklemeDurum.Cagrildi ? "border-primary alert-success" : "")"
-                         @onclick="() => SiraSecildi(sira)">
+                    <div class="card mb-2 position-relative @(sira.BeklemeDurum == BeklemeDurum.Cagrildi ? "border-primary alert-success" : "")">
+
                         @if (sira.BeklemeDurum == BeklemeDurum.Cagrildi)
                         {
                             <button type="button"
@@ -55,7 +55,7 @@
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="flex-grow-1">
                                     <div class="position-relative mb-1" style="min-height: 36px;">
-                                        <span class="badge bg-label-primary text-uppercase position-absolute start-0 top-50 translate-middle-y">Sıra</span>
+                                        <span class="badge text-uppercase position-absolute start-0 top-50 translate-middle-y @GetUzmanlikBadgeClass(sira.Uzmanlik)">Sıra</span>
                                         <span class="fs-4 fw-bold text-dark d-block text-center">@sira.SiraNo</span>
                                     </div>
                                     <div class="text-uppercase small fw-semibold text-secondary mb-1">
@@ -69,9 +69,9 @@
                                         {
                                             <span class="badge text-uppercase text-bg-success">Çağırıldı</span>
                                         }
-                                        else if (sira.BeklemeDurum == BeklemeDurum.Yonlendirildi)
+                                        else if (sira.BeklemeDurum == BeklemeDurum.Cagrildi)
                                         {
-                                            <span class="badge text-uppercase text-bg-warning">Yönlendirilmiş</span>
+                                            <span class="badge text-uppercase text-bg-success">Çağırıldı</span>
                                         }
                                         else
                                         {
