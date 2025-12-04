@@ -181,5 +181,16 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
             var var = await _kioskSiraAlmaService.HasAktifPersonelAsync(hizmetBinasiId, kanalAltIslemId);
             return Ok(new { AktifPersonelVar = var });
         }
+
+        /// <summary>
+        /// [DEBUG] Sıra numarası bilgisini test et
+        /// GET api/siramatik/kiosk-sira-alma/test-sira-no/{kanalAltIslemId}
+        /// </summary>
+        [HttpGet("test-sira-no/{kanalAltIslemId:int}")]
+        public async Task<IActionResult> TestSiraNoAsync(int kanalAltIslemId)
+        {
+            var result = await _kioskSiraAlmaService.TestGetSiraNoAsync(kanalAltIslemId);
+            return Ok(result);
+        }
     }
 }

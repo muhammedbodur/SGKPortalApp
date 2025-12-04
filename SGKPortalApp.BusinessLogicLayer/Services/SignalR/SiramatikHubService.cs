@@ -195,8 +195,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         {
             try
             {
+                _logger.LogInformation("🔍 BroadcastNewSiraAsync başladı. SiraNo: {SiraNo}, HizmetBinasiId: {HizmetBinasiId}, KanalAltIslemId: {KanalAltIslemId}",
+                    sira.SiraNo, hizmetBinasiId, kanalAltIslemId);
+
                 // Bu KanalAltIslem'e atanmış ve banko modunda olan personelleri bul
                 var affectedPersonels = await _siramatikQueryRepository.GetBankoModundakiPersonellerAsync(hizmetBinasiId, kanalAltIslemId);
+
+                _logger.LogInformation("🔍 Etkilenen personeller: {Count} kişi, TC'ler: [{TcList}]",
+                    affectedPersonels.Count, string.Join(", ", affectedPersonels));
 
                 if (affectedPersonels.Any())
                 {
@@ -210,6 +216,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     await SendToPersonelsAsync(affectedPersonels, SiraListUpdate, payload);
                     _logger.LogInformation("📤 NewSira (Kiosk) broadcast edildi. SiraId: {SiraId}, SiraNo: {SiraNo}, Etkilenen: {Count} personel",
                         sira.SiraId, sira.SiraNo, affectedPersonels.Count);
+                }
+                else
+                {
+                    _logger.LogWarning("⚠️ BroadcastNewSiraAsync: Etkilenen personel bulunamadı! HizmetBinasiId: {HizmetBinasiId}, KanalAltIslemId: {KanalAltIslemId}",
+                        hizmetBinasiId, kanalAltIslemId);
                 }
             }
             catch (Exception ex)
@@ -259,16 +270,28 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             var connectionIds = new List<string>();
             foreach (var tc in personelTcs)
             {
-                var connections = await _hubConnectionRepository.GetActiveConnectionsByTcKimlikNoAsync(tc);
+                var connections = (await _hubConnectionRepository.GetActiveConnectionsByTcKimlikNoAsync(tc)).ToList();
+                var typesList = string.Join(", ", connections.Select(c => $"{c.ConnectionType}:{c.ConnectionId}"));
+                _logger.LogInformation("🔍 TC: {Tc} için {Count} aktif bağlantı bulundu. Tipler: {Types}",
+                    tc, connections.Count, typesList);
+                
                 connectionIds.AddRange(connections
                     .Where(c => c.ConnectionType == "BankoMode")
                     .Select(c => c.ConnectionId));
             }
 
+            var idsString = string.Join(", ", connectionIds);
+            _logger.LogInformation("🔍 BankoMode connection sayısı: {Count}, IDs: {Ids}",
+                connectionIds.Count, idsString);
+
             if (connectionIds.Any())
             {
                 await _broadcaster.SendToConnectionsAsync(connectionIds, eventName, payload);
-                _logger.LogDebug("📤 {EventName} gönderildi: {Count} connection", eventName, connectionIds.Count);
+                _logger.LogInformation("📤 {EventName} gönderildi: {Count} connection'a", eventName, connectionIds.Count);
+            }
+            else
+            {
+                _logger.LogWarning("⚠️ {EventName} gönderilemedi: BankoMode connection bulunamadı!", eventName);
             }
         }
 

@@ -150,6 +150,24 @@ var SiraCagirmaPanel = (function () {
         }
     }
 
+    // ⭐ SignalR'dan gelen sıra güncellemelerini işle
+    function handleSiraUpdate(payload) {
+        console.log('📥 handleSiraUpdate çağrıldı:', payload);
+        
+        if (!dotNetHelper) {
+            console.warn('⚠️ dotNetHelper bulunamadı');
+            return;
+        }
+
+        try {
+            // Blazor component'e bildir
+            dotNetHelper.invokeMethodAsync('OnSiraUpdateFromSignalR', payload);
+            console.log('✅ Blazor\'a sıra güncellemesi gönderildi');
+        } catch (e) {
+            console.error('❌ OnSiraUpdateFromSignalR error:', e);
+        }
+    }
+
     // Test fonksiyonları
     window.testCallPanel = {
         getState: function () {
@@ -175,7 +193,8 @@ var SiraCagirmaPanel = (function () {
         closePanel: closePanel,
         togglePanel: togglePanel,
         setPin: setPin,
-        destroy: destroy
+        destroy: destroy,
+        handleSiraUpdate: handleSiraUpdate
     };
 })();
 

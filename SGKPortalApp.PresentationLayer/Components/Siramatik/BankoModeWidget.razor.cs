@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
-using SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.State;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
 
 namespace SGKPortalApp.PresentationLayer.Components.Siramatik
 {
     public partial class BankoModeWidget : ComponentBase, IDisposable
     {
-        [Inject] private IBankoModeService BankoModeService { get; set; } = default!;
+        [Inject] private IBankoApiService BankoApiService { get; set; } = default!;
         [Inject] private BankoModeStateService BankoModeState { get; set; } = default!;
         [Inject] private NavigationManager NavigationManager { get; set; } = default!;
         [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
@@ -54,39 +54,20 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
                 // ⭐ BankoModeState için mevcut kullanıcıyı set et
                 BankoModeState.SetCurrentUser(tcKimlikNo);
 
-                // Personelin atanmış bankosunu getir
-                assignedBanko = await BankoModeService.GetPersonelAssignedBankoAsync(tcKimlikNo);
-                
-                if (assignedBanko != null)
+                // Personelin atanmış bankosunu getir (API üzerinden)
+                var bankoResult = await BankoApiService.GetPersonelCurrentBankoAsync(tcKimlikNo);
+                if (bankoResult.Success && bankoResult.Data != null)
                 {
-                    // Banko modunda mı kontrol et (User tablosundan - sayfa yenilendiğinde de çalışır)
-                    var wasInBankoMode = await BankoModeService.IsPersonelInBankoModeAsync(tcKimlikNo);
-                    isInBankoMode = wasInBankoMode;
+                    assignedBanko = bankoResult.Data;
+                    
+                    // Banko modunda mı kontrol et
+                    isInBankoMode = BankoModeState.IsInBankoMode;
 
-                    Logger.LogInformation($"🔍 BankoModeWidget LoadData: {tcKimlikNo} - Banko Modu: {isInBankoMode}");
+                    Logger.LogInformation("🔍 BankoModeWidget LoadData: {TcKimlikNo} - Banko Modu: {IsInBankoMode}", tcKimlikNo, isInBankoMode);
 
-                    if (wasInBankoMode)
+                    if (isInBankoMode)
                     {
-                        // SignalR state'i de güncel tut
                         BankoModeState.ActivateBankoMode(assignedBanko.BankoId, tcKimlikNo);
-                        if (!BankoModeState.IsInBankoMode)
-                        {
-                            await BankoModeService.EnterBankoModeAsync(tcKimlikNo, assignedBanko.BankoId);
-                        }
-                    }
-                    else if (BankoModeState.IsInBankoMode)
-                    {
-                        BankoModeState.DeactivateBankoMode(tcKimlikNo);
-                    }
-                
-                    // Banko kullanımda mı kontrol et
-                    if (!isInBankoMode)
-                    {
-                        bankoInUse = await BankoModeService.IsBankoInUseAsync(assignedBanko.BankoId);
-                        if (bankoInUse)
-                        {
-                            activePersonelName = await BankoModeService.GetBankoActivePersonelNameAsync(assignedBanko.BankoId);
-                        }
                     }
                 }
             }

@@ -1,13 +1,11 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.PresentationLayer.Extensions;
 using SGKPortalApp.PresentationLayer.Helpers;
 using SGKPortalApp.PresentationLayer.Middleware;
-using SGKPortalApp.PresentationLayer.Services.Hubs;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -128,46 +126,19 @@ builder.Services.AddCors(options =>
 builder.Services.AddMemoryCache();
 
 // ═══════════════════════════════════════════════════════
-// 📡 SIGNALR HUBS
+// 📡 SIGNALR - API (9080) UZERINDEN KULLANILIYOR
 // ═══════════════════════════════════════════════════════
-builder.Services.AddSingleton<IUserIdProvider, TcKimlikNoUserIdProvider>();
-
-builder.Services.AddSignalR(options =>
-{
-    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
-    options.KeepAliveInterval = TimeSpan.FromSeconds(10);
-    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
-    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
-    options.MaximumReceiveMessageSize = 32 * 1024; // 32KB
-});
+// NOT: SignalR Hublari API katmaninda (9080) tanimli.
+// Presentation katmani JavaScript uzerinden APIye baglanir.
 
 // Hub Connection API Service (Layered Architecture)
 builder.Services.AddScoped<SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.SignalR.IHubConnectionApiService,
     SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR.HubConnectionApiService>();
 
-// NOT: UserApiService otomatik olarak AddPresentationServices içinde RegisterApiServices ile kaydediliyor
-// Common modülündeki tüm API servisleri otomatik kayıt ediliyor
-
-// Hub Connection Service (API kullanarak)
-builder.Services.AddScoped<SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces.IHubConnectionService,
-    SGKPortalApp.PresentationLayer.Services.Hubs.Concrete.HubConnectionService>();
-
-// Banko Mode Service
-builder.Services.AddScoped<SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces.IBankoModeService,
-    SGKPortalApp.PresentationLayer.Services.Hubs.Concrete.BankoModeService>();
-
-// Banko Mode State Service (Singleton - Tüm uygulama boyunca tek instance)
+// Banko Mode State Service (Singleton - Tum uygulama boyunca tek instance)
 builder.Services.AddSingleton<SGKPortalApp.PresentationLayer.Services.State.BankoModeStateService>();
 
-// SignalR Broadcaster (Business katmanından hub'a mesaj göndermek için)
-builder.Services.AddScoped<SGKPortalApp.BusinessObjectLayer.Interfaces.SignalR.ISignalRBroadcaster,
-    SGKPortalApp.PresentationLayer.Services.Hubs.Concrete.SignalRBroadcaster>();
-
-// Siramatik Hub Service (Business katmanında SignalR yayınları için)
-// NOT: Bu servis BusinessLogicLayer'da, ancak ISignalRBroadcaster'ı Presentation'dan alıyor
-// Bu nedenle ApiLayer'da kayıt edilmeli (API -> Business -> Data akışı için)
-
-Console.WriteLine("✅ SignalR Hub servisleri kaydedildi");
+Console.WriteLine("SignalR Hub: API katmaninda (https://localhost:9080/hubs/siramatik)");
 
 // ═══════════════════════════════════════════════════════
 // 🔧 AUTOMAPPER
@@ -315,11 +286,12 @@ app.MapBlazorHub(options =>
 }).AllowAnonymous();
 
 // ═══════════════════════════════════════════════════════
-// 📡 SIGNALR HUB ENDPOINTS
+// 📡 SIGNALR - API (9080) ÜZERİNDEN KULLANILIYOR
 // ═══════════════════════════════════════════════════════
-app.MapHub<SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub>("/hubs/siramatik");
-app.MapHub<SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub>("/hubs/tv"); // TV Display için backward compatibility
-Console.WriteLine("✅ SignalR Hub endpoints: /hubs/siramatik, /hubs/tv");
+// NOT: SignalR Hub'ları API katmanında (9080) tanımlı.
+// Presentation katmanı JavaScript üzerinden API'deki hub'a bağlanıyor.
+// Eski mapping'ler kaldırıldı - tüm SignalR trafiği API üzerinden.
+Console.WriteLine("ℹ️ SignalR Hub: API katmanında (https://localhost:9080/hubs/siramatik)");
 
 app.MapRazorPages();
 app.MapFallbackToPage("/_Host");

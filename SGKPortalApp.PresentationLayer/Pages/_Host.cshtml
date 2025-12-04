@@ -198,6 +198,13 @@
     <!-- ================== PAGE LIFECYCLE DETECTOR ================== -->
     <script src="~/js/page-lifecycle-detector.js"></script>
 
+    <!-- ================== KULLANICI BİLGİSİ (SignalR için) ================== -->
+    <script>
+        // SignalR bağlantısı için kullanıcı bilgisini set et
+        window.currentUserTcKimlikNo = '@(User?.FindFirst("TcKimlikNo")?.Value ?? "")';
+        console.log('👤 Kullanıcı TC:', window.currentUserTcKimlikNo || 'Giriş yapılmamış');
+    </script>
+
     <!-- ================== SIGNALR ================== -->
     <script src="/lib/microsoft/signalr/dist/browser/signalr.js"></script>
     <script src="~/js/signalr/core/signalr-connection-manager.js"></script>

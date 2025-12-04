@@ -76,5 +76,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
         /// NOT: kanalAltId parametresi KanalAlt tablosundaki ID'dir (KanalAltIslem değil!)
         /// </summary>
         Task<bool> HasAktifPersonelAsync(int hizmetBinasiId, int kanalAltId);
+
+        /// <summary>
+        /// [DEBUG] Sıra numarası bilgisini test et
+        /// </summary>
+        Task<object> TestGetSiraNoAsync(int kanalAltIslemId);
     }
 }

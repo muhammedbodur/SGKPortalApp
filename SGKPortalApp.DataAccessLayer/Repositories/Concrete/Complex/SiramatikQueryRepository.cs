@@ -38,7 +38,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             EklenmeTarihi = kai.EklenmeTarihi,
                             DuzenlenmeTarihi = kai.DuzenlenmeTarihi,
                             PersonelSayisi = _context.KanalPersonelleri
-                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif)
+                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId 
+                                          && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
+                                          && !kp.SilindiMi)
                         };
 
             return await query.AsNoTracking().ToListAsync();
@@ -65,7 +67,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             EklenmeTarihi = kai.EklenmeTarihi,
                             DuzenlenmeTarihi = kai.DuzenlenmeTarihi,
                             PersonelSayisi = _context.KanalPersonelleri
-                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif)
+                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId 
+                                          && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
+                                          && !kp.SilindiMi)
                         };
 
             return await query.AsNoTracking().ToListAsync();
@@ -118,7 +122,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             EklenmeTarihi = kai.EklenmeTarihi,
                             DuzenlenmeTarihi = kai.DuzenlenmeTarihi,
                             PersonelSayisi = _context.KanalPersonelleri
-                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif)
+                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId 
+                                          && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
+                                          && !kp.SilindiMi)
                         };
 
             return await query.AsNoTracking().ToListAsync();
@@ -231,8 +237,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                         {
                             KanalAltIslemId = kai.KanalAltIslemId,
                             PersonelSayisi = _context.KanalPersonelleri
-                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId && 
-                                           kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif)
+                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId 
+                                          && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
+                                          && !kp.SilindiMi)
                         };
 
             var result = await query.AsNoTracking().ToListAsync();
@@ -246,8 +253,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                         join k in _context.Kanallar on ka.KanalId equals k.KanalId
                         join ki in _context.KanalIslemleri on kai.KanalIslemId equals ki.KanalIslemId
                         where kai.HizmetBinasiId == hizmetBinasiId &&
-                              !_context.KanalPersonelleri.Any(kp => kp.KanalAltIslemId == kai.KanalAltIslemId && 
-                                                                   kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif)
+                              !_context.KanalPersonelleri.Any(kp => kp.KanalAltIslemId == kai.KanalAltIslemId 
+                                                                && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
+                                                                && !kp.SilindiMi)
                         select new KanalAltIslemResponseDto
                         {
                             KanalAltIslemId = kai.KanalAltIslemId,
@@ -794,36 +802,36 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         }
 
         /// <summary>
-        /// Belirli bir HizmetBinasi ve KanalAltId için banko modunda olan ve en az Yrd.Uzman yetkisine sahip personellerin TC listesini döner.
+        /// Belirli bir HizmetBinasi ve KanalAltIslemId için banko modunda olan ve en az Yrd.Uzman yetkisine sahip personellerin TC listesini döner.
         /// Kiosk sıra alma için kullanılır - sadece işlem yapabilecek personel varsa sıra alınabilir.
         /// 
-        /// NOT: kanalAltId parametresi KanalAlt tablosundaki ID'dir (KanalAltIslem değil!)
-        /// KanalPersonel.KanalAltIslemId → KanalAltIslem.KanalAltId üzerinden eşleştirilir.
+        /// NOT: kanalAltIslemId parametresi KanalAltIslem tablosundaki ID'dir!
+        /// BankoKullanici tablosu üzerinden personel-banko eşleşmesi yapılır.
         /// 
         /// Kontroller:
-        /// 1. KanalPersonel: Bu KanalAlt'a ait bir KanalAltIslem'e atanmış, aktif, en az Yrd.Uzman
-        /// 2. User: BankoModuAktif = true VE AktifBankoId != null (personel ŞU AN banko modunda mı?)
-        /// 3. Banko: User.AktifBankoId üzerinden - aynı hizmet binasında ve aktif mi?
+        /// 1. KanalPersonel: Bu KanalAltIslem'e atanmış, aktif, en az Yrd.Uzman
+        /// 2. User: BankoModuAktif = true (personel ŞU AN banko modunda mı?)
+        /// 3. BankoKullanici: Personel bir bankoya atanmış mı?
+        /// 4. Banko: Aynı hizmet binasında ve aktif mi?
         /// </summary>
-        public async Task<List<string>> GetBankoModundakiYetkiliPersonellerAsync(int hizmetBinasiId, int kanalAltId)
+        public async Task<List<string>> GetBankoModundakiYetkiliPersonellerAsync(int hizmetBinasiId, int kanalAltIslemId)
         {
-            // KanalPersonel → KanalAltIslem → KanalAlt üzerinden eşleştirme
+            // Eski proje mantığı: KanalAltIslem → Banko (HizmetBinasi üzerinden) → BankoKullanici → KanalPersonel
             var yetkiliPersoneller = await (
-                from kp in _context.KanalPersonelleri
-                join kai in _context.KanalAltIslemleri on kp.KanalAltIslemId equals kai.KanalAltIslemId
+                from kai in _context.KanalAltIslemleri
+                join ka in _context.KanallarAlt on kai.KanalAltId equals ka.KanalAltId
+                join b in _context.Bankolar on kai.HizmetBinasiId equals b.HizmetBinasiId
+                join bk in _context.BankoKullanicilari on b.BankoId equals bk.BankoId
+                join kp in _context.KanalPersonelleri on new { bk.TcKimlikNo, kai.KanalAltIslemId } 
+                    equals new { kp.TcKimlikNo, kp.KanalAltIslemId }
                 join u in _context.Users on kp.TcKimlikNo equals u.TcKimlikNo
-                join b in _context.Bankolar on u.AktifBankoId equals b.BankoId  // User'ın aktif bankosunu al
-                where kai.KanalAltId == kanalAltId                    // ⭐ KanalAlt ID eşleşmesi
-                   && kai.HizmetBinasiId == hizmetBinasiId            // ⭐ Aynı hizmet binasındaki KanalAltIslem
+                where kai.KanalAltIslemId == kanalAltIslemId          // ⭐ KanalAltIslem ID eşleşmesi
                    && kai.Aktiflik == Aktiflik.Aktif                  // KanalAltIslem aktif
                    && !kai.SilindiMi                                  // KanalAltIslem silinmemiş
                    && kp.Aktiflik == Aktiflik.Aktif                   // Personel ataması aktif
                    && !kp.SilindiMi                                   // Personel ataması silinmemiş
                    && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok      // En az Yrd.Uzman (1, 2, 3)
                    && u.BankoModuAktif == true                        // ⭐ ŞU AN banko modunda
-                   && u.AktifBankoId != null                          // ⭐ Aktif banko ID'si var
-                   && u.AktifMi == true                               // Kullanıcı aktif
-                   && b.HizmetBinasiId == hizmetBinasiId              // Aynı hizmet binasında
                    && b.BankoAktiflik == Aktiflik.Aktif               // Banko aktif
                    && !b.SilindiMi                                    // Banko silinmemiş
                 select kp.TcKimlikNo
@@ -943,6 +951,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                            && !km.SilindiMi
                            && !kmi.SilindiMi
                            && !ka.SilindiMi
+                           && !kp.SilindiMi
                            // Aktiflik kontrolleri
                            && hb.HizmetBinasiAktiflik == Aktiflik.Aktif
                            && k.Aktiflik == Aktiflik.Aktif
@@ -950,6 +959,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                            && km.Aktiflik == Aktiflik.Aktif
                            && kmi.Aktiflik == Aktiflik.Aktif
                            && ka.Aktiflik == Aktiflik.Aktif
+                           && kp.Aktiflik == Aktiflik.Aktif  // KanalPersonel aktiflik kontrolü
                            && u.BankoModuAktif == true
                            && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok  // Konusunda bilgisi olan personel
                         group new { hb, k, kma, km, kmi, ka, kp } by new
@@ -1000,154 +1010,279 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             return result;
         }
 
-        /// <summary>
-        /// Belirli bir Kiosk'taki seçilen menü için alt kanal işlemlerini getirir
-        /// Sadece aktif personel (Yrd.Uzman+) olan ve banko modunda bulunan işlemler döner
-        ///
-        /// SQL Karşılığı:
-        /// -- Adım 1: Kiosk'un hizmet binası ID'sini al
-        /// DECLARE @HizmetBinasiId INT = (SELECT HizmetBinasiId FROM SIR_KioskTanim WHERE KioskId = @kioskId AND SilindiMi = 0)
-        /// DECLARE @Bugun DATE = CAST(GETDATE() AS DATE)
-        ///
-        /// -- Adım 2: Menüdeki alt işlemleri getir (sadece aktif personeli olanlar)
-        /// SELECT
-        ///     kmi.KioskMenuIslemId,
-        ///     kmi.KanalAltId,
-        ///     ka.KanalAltAdi,
-        ///     k.KanalAdi,
-        ///     kmi.MenuSira,
-        ///     kai.KanalAltIslemId,
-        ///     (SELECT COUNT(*)
-        ///      FROM SIR_Siralar s WITH (NOLOCK)
-        ///      WHERE s.KanalAltIslemId = kai.KanalAltIslemId
-        ///        AND s.HizmetBinasiId = @HizmetBinasiId
-        ///        AND s.BeklemeDurum = 0  -- Beklemede
-        ///        AND CAST(s.SiraAlisZamani AS DATE) = @Bugun
-        ///        AND s.SilindiMi = 0
-        ///     ) AS BekleyenSiraSayisi
-        /// FROM SIR_KioskMenuIslem kmi WITH (NOLOCK)
-        /// INNER JOIN SIR_KanallarAlt ka WITH (NOLOCK)
-        ///     ON ka.KanalAltId = kmi.KanalAltId
-        /// INNER JOIN SIR_Kanallar k WITH (NOLOCK)
-        ///     ON k.KanalId = ka.KanalId
-        /// INNER JOIN SIR_KanalAltIslemleri kai WITH (NOLOCK)
-        ///     ON kai.KanalAltId = ka.KanalAltId
-        ///     AND kai.HizmetBinasiId = @HizmetBinasiId
-        /// WHERE kmi.KioskMenuId = @kioskMenuId
-        ///   AND kmi.SilindiMi = 0 AND kmi.Aktiflik = 1
-        ///   AND ka.SilindiMi = 0 AND ka.Aktiflik = 1
-        ///   AND kai.SilindiMi = 0 AND kai.Aktiflik = 1
-        ///   -- Aktif personel kontrolü (Yrd.Uzman+ ve ŞU AN banko modunda)
-        ///   AND EXISTS (
-        ///       SELECT 1
-        ///       FROM SIR_KanalPersonelleri kp WITH (NOLOCK)
-        ///       INNER JOIN CMN_Users u WITH (NOLOCK)
-        ///           ON u.TcKimlikNo = kp.TcKimlikNo
-        ///       INNER JOIN SIR_Bankolar b WITH (NOLOCK)
-        ///           ON b.BankoId = u.AktifBankoId  -- User'ın ŞU ANKİ aktif bankosu
-        ///       WHERE kp.KanalAltIslemId = kai.KanalAltIslemId
-        ///         AND kp.Aktiflik = 1 AND kp.SilindiMi = 0
-        ///         AND kp.Uzmanlik != 0  -- En az Yrd.Uzman (1,2,3)
-        ///         AND u.BankoModuAktif = 1  -- Banko modunda
-        ///         AND u.AktifBankoId IS NOT NULL  -- Aktif banko ID'si var
-        ///         AND u.AktifMi = 1  -- Kullanıcı aktif
-        ///         AND b.HizmetBinasiId = @HizmetBinasiId  -- Aynı hizmet binasında
-        ///         AND b.BankoAktiflik = 1 AND b.SilindiMi = 0
-        ///   )
-        /// ORDER BY kmi.MenuSira
-        /// </summary>
+        
         public async Task<List<KioskAltIslemDto>> GetKioskMenuAltIslemleriByKioskIdAsync(int kioskId, int kioskMenuId)
         {
+            /*
+            SELECT DISTINCT
+                -- Alt İşlem Bilgileri
+                kmi.KioskMenuIslemId,
+                kmi.KanalAltId,
+                ka.KanalAltAdi,
+                kn.KanalAdi,
+                kmi.MenuSira,
+                kai.KanalAltIslemId
+
+            FROM dbo.CMN_HizmetBinalari hb WITH (NOLOCK)
+                INNER JOIN dbo.SIR_KioskTanim AS k WITH (NOLOCK) 
+                    ON hb.HizmetBinasiId = k.HizmetBinasiId
+                INNER JOIN dbo.SIR_KioskMenuAtama AS kma WITH (NOLOCK)
+                    ON k.KioskId = kma.KioskId
+                INNER JOIN dbo.SIR_KioskMenuTanim AS km WITH (NOLOCK)
+                    ON kma.KioskMenuId = km.KioskMenuId
+                INNER JOIN dbo.SIR_KioskMenuIslem AS kmi WITH (NOLOCK)
+                    ON km.KioskMenuId = kmi.KioskMenuId
+                INNER JOIN dbo.SIR_KanallarAlt AS ka WITH (NOLOCK)
+                    ON kmi.KanalAltId = ka.KanalAltId
+                INNER JOIN dbo.SIR_Kanallar AS kn WITH (NOLOCK)
+                    ON ka.KanalId = kn.KanalId
+                INNER JOIN dbo.SIR_KanalAltIslemleri AS kai WITH (NOLOCK)
+                    ON kai.KanalAltId = ka.KanalAltId 
+                    AND kai.HizmetBinasiId = k.HizmetBinasiId
+                INNER JOIN dbo.SIR_KanalPersonelleri AS kp WITH (NOLOCK)
+                    ON kp.KanalAltIslemId = kai.KanalAltIslemId
+                INNER JOIN dbo.CMN_Users AS u WITH (NOLOCK)
+                    ON u.TcKimlikNo = kp.TcKimlikNo
+
+            WHERE 
+                -- Kiosk ve Menü filtresi
+                k.KioskId = @kioskId
+                AND km.KioskMenuId = @kioskMenuId
+
+                -- Soft delete kontrolleri
+                AND hb.SilindiMi = 0
+                AND k.SilindiMi = 0
+                AND kma.SilindiMi = 0
+                AND km.SilindiMi = 0
+                AND kmi.SilindiMi = 0
+                AND ka.SilindiMi = 0
+
+                -- Aktiflik kontrolleri
+                AND hb.HizmetBinasiAktiflik = 1
+                AND k.Aktiflik = 1
+                AND kma.Aktiflik = 1
+                AND km.Aktiflik = 1
+                AND kmi.Aktiflik = 1
+                AND ka.Aktiflik = 1
+                AND u.BankoModuAktif = 1
+                AND kp.Uzmanlik != 0
+
+            ORDER BY kmi.MenuSira
+            */
+
             var today = DateTime.Today;
 
-            // Önce kiosk'un hizmet binası ID'sini al
-            var kiosk = await _context.Kiosklar
-                .AsNoTracking()
-                .Where(k => k.KioskId == kioskId && !k.SilindiMi)
-                .Select(k => new { k.HizmetBinasiId })
-                .FirstOrDefaultAsync();
-
-            if (kiosk == null)
-                return new List<KioskAltIslemDto>();
-
-            var hizmetBinasiId = kiosk.HizmetBinasiId;
-
-            // Ana sorgu: Menüdeki alt işlemleri getir
-            var query = from kmi in _context.KioskMenuIslemleri
+            // GetKioskMenulerByKioskIdAsync ile aynı yapıda tek sorgu
+            var query = from hb in _context.HizmetBinalari
+                        join k in _context.Kiosklar on hb.HizmetBinasiId equals k.HizmetBinasiId
+                        join kma in _context.KioskMenuAtamalari on k.KioskId equals kma.KioskId
+                        join km in _context.KioskMenuler on kma.KioskMenuId equals km.KioskMenuId
+                        join kmi in _context.KioskMenuIslemleri on km.KioskMenuId equals kmi.KioskMenuId
                         join ka in _context.KanallarAlt on kmi.KanalAltId equals ka.KanalAltId
-                        join k in _context.Kanallar on ka.KanalId equals k.KanalId
-                        join kai in _context.KanalAltIslemleri on new { ka.KanalAltId, HizmetBinasiId = hizmetBinasiId }
+                        join kn in _context.Kanallar on ka.KanalId equals kn.KanalId
+                        join kai in _context.KanalAltIslemleri on new { ka.KanalAltId, k.HizmetBinasiId }
                             equals new { kai.KanalAltId, kai.HizmetBinasiId }
-                        where kmi.KioskMenuId == kioskMenuId
+                        join kp in _context.KanalPersonelleri on kai.KanalAltIslemId equals kp.KanalAltIslemId
+                        join u in _context.Users on kp.TcKimlikNo equals u.TcKimlikNo
+                        where k.KioskId == kioskId
+                           && km.KioskMenuId == kioskMenuId
+                           // Soft delete kontrolleri
+                           && !hb.SilindiMi
+                           && !k.SilindiMi
+                           && !kma.SilindiMi
+                           && !km.SilindiMi
                            && !kmi.SilindiMi
-                           && kmi.Aktiflik == Aktiflik.Aktif
                            && !ka.SilindiMi
+                           && !kp.SilindiMi
+                           // Aktiflik kontrolleri
+                           && hb.HizmetBinasiAktiflik == Aktiflik.Aktif
+                           && k.Aktiflik == Aktiflik.Aktif
+                           && kma.Aktiflik == Aktiflik.Aktif
+                           && km.Aktiflik == Aktiflik.Aktif
+                           && kmi.Aktiflik == Aktiflik.Aktif
                            && ka.Aktiflik == Aktiflik.Aktif
-                           && !kai.SilindiMi
-                           && kai.Aktiflik == Aktiflik.Aktif
+                           && kp.Aktiflik == Aktiflik.Aktif  // KanalPersonel aktiflik kontrolü
+                           && u.BankoModuAktif == true
+                           && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok
                         select new
                         {
                             kmi.KioskMenuIslemId,
                             kmi.KanalAltId,
                             ka.KanalAltAdi,
-                            k.KanalAdi,
+                            kn.KanalAdi,
                             kmi.MenuSira,
-                            KanalAltIslemId = kai.KanalAltIslemId,
-                            HizmetBinasiId = hizmetBinasiId
+                            kai.KanalAltIslemId,
+                            k.HizmetBinasiId
                         };
 
-            var menuIslemler = await query
+            // Distinct ile benzersiz alt işlemleri al
+            var altIslemler = await query
                 .AsNoTracking()
+                .Select(x => new
+                {
+                    x.KioskMenuIslemId,
+                    x.KanalAltId,
+                    x.KanalAltAdi,
+                    x.KanalAdi,
+                    x.MenuSira,
+                    x.KanalAltIslemId,
+                    x.HizmetBinasiId
+                })
+                .Distinct()
                 .OrderBy(x => x.MenuSira)
                 .ToListAsync();
 
             var result = new List<KioskAltIslemDto>();
 
-            foreach (var islem in menuIslemler)
+            foreach (var islem in altIslemler)
             {
-                // Bu işlem için aktif personel var mı? (Yrd.Uzman+ ve banko modunda)
-                var aktifPersonelVar = await (
-                    from kp in _context.KanalPersonelleri
-                    join u in _context.Users on kp.TcKimlikNo equals u.TcKimlikNo
-                    join b in _context.Bankolar on u.AktifBankoId equals b.BankoId
-                    where kp.KanalAltIslemId == islem.KanalAltIslemId
-                       && kp.Aktiflik == Aktiflik.Aktif
-                       && !kp.SilindiMi
-                       && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok  // En az Yrd.Uzman
-                       && u.BankoModuAktif == true
-                       && u.AktifBankoId != null
-                       && u.AktifMi == true
-                       && b.HizmetBinasiId == hizmetBinasiId
-                       && b.BankoAktiflik == Aktiflik.Aktif
-                       && !b.SilindiMi
-                    select kp.TcKimlikNo
-                ).AnyAsync();
+                // Bekleyen sıra sayısını hesapla
+                var bekleyenSayisi = await _context.Siralar
+                    .AsNoTracking()
+                    .CountAsync(s => s.KanalAltIslemId == islem.KanalAltIslemId
+                                  && s.HizmetBinasiId == islem.HizmetBinasiId
+                                  && s.BeklemeDurum == BeklemeDurum.Beklemede
+                                  && s.SiraAlisZamani.Date == today
+                                  && !s.SilindiMi);
 
-                // Sadece aktif personeli olan işlemleri ekle
-                if (aktifPersonelVar)
+                result.Add(new KioskAltIslemDto
                 {
-                    // Bekleyen sıra sayısını hesapla
-                    var bekleyenSayisi = await _context.Siralar
-                        .AsNoTracking()
-                        .CountAsync(s => s.KanalAltIslemId == islem.KanalAltIslemId
-                                      && s.HizmetBinasiId == hizmetBinasiId
-                                      && s.BeklemeDurum == BeklemeDurum.Beklemede
-                                      && s.SiraAlisZamani.Date == today
-                                      && !s.SilindiMi);
-
-                    result.Add(new KioskAltIslemDto
-                    {
-                        KioskMenuIslemId = islem.KioskMenuIslemId,
-                        KanalAltId = islem.KanalAltId,
-                        KanalAltAdi = islem.KanalAltAdi,
-                        KanalAdi = islem.KanalAdi,
-                        MenuSira = islem.MenuSira,
-                        BekleyenSiraSayisi = bekleyenSayisi,
-                        AktifPersonelVar = true,
-                        TahminiBeklemeSuresi = bekleyenSayisi * 5 // Ortalama 5 dk/sıra
-                    });
-                }
+                    KioskMenuIslemId = islem.KioskMenuIslemId,
+                    KanalAltId = islem.KanalAltId,
+                    KanalAltIslemId = islem.KanalAltIslemId, // Sıra alma için gerekli
+                    KanalAltAdi = islem.KanalAltAdi,
+                    KanalAdi = islem.KanalAdi,
+                    MenuSira = islem.MenuSira,
+                    BekleyenSiraSayisi = bekleyenSayisi,
+                    AktifPersonelVar = true,
+                    TahminiBeklemeSuresi = bekleyenSayisi * 5 // Ortalama 5 dk/sıra
+                });
             }
+
+            return result;
+        }
+
+        public async Task<SiraNoBilgisiDto?> GetSiraNoAsync(int kanalAltIslemId)
+        {
+            /*
+            =============================================
+            Stored Procedure: sp_GetSiraNo
+            Açıklama: KanalAltIslemId üzerinden sıra numarası bilgisini getirir
+            NOT: GetKioskMenuAltIslemleriByKioskIdAsync ile aynı mantık - BankoKullanici join'i yok
+            =============================================
+            CREATE PROCEDURE [dbo].[sp_GetSiraNo]
+                @KanalAltIslemId INT
+            AS
+            BEGIN
+                SET NOCOUNT ON;
+
+                DECLARE @Bugun DATE = CAST(GETDATE() AS DATE)
+
+                ;WITH MaxSiraNo AS (
+                    -- Aynı KanalIslemId'ye sahip TÜM KanalAltIslemleri için bugünkü max sıra no
+                    SELECT 
+                        kai_target.KanalAltIslemId,
+                        kai_target.KanalIslemId,
+                        ISNULL(MAX(s.SiraNo), ki.BaslangicNumara - 1) AS LastNumber,
+                        ki.BaslangicNumara,
+                        ki.BitisNumara
+                    FROM SIR_KanalAltIslemleri kai_target WITH (NOLOCK)
+                    INNER JOIN SIR_KanalIslemleri ki WITH (NOLOCK) ON kai_target.KanalIslemId = ki.KanalIslemId
+                    LEFT JOIN SIR_KanalAltIslemleri kai_all WITH (NOLOCK) ON kai_all.KanalIslemId = kai_target.KanalIslemId
+                        AND kai_all.Aktiflik = 1 AND kai_all.SilindiMi = 0
+                    LEFT JOIN SIR_Siralar s WITH (NOLOCK) ON kai_all.KanalAltIslemId = s.KanalAltIslemId
+                        AND CAST(s.SiraAlisZamani AS DATE) = @Bugun AND s.SilindiMi = 0
+                    WHERE kai_target.KanalAltIslemId = @KanalAltIslemId
+                    AND kai_target.SilindiMi = 0
+                    AND ki.SilindiMi = 0
+                    GROUP BY kai_target.KanalAltIslemId, kai_target.KanalIslemId, ki.BaslangicNumara, ki.BitisNumara
+                )
+                SELECT TOP 1
+                    CASE 
+                        WHEN msn.LastNumber >= msn.BaslangicNumara AND msn.LastNumber < msn.BitisNumara 
+                        THEN msn.LastNumber + 1 
+                        ELSE msn.BaslangicNumara 
+                    END AS SiraNo,
+                    hb.HizmetBinasiId,
+                    hb.HizmetBinasiAdi,
+                    ka.KanalAltAdi,
+                    kai.KanalAltIslemId,
+                    msn.KanalIslemId,
+                    msn.BaslangicNumara,
+                    msn.BitisNumara
+                FROM SIR_KanalAltIslemleri kai WITH (NOLOCK)
+                INNER JOIN MaxSiraNo msn ON kai.KanalAltIslemId = msn.KanalAltIslemId
+                INNER JOIN SIR_KanallarAlt ka WITH (NOLOCK) ON kai.KanalAltId = ka.KanalAltId
+                INNER JOIN CMN_HizmetBinalari hb WITH (NOLOCK) ON kai.HizmetBinasiId = hb.HizmetBinasiId
+                INNER JOIN SIR_KanalPersonelleri kp WITH (NOLOCK) ON kai.KanalAltIslemId = kp.KanalAltIslemId
+                INNER JOIN CMN_Users u WITH (NOLOCK) ON kp.TcKimlikNo = u.TcKimlikNo
+                WHERE kai.Aktiflik = 1 AND kai.SilindiMi = 0
+                AND kai.KanalAltIslemId = @KanalAltIslemId
+                AND kp.Aktiflik = 1 AND kp.SilindiMi = 0
+                AND kp.Uzmanlik != 0  -- En az Yrd.Uzman
+                AND u.BankoModuAktif = 1
+            END
+            GO
+
+            -- Kullanım: EXEC sp_GetSiraNo @KanalAltIslemId = 5
+            */
+
+            var today = DateTime.Today;
+
+            // Tek sorgu ile tüm işlemi yap (CTE benzeri yapı)
+            // 1. Önce max sıra numarasını hesapla (aynı KanalIslemId'ye sahip tüm KanalAltIslemleri için)
+            var maxSiraNoQuery = from kai_target in _context.KanalAltIslemleri
+                                 join ki in _context.KanalIslemleri on kai_target.KanalIslemId equals ki.KanalIslemId
+                                 where kai_target.KanalAltIslemId == kanalAltIslemId
+                                    && !kai_target.SilindiMi
+                                    && !ki.SilindiMi
+                                 select new { kai_target.KanalIslemId, ki.BaslangicNumara, ki.BitisNumara };
+
+            var kanalIslemBilgi = await maxSiraNoQuery.FirstOrDefaultAsync();
+            if (kanalIslemBilgi == null)
+                return null;
+
+            // Aynı KanalIslemId'ye sahip tüm KanalAltIslemleri için bugünkü max sıra no
+            var maxSiraNo = await (
+                from kai_all in _context.KanalAltIslemleri
+                join s in _context.Siralar on kai_all.KanalAltIslemId equals s.KanalAltIslemId into sJoin
+                from sLeft in sJoin.DefaultIfEmpty()
+                where kai_all.KanalIslemId == kanalIslemBilgi.KanalIslemId
+                   && kai_all.Aktiflik == Aktiflik.Aktif
+                   && !kai_all.SilindiMi
+                   && (sLeft == null || (sLeft.SiraAlisZamani.Date == today && !sLeft.SilindiMi))
+                select (int?)sLeft.SiraNo
+            ).MaxAsync();
+
+            var lastNumber = maxSiraNo ?? (kanalIslemBilgi.BaslangicNumara - 1);
+
+            // 2. Personel kontrolü ve sonuç sorgusu (GetKioskMenuAltIslemleriByKioskIdAsync ile BİREBİR aynı mantık)
+            var result = await (
+                from kai in _context.KanalAltIslemleri
+                join ka in _context.KanallarAlt on kai.KanalAltId equals ka.KanalAltId
+                join hb in _context.HizmetBinalari on kai.HizmetBinasiId equals hb.HizmetBinasiId
+                join kp in _context.KanalPersonelleri on kai.KanalAltIslemId equals kp.KanalAltIslemId
+                join u in _context.Users on kp.TcKimlikNo equals u.TcKimlikNo
+                where kai.KanalAltIslemId == kanalAltIslemId
+                   && !kp.SilindiMi
+                   && kp.Aktiflik == Aktiflik.Aktif
+                   && u.BankoModuAktif == true
+                   && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok  // En az Yrd.Uzman
+                select new SiraNoBilgisiDto
+                {
+                    // Sıra numarası hesaplama: aralık kontrolü
+                    SiraNo = lastNumber >= kanalIslemBilgi.BaslangicNumara && lastNumber < kanalIslemBilgi.BitisNumara
+                        ? lastNumber + 1
+                        : kanalIslemBilgi.BaslangicNumara,
+                    HizmetBinasiId = hb.HizmetBinasiId,
+                    HizmetBinasiAdi = hb.HizmetBinasiAdi,
+                    KanalAltAdi = ka.KanalAltAdi,
+                    KanalAltIslemId = kai.KanalAltIslemId,
+                    KanalIslemId = kanalIslemBilgi.KanalIslemId,
+                    BaslangicNumara = kanalIslemBilgi.BaslangicNumara,
+                    BitisNumara = kanalIslemBilgi.BitisNumara
+                }
+            ).FirstOrDefaultAsync();
 
             return result;
         }
