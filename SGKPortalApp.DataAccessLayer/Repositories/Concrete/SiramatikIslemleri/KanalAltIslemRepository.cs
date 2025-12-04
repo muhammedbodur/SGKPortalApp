@@ -64,7 +64,6 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .Include(kai => kai.KanalIslem)
                 .Include(kai => kai.Siralar)
                 .Include(kai => kai.KanalPersonelleri)
-                    .ThenInclude(kp => kp.User)
                 .FirstOrDefaultAsync(kai => kai.KanalAltIslemId == kanalAltIslemId);
         }
 
