@@ -72,9 +72,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
         Task<int> GetBekleyenSiraSayisiAsync(int hizmetBinasiId, int kanalAltIslemId);
 
         /// <summary>
-        /// Belirli bir hizmet binası ve KanalAlt için banko modunda aktif personel (Yrd.Uzman+) var mı?
-        /// NOT: kanalAltId parametresi KanalAlt tablosundaki ID'dir (KanalAltIslem değil!)
+        /// Belirli bir KanalAltIslem için banko modunda aktif personel (Yrd.Uzman+) var mı?
+        /// KanalAltIslem zaten HizmetBinasiId bilgisini içerir, bu yüzden sadece kanalAltIslemId yeterli
         /// </summary>
-        Task<bool> HasAktifPersonelAsync(int hizmetBinasiId, int kanalAltId);
+        Task<bool> HasAktifPersonelAsync(int kanalAltIslemId);
     }
 }

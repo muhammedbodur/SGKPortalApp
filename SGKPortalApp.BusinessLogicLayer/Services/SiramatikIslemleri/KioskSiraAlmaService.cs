@@ -118,7 +118,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 }
 
                 // 3. Bu KanalAltIslem'e atanmış ve banko modunda aktif personel var mı kontrol et
-                var aktifPersonelVar = await HasAktifPersonelAsync(request.HizmetBinasiId, kanalAltIslem.KanalAltIslemId);
+                var aktifPersonelVar = await HasAktifPersonelAsync(kanalAltIslem.KanalAltIslemId);
                 if (!aktifPersonelVar)
                 {
                     _logger.LogWarning("⚠️ Kiosk sıra alma: Aktif personel yok. HizmetBinasiId: {HizmetBinasiId}, KanalAltIslemId: {KanalAltIslemId}",
@@ -232,17 +232,35 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         }
 
         /// <summary>
-        /// Belirli bir hizmet binası ve KanalAlt için banko modunda aktif personel (Yrd.Uzman+) var mı?
-        /// NOT: kanalAltId parametresi KanalAlt tablosundaki ID'dir (KanalAltIslem değil!)
+        /// Belirli bir KanalAltIslem için banko modunda aktif personel (Yrd.Uzman+) var mı?
+        /// KanalAltIslem zaten HizmetBinasiId bilgisini içerir, bu yüzden sadece kanalAltIslemId yeterli
         /// </summary>
-        public async Task<bool> HasAktifPersonelAsync(int hizmetBinasiId, int kanalAltId)
+        public async Task<bool> HasAktifPersonelAsync(int kanalAltIslemId)
         {
-            var aktifPersoneller = await _siramatikQueryRepository.GetBankoModundakiYetkiliPersonellerAsync(hizmetBinasiId, kanalAltId);
-            
-            _logger.LogDebug("🔍 HasAktifPersonelAsync: HizmetBinasiId={HizmetBinasiId}, KanalAltId={KanalAltId}, AktifPersonelSayisi={Count}, Personeller={Personeller}",
-                hizmetBinasiId, kanalAltId, aktifPersoneller.Count, string.Join(",", aktifPersoneller));
-            
-            return aktifPersoneller.Any();
+            // KanalAltIslem'i personelleri ile birlikte getir
+            var kanalAltIslem = await _kanalAltIslemRepository.GetWithDetailsAsync(kanalAltIslemId);
+
+            if (kanalAltIslem == null)
+            {
+                _logger.LogWarning("⚠️ HasAktifPersonelAsync: KanalAltIslem bulunamadı. KanalAltIslemId={KanalAltIslemId}",
+                    kanalAltIslemId);
+                return false;
+            }
+
+            // Aktif, yetkili (en az Yrd.Uzman) ve banko modunda olan personel var mı?
+            var aktifPersonelVar = kanalAltIslem.KanalPersonelleri?.Any(kp =>
+                kp.Aktiflik == Aktiflik.Aktif &&
+                !kp.SilindiMi &&
+                kp.Uzmanlik != PersonelUzmanlik.BilgisiYok &&
+                kp.User != null &&
+                kp.User.BankoModuAktif &&
+                kp.User.AktifMi
+            ) ?? false;
+
+            _logger.LogDebug("🔍 HasAktifPersonelAsync: KanalAltIslemId={KanalAltIslemId}, AktifPersonelVar={AktifPersonelVar}",
+                kanalAltIslemId, aktifPersonelVar);
+
+            return aktifPersonelVar;
         }
 
         // ═══════════════════════════════════════════════════════
