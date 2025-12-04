@@ -11,14 +11,30 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramat
     public interface IKioskSimulatorApiService
     {
         /// <summary>
-        /// Hizmet binasındaki kiosk menülerini listele
+        /// Tüm aktif kiosk'ları listele
+        /// </summary>
+        Task<ServiceResult<List<KioskResponseDto>>> GetAllKiosklarAsync();
+
+        /// <summary>
+        /// Belirli bir kiosk'un menülerini listele (Yeni Yapı)
         /// Sadece aktif personeli (Yrd.Uzman+) olan menüler döner
+        /// </summary>
+        Task<ServiceResult<List<KioskMenuDto>>> GetKioskMenulerByKioskIdAsync(int kioskId);
+
+        /// <summary>
+        /// Seçilen menüdeki alt işlemleri kiosk bazlı listele (Yeni Yapı)
+        /// Sadece aktif personeli (Yrd.Uzman+) olan işlemler döner
+        /// </summary>
+        Task<ServiceResult<List<KioskAltIslemDto>>> GetKioskMenuAltIslemleriByKioskIdAsync(int kioskId, int kioskMenuId);
+
+        // ESKİ METODLAR (Geriye uyumluluk için)
+        /// <summary>
+        /// [ESKİ] Hizmet binasındaki kiosk menülerini listele
         /// </summary>
         Task<ServiceResult<List<KioskMenuDto>>> GetKioskMenulerAsync(int hizmetBinasiId);
 
         /// <summary>
-        /// Seçilen kiosk menüsündeki alt işlemleri listele
-        /// Sadece aktif personeli (Yrd.Uzman+) olan işlemler döner
+        /// [ESKİ] Seçilen kiosk menüsündeki alt işlemleri listele
         /// </summary>
         Task<ServiceResult<List<KioskAltIslemDto>>> GetKioskMenuAltIslemleriAsync(int hizmetBinasiId, int kioskMenuId);
 

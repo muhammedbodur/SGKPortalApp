@@ -917,5 +917,105 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
 
             return result;
         }
+
+        /// <summary>
+        /// Belirli bir Kiosk'taki seçilen menü için alt kanal işlemlerini getirir
+        /// Sadece aktif personel (Yrd.Uzman+) olan ve banko modunda bulunan işlemler döner
+        /// </summary>
+        public async Task<List<KioskAltIslemDto>> GetKioskMenuAltIslemleriByKioskIdAsync(int kioskId, int kioskMenuId)
+        {
+            var today = DateTime.Today;
+
+            // Önce kiosk'un hizmet binası ID'sini al
+            var kiosk = await _context.Kiosklar
+                .AsNoTracking()
+                .Where(k => k.KioskId == kioskId && !k.SilindiMi)
+                .Select(k => new { k.HizmetBinasiId })
+                .FirstOrDefaultAsync();
+
+            if (kiosk == null)
+                return new List<KioskAltIslemDto>();
+
+            var hizmetBinasiId = kiosk.HizmetBinasiId;
+
+            // Ana sorgu: Menüdeki alt işlemleri getir
+            var query = from kmi in _context.KioskMenuIslemleri
+                        join ka in _context.KanallarAlt on kmi.KanalAltId equals ka.KanalAltId
+                        join k in _context.Kanallar on ka.KanalId equals k.KanalId
+                        join kai in _context.KanalAltIslemleri on new { ka.KanalAltId, HizmetBinasiId = hizmetBinasiId }
+                            equals new { kai.KanalAltId, kai.HizmetBinasiId }
+                        where kmi.KioskMenuId == kioskMenuId
+                           && !kmi.SilindiMi
+                           && kmi.Aktiflik == Aktiflik.Aktif
+                           && !ka.SilindiMi
+                           && ka.Aktiflik == Aktiflik.Aktif
+                           && !kai.SilindiMi
+                           && kai.Aktiflik == Aktiflik.Aktif
+                        select new
+                        {
+                            kmi.KioskMenuIslemId,
+                            kmi.KanalAltId,
+                            ka.KanalAltAdi,
+                            k.KanalAdi,
+                            kmi.MenuSira,
+                            KanalAltIslemId = kai.KanalAltIslemId,
+                            HizmetBinasiId = hizmetBinasiId
+                        };
+
+            var menuIslemler = await query
+                .AsNoTracking()
+                .OrderBy(x => x.MenuSira)
+                .ToListAsync();
+
+            var result = new List<KioskAltIslemDto>();
+
+            foreach (var islem in menuIslemler)
+            {
+                // Bu işlem için aktif personel var mı? (Yrd.Uzman+ ve banko modunda)
+                var aktifPersonelVar = await (
+                    from kp in _context.KanalPersonelleri
+                    join u in _context.Users on kp.TcKimlikNo equals u.TcKimlikNo
+                    join b in _context.Bankolar on u.AktifBankoId equals b.BankoId
+                    where kp.KanalAltIslemId == islem.KanalAltIslemId
+                       && kp.Aktiflik == Aktiflik.Aktif
+                       && !kp.SilindiMi
+                       && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok  // En az Yrd.Uzman
+                       && u.BankoModuAktif == true
+                       && u.AktifBankoId != null
+                       && u.AktifMi == true
+                       && b.HizmetBinasiId == hizmetBinasiId
+                       && b.BankoAktiflik == Aktiflik.Aktif
+                       && !b.SilindiMi
+                    select kp.TcKimlikNo
+                ).AnyAsync();
+
+                // Sadece aktif personeli olan işlemleri ekle
+                if (aktifPersonelVar)
+                {
+                    // Bekleyen sıra sayısını hesapla
+                    var bekleyenSayisi = await _context.Siralar
+                        .AsNoTracking()
+                        .CountAsync(s => s.KanalAltIslemId == islem.KanalAltIslemId
+                                      && s.HizmetBinasiId == hizmetBinasiId
+                                      && s.BeklemeDurum == BeklemeDurum.Beklemede
+                                      && s.SiraAlisZamani.Date == today
+                                      && !s.SilindiMi);
+
+                    result.Add(new KioskAltIslemDto
+                    {
+                        KioskMenuIslemId = islem.KioskMenuIslemId,
+                        KanalAltId = islem.KanalAltId,
+                        KanalAltAdi = islem.KanalAltAdi,
+                        KanalAdi = islem.KanalAdi,
+                        MenuSira = islem.MenuSira,
+                        BekleyenSiraSayisi = bekleyenSayisi,
+                        AktifPersonelVar = true,
+                        TahminiBeklemeSuresi = bekleyenSayisi * 5 // Ortalama 5 dk/sıra
+                    });
+                }
+            }
+
+            return result;
+        }
     }
 }

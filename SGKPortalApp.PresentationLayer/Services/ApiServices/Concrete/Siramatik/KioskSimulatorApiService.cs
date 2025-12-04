@@ -24,7 +24,98 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         }
 
         /// <summary>
-        /// Hizmet binasındaki kiosk menülerini listele
+        /// Tüm aktif kiosk'ları listele
+        /// </summary>
+        public async Task<ServiceResult<List<KioskResponseDto>>> GetAllKiosklarAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("siramatik/kiosk");
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetAllKiosklarAsync failed: {Error}", error);
+                    return ServiceResult<List<KioskResponseDto>>.Fail("Kiosk listesi alınamadı");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<KioskResponseDto>>>();
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return ServiceResult<List<KioskResponseDto>>.Ok(apiResponse.Data, apiResponse.Message ?? "İşlem başarılı");
+                }
+
+                return ServiceResult<List<KioskResponseDto>>.Fail(apiResponse?.Message ?? "Kiosk listesi alınamadı");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetAllKiosklarAsync exception");
+                return ServiceResult<List<KioskResponseDto>>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Belirli bir kiosk'un menülerini listele (Yeni Yapı)
+        /// </summary>
+        public async Task<ServiceResult<List<KioskMenuDto>>> GetKioskMenulerByKioskIdAsync(int kioskId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{BaseEndpoint}/menuler-by-kiosk/{kioskId}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetKioskMenulerByKioskIdAsync failed: {Error}", error);
+                    return ServiceResult<List<KioskMenuDto>>.Fail("Menüler alınamadı");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<KioskMenuDto>>>();
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return ServiceResult<List<KioskMenuDto>>.Ok(apiResponse.Data, apiResponse.Message ?? "İşlem başarılı");
+                }
+
+                return ServiceResult<List<KioskMenuDto>>.Fail(apiResponse?.Message ?? "Menüler alınamadı");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetKioskMenulerByKioskIdAsync exception");
+                return ServiceResult<List<KioskMenuDto>>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Seçilen menüdeki alt işlemleri kiosk bazlı listele (Yeni Yapı)
+        /// </summary>
+        public async Task<ServiceResult<List<KioskAltIslemDto>>> GetKioskMenuAltIslemleriByKioskIdAsync(int kioskId, int kioskMenuId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"{BaseEndpoint}/alt-islemler-by-kiosk/{kioskId}/{kioskMenuId}");
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetKioskMenuAltIslemleriByKioskIdAsync failed: {Error}", error);
+                    return ServiceResult<List<KioskAltIslemDto>>.Fail("Alt işlemler alınamadı");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<KioskAltIslemDto>>>();
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return ServiceResult<List<KioskAltIslemDto>>.Ok(apiResponse.Data, apiResponse.Message ?? "İşlem başarılı");
+                }
+
+                return ServiceResult<List<KioskAltIslemDto>>.Fail(apiResponse?.Message ?? "Alt işlemler alınamadı");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetKioskMenuAltIslemleriByKioskIdAsync exception");
+                return ServiceResult<List<KioskAltIslemDto>>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        // ESKİ METODLAR (Geriye uyumluluk için)
+        /// <summary>
+        /// [ESKİ] Hizmet binasındaki kiosk menülerini listele
         /// </summary>
         public async Task<ServiceResult<List<KioskMenuDto>>> GetKioskMenulerAsync(int hizmetBinasiId)
         {
@@ -54,7 +145,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         }
 
         /// <summary>
-        /// Seçilen kiosk menüsündeki alt işlemleri listele
+        /// [ESKİ] Seçilen kiosk menüsündeki alt işlemleri listele
         /// </summary>
         public async Task<ServiceResult<List<KioskAltIslemDto>>> GetKioskMenuAltIslemleriAsync(int hizmetBinasiId, int kioskMenuId)
         {
