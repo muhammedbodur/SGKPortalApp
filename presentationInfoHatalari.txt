@@ -1,0 +1,1207 @@
+? Shared configuration yüklendi: D:\AspNetExamples\SGKPortalApp\appsettings.Shared.json
+?? Database Connection: Server=localhost\SQLEXPRESS;Database=SGKPortalDB;U...
+? HttpClient configured - BaseAddress: https://localhost:9080
+?? SGK Portal Services başlatılıyor...
+? Connection String alındı: Server=localhost\SQLEXPRESS;Database=SGKPortalDB;User Id=sa***;Password=***;TrustServerCertificate=true;MultipleActiv...
+?? Repository otomatik kayıt başlıyor...
+?? Assembly: SGKPortalApp.DataAccessLayer
+?? Bulunan interface'ler: 47
+?? Bulunan implementation'lar: 47
+  ? IAtanmaNedeniRepository -> AtanmaNedeniRepository
+  ? IAtanmaNedenleriRepository -> AtanmaNedenleriRepository
+  ? IBankoHareketRepository -> BankoHareketRepository
+  ? IBankoIslemRepository -> BankoIslemRepository
+  ? IBankoKullaniciRepository -> BankoKullaniciRepository
+  ? IBankoRepository -> BankoRepository
+  ? ICommonQueryRepository -> CommonQueryRepository
+  ? IDatabaseLogRepository -> DatabaseLogRepository
+  ? IDepartmanRepository -> DepartmanRepository
+  ? IHizmetBinasiRepository -> HizmetBinasiRepository
+  ? IHubBankoConnectionRepository -> HubBankoConnectionRepository
+  ? IHubConnectionRepository -> HubConnectionRepository
+  ? IHubTvConnectionRepository -> HubTvConnectionRepository
+  ? IIlceRepository -> IlceRepository
+  ? IIlRepository -> IlRepository
+  ? IKanalAltIslemRepository -> KanalAltIslemRepository
+  ? IKanalAltRepository -> KanalAltRepository
+  ? IKanalIslemRepository -> KanalIslemRepository
+  ? IKanalPersonelRepository -> KanalPersonelRepository
+  ? IKanalRepository -> KanalRepository
+  ? IKioskMenuAtamaRepository -> KioskMenuAtamaRepository
+  ? IKioskMenuIslemRepository -> KioskMenuIslemRepository
+  ? IKioskMenuRepository -> KioskMenuRepository
+  ? IKioskRepository -> KioskRepository
+  ? ILoginLogoutLogRepository -> LoginLogoutLogRepository
+  ? IModulAltRepository -> ModulAltRepository
+  ? IModulControllerIslemRepository -> ModulControllerIslemRepository
+  ? IModulControllerRepository -> ModulControllerRepository
+  ? IModulRepository -> ModulRepository
+  ? IPersonelCezaRepository -> PersonelCezaRepository
+  ? IPersonelCocukRepository -> PersonelCocukRepository
+  ? IPersonelDepartmanRepository -> PersonelDepartmanRepository
+  ? IPersonelEgitimRepository -> PersonelEgitimRepository
+  ? IPersonelEngelRepository -> PersonelEngelRepository
+  ? IPersonelHizmetRepository -> PersonelHizmetRepository
+  ? IPersonelImzaYetkisiRepository -> PersonelImzaYetkisiRepository
+  ? IPersonelRepository -> PersonelRepository
+  ? IPersonelYetkiRepository -> PersonelYetkiRepository
+  ? ISendikaRepository -> SendikaRepository
+  ? IServisRepository -> ServisRepository
+  ? ISiramatikQueryRepository -> SiramatikQueryRepository
+  ? ISiraRepository -> SiraRepository
+  ? ITvBankoRepository -> TvBankoRepository
+  ? ITvRepository -> TvRepository
+  ? IUnvanRepository -> UnvanRepository
+  ? IUserRepository -> UserRepository
+  ? IYetkiRepository -> YetkiRepository
+? 47 repository otomatik kayıt edildi
+
+?? Complex Query Repositories kaydediliyor...
+  ? ISiramatikQueryRepository -> SiramatikQueryRepository
+? Complex Query Repositories kayıt edildi
+
+?? SGK Portal Services hazır!
+
+?? Presentation Layer başlatılıyor...
+?? API URL: https://localhost:9080
+?? State Services kaydediliyor...
+  ? 3 State Service kayıt edildi
+?? AuthenticationServices servisleri kaydediliyor...
+    ?? Bulunan interface'ler: 1
+    ?? Bulunan implementation'lar: 4
+    ? ICookieAuthService -> CookieAuthService
+    ?? AuthenticationServices: 1 servis kayıt edildi
+?? UserSessionServices servisleri kaydediliyor...
+    ?? Bulunan interface'ler: 1
+    ?? Bulunan implementation'lar: 1
+    ? IUserInfoService -> UserInfoService
+    ?? UserSessionServices: 1 servis kayıt edildi
+?? StorageServices servisleri kaydediliyor...
+    ??  StorageServices modülünde servis bulunamadı
+?? UIServices servisleri kaydediliyor...
+    ?? Bulunan interface'ler: 5
+    ?? Bulunan implementation'lar: 15
+    ? IImageCacheService -> ImageCacheService
+    ? ILoadingService -> LoadingService
+    ? IModalService -> ModalService
+    ? IThemeService -> ThemeService
+    ? IToastService -> ToastService
+    ?? UIServices: 5 servis kayıt edildi
+?? Auth API Services kaydediliyor...
+    ?? Bulunan interface'ler: 1
+    ?? Bulunan implementation'lar: 5
+    ? IAuthApiService -> AuthApiService (Typed HttpClient)
+    ?? Auth: 1 API service kayıt edildi
+?? Common API Services kaydediliyor...
+    ?? Bulunan interface'ler: 4
+    ?? Bulunan implementation'lar: 35
+    ? IHizmetBinasiApiService -> HizmetBinasiApiService (Typed HttpClient)
+    ? IIlApiService -> IlApiService (Typed HttpClient)
+    ? IIlceApiService -> IlceApiService (Typed HttpClient)
+    ? IUserApiService -> UserApiService (Typed HttpClient)
+    ?? Common: 4 API service kayıt edildi
+?? Personel API Services kaydediliyor...
+    ?? Bulunan interface'ler: 7
+    ?? Bulunan implementation'lar: 55
+    ? IAtanmaNedeniApiService -> AtanmaNedeniApiService (Typed HttpClient)
+    ? IDepartmanApiService -> DepartmanApiService (Typed HttpClient)
+    ? IPersonelApiService -> PersonelApiService (Typed HttpClient)
+    ? IPersonelCocukApiService -> PersonelCocukApiService (Typed HttpClient)
+    ? ISendikaApiService -> SendikaApiService (Typed HttpClient)
+    ? IServisApiService -> ServisApiService (Typed HttpClient)
+    ? IUnvanApiService -> UnvanApiService (Typed HttpClient)
+    ?? Personel: 7 API service kayıt edildi
+?? Siramatik API Services kaydediliyor...
+    ?? Bulunan interface'ler: 14
+    ?? Bulunan implementation'lar: 135
+    ? IBankoApiService -> BankoApiService (Typed HttpClient)
+    ? IKanalAltApiService -> KanalAltApiService (Typed HttpClient)
+    ? IKanalAltIslemApiService -> KanalAltIslemApiService (Typed HttpClient)
+    ? IKanalApiService -> KanalApiService (Typed HttpClient)
+    ? IKanalIslemApiService -> KanalIslemApiService (Typed HttpClient)
+    ? IKanalPersonelApiService -> KanalPersonelApiService (Typed HttpClient)
+    ? IKioskApiService -> KioskApiService (Typed HttpClient)
+    ? IKioskMenuApiService -> KioskMenuApiService (Typed HttpClient)
+    ? IKioskMenuAtamaApiService -> KioskMenuAtamaApiService (Typed HttpClient)
+    ? IKioskMenuIslemApiService -> KioskMenuIslemApiService (Typed HttpClient)
+    ? IKioskSimulatorApiService -> KioskSimulatorApiService (Typed HttpClient)
+    ? ISiraCagirmaApiService -> SiraCagirmaApiService (Typed HttpClient)
+    ? ISiraYonlendirmeApiService -> SiraYonlendirmeApiService (Typed HttpClient)
+    ? ITvApiService -> TvApiService (Typed HttpClient)
+    ?? Siramatik: 14 API service kayıt edildi
+?? Pdks API Services kaydediliyor...
+    ??  Pdks modülünde API service bulunamadı
+?? Eshot API Services kaydediliyor...
+    ??  Eshot modülünde API service bulunamadı
+?? Presentation Layer hazır!
+
+? ServerAuthenticationStateProvider MANUEL kayıt edildi
+? SignalR Hub servisleri kaydedildi
+? SignalR Hub endpoints: /hubs/siramatik, /hubs/tv
+warn: Microsoft.EntityFrameworkCore.Model.Validation[10622]
+      Entity 'Modul' has a global query filter defined and is the required end of a relationship with the entity 'ModulAlt'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[10400]
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[10625]
+      The foreign key property 'PersonelYetki.YetkiId1' was created in shadow state because a conflicting property with the simple name 'YetkiId' exists in the entity type, but is either not mapped, is already used for another relationship, or is incompatible with the associated primary key type. See https://aka.ms/efcore-relationships for information on mapping relationships in EF Core.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[10625]
+      The foreign key property 'Banko.HizmetBinasiId1' was created in shadow state because a conflicting property with the simple name 'HizmetBinasiId' exists in the entity type, but is either not mapped, is already used for another relationship, or is incompatible with the associated primary key type. See https://aka.ms/efcore-relationships for information on mapping relationships in EF Core.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[10625]
+      The foreign key property 'Tv.HizmetBinasiId1' was created in shadow state because a conflicting property with the simple name 'HizmetBinasiId' exists in the entity type, but is either not mapped, is already used for another relationship, or is incompatible with the associated primary key type. See https://aka.ms/efcore-relationships for information on mapping relationships in EF Core.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'UserType' property 'UserType' on entity type 'User' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value '0', since this is the CLR default for the 'UserType' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'Aktiflik' property 'DepartmanAktiflik' on entity type 'Departman' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'Aktiflik' property 'ServisAktiflik' on entity type 'Servis' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'Aktiflik' property 'UnvanAktiflik' on entity type 'Unvan' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'Aktiflik' property 'BankoAktiflik' on entity type 'Banko' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'Aktiflik' property 'Aktiflik' on entity type 'Kiosk' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'Aktiflik' property 'Aktiflik' on entity type 'KioskMenu' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'Aktiflik' property 'TvAktiflik' on entity type 'Tv' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (60ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (32ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT [MigrationId], [ProductVersion]
+      FROM [__EFMigrationsHistory]
+      ORDER BY [MigrationId];
+? Veritabanı güncel
+
+╔════════════════════════════════════════════════════════╗
+║      SGK PORTAL PRESENTATION BAŞLATILIYOR...           ║
+╚════════════════════════════════════════════════════════╝
+?? Ortam: Development
+?? HTTPS URL: https://localhost:8080
+?? HTTP URL: http://localhost:8081
+?? API URL: https://localhost:9080
+?? Database: Server=localhost\SQLEXPRESS
+╚════════════════════════════════════════════════════════╝
+
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: https://localhost:8080
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:8081
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 5248.2581ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 4848.5027ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 5248.2191ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 5273.7238ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 5273.7317ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 4870.518ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 284.6926ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 284.9043ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: igAgnx41vcQhReBGAsu_ig - Kullanıcı: AHMET DEMİRAL (TC: 16406457430)
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 31.1561ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 31.3889ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=6c84f8b1-7e0e-45a6-99b5-d3dcf660dab1
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 25.4748ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 25.6833ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: eZDgJEl918gCPsLJzA2ULw - Kullanıcı: Muhammed Bodur (TC: 28165202398)
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=cb0f80be-6566-4817-83bf-9b878bbc3f7e
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 140.8204ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 141.0706ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 121.8498ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 122.0235ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/active/28165202398
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/active/28165202398
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/active/16406457430
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/active/16406457430
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 63.1083ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 63.3037ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 63.8658ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 64.185ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 51.1613ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 51.3236ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 941.7606ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 941.8775ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 142.0979ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 142.2566ms - 200
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 943.1479ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 943.3094ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 80.802ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 80.954ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: wejXKOyTg7P_zLGXxJA2vw - Kullanıcı: Muhammed Bodur (TC: 28165202398)
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=cb0f80be-6566-4817-83bf-9b878bbc3f7e
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/hub-connections/connect
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/hub-connections/connect
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/hub-connections/connect
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/hub-connections/connect
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 106.3438ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 106.5514ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/active/28165202398
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/active/28165202398
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 47.3935ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 47.5756ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/hub-connections/connect
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/hub-connections/connect
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 37.3948ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 37.7027ms - 200
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/kiosk
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/kiosk
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 44.8412ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 45.0441ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 1212.3316ms - 200
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 1212.1117ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 1212.2876ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 1212.5376ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: igAgnx41vcQhReBGAsu_ig | TC: 16406457430 | Type: MainLayout | IP: 127.0.0.1
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: eZDgJEl918gCPsLJzA2ULw | TC: 28165202398 | Type: MainLayout | IP: 127.0.0.1
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=False
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=True
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu algılandı: 16406457430
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 1082.416ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 1082.5739ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: wejXKOyTg7P_zLGXxJA2vw | TC: 28165202398 | Type: MainLayout | IP: 127.0.0.1
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=False
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/personel/16406457430/active-banko
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/personel/16406457430/active-banko
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/eZDgJEl918gCPsLJzA2ULw
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/eZDgJEl918gCPsLJzA2ULw
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 92.6454ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 92.8689ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Personel bağlantısı koptu: 28165202398
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request DELETE https://localhost:9080/api/hub-connections/eZDgJEl918gCPsLJzA2ULw
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request DELETE https://localhost:9080/api/hub-connections/eZDgJEl918gCPsLJzA2ULw
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.ClientHandler[101]
+      Received HTTP response headers after 724.398ms - 200
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.LogicalHandler[101]
+      End processing HTTP request after 724.5713ms - 200
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 117.9605ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 118.1123ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Aktif banko bulundu: Banko#19, TabId beklenen: , gelen: 6c84f8b1-7e0e-45a6-99b5-d3dcf660dab1
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/hub-connections/banko/transfer
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/hub-connections/banko/transfer
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 151.2487ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 151.4354ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Bağlantı koptu: eZDgJEl918gCPsLJzA2ULw - Kullanıcı: Muhammed Bodur
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 420.139ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 420.665ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request PUT https://localhost:9080/api/hub-connections/igAgnx41vcQhReBGAsu_ig/type
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request PUT https://localhost:9080/api/hub-connections/igAgnx41vcQhReBGAsu_ig/type
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 37.6536ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 37.7986ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request DELETE https://localhost:9080/api/hub-connections/Qv1CYOZLZGxHpZ_N1MyYhA
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request DELETE https://localhost:9080/api/hub-connections/Qv1CYOZLZGxHpZ_N1MyYhA
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 15.2157ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 15.3919ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko bağlantısı yenilendi: 16406457430 -> HubConnection#igAgnx41vcQhReBGAsu_ig
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/wejXKOyTg7P_zLGXxJA2vw
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/wejXKOyTg7P_zLGXxJA2vw
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 17.3274ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 17.8731ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Personel bağlantısı koptu: 28165202398
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request DELETE https://localhost:9080/api/hub-connections/wejXKOyTg7P_zLGXxJA2vw
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request DELETE https://localhost:9080/api/hub-connections/wejXKOyTg7P_zLGXxJA2vw
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 16.0002ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 16.1945ms - 200
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 20.7295ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 20.9351ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Bağlantı koptu: wejXKOyTg7P_zLGXxJA2vw - Kullanıcı: Muhammed Bodur
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 17.0814ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 17.2022ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 224.8591ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 224.9989ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 24.8958ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 25.719ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 29.4527ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 31.5157ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 20.154ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 20.3412ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: WASmBVqqu1yowuHjmv0plA - Kullanıcı: Muhammed Bodur (TC: 28165202398)
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=cb0f80be-6566-4817-83bf-9b878bbc3f7e
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 22.5649ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 22.8122ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/active/28165202398
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/active/28165202398
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 20.6599ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 20.8598ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/hub-connections/connect
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/hub-connections/connect
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/kiosk
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/kiosk
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.ClientHandler[101]
+      Received HTTP response headers after 59.8631ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 64.7857ms - 200
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.LogicalHandler[101]
+      End processing HTTP request after 59.9882ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 65.0017ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 120.6132ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 120.7168ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: WASmBVqqu1yowuHjmv0plA | TC: 28165202398 | Type: MainLayout | IP: 127.0.0.1
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=False
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 27.2371ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 27.3527ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 22.4914ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 22.7799ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/igAgnx41vcQhReBGAsu_ig
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/igAgnx41vcQhReBGAsu_ig
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 14.5719ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 14.7276ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/banko-connection/836
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/banko-connection/836
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 149.3776ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 149.6115ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 130.4515ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 130.7987ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/igAgnx41vcQhReBGAsu_ig
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/igAgnx41vcQhReBGAsu_ig
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 45.0564ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 45.1644ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/banko-connection/836
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/banko-connection/836
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 31.9395ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 32.0682ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko#19 bağlantısı koptu (geçici olabilir): 16406457430
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request DELETE https://localhost:9080/api/hub-connections/igAgnx41vcQhReBGAsu_ig
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request DELETE https://localhost:9080/api/hub-connections/igAgnx41vcQhReBGAsu_ig
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 66.1577ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 66.2667ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 53.6549ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 53.745ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Bağlantı koptu: igAgnx41vcQhReBGAsu_ig - Kullanıcı: AHMET DEMİRAL
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 104.3765ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 104.623ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 180.5648ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 180.6537ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 955.1007ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 955.1878ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 279.1663ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 279.2445ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 44.0018ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 44.1143ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: QN_bNvgD9sj2tkzgMVYNtA - Kullanıcı: AHMET DEMİRAL (TC: 16406457430)
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=6c84f8b1-7e0e-45a6-99b5-d3dcf660dab1
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 164.2546ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 166.833ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/active/16406457430
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/active/16406457430
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 58.8303ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 58.9057ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/hub-connections/connect
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/hub-connections/connect
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 196.0399ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 196.1444ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: QN_bNvgD9sj2tkzgMVYNtA | TC: 16406457430 | Type: MainLayout | IP: 127.0.0.1
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=True
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu algılandı: 16406457430
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/personel/16406457430/active-banko
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/personel/16406457430/active-banko
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 32.5925ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 32.696ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Aktif banko bulundu: Banko#19, TabId beklenen: 6c84f8b1-7e0e-45a6-99b5-d3dcf660dab1, gelen: 6c84f8b1-7e0e-45a6-99b5-d3dcf660dab1
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/hub-connections/banko/transfer
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/hub-connections/banko/transfer
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/banko/personel/16406457430/banko
+info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/banko/personel/16406457430/banko
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 73.0727ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 73.1712ms - 200
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 165.7439ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 165.8557ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request PUT https://localhost:9080/api/hub-connections/QN_bNvgD9sj2tkzgMVYNtA/type
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request PUT https://localhost:9080/api/hub-connections/QN_bNvgD9sj2tkzgMVYNtA/type
+info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/banko/personel/16406457430/banko
+info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/banko/personel/16406457430/banko
+?? State senkronize edildi - Pinned: True, Visible: True
+? SiraCagirmaPanel JavaScript initialized
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 152.6145ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 153.0968ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko bağlantısı yenilendi: 16406457430 -> HubConnection#QN_bNvgD9sj2tkzgMVYNtA
+info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[101]
+      Received HTTP response headers after 644.9542ms - 200
+info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[101]
+      Received HTTP response headers after 585.9443ms - 200
+info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[101]
+      End processing HTTP request after 645.0462ms - 200
+info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[101]
+      End processing HTTP request after 586.2882ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout - Banko modu state senkronize edildi: Banko#19
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 15.3409ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 15.4245ms - 200
+info: SGKPortalApp.PresentationLayer.Components.Siramatik.BankoModeWidget[0]
+      ?? BankoModeWidget LoadData: 16406457430 - Banko Modu: True
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 57.0658ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 57.1338ms - 200
+info: System.Net.Http.HttpClient.ISiraCagirmaApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/siramatik/sira-cagirma/banko-panel/16406457430
+info: System.Net.Http.HttpClient.ISiraCagirmaApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/siramatik/sira-cagirma/banko-panel/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 12.382ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 12.4651ms - 200
+info: System.Net.Http.HttpClient.ISiraCagirmaApiService.ClientHandler[101]
+      Received HTTP response headers after 1133.9897ms - 200
+info: System.Net.Http.HttpClient.ISiraCagirmaApiService.LogicalHandler[101]
+      End processing HTTP request after 1134.0717ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? Banko panel sıraları yüklendi: 4
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/siramatik/kiosk-sira-alma/menuler-by-kiosk/1
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/siramatik/kiosk-sira-alma/menuler-by-kiosk/1
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.ClientHandler[101]
+      Received HTTP response headers after 310.4555ms - 200
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.LogicalHandler[101]
+      End processing HTTP request after 310.6216ms - 200
+info: SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskSimulator.Index[0]
+      Kiosk menüleri yüklendi: 3 menü
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 12.4773ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 12.5816ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/QN_bNvgD9sj2tkzgMVYNtA
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/QN_bNvgD9sj2tkzgMVYNtA
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 14.0238ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 14.117ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/banko-connection/839
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/banko-connection/839
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 21.5563ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 21.7288ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 10.1559ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 10.3035ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/QN_bNvgD9sj2tkzgMVYNtA
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/QN_bNvgD9sj2tkzgMVYNtA
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 13.4604ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 13.5527ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/banko-connection/839
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/banko-connection/839
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 16.8342ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 16.9103ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko#19 bağlantısı koptu (geçici olabilir): 16406457430
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request DELETE https://localhost:9080/api/hub-connections/QN_bNvgD9sj2tkzgMVYNtA
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request DELETE https://localhost:9080/api/hub-connections/QN_bNvgD9sj2tkzgMVYNtA
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 13.9232ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 14.0727ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 27.0872ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 27.1936ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Bağlantı koptu: QN_bNvgD9sj2tkzgMVYNtA - Kullanıcı: AHMET DEMİRAL
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 40.1572ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 40.309ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 29.9606ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 30.062ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 19.4011ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 19.679ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 18.6858ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 18.7626ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 27.8429ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 28.1307ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: kXpxl1spnvFJZEgx8GdC9w - Kullanıcı: AHMET DEMİRAL (TC: 16406457430)
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=6c84f8b1-7e0e-45a6-99b5-d3dcf660dab1
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 11.9886ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 12.054ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/active/16406457430
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/active/16406457430
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 81.9842ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 82.0687ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/hub-connections/connect
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/hub-connections/connect
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 83.6529ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 83.7175ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: kXpxl1spnvFJZEgx8GdC9w | TC: 16406457430 | Type: MainLayout | IP: 127.0.0.1
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=True
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu algılandı: 16406457430
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/personel/16406457430/active-banko
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/personel/16406457430/active-banko
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 14.1848ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 14.243ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Aktif banko bulundu: Banko#19, TabId beklenen: 6c84f8b1-7e0e-45a6-99b5-d3dcf660dab1, gelen: 6c84f8b1-7e0e-45a6-99b5-d3dcf660dab1
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/hub-connections/banko/transfer
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/hub-connections/banko/transfer
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 32.001ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 32.0605ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request PUT https://localhost:9080/api/hub-connections/kXpxl1spnvFJZEgx8GdC9w/type
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request PUT https://localhost:9080/api/hub-connections/kXpxl1spnvFJZEgx8GdC9w/type
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 14.1271ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 14.2965ms - 200
+info: SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko bağlantısı yenilendi: 16406457430 -> HubConnection#kXpxl1spnvFJZEgx8GdC9w
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 17.5186ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 17.6596ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/banko/personel/16406457430/banko
+info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/banko/personel/16406457430/banko
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 20.5744ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 20.7252ms - 200
+info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/banko/personel/16406457430/banko
+info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/banko/personel/16406457430/banko
+info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[101]
+      Received HTTP response headers after 27.5506ms - 200
+info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[101]
+      End processing HTTP request after 27.629ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[101]
+      Received HTTP response headers after 19.2762ms - 200
+info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[101]
+      End processing HTTP request after 21.482ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout - Banko modu state senkronize edildi: Banko#19
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 17.3793ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 17.4845ms - 200
+info: SGKPortalApp.PresentationLayer.Components.Siramatik.BankoModeWidget[0]
+      ?? BankoModeWidget LoadData: 16406457430 - Banko Modu: True
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 14.0767ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 14.1535ms - 200
+info: System.Net.Http.HttpClient.ISiraCagirmaApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/siramatik/sira-cagirma/banko-panel/16406457430
+info: System.Net.Http.HttpClient.ISiraCagirmaApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/siramatik/sira-cagirma/banko-panel/16406457430
+info: System.Net.Http.HttpClient.ISiraCagirmaApiService.ClientHandler[101]
+      Received HTTP response headers after 36.7886ms - 200
+info: System.Net.Http.HttpClient.ISiraCagirmaApiService.LogicalHandler[101]
+      End processing HTTP request after 36.8602ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? Banko panel sıraları yüklendi: 4
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+?? State senkronize edildi - Pinned: True, Visible: True
+? SiraCagirmaPanel JavaScript initialized
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 6.611ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 6.6912ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 18.5104ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 18.646ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/kXpxl1spnvFJZEgx8GdC9w
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/kXpxl1spnvFJZEgx8GdC9w
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 16.1457ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 16.2102ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/banko-connection/840
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/banko-connection/840
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 13.8257ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 13.8978ms - 200
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/siramatik/kiosk-sira-alma/alt-islemler-by-kiosk/1/7
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/siramatik/kiosk-sira-alma/alt-islemler-by-kiosk/1/7
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.ClientHandler[101]
+      Received HTTP response headers after 247.4803ms - 200
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.LogicalHandler[101]
+      End processing HTTP request after 247.6316ms - 200
+info: SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskSimulator.Index[0]
+      Alt işlemler yüklendi: 2 işlem
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/siramatik/kiosk-sira-alma/sira-al
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/siramatik/kiosk-sira-alma/sira-al
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.ClientHandler[101]
+      Received HTTP response headers after 626.5766ms - 200
+info: System.Net.Http.HttpClient.IKioskSimulatorApiService.LogicalHandler[101]
+      End processing HTTP request after 626.6452ms - 200
+info: SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskSimulator.Index[0]
+      Sıra alındı: 4004
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 9.5575ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 9.6383ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 9.546ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 9.6177ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/kXpxl1spnvFJZEgx8GdC9w
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/kXpxl1spnvFJZEgx8GdC9w
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 7.0004ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 7.0527ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/banko-connection/840
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/banko-connection/840
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 5.9851ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 6.0411ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 7.2574ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 7.3282ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 7.1989ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 7.2726ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/kXpxl1spnvFJZEgx8GdC9w
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/kXpxl1spnvFJZEgx8GdC9w
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 7.8558ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 7.9162ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hub-connections/banko-connection/840
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hub-connections/banko-connection/840
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 7.1639ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 7.2325ms - 200

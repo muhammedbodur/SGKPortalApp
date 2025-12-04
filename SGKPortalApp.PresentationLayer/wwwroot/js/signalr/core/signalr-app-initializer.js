@@ -29,7 +29,8 @@
     // CONFIGURATION
     // ============================================
     const CONFIG = {
-        hubUrl: '/hubs/siramatik',
+        // API'deki SignalR Hub'a bağlan (9080 portu)
+        hubUrl: 'https://localhost:9080/hubs/siramatik',
         loginRedirectUrl: '/Account/Login',
         enableDebugLogs: true
     };

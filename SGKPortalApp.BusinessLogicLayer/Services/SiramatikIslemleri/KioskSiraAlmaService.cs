@@ -54,143 +54,113 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         }
 
         /// <summary>
-        /// Kiosk'tan sıra al
+        /// Kiosk'tan sıra al - Eski proje mantığı ile
+        /// KanalAltIslemId üzerinden tek parametre ile çalışır
         /// </summary>
         public async Task<ApiResponseDto<KioskSiraAlResponseDto>> SiraAlAsync(KioskSiraAlRequestDto request)
         {
             try
             {
-                _logger.LogInformation("🎫 Kiosk sıra alma başladı. KioskMenuIslemId: {KioskMenuIslemId}, HizmetBinasiId: {HizmetBinasiId}",
-                    request.KioskMenuIslemId, request.HizmetBinasiId);
+                _logger.LogInformation("🎫 Kiosk sıra alma başladı. KanalAltIslemId: {KanalAltIslemId}",
+                    request.KanalAltIslemId);
 
-                // 1. KioskMenuIslem'i bul ve KanalAltId'yi al
-                var kioskMenuIslem = await _kioskMenuIslemRepository.GetWithDetailsAsync(request.KioskMenuIslemId);
-                
-                int kanalAltId;
-                string kanalAltAdi;
-
-                if (kioskMenuIslem != null)
+                // Business validation
+                if (request.KanalAltIslemId <= 0)
                 {
-                    // KioskMenuIslem bulundu - normal akış
-                    if (kioskMenuIslem.Aktiflik != Aktiflik.Aktif)
-                    {
-                        return ApiResponseDto<KioskSiraAlResponseDto>.ErrorResult(
-                            "İşlem aktif değil",
-                            "Bu işlem şu anda aktif değil.");
-                    }
-
-                    kanalAltId = kioskMenuIslem.KanalAltId;
-                    kanalAltAdi = kioskMenuIslem.KanalAlt?.KanalAltAdi ?? "Bilinmiyor";
-                }
-                else
-                {
-                    // KioskMenuIslem bulunamadı - direkt KanalAltIslemId olarak dene (test/simülasyon için)
-                    var direktKanalAltIslem = await _kanalAltIslemRepository.GetWithDetailsAsync(request.KioskMenuIslemId);
-                    if (direktKanalAltIslem == null)
-                    {
-                        return ApiResponseDto<KioskSiraAlResponseDto>.ErrorResult(
-                            "Geçersiz işlem",
-                            "Belirtilen işlem bulunamadı.");
-                    }
-
-                    if (direktKanalAltIslem.Aktiflik != Aktiflik.Aktif)
-                    {
-                        return ApiResponseDto<KioskSiraAlResponseDto>.ErrorResult(
-                            "İşlem aktif değil",
-                            "Bu işlem şu anda aktif değil.");
-                    }
-
-                    // Direkt KanalAltIslem kullanılıyor
-                    kanalAltId = direktKanalAltIslem.KanalAltId;
-                    kanalAltAdi = direktKanalAltIslem.KanalAlt?.KanalAltAdi ?? "Bilinmiyor";
-                }
-
-                // 2. HizmetBinasi + KanalAlt kombinasyonundan KanalAltIslem'i bul
-                var kanalAltIslemler = await _kanalAltIslemRepository.GetByKanalAltAsync(kanalAltId);
-                var kanalAltIslem = kanalAltIslemler
-                    .FirstOrDefault(kai => kai.HizmetBinasiId == request.HizmetBinasiId && kai.Aktiflik == Aktiflik.Aktif);
-
-                if (kanalAltIslem == null)
-                {
+                    _logger.LogWarning("GetSiraNoAsync failed: Invalid KanalAltIslemId: {KanalAltIslemId}", request.KanalAltIslemId);
                     return ApiResponseDto<KioskSiraAlResponseDto>.ErrorResult(
-                        "İşlem bulunamadı",
-                        "Bu hizmet binasında belirtilen işlem tanımlı değil.");
+                        "Geçersiz işlem",
+                        "Geçersiz KanalAltIslemId!");
                 }
 
-                // 3. Bu KanalAltIslem'e atanmış ve banko modunda aktif personel var mı kontrol et
-                var aktifPersonelVar = await HasAktifPersonelAsync(kanalAltIslem.KanalAltIslemId);
-                if (!aktifPersonelVar)
+                _logger.LogInformation("🔍 GetSiraNoAsync çağrılıyor. KanalAltIslemId: {KanalAltIslemId}", request.KanalAltIslemId);
+                
+                var siraNoBilgisi = await _siramatikQueryRepository.GetSiraNoAsync(request.KanalAltIslemId);
+
+                _logger.LogInformation("🔍 GetSiraNoAsync sonucu: {Result}, SiraNo: {SiraNo}", 
+                    siraNoBilgisi != null ? "Bulundu" : "NULL", 
+                    siraNoBilgisi?.SiraNo ?? 0);
+
+                if (siraNoBilgisi == null || siraNoBilgisi.SiraNo <= 0)
                 {
-                    _logger.LogWarning("⚠️ Kiosk sıra alma: Aktif personel yok. HizmetBinasiId: {HizmetBinasiId}, KanalAltIslemId: {KanalAltIslemId}",
-                        request.HizmetBinasiId, kanalAltIslem.KanalAltIslemId);
+                    _logger.LogWarning("⚠️ Kiosk sıra alma: Sıra numarası alınamadı. KanalAltIslemId: {KanalAltIslemId}, SiraNoBilgisi: {SiraNoBilgisi}",
+                        request.KanalAltIslemId, siraNoBilgisi != null ? $"SiraNo={siraNoBilgisi.SiraNo}" : "NULL");
                     
                     return ApiResponseDto<KioskSiraAlResponseDto>.ErrorResult(
                         "Şu anda hizmet verilemiyor",
                         "Bu işlem için şu anda aktif personel bulunmamaktadır. Lütfen daha sonra tekrar deneyiniz.");
                 }
 
-                // 4. Bugün için yeni sıra numarası üret
-                var yeniSiraNo = await GetNextSiraNoAsync(request.HizmetBinasiId, kanalAltIslem.KanalAltIslemId);
-
-                // 5. Yeni Sira entity'si oluştur
+                // Yeni Sira entity'si oluştur
+                // NOT: Navigation property'ler null! ile bypass ediliyor - EF Core FK üzerinden ilişki kuracak
                 var yeniSira = new Sira
                 {
-                    SiraNo = yeniSiraNo,
-                    KanalAltIslemId = kanalAltIslem.KanalAltIslemId,
-                    KanalAltIslem = kanalAltIslem,
-                    KanalAltAdi = kanalAltAdi,
-                    HizmetBinasiId = request.HizmetBinasiId,
-                    HizmetBinasi = kanalAltIslem.HizmetBinasi,
+                    SiraNo = siraNoBilgisi.SiraNo,
+                    KanalAltIslemId = siraNoBilgisi.KanalAltIslemId,
+                    KanalAltIslem = null!,  // FK üzerinden ilişki kurulacak
+                    KanalAltAdi = siraNoBilgisi.KanalAltAdi,
+                    HizmetBinasiId = siraNoBilgisi.HizmetBinasiId,
+                    HizmetBinasi = null!,   // FK üzerinden ilişki kurulacak
                     SiraAlisZamani = DateTime.Now,
                     BeklemeDurum = BeklemeDurum.Beklemede
                 };
 
-                // 6. Veritabanına kaydet
+                // Veritabanına kaydet
                 await _siraRepository.AddAsync(yeniSira);
-                await _unitOfWork.SaveChangesAsync();
+                var insertedRows = await _unitOfWork.SaveChangesAsync();
+
+                if (insertedRows <= 0)
+                {
+                    return ApiResponseDto<KioskSiraAlResponseDto>.ErrorResult(
+                        "Sıra kaydedilemedi",
+                        "Sıra numarası oluşturuldu ancak kaydedilemedi.");
+                }
 
                 _logger.LogInformation("✅ Kiosk sıra oluşturuldu. SiraId: {SiraId}, SiraNo: {SiraNo}, KanalAltIslemId: {KanalAltIslemId}",
-                    yeniSira.SiraId, yeniSira.SiraNo, kanalAltIslem.KanalAltIslemId);
+                    yeniSira.SiraId, yeniSira.SiraNo, siraNoBilgisi.KanalAltIslemId);
 
-                // 7. Bekleyen sıra sayısını hesapla
-                var bekleyenSiraSayisi = await GetBekleyenSiraSayisiAsync(request.HizmetBinasiId, kanalAltIslem.KanalAltIslemId);
+                // Bekleyen sıra sayısını hesapla
+                var bekleyenSiraSayisi = await GetBekleyenSiraSayisiAsync(siraNoBilgisi.HizmetBinasiId, siraNoBilgisi.KanalAltIslemId);
 
-                // 8. SignalR ile banko panellerine bildirim gönder
+                // SignalR ile banko panellerine bildirim gönder
                 var siraDto = new SiraCagirmaResponseDto
                 {
                     SiraId = yeniSira.SiraId,
                     SiraNo = yeniSira.SiraNo,
-                    KanalAltAdi = kanalAltAdi,
+                    KanalAltAdi = siraNoBilgisi.KanalAltAdi,
                     BeklemeDurum = BeklemeDurum.Beklemede,
                     SiraAlisZamani = yeniSira.SiraAlisZamani,
-                    HizmetBinasiId = request.HizmetBinasiId,
-                    HizmetBinasiAdi = kanalAltIslem.HizmetBinasi?.HizmetBinasiAdi ?? "Bilinmiyor",
-                    KanalAltIslemId = kanalAltIslem.KanalAltIslemId
+                    HizmetBinasiId = siraNoBilgisi.HizmetBinasiId,
+                    HizmetBinasiAdi = siraNoBilgisi.HizmetBinasiAdi,
+                    KanalAltIslemId = siraNoBilgisi.KanalAltIslemId
                 };
 
-                _ = _hubService.BroadcastNewSiraAsync(siraDto, request.HizmetBinasiId, kanalAltIslem.KanalAltIslemId);
+                _logger.LogInformation("📤 SignalR broadcast başlatılıyor. SiraNo: {SiraNo}, HizmetBinasiId: {HizmetBinasiId}, KanalAltIslemId: {KanalAltIslemId}",
+                    yeniSira.SiraNo, siraNoBilgisi.HizmetBinasiId, siraNoBilgisi.KanalAltIslemId);
+                
+                await _hubService.BroadcastNewSiraAsync(siraDto, siraNoBilgisi.HizmetBinasiId, siraNoBilgisi.KanalAltIslemId);
 
-                // 9. Response oluştur
+                // Response oluştur
                 var response = new KioskSiraAlResponseDto
                 {
                     SiraId = yeniSira.SiraId,
                     SiraNo = yeniSira.SiraNo,
-                    KanalAltAdi = kanalAltAdi,
-                    HizmetBinasiId = request.HizmetBinasiId,
-                    HizmetBinasiAdi = kanalAltIslem.HizmetBinasi?.HizmetBinasiAdi ?? "Bilinmiyor",
-                    KanalAltIslemId = kanalAltIslem.KanalAltIslemId,
+                    KanalAltAdi = siraNoBilgisi.KanalAltAdi,
+                    HizmetBinasiId = siraNoBilgisi.HizmetBinasiId,
+                    HizmetBinasiAdi = siraNoBilgisi.HizmetBinasiAdi,
+                    KanalAltIslemId = siraNoBilgisi.KanalAltIslemId,
                     SiraAlisZamani = yeniSira.SiraAlisZamani,
                     BekleyenSiraSayisi = bekleyenSiraSayisi - 1, // Kendisi hariç öndeki sayı
-                    AktifPersonelVar = aktifPersonelVar,
+                    AktifPersonelVar = true,
                     TahminiBeklemeSuresi = (bekleyenSiraSayisi - 1) * 5, // Ortalama 5 dk/sıra varsayımı
-                    FisMesaji = $"Sıra No: {yeniSira.SiraNo}\n{kanalAltAdi}\nTarih: {yeniSira.SiraAlisZamani:dd.MM.yyyy HH:mm}\nÖnünüzde {bekleyenSiraSayisi - 1} kişi bekliyor."
+                    FisMesaji = $"Sıra No: {yeniSira.SiraNo}\n{siraNoBilgisi.KanalAltAdi}\nTarih: {yeniSira.SiraAlisZamani:dd.MM.yyyy HH:mm}\nÖnünüzde {bekleyenSiraSayisi - 1} kişi bekliyor."
                 };
 
                 return ApiResponseDto<KioskSiraAlResponseDto>.SuccessResult(response, "Sıra başarıyla alındı.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Kiosk sıra alma hatası. KioskMenuIslemId: {KioskMenuIslemId}", request.KioskMenuIslemId);
+                _logger.LogError(ex, "❌ Kiosk sıra alma hatası. KanalAltIslemId: {KanalAltIslemId}", request.KanalAltIslemId);
                 return ApiResponseDto<KioskSiraAlResponseDto>.ErrorResult(
                     "Sıra alınamadı",
                     "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyiniz.");
@@ -232,35 +202,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         }
 
         /// <summary>
-        /// Belirli bir KanalAltIslem için banko modunda aktif personel (Yrd.Uzman+) var mı?
-        /// KanalAltIslem zaten HizmetBinasiId bilgisini içerir, bu yüzden sadece kanalAltIslemId yeterli
+        /// Belirli bir hizmet binası ve KanalAltIslem için banko modunda aktif personel (Yrd.Uzman+) var mı?
+        /// NOT: kanalAltIslemId parametresi KanalAltIslem tablosundaki ID'dir!
         /// </summary>
-        public async Task<bool> HasAktifPersonelAsync(int kanalAltIslemId)
+        public async Task<bool> HasAktifPersonelAsync(int hizmetBinasiId, int kanalAltIslemId)
         {
-            // KanalAltIslem'i personelleri ile birlikte getir
-            var kanalAltIslem = await _kanalAltIslemRepository.GetWithDetailsAsync(kanalAltIslemId);
-
-            if (kanalAltIslem == null)
-            {
-                _logger.LogWarning("⚠️ HasAktifPersonelAsync: KanalAltIslem bulunamadı. KanalAltIslemId={KanalAltIslemId}",
-                    kanalAltIslemId);
-                return false;
-            }
-
-            // Aktif, yetkili (en az Yrd.Uzman) ve banko modunda olan personel var mı?
-            var aktifPersonelVar = kanalAltIslem.KanalPersonelleri?.Any(kp =>
-                kp.Aktiflik == Aktiflik.Aktif &&
-                !kp.SilindiMi &&
-                kp.Uzmanlik != PersonelUzmanlik.BilgisiYok &&
-                kp.User != null &&
-                kp.User.BankoModuAktif &&
-                kp.User.AktifMi
-            ) ?? false;
-
-            _logger.LogDebug("🔍 HasAktifPersonelAsync: KanalAltIslemId={KanalAltIslemId}, AktifPersonelVar={AktifPersonelVar}",
-                kanalAltIslemId, aktifPersonelVar);
-
-            return aktifPersonelVar;
+            var aktifPersoneller = await _siramatikQueryRepository.GetBankoModundakiYetkiliPersonellerAsync(hizmetBinasiId, kanalAltIslemId);
+            
+            _logger.LogDebug("🔍 HasAktifPersonelAsync: HizmetBinasiId={HizmetBinasiId}, KanalAltIslemId={KanalAltIslemId}, AktifPersonelSayisi={Count}, Personeller={Personeller}",
+                hizmetBinasiId, kanalAltIslemId, aktifPersoneller.Count, string.Join(",", aktifPersoneller));
+            
+            return aktifPersoneller.Any();
         }
 
         // ═══════════════════════════════════════════════════════
@@ -475,6 +427,21 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     "Alt işlemler getirilemedi",
                     "Beklenmeyen bir hata oluştu.");
             }
+        }
+
+        /// <summary>
+        /// [DEBUG] Sıra numarası bilgisini test et
+        /// </summary>
+        public async Task<object> TestGetSiraNoAsync(int kanalAltIslemId)
+        {
+            var siraNoBilgisi = await _siramatikQueryRepository.GetSiraNoAsync(kanalAltIslemId);
+            
+            return new
+            {
+                KanalAltIslemId = kanalAltIslemId,
+                Sonuc = siraNoBilgisi != null ? "Bulundu" : "NULL",
+                SiraNoBilgisi = siraNoBilgisi
+            };
         }
     }
 }

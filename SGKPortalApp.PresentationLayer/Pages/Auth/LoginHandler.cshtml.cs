@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
-using SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -15,14 +14,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
     public class LoginHandlerModel : PageModel
     {
         private readonly ILogger<LoginHandlerModel> _logger;
-        private readonly IBankoModeService _bankoModeService;
 
-        public LoginHandlerModel(
-            ILogger<LoginHandlerModel> logger,
-            IBankoModeService bankoModeService)
+        public LoginHandlerModel(ILogger<LoginHandlerModel> logger)
         {
             _logger = logger;
-            _bankoModeService = bankoModeService;
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -34,7 +29,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                 using var reader = new StreamReader(Request.Body);
                 var body = await reader.ReadToEndAsync();
 
-                _logger.LogDebug($"🔵 Request Body uzunluğu: {body.Length}");
+                _logger.LogDebug("🔵 Request Body uzunluğu: {Length}", body.Length);
 
                 if (string.IsNullOrEmpty(body))
                 {
@@ -53,7 +48,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                     return BadRequest("Geçersiz login response");
                 }
 
-                _logger.LogDebug($"🔵 Login response alındı: {loginResponse.AdSoyad}");
+                _logger.LogDebug("🔵 Login response alındı: {AdSoyad}", loginResponse.AdSoyad);
 
                 var claims = new List<Claim>
                 {
@@ -61,7 +56,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                     new Claim("AdSoyad", loginResponse.AdSoyad),
                     new Claim(ClaimTypes.Name, loginResponse.AdSoyad),
                     new Claim("SessionID", loginResponse.SessionId),
-                    new Claim("UserType", loginResponse.UserType ?? "Personel") // TV veya Personel
+                    new Claim("UserType", loginResponse.UserType ?? "Personel")
                 };
 
                 // Personel için ek claim'ler
@@ -97,18 +92,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
 
                 _logger.LogInformation("✅ Kullanıcı giriş yaptı: {AdSoyad} ({TcKimlikNo}) - {UserType}",
                     loginResponse.AdSoyad, loginResponse.TcKimlikNo, loginResponse.UserType);
-
-                // ⭐ Banko modu kontrolü - Personel ise
-                if (loginResponse.UserType != "TvUser")
-                {
-                    var isBankoMode = await _bankoModeService.IsPersonelInBankoModeAsync(loginResponse.TcKimlikNo);
-                    if (isBankoMode)
-                    {
-                        // Login olurken banko modundan çık (eski bağlantıları temizle)
-                        await _bankoModeService.ExitBankoModeAsync(loginResponse.TcKimlikNo);
-                        _logger.LogInformation("🏦 Login sırasında banko modundan çıkıldı: {TcKimlikNo}", loginResponse.TcKimlikNo);
-                    }
-                }
 
                 // Ana sayfaya yönlendir
                 _logger.LogDebug("🔵 Ana sayfaya yönlendiriliyor");

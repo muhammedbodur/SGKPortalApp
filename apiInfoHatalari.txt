@@ -1,0 +1,587 @@
+? Shared configuration yüklendi: D:\AspNetExamples\SGKPortalApp\appsettings.Shared.json
+?? SGK Portal Services başlatılıyor...
+? Connection String alındı: Server=localhost\SQLEXPRESS;Database=SGKPortalDB;User Id=sa***;Password=***;TrustServerCertificate=true;MultipleActiv...
+?? Repository otomatik kayıt başlıyor...
+?? Assembly: SGKPortalApp.DataAccessLayer
+?? Bulunan interface'ler: 47
+?? Bulunan implementation'lar: 47
+  ? IAtanmaNedeniRepository -> AtanmaNedeniRepository
+  ? IAtanmaNedenleriRepository -> AtanmaNedenleriRepository
+  ? IBankoHareketRepository -> BankoHareketRepository
+  ? IBankoIslemRepository -> BankoIslemRepository
+  ? IBankoKullaniciRepository -> BankoKullaniciRepository
+  ? IBankoRepository -> BankoRepository
+  ? ICommonQueryRepository -> CommonQueryRepository
+  ? IDatabaseLogRepository -> DatabaseLogRepository
+  ? IDepartmanRepository -> DepartmanRepository
+  ? IHizmetBinasiRepository -> HizmetBinasiRepository
+  ? IHubBankoConnectionRepository -> HubBankoConnectionRepository
+  ? IHubConnectionRepository -> HubConnectionRepository
+  ? IHubTvConnectionRepository -> HubTvConnectionRepository
+  ? IIlceRepository -> IlceRepository
+  ? IIlRepository -> IlRepository
+  ? IKanalAltIslemRepository -> KanalAltIslemRepository
+  ? IKanalAltRepository -> KanalAltRepository
+  ? IKanalIslemRepository -> KanalIslemRepository
+  ? IKanalPersonelRepository -> KanalPersonelRepository
+  ? IKanalRepository -> KanalRepository
+  ? IKioskMenuAtamaRepository -> KioskMenuAtamaRepository
+  ? IKioskMenuIslemRepository -> KioskMenuIslemRepository
+  ? IKioskMenuRepository -> KioskMenuRepository
+  ? IKioskRepository -> KioskRepository
+  ? ILoginLogoutLogRepository -> LoginLogoutLogRepository
+  ? IModulAltRepository -> ModulAltRepository
+  ? IModulControllerIslemRepository -> ModulControllerIslemRepository
+  ? IModulControllerRepository -> ModulControllerRepository
+  ? IModulRepository -> ModulRepository
+  ? IPersonelCezaRepository -> PersonelCezaRepository
+  ? IPersonelCocukRepository -> PersonelCocukRepository
+  ? IPersonelDepartmanRepository -> PersonelDepartmanRepository
+  ? IPersonelEgitimRepository -> PersonelEgitimRepository
+  ? IPersonelEngelRepository -> PersonelEngelRepository
+  ? IPersonelHizmetRepository -> PersonelHizmetRepository
+  ? IPersonelImzaYetkisiRepository -> PersonelImzaYetkisiRepository
+  ? IPersonelRepository -> PersonelRepository
+  ? IPersonelYetkiRepository -> PersonelYetkiRepository
+  ? ISendikaRepository -> SendikaRepository
+  ? IServisRepository -> ServisRepository
+  ? ISiramatikQueryRepository -> SiramatikQueryRepository
+  ? ISiraRepository -> SiraRepository
+  ? ITvBankoRepository -> TvBankoRepository
+  ? ITvRepository -> TvRepository
+  ? IUnvanRepository -> UnvanRepository
+  ? IUserRepository -> UserRepository
+  ? IYetkiRepository -> YetkiRepository
+? 47 repository otomatik kayıt edildi
+
+?? Complex Query Repositories kaydediliyor...
+  ? ISiramatikQueryRepository -> SiramatikQueryRepository
+? Complex Query Repositories kayıt edildi
+
+?? SGK Portal Services hazır!
+
+?? Business Logic Layer başlatılıyor...
+  ? AutoMapper profilleri yüklendi
+  ?? Auth servisleri kaydediliyor...
+    ?? Bulunan interface'ler: 1
+    ?? Bulunan implementation'lar: 8
+    ? IAuthService -> AuthService
+    ? <>c (Concrete - Interface yok)
+    ? <>c__DisplayClass3_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass4_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass5_0 (Concrete - Interface yok)
+    ? <LoginAsync>d__3 (Concrete - Interface yok)
+    ? <ResetPasswordAsync>d__5 (Concrete - Interface yok)
+    ? <VerifyIdentityAsync>d__4 (Concrete - Interface yok)
+    ?? Auth: 8 servis kayıt edildi
+  ?? Common servisleri kaydediliyor...
+    ?? Bulunan interface'ler: 4
+    ?? Bulunan implementation'lar: 58
+    ? IHizmetBinasiService -> HizmetBinasiService
+    ? IIlceService -> IlceService
+    ? IIlService -> IlService
+    ? IUserService -> UserService
+    ? <>c (Concrete - Interface yok)
+    ? <CreateAsync>d__8 (Concrete - Interface yok)
+    ? <DeleteAsync>d__10 (Concrete - Interface yok)
+    ? <GetActiveAsync>d__11 (Concrete - Interface yok)
+    ? <GetAllAsync>d__5 (Concrete - Interface yok)
+    ? <GetByDepartmanAsync>d__12 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__6 (Concrete - Interface yok)
+    ? <GetDetailByIdAsync>d__7 (Concrete - Interface yok)
+    ? <GetPersonelCountAsync>d__13 (Concrete - Interface yok)
+    ? <GetServislerByHizmetBinasiIdAsync>d__15 (Concrete - Interface yok)
+    ? <ToggleStatusAsync>d__14 (Concrete - Interface yok)
+    ? <UpdateAsync>d__9 (Concrete - Interface yok)
+    ? <>c (Concrete - Interface yok)
+    ? <>c__DisplayClass11_0 (Concrete - Interface yok)
+    ? <CreateAsync>d__6 (Concrete - Interface yok)
+    ? <DeleteAsync>d__8 (Concrete - Interface yok)
+    ? <GetAllAsync>d__4 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__5 (Concrete - Interface yok)
+    ? <GetByIlAsync>d__9 (Concrete - Interface yok)
+    ? <GetByIlDropdownAsync>d__13 (Concrete - Interface yok)
+    ? <GetByNameAsync>d__10 (Concrete - Interface yok)
+    ? <GetDropdownAsync>d__12 (Concrete - Interface yok)
+    ? <GetPagedAsync>d__11 (Concrete - Interface yok)
+    ? <UpdateAsync>d__7 (Concrete - Interface yok)
+    ? <>c (Concrete - Interface yok)
+    ? <>c__DisplayClass10_0 (Concrete - Interface yok)
+    ? <CreateAsync>d__6 (Concrete - Interface yok)
+    ? <DeleteAsync>d__8 (Concrete - Interface yok)
+    ? <GetAllAsync>d__4 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__5 (Concrete - Interface yok)
+    ? <GetByNameAsync>d__9 (Concrete - Interface yok)
+    ? <GetDropdownAsync>d__12 (Concrete - Interface yok)
+    ? <GetIlceCountAsync>d__11 (Concrete - Interface yok)
+    ? <GetPagedAsync>d__10 (Concrete - Interface yok)
+    ? <UpdateAsync>d__7 (Concrete - Interface yok)
+    ? <>c__DisplayClass17_0 (Concrete - Interface yok)
+    ? <ActivateBankoModeAsync>d__18 (Concrete - Interface yok)
+    ? <ActivateUserAsync>d__14 (Concrete - Interface yok)
+    ? <ChangePasswordAsync>d__10 (Concrete - Interface yok)
+    ? <ClearSessionAsync>d__16 (Concrete - Interface yok)
+    ? <DeactivateBankoModeAsync>d__19 (Concrete - Interface yok)
+    ? <DeactivateUserAsync>d__15 (Concrete - Interface yok)
+    ? <DeleteAsync>d__9 (Concrete - Interface yok)
+    ? <GetActiveBankoIdAsync>d__21 (Concrete - Interface yok)
+    ? <GetActiveUsersAsync>d__6 (Concrete - Interface yok)
+    ? <GetAllAsync>d__5 (Concrete - Interface yok)
+    ? <GetBySessionIdAsync>d__17 (Concrete - Interface yok)
+    ? <GetByTcKimlikNoAsync>d__4 (Concrete - Interface yok)
+    ? <GetLockedUsersAsync>d__7 (Concrete - Interface yok)
+    ? <IsBankoModeActiveAsync>d__20 (Concrete - Interface yok)
+    ? <LockUserAsync>d__12 (Concrete - Interface yok)
+    ? <ResetPasswordAsync>d__11 (Concrete - Interface yok)
+    ? <UnlockUserAsync>d__13 (Concrete - Interface yok)
+    ? <UpdateAsync>d__8 (Concrete - Interface yok)
+    ?? Common: 58 servis kayıt edildi
+  ?? PersonelIslemleri servisleri kaydediliyor...
+    ?? Bulunan interface'ler: 7
+    ?? Bulunan implementation'lar: 77
+    ? IAtanmaNedeniService -> AtanmaNedeniService
+    ? IDepartmanService -> DepartmanService
+    ? IPersonelCocukService -> PersonelCocukService
+    ? IPersonelService -> PersonelService
+    ? ISendikaService -> SendikaService
+    ? IServisService -> ServisService
+    ? IUnvanService -> UnvanService
+    ? <CreateAsync>d__6 (Concrete - Interface yok)
+    ? <DeleteAsync>d__8 (Concrete - Interface yok)
+    ? <GetAllAsync>d__4 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__5 (Concrete - Interface yok)
+    ? <UpdateAsync>d__7 (Concrete - Interface yok)
+    ? <>c (Concrete - Interface yok)
+    ? <>c__DisplayClass11_0 (Concrete - Interface yok)
+    ? <CreateAsync>d__6 (Concrete - Interface yok)
+    ? <DeleteAsync>d__8 (Concrete - Interface yok)
+    ? <GetActiveAsync>d__9 (Concrete - Interface yok)
+    ? <GetAllAsync>d__4 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__5 (Concrete - Interface yok)
+    ? <GetByNameAsync>d__10 (Concrete - Interface yok)
+    ? <GetDropdownAsync>d__13 (Concrete - Interface yok)
+    ? <GetPagedAsync>d__11 (Concrete - Interface yok)
+    ? <GetPersonelCountAsync>d__12 (Concrete - Interface yok)
+    ? <UpdateAsync>d__7 (Concrete - Interface yok)
+    ? <CreateAsync>d__7 (Concrete - Interface yok)
+    ? <DeleteAsync>d__9 (Concrete - Interface yok)
+    ? <GetAllAsync>d__4 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__6 (Concrete - Interface yok)
+    ? <GetByPersonelTcKimlikNoAsync>d__5 (Concrete - Interface yok)
+    ? <UpdateAsync>d__8 (Concrete - Interface yok)
+    ? <>c__DisplayClass12_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass13_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass6_0 (Concrete - Interface yok)
+    ? <CreateCompleteAsync>d__12 (Concrete - Interface yok)
+    ? <DeleteAsync>d__6 (Concrete - Interface yok)
+    ? <GetActiveAsync>d__7 (Concrete - Interface yok)
+    ? <GetAllAsync>d__4 (Concrete - Interface yok)
+    ? <GetByDepartmanAsync>d__9 (Concrete - Interface yok)
+    ? <GetByHizmetBinasiIdAsync>d__11 (Concrete - Interface yok)
+    ? <GetByServisAsync>d__10 (Concrete - Interface yok)
+    ? <GetByTcKimlikNoAsync>d__5 (Concrete - Interface yok)
+    ? <GetPagedAsync>d__8 (Concrete - Interface yok)
+    ? <UpdateCompleteAsync>d__13 (Concrete - Interface yok)
+    ? <CreateAsync>d__6 (Concrete - Interface yok)
+    ? <DeleteAsync>d__8 (Concrete - Interface yok)
+    ? <GetAllAsync>d__4 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__5 (Concrete - Interface yok)
+    ? <UpdateAsync>d__7 (Concrete - Interface yok)
+    ? <>c (Concrete - Interface yok)
+    ? <>c__DisplayClass11_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass12_0 (Concrete - Interface yok)
+    ? <CreateAsync>d__6 (Concrete - Interface yok)
+    ? <DeleteAsync>d__8 (Concrete - Interface yok)
+    ? <GetActiveAsync>d__9 (Concrete - Interface yok)
+    ? <GetAllAsync>d__4 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__5 (Concrete - Interface yok)
+    ? <GetByNameAsync>d__10 (Concrete - Interface yok)
+    ? <GetDropdownAsync>d__13 (Concrete - Interface yok)
+    ? <GetPagedAsync>d__11 (Concrete - Interface yok)
+    ? <GetPersonelCountAsync>d__12 (Concrete - Interface yok)
+    ? <UpdateAsync>d__7 (Concrete - Interface yok)
+    ? <>c (Concrete - Interface yok)
+    ? <>c__DisplayClass11_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass12_0 (Concrete - Interface yok)
+    ? <CreateAsync>d__6 (Concrete - Interface yok)
+    ? <DeleteAsync>d__8 (Concrete - Interface yok)
+    ? <GetActiveAsync>d__9 (Concrete - Interface yok)
+    ? <GetAllAsync>d__4 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__5 (Concrete - Interface yok)
+    ? <GetByNameAsync>d__10 (Concrete - Interface yok)
+    ? <GetDropdownAsync>d__13 (Concrete - Interface yok)
+    ? <GetPagedAsync>d__11 (Concrete - Interface yok)
+    ? <GetPersonelCountAsync>d__12 (Concrete - Interface yok)
+    ? <UpdateAsync>d__7 (Concrete - Interface yok)
+    ? <<CreateCompleteAsync>b__0>d (Concrete - Interface yok)
+    ? <<UpdateCompleteAsync>b__0>d (Concrete - Interface yok)
+    ? <<DeleteAsync>b__0>d (Concrete - Interface yok)
+    ?? PersonelIslemleri: 77 servis kayıt edildi
+  ?? SiramatikIslemleri servisleri kaydediliyor...
+    ?? Bulunan interface'ler: 14
+    ?? Bulunan implementation'lar: 191
+    ? IBankoService -> BankoService
+    ? IKanalAltIslemService -> KanalAltIslemService
+    ? IKanalAltService -> KanalAltService
+    ? IKanalIslemService -> KanalIslemService
+    ? IKanalPersonelService -> KanalPersonelService
+    ? IKanalService -> KanalService
+    ? IKioskMenuAtamaService -> KioskMenuAtamaService
+    ? IKioskMenuIslemService -> KioskMenuIslemService
+    ? IKioskMenuService -> KioskMenuService
+    ? IKioskService -> KioskService
+    ? IKioskSiraAlmaService -> KioskSiraAlmaService
+    ? ISiraCagirmaService -> SiraCagirmaService
+    ? ISiraYonlendirmeService -> SiraYonlendirmeService
+    ? ITvService -> TvService
+    ? <<CleanupInconsistentBankoAssignmentsAsync>b__17_0>d (Concrete - Interface yok)
+    ? <>c__DisplayClass14_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass15_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass18_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass4_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass6_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass7_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass8_0 (Concrete - Interface yok)
+    ? <AssignPersonelToBankoAsync>d__13 (Concrete - Interface yok)
+    ? <CleanupInconsistentBankoAssignmentsAsync>d__17 (Concrete - Interface yok)
+    ? <CreateAsync>d__6 (Concrete - Interface yok)
+    ? <DeleteAsync>d__8 (Concrete - Interface yok)
+    ? <GetActiveAsync>d__12 (Concrete - Interface yok)
+    ? <GetAllAsync>d__4 (Concrete - Interface yok)
+    ? <GetAvailableBankosAsync>d__11 (Concrete - Interface yok)
+    ? <GetByHizmetBinasiAsync>d__9 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__5 (Concrete - Interface yok)
+    ? <GetGroupedByKatAsync>d__10 (Concrete - Interface yok)
+    ? <GetPersonelCurrentBankoAsync>d__16 (Concrete - Interface yok)
+    ? <ToggleAktiflikAsync>d__18 (Concrete - Interface yok)
+    ? <UnassignBankoAsync>d__15 (Concrete - Interface yok)
+    ? <UnassignPersonelFromBankoAsync>d__14 (Concrete - Interface yok)
+    ? <UpdateAsync>d__7 (Concrete - Interface yok)
+    ? <CreateAsync>d__11 (Concrete - Interface yok)
+    ? <DeleteAsync>d__13 (Concrete - Interface yok)
+    ? <GetAllAsync>d__5 (Concrete - Interface yok)
+    ? <GetByHizmetBinasiIdAsync>d__6 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__14 (Concrete - Interface yok)
+    ? <GetByIdWithDetailsAsync>d__7 (Concrete - Interface yok)
+    ? <GetByKanalIslemIdAsync>d__8 (Concrete - Interface yok)
+    ? <GetEslestirmeYapilmamisAsync>d__10 (Concrete - Interface yok)
+    ? <GetPersonelSayilariAsync>d__9 (Concrete - Interface yok)
+    ? <UpdateAsync>d__12 (Concrete - Interface yok)
+    ? <CreateAsync>d__6 (Concrete - Interface yok)
+    ? <DeleteAsync>d__8 (Concrete - Interface yok)
+    ? <GetActiveAsync>d__9 (Concrete - Interface yok)
+    ? <GetAllAsync>d__4 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__5 (Concrete - Interface yok)
+    ? <GetByKanalIdAsync>d__10 (Concrete - Interface yok)
+    ? <GetWithDetailsAsync>d__11 (Concrete - Interface yok)
+    ? <UpdateAsync>d__7 (Concrete - Interface yok)
+    ? <CreateAsync>d__6 (Concrete - Interface yok)
+    ? <DeleteAsync>d__8 (Concrete - Interface yok)
+    ? <GetActiveAsync>d__11 (Concrete - Interface yok)
+    ? <GetAllAsync>d__4 (Concrete - Interface yok)
+    ? <GetByHizmetBinasiIdAsync>d__10 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__5 (Concrete - Interface yok)
+    ? <GetByKanalIdAsync>d__9 (Concrete - Interface yok)
+    ? <UpdateAsync>d__7 (Concrete - Interface yok)
+    ? <CreateAsync>d__5 (Concrete - Interface yok)
+    ? <DeleteAsync>d__7 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__8 (Concrete - Interface yok)
+    ? <GetByKanalAltIslemIdAsync>d__11 (Concrete - Interface yok)
+    ? <GetByPersonelTcAsync>d__10 (Concrete - Interface yok)
+    ? <GetPersonelAtamaMatrixAsync>d__12 (Concrete - Interface yok)
+    ? <GetPersonellerByHizmetBinasiIdAsync>d__9 (Concrete - Interface yok)
+    ? <UpdateAsync>d__6 (Concrete - Interface yok)
+    ? <CreateAsync>d__6 (Concrete - Interface yok)
+    ? <DeleteAsync>d__8 (Concrete - Interface yok)
+    ? <GetActiveAsync>d__9 (Concrete - Interface yok)
+    ? <GetAllAsync>d__4 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__5 (Concrete - Interface yok)
+    ? <UpdateAsync>d__7 (Concrete - Interface yok)
+    ? <>c__DisplayClass10_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass8_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass9_0 (Concrete - Interface yok)
+    ? <CreateAsync>d__8 (Concrete - Interface yok)
+    ? <DeleteAsync>d__10 (Concrete - Interface yok)
+    ? <GetActiveByKioskAsync>d__6 (Concrete - Interface yok)
+    ? <GetAllAsync>d__4 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__7 (Concrete - Interface yok)
+    ? <GetByKioskAsync>d__5 (Concrete - Interface yok)
+    ? <UpdateAsync>d__9 (Concrete - Interface yok)
+    ? <>c__DisplayClass6_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass7_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass8_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass9_0 (Concrete - Interface yok)
+    ? <CreateAsync>d__6 (Concrete - Interface yok)
+    ? <DeleteAsync>d__8 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__5 (Concrete - Interface yok)
+    ? <GetByKioskMenuAsync>d__4 (Concrete - Interface yok)
+    ? <UpdateAsync>d__7 (Concrete - Interface yok)
+    ? <UpdateSiraAsync>d__9 (Concrete - Interface yok)
+    ? <>c__DisplayClass6_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass7_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass8_0 (Concrete - Interface yok)
+    ? <CreateAsync>d__6 (Concrete - Interface yok)
+    ? <DeleteAsync>d__8 (Concrete - Interface yok)
+    ? <GetActiveAsync>d__9 (Concrete - Interface yok)
+    ? <GetAllAsync>d__4 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__5 (Concrete - Interface yok)
+    ? <UpdateAsync>d__7 (Concrete - Interface yok)
+    ? <>c__DisplayClass6_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass7_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass8_0 (Concrete - Interface yok)
+    ? <CreateAsync>d__6 (Concrete - Interface yok)
+    ? <DeleteAsync>d__8 (Concrete - Interface yok)
+    ? <GetActiveAsync>d__10 (Concrete - Interface yok)
+    ? <GetAllAsync>d__4 (Concrete - Interface yok)
+    ? <GetByHizmetBinasiAsync>d__9 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__5 (Concrete - Interface yok)
+    ? <GetWithMenuAsync>d__11 (Concrete - Interface yok)
+    ? <UpdateAsync>d__7 (Concrete - Interface yok)
+    ? <>c (Concrete - Interface yok)
+    ? <>c__DisplayClass10_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass11_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass15_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass16_0 (Concrete - Interface yok)
+    ? <GetBekleyenSiraSayisiAsync>d__11 (Concrete - Interface yok)
+    ? <GetKioskMenuAltIslemleriAsync>d__16 (Concrete - Interface yok)
+    ? <GetKioskMenuAltIslemleriByKioskIdAsync>d__14 (Concrete - Interface yok)
+    ? <GetKioskMenulerAsync>d__15 (Concrete - Interface yok)
+    ? <GetKioskMenulerByKioskIdAsync>d__13 (Concrete - Interface yok)
+    ? <GetNextSiraNoAsync>d__10 (Concrete - Interface yok)
+    ? <HasAktifPersonelAsync>d__12 (Concrete - Interface yok)
+    ? <SiraAlAsync>d__9 (Concrete - Interface yok)
+    ? <TestGetSiraNoAsync>d__17 (Concrete - Interface yok)
+    ? <>c (Concrete - Interface yok)
+    ? <GetBankoPanelSiralarAsync>d__12 (Concrete - Interface yok)
+    ? <GetBekleyenSiralarAsync>d__6 (Concrete - Interface yok)
+    ? <GetFirstCallableSiraIdAsync>d__9 (Concrete - Interface yok)
+    ? <GetPersonelBekleyenSiralarAsync>d__7 (Concrete - Interface yok)
+    ? <SiraIptalAsync>d__11 (Concrete - Interface yok)
+    ? <SiraTamamlaAsync>d__10 (Concrete - Interface yok)
+    ? <SiradakiCagirAsync>d__8 (Concrete - Interface yok)
+    ? <>c (Concrete - Interface yok)
+    ? <>c__DisplayClass12_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass8_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass8_1 (Concrete - Interface yok)
+    ? <GetYonlendirilmisSiraCountAsync>d__12 (Concrete - Interface yok)
+    ? <GetYonlendirmeSecenekleriAsync>d__13 (Concrete - Interface yok)
+    ? <ValidateBaskaBankoYonlendirme>d__9 (Concrete - Interface yok)
+    ? <ValidateSefYonlendirme>d__10 (Concrete - Interface yok)
+    ? <ValidateUzmanYonlendirme>d__11 (Concrete - Interface yok)
+    ? <YonlendirSiraAsync>d__8 (Concrete - Interface yok)
+    ? <>c (Concrete - Interface yok)
+    ? <>c__DisplayClass10_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass10_1 (Concrete - Interface yok)
+    ? <>c__DisplayClass11_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass8_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass9_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass9_1 (Concrete - Interface yok)
+    ? <AddBankoToTvAsync>d__15 (Concrete - Interface yok)
+    ? <CreateAsync>d__4 (Concrete - Interface yok)
+    ? <CreateTvUserAsync>d__18 (Concrete - Interface yok)
+    ? <CreateUsersForAllTvsAsync>d__17 (Concrete - Interface yok)
+    ? <DeleteAsync>d__6 (Concrete - Interface yok)
+    ? <GetActiveAsync>d__11 (Concrete - Interface yok)
+    ? <GetAllAsync>d__8 (Concrete - Interface yok)
+    ? <GetByHizmetBinasiAsync>d__9 (Concrete - Interface yok)
+    ? <GetByHizmetBinasiDropdownAsync>d__14 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__7 (Concrete - Interface yok)
+    ? <GetByKatTipiAsync>d__10 (Concrete - Interface yok)
+    ? <GetDropdownAsync>d__13 (Concrete - Interface yok)
+    ? <GetWithDetailsAsync>d__12 (Concrete - Interface yok)
+    ? <RemoveBankoFromTvAsync>d__16 (Concrete - Interface yok)
+    ? <UpdateAsync>d__5 (Concrete - Interface yok)
+    ? <<UnassignPersonelFromBankoAsync>b__0>d (Concrete - Interface yok)
+    ? <<UnassignBankoAsync>b__0>d (Concrete - Interface yok)
+    ? <<ToggleAktiflikAsync>b__0>d (Concrete - Interface yok)
+    ? <<CreateAsync>b__0>d (Concrete - Interface yok)
+    ? <<UpdateAsync>b__0>d (Concrete - Interface yok)
+    ? <<DeleteAsync>b__0>d (Concrete - Interface yok)
+    ? <<DeleteAsync>b__0>d (Concrete - Interface yok)
+    ? <<CreateAsync>b__0>d (Concrete - Interface yok)
+    ? <<UpdateAsync>b__0>d (Concrete - Interface yok)
+    ? <<CreateAsync>b__0>d (Concrete - Interface yok)
+    ? <<UpdateAsync>b__0>d (Concrete - Interface yok)
+    ? <<DeleteAsync>b__0>d (Concrete - Interface yok)
+    ? <<UpdateSiraAsync>b__0>d (Concrete - Interface yok)
+    ? <<CreateAsync>b__0>d (Concrete - Interface yok)
+    ? <<UpdateAsync>b__0>d (Concrete - Interface yok)
+    ? <<DeleteAsync>b__0>d (Concrete - Interface yok)
+    ? <<CreateAsync>b__0>d (Concrete - Interface yok)
+    ? <<UpdateAsync>b__0>d (Concrete - Interface yok)
+    ? <<DeleteAsync>b__0>d (Concrete - Interface yok)
+    ? <<YonlendirSiraAsync>b__0>d (Concrete - Interface yok)
+    ?? SiramatikIslemleri: 191 servis kayıt edildi
+  ?? PdksIslemleri servisleri kaydediliyor...
+    ??  PdksIslemleri modülünde servis bulunamadı
+  ?? EshotIslemleri servisleri kaydediliyor...
+    ??  EshotIslemleri modülünde servis bulunamadı
+  ?? SignalR servisleri kaydediliyor...
+    ?? Bulunan interface'ler: 2
+    ?? Bulunan implementation'lar: 75
+    ? IHubConnectionBusinessService -> HubConnectionBusinessService
+    ? ISiramatikHubService -> SiramatikHubService
+    ? <>c (Concrete - Interface yok)
+    ? <>c__DisplayClass10_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass11_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass12_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass13_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass14_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass14_1 (Concrete - Interface yok)
+    ? <>c__DisplayClass14_2 (Concrete - Interface yok)
+    ? <>c__DisplayClass15_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass15_1 (Concrete - Interface yok)
+    ? <>c__DisplayClass15_2 (Concrete - Interface yok)
+    ? <>c__DisplayClass17_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass17_1 (Concrete - Interface yok)
+    ? <>c__DisplayClass18_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass19_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass20_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass21_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass22_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass23_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass23_1 (Concrete - Interface yok)
+    ? <>c__DisplayClass25_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass26_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass26_1 (Concrete - Interface yok)
+    ? <>c__DisplayClass27_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass27_1 (Concrete - Interface yok)
+    ? <>c__DisplayClass28_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass28_1 (Concrete - Interface yok)
+    ? <>c__DisplayClass29_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass3_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass4_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass5_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass6_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass7_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass8_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass8_1 (Concrete - Interface yok)
+    ? <CreateBankoConnectionAsync>d__16 (Concrete - Interface yok)
+    ? <CreateOrUpdateConnectionAsync>d__3 (Concrete - Interface yok)
+    ? <CreateTvConnectionAsync>d__24 (Concrete - Interface yok)
+    ? <DeactivateBankoConnectionAsync>d__7 (Concrete - Interface yok)
+    ? <DeactivateBankoConnectionByHubConnectionIdAsync>d__17 (Concrete - Interface yok)
+    ? <DeactivateTvConnectionByHubConnectionIdAsync>d__25 (Concrete - Interface yok)
+    ? <DisconnectAsync>d__4 (Concrete - Interface yok)
+    ? <GetActiveConnectionsByTcKimlikNoAsync>d__5 (Concrete - Interface yok)
+    ? <GetActiveTvByTcKimlikNoAsync>d__26 (Concrete - Interface yok)
+    ? <GetBankoActivePersonelAsync>d__22 (Concrete - Interface yok)
+    ? <GetBankoConnectionByHubConnectionIdAsync>d__20 (Concrete - Interface yok)
+    ? <GetByConnectionIdAsync>d__19 (Concrete - Interface yok)
+    ? <GetNonBankoConnectionsByTcKimlikNoAsync>d__18 (Concrete - Interface yok)
+    ? <GetNonTvConnectionsByTcKimlikNoAsync>d__29 (Concrete - Interface yok)
+    ? <GetPersonelActiveBankoAsync>d__11 (Concrete - Interface yok)
+    ? <GetTvActiveUserAsync>d__27 (Concrete - Interface yok)
+    ? <GetTvConnectionByHubConnectionIdAsync>d__21 (Concrete - Interface yok)
+    ? <IsBankoInUseAsync>d__10 (Concrete - Interface yok)
+    ? <IsTvInUseByOtherTvUserAsync>d__15 (Concrete - Interface yok)
+    ? <IsTvInUseByTvUserAsync>d__14 (Concrete - Interface yok)
+    ? <RegisterBankoConnectionAsync>d__6 (Concrete - Interface yok)
+    ? <RegisterTvConnectionAsync>d__8 (Concrete - Interface yok)
+    ? <RegisterTvConnectionAsync>d__9 (Concrete - Interface yok)
+    ? <SetConnectionStatusAsync>d__13 (Concrete - Interface yok)
+    ? <TransferBankoConnectionAsync>d__23 (Concrete - Interface yok)
+    ? <TransferTvConnectionAsync>d__28 (Concrete - Interface yok)
+    ? <UpdateConnectionTypeAsync>d__12 (Concrete - Interface yok)
+    ? <>c (Concrete - Interface yok)
+    ? <>c__DisplayClass10_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass7_0 (Concrete - Interface yok)
+    ? <BroadcastNewSiraAsync>d__11 (Concrete - Interface yok)
+    ? <BroadcastSiraCalledAsync>d__7 (Concrete - Interface yok)
+    ? <BroadcastSiraCancelledAsync>d__9 (Concrete - Interface yok)
+    ? <BroadcastSiraCompletedAsync>d__8 (Concrete - Interface yok)
+    ? <BroadcastSiraRedirectedAsync>d__10 (Concrete - Interface yok)
+    ? <BroadcastSiraToTvAsync>d__12 (Concrete - Interface yok)
+    ? <SendToPersonelAsync>d__14 (Concrete - Interface yok)
+    ? <SendToPersonelsAsync>d__13 (Concrete - Interface yok)
+    ?? SignalR: 75 servis kayıt edildi
+  ?? Business Logic Layer hazır!
+
+warn: Microsoft.EntityFrameworkCore.Model.Validation[10622]
+      Entity 'Modul' has a global query filter defined and is the required end of a relationship with the entity 'ModulAlt'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[10400]
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[10625]
+      The foreign key property 'PersonelYetki.YetkiId1' was created in shadow state because a conflicting property with the simple name 'YetkiId' exists in the entity type, but is either not mapped, is already used for another relationship, or is incompatible with the associated primary key type. See https://aka.ms/efcore-relationships for information on mapping relationships in EF Core.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[10625]
+      The foreign key property 'Banko.HizmetBinasiId1' was created in shadow state because a conflicting property with the simple name 'HizmetBinasiId' exists in the entity type, but is either not mapped, is already used for another relationship, or is incompatible with the associated primary key type. See https://aka.ms/efcore-relationships for information on mapping relationships in EF Core.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[10625]
+      The foreign key property 'Tv.HizmetBinasiId1' was created in shadow state because a conflicting property with the simple name 'HizmetBinasiId' exists in the entity type, but is either not mapped, is already used for another relationship, or is incompatible with the associated primary key type. See https://aka.ms/efcore-relationships for information on mapping relationships in EF Core.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'UserType' property 'UserType' on entity type 'User' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value '0', since this is the CLR default for the 'UserType' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'Aktiflik' property 'DepartmanAktiflik' on entity type 'Departman' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'Aktiflik' property 'ServisAktiflik' on entity type 'Servis' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'Aktiflik' property 'UnvanAktiflik' on entity type 'Unvan' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'Aktiflik' property 'BankoAktiflik' on entity type 'Banko' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'Aktiflik' property 'Aktiflik' on entity type 'Kiosk' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'Aktiflik' property 'Aktiflik' on entity type 'KioskMenu' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'Aktiflik' property 'TvAktiflik' on entity type 'Tv' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+? Veritabanı güncel
+
+╔════════════════════════════════════════════════════════╗
+║         SGK PORTAL API BAŞLATILIYOR...                 ║
+╚════════════════════════════════════════════════════════╝
+?? Ortam: Development
+?? HTTPS URL: https://localhost:9080
+?? HTTP URL: http://localhost:9081
+?? Swagger: https://localhost:9080
+??  Health: https://localhost:9080/health
+??  Health Ready: https://localhost:9080/health/ready
+??  Health Live: https://localhost:9080/health/live
+╚════════════════════════════════════════════════════════╝
+
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: https://localhost:9080
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:9081
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: D:\AspNetExamples\SGKPortalApp\SGKPortalApp.ApiLayer
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
+      ? Banko bağlantısı devredildi: 16406457430 -> HubConnection#836
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
+      ? Banko bağlantısı devredildi: 16406457430 -> HubConnection#839
+warn: Microsoft.EntityFrameworkCore.Query[10108]
+      Collection navigations are only considered null if their parent entity is null. Use 'Any' to check whether collection navigation 'Banko.BankoKullanicilari' is empty.
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.KioskSiraAlmaService[0]
+      ?? Kiosk menüleri getiriliyor (Complex Query). KioskId: 1
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.KioskSiraAlmaService[0]
+      ? Kiosk menüleri getirildi. KioskId: 1, Menü sayısı: 3
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
+      ? Banko bağlantısı devredildi: 16406457430 -> HubConnection#840
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.KioskSiraAlmaService[0]
+      ?? Kiosk alt işlemleri getiriliyor (Complex Query). KioskId: 1, KioskMenuId: 7
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.KioskSiraAlmaService[0]
+      ? Kiosk alt işlemleri getirildi. KioskMenuId: 7, İşlem sayısı: 2
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.KioskSiraAlmaService[0]
+      ?? Kiosk sıra alma başladı. KanalAltIslemId: 13
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.KioskSiraAlmaService[0]
+      ?? GetSiraNoAsync çağrılıyor. KanalAltIslemId: 13
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.KioskSiraAlmaService[0]
+      ?? GetSiraNoAsync sonucu: Bulundu, SiraNo: 4004
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.KioskSiraAlmaService[0]
+      ? Kiosk sıra oluşturuldu. SiraId: 52, SiraNo: 4004, KanalAltIslemId: 13
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.KioskSiraAlmaService[0]
+      ?? SignalR broadcast başlatılıyor. SiraNo: 4004, HizmetBinasiId: 6, KanalAltIslemId: 13
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? BroadcastNewSiraAsync başladı. SiraNo: 4004, HizmetBinasiId: 6, KanalAltIslemId: 13
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? Etkilenen personeller: 1 kişi, TC'ler: [16406457430]
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? TC: 16406457430 için 1 aktif bağlantı bulundu. Tipler: BankoMode:kXpxl1spnvFJZEgx8GdC9w
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? BankoMode connection sayısı: 1, IDs: kXpxl1spnvFJZEgx8GdC9w
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? siraListUpdate gönderildi: 1 connection'a
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? NewSira (Kiosk) broadcast edildi. SiraId: 52, SiraNo: 4004, Etkilenen: 1 personel

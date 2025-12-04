@@ -54,10 +54,13 @@ class SignalRConnectionManager {
                 isTvDisplay: isTvDisplay
             });
             
+            // Kullanıcı bilgisini al (Blazor tarafından set edilmiş olmalı)
+            const tcKimlikNo = window.currentUserTcKimlikNo || '';
+            
             this.connection = new signalR.HubConnectionBuilder()
-                .withUrl(`${this.hubUrl}?tabSessionId=${encodeURIComponent(tabId)}&isRefresh=${isRefresh}&isNewTab=${isNewTab}&isTvDisplay=${isTvDisplay}`, {
-                    accessTokenFactory: () => null,
+                .withUrl(`${this.hubUrl}?tabSessionId=${encodeURIComponent(tabId)}&isRefresh=${isRefresh}&isNewTab=${isNewTab}&isTvDisplay=${isTvDisplay}&tcKimlikNo=${encodeURIComponent(tcKimlikNo)}`, {
                     transport: signalR.HttpTransportType.WebSockets,
+                    withCredentials: true
                 })
                 .withAutomaticReconnect(this.reconnectIntervals)
                 .configureLogging(signalR.LogLevel.Information)
