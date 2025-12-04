@@ -30,8 +30,8 @@
     // ============================================
     const CONFIG = {
         // ⭐ ApiLayer Hub URL'ini kullan (PresentationLayer değil!)
-        // Eğer window.appConfig.apiUrl varsa onu kullan, yoksa relative URL (backward compat)
-        hubUrl: window.appConfig?.apiUrl ? `${window.appConfig.apiUrl}/hubs/siramatik` : '/hubs/siramatik',
+        // appsettings.json'dan gelen API URL'i kullanır (dinamik)
+        hubUrl: window.appConfig?.apiUrl ? `${window.appConfig.apiUrl}/hubs/siramatik` : 'https://localhost:9080/hubs/siramatik',
         loginRedirectUrl: '/Account/Login',
         enableDebugLogs: true
     };

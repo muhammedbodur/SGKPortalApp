@@ -106,6 +106,18 @@ window.bankoMode = {
             window.location.href = '/auth/login';
         });
 
+        // ⭐ Sıra listesi güncelleme (Kiosk'tan yeni sıra geldiğinde)
+        connection.on("siraListUpdate", (payload) => {
+            console.log('📥 siraListUpdate alındı:', payload);
+            
+            // SiraCagirmaPanel varsa güncelle
+            if (typeof SiraCagirmaPanel !== 'undefined' && typeof SiraCagirmaPanel.handleSiraUpdate === 'function') {
+                SiraCagirmaPanel.handleSiraUpdate(payload);
+            } else {
+                console.warn('⚠️ SiraCagirmaPanel bulunamadı veya handleSiraUpdate metodu yok');
+            }
+        });
+
         console.log('✅ Banko modu event handlerlari kuruldu (camelCase)');
     },
 

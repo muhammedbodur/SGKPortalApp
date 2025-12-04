@@ -142,19 +142,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskSimulator
             try
             {
                 // Kiosk'un hizmet binası ID'sini al
-                var selectedKiosk = kiosklar.FirstOrDefault(k => k.KioskId == selectedKioskId);
-                if (selectedKiosk == null)
-                {
-                    await _toastService.ShowErrorAsync("Kiosk bilgisi bulunamadı");
-                    isLoading = false;
-                    StateHasChanged();
-                    return;
-                }
-
+                // Eski proje mantığı: Sadece KanalAltIslemId ile sıra al
                 var request = new KioskSiraAlRequestDto
                 {
-                    KioskMenuIslemId = islem.KioskMenuIslemId,
-                    HizmetBinasiId = selectedKiosk.HizmetBinasiId
+                    KanalAltIslemId = islem.KanalAltIslemId,
+                    KioskId = selectedKioskId
                 };
 
                 var result = await _kioskSimulatorService.SiraAlAsync(request);

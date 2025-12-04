@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
-using SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.State;
 using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
@@ -17,7 +16,6 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
     public partial class MainLayout : IAsyncDisposable, IDisposable
     {
         [Inject] private IJSRuntime JS { get; set; } = default!;
-        [Inject] private IBankoModeService? BankoModeService { get; set; }
         [Inject] private IHttpContextAccessor? HttpContextAccessor { get; set; }
         [Inject] private BankoModeStateService BankoModeState { get; set; } = default!;
         [Inject] private NavigationManager NavigationManager { get; set; } = default!;
@@ -64,21 +62,7 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                 if (!string.IsNullOrEmpty(tcKimlikNo))
                 {
                     BankoModeState.SetCurrentUser(tcKimlikNo);
-                    
-                    // Kullanıcı zaten banko modunda mı kontrol et ve state'i senkronize et
-                    if (BankoModeService != null)
-                    {
-                        var isInBankoMode = await BankoModeService.IsPersonelInBankoModeAsync(tcKimlikNo);
-                        if (isInBankoMode)
-                        {
-                            var assignedBanko = await BankoModeService.GetPersonelAssignedBankoAsync(tcKimlikNo);
-                            if (assignedBanko != null)
-                            {
-                                BankoModeState.ActivateBankoMode(assignedBanko.BankoId, tcKimlikNo);
-                                Logger.LogInformation("✅ MainLayout - Banko modu state senkronize edildi: Banko#{BankoId}", assignedBanko.BankoId);
-                            }
-                        }
-                    }
+                    // NOT: Banko modu senkronizasyonu API üzerinden yapılacak
                 }
 
                 // 2. İlk session kontrolü
@@ -385,34 +369,9 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         // Banko mode metodları - değişiklik yok
         public async Task<bool> EnterBankoModeAsync(int bankoId)
         {
-            try
-            {
-                var tcKimlikNo = HttpContextAccessor?.HttpContext?.User.FindFirst("TcKimlikNo")?.Value;
-                if (string.IsNullOrEmpty(tcKimlikNo))
-                {
-                    Logger.LogWarning("❌ Kullanıcı bilgisi bulunamadı");
-                    return false;
-                }
-
-                if (BankoModeService != null)
-                {
-                    var bankoInUse = await BankoModeService.IsBankoInUseAsync(bankoId);
-                    if (bankoInUse)
-                    {
-                        var activePersonel = await BankoModeService.GetBankoActivePersonelNameAsync(bankoId);
-                        Logger.LogWarning("❌ Banko#{BankoId} kullanımda: {ActivePersonel}", bankoId, activePersonel);
-                        return false;
-                    }
-                }
-
-                Logger.LogDebug("⚠️ EnterBankoModeAsync - BankoModeWidget kullanılmalı");
-                return false;
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, "❌ EnterBankoModeAsync hatası");
-                return false;
-            }
+            Logger.LogDebug("⚠️ EnterBankoModeAsync - BankoModeWidget kullanılmalı");
+            await Task.CompletedTask;
+            return false;
         }
 
         public async Task<bool> ExitBankoModeAsync()

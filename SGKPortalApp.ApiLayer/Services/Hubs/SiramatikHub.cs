@@ -62,7 +62,13 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
             var isNewTab = bool.TryParse(httpContext?.Request.Query["isNewTab"].ToString(), out var newTab) && newTab;
             var isTvDisplay = bool.TryParse(httpContext?.Request.Query["isTvDisplay"].ToString(), out var tvDisplay) && tvDisplay;
             _logger.LogInformation($"🔍 Page Lifecycle: isRefresh={isRefresh}, isNewTab={isNewTab}, isTvDisplay={isTvDisplay}, tabSessionId={tabSessionId}");
+            
+            // TcKimlikNo: Önce Context.User'dan, yoksa query string'den al
             var tcKimlikNo = Context.User?.FindFirst("TcKimlikNo")?.Value;
+            if (string.IsNullOrEmpty(tcKimlikNo))
+            {
+                tcKimlikNo = httpContext?.Request.Query["tcKimlikNo"].ToString();
+            }
             var userType = Context.User?.FindFirst("UserType")?.Value;
             
             if (!string.IsNullOrEmpty(tcKimlikNo))
@@ -105,15 +111,24 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
 
                         if (activeBanko != null)
                         {
-                            _logger.LogInformation($"🔍 Aktif banko bulundu: Banko#{activeBanko.BankoId}, TabId beklenen: {PersonelBankoTabSessions.GetValueOrDefault(tcKimlikNo)}, gelen: {tabSessionId}");
+                            _logger.LogInformation($"🔍 Aktif banko bulundu: Banko#{activeBanko.BankoId}, TabId beklenen: {PersonelBankoTabSessions.GetValueOrDefault(tcKimlikNo)}, gelen: {tabSessionId}, isRefresh: {isRefresh}");
                             var expectedTabId = PersonelBankoTabSessions.GetOrAdd(tcKimlikNo, tabSessionId);
-                            if (!string.Equals(expectedTabId, tabSessionId, StringComparison.Ordinal))
+                            
+                            // Tab ID farklı VE refresh değilse -> yeni sekme açılmaya çalışılıyor
+                            if (!string.Equals(expectedTabId, tabSessionId, StringComparison.Ordinal) && !isRefresh)
                             {
                                 _logger.LogWarning($"⚠️ Banko modundayken yeni tab denemesi: {tcKimlikNo}");
                                 await Clients.Caller.SendAsync(SignalREvents.ForceLogout, "Banko modundayken yeni sekme açamazsınız!");
                                 ConnectionTabSessions.TryRemove(info.ConnectionId, out _);
                                 Context.Abort();
                                 return;
+                            }
+                            
+                            // Refresh durumunda yeni tabSessionId'yi kabul et
+                            if (isRefresh)
+                            {
+                                _logger.LogInformation($"🔄 Sayfa yenileme algılandı, tabSessionId güncelleniyor: {tcKimlikNo}");
+                                PersonelBankoTabSessions[tcKimlikNo] = tabSessionId;
                             }
 
                             var transferred = await _connectionService.TransferBankoConnectionAsync(tcKimlikNo, info.ConnectionId);
@@ -384,7 +399,13 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
         {
             try
             {
+                // TcKimlikNo: Önce Context.User'dan, yoksa query string'den al
                 var tcKimlikNo = Context.User?.FindFirst("TcKimlikNo")?.Value;
+                if (string.IsNullOrEmpty(tcKimlikNo))
+                {
+                    var httpContext = Context.GetHttpContext();
+                    tcKimlikNo = httpContext?.Request.Query["tcKimlikNo"].ToString();
+                }
                 var connectionId = Context.ConnectionId;
                 
                 if (string.IsNullOrEmpty(tcKimlikNo))
@@ -491,7 +512,13 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
         {
             try
             {
+                // TcKimlikNo: Önce Context.User'dan, yoksa query string'den al
                 var tcKimlikNo = Context.User?.FindFirst("TcKimlikNo")?.Value;
+                if (string.IsNullOrEmpty(tcKimlikNo))
+                {
+                    var httpContext = Context.GetHttpContext();
+                    tcKimlikNo = httpContext?.Request.Query["tcKimlikNo"].ToString();
+                }
                 var connectionId = Context.ConnectionId;
                 
                 if (string.IsNullOrEmpty(tcKimlikNo))

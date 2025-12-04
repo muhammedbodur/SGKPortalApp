@@ -4,22 +4,17 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri
 {
     /// <summary>
     /// Kiosk'tan sıra alma isteği için DTO
-    /// Masaüstü kiosk uygulamasını simüle eder
+    /// Eski proje mantığı: Sadece KanalAltIslemId ile çalışır
+    /// HizmetBinasiId, KanalAltIslem tablosundan otomatik alınır
     /// </summary>
     public class KioskSiraAlRequestDto
     {
         /// <summary>
-        /// Kiosk menü işlem ID - Hangi işlem için sıra alınacak
-        /// KioskMenuIslem üzerinden KanalAltId'ye ulaşılır
+        /// Kanal Alt İşlem ID - Hangi işlem için sıra alınacak
+        /// Bu ID üzerinden HizmetBinasiId ve diğer bilgiler otomatik alınır
         /// </summary>
-        [Required(ErrorMessage = "KioskMenuIslemId zorunludur")]
-        public int KioskMenuIslemId { get; set; }
-
-        /// <summary>
-        /// Hizmet binası ID - Hangi binada sıra alınacak
-        /// </summary>
-        [Required(ErrorMessage = "HizmetBinasiId zorunludur")]
-        public int HizmetBinasiId { get; set; }
+        [Required(ErrorMessage = "KanalAltIslemId zorunludur")]
+        public int KanalAltIslemId { get; set; }
 
         /// <summary>
         /// Kiosk ID - Hangi kiosk'tan sıra alındığı (opsiyonel, loglama için)
