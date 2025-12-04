@@ -16,6 +16,21 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
         }
 
+        /// <summary>
+        /// Tüm kiosk'ları navigation property'leri ile birlikte getirir
+        /// </summary>
+        public override async Task<IEnumerable<Kiosk>> GetAllAsync()
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Include(kiosk => kiosk.HizmetBinasi)
+                    .ThenInclude(hb => hb.Departman)
+                .Include(kiosk => kiosk.MenuAtamalari.Where(ma => ma.Aktiflik == Aktiflik.Aktif))
+                    .ThenInclude(ma => ma.KioskMenu)
+                .OrderBy(kiosk => kiosk.KioskAdi)
+                .ToListAsync();
+        }
+
         public async Task<IEnumerable<Kiosk>> GetByHizmetBinasiAsync(int hizmetBinasiId)
         {
             return await _dbSet

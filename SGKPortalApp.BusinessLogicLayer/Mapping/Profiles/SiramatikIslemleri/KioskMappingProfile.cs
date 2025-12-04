@@ -14,9 +14,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
             CreateMap<KioskMenu, KioskMenuResponseDto>();
 
             CreateMap<Kiosk, KioskResponseDto>()
-                .ForMember(dest => dest.HizmetBinasiAdi, 
+                .ForMember(dest => dest.HizmetBinasiAdi,
                     opt => opt.MapFrom(src => src.HizmetBinasi != null ? src.HizmetBinasi.HizmetBinasiAdi : null))
-                .ForMember(dest => dest.DepartmanAdi, 
+                .ForMember(dest => dest.DepartmanId,
+                    opt => opt.MapFrom(src => src.HizmetBinasi != null ? (int?)src.HizmetBinasi.DepartmanId : null))
+                .ForMember(dest => dest.DepartmanAdi,
                     opt => opt.MapFrom(src => src.HizmetBinasi != null && src.HizmetBinasi.Departman != null ? src.HizmetBinasi.Departman.DepartmanAdi : null))
                 .ForMember(dest => dest.AtananKioskMenuId,
                     opt => opt.MapFrom(src => src.MenuAtamalari != null && src.MenuAtamalari.Any(ma => ma.Aktiflik == Aktiflik.Aktif) 
