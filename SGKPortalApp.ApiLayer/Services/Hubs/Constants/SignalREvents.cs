@@ -1,4 +1,4 @@
-namespace SGKPortalApp.PresentationLayer.Services.Hubs.Constants
+namespace SGKPortalApp.ApiLayer.Services.Hubs.Constants
 {
     /// <summary>
     /// SignalR event adları - camelCase formatında (JavaScript convention)

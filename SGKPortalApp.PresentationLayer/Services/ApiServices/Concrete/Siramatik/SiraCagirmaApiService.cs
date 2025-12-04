@@ -45,11 +45,22 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             }
         }
 
-        public async Task<SiraCagirmaResponseDto?> SiradakiCagirAsync(int siraId, string personelTcKimlikNo, int? firstCallableSiraId)
+        public async Task<SiraCagirmaResponseDto?> SiradakiCagirAsync(int siraId, string personelTcKimlikNo, int? bankoId = null, string? bankoNo = null, int? firstCallableSiraId = null)
         {
             try
             {
-                var query = $"personelTcKimlikNo={personelTcKimlikNo}" + (firstCallableSiraId.HasValue ? $"&firstCallableSiraId={firstCallableSiraId.Value}" : string.Empty);
+                var queryParams = new List<string> { $"personelTcKimlikNo={personelTcKimlikNo}" };
+                
+                if (bankoId.HasValue)
+                    queryParams.Add($"bankoId={bankoId.Value}");
+                
+                if (!string.IsNullOrEmpty(bankoNo))
+                    queryParams.Add($"bankoNo={Uri.EscapeDataString(bankoNo)}");
+                
+                if (firstCallableSiraId.HasValue)
+                    queryParams.Add($"firstCallableSiraId={firstCallableSiraId.Value}");
+
+                var query = string.Join("&", queryParams);
                 var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/siradaki-cagir/{siraId}?{query}", new { });
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadFromJsonAsync<SiraCagirmaResponseDto>();

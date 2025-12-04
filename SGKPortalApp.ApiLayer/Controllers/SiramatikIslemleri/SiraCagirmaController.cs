@@ -3,6 +3,10 @@ using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
 
 namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
 {
+    /// <summary>
+    /// Sıra Çağırma API Controller
+    /// SignalR broadcast işlemleri Business katmanında yapılır (Layered Architecture)
+    /// </summary>
     [ApiController]
     [Route("api/siramatik/sira-cagirma")]
     public class SiraCagirmaController : ControllerBase
@@ -51,8 +55,18 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         /// <summary>
         /// Sıradaki vatandaşı çağırır.
         /// </summary>
+        /// <param name="siraId">Çağrılacak sıra ID</param>
+        /// <param name="personelTcKimlikNo">Çağıran personel TC</param>
+        /// <param name="bankoId">Çağıran banko ID (TV bildirimi için)</param>
+        /// <param name="bankoNo">Çağıran banko numarası (TV bildirimi için)</param>
+        /// <param name="firstCallableSiraId">Concurrency kontrolü için ilk çağrılabilir sıra ID</param>
         [HttpPost("siradaki-cagir/{siraId:int}")]
-        public async Task<IActionResult> SiradakiCagirAsync(int siraId, [FromQuery] string personelTcKimlikNo, [FromQuery] int? firstCallableSiraId)
+        public async Task<IActionResult> SiradakiCagirAsync(
+            int siraId, 
+            [FromQuery] string personelTcKimlikNo, 
+            [FromQuery] int? bankoId,
+            [FromQuery] string? bankoNo,
+            [FromQuery] int? firstCallableSiraId)
         {
             if (string.IsNullOrWhiteSpace(personelTcKimlikNo))
             {
@@ -61,7 +75,8 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
 
             try
             {
-                var result = await _siraCagirmaService.SiradakiCagirAsync(siraId, personelTcKimlikNo, firstCallableSiraId);
+                // SignalR broadcast Business katmanında yapılır
+                var result = await _siraCagirmaService.SiradakiCagirAsync(siraId, personelTcKimlikNo, bankoId, bankoNo, firstCallableSiraId);
                 return result != null ? Ok(result) : NotFound();
             }
             catch (InvalidOperationException ex)
@@ -76,6 +91,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         [HttpPut("tamamla/{siraId:int}")]
         public async Task<IActionResult> SiraTamamlaAsync(int siraId)
         {
+            // SignalR broadcast Business katmanında yapılır
             var success = await _siraCagirmaService.SiraTamamlaAsync(siraId);
             return success ? Ok() : NotFound();
         }
@@ -86,6 +102,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         [HttpDelete("iptal/{siraId:int}")]
         public async Task<IActionResult> SiraIptalAsync(int siraId, [FromQuery] string? iptalNedeni)
         {
+            // SignalR broadcast Business katmanında yapılır
             var success = await _siraCagirmaService.SiraIptalAsync(siraId, iptalNedeni ?? string.Empty);
             return success ? Ok() : NotFound();
         }

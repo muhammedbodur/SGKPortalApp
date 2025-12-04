@@ -741,5 +741,95 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                 };
             }
         }
+
+        // ═══════════════════════════════════════════════════════
+        // SIGNALR BROADCAST İÇİN ETKİLENEN PERSONELLER
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Belirli bir sıranın çağrılması/tamamlanması durumunda etkilenen personellerin TC listesini döner.
+        /// Aynı KanalAltIslem'e atanmış ve banko modunda olan personeller etkilenir.
+        /// </summary>
+        public async Task<List<string>> GetSiraEtkilenenPersonellerAsync(int siraId)
+        {
+            // 1. Sıranın KanalAltIslemId ve HizmetBinasiId'sini bul
+            var sira = await _context.Siralar
+                .AsNoTracking()
+                .Where(s => s.SiraId == siraId)
+                .Select(s => new { s.KanalAltIslemId, s.HizmetBinasiId })
+                .FirstOrDefaultAsync();
+
+            if (sira == null)
+                return new List<string>();
+
+            return await GetBankoModundakiPersonellerAsync(sira.HizmetBinasiId, sira.KanalAltIslemId);
+        }
+
+        /// <summary>
+        /// Belirli bir HizmetBinasi ve KanalAltIslem için banko modunda olan personellerin TC listesini döner.
+        /// </summary>
+        public async Task<List<string>> GetBankoModundakiPersonellerAsync(int hizmetBinasiId, int kanalAltIslemId)
+        {
+            // Banko modunda olan personelleri bul:
+            // 1. KanalPersonel tablosunda bu KanalAltIslem'e atanmış
+            // 2. User tablosunda BankoModuAktif = true
+            // 3. Aynı HizmetBinasi'nda
+
+            var etkilenenPersoneller = await (
+                from kp in _context.KanalPersonelleri
+                join u in _context.Users on kp.TcKimlikNo equals u.TcKimlikNo
+                join bk in _context.BankoKullanicilari on u.TcKimlikNo equals bk.TcKimlikNo into bkJoin
+                from bk in bkJoin.DefaultIfEmpty()
+                join b in _context.Bankolar on bk.BankoId equals b.BankoId into bJoin
+                from b in bJoin.DefaultIfEmpty()
+                where kp.KanalAltIslemId == kanalAltIslemId
+                   && kp.Aktiflik == Aktiflik.Aktif
+                   && !kp.SilindiMi
+                   && u.BankoModuAktif == true
+                   && (b == null || b.HizmetBinasiId == hizmetBinasiId)
+                select kp.TcKimlikNo
+            ).Distinct().ToListAsync();
+
+            return etkilenenPersoneller;
+        }
+
+        /// <summary>
+        /// Belirli bir HizmetBinasi ve KanalAltId için banko modunda olan ve en az Yrd.Uzman yetkisine sahip personellerin TC listesini döner.
+        /// Kiosk sıra alma için kullanılır - sadece işlem yapabilecek personel varsa sıra alınabilir.
+        /// 
+        /// NOT: kanalAltId parametresi KanalAlt tablosundaki ID'dir (KanalAltIslem değil!)
+        /// KanalPersonel.KanalAltIslemId → KanalAltIslem.KanalAltId üzerinden eşleştirilir.
+        /// 
+        /// Kontroller:
+        /// 1. KanalPersonel: Bu KanalAlt'a ait bir KanalAltIslem'e atanmış, aktif, en az Yrd.Uzman
+        /// 2. User: BankoModuAktif = true VE AktifBankoId != null (personel ŞU AN banko modunda mı?)
+        /// 3. Banko: User.AktifBankoId üzerinden - aynı hizmet binasında ve aktif mi?
+        /// </summary>
+        public async Task<List<string>> GetBankoModundakiYetkiliPersonellerAsync(int hizmetBinasiId, int kanalAltId)
+        {
+            // KanalPersonel → KanalAltIslem → KanalAlt üzerinden eşleştirme
+            var yetkiliPersoneller = await (
+                from kp in _context.KanalPersonelleri
+                join kai in _context.KanalAltIslemleri on kp.KanalAltIslemId equals kai.KanalAltIslemId
+                join u in _context.Users on kp.TcKimlikNo equals u.TcKimlikNo
+                join b in _context.Bankolar on u.AktifBankoId equals b.BankoId  // User'ın aktif bankosunu al
+                where kai.KanalAltId == kanalAltId                    // ⭐ KanalAlt ID eşleşmesi
+                   && kai.HizmetBinasiId == hizmetBinasiId            // ⭐ Aynı hizmet binasındaki KanalAltIslem
+                   && kai.Aktiflik == Aktiflik.Aktif                  // KanalAltIslem aktif
+                   && !kai.SilindiMi                                  // KanalAltIslem silinmemiş
+                   && kp.Aktiflik == Aktiflik.Aktif                   // Personel ataması aktif
+                   && !kp.SilindiMi                                   // Personel ataması silinmemiş
+                   && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok      // En az Yrd.Uzman (1, 2, 3)
+                   && u.BankoModuAktif == true                        // ⭐ ŞU AN banko modunda
+                   && u.AktifBankoId != null                          // ⭐ Aktif banko ID'si var
+                   && u.AktifMi == true                               // Kullanıcı aktif
+                   && b.HizmetBinasiId == hizmetBinasiId              // Aynı hizmet binasında
+                   && b.BankoAktiflik == Aktiflik.Aktif               // Banko aktif
+                   && !b.SilindiMi                                    // Banko silinmemiş
+                select kp.TcKimlikNo
+            ).Distinct().ToListAsync();
+
+            return yetkiliPersoneller;
+        }
     }
 }

@@ -65,5 +65,14 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
                     .ThenInclude(u => u.Personel)
                 .ToListAsync();
         }
+
+        // Kullanıcının aktif bağlantılarını listeler (BankoMode için)
+        public async Task<IEnumerable<HubConnection>> GetActiveConnectionsByTcKimlikNoAsync(string tcKimlikNo)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Where(hc => hc.TcKimlikNo == tcKimlikNo && hc.ConnectionStatus == ConnectionStatus.online)
+                .ToListAsync();
+        }
     }
 }

@@ -20,7 +20,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
         /// <summary>
         /// Sıradaki vatandaşı çağırır
         /// </summary>
-        Task<SiraCagirmaResponseDto?> SiradakiCagirAsync(int siraId, string personelTcKimlikNo, int? firstCallableSiraId = null);
+        /// <param name="siraId">Çağrılacak sıra ID</param>
+        /// <param name="personelTcKimlikNo">Çağıran personel TC</param>
+        /// <param name="bankoId">Çağıran banko ID (TV bildirimi için)</param>
+        /// <param name="bankoNo">Çağıran banko numarası (TV bildirimi için)</param>
+        /// <param name="firstCallableSiraId">Concurrency kontrolü için ilk çağrılabilir sıra ID</param>
+        Task<SiraCagirmaResponseDto?> SiradakiCagirAsync(int siraId, string personelTcKimlikNo, int? bankoId = null, string? bankoNo = null, int? firstCallableSiraId = null);
 
         /// <summary>
         /// Sırayı tamamlar

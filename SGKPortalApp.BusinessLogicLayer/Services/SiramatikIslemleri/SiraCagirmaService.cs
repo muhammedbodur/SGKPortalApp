@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
@@ -10,21 +12,28 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 {
     /// <summary>
     /// Sıra Çağırma Servisi - Business Logic
+    /// SignalR broadcast işlemleri bu katmanda yapılır (Layered Architecture)
     /// </summary>
     public class SiraCagirmaService : ISiraCagirmaService
     {
         private readonly ISiraRepository _siraRepository;
         private readonly ISiramatikQueryRepository _siramatikQueryRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ISiramatikHubService _hubService;
+        private readonly ILogger<SiraCagirmaService> _logger;
 
         public SiraCagirmaService(
             ISiraRepository siraRepository,
             ISiramatikQueryRepository siramatikQueryRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ISiramatikHubService hubService,
+            ILogger<SiraCagirmaService> logger)
         {
             _siraRepository = siraRepository;
             _siramatikQueryRepository = siramatikQueryRepository;
             _unitOfWork = unitOfWork;
+            _hubService = hubService;
+            _logger = logger;
         }
 
         public async Task<List<SiraCagirmaResponseDto>> GetBekleyenSiralarAsync()
@@ -64,7 +73,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }).ToList();
         }
 
-        public async Task<SiraCagirmaResponseDto?> SiradakiCagirAsync(int siraId, string personelTcKimlikNo, int? firstCallableSiraId = null)
+        public async Task<SiraCagirmaResponseDto?> SiradakiCagirAsync(int siraId, string personelTcKimlikNo, int? bankoId = null, string? bankoNo = null, int? firstCallableSiraId = null)
         {
             if (firstCallableSiraId.HasValue)
             {
@@ -98,7 +107,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             _siraRepository.Update(sira);
             await _unitOfWork.SaveChangesAsync();
 
-            return new SiraCagirmaResponseDto
+            var result = new SiraCagirmaResponseDto
             {
                 SiraId = sira.SiraId,
                 SiraNo = sira.SiraNo,
@@ -108,8 +117,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 IslemBaslamaZamani = sira.IslemBaslamaZamani,
                 PersonelAdSoyad = sira.Personel?.AdSoyad,
                 HizmetBinasiId = sira.HizmetBinasiId,
-                HizmetBinasiAdi = sira.HizmetBinasi?.HizmetBinasiAdi ?? "Bilinmiyor"
+                HizmetBinasiAdi = sira.HizmetBinasi?.HizmetBinasiAdi ?? "Bilinmiyor",
+                KanalAltIslemId = sira.KanalAltIslemId
             };
+
+            // ═══════════════════════════════════════════════════════
+            // SIGNALR BROADCAST - Business katmanında (Layered Architecture)
+            // Masaüstü Kiosk, Web Kiosk, Mobil App - tüm client'lar için çalışır
+            // ═══════════════════════════════════════════════════════
+            _ = _hubService.BroadcastSiraCalledAsync(result, bankoId ?? 0, bankoNo ?? "", personelTcKimlikNo);
+
+            return result;
         }
 
         private async Task<int?> GetFirstCallableSiraIdAsync(string personelTcKimlikNo)
@@ -127,11 +145,19 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 return false;
             }
 
+            // Broadcast için bilgileri sakla
+            var hizmetBinasiId = sira.HizmetBinasiId;
+            var kanalAltIslemId = sira.KanalAltIslemId;
+
             sira.BeklemeDurum = BeklemeDurum.Bitti;
             sira.IslemBitisZamani = DateTime.Now;
 
             _siraRepository.Update(sira);
             await _unitOfWork.SaveChangesAsync();
+
+            // SignalR broadcast - Business katmanında
+            _ = _hubService.BroadcastSiraCompletedAsync(siraId, hizmetBinasiId, kanalAltIslemId);
+
             return true;
         }
 
@@ -143,13 +169,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 return false;
             }
 
+            // Broadcast için bilgileri sakla
+            var hizmetBinasiId = sira.HizmetBinasiId;
+            var kanalAltIslemId = sira.KanalAltIslemId;
+
             // İptal için Bitti durumuna set ediyoruz (enum'da IptalEdildi yok)
             sira.BeklemeDurum = BeklemeDurum.Bitti;
             sira.IslemBitisZamani = DateTime.Now;
-            // Not: IptalNedeni ve IptalZamani property'leri entity'de yok
 
             _siraRepository.Update(sira);
             await _unitOfWork.SaveChangesAsync();
+
+            // SignalR broadcast - Business katmanında
+            _ = _hubService.BroadcastSiraCancelledAsync(siraId, hizmetBinasiId, kanalAltIslemId);
+
             return true;
         }
 

@@ -1,5 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using SGKPortalApp.ApiLayer.Services.Hubs;
+using SGKPortalApp.ApiLayer.Services.Hubs.Concrete;
+using SGKPortalApp.ApiLayer.Services.Hubs.Interfaces;
+using SGKPortalApp.ApiLayer.Services.State;
+using SGKPortalApp.BusinessObjectLayer.Interfaces.SignalR;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.BusinessLogicLayer.Extensions;
 using SGKPortalApp.DataAccessLayer.Context;
@@ -62,6 +68,16 @@ namespace SGKPortalApp.ApiLayer
 
             // Business Logic Layer
             builder.Services.AddBusinessLogicLayer();
+
+            // ═══════════════════════════════════════════════════════
+            // 📡 SIGNALR SERVİSLERİ
+            // ═══════════════════════════════════════════════════════
+            builder.Services.AddSignalR();
+            builder.Services.AddSingleton<BankoModeStateService>();
+            builder.Services.AddScoped<IHubConnectionService, HubConnectionService>();
+            builder.Services.AddScoped<IBankoModeService, BankoModeService>();
+            builder.Services.AddScoped<ISignalRBroadcaster, SignalRBroadcaster>();
+            builder.Services.AddSingleton<IUserIdProvider, TcKimlikNoUserIdProvider>();
 
             // ═══════════════════════════════════════════════════════
             // 🔧 AUTOMAPPER
@@ -197,6 +213,11 @@ namespace SGKPortalApp.ApiLayer
             });
 
             app.MapControllers();
+
+            // ═══════════════════════════════════════════════════════
+            // 📡 SIGNALR HUB ENDPOINTS
+            // ═══════════════════════════════════════════════════════
+            app.MapHub<SiramatikHub>("/hubs/siramatik");
 
             // ═══════════════════════════════════════════════════════
             // 🏠 ROOT ENDPOINT (API Info)

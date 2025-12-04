@@ -22,5 +22,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common
 
         // Tüm bağlantıları detaylı listeler
         Task<IEnumerable<HubConnection>> GetAllWithDetailsAsync();
+
+        // Kullanıcının aktif bağlantılarını listeler (BankoMode için)
+        Task<IEnumerable<HubConnection>> GetActiveConnectionsByTcKimlikNoAsync(string tcKimlikNo);
     }
 }

@@ -1,0 +1,993 @@
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.SignalR;
+using SGKPortalApp.PresentationLayer.Services.Hubs.Interfaces;
+
+namespace SGKPortalApp.PresentationLayer.Services.Hubs.Concrete
+{
+    /// <summary>
+    /// Hub Connection Service (Wrapper - Layered Architecture)
+    /// SignalR Hub → HubConnectionService → HubConnectionApiService → API → Business → Data
+    /// 
+    /// Bu servis SignalR Hub'lar için bir wrapper görevi görür.
+    /// Tüm işlemler HubConnectionApiService üzerinden API'ye yönlendirilir.
+    /// </summary>
+    public class HubConnectionService : IHubConnectionService
+    {
+        private readonly IHubConnectionApiService _apiService;
+        private readonly ILogger<HubConnectionService> _logger;
+
+        public HubConnectionService(
+            IHubConnectionApiService apiService, 
+            ILogger<HubConnectionService> logger)
+        {
+            _apiService = apiService;
+            _logger = logger;
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // CORE CONNECTION MANAGEMENT
+        // ═══════════════════════════════════════════════════════
+
+        public async Task<bool> CreateOrUpdateUserConnectionAsync(string connectionId, string tcKimlikNo)
+            => await _apiService.CreateOrUpdateUserConnectionAsync(connectionId, tcKimlikNo);
+
+        public async Task<bool> DisconnectAsync(string connectionId)
+            => await _apiService.DisconnectAsync(connectionId);
+
+        public async Task<List<HubConnection>> GetActiveConnectionsByTcKimlikNoAsync(string tcKimlikNo)
+            => await _apiService.GetActiveConnectionsByTcKimlikNoAsync(tcKimlikNo);
+
+        public async Task<HubConnection?> GetByConnectionIdAsync(string connectionId)
+            => await _apiService.GetByConnectionIdAsync(connectionId);
+
+        public async Task<bool> UpdateConnectionTypeAsync(string connectionId, string connectionType)
+            => await _apiService.UpdateConnectionTypeAsync(connectionId, connectionType);
+
+        public async Task<bool> SetConnectionStatusAsync(string connectionId, string status)
+            => await _apiService.SetConnectionStatusAsync(connectionId, status);
+
+        public async Task<bool> RegisterUserConnectionAsync(string connectionId, string tcKimlikNo, string connectionType)
+            => await _apiService.CreateOrUpdateUserConnectionAsync(connectionId, tcKimlikNo);
+
+        // ═══════════════════════════════════════════════════════
+        // BANKO CONNECTION MANAGEMENT
+        // ═══════════════════════════════════════════════════════
+
+        public async Task<bool> RegisterBankoConnectionAsync(int bankoId, string connectionId, string tcKimlikNo)
+            => await _apiService.RegisterBankoConnectionAsync(bankoId, connectionId, tcKimlikNo);
+
+        public async Task<bool> RegisterBankoConnectionAsync(int bankoId, string connectionId, ConnectionStatus status)
+            => await _apiService.RegisterBankoConnectionAsync(bankoId, connectionId, "");
+
+        public async Task<bool> UnregisterBankoConnectionAsync(int bankoId, string connectionId)
+            => await _apiService.DeactivateBankoConnectionAsync("");
+
+        public async Task<bool> DeactivateBankoConnectionAsync(string tcKimlikNo)
+            => await _apiService.DeactivateBankoConnectionAsync(tcKimlikNo);
+
+        public async Task<bool> IsBankoInUseAsync(int bankoId)
+            => await _apiService.IsBankoInUseAsync(bankoId);
+
+        public async Task<bool> IsBankoConnectedAsync(int bankoId)
+            => await _apiService.IsBankoInUseAsync(bankoId);
+
+        public async Task<HubBankoConnection?> GetPersonelActiveBankoAsync(string tcKimlikNo)
+            => await _apiService.GetPersonelActiveBankoAsync(tcKimlikNo);
+
+        public async Task<User?> GetBankoActivePersonelAsync(int bankoId)
+            => await _apiService.GetBankoActivePersonelAsync(bankoId);
+
+        public async Task<int?> GetBankoIdByConnectionIdAsync(string connectionId)
+            => throw new NotImplementedException("API endpoint eklenecek");
+
+        public async Task<string?> GetConnectionIdByBankoIdAsync(int bankoId)
+            => throw new NotImplementedException("API endpoint eklenecek");
+
+        public async Task<Dictionary<int, string>> GetAllActiveBankoConnectionsAsync()
+            => throw new NotImplementedException("API endpoint eklenecek");
+
+        public async Task<HubBankoConnection?> GetBankoConnectionByHubConnectionIdAsync(int hubConnectionId)
+            => throw new NotImplementedException("API endpoint eklenecek");
+
+        // ═══════════════════════════════════════════════════════
+        // TV CONNECTION MANAGEMENT
+        // ═══════════════════════════════════════════════════════
+
+        public async Task<bool> RegisterTvConnectionAsync(int tvId, string connectionId, string tcKimlikNo)
+            => await _apiService.RegisterTvConnectionAsync(tvId, connectionId, tcKimlikNo);
+
+        public async Task<bool> RegisterTvConnectionAsync(int tvId, string connectionId)
+            => await _apiService.RegisterTvConnectionAsync(tvId, connectionId, "");
+
+        public async Task<bool> RegisterTvConnectionAsync(int tvId, string connectionId, ConnectionStatus status)
+            => await _apiService.RegisterTvConnectionAsync(tvId, connectionId, "");
+
+        public async Task<bool> UnregisterTvConnectionAsync(int tvId, string connectionId)
+            => throw new NotImplementedException("API endpoint eklenecek");
+
+        public async Task<bool> IsTvInUseByTvUserAsync(int tvId)
+            => await _apiService.IsTvInUseByTvUserAsync(tvId);
+
+        public async Task<bool> IsTvConnectedAsync(int tvId)
+            => await _apiService.IsTvInUseByTvUserAsync(tvId);
+
+        public async Task<int?> GetTvIdByConnectionIdAsync(string connectionId)
+            => throw new NotImplementedException("API endpoint eklenecek");
+
+        public async Task<string?> GetConnectionIdByTvIdAsync(int tvId)
+            => throw new NotImplementedException("API endpoint eklenecek");
+
+        public async Task<Dictionary<int, string>> GetAllActiveConnectionsAsync()
+            => throw new NotImplementedException("API endpoint eklenecek");
+
+        public async Task<HubTvConnection?> GetTvConnectionByHubConnectionIdAsync(int hubConnectionId)
+            => throw new NotImplementedException("API endpoint eklenecek");
+
+        public async Task<bool> UpdateConnectionStatusAsync(string connectionId, ConnectionStatus status)
+            => await _apiService.SetConnectionStatusAsync(connectionId, status.ToString());
+
+        // ═══════════════════════════════════════════════════════
+        // TV CONNECTION MANAGEMENT
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// TV bağlantısını kaydet veya güncelle
+        /// ⚠️ TV için User ZORUNLU (TV oluşturulurken otomatik oluşturulur)
+        /// </summary>
+        public async Task<bool> RegisterTvConnectionAsync(int tvId, string connectionId, ConnectionStatus status)
+        {
+            try
+            {
+                // 1. TV'yi ve User'ını bul
+                var tv = await _context.Tvler.FirstOrDefaultAsync(t => t.TvId == tvId);
+                if (tv == null)
+                {
+                    _logger.LogWarning($"❌ TV bulunamadı: {tvId}");
+                    return false;
+                }
+
+                // 2. TV için User kontrolü (TV User zorunlu)
+                if (string.IsNullOrEmpty(tv.TcKimlikNo))
+                {
+                    _logger.LogError($"❌ TV için User oluşturulmamış: TV#{tvId}");
+                    _logger.LogError("💡 İpucu: TV oluşturulurken otomatik User oluşturulmalı");
+                    return false;
+                }
+
+                // 3. HubConnection oluştur veya güncelle (TV User'ı ile)
+                var hubConnection = await GetOrCreateHubConnectionAsync(connectionId, tcKimlikNo: tv.TcKimlikNo);
+
+                // 3. Mevcut TV bağlantısını kontrol et
+                var existingTvConnection = await _context.HubTvConnections
+                    .FirstOrDefaultAsync(htc => htc.TvId == tvId);
+
+                if (existingTvConnection != null)
+                {
+                    // Güncelle
+                    existingTvConnection.HubConnectionId = hubConnection.HubConnectionId;
+                    existingTvConnection.IslemZamani = DateTime.Now;
+                    existingTvConnection.DuzenlenmeTarihi = DateTime.Now;
+                    
+                    _context.HubTvConnections.Update(existingTvConnection);
+                    _logger.LogInformation($"✏️ TV bağlantısı güncellendi: TV#{tvId}");
+                }
+                else
+                {
+                    // Yeni kayıt oluştur
+                    var newTvConnection = new HubTvConnection
+                    {
+                        HubConnectionId = hubConnection.HubConnectionId,
+                        TvId = tvId,
+                        IslemZamani = DateTime.Now,
+                        EklenmeTarihi = DateTime.Now,
+                        DuzenlenmeTarihi = DateTime.Now
+                    };
+
+                    await _context.HubTvConnections.AddAsync(newTvConnection);
+                    _logger.LogInformation($"➕ Yeni TV bağlantısı kaydedildi: TV#{tvId}");
+                }
+
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ TV bağlantısı kaydedilemedi: TV#{tvId}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// TV bağlantısını kaldır
+        /// </summary>
+        public async Task<bool> UnregisterTvConnectionAsync(int tvId, string connectionId)
+        {
+            try
+            {
+                var tvConnection = await _context.HubTvConnections
+                    .Include(htc => htc.HubConnection)
+                    .FirstOrDefaultAsync(htc => htc.TvId == tvId && 
+                                                htc.HubConnection != null && 
+                                                htc.HubConnection.ConnectionId == connectionId);
+
+                if (tvConnection != null)
+                {
+                    // Soft delete
+                    tvConnection.SilindiMi = true;
+                    tvConnection.DuzenlenmeTarihi = DateTime.Now;
+                    
+                    // HubConnection'ı da offline yap
+                    if (tvConnection.HubConnection != null)
+                    {
+                        tvConnection.HubConnection.ConnectionStatus = ConnectionStatus.offline;
+                        tvConnection.HubConnection.IslemZamani = DateTime.Now;
+                        tvConnection.HubConnection.DuzenlenmeTarihi = DateTime.Now;
+                    }
+                    
+                    await _context.SaveChangesAsync();
+                    
+                    _logger.LogInformation($"🔴 TV bağlantısı kaldırıldı: TV#{tvId}");
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ TV bağlantısı kaldırılamadı: TV#{tvId}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// TV'nin bağlantı durumunu kontrol et
+        /// </summary>
+        public async Task<bool> IsTvConnectedAsync(int tvId)
+        {
+            try
+            {
+                var tvConnection = await _context.HubTvConnections
+                    .Include(htc => htc.HubConnection)
+                    .FirstOrDefaultAsync(htc => htc.TvId == tvId);
+
+                return tvConnection != null && 
+                       tvConnection.HubConnection != null && 
+                       tvConnection.HubConnection.ConnectionStatus == ConnectionStatus.online;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ TV bağlantı durumu kontrol edilemedi: TV#{tvId}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// ConnectionId'ye göre TV ID'sini al
+        /// </summary>
+        public async Task<int?> GetTvIdByConnectionIdAsync(string connectionId)
+        {
+            try
+            {
+                var tvConnection = await _context.HubTvConnections
+                    .Include(htc => htc.HubConnection)
+                    .FirstOrDefaultAsync(htc => htc.HubConnection != null && 
+                                                htc.HubConnection.ConnectionId == connectionId);
+
+                return tvConnection?.TvId;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ ConnectionId'ye göre TV ID alınamadı: {connectionId}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// TV'nin connection ID'sini al
+        /// </summary>
+        public async Task<string?> GetConnectionIdByTvIdAsync(int tvId)
+        {
+            try
+            {
+                var tvConnection = await _context.HubTvConnections
+                    .Include(htc => htc.HubConnection)
+                    .FirstOrDefaultAsync(htc => htc.TvId == tvId && 
+                                                htc.HubConnection != null && 
+                                                htc.HubConnection.ConnectionStatus == ConnectionStatus.online);
+
+                return tvConnection?.HubConnection?.ConnectionId;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ TV ID'ye göre ConnectionId alınamadı: TV#{tvId}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Tüm aktif TV bağlantılarını al
+        /// </summary>
+        public async Task<Dictionary<int, string>> GetAllActiveConnectionsAsync()
+        {
+            try
+            {
+                var connections = await _context.HubTvConnections
+                    .Include(htc => htc.HubConnection)
+                    .Where(htc => htc.HubConnection != null && 
+                                  htc.HubConnection.ConnectionStatus == ConnectionStatus.online)
+                    .ToDictionaryAsync(htc => htc.TvId, 
+                                      htc => htc.HubConnection!.ConnectionId);
+
+                return connections;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Aktif TV bağlantıları alınamadı");
+                return new Dictionary<int, string>();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // BANKO CONNECTION MANAGEMENT
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Banko bağlantısını kaydet veya güncelle
+        /// ⚠️ GÜVENLİK: Banko için User ZORUNLU (TcKimlikNo null olamaz)
+        /// </summary>
+        public async Task<bool> RegisterBankoConnectionAsync(int bankoId, string connectionId, ConnectionStatus status)
+        {
+            try
+            {
+                // 1. Banko'nun var olup olmadığını kontrol et
+                var bankoExists = await _context.Bankolar.AnyAsync(b => b.BankoId == bankoId);
+                if (!bankoExists)
+                {
+                    _logger.LogWarning($"❌ Banko bulunamadı: {bankoId}");
+                    return false;
+                }
+
+                // 2. HubConnection'ı bul
+                var hubConnection = await _context.HubConnections
+                    .FirstOrDefaultAsync(hc => hc.ConnectionId == connectionId);
+
+                if (hubConnection == null)
+                {
+                    _logger.LogError($"❌ HubConnection bulunamadı: {connectionId}");
+                    _logger.LogError("💡 İpucu: Önce kullanıcı login olmalı ve HubConnection oluşturulmalı");
+                    return false;
+                }
+
+                // 3. ⚠️ NOT: TcKimlikNo artık veritabanı seviyesinde zorunlu (required constraint)
+                //     Ekstra kontrol gerekmez, zaten null olamaz
+
+                // 4. Mevcut Banko bağlantısını kontrol et
+                var existingBankoConnection = await _context.HubBankoConnections
+                    .FirstOrDefaultAsync(hbc => hbc.BankoId == bankoId);
+
+                if (existingBankoConnection != null)
+                {
+                    // Güncelle
+                    existingBankoConnection.HubConnectionId = hubConnection.HubConnectionId;
+                    existingBankoConnection.IslemZamani = DateTime.Now;
+                    existingBankoConnection.DuzenlenmeTarihi = DateTime.Now;
+                    
+                    _context.HubBankoConnections.Update(existingBankoConnection);
+                    _logger.LogInformation($"✏️ Banko bağlantısı güncellendi: Banko#{bankoId} (User: {hubConnection.TcKimlikNo})");
+                }
+                else
+                {
+                    // Yeni kayıt oluştur
+                    var newBankoConnection = new HubBankoConnection
+                    {
+                        HubConnectionId = hubConnection.HubConnectionId,
+                        BankoId = bankoId,
+                        IslemZamani = DateTime.Now,
+                        EklenmeTarihi = DateTime.Now,
+                        DuzenlenmeTarihi = DateTime.Now
+                    };
+
+                    await _context.HubBankoConnections.AddAsync(newBankoConnection);
+                    _logger.LogInformation($"➕ Yeni Banko bağlantısı kaydedildi: Banko#{bankoId} (User: {hubConnection.TcKimlikNo})");
+                }
+
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ Banko bağlantısı kaydedilemedi: Banko#{bankoId}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Banko bağlantısını kaldır
+        /// </summary>
+        public async Task<bool> UnregisterBankoConnectionAsync(int bankoId, string connectionId)
+        {
+            try
+            {
+                var bankoConnection = await _context.HubBankoConnections
+                    .Include(hbc => hbc.HubConnection)
+                    .FirstOrDefaultAsync(hbc => hbc.BankoId == bankoId && 
+                                                hbc.HubConnection != null && 
+                                                hbc.HubConnection.ConnectionId == connectionId);
+
+                if (bankoConnection != null)
+                {
+                    // Soft delete
+                    bankoConnection.SilindiMi = true;
+                    bankoConnection.DuzenlenmeTarihi = DateTime.Now;
+                    
+                    // HubConnection'ı da offline yap
+                    if (bankoConnection.HubConnection != null)
+                    {
+                        bankoConnection.HubConnection.ConnectionStatus = ConnectionStatus.offline;
+                        bankoConnection.HubConnection.IslemZamani = DateTime.Now;
+                        bankoConnection.HubConnection.DuzenlenmeTarihi = DateTime.Now;
+                    }
+                    
+                    await _context.SaveChangesAsync();
+                    
+                    _logger.LogInformation($"🔴 Banko bağlantısı kaldırıldı: Banko#{bankoId}");
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ Banko bağlantısı kaldırılamadı: Banko#{bankoId}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Banko'nun bağlantı durumunu kontrol et
+        /// </summary>
+        public async Task<bool> IsBankoConnectedAsync(int bankoId)
+        {
+            try
+            {
+                var bankoConnection = await _context.HubBankoConnections
+                    .Include(hbc => hbc.HubConnection)
+                    .FirstOrDefaultAsync(hbc => hbc.BankoId == bankoId);
+
+                return bankoConnection != null && 
+                       bankoConnection.HubConnection != null && 
+                       bankoConnection.HubConnection.ConnectionStatus == ConnectionStatus.online;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ Banko bağlantı durumu kontrol edilemedi: Banko#{bankoId}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// ConnectionId'ye göre Banko ID'sini al
+        /// </summary>
+        public async Task<int?> GetBankoIdByConnectionIdAsync(string connectionId)
+        {
+            try
+            {
+                var bankoConnection = await _context.HubBankoConnections
+                    .Include(hbc => hbc.HubConnection)
+                    .FirstOrDefaultAsync(hbc => hbc.HubConnection != null && 
+                                                hbc.HubConnection.ConnectionId == connectionId);
+
+                return bankoConnection?.BankoId;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ ConnectionId'ye göre Banko ID alınamadı: {connectionId}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Banko'nun connection ID'sini al
+        /// </summary>
+        public async Task<string?> GetConnectionIdByBankoIdAsync(int bankoId)
+        {
+            try
+            {
+                var bankoConnection = await _context.HubBankoConnections
+                    .Include(hbc => hbc.HubConnection)
+                    .FirstOrDefaultAsync(hbc => hbc.BankoId == bankoId && 
+                                                hbc.HubConnection != null && 
+                                                hbc.HubConnection.ConnectionStatus == ConnectionStatus.online);
+
+                return bankoConnection?.HubConnection?.ConnectionId;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ Banko ID'ye göre ConnectionId alınamadı: Banko#{bankoId}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Tüm aktif banko bağlantılarını al
+        /// </summary>
+        public async Task<Dictionary<int, string>> GetAllActiveBankoConnectionsAsync()
+        {
+            try
+            {
+                var connections = await _context.HubBankoConnections
+                    .Include(hbc => hbc.HubConnection)
+                    .Where(hbc => hbc.HubConnection != null && 
+                                  hbc.HubConnection.ConnectionStatus == ConnectionStatus.online)
+                    .ToDictionaryAsync(hbc => hbc.BankoId, 
+                                      hbc => hbc.HubConnection!.ConnectionId);
+
+                return connections;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Aktif banko bağlantıları alınamadı");
+                return new Dictionary<int, string>();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // GENERIC CONNECTION MANAGEMENT
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Bağlantı durumunu güncelle
+        /// </summary>
+        public async Task<bool> UpdateConnectionStatusAsync(string connectionId, ConnectionStatus status)
+        {
+            try
+            {
+                var hubConnection = await _context.HubConnections
+                    .FirstOrDefaultAsync(hc => hc.ConnectionId == connectionId);
+
+                if (hubConnection != null)
+                {
+                    hubConnection.ConnectionStatus = status;
+                    hubConnection.IslemZamani = DateTime.Now;
+                    hubConnection.DuzenlenmeTarihi = DateTime.Now;
+                    
+                    _context.HubConnections.Update(hubConnection);
+                    await _context.SaveChangesAsync();
+                    
+                    _logger.LogInformation($"✏️ Bağlantı durumu güncellendi: {connectionId} -> {status}");
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ Bağlantı durumu güncellenemedi: {connectionId}");
+                return false;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // MULTI-CONNECTION MANAGEMENT (Yeni Yapı)
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Kullanıcının tüm aktif bağlantılarını getir (TcKimlikNo bazında)
+        /// </summary>
+        public async Task<List<HubConnection>> GetActiveConnectionsByTcKimlikNoAsync(string tcKimlikNo)
+        {
+            try
+            {
+                return await _context.HubConnections
+                    .Where(hc => hc.TcKimlikNo == tcKimlikNo && 
+                                 hc.ConnectionStatus == ConnectionStatus.online)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ Aktif bağlantılar alınamadı: {tcKimlikNo}");
+                return new List<HubConnection>();
+            }
+        }
+
+        /// <summary>
+        /// Banko başka personel tarafından kullanılıyor mu?
+        /// </summary>
+        public async Task<bool> IsBankoInUseAsync(int bankoId)
+        {
+            try
+            {
+                return await _context.HubBankoConnections
+                    .AnyAsync(hbc => hbc.BankoId == bankoId && 
+                                     hbc.BankoModuAktif);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ Banko kullanım durumu kontrol edilemedi: Banko#{bankoId}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Personelin aktif banko oturumunu getir
+        /// </summary>
+        public async Task<HubBankoConnection?> GetPersonelActiveBankoAsync(string tcKimlikNo)
+        {
+            try
+            {
+                return await _context.HubBankoConnections
+                    .FirstOrDefaultAsync(hbc => hbc.TcKimlikNo == tcKimlikNo && 
+                                                hbc.BankoModuAktif);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ Personel banko oturumu alınamadı: {tcKimlikNo}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Banko oturumu oluştur (Fiziksel bankoya geçiş) - OVERLOAD
+        /// </summary>
+        public async Task<bool> RegisterBankoConnectionAsync(int bankoId, string connectionId, string tcKimlikNo)
+        {
+            try
+            {
+                // 1. HubConnection'ı bul
+                var hubConnection = await _context.HubConnections
+                    .FirstOrDefaultAsync(hc => hc.ConnectionId == connectionId);
+
+                if (hubConnection == null)
+                {
+                    _logger.LogError($"❌ HubConnection bulunamadı: {connectionId}");
+                    return false;
+                }
+
+                // 2. Yeni banko oturumu oluştur
+                var bankoConnection = new HubBankoConnection
+                {
+                    HubConnectionId = hubConnection.HubConnectionId,
+                    BankoId = bankoId,
+                    TcKimlikNo = tcKimlikNo,
+                    BankoModuAktif = true,
+                    BankoModuBaslangic = DateTime.Now,
+                    IslemZamani = DateTime.Now,
+                    EklenmeTarihi = DateTime.Now,
+                    DuzenlenmeTarihi = DateTime.Now
+                };
+
+                await _context.HubBankoConnections.AddAsync(bankoConnection);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"✅ Banko oturumu oluşturuldu: Banko#{bankoId} - {tcKimlikNo}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ Banko oturumu oluşturulamadı: Banko#{bankoId}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Banko oturumunu kapat (Banko modundan çıkış)
+        /// </summary>
+        public async Task<bool> DeactivateBankoConnectionAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var bankoConnection = await _context.HubBankoConnections
+                    .FirstOrDefaultAsync(hbc => hbc.TcKimlikNo == tcKimlikNo && 
+                                                hbc.BankoModuAktif);
+
+                if (bankoConnection != null)
+                {
+                    bankoConnection.BankoModuAktif = false;
+                    bankoConnection.BankoModuBitis = DateTime.Now;
+                    bankoConnection.DuzenlenmeTarihi = DateTime.Now;
+
+                    _context.HubBankoConnections.Update(bankoConnection);
+                    await _context.SaveChangesAsync();
+
+                    _logger.LogInformation($"✅ Banko oturumu kapatıldı: Banko#{bankoConnection.BankoId} - {tcKimlikNo}");
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ Banko oturumu kapatılamadı: {tcKimlikNo}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Bağlantı tipini güncelle (MainLayout, TvDisplay, BankoMode)
+        /// </summary>
+        public async Task<bool> UpdateConnectionTypeAsync(string connectionId, string connectionType)
+        {
+            try
+            {
+                var hubConnection = await _context.HubConnections
+                    .FirstOrDefaultAsync(hc => hc.ConnectionId == connectionId);
+
+                if (hubConnection != null)
+                {
+                    hubConnection.ConnectionType = connectionType;
+                    hubConnection.DuzenlenmeTarihi = DateTime.Now;
+
+                    _context.HubConnections.Update(hubConnection);
+                    await _context.SaveChangesAsync();
+
+                    _logger.LogInformation($"✅ Bağlantı tipi güncellendi: {connectionId} -> {connectionType}");
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ Bağlantı tipi güncellenemedi: {connectionId}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Bağlantı durumunu güncelle (online, offline, reconnecting)
+        /// </summary>
+        public async Task<bool> SetConnectionStatusAsync(string connectionId, string status)
+        {
+            try
+            {
+                var hubConnection = await _context.HubConnections
+                    .FirstOrDefaultAsync(hc => hc.ConnectionId == connectionId);
+
+                if (hubConnection != null)
+                {
+                    // String'i enum'a çevir
+                    if (Enum.TryParse<ConnectionStatus>(status, true, out var connectionStatus))
+                    {
+                        hubConnection.ConnectionStatus = connectionStatus;
+                        hubConnection.LastActivityAt = DateTime.Now;
+                        hubConnection.DuzenlenmeTarihi = DateTime.Now;
+
+                        _context.HubConnections.Update(hubConnection);
+                        await _context.SaveChangesAsync();
+
+                        _logger.LogInformation($"✅ Bağlantı durumu güncellendi: {connectionId} -> {status}");
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ Bağlantı durumu güncellenemedi: {connectionId}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// ConnectionId ile HubConnection getir
+        /// </summary>
+        public async Task<HubConnection?> GetByConnectionIdAsync(string connectionId)
+        {
+            try
+            {
+                return await _context.HubConnections
+                    .FirstOrDefaultAsync(hc => hc.ConnectionId == connectionId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ HubConnection alınamadı: {connectionId}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Bağlantıyı tamamen kapat ve sil
+        /// </summary>
+        public async Task<bool> DisconnectAsync(string connectionId)
+        {
+            try
+            {
+                var hubConnection = await _context.HubConnections
+                    .Include(hc => hc.HubTvConnection)
+                    .Include(hc => hc.HubBankoConnection)
+                    .FirstOrDefaultAsync(hc => hc.ConnectionId == connectionId);
+
+                if (hubConnection != null)
+                {
+                    // Soft delete
+                    hubConnection.SilindiMi = true;
+                    hubConnection.ConnectionStatus = ConnectionStatus.offline;
+                    hubConnection.DuzenlenmeTarihi = DateTime.Now;
+
+                    // İlişkili TV ve Banko bağlantılarını da sil
+                    if (hubConnection.HubTvConnection != null)
+                    {
+                        hubConnection.HubTvConnection.SilindiMi = true;
+                        hubConnection.HubTvConnection.DuzenlenmeTarihi = DateTime.Now;
+                    }
+
+                    if (hubConnection.HubBankoConnection != null)
+                    {
+                        hubConnection.HubBankoConnection.SilindiMi = true;
+                        hubConnection.HubBankoConnection.BankoModuAktif = false;
+                        hubConnection.HubBankoConnection.BankoModuBitis = DateTime.Now;
+                        hubConnection.HubBankoConnection.DuzenlenmeTarihi = DateTime.Now;
+                    }
+
+                    _context.HubConnections.Update(hubConnection);
+                    await _context.SaveChangesAsync();
+
+                    _logger.LogInformation($"✅ Bağlantı kapatıldı: {connectionId}");
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ Bağlantı kapatılamadı: {connectionId}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// TV bağlantısını kaydet (Yeni yapı - birden fazla kullanıcı) - OVERLOAD
+        /// </summary>
+        public async Task<bool> RegisterTvConnectionAsync(int tvId, string connectionId)
+        {
+            try
+            {
+                // 1. HubConnection'ı bul
+                var hubConnection = await _context.HubConnections
+                    .FirstOrDefaultAsync(hc => hc.ConnectionId == connectionId);
+
+                if (hubConnection == null)
+                {
+                    _logger.LogError($"❌ HubConnection bulunamadı: {connectionId}");
+                    return false;
+                }
+
+                // 2. Yeni TV bağlantısı oluştur
+                var tvConnection = new HubTvConnection
+                {
+                    HubConnectionId = hubConnection.HubConnectionId,
+                    TvId = tvId,
+                    IslemZamani = DateTime.Now,
+                    EklenmeTarihi = DateTime.Now,
+                    DuzenlenmeTarihi = DateTime.Now
+                };
+
+                await _context.HubTvConnections.AddAsync(tvConnection);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"✅ TV bağlantısı oluşturuldu: TV#{tvId} - {connectionId}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ TV bağlantısı oluşturulamadı: TV#{tvId}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// TV başka bir TV User tarafından kullanılıyor mu?
+        /// </summary>
+        public async Task<bool> IsTvInUseByTvUserAsync(int tvId)
+        {
+            try
+            {
+                // TV User'ın TcKimlikNo'su "TV" ile başlar
+                return await _context.HubTvConnections
+                    .Include(htc => htc.HubConnection)
+                    .AnyAsync(htc => htc.TvId == tvId && 
+                                     htc.HubConnection != null &&
+                                     htc.HubConnection.TcKimlikNo.StartsWith("TV") &&
+                                     htc.HubConnection.ConnectionStatus == ConnectionStatus.online);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ TV kullanım durumu kontrol edilemedi: TV#{tvId}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// HubConnectionId ile HubBankoConnection getir
+        /// </summary>
+        public async Task<HubBankoConnection?> GetBankoConnectionByHubConnectionIdAsync(int hubConnectionId)
+        {
+            try
+            {
+                return await _context.HubBankoConnections
+                    .FirstOrDefaultAsync(hbc => hbc.HubConnectionId == hubConnectionId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ HubBankoConnection alınamadı: {hubConnectionId}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// HubConnectionId ile HubTvConnection getir
+        /// </summary>
+        public async Task<HubTvConnection?> GetTvConnectionByHubConnectionIdAsync(int hubConnectionId)
+        {
+            try
+            {
+                return await _context.HubTvConnections
+                    .FirstOrDefaultAsync(htc => htc.HubConnectionId == hubConnectionId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ HubTvConnection alınamadı: {hubConnectionId}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Bankodaki aktif personeli getir
+        /// </summary>
+        public async Task<User?> GetBankoActivePersonelAsync(int bankoId)
+        {
+            try
+            {
+                var bankoConnection = await _context.HubBankoConnections
+                    .Include(hbc => hbc.HubConnection)
+                    .ThenInclude(hc => hc!.User)
+                    .FirstOrDefaultAsync(hbc => hbc.BankoId == bankoId && 
+                                                hbc.BankoModuAktif);
+
+                return bankoConnection?.HubConnection?.User;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ Banko personeli alınamadı: Banko#{bankoId}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Kullanıcı için yeni bağlantı oluştur (ConnectionType ile)
+        /// </summary>
+        public async Task<bool> RegisterUserConnectionAsync(string connectionId, string tcKimlikNo, string connectionType)
+        {
+            try
+            {
+                // Yeni bağlantı oluştur
+                var hubConnection = new HubConnection
+                {
+                    TcKimlikNo = tcKimlikNo,
+                    ConnectionId = connectionId,
+                    ConnectionType = connectionType,
+                    ConnectionStatus = ConnectionStatus.online,
+                    ConnectedAt = DateTime.Now,
+                    LastActivityAt = DateTime.Now,
+                    IslemZamani = DateTime.Now,
+                    EklenmeTarihi = DateTime.Now,
+                    DuzenlenmeTarihi = DateTime.Now
+                };
+
+                await _context.HubConnections.AddAsync(hubConnection);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"✅ Yeni bağlantı oluşturuldu: {connectionId} ({connectionType}) - {tcKimlikNo}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"❌ Bağlantı oluşturulamadı: {connectionId}");
+                return false;
+            }
+        }
+    }
+}

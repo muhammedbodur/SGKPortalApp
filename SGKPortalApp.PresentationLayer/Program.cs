@@ -159,6 +159,14 @@ builder.Services.AddScoped<SGKPortalApp.PresentationLayer.Services.Hubs.Interfac
 // Banko Mode State Service (Singleton - Tüm uygulama boyunca tek instance)
 builder.Services.AddSingleton<SGKPortalApp.PresentationLayer.Services.State.BankoModeStateService>();
 
+// SignalR Broadcaster (Business katmanından hub'a mesaj göndermek için)
+builder.Services.AddScoped<SGKPortalApp.BusinessObjectLayer.Interfaces.SignalR.ISignalRBroadcaster,
+    SGKPortalApp.PresentationLayer.Services.Hubs.Concrete.SignalRBroadcaster>();
+
+// Siramatik Hub Service (Business katmanında SignalR yayınları için)
+// NOT: Bu servis BusinessLogicLayer'da, ancak ISignalRBroadcaster'ı Presentation'dan alıyor
+// Bu nedenle ApiLayer'da kayıt edilmeli (API -> Business -> Data akışı için)
+
 Console.WriteLine("✅ SignalR Hub servisleri kaydedildi");
 
 // ═══════════════════════════════════════════════════════
