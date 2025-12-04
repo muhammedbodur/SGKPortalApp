@@ -47,5 +47,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex
         /// Kiosk sıra alma için kullanılır - sadece işlem yapabilecek personel varsa sıra alınabilir.
         /// </summary>
         Task<List<string>> GetBankoModundakiYetkiliPersonellerAsync(int hizmetBinasiId, int kanalAltIslemId);
+
+        // Kiosk Menü Sorguları
+        /// <summary>
+        /// Belirli bir Kiosk için menüleri detaylı olarak getirir
+        /// Menüler için aktif personel sayısı, işlem sayısı gibi istatistiksel bilgileri içerir
+        /// Aliağa SGM gibi spesifik kiosk'lar için kullanılır
+        /// </summary>
+        Task<List<KioskMenuDetayResponseDto>> GetKioskMenulerByKioskIdAsync(int kioskId);
     }
 }

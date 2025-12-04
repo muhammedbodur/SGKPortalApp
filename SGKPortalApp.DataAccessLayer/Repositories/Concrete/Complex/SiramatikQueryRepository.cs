@@ -831,5 +831,91 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
 
             return yetkiliPersoneller;
         }
+
+        // ═══════════════════════════════════════════════════════
+        // KIOSK MENÜ SORGULARI
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Belirli bir Kiosk için menüleri detaylı olarak getirir
+        /// Menüler için aktif personel sayısı, işlem sayısı gibi istatistiksel bilgileri içerir
+        /// SQL: Aliağa SGM için optimize edilmiş kompleks sorgu
+        /// </summary>
+        public async Task<List<KioskMenuDetayResponseDto>> GetKioskMenulerByKioskIdAsync(int kioskId)
+        {
+            var query = from hb in _context.HizmetBinalari
+                        join k in _context.Kiosklar on hb.HizmetBinasiId equals k.HizmetBinasiId
+                        join kma in _context.KioskMenuAtamalari on k.KioskId equals kma.KioskId
+                        join km in _context.KioskMenuler on kma.KioskMenuId equals km.KioskMenuId
+                        join kmi in _context.KioskMenuIslemleri on km.KioskMenuId equals kmi.KioskMenuId
+                        join ka in _context.KanallarAlt on kmi.KanalAltId equals ka.KanalAltId
+                        join kai in _context.KanalAltIslemleri on new { ka.KanalAltId, k.HizmetBinasiId }
+                            equals new { kai.KanalAltId, kai.HizmetBinasiId }
+                        join kp in _context.KanalPersonelleri on kai.KanalAltIslemId equals kp.KanalAltIslemId
+                        join u in _context.Users on kp.TcKimlikNo equals u.TcKimlikNo
+                        where k.KioskId == kioskId
+                           // Soft delete kontrolleri
+                           && !hb.SilindiMi
+                           && !k.SilindiMi
+                           && !kma.SilindiMi
+                           && !km.SilindiMi
+                           && !kmi.SilindiMi
+                           && !ka.SilindiMi
+                           // Aktiflik kontrolleri
+                           && hb.HizmetBinasiAktiflik == Aktiflik.Aktif
+                           && k.Aktiflik == Aktiflik.Aktif
+                           && kma.Aktiflik == Aktiflik.Aktif
+                           && km.Aktiflik == Aktiflik.Aktif
+                           && kmi.Aktiflik == Aktiflik.Aktif
+                           && ka.Aktiflik == Aktiflik.Aktif
+                           && u.BankoModuAktif == true
+                           && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok  // Konusunda bilgisi olan personel
+                        group new { hb, k, kma, km, kmi, ka, kp } by new
+                        {
+                            hb.HizmetBinasiId,
+                            hb.HizmetBinasiAdi,
+                            k.KioskId,
+                            k.KioskAdi,
+                            k.KioskIp,
+                            km.KioskMenuId,
+                            km.MenuAdi,
+                            km.Aciklama,
+                            km.MenuSira
+                        } into g
+                        select new KioskMenuDetayResponseDto
+                        {
+                            // Hizmet Binası Bilgileri
+                            HizmetBinasiId = g.Key.HizmetBinasiId,
+                            HizmetBinasiAdi = g.Key.HizmetBinasiAdi,
+
+                            // Kiosk Bilgileri
+                            KioskId = g.Key.KioskId,
+                            KioskAdi = g.Key.KioskAdi,
+                            KioskIp = g.Key.KioskIp,
+
+                            // Menü Bilgileri
+                            KioskMenuId = g.Key.KioskMenuId,
+                            MenuAdi = g.Key.MenuAdi,
+                            MenuAciklama = g.Key.Aciklama,
+                            MenuSiraNo = g.Key.MenuSira,
+
+                            // Menü Atama Bilgileri
+                            KioskMenuAtamaId = g.Max(x => x.kma.KioskMenuAtamaId),
+                            AtamaTarihi = g.Max(x => x.kma.AtamaTarihi),
+
+                            // Aggregate Bilgiler
+                            ToplamIslemSayisi = g.Select(x => x.kmi.KioskMenuIslemId).Distinct().Count(),
+                            ToplamKanalAltSayisi = g.Select(x => x.ka.KanalAltId).Distinct().Count(),
+                            ToplamPersonelSayisi = g.Select(x => x.kp.TcKimlikNo).Distinct().Count()
+                        };
+
+            var result = await query
+                .AsNoTracking()
+                .OrderBy(x => x.KioskAdi)
+                .ThenBy(x => x.MenuSiraNo)
+                .ToListAsync();
+
+            return result;
+        }
     }
 }
