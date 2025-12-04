@@ -1024,20 +1024,16 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             foreach (var islem in menuIslemler)
             {
                 // Bu işlem için aktif personel var mı? (Yrd.Uzman+ ve banko modunda)
+                // NOT: SQL sorgusundaki mantıkla uyumlu - sadece BankoModuAktif kontrolü
                 var aktifPersonelVar = await (
                     from kp in _context.KanalPersonelleri
                     join u in _context.Users on kp.TcKimlikNo equals u.TcKimlikNo
-                    join b in _context.Bankolar on u.AktifBankoId equals b.BankoId
                     where kp.KanalAltIslemId == islem.KanalAltIslemId
                        && kp.Aktiflik == Aktiflik.Aktif
                        && !kp.SilindiMi
                        && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok  // En az Yrd.Uzman
                        && u.BankoModuAktif == true
-                       && u.AktifBankoId != null
                        && u.AktifMi == true
-                       && b.HizmetBinasiId == hizmetBinasiId
-                       && b.BankoAktiflik == Aktiflik.Aktif
-                       && !b.SilindiMi
                     select kp.TcKimlikNo
                 ).AnyAsync();
 

@@ -198,6 +198,15 @@
     <!-- ================== PAGE LIFECYCLE DETECTOR ================== -->
     <script src="~/js/page-lifecycle-detector.js"></script>
 
+    <!-- ================== API CONFIGURATION ================== -->
+    <script>
+        // API URL'ini JavaScript'e inject et (appsettings.json'dan)
+        window.appConfig = {
+            apiUrl: '@(Context.RequestServices.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>()["AppSettings:ApiUrl"] ?? "https://localhost:9080")'
+        };
+        console.log('✅ API URL ayarlandı:', window.appConfig.apiUrl);
+    </script>
+
     <!-- ================== SIGNALR ================== -->
     <script src="/lib/microsoft/signalr/dist/browser/signalr.js"></script>
     <script src="~/js/signalr/core/signalr-connection-manager.js"></script>

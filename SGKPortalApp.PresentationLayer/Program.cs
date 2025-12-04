@@ -317,9 +317,12 @@ app.MapBlazorHub(options =>
 // ═══════════════════════════════════════════════════════
 // 📡 SIGNALR HUB ENDPOINTS
 // ═══════════════════════════════════════════════════════
-app.MapHub<SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub>("/hubs/siramatik");
-app.MapHub<SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub>("/hubs/tv"); // TV Display için backward compatibility
-Console.WriteLine("✅ SignalR Hub endpoints: /hubs/siramatik, /hubs/tv");
+// ⚠️ HUB ARTİK APİLAYER'DA! PresentationLayer Hub'lar devre dışı.
+// Web UI artık ApiLayer Hub'a bağlanıyor (https://localhost:9080/hubs/siramatik)
+// Masaüstü kiosk uygulaması da ApiLayer Hub'a bağlanacak
+// app.MapHub<SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub>("/hubs/siramatik");
+// app.MapHub<SGKPortalApp.PresentationLayer.Services.Hubs.SiramatikHub>("/hubs/tv");
+Console.WriteLine("⚠️ SignalR Hub artık ApiLayer'da kullanılıyor. PresentationLayer Hub'lar devre dışı.");
 
 app.MapRazorPages();
 app.MapFallbackToPage("/_Host");

@@ -58,6 +58,7 @@ class SignalRConnectionManager {
                 .withUrl(`${this.hubUrl}?tabSessionId=${encodeURIComponent(tabId)}&isRefresh=${isRefresh}&isNewTab=${isNewTab}&isTvDisplay=${isTvDisplay}`, {
                     accessTokenFactory: () => null,
                     transport: signalR.HttpTransportType.WebSockets,
+                    withCredentials: true  // CORS için gerekli - Cookie ve Authentication header'ları gönderir
                 })
                 .withAutomaticReconnect(this.reconnectIntervals)
                 .configureLogging(signalR.LogLevel.Information)
