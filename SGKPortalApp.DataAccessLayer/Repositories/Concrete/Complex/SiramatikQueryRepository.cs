@@ -839,10 +839,92 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         /// <summary>
         /// Belirli bir Kiosk için menüleri detaylı olarak getirir
         /// Menüler için aktif personel sayısı, işlem sayısı gibi istatistiksel bilgileri içerir
-        /// SQL: Aliağa SGM için optimize edilmiş kompleks sorgu
         /// </summary>
         public async Task<List<KioskMenuDetayResponseDto>> GetKioskMenulerByKioskIdAsync(int kioskId)
         {
+            /*
+            SELECT
+            -- Hizmet Binası Bilgileri
+            hb.HizmetBinasiId,
+            hb.HizmetBinasiAdi,
+    
+            -- Kiosk Bilgileri
+            k.KioskId,
+            k.KioskAdi,
+            k.KioskIp,
+    
+            -- Menü Bilgileri (Gruplanacak)
+            km.KioskMenuId,
+            km.MenuAdi,
+            km.Aciklama AS MenuAciklama,
+            km.MenuSira AS MenuSiraNo,
+    
+            -- Menü Atama Bilgileri
+            MAX(kma.KioskMenuAtamaId) AS KioskMenuAtamaId,
+            MAX(kma.AtamaTarihi) AS AtamaTarihi,
+    
+            -- Aggregate Bilgiler
+            COUNT(DISTINCT kmi.KioskMenuIslemId) AS ToplamIslemSayisi,
+            COUNT(DISTINCT ka.KanalAltId) AS ToplamKanalAltSayisi,
+            COUNT(DISTINCT kp.TcKimlikNo) AS ToplamPersonelSayisi
+    
+        FROM dbo.CMN_HizmetBinalari hb WITH (NOLOCK)
+            INNER JOIN dbo.SIR_KioskTanim AS k WITH (NOLOCK) 
+                ON hb.HizmetBinasiId = k.HizmetBinasiId
+            INNER JOIN dbo.SIR_KioskMenuAtama AS kma WITH (NOLOCK)
+                ON k.KioskId = kma.KioskId
+            INNER JOIN dbo.SIR_KioskMenuTanim AS km WITH (NOLOCK)
+                ON kma.KioskMenuId = km.KioskMenuId
+            INNER JOIN dbo.SIR_KioskMenuIslem AS kmi WITH (NOLOCK)
+                ON km.KioskMenuId = kmi.KioskMenuId
+            INNER JOIN dbo.SIR_KanallarAlt AS ka WITH (NOLOCK)
+                ON kmi.KanalAltId = ka.KanalAltId
+            INNER JOIN dbo.SIR_KanalAltIslemleri AS kai WITH (NOLOCK)
+                ON kai.KanalAltId = ka.KanalAltId 
+                AND kai.HizmetBinasiId = k.HizmetBinasiId
+            INNER JOIN dbo.SIR_KanalPersonelleri AS kp WITH (NOLOCK)
+                ON kp.KanalAltIslemId = kai.KanalAltIslemId
+            INNER JOIN dbo.CMN_Users AS u WITH (NOLOCK)
+                ON u.TcKimlikNo = kp.TcKimlikNo
+        
+        WHERE 
+            -- Kiosk filtresi
+            k.KioskId = 1 -- Aliağa SGM'deki kiosk
+        
+            -- Soft delete kontrolleri
+            AND hb.SilindiMi = 0
+            AND k.SilindiMi = 0
+            AND kma.SilindiMi = 0
+            AND km.SilindiMi = 0
+            AND kmi.SilindiMi = 0
+            AND ka.SilindiMi = 0
+    
+            -- Aktiflik kontrolleri
+            AND hb.HizmetBinasiAktiflik = 1  -- Aktif
+            AND k.Aktiflik = 1               -- Aktif
+            AND kma.Aktiflik = 1             -- Aktif
+            AND km.Aktiflik = 1              -- Aktif
+            AND kmi.Aktiflik = 1             -- Aktif
+            AND ka.Aktiflik = 1              -- Aktif
+            AND u.BankoModuAktif = 1         -- Banko Modu Aktiflik
+            AND kp.Uzmanlik != 0             -- Konusunda Bilgisi Olan Personel
+
+        GROUP BY 
+            hb.HizmetBinasiId,
+            hb.HizmetBinasiAdi,
+            k.KioskId,
+            k.KioskAdi,
+            k.KioskIp,
+            km.KioskMenuId,
+            km.MenuAdi,
+            km.Aciklama,
+            km.MenuSira
+
+        ORDER BY 
+            k.KioskAdi,       
+            km.MenuSira;
+ 
+            */
             var query = from hb in _context.HizmetBinalari
                         join k in _context.Kiosklar on hb.HizmetBinasiId equals k.HizmetBinasiId
                         join kma in _context.KioskMenuAtamalari on k.KioskId equals kma.KioskId
