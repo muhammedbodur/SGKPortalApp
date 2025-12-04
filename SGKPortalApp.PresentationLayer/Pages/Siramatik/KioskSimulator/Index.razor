@@ -23,28 +23,28 @@
         </div>
     </div>
 
-    <!-- Hizmet Binası Seçimi -->
+    <!-- Kiosk Seçimi -->
     <div class="card mb-4">
         <div class="card-body">
             <div class="row align-items-end">
                 <div class="col-md-4">
                     <label class="form-label fw-bold">
-                        <i class="bx bx-building me-1"></i>Hizmet Binası Seçiniz
+                        <i class="bx bx-desktop me-1"></i>Kiosk Seçiniz
                     </label>
-                    <select class="form-select form-select-lg" @onchange="OnHizmetBinasiChanged" value="@selectedHizmetBinasiId">
-                        <option value="0">-- Hizmet Binası Seçiniz --</option>
-                        @foreach (var bina in hizmetBinalari)
+                    <select class="form-select form-select-lg" @onchange="OnKioskChanged" value="@selectedKioskId">
+                        <option value="0">-- Kiosk Seçiniz --</option>
+                        @foreach (var kiosk in kiosklar)
                         {
-                            <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                            <option value="@kiosk.KioskId">@kiosk.KioskAdi (@kiosk.HizmetBinasiAdi)</option>
                         }
                     </select>
                 </div>
                 <div class="col-md-8">
-                    @if (selectedHizmetBinasiId > 0)
+                    @if (selectedKioskId > 0)
                     {
                         <div class="alert alert-info mb-0">
                             <i class="bx bx-info-circle me-1"></i>
-                            <strong>@GetSelectedHizmetBinasiAdi()</strong> için kiosk simülasyonu aktif
+                            <strong>@GetSelectedKioskAdi()</strong> için kiosk simülasyonu aktif
                         </div>
                     }
                 </div>
@@ -52,7 +52,7 @@
         </div>
     </div>
 
-    @if (selectedHizmetBinasiId > 0)
+    @if (selectedKioskId > 0)
     {
         <!-- Kiosk Ekranı Simülasyonu -->
         <div class="row">
@@ -245,8 +245,8 @@
                     <div class="card-body">
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between">
-                                <span>Hizmet Binası:</span>
-                                <strong>@GetSelectedHizmetBinasiAdi()</strong>
+                                <span>Kiosk:</span>
+                                <strong>@GetSelectedKioskAdi()</strong>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Mevcut Adım:</span>

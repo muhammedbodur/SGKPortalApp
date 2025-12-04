@@ -55,5 +55,12 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex
         /// Aliağa SGM gibi spesifik kiosk'lar için kullanılır
         /// </summary>
         Task<List<KioskMenuDetayResponseDto>> GetKioskMenulerByKioskIdAsync(int kioskId);
+
+        /// <summary>
+        /// Belirli bir Kiosk'taki seçilen menü için alt kanal işlemlerini getirir
+        /// Sadece aktif personel (Yrd.Uzman+) olan ve banko modunda bulunan işlemler döner
+        /// Menü seçildikten sonra vatandaşın göreceği alt işlemler listesi
+        /// </summary>
+        Task<List<KioskAltIslemDto>> GetKioskMenuAltIslemleriByKioskIdAsync(int kioskId, int kioskMenuId);
     }
 }

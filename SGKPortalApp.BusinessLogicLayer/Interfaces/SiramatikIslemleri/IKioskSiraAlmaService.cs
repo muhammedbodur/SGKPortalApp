@@ -16,21 +16,34 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
     public interface IKioskSiraAlmaService
     {
         // ═══════════════════════════════════════════════════════
-        // ADIM 1: KIOSK MENÜLERİ
+        // YENİ YAPILAR: KIOSK BAZLI İŞLEMLER
         // ═══════════════════════════════════════════════════════
 
         /// <summary>
-        /// Hizmet binasındaki kiosk menülerini listeler
+        /// Belirli bir Kiosk için menüleri detaylı olarak getirir (YENİ)
+        /// Complex query kullanarak kiosk bazlı menü listesini döner
+        /// </summary>
+        Task<ApiResponseDto<List<KioskMenuDto>>> GetKioskMenulerByKioskIdAsync(int kioskId);
+
+        /// <summary>
+        /// Belirli bir Kiosk'taki seçilen menü için alt kanal işlemlerini getirir (YENİ)
+        /// Complex query kullanarak kiosk ve menü bazlı alt işlem listesini döner
+        /// Sadece aktif personel (Yrd.Uzman+) olan ve banko modunda bulunan işlemler döner
+        /// </summary>
+        Task<ApiResponseDto<List<KioskAltIslemDto>>> GetKioskMenuAltIslemleriByKioskIdAsync(int kioskId, int kioskMenuId);
+
+        // ═══════════════════════════════════════════════════════
+        // ESKİ YAPILAR: HİZMET BİNASI BAZLI İŞLEMLER (Geriye Uyumluluk)
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// [ESKİ] Hizmet binasındaki kiosk menülerini listeler
         /// Sadece en az bir alt işleminde aktif personel (Yrd.Uzman+) olan menüler döner
         /// </summary>
         Task<ApiResponseDto<List<KioskMenuDto>>> GetKioskMenulerAsync(int hizmetBinasiId);
 
-        // ═══════════════════════════════════════════════════════
-        // ADIM 2: ALT KANAL İŞLEMLERİ
-        // ═══════════════════════════════════════════════════════
-
         /// <summary>
-        /// Seçilen kiosk menüsündeki alt kanal işlemlerini listeler
+        /// [ESKİ] Seçilen kiosk menüsündeki alt kanal işlemlerini listeler
         /// Sadece aktif personel (Yrd.Uzman+) olan işlemler döner
         /// </summary>
         Task<ApiResponseDto<List<KioskAltIslemDto>>> GetKioskMenuAltIslemleriAsync(int hizmetBinasiId, int kioskMenuId);

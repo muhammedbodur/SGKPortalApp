@@ -11,17 +11,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskSimulator
     public partial class Index
     {
         [Inject] private IKioskSimulatorApiService _kioskSimulatorService { get; set; } = default!;
-        [Inject] private IHizmetBinasiApiService _hizmetBinasiService { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
         [Inject] private ILogger<Index> _logger { get; set; } = default!;
 
         // State
         private bool isLoading = false;
-        private int selectedHizmetBinasiId = 0;
+        private int selectedKioskId = 0;
         private KioskStep currentStep = KioskStep.MenuSecimi;
 
         // Data
-        private List<HizmetBinasiResponseDto> hizmetBinalari = new();
+        private List<KioskResponseDto> kiosklar = new();
         private List<KioskMenuDto> kioskMenuler = new();
         private List<KioskAltIslemDto> altIslemler = new();
 
@@ -32,34 +31,34 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskSimulator
 
         protected override async Task OnInitializedAsync()
         {
-            await LoadHizmetBinalariAsync();
+            await LoadKiosklarAsync();
         }
 
-        private async Task LoadHizmetBinalariAsync()
+        private async Task LoadKiosklarAsync()
         {
             try
             {
-                var result = await _hizmetBinasiService.GetAllAsync();
+                var result = await _kioskSimulatorService.GetAllKiosklarAsync();
                 if (result.Success && result.Data != null)
                 {
-                    hizmetBinalari = result.Data;
+                    kiosklar = result.Data;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Hizmet binaları yüklenirken hata");
-                await _toastService.ShowErrorAsync("Hizmet binaları yüklenemedi");
+                _logger.LogError(ex, "Kiosk'lar yüklenirken hata");
+                await _toastService.ShowErrorAsync("Kiosk'lar yüklenemedi");
             }
         }
 
-        private async Task OnHizmetBinasiChanged(ChangeEventArgs e)
+        private async Task OnKioskChanged(ChangeEventArgs e)
         {
-            if (int.TryParse(e.Value?.ToString(), out var hizmetBinasiId))
+            if (int.TryParse(e.Value?.ToString(), out var kioskId))
             {
-                selectedHizmetBinasiId = hizmetBinasiId;
+                selectedKioskId = kioskId;
                 ResetKiosk();
 
-                if (hizmetBinasiId > 0)
+                if (kioskId > 0)
                 {
                     await LoadKioskMenulerAsync();
                 }
@@ -73,7 +72,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskSimulator
 
             try
             {
-                var result = await _kioskSimulatorService.GetKioskMenulerAsync(selectedHizmetBinasiId);
+                var result = await _kioskSimulatorService.GetKioskMenulerByKioskIdAsync(selectedKioskId);
                 if (result.Success && result.Data != null)
                 {
                     kioskMenuler = result.Data;
@@ -102,13 +101,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskSimulator
         {
             selectedMenu = menu;
             currentStep = KioskStep.AltIslemSecimi;
-            
+
             isLoading = true;
             StateHasChanged();
 
             try
             {
-                var result = await _kioskSimulatorService.GetKioskMenuAltIslemleriAsync(selectedHizmetBinasiId, menu.KioskMenuId);
+                var result = await _kioskSimulatorService.GetKioskMenuAltIslemleriByKioskIdAsync(selectedKioskId, menu.KioskMenuId);
                 if (result.Success && result.Data != null)
                 {
                     altIslemler = result.Data;
@@ -136,16 +135,26 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskSimulator
         private async Task SelectAltIslem(KioskAltIslemDto islem)
         {
             selectedAltIslem = islem;
-            
+
             isLoading = true;
             StateHasChanged();
 
             try
             {
+                // Kiosk'un hizmet binası ID'sini al
+                var selectedKiosk = kiosklar.FirstOrDefault(k => k.KioskId == selectedKioskId);
+                if (selectedKiosk == null)
+                {
+                    await _toastService.ShowErrorAsync("Kiosk bilgisi bulunamadı");
+                    isLoading = false;
+                    StateHasChanged();
+                    return;
+                }
+
                 var request = new KioskSiraAlRequestDto
                 {
                     KioskMenuIslemId = islem.KioskMenuIslemId,
-                    HizmetBinasiId = selectedHizmetBinasiId
+                    HizmetBinasiId = selectedKiosk.HizmetBinasiId
                 };
 
                 var result = await _kioskSimulatorService.SiraAlAsync(request);
@@ -198,9 +207,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskSimulator
             altIslemler = new();
         }
 
-        private string GetSelectedHizmetBinasiAdi()
+        private string GetSelectedKioskAdi()
         {
-            return hizmetBinalari.FirstOrDefault(h => h.HizmetBinasiId == selectedHizmetBinasiId)?.HizmetBinasiAdi ?? "-";
+            return kiosklar.FirstOrDefault(k => k.KioskId == selectedKioskId)?.KioskAdi ?? "-";
         }
 
         private string GetCurrentStepName()

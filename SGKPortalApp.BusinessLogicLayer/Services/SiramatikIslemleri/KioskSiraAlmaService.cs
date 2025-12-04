@@ -246,11 +246,81 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         }
 
         // ═══════════════════════════════════════════════════════
-        // ADIM 1: KIOSK MENÜLERİ
+        // YENİ YAPILAR: KIOSK BAZLI İŞLEMLER (Complex Query)
         // ═══════════════════════════════════════════════════════
 
         /// <summary>
-        /// Hizmet binasındaki kiosk menülerini listeler
+        /// Belirli bir Kiosk için menüleri detaylı olarak getirir (YENİ)
+        /// Complex query kullanarak kiosk bazlı menü listesini döner
+        /// </summary>
+        public async Task<ApiResponseDto<List<KioskMenuDto>>> GetKioskMenulerByKioskIdAsync(int kioskId)
+        {
+            try
+            {
+                _logger.LogInformation("📋 Kiosk menüleri getiriliyor (Complex Query). KioskId: {KioskId}", kioskId);
+
+                // Complex query ile menüleri getir
+                var menuDetaylar = await _siramatikQueryRepository.GetKioskMenulerByKioskIdAsync(kioskId);
+
+                // DTO dönüşümü
+                var result = menuDetaylar.Select(m => new KioskMenuDto
+                {
+                    KioskMenuId = m.KioskMenuId,
+                    MenuAdi = m.MenuAdi,
+                    Aciklama = m.MenuAciklama,
+                    MenuSira = m.MenuSiraNo,
+                    AktifAltIslemSayisi = m.ToplamIslemSayisi,
+                    ToplamBekleyenSiraSayisi = 0 // Complex query'de hesaplanmıyor, gerekirse ayrı sorgu
+                }).ToList();
+
+                _logger.LogInformation("✅ Kiosk menüleri getirildi. KioskId: {KioskId}, Menü sayısı: {Count}",
+                    kioskId, result.Count);
+
+                return ApiResponseDto<List<KioskMenuDto>>.SuccessResult(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Kiosk menüleri getirme hatası (Complex Query). KioskId: {KioskId}", kioskId);
+                return ApiResponseDto<List<KioskMenuDto>>.ErrorResult(
+                    "Menüler getirilemedi",
+                    "Beklenmeyen bir hata oluştu.");
+            }
+        }
+
+        /// <summary>
+        /// Belirli bir Kiosk'taki seçilen menü için alt kanal işlemlerini getirir (YENİ)
+        /// Complex query kullanarak kiosk ve menü bazlı alt işlem listesini döner
+        /// </summary>
+        public async Task<ApiResponseDto<List<KioskAltIslemDto>>> GetKioskMenuAltIslemleriByKioskIdAsync(int kioskId, int kioskMenuId)
+        {
+            try
+            {
+                _logger.LogInformation("📋 Kiosk alt işlemleri getiriliyor (Complex Query). KioskId: {KioskId}, KioskMenuId: {KioskMenuId}",
+                    kioskId, kioskMenuId);
+
+                // Complex query ile alt işlemleri getir
+                var altIslemler = await _siramatikQueryRepository.GetKioskMenuAltIslemleriByKioskIdAsync(kioskId, kioskMenuId);
+
+                _logger.LogInformation("✅ Kiosk alt işlemleri getirildi. KioskMenuId: {KioskMenuId}, İşlem sayısı: {Count}",
+                    kioskMenuId, altIslemler.Count);
+
+                return ApiResponseDto<List<KioskAltIslemDto>>.SuccessResult(altIslemler);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Kiosk alt işlemleri getirme hatası (Complex Query). KioskMenuId: {KioskMenuId}", kioskMenuId);
+                return ApiResponseDto<List<KioskAltIslemDto>>.ErrorResult(
+                    "Alt işlemler getirilemedi",
+                    "Beklenmeyen bir hata oluştu.");
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // ESKİ YAPILAR: HİZMET BİNASI BAZLI İŞLEMLER (Geriye Uyumluluk)
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// [ESKİ] Hizmet binasındaki kiosk menülerini listeler
         /// Sadece en az bir alt işleminde aktif personel (Yrd.Uzman+) olan menüler döner
         /// </summary>
         public async Task<ApiResponseDto<List<KioskMenuDto>>> GetKioskMenulerAsync(int hizmetBinasiId)
@@ -329,7 +399,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         // ═══════════════════════════════════════════════════════
 
         /// <summary>
-        /// Seçilen kiosk menüsündeki alt kanal işlemlerini listeler
+        /// [ESKİ] Seçilen kiosk menüsündeki alt kanal işlemlerini listeler
         /// Sadece aktif personel (Yrd.Uzman+) olan işlemler döner
         /// </summary>
         public async Task<ApiResponseDto<List<KioskAltIslemDto>>> GetKioskMenuAltIslemleriAsync(int hizmetBinasiId, int kioskMenuId)
