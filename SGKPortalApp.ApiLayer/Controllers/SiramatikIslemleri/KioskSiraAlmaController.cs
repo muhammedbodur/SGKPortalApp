@@ -25,11 +25,59 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         }
 
         // ═══════════════════════════════════════════════════════
-        // ADIM 1: KIOSK MENÜLERİ
+        // YENİ YAPILAR: KIOSK BAZLI İŞLEMLER
         // ═══════════════════════════════════════════════════════
 
         /// <summary>
-        /// Hizmet binasındaki kiosk menülerini listele
+        /// Belirli bir kiosk'un menülerini listele (Complex Query)
+        /// GET api/siramatik/kiosk-sira-alma/menuler-by-kiosk/{kioskId}
+        /// </summary>
+        /// <remarks>
+        /// Vatandaşın kiosk ekranında ilk gördüğü menü listesi.
+        /// Sadece aktif personeli olan menüler döner.
+        /// Complex query kullanarak performanslı sonuç döner.
+        /// </remarks>
+        [HttpGet("menuler-by-kiosk/{kioskId:int}")]
+        public async Task<IActionResult> GetKioskMenulerByKioskIdAsync(int kioskId)
+        {
+            var result = await _kioskSiraAlmaService.GetKioskMenulerByKioskIdAsync(kioskId);
+
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+
+            return BadRequest(result);
+        }
+
+        /// <summary>
+        /// Seçilen menüdeki alt işlemleri kiosk bazlı listele (Complex Query)
+        /// GET api/siramatik/kiosk-sira-alma/alt-islemler-by-kiosk/{kioskId}/{kioskMenuId}
+        /// </summary>
+        /// <remarks>
+        /// Vatandaş menü seçtikten sonra gördüğü alt işlem listesi.
+        /// Sadece aktif personel (Yrd.Uzman+) olan ve banko modunda bulunan işlemler döner.
+        /// Complex query kullanarak performanslı sonuç döner.
+        /// </remarks>
+        [HttpGet("alt-islemler-by-kiosk/{kioskId:int}/{kioskMenuId:int}")]
+        public async Task<IActionResult> GetKioskMenuAltIslemleriByKioskIdAsync(int kioskId, int kioskMenuId)
+        {
+            var result = await _kioskSiraAlmaService.GetKioskMenuAltIslemleriByKioskIdAsync(kioskId, kioskMenuId);
+
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+
+            return BadRequest(result);
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // ESKİ YAPILAR: HİZMET BİNASI BAZLI İŞLEMLER (Geriye Uyumluluk)
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// [ESKİ] Hizmet binasındaki kiosk menülerini listele
         /// GET api/siramatik/kiosk-sira-alma/menuler/{hizmetBinasiId}
         /// </summary>
         /// <remarks>
@@ -49,12 +97,8 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
             return BadRequest(result);
         }
 
-        // ═══════════════════════════════════════════════════════
-        // ADIM 2: ALT KANAL İŞLEMLERİ
-        // ═══════════════════════════════════════════════════════
-
         /// <summary>
-        /// Seçilen kiosk menüsündeki alt işlemleri listele
+        /// [ESKİ] Seçilen kiosk menüsündeki alt işlemleri listele
         /// GET api/siramatik/kiosk-sira-alma/alt-islemler/{hizmetBinasiId}/{kioskMenuId}
         /// </summary>
         /// <remarks>

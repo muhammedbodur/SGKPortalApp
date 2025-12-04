@@ -921,6 +921,58 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         /// <summary>
         /// Belirli bir Kiosk'taki seçilen menü için alt kanal işlemlerini getirir
         /// Sadece aktif personel (Yrd.Uzman+) olan ve banko modunda bulunan işlemler döner
+        ///
+        /// SQL Karşılığı:
+        /// -- Adım 1: Kiosk'un hizmet binası ID'sini al
+        /// DECLARE @HizmetBinasiId INT = (SELECT HizmetBinasiId FROM SIR_KioskTanim WHERE KioskId = @kioskId AND SilindiMi = 0)
+        /// DECLARE @Bugun DATE = CAST(GETDATE() AS DATE)
+        ///
+        /// -- Adım 2: Menüdeki alt işlemleri getir (sadece aktif personeli olanlar)
+        /// SELECT
+        ///     kmi.KioskMenuIslemId,
+        ///     kmi.KanalAltId,
+        ///     ka.KanalAltAdi,
+        ///     k.KanalAdi,
+        ///     kmi.MenuSira,
+        ///     kai.KanalAltIslemId,
+        ///     (SELECT COUNT(*)
+        ///      FROM SIR_Siralar s WITH (NOLOCK)
+        ///      WHERE s.KanalAltIslemId = kai.KanalAltIslemId
+        ///        AND s.HizmetBinasiId = @HizmetBinasiId
+        ///        AND s.BeklemeDurum = 0  -- Beklemede
+        ///        AND CAST(s.SiraAlisZamani AS DATE) = @Bugun
+        ///        AND s.SilindiMi = 0
+        ///     ) AS BekleyenSiraSayisi
+        /// FROM SIR_KioskMenuIslem kmi WITH (NOLOCK)
+        /// INNER JOIN SIR_KanallarAlt ka WITH (NOLOCK)
+        ///     ON ka.KanalAltId = kmi.KanalAltId
+        /// INNER JOIN SIR_Kanallar k WITH (NOLOCK)
+        ///     ON k.KanalId = ka.KanalId
+        /// INNER JOIN SIR_KanalAltIslemleri kai WITH (NOLOCK)
+        ///     ON kai.KanalAltId = ka.KanalAltId
+        ///     AND kai.HizmetBinasiId = @HizmetBinasiId
+        /// WHERE kmi.KioskMenuId = @kioskMenuId
+        ///   AND kmi.SilindiMi = 0 AND kmi.Aktiflik = 1
+        ///   AND ka.SilindiMi = 0 AND ka.Aktiflik = 1
+        ///   AND kai.SilindiMi = 0 AND kai.Aktiflik = 1
+        ///   -- Aktif personel kontrolü (Yrd.Uzman+ ve ŞU AN banko modunda)
+        ///   AND EXISTS (
+        ///       SELECT 1
+        ///       FROM SIR_KanalPersonelleri kp WITH (NOLOCK)
+        ///       INNER JOIN CMN_Users u WITH (NOLOCK)
+        ///           ON u.TcKimlikNo = kp.TcKimlikNo
+        ///       INNER JOIN SIR_Bankolar b WITH (NOLOCK)
+        ///           ON b.BankoId = u.AktifBankoId  -- User'ın ŞU ANKİ aktif bankosu
+        ///       WHERE kp.KanalAltIslemId = kai.KanalAltIslemId
+        ///         AND kp.Aktiflik = 1 AND kp.SilindiMi = 0
+        ///         AND kp.Uzmanlik != 0  -- En az Yrd.Uzman (1,2,3)
+        ///         AND u.BankoModuAktif = 1  -- Banko modunda
+        ///         AND u.AktifBankoId IS NOT NULL  -- Aktif banko ID'si var
+        ///         AND u.AktifMi = 1  -- Kullanıcı aktif
+        ///         AND b.HizmetBinasiId = @HizmetBinasiId  -- Aynı hizmet binasında
+        ///         AND b.BankoAktiflik = 1 AND b.SilindiMi = 0
+        ///   )
+        /// ORDER BY kmi.MenuSira
         /// </summary>
         public async Task<List<KioskAltIslemDto>> GetKioskMenuAltIslemleriByKioskIdAsync(int kioskId, int kioskMenuId)
         {
