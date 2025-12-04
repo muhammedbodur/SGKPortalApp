@@ -1136,6 +1136,20 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
 
             foreach (var islem in altIslemler)
             {
+                // Bu işlem için aktif personel var mı? (Yrd.Uzman+ ve banko modunda)
+                // NOT: SQL sorgusundaki mantıkla uyumlu - sadece BankoModuAktif kontrolü
+                var aktifPersonelVar = await (
+                    from kp in _context.KanalPersonelleri
+                    join u in _context.Users on kp.TcKimlikNo equals u.TcKimlikNo
+                    where kp.KanalAltIslemId == islem.KanalAltIslemId
+                       && kp.Aktiflik == Aktiflik.Aktif
+                       && !kp.SilindiMi
+                       && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok  // En az Yrd.Uzman
+                       && u.BankoModuAktif == true
+                       && u.AktifMi == true
+                    select kp.TcKimlikNo
+                ).AnyAsync();
+
                 // Bekleyen sıra sayısını hesapla
                 var bekleyenSayisi = await _context.Siralar
                     .AsNoTracking()
@@ -1154,7 +1168,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                     KanalAdi = islem.KanalAdi,
                     MenuSira = islem.MenuSira,
                     BekleyenSiraSayisi = bekleyenSayisi,
-                    AktifPersonelVar = true,
+                    AktifPersonelVar = aktifPersonelVar,  // Gerçek kontrol sonucu
                     TahminiBeklemeSuresi = bekleyenSayisi * 5 // Ortalama 5 dk/sıra
                 });
             }

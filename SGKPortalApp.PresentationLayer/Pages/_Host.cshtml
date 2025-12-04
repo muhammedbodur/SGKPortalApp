@@ -198,10 +198,17 @@
     <!-- ================== PAGE LIFECYCLE DETECTOR ================== -->
     <script src="~/js/page-lifecycle-detector.js"></script>
 
-    <!-- ================== KULLANICI BİLGİSİ (SignalR için) ================== -->
+    <!-- ================== API & USER CONFIGURATION ================== -->
     <script>
+        // API URL'ini JavaScript'e inject et (appsettings.json'dan)
+        window.appConfig = {
+            apiUrl: '@(Context.RequestServices.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>()["AppSettings:ApiUrl"] ?? "https://localhost:9080")'
+        };
+
         // SignalR bağlantısı için kullanıcı bilgisini set et
         window.currentUserTcKimlikNo = '@(User?.FindFirst("TcKimlikNo")?.Value ?? "")';
+
+        console.log('✅ API URL ayarlandı:', window.appConfig.apiUrl);
         console.log('👤 Kullanıcı TC:', window.currentUserTcKimlikNo || 'Giriş yapılmamış');
     </script>
 
