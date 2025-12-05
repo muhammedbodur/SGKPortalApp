@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using SGKPortalApp.PresentationLayer.Services.State;
 using System.Text;
 using System.Text.Json;
 
@@ -12,15 +13,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
         private readonly ILogger<LogoutModel> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
+        private readonly BankoModeStateService _bankoModeState;
 
         public LogoutModel(
             ILogger<LogoutModel> logger,
             IHttpClientFactory httpClientFactory,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            BankoModeStateService bankoModeState)
         {
             _logger = logger;
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
+            _bankoModeState = bankoModeState;
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -31,6 +35,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                 var tcKimlikNo = User?.FindFirst("TcKimlikNo")?.Value;
 
                 _logger.LogInformation("🔄 Logout: {UserName} çıkış yapıyor...", userName);
+
+                // ⭐ BankoModeState'i temizle (Singleton service'teki state'i sıfırla)
+                if (!string.IsNullOrEmpty(tcKimlikNo))
+                {
+                    if (_bankoModeState.IsPersonelInBankoMode(tcKimlikNo))
+                    {
+                        _bankoModeState.DeactivateBankoMode(tcKimlikNo);
+                        _logger.LogInformation("🔄 Logout: BankoModeState temizlendi - {TcKimlikNo}", tcKimlikNo);
+                    }
+                }
 
                 // ⚠️ API'ye logout çağrısı yap (banko modundan çıkış için)
                 if (!string.IsNullOrEmpty(tcKimlikNo))

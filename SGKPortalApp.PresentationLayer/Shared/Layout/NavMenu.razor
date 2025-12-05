@@ -2,6 +2,11 @@
 @inject SGKPortalApp.PresentationLayer.Services.State.BankoModeStateService BankoModeState
 @inject IHttpContextAccessor HttpContextAccessor
 
+@code {
+    private string? _tcKimlikNo;
+    private bool IsInBankoMode => !string.IsNullOrEmpty(_tcKimlikNo) && BankoModeState.IsPersonelInBankoMode(_tcKimlikNo);
+}
+
 <!-- Layout menu -->
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
 
@@ -30,7 +35,7 @@
             </a>
         </li>
 
-        @if (!BankoModeState.IsInBankoMode)
+        @if (!IsInBankoMode)
         {
             <!-- Hizmet Binaları -->
             <li class="menu-item @(IsSectionActive("/common") ? "active open" : "")">
@@ -407,15 +412,16 @@
 
     protected override void OnInitialized()
     {
-        // ⭐ BankoModeState için mevcut kullanıcıyı set et
-        var tcKimlikNo = HttpContextAccessor.HttpContext?.User.FindFirst("TcKimlikNo")?.Value;
-        if (!string.IsNullOrEmpty(tcKimlikNo))
+        // ⭐ Kullanıcı TC'sini al ve sakla
+        _tcKimlikNo = HttpContextAccessor.HttpContext?.User.FindFirst("TcKimlikNo")?.Value;
+        if (!string.IsNullOrEmpty(_tcKimlikNo))
         {
-            BankoModeState.SetCurrentUser(tcKimlikNo);
+            BankoModeState.SetCurrentUser(_tcKimlikNo);
+            // ⭐ Kullanıcı bazlı event subscription (AsyncLocal'a bağımlı değil!)
+            BankoModeState.SubscribeToUserChanges(_tcKimlikNo, OnBankoModeChanged);
         }
 
         Navigation.LocationChanged += OnLocationChanged;
-        BankoModeState.OnBankoModeChanged += OnBankoModeChanged;
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -431,6 +437,10 @@
     public void Dispose()
     {
         Navigation.LocationChanged -= OnLocationChanged;
-        BankoModeState.OnBankoModeChanged -= OnBankoModeChanged;
+        // ⭐ Kullanıcı bazlı event unsubscription
+        if (!string.IsNullOrEmpty(_tcKimlikNo))
+        {
+            BankoModeState.UnsubscribeFromUserChanges(_tcKimlikNo, OnBankoModeChanged);
+        }
     }
 }

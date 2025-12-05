@@ -114,6 +114,27 @@ namespace SGKPortalApp.PresentationLayer.Services.State
             return _userBankoStates.TryGetValue(tcKimlikNo, out var bankoId) ? bankoId : null;
         }
 
+        /// <summary>
+        /// ⭐ Belirli bir kullanıcı için event handler kaydet (AsyncLocal'a bağımlı değil)
+        /// </summary>
+        public void SubscribeToUserChanges(string tcKimlikNo, Action handler)
+        {
+            if (string.IsNullOrEmpty(tcKimlikNo)) return;
+            _userEvents.AddOrUpdate(tcKimlikNo, handler, (_, existing) => existing + handler);
+        }
+
+        /// <summary>
+        /// ⭐ Belirli bir kullanıcı için event handler kaldır
+        /// </summary>
+        public void UnsubscribeFromUserChanges(string tcKimlikNo, Action handler)
+        {
+            if (string.IsNullOrEmpty(tcKimlikNo)) return;
+            if (_userEvents.TryGetValue(tcKimlikNo, out var existing))
+            {
+                _userEvents[tcKimlikNo] = existing - handler;
+            }
+        }
+
         private void NotifyUser(string tcKimlikNo)
         {
             if (_userEvents.TryGetValue(tcKimlikNo, out var handler))

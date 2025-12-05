@@ -3,12 +3,14 @@ using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.PresentationLayer.Services.State;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 
 namespace SGKPortalApp.PresentationLayer.Components.Siramatik
 {
     public partial class BankoModeWidget : ComponentBase, IDisposable
     {
         [Inject] private IBankoApiService BankoApiService { get; set; } = default!;
+        [Inject] private IUserApiService UserApiService { get; set; } = default!;
         [Inject] private BankoModeStateService BankoModeState { get; set; } = default!;
         [Inject] private NavigationManager NavigationManager { get; set; } = default!;
         [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
@@ -20,25 +22,44 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
         private bool bankoInUse = false;
         private string? activePersonelName;
         private bool isLoading = false;
+        
+        // ⭐ Kullanıcı TC (AsyncLocal'a bağımlı olmamak için)
+        private string? _tcKimlikNo;
 
         protected override async Task OnInitializedAsync()
         {
-            // State değişikliklerini dinle
-            BankoModeState.OnBankoModeChanged += OnBankoModeStateChanged;
-            isInBankoMode = BankoModeState.IsInBankoMode;
+            // Kullanıcı TC'sini al ve sakla
+            _tcKimlikNo = HttpContextAccessor.HttpContext?.User.FindFirst("TcKimlikNo")?.Value;
+            
+            // ⭐ Kullanıcı bazlı event subscription (AsyncLocal'a bağımlı değil!)
+            if (!string.IsNullOrEmpty(_tcKimlikNo))
+            {
+                BankoModeState.SubscribeToUserChanges(_tcKimlikNo, OnBankoModeStateChanged);
+                isInBankoMode = BankoModeState.IsPersonelInBankoMode(_tcKimlikNo);
+            }
+            
             await LoadData();
         }
         
         private void OnBankoModeStateChanged()
         {
-            // State değiştiğinde UI'ı güncelle
-            isInBankoMode = BankoModeState.IsInBankoMode;
+            // State değiştiğinde UI'ı güncelle (tcKimlikNo ile kontrol et)
+            if (!string.IsNullOrEmpty(_tcKimlikNo))
+            {
+                isInBankoMode = BankoModeState.IsPersonelInBankoMode(_tcKimlikNo);
+                Logger.LogInformation("🔔 BankoModeWidget event alındı: {TcKimlikNo} - isInBankoMode: {IsActive}", 
+                    _tcKimlikNo, isInBankoMode);
+            }
             InvokeAsync(StateHasChanged);
         }
         
         public void Dispose()
         {
-            BankoModeState.OnBankoModeChanged -= OnBankoModeStateChanged;
+            // ⭐ Kullanıcı bazlı event unsubscription
+            if (!string.IsNullOrEmpty(_tcKimlikNo))
+            {
+                BankoModeState.UnsubscribeFromUserChanges(_tcKimlikNo, OnBankoModeStateChanged);
+            }
         }
 
         private async Task LoadData()
@@ -60,15 +81,30 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
                 {
                     assignedBanko = bankoResult.Data;
                     
-                    // Banko modunda mı kontrol et
-                    isInBankoMode = BankoModeState.IsInBankoMode;
+                    // ⭐ DB'den gerçek Banko modu durumunu kontrol et (User tablosu)
+                    var bankoModeResult = await UserApiService.IsBankoModeActiveAsync(tcKimlikNo);
+                    var dbBankoModeActive = bankoModeResult.Success && bankoModeResult.Data;
+                    
+                    // In-memory state ile DB durumunu karşılaştır (tcKimlikNo ile kontrol et)
+                    var stateIsActive = BankoModeState.IsPersonelInBankoMode(tcKimlikNo);
+                    
+                    Logger.LogInformation(
+                        "🔍 BankoModeWidget LoadData: {TcKimlikNo} - DB Banko Modu: {DbActive}, State Banko Modu: {StateActive}", 
+                        tcKimlikNo, dbBankoModeActive, stateIsActive);
 
-                    Logger.LogInformation("🔍 BankoModeWidget LoadData: {TcKimlikNo} - Banko Modu: {IsInBankoMode}", tcKimlikNo, isInBankoMode);
-
-                    if (isInBankoMode)
+                    // ⭐ SADECE DB'de aktifse ve state'te değilse -> State'i senkronize et
+                    // (Sayfa yenileme veya yeni sekme durumunda DB'den state'i geri yükle)
+                    // NOT: DB'de pasif ama state'te aktifse DOKUNMA - SignalR event'i henüz DB'ye yazılmamış olabilir
+                    if (dbBankoModeActive && !stateIsActive)
                     {
+                        Logger.LogInformation(
+                            "🔄 BankoModeState senkronize ediliyor: Banko#{BankoId} aktif", 
+                            assignedBanko.BankoId);
                         BankoModeState.ActivateBankoMode(assignedBanko.BankoId, tcKimlikNo);
                     }
+                    
+                    // Son durumu al (tcKimlikNo ile kontrol et)
+                    isInBankoMode = BankoModeState.IsPersonelInBankoMode(tcKimlikNo);
                 }
             }
             catch (Exception ex)

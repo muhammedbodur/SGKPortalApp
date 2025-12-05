@@ -122,9 +122,19 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs.Concrete
                 var bankoInUse = await IsBankoInUseAsync(bankoId);
                 if (bankoInUse)
                 {
-                    var activePerson = await GetBankoActivePersonelNameAsync(bankoId);
-                    _logger.LogWarning($"❌ Banko#{bankoId} kullanımda: {activePerson}");
-                    return false;
+                    // Aynı kullanıcı mı kontrol et (sayfa yenileme durumu)
+                    var activePersonel = await _connectionService.GetBankoActivePersonelAsync(bankoId);
+                    if (activePersonel != null && activePersonel.TcKimlikNo == tcKimlikNo)
+                    {
+                        // Aynı kullanıcı, devam et (sayfa yenileme veya yeni sekme)
+                        _logger.LogInformation($"✅ Banko#{bankoId} zaten {tcKimlikNo} tarafından kullanılıyor, devam ediliyor...");
+                    }
+                    else
+                    {
+                        var activePerson = activePersonel?.PersonelAdSoyad ?? "başka bir personel";
+                        _logger.LogWarning($"❌ Banko#{bankoId} kullanımda: {activePerson}");
+                        return false;
+                    }
                 }
 
                 // 2. Bu personel başka bankoda mı?

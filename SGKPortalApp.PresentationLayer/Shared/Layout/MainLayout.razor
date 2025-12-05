@@ -1,7 +1,7 @@
 @inherits LayoutComponentBase
 @using SGKPortalApp.PresentationLayer.Components.Siramatik
 
-<div class="layout-wrapper layout-content-navbar @(siraPanelAcik ? "sira-panel-open" : "") @(BankoModeState.IsInBankoMode ? "banko-mode-active" : "")">
+<div class="layout-wrapper layout-content-navbar @(siraPanelAcik ? "sira-panel-open" : "") @(IsInBankoMode ? "banko-mode-active" : "")">
     <div class="layout-container">
         <NavMenu />
         <div class="layout-page">
@@ -22,14 +22,14 @@
 </div>
 
 @* Sıra Çağırma Paneli - Sadece Banko Modunda Görünür *@
-@if (BankoModeState.IsInBankoMode)
+@if (IsInBankoMode)
 {
     <SiraCagirmaPanel 
         SiraListesi="@siraListesi" 
         OnSiraCagir="@HandleSiraCagir" 
         OnPanelStateChanged="@HandlePanelStateChanged"
-        AktifBankoId="@(BankoModeState.ActiveBankoId ?? 0)"
-        PersonelTcKimlikNo="@(BankoModeState.PersonelTcKimlikNo ?? string.Empty)" />
+        AktifBankoId="@(BankoModeState.GetUserActiveBankoId(_tcKimlikNo ?? "") ?? 0)"
+        PersonelTcKimlikNo="@(_tcKimlikNo ?? string.Empty)" />
 }
 
 @* SignalR Bağlantısı - _Host.cshtml'de merkezi olarak yönetilir *@

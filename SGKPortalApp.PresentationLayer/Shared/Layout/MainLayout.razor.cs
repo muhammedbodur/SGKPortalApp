@@ -34,6 +34,10 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         private bool siraPanelAcik = false;
         private DotNetObjectReference<MainLayout>? dotNetHelper;
 
+        // ⭐ Kullanıcı TC ve Banko modu kontrolü (AsyncLocal'a bağımlı olmayan)
+        private string? _tcKimlikNo;
+        private bool IsInBankoMode => !string.IsNullOrEmpty(_tcKimlikNo) && BankoModeState.IsPersonelInBankoMode(_tcKimlikNo);
+
         // ✅ Session check için cache
         private DateTime _lastSessionCheck = DateTime.MinValue;
         private readonly TimeSpan _sessionCheckInterval = TimeSpan.FromSeconds(30); // 30 saniyede bir kontrol et
@@ -57,11 +61,11 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                     return;
                 }
 
-                // 1.5 ⭐ BankoModeState için mevcut kullanıcıyı set et
-                var tcKimlikNo = HttpContextAccessor?.HttpContext?.User.FindFirst("TcKimlikNo")?.Value;
-                if (!string.IsNullOrEmpty(tcKimlikNo))
+                // 1.5 ⭐ Kullanıcı TC'sini al ve sakla
+                _tcKimlikNo = HttpContextAccessor?.HttpContext?.User.FindFirst("TcKimlikNo")?.Value;
+                if (!string.IsNullOrEmpty(_tcKimlikNo))
                 {
-                    BankoModeState.SetCurrentUser(tcKimlikNo);
+                    BankoModeState.SetCurrentUser(_tcKimlikNo);
                     // NOT: Banko modu senkronizasyonu API üzerinden yapılacak
                 }
 
@@ -73,7 +77,11 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
 
                 // 4. Event listener'ları kaydet
                 NavigationManager.LocationChanged += OnLocationChanged;
-                BankoModeState.OnBankoModeChanged += OnBankoModeStateChanged;
+                // ⭐ Kullanıcı bazlı event subscription (AsyncLocal'a bağımlı değil!)
+                if (!string.IsNullOrEmpty(_tcKimlikNo))
+                {
+                    BankoModeState.SubscribeToUserChanges(_tcKimlikNo, OnBankoModeStateChanged);
+                }
 
                 // 5. İlk kontroller
                 CheckBankoModeAccess();
@@ -84,6 +92,29 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
             {
                 Logger.LogError(ex, "❌ MainLayout initialization hatası");
                 NavigationManager.NavigateTo("/auth/login", forceLoad: true);
+            }
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                try
+                {
+                    // ⭐ JS initialization - SignalR event handler'ları kur
+                    await JS.InvokeVoidAsync("initSneatMenu");
+
+                    dotNetHelper = DotNetObjectReference.Create(this);
+                    await JS.InvokeVoidAsync("bankoMode.setupEventHandlers", dotNetHelper);
+
+                    // NOT: ForceLogout handler'ı signalr-app-initializer.js içinde zaten kuruluyor
+
+                    Logger.LogInformation("✅ MainLayout JS initialization tamamlandı (OnAfterRenderAsync)");
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex, "❌ MainLayout JS initialization hatası");
+                }
             }
         }
 
@@ -254,26 +285,8 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
             catch (Exception ex)
             {
                 Logger.LogError(ex, "❌ Session kontrolü hatası");
-                // Hata durumunda güvenli tarafta kal
+                // Hata durumunda güvenli tarafta kal - login'e yönlendir
                 NavigationManager.NavigateTo("/auth/login?error=true", forceLoad: true);
-                await Task.Delay(500);
-
-                try
-                {
-                    await JS.InvokeVoidAsync("initSneatMenu");
-
-                    dotNetHelper = DotNetObjectReference.Create(this);
-                    await JS.InvokeVoidAsync("bankoMode.setupEventHandlers", dotNetHelper);
-
-                    // SignalR ForceLogout event listener'ı ekle
-                    await JS.InvokeVoidAsync("signalRManager.registerForceLogoutHandler", dotNetHelper);
-
-                    Logger.LogDebug("✅ MainLayout JS initialization tamamlandı");
-                }
-                catch (Exception jsEx)
-                {
-                    Logger.LogError(jsEx, "❌ MainLayout JS initialization hatası");
-                }
             }
         }
 
@@ -426,7 +439,11 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         public void Dispose()
         {
             NavigationManager.LocationChanged -= OnLocationChanged;
-            BankoModeState.OnBankoModeChanged -= OnBankoModeStateChanged;
+            // ⭐ Kullanıcı bazlı event unsubscription
+            if (!string.IsNullOrEmpty(_tcKimlikNo))
+            {
+                BankoModeState.UnsubscribeFromUserChanges(_tcKimlikNo, OnBankoModeStateChanged);
+            }
             _cts?.Cancel();
             _cts?.Dispose();
         }

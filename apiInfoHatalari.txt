@@ -547,52 +547,30 @@ info: Microsoft.Hosting.Lifetime[0]
       Hosting environment: Development
 info: Microsoft.Hosting.Lifetime[0]
       Content root path: D:\AspNetExamples\SGKPortalApp\SGKPortalApp.ApiLayer
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: TzbwOawoF9CaCuJyRVFwqA - Kullanıcı: Anonymous (TC: Yok)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=23526eaf-f6de-42ab-97ff-f810585d1564
-warn: Microsoft.EntityFrameworkCore.Query[10108]
-      Collection navigations are only considered null if their parent entity is null. Use 'Any' to check whether collection navigation 'Banko.BankoKullanicilari' is empty.
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: TzbwOawoF9CaCuJyRVFwqA | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Personel bağlantısı koptu: 28165202398
-info: SGKPortalApp.ApiLayer.Controllers.Auth.AuthController[0]
-      ?? Logout: 28165202398 çıkış yapıyor...
-info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
-      ?? Banko modundan çıkılıyor: 28165202398
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: TzbwOawoF9CaCuJyRVFwqA - Kullanıcı: Anonymous
-info: SGKPortalApp.BusinessLogicLayer.Services.Common.UserService[0]
-      Banko modu deaktif edildi. TC: 28165202398
-info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
-      ? Banko modundan çıkıldı: 28165202398
-info: SGKPortalApp.ApiLayer.Controllers.Auth.AuthController[0]
-      ? Logout: Banko modu temizlendi - 28165202398
 warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
-      ?? Kullanıcı farklı bir cihazdan/tarayıcıdan giriş yaptı - TcKimlikNo: 28165202398, Eski SessionID: c48e9226-5390-4208-a96c-c2242801b537, Yeni SessionID: 3371268d-08e6-434a-be37-913efc23b33b
-info: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
-      Login başarılı - 28165202398 - Muhammed Bodur
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: EeC0llTXeJeE_EN3_tqdxA - Kullanıcı: Anonymous (TC: Yok)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=c1a3dc0c-a625-42f8-b216-3616e66f12d3
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: EeC0llTXeJeE_EN3_tqdxA | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
-warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
-      ?? Kullanıcı farklı bir cihazdan/tarayıcıdan giriş yaptı - TcKimlikNo: 16406457430, Eski SessionID: d2a3add8-2591-450b-984f-4433bcd4b87a, Yeni SessionID: a32f3317-1df7-45ff-abb4-c3cb045e0011
+      ?? Kullanıcı farklı bir cihazdan/tarayıcıdan giriş yaptı - TcKimlikNo: 16406457430, Eski SessionID: 039e0703-ca15-452f-9f5d-a4c10b7cd3b0, Yeni SessionID: d5fc7136-f10b-4464-a112-c7a5fe9ed2d1
 info: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
       Login başarılı - 16406457430 - AHMET DEMİRAL
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: 51zRbJE_BOys6sqZfYTuBQ - Kullanıcı: Anonymous (TC: Yok)
+      ?? [SiramatikHub] Yeni bağlantı: 6UEHyXApxQVhHHuunjOqtA - Kullanıcı: Anonymous (TC: Yok)
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=a0ddf1f4-47f4-4b1a-9cb6-ce9ff17864ab
+      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=740d2ffd-970c-429e-9a32-706649a15289
+warn: Microsoft.EntityFrameworkCore.Query[10108]
+      Collection navigations are only considered null if their parent entity is null. Use 'Any' to check whether collection navigation 'Banko.BankoKullanicilari' is empty.
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: 51zRbJE_BOys6sqZfYTuBQ | TC: 16406457430 | Type: MainLayout | IP: ::1
+      ? Yeni bağlantı oluşturuldu: 6UEHyXApxQVhHHuunjOqtA | TC: 16406457430 | Type: MainLayout | IP: ::1
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=False
+warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
+      ?? Kullanıcı farklı bir cihazdan/tarayıcıdan giriş yaptı - TcKimlikNo: 28165202398, Eski SessionID: d2ff3187-85fd-4d3b-ae94-03c32f6bfeb3, Yeni SessionID: 8ec255b2-aecf-4099-9f5c-ef3e67b48096
+info: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
+      Login başarılı - 28165202398 - Muhammed Bodur
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: 9JivY4ICk4ms2fSg0xxUzw - Kullanıcı: Anonymous (TC: Yok)
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=76a2ef2f-f594-41bb-9f28-8f4371ae987d
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: 9JivY4ICk4ms2fSg0xxUzw | TC: 28165202398 | Type: MainLayout | IP: ::1
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? Banko modu kontrolü: isBankoMode=False
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
@@ -600,11 +578,9 @@ info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? [EnterBankoMode] TcKimlikNo query string'den alındı: '16406457430'
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [EnterBankoMode] Banko moduna geçiliyor: TcKimlikNo='16406457430', BankoId=19, ConnectionId=51zRbJE_BOys6sqZfYTuBQ
-warn: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko moduna geçiş: Diğer tab kapatıldı (5zHIDY9B_OsGBDUF-3L0LQ)
+      ?? [EnterBankoMode] Banko moduna geçiliyor: TcKimlikNo='16406457430', BankoId=19, ConnectionId=6UEHyXApxQVhHHuunjOqtA
 info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
-      ?? Banko moduna geçiliyor: 16406457430 -> Banko#19 | Aktif ConnectionId: 51zRbJE_BOys6sqZfYTuBQ
+      ?? Banko moduna geçiliyor: 16406457430 -> Banko#19 | Aktif ConnectionId: 6UEHyXApxQVhHHuunjOqtA
 [UserRepository] ActivateBankoModeAsync çağrıldı - TcKimlikNo: '16406457430', BankoId: 19
 [UserRepository] Kullanıcı bulundu: 16406457430, Aktif: True
 [UserRepository] Banko modu aktif edildi
@@ -614,120 +590,32 @@ info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
       ? Banko modu aktif: 16406457430 -> Banko#19
 info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
       ? Banko modu aktif edildi. Sayfa yenilendiğinde eski bağlantılar otomatik kapanacak.
-fail: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
-      UpdateConnectionTypeAsync hatası
-      System.InvalidOperationException: The instance of entity type 'HubConnection' cannot be tracked because another instance with the key value '{HubConnectionId: 905}' is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached.
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1.ThrowIdentityConflict(InternalEntityEntry entry)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1.Add(TKey key, InternalEntityEntry entry, Boolean updateDuplicate)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1.Add(TKey key, InternalEntityEntry entry)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1.Add(InternalEntityEntry entry)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.StartTracking(InternalEntityEntry entry)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.InternalEntityEntry.SetEntityState(EntityState oldState, EntityState newState, Boolean acceptChanges, Boolean modifyProperties)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.InternalEntityEntry.SetEntityState(EntityState entityState, Boolean acceptChanges, Boolean modifyProperties, Nullable`1 forceStateWhenUnknownKey, Nullable`1 fallbackState)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityGraphAttacher.PaintAction(EntityEntryGraphNode`1 node)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityEntryGraphIterator.TraverseGraph[TState](EntityEntryGraphNode`1 node, Func`2 handleNode)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityGraphAttacher.AttachGraph(InternalEntityEntry rootEntry, EntityState targetState, EntityState storeGeneratedWithKeySetTargetState, Boolean forceStateWhenUnknownKey)
-         at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.SetEntityState(InternalEntityEntry entry, EntityState entityState)
-         at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.Attach(TEntity entity)
-         at SGKPortalApp.DataAccessLayer.Repositories.Generic.GenericRepository`1.Update(T entity) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Generic\GenericRepository.cs:line 103
-         at SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService.UpdateConnectionTypeAsync(String connectionId, String connectionType) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\SignalR\HubConnectionBusinessService.cs:line 299
 info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
       ? Banko bağlantısı oluşturuldu: Banko#19, TC#16406457430
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Gruba katıldı: 51zRbJE_BOys6sqZfYTuBQ -> BANKO_19
+      ? Gruba katıldı: 6UEHyXApxQVhHHuunjOqtA -> BANKO_19
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ? 16406457430 -> Banko#19 moduna girdi (Fiziksel)
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? [EnterBankoMode] TcKimlikNo claim'den alındı: ''
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [EnterBankoMode] TcKimlikNo query string'den alındı: '16406457430'
+      ?? [EnterBankoMode] TcKimlikNo query string'den alındı: '28165202398'
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [EnterBankoMode] Banko moduna geçiliyor: TcKimlikNo='16406457430', BankoId=19, ConnectionId=51zRbJE_BOys6sqZfYTuBQ
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Banko#19 zaten 16406457430 tarafından kullanılıyor, devam ediliyor...
+      ?? [EnterBankoMode] Banko moduna geçiliyor: TcKimlikNo='28165202398', BankoId=18, ConnectionId=9JivY4ICk4ms2fSg0xxUzw
 info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
-      ?? Banko moduna geçiliyor: 16406457430 -> Banko#19 | Aktif ConnectionId: 51zRbJE_BOys6sqZfYTuBQ
-warn: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
-      ? Banko#19 kullanımda: AHMET DEMİRAL
-fail: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Banko moduna giriş hatası: Banko#19
-      Microsoft.AspNetCore.SignalR.HubException: Banko modu kullanıcı kaydı oluşturulamadı.
-         at SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub.EnterBankoMode(Int32 bankoId) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.ApiLayer\Services\Hubs\SiramatikHub.cs:line 495
-fail: Microsoft.AspNetCore.SignalR.Internal.DefaultHubDispatcher[8]
-      Failed to invoke hub method 'EnterBankoMode'.
-      Microsoft.AspNetCore.SignalR.HubException: Banko modu kullanıcı kaydı oluşturulamadı.
-         at SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub.EnterBankoMode(Int32 bankoId) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.ApiLayer\Services\Hubs\SiramatikHub.cs:line 495
-         at SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub.EnterBankoMode(Int32 bankoId) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.ApiLayer\Services\Hubs\SiramatikHub.cs:line 525
-         at Microsoft.AspNetCore.SignalR.Internal.DefaultHubDispatcher`1.ExecuteMethod(ObjectMethodExecutor methodExecutor, Hub hub, Object[] arguments)
-         at Microsoft.AspNetCore.SignalR.Internal.DefaultHubDispatcher`1.<Invoke>g__ExecuteInvocation|22_0(DefaultHubDispatcher`1 dispatcher, ObjectMethodExecutor methodExecutor, THub hub, Object[] arguments, AsyncServiceScope scope, IHubActivator`1 hubActivator, HubConnectionContext connection, HubMethodInvocationMessage hubMethodInvocationMessage, Boolean isStreamCall)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Personel bağlantısı koptu: 16406457430
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: 51zRbJE_BOys6sqZfYTuBQ - Kullanıcı: Anonymous
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: qeX7C4deZeuzXQb7soMVYA - Kullanıcı: Anonymous (TC: Yok)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=a0ddf1f4-47f4-4b1a-9cb6-ce9ff17864ab
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: qeX7C4deZeuzXQb7soMVYA | TC: 16406457430 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=True
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu algılandı: 16406457430
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Aktif banko bulundu: Banko#19, TabId beklenen: a0ddf1f4-47f4-4b1a-9cb6-ce9ff17864ab, gelen: a0ddf1f4-47f4-4b1a-9cb6-ce9ff17864ab, isRefresh: False
-fail: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
-      TransferBankoConnectionAsync hatası
-      System.InvalidOperationException: The instance of entity type 'HubConnection' cannot be tracked because another instance with the key value '{HubConnectionId: 906}' is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached.
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1.ThrowIdentityConflict(InternalEntityEntry entry)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1.Add(TKey key, InternalEntityEntry entry, Boolean updateDuplicate)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1.Add(TKey key, InternalEntityEntry entry)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1.Add(InternalEntityEntry entry)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.StartTracking(InternalEntityEntry entry)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.InternalEntityEntry.SetEntityState(EntityState oldState, EntityState newState, Boolean acceptChanges, Boolean modifyProperties)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.InternalEntityEntry.SetEntityState(EntityState entityState, Boolean acceptChanges, Boolean modifyProperties, Nullable`1 forceStateWhenUnknownKey, Nullable`1 fallbackState)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityGraphAttacher.PaintAction(EntityEntryGraphNode`1 node)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityEntryGraphIterator.TraverseGraph[TState](EntityEntryGraphNode`1 node, Func`2 handleNode)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityGraphAttacher.AttachGraph(InternalEntityEntry rootEntry, EntityState targetState, EntityState storeGeneratedWithKeySetTargetState, Boolean forceStateWhenUnknownKey)
-         at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.SetEntityState(InternalEntityEntry entry, EntityState entityState)
-         at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.Attach(TEntity entity)
-         at SGKPortalApp.DataAccessLayer.Repositories.Generic.GenericRepository`1.Update(T entity) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Generic\GenericRepository.cs:line 103
-         at SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService.TransferBankoConnectionAsync(String tcKimlikNo, String newConnectionId) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\SignalR\HubConnectionBusinessService.cs:line 659
-warn: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko bağlantısı yeni connection'a devredilemedi: 16406457430
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Personel bağlantısı koptu: 16406457430
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: qeX7C4deZeuzXQb7soMVYA - Kullanıcı: Anonymous
-warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
-      ?? Login sırasında orphan banko mode flag tespit edildi: 16406457430
-info: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
-      ? Orphan banko mode flag temizlendi: 16406457430
-warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
-      ?? Kullanıcı farklı bir cihazdan/tarayıcıdan giriş yaptı - TcKimlikNo: 16406457430, Eski SessionID: a32f3317-1df7-45ff-abb4-c3cb045e0011, Yeni SessionID: 7e1588dd-ae96-45de-8ea7-6ab17f2e199f
-info: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
-      Login başarılı - 16406457430 - AHMET DEMİRAL
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: jHr8fZfKOl7NeDjAY2I0ww - Kullanıcı: Anonymous (TC: Yok)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=a0ddf1f4-47f4-4b1a-9cb6-ce9ff17864ab
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: jHr8fZfKOl7NeDjAY2I0ww | TC: 16406457430 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [EnterBankoMode] TcKimlikNo claim'den alındı: ''
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [EnterBankoMode] TcKimlikNo query string'den alındı: '16406457430'
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [EnterBankoMode] Banko moduna geçiliyor: TcKimlikNo='16406457430', BankoId=19, ConnectionId=jHr8fZfKOl7NeDjAY2I0ww
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Banko#19 zaten 16406457430 tarafından kullanılıyor, devam ediliyor...
+      ?? Banko moduna geçiliyor: 28165202398 -> Banko#18 | Aktif ConnectionId: 9JivY4ICk4ms2fSg0xxUzw
+[UserRepository] ActivateBankoModeAsync çağrıldı - TcKimlikNo: '28165202398', BankoId: 18
+[UserRepository] Kullanıcı bulundu: 28165202398, Aktif: True
+[UserRepository] Banko modu aktif edildi
+info: SGKPortalApp.BusinessLogicLayer.Services.Common.UserService[0]
+      Banko modu aktif edildi. TC: 28165202398, BankoId: 18
 info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
-      ?? Banko moduna geçiliyor: 16406457430 -> Banko#19 | Aktif ConnectionId: jHr8fZfKOl7NeDjAY2I0ww
-warn: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
-      ? Banko#19 kullanımda:
-fail: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Banko moduna giriş hatası: Banko#19
-      Microsoft.AspNetCore.SignalR.HubException: Banko modu kullanıcı kaydı oluşturulamadı.
-         at SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub.EnterBankoMode(Int32 bankoId) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.ApiLayer\Services\Hubs\SiramatikHub.cs:line 495
+      ? Banko modu aktif: 28165202398 -> Banko#18
+info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
+      ? Banko modu aktif edildi. Sayfa yenilendiğinde eski bağlantılar otomatik kapanacak.
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
+      ? Banko bağlantısı oluşturuldu: Banko#18, TC#28165202398
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Gruba katıldı: 9JivY4ICk4ms2fSg0xxUzw -> BANKO_18
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? 28165202398 -> Banko#18 moduna girdi (Fiziksel)

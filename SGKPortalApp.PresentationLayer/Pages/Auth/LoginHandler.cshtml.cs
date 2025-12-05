@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
+using SGKPortalApp.PresentationLayer.Services.State;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -14,10 +15,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
     public class LoginHandlerModel : PageModel
     {
         private readonly ILogger<LoginHandlerModel> _logger;
+        private readonly BankoModeStateService _bankoModeState;
 
-        public LoginHandlerModel(ILogger<LoginHandlerModel> logger)
+        public LoginHandlerModel(
+            ILogger<LoginHandlerModel> logger,
+            BankoModeStateService bankoModeState)
         {
             _logger = logger;
+            _bankoModeState = bankoModeState;
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -49,6 +54,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                 }
 
                 _logger.LogDebug("🔵 Login response alındı: {AdSoyad}", loginResponse.AdSoyad);
+
+                // ⭐ Yeni login'de eski BankoModeState'i temizle (Singleton service'teki eski state'i sıfırla)
+                if (_bankoModeState.IsPersonelInBankoMode(loginResponse.TcKimlikNo))
+                {
+                    _bankoModeState.DeactivateBankoMode(loginResponse.TcKimlikNo);
+                    _logger.LogInformation("🔄 Login: Eski BankoModeState temizlendi - {TcKimlikNo}", loginResponse.TcKimlikNo);
+                }
 
                 var claims = new List<Claim>
                 {

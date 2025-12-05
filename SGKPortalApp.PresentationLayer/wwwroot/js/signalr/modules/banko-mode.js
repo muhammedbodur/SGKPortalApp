@@ -1,6 +1,8 @@
 // Banko Modu Yönetimi
 window.bankoMode = {
     connection: null,
+    dotNetHelper: null,
+    eventHandlersSetup: false,
 
     // SignalR bağlantısını al (MainLayout'tan)
     getConnection: function () {
@@ -11,10 +13,16 @@ window.bankoMode = {
         return this.connection;
     },
 
-    // Bağlantıyı set et (MainLayout'tan çağrılır)
+    // Bağlantıyı set et (signalr-app-initializer'dan çağrılır)
     setConnection: function (connection) {
         this.connection = connection;
         console.log('✅ Banko modu SignalR bağlantısı ayarlandı');
+        
+        // ⭐ Eğer dotNetHelper zaten set edilmişse, event handler'ları kur
+        if (this.dotNetHelper && !this.eventHandlersSetup) {
+            console.log('🔄 Connection geldi, event handler\'ları kuruluyor...');
+            this._setupEventHandlersInternal();
+        }
     },
 
     // Aktif tab'ın ConnectionId'sini al
@@ -67,17 +75,41 @@ window.bankoMode = {
         }
     },
 
-    // Event handler'ları kur
+    // Event handler'ları kur (MainLayout.OnAfterRenderAsync'den çağrılır)
     // ⭐ Event adları: camelCase formatında (SignalREvents.cs ile uyumlu)
     setupEventHandlers: function (dotNetHelper) {
-        const connection = this.getConnection();
-        if (!connection) return;
+        this.dotNetHelper = dotNetHelper;
+        console.log('📝 dotNetHelper kaydedildi');
+        
+        // Connection henüz hazır değilse, setConnection çağrıldığında kurulacak
+        if (!this.connection) {
+            console.log('⏳ Connection henüz hazır değil, event handler\'lar connection geldiğinde kurulacak');
+            return;
+        }
+        
+        this._setupEventHandlersInternal();
+    },
+    
+    // Internal: Event handler'ları gerçekten kur
+    _setupEventHandlersInternal: function () {
+        if (this.eventHandlersSetup) {
+            console.log('⚠️ Event handler\'lar zaten kurulmuş');
+            return;
+        }
+        
+        const connection = this.connection;
+        const dotNetHelper = this.dotNetHelper;
+        
+        if (!connection || !dotNetHelper) {
+            console.error('❌ Connection veya dotNetHelper eksik!');
+            return;
+        }
 
         // Banko modu aktif oldu
         connection.on("bankoModeActivated", (data) => {
             console.log('✅ bankoModeActivated:', data);
-            if (dotNetHelper) {
-                dotNetHelper.invokeMethodAsync('OnBankoModeActivated', data.bankoId)
+            if (this.dotNetHelper) {
+                this.dotNetHelper.invokeMethodAsync('OnBankoModeActivated', data.bankoId)
                     .then(() => {
                         console.log('✅ C# OnBankoModeActivated tamamlandı - UI Blazor tarafından güncellenecek');
                     })
@@ -90,8 +122,8 @@ window.bankoMode = {
         // Banko modu deaktif oldu
         connection.on("bankoModeDeactivated", (data) => {
             console.log('✅ bankoModeDeactivated');
-            if (dotNetHelper) {
-                dotNetHelper.invokeMethodAsync('OnBankoModeDeactivated')
+            if (this.dotNetHelper) {
+                this.dotNetHelper.invokeMethodAsync('OnBankoModeDeactivated')
                     .then(() => {
                         console.log('✅ C# OnBankoModeDeactivated tamamlandı - UI Blazor tarafından güncellenecek');
                     })
@@ -126,6 +158,7 @@ window.bankoMode = {
             }
         });
 
+        this.eventHandlersSetup = true;
         console.log('✅ Banko modu event handlerlari kuruldu (camelCase)');
     },
 
