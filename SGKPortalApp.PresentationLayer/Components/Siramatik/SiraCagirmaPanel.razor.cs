@@ -128,6 +128,79 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
             Console.WriteLine($"🔄 State JS'den güncellendi - Visible: {IsVisible}, Pinned: {IsPinned}");
         }
 
+        /// <summary>
+        /// SignalR'dan gelen sıra güncellemelerini işle (JS'den çağrılır)
+        /// </summary>
+        [JSInvokable]
+        public async Task OnSiraUpdateFromSignalR(object payload)
+        {
+            try
+            {
+                Console.WriteLine($"📥 OnSiraUpdateFromSignalR çağrıldı: {payload}");
+
+                // Payload'ı parse et
+                var jsonElement = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(payload.ToString() ?? "{}");
+                
+                var updateType = jsonElement.TryGetProperty("updateType", out var updateTypeProp) 
+                    ? updateTypeProp.GetInt32() 
+                    : 0;
+
+                if (jsonElement.TryGetProperty("sira", out var siraProp))
+                {
+                    var siraJson = siraProp.GetRawText();
+                    var yeniSira = System.Text.Json.JsonSerializer.Deserialize<SiraCagirmaResponseDto>(siraJson, new System.Text.Json.JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
+                    if (yeniSira != null)
+                    {
+                        // UpdateType: 0 = Append (yeni sıra ekle)
+                        if (updateType == 0)
+                        {
+                            // Aynı sıra zaten listede var mı kontrol et
+                            if (!SiraListesi.Any(s => s.SiraId == yeniSira.SiraId))
+                            {
+                                SiraListesi.Add(yeniSira);
+                                Console.WriteLine($"✅ Yeni sıra eklendi: #{yeniSira.SiraNo} (ID: {yeniSira.SiraId})");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"⚠️ Sıra zaten listede: #{yeniSira.SiraNo}");
+                            }
+                        }
+                        // UpdateType: 1 = Update (mevcut sırayı güncelle)
+                        else if (updateType == 1)
+                        {
+                            var mevcutSira = SiraListesi.FirstOrDefault(s => s.SiraId == yeniSira.SiraId);
+                            if (mevcutSira != null)
+                            {
+                                var index = SiraListesi.IndexOf(mevcutSira);
+                                SiraListesi[index] = yeniSira;
+                                Console.WriteLine($"✅ Sıra güncellendi: #{yeniSira.SiraNo}");
+                            }
+                        }
+                        // UpdateType: 2 = Remove (sırayı kaldır)
+                        else if (updateType == 2)
+                        {
+                            var silinecek = SiraListesi.FirstOrDefault(s => s.SiraId == yeniSira.SiraId);
+                            if (silinecek != null)
+                            {
+                                SiraListesi.Remove(silinecek);
+                                Console.WriteLine($"✅ Sıra kaldırıldı: #{yeniSira.SiraNo}");
+                            }
+                        }
+
+                        await InvokeAsync(StateHasChanged);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ OnSiraUpdateFromSignalR error: {ex.Message}");
+            }
+        }
+
         private async Task TogglePanel()
         {
             try
