@@ -143,7 +143,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         {
             try
             {
-                // Kaynak personele REMOVE gönder
+                _logger.LogInformation("🔄 SiraRedirected broadcast başladı. SiraId: {SiraId}, YonlendirmeTipi: {YonlendirmeTipi}, Kaynak: {SourceBanko}, Hedef: {TargetBanko}",
+                    sira.SiraId, sira.YonlendirmeTipi, sourceBankoId, targetBankoId);
+
+                // 1. Kaynak personele REMOVE gönder
                 var removePayload = new SiraUpdatePayloadDto
                 {
                     UpdateType = SiraUpdateType.Remove,
@@ -155,11 +158,47 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 };
 
                 await SendToPersonelAsync(sourcePersonelTc, SiraListUpdate, removePayload);
+                _logger.LogInformation("📤 Kaynak personele REMOVE gönderildi. PersonelTc: {PersonelTc}", sourcePersonelTc);
 
-                // Hedef bankodaki personellere INSERT gönder
-                var affectedPersonels = await _siramatikQueryRepository.GetBankoModundakiPersonellerAsync(sira.HizmetBinasiId, sira.KanalAltIslemId);
-                var targetPersonels = affectedPersonels.Where(tc => tc != sourcePersonelTc).ToList();
+                // 2. Hedef personelleri yönlendirme tipine göre akıllı şekilde bul
+                List<string> targetPersonels = new List<string>();
+                string aciklama = "";
 
+                switch (sira.YonlendirmeTipi)
+                {
+                    case BusinessObjectLayer.Enums.SiramatikIslemleri.YonlendirmeTipi.BaskaBanko:
+                        // Sadece hedef bankodaki personele gönder
+                        targetPersonels = await _siramatikQueryRepository.GetBankodakiAktifPersonellerAsync(targetBankoId);
+                        aciklama = "Başka bankoya yönlendirilmiş sıra";
+                        _logger.LogInformation("🎯 BaskaBanko yönlendirme. HedefBankoId: {TargetBankoId}, Hedef personel sayısı: {Count}",
+                            targetBankoId, targetPersonels.Count);
+                        break;
+
+                    case BusinessObjectLayer.Enums.SiramatikIslemleri.YonlendirmeTipi.Sef:
+                        // Sadece Şef yetkisine sahip personellere gönder
+                        targetPersonels = await _siramatikQueryRepository.GetBankoModundakiSefPersonellerAsync(sira.HizmetBinasiId, sira.KanalAltIslemId);
+                        aciklama = "Şef'e yönlendirilmiş sıra";
+                        _logger.LogInformation("🎯 Şef yönlendirme. Şef personel sayısı: {Count}", targetPersonels.Count);
+                        break;
+
+                    case BusinessObjectLayer.Enums.SiramatikIslemleri.YonlendirmeTipi.UzmanPersonel:
+                        // Sadece Uzman yetkisine sahip personellere gönder
+                        targetPersonels = await _siramatikQueryRepository.GetBankoModundakiUzmanPersonellerAsync(sira.HizmetBinasiId, sira.KanalAltIslemId);
+                        aciklama = "Uzman personele yönlendirilmiş sıra";
+                        _logger.LogInformation("🎯 Uzman yönlendirme. Uzman personel sayısı: {Count}", targetPersonels.Count);
+                        break;
+
+                    default:
+                        _logger.LogWarning("⚠️ Bilinmeyen YonlendirmeTipi: {YonlendirmeTipi}. Tüm personellere gönderiliyor.", sira.YonlendirmeTipi);
+                        targetPersonels = await _siramatikQueryRepository.GetBankoModundakiPersonellerAsync(sira.HizmetBinasiId, sira.KanalAltIslemId);
+                        aciklama = "Yönlendirilmiş sıra";
+                        break;
+                }
+
+                // Kaynak personeli hedef listesinden çıkar
+                targetPersonels = targetPersonels.Where(tc => tc != sourcePersonelTc).ToList();
+
+                // 3. Hedef personellere INSERT gönder
                 if (targetPersonels.Any())
                 {
                     var insertPayload = new SiraUpdatePayloadDto
@@ -168,15 +207,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                         Sira = sira,
                         BankoId = targetBankoId,
                         Position = 0, // En başa ekle (yönlendirilen sıralar öncelikli)
-                        Aciklama = "Yönlendirilmiş sıra",
+                        Aciklama = aciklama,
                         Timestamp = DateTime.Now
                     };
 
                     await SendToPersonelsAsync(targetPersonels, SiraListUpdate, insertPayload);
+                    _logger.LogInformation("📤 Hedef personellere INSERT gönderildi. Personel sayısı: {Count}, TC'ler: [{TcList}]",
+                        targetPersonels.Count, string.Join(", ", targetPersonels));
+                }
+                else
+                {
+                    _logger.LogWarning("⚠️ Hedef personel bulunamadı! YonlendirmeTipi: {YonlendirmeTipi}, SiraId: {SiraId}",
+                        sira.YonlendirmeTipi, sira.SiraId);
                 }
 
-                _logger.LogInformation("📤 SiraRedirected broadcast edildi. SiraId: {SiraId}, Kaynak: {SourceBanko}, Hedef: {TargetBanko}",
-                    sira.SiraId, sourceBankoId, targetBankoId);
+                _logger.LogInformation("✅ SiraRedirected broadcast tamamlandı. SiraId: {SiraId}, YonlendirmeTipi: {YonlendirmeTipi}",
+                    sira.SiraId, sira.YonlendirmeTipi);
             }
             catch (Exception ex)
             {

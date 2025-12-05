@@ -48,6 +48,24 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex
         /// </summary>
         Task<List<string>> GetBankoModundakiYetkiliPersonellerAsync(int hizmetBinasiId, int kanalAltIslemId);
 
+        /// <summary>
+        /// Belirli bir HizmetBinasi ve KanalAltIslem için banko modunda olan ve Şef yetkisine sahip personellerin TC listesini döner.
+        /// Şef'e yönlendirilen sıralar için SignalR broadcast'inde kullanılır.
+        /// </summary>
+        Task<List<string>> GetBankoModundakiSefPersonellerAsync(int hizmetBinasiId, int kanalAltIslemId);
+
+        /// <summary>
+        /// Belirli bir HizmetBinasi ve KanalAltIslem için banko modunda olan ve Uzman yetkisine sahip personellerin TC listesini döner.
+        /// Uzman'a yönlendirilen sıralar için SignalR broadcast'inde kullanılır.
+        /// </summary>
+        Task<List<string>> GetBankoModundakiUzmanPersonellerAsync(int hizmetBinasiId, int kanalAltIslemId);
+
+        /// <summary>
+        /// Belirli bir Banko'da aktif olan personelin TC kimlik numarasını döner.
+        /// Başka bankoya yönlendirilen sıralar için SignalR broadcast'inde kullanılır.
+        /// </summary>
+        Task<List<string>> GetBankodakiAktifPersonellerAsync(int bankoId);
+
         // Kiosk Menü Sorguları
         /// <summary>
         /// Belirli bir Kiosk için menüleri detaylı olarak getirir

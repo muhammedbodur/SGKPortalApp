@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
@@ -23,6 +24,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         private readonly IUserRepository _userRepository;
         private readonly IBankoKullaniciRepository _bankoKullaniciRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ISiramatikHubService _hubService;
         private readonly ILogger<SiraYonlendirmeService> _logger;
 
         public SiraYonlendirmeService(
@@ -32,6 +34,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             IUserRepository userRepository,
             IBankoKullaniciRepository bankoKullaniciRepository,
             IUnitOfWork unitOfWork,
+            ISiramatikHubService hubService,
             ILogger<SiraYonlendirmeService> logger)
         {
             _siraRepository = siraRepository;
@@ -40,6 +43,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             _userRepository = userRepository;
             _bankoKullaniciRepository = bankoKullaniciRepository;
             _unitOfWork = unitOfWork;
+            _hubService = hubService;
             _logger = logger;
         }
 
@@ -151,6 +155,45 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     _logger.LogInformation(
                         "Sıra yönlendirildi. SiraId: {SiraId}, SiraNo: {SiraNo}, Kaynak: {KaynakBankoId}, Hedef: {HedefBankoId}, Tip: {YonlendirmeTipi}",
                         sira.SiraId, sira.SiraNo, request.YonlendirenBankoId, hedefBankoId, request.YonlendirmeTipi);
+
+                    // ═══════════════════════════════════════════════════════
+                    // SİGNALR BROADCAST - Yönlendirmeyi ilgili personellere bildir
+                    // ═══════════════════════════════════════════════════════
+                    try
+                    {
+                        // Sıra bilgilerini DTO'ya çevir
+                        var siraDto = new SiraCagirmaResponseDto
+                        {
+                            SiraId = sira.SiraId,
+                            SiraNo = sira.SiraNo,
+                            KanalAltAdi = sira.KanalAltIslem?.KanalAlt?.KanalAltAdi ?? "Bilinmiyor",
+                            HizmetBinasiId = sira.HizmetBinasiId,
+                            HizmetBinasiAdi = sira.HizmetBinasi?.HizmetBinasiAdi ?? "Bilinmiyor",
+                            KanalAltIslemId = sira.KanalAltIslemId,
+                            BeklemeDurum = sira.BeklemeDurum,
+                            SiraAlisZamani = sira.SiraAlisZamani,
+                            YonlendirildiMi = true,
+                            YonlendirmeTipi = request.YonlendirmeTipi,
+                            HedefBankoId = hedefBankoId
+                        };
+
+                        _logger.LogInformation("📤 SignalR broadcast başlatılıyor. SiraId: {SiraId}, YonlendirmeTipi: {YonlendirmeTipi}",
+                            sira.SiraId, request.YonlendirmeTipi);
+
+                        await _hubService.BroadcastSiraRedirectedAsync(
+                            siraDto,
+                            request.YonlendirenBankoId,
+                            hedefBankoId,
+                            request.YonlendirenPersonelTc
+                        );
+
+                        _logger.LogInformation("✅ SignalR broadcast tamamlandı. SiraId: {SiraId}", sira.SiraId);
+                    }
+                    catch (Exception hubEx)
+                    {
+                        // SignalR hatası işlemi başarısızlığa neden olmamalı
+                        _logger.LogError(hubEx, "❌ SignalR broadcast hatası. SiraId: {SiraId}. İşlem başarılı ama bildirim gönderilemedi.", sira.SiraId);
+                    }
 
                     return ApiResponseDto<bool>.SuccessResult(true, "Sıra başarıyla yönlendirildi");
                 }

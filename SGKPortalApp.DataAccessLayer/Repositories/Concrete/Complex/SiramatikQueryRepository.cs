@@ -840,6 +840,74 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             return yetkiliPersoneller;
         }
 
+        /// <summary>
+        /// Belirli bir HizmetBinasi ve KanalAltIslem için banko modunda olan ve Şef yetkisine sahip personellerin TC listesini döner.
+        /// Şef'e yönlendirilen sıralar için SignalR broadcast'inde kullanılır.
+        /// </summary>
+        public async Task<List<string>> GetBankoModundakiSefPersonellerAsync(int hizmetBinasiId, int kanalAltIslemId)
+        {
+            var sefPersoneller = await (
+                from kp in _context.KanalPersonelleri
+                join u in _context.Users on kp.TcKimlikNo equals u.TcKimlikNo
+                join bk in _context.BankoKullanicilari on u.TcKimlikNo equals bk.TcKimlikNo into bkJoin
+                from bk in bkJoin.DefaultIfEmpty()
+                join b in _context.Bankolar on bk.BankoId equals b.BankoId into bJoin
+                from b in bJoin.DefaultIfEmpty()
+                where kp.KanalAltIslemId == kanalAltIslemId
+                   && kp.Aktiflik == Aktiflik.Aktif
+                   && !kp.SilindiMi
+                   && kp.Uzmanlik == PersonelUzmanlik.Sef  // Sadece Şef personeller
+                   && u.BankoModuAktif == true             // Banko modunda
+                   && (b == null || b.HizmetBinasiId == hizmetBinasiId)
+                select kp.TcKimlikNo
+            ).Distinct().ToListAsync();
+
+            return sefPersoneller;
+        }
+
+        /// <summary>
+        /// Belirli bir HizmetBinasi ve KanalAltIslem için banko modunda olan ve Uzman yetkisine sahip personellerin TC listesini döner.
+        /// Uzman'a yönlendirilen sıralar için SignalR broadcast'inde kullanılır.
+        /// </summary>
+        public async Task<List<string>> GetBankoModundakiUzmanPersonellerAsync(int hizmetBinasiId, int kanalAltIslemId)
+        {
+            var uzmanPersoneller = await (
+                from kp in _context.KanalPersonelleri
+                join u in _context.Users on kp.TcKimlikNo equals u.TcKimlikNo
+                join bk in _context.BankoKullanicilari on u.TcKimlikNo equals bk.TcKimlikNo into bkJoin
+                from bk in bkJoin.DefaultIfEmpty()
+                join b in _context.Bankolar on bk.BankoId equals b.BankoId into bJoin
+                from b in bJoin.DefaultIfEmpty()
+                where kp.KanalAltIslemId == kanalAltIslemId
+                   && kp.Aktiflik == Aktiflik.Aktif
+                   && !kp.SilindiMi
+                   && kp.Uzmanlik == PersonelUzmanlik.Uzman  // Sadece Uzman personeller
+                   && u.BankoModuAktif == true                // Banko modunda
+                   && (b == null || b.HizmetBinasiId == hizmetBinasiId)
+                select kp.TcKimlikNo
+            ).Distinct().ToListAsync();
+
+            return uzmanPersoneller;
+        }
+
+        /// <summary>
+        /// Belirli bir Banko'da aktif olan personelin TC kimlik numarasını döner.
+        /// Başka bankoya yönlendirilen sıralar için SignalR broadcast'inde kullanılır.
+        /// </summary>
+        public async Task<List<string>> GetBankodakiAktifPersonellerAsync(int bankoId)
+        {
+            var bankoPersonelleri = await (
+                from bk in _context.BankoKullanicilari
+                join u in _context.Users on bk.TcKimlikNo equals u.TcKimlikNo
+                where bk.BankoId == bankoId
+                   && u.BankoModuAktif == true  // Banko modunda
+                   && u.AktifBankoId == bankoId // Bu bankoda aktif
+                select bk.TcKimlikNo
+            ).Distinct().ToListAsync();
+
+            return bankoPersonelleri;
+        }
+
         // ═══════════════════════════════════════════════════════
         // KIOSK MENÜ SORGULARI
         // ═══════════════════════════════════════════════════════
