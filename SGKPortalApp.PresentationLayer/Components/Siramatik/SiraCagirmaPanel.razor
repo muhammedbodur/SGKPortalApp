@@ -43,6 +43,7 @@
                     <div class="card mb-2 position-relative @(sira.BeklemeDurum == BeklemeDurum.Cagrildi ? "border-primary alert-success" : "")"
                          data-sira-id="@sira.SiraId"
                          data-sira-type="@sira.BeklemeDurum"
+                         data-sira-directed="@sira.YonlendirmeTipi"
                          data-callable="@IsCallableSira(sira)"
                          data-first-callable="@isFirstCallable">
 
