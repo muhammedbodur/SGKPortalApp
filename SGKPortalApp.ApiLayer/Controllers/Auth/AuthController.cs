@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SGKPortalApp.ApiLayer.Services.Hubs.Interfaces;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
 
@@ -10,11 +11,16 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IBankoModeService _bankoModeService;
         private readonly ILogger<AuthController> _logger;
 
-        public AuthController(IAuthService authService, ILogger<AuthController> logger)
+        public AuthController(
+            IAuthService authService,
+            IBankoModeService bankoModeService,
+            ILogger<AuthController> logger)
         {
             _authService = authService;
+            _bankoModeService = bankoModeService;
             _logger = logger;
         }
 
@@ -94,13 +100,40 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
 
         /// <summary>
         /// Çıkış işlemi
+        /// Banko modundan çıkış ve session temizleme
         /// </summary>
         [HttpPost("logout")]
-        [Authorize]
-        public async Task<IActionResult> Logout()
+        [AllowAnonymous] // Cookie authentication zaten logout'ta temizlenmiş olabilir
+        public async Task<IActionResult> Logout([FromBody] LogoutRequestDto? request)
         {
-            // Session ID'yi temizle (opsiyonel - gerekirse implement edilir)
-            return Ok(new { message = "Çıkış başarılı" });
+            try
+            {
+                // TcKimlikNo: Önce request'ten, yoksa User claim'den al
+                var tcKimlikNo = request?.TcKimlikNo ?? User?.FindFirst("TcKimlikNo")?.Value;
+
+                if (!string.IsNullOrEmpty(tcKimlikNo))
+                {
+                    _logger.LogInformation("🔄 Logout: {TcKimlikNo} çıkış yapıyor...", tcKimlikNo);
+
+                    // Banko modundan çık (flag temizle)
+                    try
+                    {
+                        await _bankoModeService.ExitBankoModeAsync(tcKimlikNo);
+                        _logger.LogInformation("✅ Logout: Banko modu temizlendi - {TcKimlikNo}", tcKimlikNo);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "⚠️ Logout: Banko modu temizlenirken hata - {TcKimlikNo}", tcKimlikNo);
+                    }
+                }
+
+                return Ok(new { message = "Çıkış başarılı" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Logout sırasında hata oluştu");
+                return Ok(new { message = "Çıkış tamamlandı (bazı hatalarla)" });
+            }
         }
     }
 }
