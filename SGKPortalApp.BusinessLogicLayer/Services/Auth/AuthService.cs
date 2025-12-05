@@ -107,6 +107,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                 user.SonGirisTarihi = DateTime.Now;
                 user.BasarisizGirisSayisi = 0; // Başarılı girişte sıfırla
 
+                // ⚠️ Yeni login sonrası orphan banko mode flag'ini temizle
+                // (Önceki oturumdan kalmış olabilir - HubBankoConnection kaydı yok ama User flag'i aktif)
+                if (user.BankoModuAktif)
+                {
+                    _logger.LogWarning("⚠️ Login sırasında orphan banko mode flag tespit edildi: {TcKimlikNo}", user.TcKimlikNo);
+                    user.BankoModuAktif = false;
+                    user.AktifBankoId = null;
+                    _logger.LogInformation("✅ Orphan banko mode flag temizlendi: {TcKimlikNo}", user.TcKimlikNo);
+                }
+
                 await _context.SaveChangesAsync();
 
                 // 🔥 Eski oturum varsa loglayalım (farklı cihazdan login uyarısı için)

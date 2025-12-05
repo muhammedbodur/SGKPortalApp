@@ -113,7 +113,7 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
                         {
                             _logger.LogInformation($"🔍 Aktif banko bulundu: Banko#{activeBanko.BankoId}, TabId beklenen: {PersonelBankoTabSessions.GetValueOrDefault(tcKimlikNo)}, gelen: {tabSessionId}, isRefresh: {isRefresh}");
                             var expectedTabId = PersonelBankoTabSessions.GetOrAdd(tcKimlikNo, tabSessionId);
-                            
+
                             // Tab ID farklı VE refresh değilse -> yeni sekme açılmaya çalışılıyor
                             if (!string.Equals(expectedTabId, tabSessionId, StringComparison.Ordinal) && !isRefresh)
                             {
@@ -123,7 +123,7 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
                                 Context.Abort();
                                 return;
                             }
-                            
+
                             // Refresh durumunda yeni tabSessionId'yi kabul et
                             if (isRefresh)
                             {
@@ -158,6 +158,22 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
                                 ConnectionTabSessions.TryRemove(info.ConnectionId, out _);
                                 Context.Abort();
                             }
+                        }
+                        else
+                        {
+                            // ⚠️ Orphan banko mode flag - User tablosunda aktif ama HubBankoConnection kaydı yok
+                            _logger.LogWarning($"⚠️ User tablosunda banko modu aktif ama HubBankoConnection kaydı yok (orphan flag): {tcKimlikNo}");
+                            _logger.LogWarning($"🧹 Orphan banko mode flag'i temizleniyor...");
+
+                            // Banko modunu kapat (User tablosundaki flag'leri temizle)
+                            await _bankoModeService.ExitBankoModeAsync(tcKimlikNo);
+
+                            // State'i de temizle
+                            _stateService.DeactivateBankoMode(tcKimlikNo);
+                            PersonelBankoTabSessions.TryRemove(tcKimlikNo, out _);
+
+                            _logger.LogInformation($"✅ Orphan banko mode flag temizlendi. Normal bağlantıya devam ediliyor: {tcKimlikNo}");
+                            // Normal akışa devam et (banko moduna sokma)
                         }
                     }
                     // ⚠️ TV transfer mantığı KALDIRILDI!
