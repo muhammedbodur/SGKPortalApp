@@ -5,58 +5,63 @@ namespace SGKPortalApp.ApiLayer.Services.State
     /// <summary>
     /// Banko modu state yönetimi
     /// Singleton olarak çalışır, kullanıcı bazlı banko modu durumunu tutar
+    /// ⚠️ AsyncLocal kullanarak thread-safe context isolation sağlar
     /// </summary>
     public class BankoModeStateService
     {
         // Kullanıcı bazlı state (TcKimlikNo -> BankoId)
         private readonly ConcurrentDictionary<string, int> _userBankoStates = new();
-        
+
         // Event'ler kullanıcı bazlı (TcKimlikNo -> Event)
         private readonly ConcurrentDictionary<string, Action?> _userEvents = new();
 
-        // Mevcut kullanıcı context'i (Scoped olarak set edilmeli)
-        private string? _currentUserTc;
+        // ⭐ AsyncLocal: Her async context için ayrı değer (thread-safe, race condition yok!)
+        private static readonly AsyncLocal<string?> _currentUserTc = new();
 
         /// <summary>
         /// Mevcut kullanıcıyı set et (Her request başında çağrılmalı)
+        /// ⭐ AsyncLocal kullanarak context-specific value set eder
         /// </summary>
         public void SetCurrentUser(string tcKimlikNo)
         {
-            _currentUserTc = tcKimlikNo;
+            _currentUserTc.Value = tcKimlikNo;
         }
 
         /// <summary>
         /// Banko modu aktif mi? (Mevcut kullanıcı için)
         /// </summary>
-        public bool IsInBankoMode => !string.IsNullOrEmpty(_currentUserTc) && _userBankoStates.ContainsKey(_currentUserTc);
+        public bool IsInBankoMode => !string.IsNullOrEmpty(_currentUserTc.Value) && _userBankoStates.ContainsKey(_currentUserTc.Value);
 
         /// <summary>
         /// Aktif banko ID (Mevcut kullanıcı için)
         /// </summary>
-        public int? ActiveBankoId => !string.IsNullOrEmpty(_currentUserTc) && _userBankoStates.TryGetValue(_currentUserTc, out var bankoId) ? bankoId : null;
+        public int? ActiveBankoId => !string.IsNullOrEmpty(_currentUserTc.Value) && _userBankoStates.TryGetValue(_currentUserTc.Value, out var bankoId) ? bankoId : null;
 
         /// <summary>
         /// Banko modundaki personel TC Kimlik No (Mevcut kullanıcı için)
         /// </summary>
-        public string? PersonelTcKimlikNo => IsInBankoMode ? _currentUserTc : null;
+        public string? PersonelTcKimlikNo => IsInBankoMode ? _currentUserTc.Value : null;
 
         /// <summary>
         /// Banko modu değişiklik event'i (Mevcut kullanıcı için)
+        /// ⚠️ AsyncLocal context'inden TcKimlikNo alır
         /// </summary>
         public event Action? OnBankoModeChanged
         {
             add
             {
-                if (!string.IsNullOrEmpty(_currentUserTc))
+                var tc = _currentUserTc.Value;
+                if (!string.IsNullOrEmpty(tc))
                 {
-                    _userEvents.AddOrUpdate(_currentUserTc, value, (_, existing) => existing + value);
+                    _userEvents.AddOrUpdate(tc, value, (_, existing) => existing + value);
                 }
             }
             remove
             {
-                if (!string.IsNullOrEmpty(_currentUserTc) && _userEvents.TryGetValue(_currentUserTc, out var existing))
+                var tc = _currentUserTc.Value;
+                if (!string.IsNullOrEmpty(tc) && _userEvents.TryGetValue(tc, out var existing))
                 {
-                    _userEvents[_currentUserTc] = existing - value;
+                    _userEvents[tc] = existing - value;
                 }
             }
         }
@@ -71,14 +76,16 @@ namespace SGKPortalApp.ApiLayer.Services.State
         }
 
         /// <summary>
-        /// Banko modunu deaktif et
+        /// Banko modunu deaktif et (Mevcut kullanıcı için)
+        /// ⚠️ AsyncLocal context'inden TcKimlikNo alır
         /// </summary>
         public void DeactivateBankoMode()
         {
-            if (!string.IsNullOrEmpty(_currentUserTc))
+            var tc = _currentUserTc.Value;
+            if (!string.IsNullOrEmpty(tc))
             {
-                _userBankoStates.TryRemove(_currentUserTc, out _);
-                NotifyUser(_currentUserTc);
+                _userBankoStates.TryRemove(tc, out _);
+                NotifyUser(tc);
             }
         }
 
