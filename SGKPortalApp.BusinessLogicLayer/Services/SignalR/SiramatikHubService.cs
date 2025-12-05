@@ -198,21 +198,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 // Kaynak personeli hedef listesinden çıkar
                 targetPersonels = targetPersonels.Where(tc => tc != sourcePersonelTc).ToList();
 
-                // 3. Hedef personellere INSERT gönder
+                // 3. Hedef personellere REFRESH gönder (her personel kendi sıralamasını alır)
                 if (targetPersonels.Any())
                 {
-                    var insertPayload = new SiraUpdatePayloadDto
+                    var refreshPayload = new SiraUpdatePayloadDto
                     {
-                        UpdateType = SiraUpdateType.Insert,
+                        UpdateType = SiraUpdateType.Refresh, // ⭐ Her personel GetBankoPanelBekleyenSiralarAsync çağırır
                         Sira = sira,
                         BankoId = targetBankoId,
-                        Position = 0, // En başa ekle (yönlendirilen sıralar öncelikli)
                         Aciklama = aciklama,
                         Timestamp = DateTime.Now
                     };
 
-                    await SendToPersonelsAsync(targetPersonels, SiraListUpdate, insertPayload);
-                    _logger.LogInformation("📤 Hedef personellere INSERT gönderildi. Personel sayısı: {Count}, TC'ler: [{TcList}]",
+                    await SendToPersonelsAsync(targetPersonels, SiraListUpdate, refreshPayload);
+                    _logger.LogInformation("📤 Hedef personellere REFRESH gönderildi. Personel sayısı: {Count}, TC'ler: [{TcList}]",
                         targetPersonels.Count, string.Join(", ", targetPersonels));
                 }
                 else
