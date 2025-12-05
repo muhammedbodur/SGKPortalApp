@@ -118,6 +118,10 @@
         console.log('🧹 Login: Client-side temizlik başlatılıyor...');
         
         try {
+            // Mevcut tab/session bilgilerini şimdilik sakla
+            const preservedTabSessionId = sessionStorage.getItem('portal.tabSessionId');
+            const preservedHasVisited = sessionStorage.getItem('portal.hasVisited');
+
             // 1. LocalStorage temizle
             localStorage.removeItem('callPanelIsPinned');
             localStorage.removeItem('callPanelIsVisible');
@@ -127,6 +131,14 @@
             
             // 2. SessionStorage temizle
             sessionStorage.clear();
+            if (preservedTabSessionId) {
+                sessionStorage.setItem('portal.tabSessionId', preservedTabSessionId);
+                console.log('♻️ portal.tabSessionId korundu');
+            }
+            if (preservedHasVisited) {
+                sessionStorage.setItem('portal.hasVisited', preservedHasVisited);
+                console.log('♻️ portal.hasVisited korundu');
+            }
             console.log('✅ SessionStorage temizlendi');
             
             // 3. Sıra Çağırma Paneli'ni temizle (varsa)
@@ -149,6 +161,19 @@
                 } catch (e) {
                     console.warn('⚠️ Banko Mode temizlenirken hata:', e);
                 }
+            }
+
+            // 5. SignalR guard'larını sıfırla
+            try {
+                if (window.signalRManager?.stop) {
+                    window.signalRManager.stop();
+                }
+                delete window.signalRManager;
+                delete window.signalRApp;
+                delete window.signalRAppInitialized;
+                console.log('♻️ SignalR guard değerleri sıfırlandı');
+            } catch (e) {
+                console.warn('⚠️ SignalR guard temizlenirken hata:', e);
             }
             
             console.log('✅ Login: Client-side temizlik tamamlandı');
