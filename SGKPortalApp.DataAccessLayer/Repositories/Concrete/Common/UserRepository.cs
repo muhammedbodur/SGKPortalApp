@@ -96,13 +96,26 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
 
         public async Task<bool> ActivateBankoModeAsync(string tcKimlikNo, int bankoId)
         {
-            var user = await _dbSet.FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo);
-            if (user == null)
-                return false;
+            // Debug logging
+            Console.WriteLine($"[UserRepository] ActivateBankoModeAsync çağrıldı - TcKimlikNo: '{tcKimlikNo}', BankoId: {bankoId}");
 
+            // SilindiMi filtresi eklensin (diğer metodlarla tutarlılık)
+            var user = await _dbSet.FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo && !u.SilindiMi);
+
+            if (user == null)
+            {
+                Console.WriteLine($"[UserRepository] HATA: Kullanıcı bulunamadı! TcKimlikNo: '{tcKimlikNo}'");
+                // Tüm kullanıcıları kontrol et (debug)
+                var allUsers = await _dbSet.Select(u => new { u.TcKimlikNo, u.SilindiMi }).ToListAsync();
+                Console.WriteLine($"[UserRepository] Toplam {allUsers.Count} kullanıcı var. İlk 5: {string.Join(", ", allUsers.Take(5).Select(u => $"{u.TcKimlikNo}(Silinmis:{u.SilindiMi})"))}");
+                return false;
+            }
+
+            Console.WriteLine($"[UserRepository] Kullanıcı bulundu: {user.TcKimlikNo}, Aktif: {user.AktifMi}");
             user.BankoModuAktif = true;
             user.AktifBankoId = bankoId;
             user.BankoModuBaslangic = DateTime.Now;
+            Console.WriteLine($"[UserRepository] Banko modu aktif edildi");
 
             return true;
         }

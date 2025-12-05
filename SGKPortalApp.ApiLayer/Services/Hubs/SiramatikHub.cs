@@ -417,18 +417,23 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
             {
                 // TcKimlikNo: Önce Context.User'dan, yoksa query string'den al
                 var tcKimlikNo = Context.User?.FindFirst("TcKimlikNo")?.Value;
+                _logger.LogInformation($"🔍 [EnterBankoMode] TcKimlikNo claim'den alındı: '{tcKimlikNo}'");
+
                 if (string.IsNullOrEmpty(tcKimlikNo))
                 {
                     var httpContext = Context.GetHttpContext();
                     tcKimlikNo = httpContext?.Request.Query["tcKimlikNo"].ToString();
+                    _logger.LogInformation($"🔍 [EnterBankoMode] TcKimlikNo query string'den alındı: '{tcKimlikNo}'");
                 }
                 var connectionId = Context.ConnectionId;
-                
+
                 if (string.IsNullOrEmpty(tcKimlikNo))
                 {
                     throw new HubException("Kullanıcı bilgisi bulunamadı!");
                 }
-                
+
+                _logger.LogInformation($"🏦 [EnterBankoMode] Banko moduna geçiliyor: TcKimlikNo='{tcKimlikNo}', BankoId={bankoId}, ConnectionId={connectionId}");
+
                 // 1. Bu banko başka personel tarafından kullanılıyor mu?
                 var bankoInUse = await _connectionService.IsBankoInUseAsync(bankoId);
                 if (bankoInUse)
