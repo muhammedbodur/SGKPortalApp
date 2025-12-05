@@ -1,3 +1,4 @@
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
@@ -1367,6 +1368,29 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             ).FirstOrDefaultAsync();
 
             return result;
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // POZİSYON HESAPLAMA (STORED PROCEDURE)
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Belirli bir sıranın her bir etkilenen personelin panelinde hangi pozisyonda görüneceğini hesaplar.
+        /// sp_CalculateSiraPositionsForSira stored procedure'ünü kullanır.
+        /// </summary>
+        public async Task<Dictionary<string, int>> CalculateSiraPositionsAsync(int siraId)
+        {
+            // Stored procedure'ü çağır
+            var siraIdParam = new SqlParameter("@SiraId", siraId);
+
+            var results = await _context.Database
+                .SqlQueryRaw<SiraPositionDto>(
+                    "EXEC sp_CalculateSiraPositionsForSira @SiraId",
+                    siraIdParam)
+                .ToListAsync();
+
+            // Dictionary'ye dönüştür
+            return results.ToDictionary(x => x.TcKimlikNo, x => x.Position);
         }
     }
 }

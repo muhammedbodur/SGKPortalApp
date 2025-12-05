@@ -88,5 +88,15 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex
         /// BankoKullanici tablosu üzerinden personel kontrolü yapar
         /// </summary>
         Task<SiraNoBilgisiDto?> GetSiraNoAsync(int kanalAltIslemId);
+
+        // Pozisyon Hesaplama (Stored Procedure)
+        /// <summary>
+        /// Belirli bir sıranın her bir etkilenen personelin panelinde hangi pozisyonda görüneceğini hesaplar.
+        /// sp_CalculateSiraPositionsForSira stored procedure'ünü kullanır.
+        /// Yeni sıra alma (Kiosk) veya sıra yönlendirme için SignalR broadcast'inde kullanılır.
+        /// </summary>
+        /// <param name="siraId">Pozisyonu hesaplanacak sıranın ID'si</param>
+        /// <returns>TcKimlikNo ve Position içeren dictionary (0-based index)</returns>
+        Task<Dictionary<string, int>> CalculateSiraPositionsAsync(int siraId);
     }
 }
