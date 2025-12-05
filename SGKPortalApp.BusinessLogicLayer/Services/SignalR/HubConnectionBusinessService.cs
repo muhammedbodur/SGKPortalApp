@@ -290,14 +290,21 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             try
             {
                 var repo = _unitOfWork.Repository<HubConnection>();
-                var connection = await repo.FirstOrDefaultAsync(c => c.ConnectionId == connectionId);
 
-                if (connection != null)
+                // Önce ConnectionId ile sadece Id bilgisini al (AsNoTracking)
+                var connectionProjection = await repo.FirstOrDefaultAsync(c => c.ConnectionId == connectionId);
+
+                if (connectionProjection != null)
                 {
-                    connection.ConnectionType = connectionType;
-                    connection.DuzenlenmeTarihi = DateTime.Now;
-                    repo.Update(connection);
-                    await _unitOfWork.SaveChangesAsync();
+                    // Sonra primary key üzerinden tracked entity'yi getir
+                    var trackedConnection = await repo.GetByIdAsync(connectionProjection.HubConnectionId);
+
+                    if (trackedConnection != null)
+                    {
+                        trackedConnection.ConnectionType = connectionType;
+                        trackedConnection.DuzenlenmeTarihi = DateTime.Now;
+                        await _unitOfWork.SaveChangesAsync();
+                    }
                 }
 
                 return true;
@@ -314,15 +321,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             try
             {
                 var repo = _unitOfWork.Repository<HubConnection>();
-                var connection = await repo.FirstOrDefaultAsync(c => c.ConnectionId == connectionId);
 
-                if (connection != null)
+                // Önce ConnectionId ile sadece Id bilgisini al (AsNoTracking)
+                var connectionProjection = await repo.FirstOrDefaultAsync(c => c.ConnectionId == connectionId);
+
+                if (connectionProjection != null &&
+                    Enum.TryParse<BusinessObjectLayer.Enums.SiramatikIslemleri.ConnectionStatus>(status, out var connectionStatus))
                 {
-                    if (Enum.TryParse<BusinessObjectLayer.Enums.SiramatikIslemleri.ConnectionStatus>(status, out var connectionStatus))
+                    // Sonra primary key üzerinden tracked entity'yi getir
+                    var trackedConnection = await repo.GetByIdAsync(connectionProjection.HubConnectionId);
+
+                    if (trackedConnection != null)
                     {
-                        connection.ConnectionStatus = connectionStatus;
-                        connection.DuzenlenmeTarihi = DateTime.Now;
-                        repo.Update(connection);
+                        trackedConnection.ConnectionStatus = connectionStatus;
+                        trackedConnection.DuzenlenmeTarihi = DateTime.Now;
                         await _unitOfWork.SaveChangesAsync();
                     }
                 }
@@ -607,12 +619,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 var connectionRepo = _unitOfWork.Repository<HubConnection>();
                 var bankoRepo = _unitOfWork.Repository<HubBankoConnection>();
 
-                var newConnection = await connectionRepo.FirstOrDefaultAsync(
+                // Önce yeni connection için sadece Id bilgisini al (AsNoTracking)
+                var newConnectionProjection = await connectionRepo.FirstOrDefaultAsync(
                     c => c.ConnectionId == newConnectionId && !c.SilindiMi);
+
+                if (newConnectionProjection == null)
+                {
+                    _logger.LogWarning("TransferBankoConnectionAsync: Yeni connection bulunamadı ({ConnectionId})", newConnectionId);
+                    return false;
+                }
+
+                // Sonra primary key üzerinden tracked entity'yi getir
+                var newConnection = await connectionRepo.GetByIdAsync(newConnectionProjection.HubConnectionId);
 
                 if (newConnection == null)
                 {
-                    _logger.LogWarning("TransferBankoConnectionAsync: Yeni connection bulunamadı ({ConnectionId})", newConnectionId);
+                    _logger.LogWarning("TransferBankoConnectionAsync: Yeni connection tracked olarak getirilemedi ({ConnectionId})", newConnectionId);
                     return false;
                 }
 
