@@ -77,20 +77,28 @@ window.bankoMode = {
         connection.on("bankoModeActivated", (data) => {
             console.log('✅ bankoModeActivated:', data);
             if (dotNetHelper) {
-                dotNetHelper.invokeMethodAsync('OnBankoModeActivated', data.bankoId);
+                dotNetHelper.invokeMethodAsync('OnBankoModeActivated', data.bankoId)
+                    .then(() => {
+                        console.log('✅ C# OnBankoModeActivated tamamlandı - UI Blazor tarafından güncellenecek');
+                    })
+                    .catch(err => {
+                        console.error('❌ OnBankoModeActivated çağrısı başarısız:', err);
+                    });
             }
-            // UI'ı güncelle - sayfa yenile
-            window.location.reload();
         });
 
         // Banko modu deaktif oldu
         connection.on("bankoModeDeactivated", (data) => {
             console.log('✅ bankoModeDeactivated');
             if (dotNetHelper) {
-                dotNetHelper.invokeMethodAsync('OnBankoModeDeactivated');
+                dotNetHelper.invokeMethodAsync('OnBankoModeDeactivated')
+                    .then(() => {
+                        console.log('✅ C# OnBankoModeDeactivated tamamlandı - UI Blazor tarafından güncellenecek');
+                    })
+                    .catch(err => {
+                        console.error('❌ OnBankoModeDeactivated çağrısı başarısız:', err);
+                    });
             }
-            // UI'ı güncelle - sayfa yenile
-            window.location.reload();
         });
 
         // Banko modu hatası

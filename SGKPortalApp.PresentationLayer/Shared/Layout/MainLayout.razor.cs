@@ -385,14 +385,42 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         public async Task OnBankoModeActivated(int bankoId)
         {
             Logger.LogInformation("✅ MainLayout - Banko modu aktif: Banko#{BankoId}", bankoId);
-            await Task.CompletedTask;
+
+            // ⭐ BankoModeState'i güncelle
+            var tcKimlikNo = HttpContextAccessor?.HttpContext?.User.FindFirst("TcKimlikNo")?.Value;
+            if (!string.IsNullOrEmpty(tcKimlikNo))
+            {
+                BankoModeState.ActivateBankoMode(bankoId, tcKimlikNo);
+                Logger.LogInformation("🏦 BankoModeState aktif edildi: Banko#{BankoId}, TcKimlikNo={TcKimlikNo}", bankoId, tcKimlikNo);
+
+                // UI güncelle
+                await InvokeAsync(StateHasChanged);
+            }
+            else
+            {
+                Logger.LogWarning("⚠️ OnBankoModeActivated: TcKimlikNo bulunamadı!");
+            }
         }
 
         [JSInvokable]
         public async Task OnBankoModeDeactivated()
         {
             Logger.LogInformation("✅ MainLayout - Banko modu deaktif");
-            await Task.CompletedTask;
+
+            // ⭐ BankoModeState'i güncelle
+            var tcKimlikNo = HttpContextAccessor?.HttpContext?.User.FindFirst("TcKimlikNo")?.Value;
+            if (!string.IsNullOrEmpty(tcKimlikNo))
+            {
+                BankoModeState.DeactivateBankoMode(tcKimlikNo);
+                Logger.LogInformation("🚪 BankoModeState deaktif edildi: TcKimlikNo={TcKimlikNo}", tcKimlikNo);
+
+                // UI güncelle
+                await InvokeAsync(StateHasChanged);
+            }
+            else
+            {
+                Logger.LogWarning("⚠️ OnBankoModeDeactivated: TcKimlikNo bulunamadı!");
+            }
         }
 
         public void Dispose()
