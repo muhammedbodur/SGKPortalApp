@@ -750,6 +750,261 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             }
         }
 
+        /// <summary>
+        /// ⭐ INCREMENTAL UPDATE: Belirli bir sıra alındığında/yönlendirildiğinde,
+        /// o sırayı görebilecek TÜM personellerin güncel sıra listelerini getirir.
+        /// Her satırda PersonelTc ve ConnectionId bilgisi yer alır.
+        /// SignalR ile her personele kendi listesi gönderilir.
+        /// </summary>
+        public async Task<List<SiraCagirmaResponseDto>> GetBankoPanelBekleyenSiralarBySiraIdAsync(int siraId)
+        {
+            var today = DateTime.Today;
+
+            // ADIM 1: Verilen sıranın bilgilerini al
+            var siraInfo = await (
+                from s in _context.Siralar
+                where s.SiraId == siraId && !s.SilindiMi
+                select new
+                {
+                    s.KanalAltIslemId,
+                    s.HizmetBinasiId,
+                    s.YonlendirmeTipi
+                }
+            ).FirstOrDefaultAsync();
+
+            if (siraInfo == null)
+                return new List<SiraCagirmaResponseDto>();
+
+            // ADIM 2: Bu sırayı alabilecek tüm personelleri bul (HedefPersoneller CTE)
+            var hedefPersonellerQuery = from kp in _context.KanalPersonelleri
+                                        where kp.KanalAltIslemId == siraInfo.KanalAltIslemId
+                                           && kp.Aktiflik == Aktiflik.Aktif
+                                           && !kp.SilindiMi
+                                           && (
+                                               // Normal personeller (kanal uzmanlığı olan)
+                                               kp.Uzmanlik == PersonelUzmanlik.YrdUzman
+                                               || kp.Uzmanlik == PersonelUzmanlik.Uzman
+                                               || kp.Uzmanlik == PersonelUzmanlik.Sef
+                                               // Veya yönlendirme tipine göre ek kontroller
+                                               || (siraInfo.YonlendirmeTipi == YonlendirmeTipi.Sef && kp.Uzmanlik == PersonelUzmanlik.Sef)
+                                               || (siraInfo.YonlendirmeTipi == YonlendirmeTipi.UzmanPersonel && kp.Uzmanlik == PersonelUzmanlik.Uzman)
+                                           )
+                                        select kp.TcKimlikNo;
+
+            var hedefPersoneller = await hedefPersonellerQuery.Distinct().ToListAsync();
+
+            if (!hedefPersoneller.Any())
+                return new List<SiraCagirmaResponseDto>();
+
+            // ADIM 3: Her personelin uzmanlık kayıtları (PersonelUzmanlikKayitlari CTE)
+            var personelUzmanlikKayitlari = await (
+                from kp in _context.KanalPersonelleri
+                where hedefPersoneller.Contains(kp.TcKimlikNo)
+                   && kp.Aktiflik == Aktiflik.Aktif
+                   && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok
+                   && !kp.SilindiMi
+                select new
+                {
+                    kp.TcKimlikNo,
+                    kp.KanalAltIslemId,
+                    kp.Uzmanlik
+                }
+            ).Distinct().ToListAsync();
+
+            // ADIM 4: Tüm hedef personellerin sıralarını getir + ConnectionId
+            // Her personel için çağrılmış EN SON sıra ID'lerini al
+            var sonCagirilanSiraIdler = await (
+                from s in _context.Siralar
+                where hedefPersoneller.Contains(s.TcKimlikNo)
+                   && s.BeklemeDurum == BeklemeDurum.Cagrildi
+                   && s.SiraAlisZamani.Date == today
+                   && !s.SilindiMi
+                group s by s.TcKimlikNo into g
+                select new
+                {
+                    TcKimlikNo = g.Key,
+                    SonCagirilanSiraId = g.OrderByDescending(x => x.SiraNo).Select(x => x.SiraId).FirstOrDefault()
+                }
+            ).ToListAsync();
+
+            var sonCagirilanDict = sonCagirilanSiraIdler.ToDictionary(x => x.TcKimlikNo, x => x.SonCagirilanSiraId);
+
+            // Ana sorgu
+            var query = from hp in hedefPersoneller.AsQueryable()
+                        join pPersonel in _context.Personeller on hp equals pPersonel.TcKimlikNo
+                        join bk in _context.BankoKullanicilari on hp equals bk.TcKimlikNo
+                        join b in _context.Bankolar on bk.BankoId equals b.BankoId
+                        join u in _context.Users on hp equals u.TcKimlikNo
+                        join hc in _context.HubConnections on u.TcKimlikNo equals hc.TcKimlikNo
+                        join hbc in _context.HubBankoConnections on hc.HubConnectionId equals hbc.HubConnectionId
+                        join hb in _context.HizmetBinalari on bk.HizmetBinasiId equals hb.HizmetBinasiId
+                        from uzm in personelUzmanlikKayitlari.Where(pk => pk.TcKimlikNo == hp).DefaultIfEmpty()
+                        join kai in _context.KanalAltIslemleri on uzm.KanalAltIslemId equals kai.KanalAltIslemId
+                        join s in _context.Siralar on kai.KanalAltIslemId equals s.KanalAltIslemId
+                        join pYonlendiren in _context.Personeller on s.YonlendirenPersonelTc equals pYonlendiren.TcKimlikNo into yonGroup
+                        from pYonlendiren in yonGroup.DefaultIfEmpty()
+                        where pPersonel.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif
+                           && !pPersonel.SilindiMi
+                           && !bk.SilindiMi
+                           && b.BankoAktiflik == Aktiflik.Aktif
+                           && !b.SilindiMi
+                           && b.HizmetBinasiId == siraInfo.HizmetBinasiId
+                           && u.BankoModuAktif
+                           && u.AktifMi
+                           && hc.ConnectionStatus == "online"
+                           && !hc.SilindiMi
+                           && kai.Aktiflik == Aktiflik.Aktif
+                           && !kai.SilindiMi
+                           && s.HizmetBinasiId == bk.HizmetBinasiId
+                           && !s.SilindiMi
+                           && s.SiraAlisZamani.Date == today
+                           && uzm.Uzmanlik != PersonelUzmanlik.BilgisiYok
+                           && (
+                                // 1. Normal Bekleyen Sıralar
+                                s.BeklemeDurum == BeklemeDurum.Beklemede
+
+                                // 2. Çağrılmış EN SON Sıra (bu personele ait)
+                                || (s.BeklemeDurum == BeklemeDurum.Cagrildi
+                                    && s.TcKimlikNo == hp
+                                    && sonCagirilanDict.ContainsKey(hp)
+                                    && s.SiraId == sonCagirilanDict[hp])
+
+                                // 3. Şef'e Yönlendirilmiş
+                                || (s.BeklemeDurum == BeklemeDurum.Yonlendirildi
+                                    && s.YonlendirildiMi
+                                    && s.YonlendirmeTipi == YonlendirmeTipi.Sef
+                                    && s.TcKimlikNo != hp
+                                    && s.HedefBankoId == null
+                                    && uzm.Uzmanlik == PersonelUzmanlik.Sef)
+
+                                // 4. Başka Bankoya Yönlendirilmiş
+                                || (s.BeklemeDurum == BeklemeDurum.Yonlendirildi
+                                    && s.YonlendirildiMi
+                                    && s.YonlendirmeTipi == YonlendirmeTipi.BaskaBanko
+                                    && s.TcKimlikNo != hp
+                                    && s.HedefBankoId == bk.BankoId)
+
+                                // 5. Genel Uzmana Yönlendirilmiş
+                                || (s.BeklemeDurum == BeklemeDurum.Yonlendirildi
+                                    && s.YonlendirildiMi
+                                    && s.YonlendirmeTipi == YonlendirmeTipi.UzmanPersonel
+                                    && s.TcKimlikNo != hp
+                                    && s.HedefBankoId == null
+                                    && uzm.Uzmanlik == PersonelUzmanlik.Uzman)
+                              )
+                        select new
+                        {
+                            PersonelTc = hp,
+                            PersonelAdSoyad = pPersonel.AdSoyad,
+                            ConnectionId = hc.ConnectionId,
+                            s.SiraId,
+                            s.SiraNo,
+                            s.KanalAltAdi,
+                            s.SiraAlisZamani,
+                            s.IslemBaslamaZamani,
+                            s.BeklemeDurum,
+                            Uzmanlik = uzm.Uzmanlik,
+                            BankoId = b.BankoId,
+                            hb.HizmetBinasiId,
+                            hb.HizmetBinasiAdi,
+                            s.YonlendirildiMi,
+                            s.YonlendirmeTipi,
+                            s.HedefBankoId,
+                            s.YonlendirenBankoId,
+                            s.YonlendirenPersonelTc,
+                            YonlendirenPersonelAdSoyad = pYonlendiren != null ? pYonlendiren.AdSoyad : null,
+                            // Öncelik hesaplamaları
+                            DurumOnceligi = s.BeklemeDurum == BeklemeDurum.Cagrildi ? 0
+                                          : s.BeklemeDurum == BeklemeDurum.Yonlendirildi ? 1
+                                          : 2,
+                            UzmanlikOnceligi = s.BeklemeDurum == BeklemeDurum.Beklemede
+                                             ? (uzm.Uzmanlik == PersonelUzmanlik.Sef ? 0
+                                              : uzm.Uzmanlik == PersonelUzmanlik.Uzman ? 1
+                                              : uzm.Uzmanlik == PersonelUzmanlik.YrdUzman ? 2
+                                              : 3)
+                                             : 99
+                        };
+
+            var rawResult = await query
+                .AsNoTracking()
+                .Distinct()
+                .OrderBy(x => x.PersonelTc)
+                .ThenBy(x => x.DurumOnceligi)
+                .ThenBy(x => x.UzmanlikOnceligi)
+                .ThenBy(x => x.SiraAlisZamani)
+                .ThenBy(x => x.SiraNo)
+                .ToListAsync();
+
+            // DTO mapping
+            var result = rawResult
+                .Select(x => new SiraCagirmaResponseDto
+                {
+                    PersonelTc = x.PersonelTc,
+                    PersonelAdSoyad = x.PersonelAdSoyad,
+                    ConnectionId = x.ConnectionId,
+                    SiraId = x.SiraId,
+                    SiraNo = x.SiraNo,
+                    KanalAltAdi = x.KanalAltAdi,
+                    BeklemeDurum = x.BeklemeDurum,
+                    SiraAlisZamani = x.SiraAlisZamani,
+                    IslemBaslamaZamani = x.IslemBaslamaZamani,
+                    HizmetBinasiId = x.HizmetBinasiId,
+                    HizmetBinasiAdi = x.HizmetBinasiAdi,
+                    Uzmanlik = x.Uzmanlik,
+                    YonlendirildiMi = x.YonlendirildiMi,
+                    YonlendirmeTipi = x.YonlendirmeTipi,
+                    YonlendirenPersonelTc = x.YonlendirenPersonelTc,
+                    YonlendirenPersonelAdSoyad = x.YonlendirenPersonelAdSoyad,
+                    YonlendirmeAciklamasi = BuildYonlendirmeAciklamasiForIncremental(
+                        x.YonlendirildiMi,
+                        x.YonlendirmeTipi,
+                        x.Uzmanlik,
+                        x.HedefBankoId,
+                        x.BankoId,
+                        x.YonlendirenPersonelAdSoyad)
+                })
+                .ToList();
+
+            return result;
+
+            // Local function
+            string? BuildYonlendirmeAciklamasiForIncremental(
+                bool yonlendirildiMi,
+                YonlendirmeTipi? yonlendirmeTipi,
+                PersonelUzmanlik uzmanlik,
+                int? hedefBankoId,
+                int bankoId,
+                string? yonlendirenPersonelAdSoyad)
+            {
+                if (!yonlendirildiMi || yonlendirmeTipi == null)
+                    return null;
+
+                var yonlendirenBilgi = !string.IsNullOrEmpty(yonlendirenPersonelAdSoyad)
+                    ? $"{yonlendirenPersonelAdSoyad} tarafından"
+                    : "";
+
+                return yonlendirmeTipi switch
+                {
+                    YonlendirmeTipi.Sef =>
+                        $"Şef değerlendirmesi için size {yonlendirenBilgi} yönlendirildi.",
+
+                    YonlendirmeTipi.UzmanPersonel when uzmanlik == PersonelUzmanlik.Uzman =>
+                        $"Uzman görüşü beklendiği için size {yonlendirenBilgi} aktarılmış durumda.",
+
+                    YonlendirmeTipi.UzmanPersonel =>
+                        $"Uzman personele {yonlendirenBilgi} yönlendirildi.",
+
+                    YonlendirmeTipi.BaskaBanko when hedefBankoId.HasValue && hedefBankoId == bankoId =>
+                        $"Bu sıra doğrudan bankonuza {yonlendirenBilgi} yönlendirildi.",
+
+                    YonlendirmeTipi.BaskaBanko =>
+                        $"Başka bir bankoya {yonlendirenBilgi} yönlendirilmiş sıra.",
+
+                    _ => null
+                };
+            }
+        }
+
         // ═══════════════════════════════════════════════════════
         // SIGNALR BROADCAST İÇİN ETKİLENEN PERSONELLER
         // ═══════════════════════════════════════════════════════

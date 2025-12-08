@@ -127,6 +127,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             // ═══════════════════════════════════════════════════════
             _ = _hubService.BroadcastSiraCalledAsync(result, bankoId ?? 0, bankoNo ?? "", personelTcKimlikNo);
 
+            // ⭐ INCREMENTAL UPDATE: Etkilenen personellere güncel listeyi gönder
+            _ = _hubService.BroadcastBankoPanelGuncellemesiAsync(siraId);
+
             return result;
         }
 
@@ -189,6 +192,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         public async Task<List<SiraCagirmaResponseDto>> GetBankoPanelSiralarAsync(string tcKimlikNo)
         {
             return await _siramatikQueryRepository.GetBankoPanelBekleyenSiralarAsync(tcKimlikNo);
+        }
+
+        public async Task<Dictionary<string, List<SiraCagirmaResponseDto>>> GetBankoPanelSiralarBySiraIdAsync(int siraId)
+        {
+            // Repository'den tüm satırları al (PersonelTc + ConnectionId içeren)
+            var rawData = await _siramatikQueryRepository.GetBankoPanelBekleyenSiralarBySiraIdAsync(siraId);
+
+            // PersonelTc'ye göre grupla
+            var grouped = rawData
+                .GroupBy(x => x.PersonelTc!)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderBy(x => x.SiraAlisZamani).ThenBy(x => x.SiraNo).ToList()
+                );
+
+            return grouped;
         }
     }
 }

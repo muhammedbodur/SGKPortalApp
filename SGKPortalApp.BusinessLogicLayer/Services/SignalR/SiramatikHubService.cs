@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SignalR;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Interfaces.SignalR;
@@ -307,6 +308,70 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             {
                 await _broadcaster.SendToConnectionsAsync(connectionIds, eventName, payload);
                 _logger.LogDebug("📤 {EventName} gönderildi: {PersonelTc}", eventName, personelTc);
+            }
+        }
+
+        #endregion
+
+        // ═══════════════════════════════════════════════════════
+        // ⭐ INCREMENTAL UPDATE
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// ⭐ Sıra alındığında/yönlendirildiğinde etkilenen personellere güncel listeyi gönder
+        /// ConnectionId ile direkt mesaj gönderilir
+        /// </summary>
+        public async Task BroadcastBankoPanelGuncellemesiAsync(int siraId)
+        {
+            try
+            {
+                _logger.LogInformation("🔍 BankoPanelGuncellemesi başladı. SiraId: {SiraId}", siraId);
+
+                // Repository'den tüm satırları al (PersonelTc + ConnectionId içeren)
+                var rawData = await _siramatikQueryRepository.GetBankoPanelBekleyenSiralarBySiraIdAsync(siraId);
+
+                if (!rawData.Any())
+                {
+                    _logger.LogWarning("⚠️ SiraId: {SiraId} için etkilenen personel bulunamadı!", siraId);
+                    return;
+                }
+
+                // PersonelTc ve ConnectionId'ye göre grupla
+                var personelGroups = rawData
+                    .GroupBy(x => new { x.PersonelTc, x.ConnectionId })
+                    .Select(g => new
+                    {
+                        PersonelTc = g.Key.PersonelTc!,
+                        ConnectionId = g.Key.ConnectionId!,
+                        Siralar = g.OrderBy(s => s.SiraAlisZamani).ThenBy(s => s.SiraNo).ToList()
+                    })
+                    .ToList();
+
+                _logger.LogInformation("🔍 {Count} personele mesaj gönderilecek", personelGroups.Count);
+
+                // Her personele kendi ConnectionId üzerinden direkt mesaj gönder
+                foreach (var group in personelGroups)
+                {
+                    var payload = new
+                    {
+                        siraId = siraId,
+                        personelTc = group.PersonelTc,
+                        siralar = group.Siralar,
+                        timestamp = DateTime.Now
+                    };
+
+                    await _broadcaster.SendToConnectionAsync(group.ConnectionId, "BankoPanelSiraGuncellemesi", payload);
+
+                    _logger.LogInformation("📤 BankoPanelGuncellemesi gönderildi. TC: {PersonelTc}, ConnectionId: {ConnectionId}, Sıra sayısı: {Count}",
+                        group.PersonelTc, group.ConnectionId, group.Siralar.Count);
+                }
+
+                _logger.LogInformation("✅ BankoPanelGuncellemesi tamamlandı. SiraId: {SiraId}, Etkilenen: {Count} personel",
+                    siraId, personelGroups.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ BankoPanelGuncellemesi hatası. SiraId: {SiraId}", siraId);
             }
         }
 
