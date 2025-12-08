@@ -30,6 +30,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex
         // Banko Sıra Çağırma Paneli
         Task<List<SiraCagirmaResponseDto>> GetBankoPanelBekleyenSiralarAsync(string tcKimlikNo);
 
+        /// <summary>
+        /// ⭐ Incremental Update: Belirli bir sıra alındığında/yönlendirildiğinde,
+        /// o sırayı görebilecek TÜM personellerin güncel sıra listelerini getirir.
+        /// SignalR ile her personele kendi listesi gönderilir.
+        /// </summary>
+        Task<List<SiraCagirmaResponseDto>> GetBankoPanelBekleyenSiralarBySiraIdAsync(int siraId);
+
         // SignalR Broadcast için etkilenen personelleri bul
         /// <summary>
         /// Belirli bir sıranın çağrılması/tamamlanması durumunda etkilenen personellerin TC listesini döner.

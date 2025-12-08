@@ -41,5 +41,11 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramat
         /// Banko paneli için personelin uzmanlığına göre bekleyen sıraları getirir
         /// </summary>
         Task<List<SiraCagirmaResponseDto>> GetBankoPanelSiralarAsync(string tcKimlikNo);
+
+        /// <summary>
+        /// ⭐ INCREMENTAL UPDATE: Belirli bir sıra için etkilenen personellerin güncel listelerini getirir
+        /// Test/Debug amaçlı. SignalR otomatik olarak çağırır.
+        /// </summary>
+        Task<Dictionary<string, List<SiraCagirmaResponseDto>>> GetBankoPanelSiralarBySiraIdAsync(int siraId);
     }
 }

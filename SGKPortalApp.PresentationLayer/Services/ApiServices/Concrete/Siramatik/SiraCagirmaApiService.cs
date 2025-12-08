@@ -113,5 +113,19 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
                 return new List<SiraCagirmaResponseDto>();
             }
         }
+
+        public async Task<Dictionary<string, List<SiraCagirmaResponseDto>>> GetBankoPanelSiralarBySiraIdAsync(int siraId)
+        {
+            try
+            {
+                var response = await _httpClient.GetFromJsonAsync<Dictionary<string, List<SiraCagirmaResponseDto>>>($"{BaseUrl}/banko-panel-by-sira/{siraId}");
+                return response ?? new Dictionary<string, List<SiraCagirmaResponseDto>>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"API Hatası - GetBankoPanelSiralarBySiraIdAsync: {ex.Message}");
+                return new Dictionary<string, List<SiraCagirmaResponseDto>>();
+            }
+        }
     }
 }

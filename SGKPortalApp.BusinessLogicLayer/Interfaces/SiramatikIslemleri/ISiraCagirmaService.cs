@@ -41,5 +41,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
         /// Banko paneli için personelin uzmanlığına uygun bekleyen sıraları getirir
         /// </summary>
         Task<List<SiraCagirmaResponseDto>> GetBankoPanelSiralarAsync(string tcKimlikNo);
+
+        /// <summary>
+        /// ⭐ INCREMENTAL UPDATE: Belirli bir sıra alındığında/yönlendirildiğinde,
+        /// o sırayı görebilecek TÜM personellerin güncel sıra listelerini getirir.
+        /// PersonelTc'ye göre gruplandırılmış liste döner.
+        /// </summary>
+        Task<Dictionary<string, List<SiraCagirmaResponseDto>>> GetBankoPanelSiralarBySiraIdAsync(int siraId);
     }
 }

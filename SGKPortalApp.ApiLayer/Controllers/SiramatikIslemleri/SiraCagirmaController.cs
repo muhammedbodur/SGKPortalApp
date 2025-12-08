@@ -53,6 +53,17 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         }
 
         /// <summary>
+        /// ⭐ INCREMENTAL UPDATE: Belirli bir sıra için etkilenen personellerin güncel listelerini getirir.
+        /// Test/Debug amaçlı kullanılabilir. SignalR otomatik olarak çağırır.
+        /// </summary>
+        [HttpGet("banko-panel-by-sira/{siraId:int}")]
+        public async Task<IActionResult> GetBankoPanelSiralarBySiraIdAsync(int siraId)
+        {
+            var result = await _siraCagirmaService.GetBankoPanelSiralarBySiraIdAsync(siraId);
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Sıradaki vatandaşı çağırır.
         /// </summary>
         /// <param name="siraId">Çağrılacak sıra ID</param>

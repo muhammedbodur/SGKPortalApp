@@ -43,6 +43,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR
             int targetBankoId,
             string sourcePersonelTc);
 
+        /// <summary>
+        /// ⭐ INCREMENTAL UPDATE: Sıra alındığında/yönlendirildiğinde etkilenen personellere
+        /// güncel sıra listelerini gönderir. Her personele ConnectionId ile direkt mesaj gönderilir.
+        /// </summary>
+        Task BroadcastBankoPanelGuncellemesiAsync(int siraId);
+
         // ═══════════════════════════════════════════════════════
         // KIOSK / YENİ SIRA BİLDİRİMLERİ
         // ═══════════════════════════════════════════════════════
