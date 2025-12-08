@@ -39,6 +39,16 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SignalR
         public string? Aciklama { get; set; }
 
         /// <summary>
+        /// Bu sıranın üstünde olması gereken sıra ID (INSERT için konum belirleme)
+        /// </summary>
+        public int? PreviousSiraId { get; set; }
+
+        /// <summary>
+        /// Bu sıranın altında olması gereken sıra ID (INSERT için konum belirleme)
+        /// </summary>
+        public int? NextSiraId { get; set; }
+
+        /// <summary>
         /// İşlem zamanı
         /// </summary>
         public DateTime Timestamp { get; set; } = DateTime.Now;

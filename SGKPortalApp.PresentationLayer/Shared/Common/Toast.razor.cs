@@ -22,9 +22,15 @@ namespace SGKPortalApp.PresentationLayer.Shared.Common
         #region Properties
 
         /// <summary>
-        /// Aktif olarak ekranda gösterilen toast'lar
+        /// Aktif olarak ekranda gösterilen toast'lar (thread-safe)
         /// </summary>
-        protected List<ToastMessage> ActiveToasts { get; set; } = new();
+        private readonly List<ToastMessage> _activeToasts = new();
+        private readonly object _lock = new();
+
+        /// <summary>
+        /// Render sırasında kullanılacak snapshot
+        /// </summary>
+        protected IReadOnlyList<ToastMessage> ActiveToasts => GetToastsSnapshot();
 
         /// <summary>
         /// Eski toast'ları temizlemek için timer
@@ -58,13 +64,27 @@ namespace SGKPortalApp.PresentationLayer.Shared.Common
         #region Event Handlers
 
         /// <summary>
+        /// Thread-safe snapshot döndürür
+        /// </summary>
+        private IReadOnlyList<ToastMessage> GetToastsSnapshot()
+        {
+            lock (_lock)
+            {
+                return _activeToasts.ToList();
+            }
+        }
+
+        /// <summary>
         /// Yeni bir toast mesajı geldiğinde çalışır
         /// </summary>
         /// <param name="toast">Gösterilecek toast mesajı</param>
         private void HandleToastShow(ToastMessage toast)
         {
-            // Listeye ekle
-            ActiveToasts.Add(toast);
+            // Listeye ekle (thread-safe)
+            lock (_lock)
+            {
+                _activeToasts.Add(toast);
+            }
 
             // Duration süresi sonra otomatik kaldır
             Task.Delay(toast.Duration).ContinueWith(_ =>
@@ -82,9 +102,18 @@ namespace SGKPortalApp.PresentationLayer.Shared.Common
         /// <param name="toast">Kaldırılacak toast</param>
         protected void RemoveToast(ToastMessage toast)
         {
-            if (ActiveToasts.Contains(toast))
+            bool removed = false;
+            lock (_lock)
             {
-                ActiveToasts.Remove(toast);
+                if (_activeToasts.Contains(toast))
+                {
+                    _activeToasts.Remove(toast);
+                    removed = true;
+                }
+            }
+            
+            if (removed)
+            {
                 InvokeAsync(StateHasChanged);
             }
         }
@@ -99,16 +128,21 @@ namespace SGKPortalApp.PresentationLayer.Shared.Common
         /// </summary>
         private void CleanupOldToasts()
         {
-            var expiredToasts = ActiveToasts
-                .Where(t => DateTime.Now - t.Timestamp > TimeSpan.FromMilliseconds(t.Duration))
-                .ToList();
+            List<ToastMessage> expiredToasts;
+            lock (_lock)
+            {
+                expiredToasts = _activeToasts
+                    .Where(t => DateTime.Now - t.Timestamp > TimeSpan.FromMilliseconds(t.Duration))
+                    .ToList();
+
+                foreach (var toast in expiredToasts)
+                {
+                    _activeToasts.Remove(toast);
+                }
+            }
 
             if (expiredToasts.Any())
             {
-                foreach (var toast in expiredToasts)
-                {
-                    ActiveToasts.Remove(toast);
-                }
                 InvokeAsync(StateHasChanged);
             }
         }

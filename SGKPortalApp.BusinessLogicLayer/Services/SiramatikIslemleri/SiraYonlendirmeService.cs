@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
@@ -23,6 +25,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         private readonly IUserRepository _userRepository;
         private readonly IBankoKullaniciRepository _bankoKullaniciRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ISiramatikHubService _hubService;
         private readonly ILogger<SiraYonlendirmeService> _logger;
 
         public SiraYonlendirmeService(
@@ -32,6 +35,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             IUserRepository userRepository,
             IBankoKullaniciRepository bankoKullaniciRepository,
             IUnitOfWork unitOfWork,
+            ISiramatikHubService hubService,
             ILogger<SiraYonlendirmeService> logger)
         {
             _siraRepository = siraRepository;
@@ -40,12 +44,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             _userRepository = userRepository;
             _bankoKullaniciRepository = bankoKullaniciRepository;
             _unitOfWork = unitOfWork;
+            _hubService = hubService;
             _logger = logger;
         }
 
         public async Task<ApiResponseDto<bool>> YonlendirSiraAsync(SiraYonlendirmeDto request)
         {
-            return await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            // Broadcast için gerekli bilgiler
+            SiraCagirmaResponseDto? siraDto = null;
+            int hedefBankoIdForBroadcast = 0;
+
+            var result = await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 try
                 {
@@ -132,7 +141,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     // ═══════════════════════════════════════════════════════
                     // YÖNLENDİRME İŞLEMİ
                     // ═══════════════════════════════════════════════════════
-                    var result = await _siraRepository.YonlendirSiraAsync(
+                    var yonlendirmeResult = await _siraRepository.YonlendirSiraAsync(
                         request.SiraId,
                         request.YonlendirenBankoId,
                         hedefBankoId,
@@ -141,9 +150,25 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         request.YonlendirmeNedeni
                     );
 
-                    if (!result)
+                    if (!yonlendirmeResult)
                     {
                         return ApiResponseDto<bool>.ErrorResult("Yönlendirme işlemi başarısız oldu");
+                    }
+
+                    // ⭐ Yönlendiren bankonun BankoHareket kaydını tamamla
+                    var yonlendirmeBitisZamani = DateTime.Now;
+                    var bankoHareketRepo = _unitOfWork.GetRepository<IBankoHareketRepository>();
+                    var mevcutHareketler = await bankoHareketRepo.GetBySiraForUpdateAsync(request.SiraId);
+                    var aktifHareket = mevcutHareketler.FirstOrDefault(bh => 
+                        bh.BankoId == request.YonlendirenBankoId && bh.IslemBitisZamani == null);
+                    
+                    if (aktifHareket != null)
+                    {
+                        aktifHareket.IslemBitisZamani = yonlendirmeBitisZamani;
+                        aktifHareket.IslemSuresiSaniye = (int)(yonlendirmeBitisZamani - aktifHareket.IslemBaslamaZamani).TotalSeconds;
+                        bankoHareketRepo.Update(aktifHareket);
+                        _logger.LogInformation("📝 BankoHareket yönlendirme ile tamamlandı. SiraId: {SiraId}, BankoId: {BankoId}, Süre: {Sure}sn", 
+                            request.SiraId, request.YonlendirenBankoId, aktifHareket.IslemSuresiSaniye);
                     }
 
                     await _unitOfWork.SaveChangesAsync();
@@ -151,6 +176,21 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     _logger.LogInformation(
                         "Sıra yönlendirildi. SiraId: {SiraId}, SiraNo: {SiraNo}, Kaynak: {KaynakBankoId}, Hedef: {HedefBankoId}, Tip: {YonlendirmeTipi}",
                         sira.SiraId, sira.SiraNo, request.YonlendirenBankoId, hedefBankoId, request.YonlendirmeTipi);
+
+                    // Broadcast için bilgileri kaydet
+                    siraDto = new SiraCagirmaResponseDto
+                    {
+                        SiraId = sira.SiraId,
+                        SiraNo = sira.SiraNo,
+                        KanalAltIslemId = sira.KanalAltIslemId,
+                        KanalAltAdi = sira.KanalAltAdi,
+                        HizmetBinasiId = sira.HizmetBinasiId,
+                        SiraAlisZamani = sira.SiraAlisZamani,
+                        BeklemeDurum = BeklemeDurum.Yonlendirildi,
+                        YonlendirildiMi = true,
+                        YonlendirmeTipi = request.YonlendirmeTipi
+                    };
+                    hedefBankoIdForBroadcast = hedefBankoId;
 
                     return ApiResponseDto<bool>.SuccessResult(true, "Sıra başarıyla yönlendirildi");
                 }
@@ -160,6 +200,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     return ApiResponseDto<bool>.ErrorResult("Sıra yönlendirilirken bir hata oluştu", ex.Message);
                 }
             });
+
+            // Transaction tamamlandıktan sonra SignalR broadcast yap
+            if (result.Success && siraDto != null)
+            {
+                await _hubService.BroadcastSiraRedirectedAsync(
+                    siraDto,
+                    request.YonlendirenBankoId,
+                    hedefBankoIdForBroadcast,
+                    request.YonlendirenPersonelTc);
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -345,14 +397,19 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 var result = new YonlendirmeSecenekleriResponseDto();
 
+                // ⭐ Yönlendiren personelin TC'sini bul (kaynak bankodan)
+                var kaynakBankoKullanici = await _bankoKullaniciRepository.GetByBankoAsync(kaynakBankoId);
+                var yonlendirenPersonelTc = kaynakBankoKullanici?.TcKimlikNo;
+
                 // ═══════════════════════════════════════════════════════
-                // ŞEF KONTROLÜ
+                // ŞEF KONTROLÜ (kendisi hariç)
                 // ═══════════════════════════════════════════════════════
                 var kanalPersoneller = await _kanalPersonelRepository.GetByKanalAltIslemAsync(sira.KanalAltIslemId);
                 var sefPersoneller = kanalPersoneller
                     .Where(kp => kp.Uzmanlik == PersonelUzmanlik.Sef &&
                                  kp.Aktiflik == Aktiflik.Aktif &&
-                                 !kp.SilindiMi)
+                                 !kp.SilindiMi &&
+                                 kp.TcKimlikNo != yonlendirenPersonelTc) // ⭐ Kendisi hariç
                     .ToList();
 
                 int aktifSefCount = 0;
@@ -372,12 +429,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 result.SefPersonelCount = aktifSefCount;
 
                 // ═══════════════════════════════════════════════════════
-                // UZMAN KONTROLÜ
+                // UZMAN KONTROLÜ (kendisi hariç)
                 // ═══════════════════════════════════════════════════════
                 var uzmanPersoneller = kanalPersoneller
                     .Where(kp => kp.Uzmanlik == PersonelUzmanlik.Uzman &&
                                  kp.Aktiflik == Aktiflik.Aktif &&
-                                 !kp.SilindiMi)
+                                 !kp.SilindiMi &&
+                                 kp.TcKimlikNo != yonlendirenPersonelTc) // ⭐ Kendisi hariç
                     .ToList();
 
                 int aktifUzmanCount = 0;
@@ -397,7 +455,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 result.UzmanPersonelCount = aktifUzmanCount;
 
                 // ═══════════════════════════════════════════════════════
-                // AKTİF BANKOLAR (BaskaBanko için)
+                // AKTİF BANKOLAR (BaskaBanko için - sadece Uzman personeller)
                 // ═══════════════════════════════════════════════════════
                 var tumBankolar = await _bankoRepository.GetAllAsync();
                 var aktifBankolar = new List<BankoOptionDto>();
@@ -418,7 +476,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     if (user == null || !user.BankoModuAktif || user.AktifBankoId != banko.BankoId)
                         continue;
 
-                    // Aktif banko bulundu
+                    // ⭐ Personelin uzmanlığı Uzman mı? (Şef'ler BaskaBanko listesinde görünmemeli)
+                    var personelKanalAtama = kanalPersoneller.FirstOrDefault(kp => kp.TcKimlikNo == bankoKullanici.TcKimlikNo);
+                    if (personelKanalAtama == null || personelKanalAtama.Uzmanlik != PersonelUzmanlik.Uzman)
+                        continue;
+
+                    // Aktif banko bulundu (Uzman personel)
                     aktifBankolar.Add(new BankoOptionDto
                     {
                         BankoId = banko.BankoId,

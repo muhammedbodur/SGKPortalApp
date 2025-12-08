@@ -28,5 +28,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
 
         // Aktif işlemleri listeler
         Task<IEnumerable<KanalAltIslem>> GetActiveAsync();
+
+        // ID ile işlemi getirir (tracking olmadan)
+        Task<KanalAltIslem?> GetByIdNoTrackingAsync(int kanalAltIslemId);
     }
 }

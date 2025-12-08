@@ -4,8 +4,11 @@ using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SignalR;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Interfaces.SignalR;
+using SGKPortalApp.Common.Extensions;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
 {
@@ -21,6 +24,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         private readonly ISignalRBroadcaster _broadcaster;
         private readonly IHubConnectionRepository _hubConnectionRepository;
         private readonly ISiramatikQueryRepository _siramatikQueryRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<SiramatikHubService> _logger;
 
         // SignalR Event sabitleri (SignalREvents.cs ile senkron tutulmalı)
@@ -31,11 +35,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             ISignalRBroadcaster broadcaster,
             IHubConnectionRepository hubConnectionRepository,
             ISiramatikQueryRepository siramatikQueryRepository,
+            IUnitOfWork unitOfWork,
             ILogger<SiramatikHubService> logger)
         {
             _broadcaster = broadcaster;
             _hubConnectionRepository = hubConnectionRepository;
             _siramatikQueryRepository = siramatikQueryRepository;
+            _unitOfWork = unitOfWork;
             _logger = logger;
         }
 
@@ -157,23 +163,58 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
 
                 await SendToPersonelAsync(sourcePersonelTc, SiraListUpdate, removePayload);
 
-                // Hedef bankodaki personellere INSERT gönder
-                var affectedPersonels = await _siramatikQueryRepository.GetBankoModundakiPersonellerAsync(sira.HizmetBinasiId, sira.KanalAltIslemId);
-                var targetPersonels = affectedPersonels.Where(tc => tc != sourcePersonelTc).ToList();
-
-                if (targetPersonels.Any())
+                // Hedef personellere INSERT gönder - her personel için komşu sıraları hesapla
+                var targetPersonelSiralar = await _siramatikQueryRepository.GetBankoPanelBekleyenSiralarBySiraIdAsync(sira.SiraId);
+                
+                if (targetPersonelSiralar.Any())
                 {
-                    var insertPayload = new SiraUpdatePayloadDto
-                    {
-                        UpdateType = SiraUpdateType.Insert,
-                        Sira = sira,
-                        BankoId = targetBankoId,
-                        Position = 0, // En başa ekle (yönlendirilen sıralar öncelikli)
-                        Aciklama = "Yönlendirilmiş sıra",
-                        Timestamp = DateTime.Now
-                    };
+                    // PersonelTc'ye göre grupla
+                    var personelGroups = targetPersonelSiralar
+                        .Where(x => x.PersonelTc != sourcePersonelTc) // Kaynak personeli hariç tut
+                        .GroupBy(x => x.PersonelTc)
+                        .ToList();
 
-                    await SendToPersonelsAsync(targetPersonels, SiraListUpdate, insertPayload);
+                    foreach (var group in personelGroups)
+                    {
+                        var personelTc = group.Key;
+                        // ⭐ Backend'den gelen sıralama zaten doğru, değiştirme
+                        var siralar = group.ToList();
+                        
+                        // Yönlendirilen sıranın pozisyonunu bul
+                        var siraIndex = siralar.FindIndex(s => s.SiraId == sira.SiraId);
+                        
+                        // ⭐ Backend'den gelen güncel sıra bilgisini kullan (YonlendirmeAciklamasi dahil)
+                        var guncelSira = siraIndex >= 0 ? siralar[siraIndex] : sira;
+                        
+                        int? previousSiraId = null;
+                        int? nextSiraId = null;
+                        
+                        if (siraIndex > 0)
+                        {
+                            previousSiraId = siralar[siraIndex - 1].SiraId;
+                        }
+                        if (siraIndex >= 0 && siraIndex < siralar.Count - 1)
+                        {
+                            nextSiraId = siralar[siraIndex + 1].SiraId;
+                        }
+
+                        var insertPayload = new SiraUpdatePayloadDto
+                        {
+                            UpdateType = SiraUpdateType.Insert,
+                            Sira = guncelSira, // ⭐ Güncel sıra bilgisi (YonlendirmeAciklamasi dahil)
+                            BankoId = targetBankoId,
+                            Position = siraIndex >= 0 ? siraIndex : 0,
+                            PreviousSiraId = previousSiraId,
+                            NextSiraId = nextSiraId,
+                            Aciklama = "Yönlendirilmiş sıra",
+                            Timestamp = DateTime.Now
+                        };
+
+                        await SendToPersonelAsync(personelTc!, SiraListUpdate, insertPayload);
+                        
+                        _logger.LogInformation("📤 INSERT gönderildi: TC={PersonelTc}, SiraId={SiraId}, Prev={Prev}, Next={Next}",
+                            personelTc, sira.SiraId, previousSiraId, nextSiraId);
+                    }
                 }
 
                 _logger.LogInformation("📤 SiraRedirected broadcast edildi. SiraId: {SiraId}, Kaynak: {SourceBanko}, Hedef: {TargetBanko}",
@@ -262,6 +303,92 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             }
         }
 
+        /// <summary>
+        /// Sıra çağırıldığında TV'lere bildirim gönderir
+        /// HubTvConnection tablosu üzerinden aktif TV bağlantılarına mesaj gönderir
+        /// Sıra çağırma paneli gibi tüm güncel listeyi gönderir
+        /// </summary>
+        public async Task BroadcastSiraCalledToTvAsync(SiraCagirmaResponseDto sira, int bankoId, string bankoNo)
+        {
+            try
+            {
+                // Banko bilgilerini al (katTipi ve bankoNo için)
+                var bankoRepo = _unitOfWork.GetRepository<IBankoRepository>();
+                var banko = await bankoRepo.GetByIdAsync(bankoId);
+                
+                string katTipi = banko?.KatTipi.GetDisplayName() ?? "";
+                // bankoNo parametresi boş gelebilir, veritabanından al
+                string actualBankoNo = !string.IsNullOrEmpty(bankoNo) ? bankoNo : (banko?.BankoNo.ToString() ?? "");
+
+                // Bu bankoya bağlı TV'leri bul (TvBanko tablosundan)
+                var tvRepo = _unitOfWork.GetRepository<ITvRepository>();
+                var tvBankolar = await tvRepo.GetTvBankolarByBankoIdAsync(bankoId);
+
+                if (tvBankolar == null || !tvBankolar.Any())
+                {
+                    _logger.LogDebug("ℹ️ Banko#{BankoId} için bağlı TV bulunamadı", bankoId);
+                    return;
+                }
+
+                // HubTvConnection tablosundan aktif TV bağlantılarını al
+                var hubTvConnectionRepo = _unitOfWork.GetRepository<IHubTvConnectionRepository>();
+                var bankoHareketRepo = _unitOfWork.GetRepository<IBankoHareketRepository>();
+
+                foreach (var tvBanko in tvBankolar)
+                {
+                    // Bu TV'nin aktif bağlantılarını bul
+                    var tvConnections = await hubTvConnectionRepo.GetByTvAsync(tvBanko.TvId);
+                    var connectionIds = tvConnections
+                        .Where(tc => tc.HubConnection != null && !string.IsNullOrEmpty(tc.HubConnection.ConnectionId))
+                        .Select(tc => tc.HubConnection!.ConnectionId)
+                        .ToList();
+
+                    if (!connectionIds.Any())
+                    {
+                        _logger.LogDebug("ℹ️ TV#{TvId} için aktif bağlantı bulunamadı", tvBanko.TvId);
+                        continue;
+                    }
+
+                    // Bu TV'ye bağlı tüm bankoların ID'lerini al
+                    var tvninBankolari = await tvRepo.GetTvBankolarAsync(tvBanko.TvId);
+                    var bankoIds = tvninBankolari.Select(tb => tb.BankoId).ToList();
+
+                    // Tüm bankolardaki güncel sıraları al (sıra çağırma paneli mantığı)
+                    var aktifHareketler = await bankoHareketRepo.GetAktifSiralarByBankoIdsAsync(bankoIds);
+                    var siralar = aktifHareketler.Select(bh => new
+                    {
+                        bankoId = bh.BankoId,
+                        bankoNo = bh.Banko?.BankoNo ?? 0,
+                        katTipi = bh.Banko?.KatTipi.GetDisplayName() ?? "",
+                        siraNo = bh.SiraNo
+                    }).ToList();
+
+                    // Payload: Overlay bilgisi + tüm güncel liste
+                    var tvPayload = new
+                    {
+                        // Overlay için (yeni çağrılan sıra)
+                        siraNo = sira.SiraNo,
+                        bankoNo = actualBankoNo,
+                        bankoId = bankoId,
+                        katTipi = katTipi,
+                        kanalAltAdi = sira.KanalAltAdi,
+                        updateType = "SiraCalled",
+                        // Tüm güncel liste
+                        siralar = siralar,
+                        timestamp = DateTime.Now
+                    };
+
+                    await _broadcaster.SendToConnectionsAsync(connectionIds, "TvSiraGuncellendi", tvPayload);
+                    _logger.LogInformation("📺 TV#{TvId}'ye sıra bildirimi gönderildi: Sıra#{SiraNo}, Liste: {Count} sıra, {ConnCount} bağlantı",
+                        tvBanko.TvId, sira.SiraNo, siralar.Count, connectionIds.Count);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ TV sıra çağırma broadcast hatası. SiraId: {SiraId}, BankoId: {BankoId}", sira.SiraId, bankoId);
+            }
+        }
+
         #region Private Helper Methods
 
         private async Task SendToPersonelsAsync(List<string> personelTcs, string eventName, object payload)
@@ -318,8 +445,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         // ═══════════════════════════════════════════════════════
 
         /// <summary>
-        /// ⭐ Sıra alındığında/yönlendirildiğinde etkilenen personellere güncel listeyi gönder
-        /// ConnectionId ile direkt mesaj gönderilir
+        /// Sıra alındığında/yönlendirildiğinde etkilenen personellere güncelleme gönderir
         /// </summary>
         public async Task BroadcastBankoPanelGuncellemesiAsync(int siraId)
         {
@@ -327,23 +453,39 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             {
                 _logger.LogInformation("🔍 BankoPanelGuncellemesi başladı. SiraId: {SiraId}", siraId);
 
+                // Sıra bilgisini al
+                var siraRepo = _unitOfWork.GetRepository<ISiraRepository>();
+                var sira = await siraRepo.GetByIdAsync(siraId);
+                if (sira == null)
+                {
+                    _logger.LogWarning("⚠️ SiraId: {SiraId} bulunamadı!", siraId);
+                    return;
+                }
+
+                _logger.LogInformation("🔍 Sıra bulundu. KanalAltIslemId: {KanalAltIslemId}, HizmetBinasiId: {HizmetBinasiId}",
+                    sira.KanalAltIslemId, sira.HizmetBinasiId);
+
                 // Repository'den tüm satırları al (PersonelTc + ConnectionId içeren)
                 var rawData = await _siramatikQueryRepository.GetBankoPanelBekleyenSiralarBySiraIdAsync(siraId);
 
+                _logger.LogInformation("🔍 GetBankoPanelBekleyenSiralarBySiraIdAsync sonucu: {Count} satır", rawData.Count);
+
                 if (!rawData.Any())
                 {
-                    _logger.LogWarning("⚠️ SiraId: {SiraId} için etkilenen personel bulunamadı!", siraId);
+                    _logger.LogWarning("⚠️ SiraId: {SiraId} için etkilenen personel bulunamadı! HizmetBinasiId: {HizmetBinasiId}, KanalAltIslemId: {KanalAltIslemId}",
+                        siraId, sira.HizmetBinasiId, sira.KanalAltIslemId);
                     return;
                 }
 
                 // PersonelTc ve ConnectionId'ye göre grupla
+                // ⭐ Backend'den gelen sıralama zaten doğru (GetBankoPanelBekleyenSiralarBySiraIdAsync)
                 var personelGroups = rawData
                     .GroupBy(x => new { x.PersonelTc, x.ConnectionId })
                     .Select(g => new
                     {
                         PersonelTc = g.Key.PersonelTc!,
                         ConnectionId = g.Key.ConnectionId!,
-                        Siralar = g.OrderBy(s => s.SiraAlisZamani).ThenBy(s => s.SiraNo).ToList()
+                        Siralar = g.ToList() // Sıralama zaten doğru
                     })
                     .ToList();
 
@@ -352,18 +494,25 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 // Her personele kendi ConnectionId üzerinden direkt mesaj gönder
                 foreach (var group in personelGroups)
                 {
+                    // ⭐ Sadece tetikleyen sırayı bul ve pozisyonunu hesapla
+                    var tetikleyenSira = group.Siralar.FirstOrDefault(s => s.SiraId == siraId);
+                    var pozisyon = tetikleyenSira != null ? group.Siralar.IndexOf(tetikleyenSira) : -1;
+
                     var payload = new
                     {
                         siraId = siraId,
                         personelTc = group.PersonelTc,
-                        siralar = group.Siralar,
+                        // ⭐ Sadece yeni/değişen sıra gönderiliyor (tüm liste değil!)
+                        sira = tetikleyenSira,
+                        pozisyon = pozisyon, // Listedeki pozisyonu
+                        toplamSiraSayisi = group.Siralar.Count,
                         timestamp = DateTime.Now
                     };
 
-                    await _broadcaster.SendToConnectionAsync(group.ConnectionId, "BankoPanelSiraGuncellemesi", payload);
+                    await _broadcaster.SendToConnectionsAsync(new[] { group.ConnectionId }, "BankoPanelSiraGuncellemesi", payload);
 
-                    _logger.LogInformation("📤 BankoPanelGuncellemesi gönderildi. TC: {PersonelTc}, ConnectionId: {ConnectionId}, Sıra sayısı: {Count}",
-                        group.PersonelTc, group.ConnectionId, group.Siralar.Count);
+                    _logger.LogInformation("📤 BankoPanelGuncellemesi gönderildi. TC: {PersonelTc}, SiraNo: {SiraNo}, Pozisyon: {Pozisyon}/{Toplam}",
+                        group.PersonelTc, tetikleyenSira?.SiraNo ?? 0, pozisyon, group.Siralar.Count);
                 }
 
                 _logger.LogInformation("✅ BankoPanelGuncellemesi tamamlandı. SiraId: {SiraId}, Etkilenen: {Count} personel",
@@ -374,7 +523,5 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 _logger.LogError(ex, "❌ BankoPanelGuncellemesi hatası. SiraId: {SiraId}", siraId);
             }
         }
-
-        #endregion
     }
 }

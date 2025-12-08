@@ -89,13 +89,47 @@ body.layout-shifted {
 
 /* Card Animations */
 .call-panel .card {
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
+    animation: siraCardFadeIn 0.4s ease-out;
 }
 
 .call-panel .card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(105, 108, 255, 0.2);
+}
+
+/* Yeni sıra ekleme animasyonu */
+@keyframes siraCardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Sıra highlight animasyonu (yeni eklenen) */
+.call-panel .card.sira-new {
+    animation: siraHighlight 1s ease-out;
+}
+
+@keyframes siraHighlight {
+    0% {
+        background-color: rgba(105, 108, 255, 0.3);
+        transform: scale(1.02);
+    }
+    100% {
+        background-color: transparent;
+        transform: scale(1);
+    }
+}
+
+/* Bekleyen sıra sayısı badge animasyonu */
+.call-panel .text-muted {
+    transition: all 0.3s ease;
 }
 
 /* Scrollbar Styling */

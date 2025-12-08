@@ -73,5 +73,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR
             SiraCagirmaResponseDto sira,
             string bankoNo,
             int hizmetBinasiId);
+
+        /// <summary>
+        /// Sıra çağırıldığında TV'lere bildirim gönderir
+        /// </summary>
+        Task BroadcastSiraCalledToTvAsync(SiraCagirmaResponseDto sira, int bankoId, string bankoNo);
     }
 }

@@ -126,6 +126,22 @@
             }
         }
 
+        /* Kart kaldırma animasyonu */
+        .banko-card.removing {
+            animation: slideOut 0.3s ease-out forwards;
+        }
+
+        @@keyframes slideOut {
+            0% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
         .banko-info {
             flex: 1;
             text-align: center;
@@ -393,6 +409,109 @@
         .fullscreen .tv-header {
             padding: 1vh 1.5vw;
         }
+
+        /* ═══════════════════════════════════════════════════════ */
+        /* SIRA ÇAĞRILDI OVERLAY POPUP */
+        /* ═══════════════════════════════════════════════════════ */
+        #siraCalledOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.98) 0%, rgba(118, 75, 162, 0.98) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        #siraCalledOverlay.fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+
+        .sira-called-content {
+            text-align: center;
+            color: white;
+            animation: scaleIn 0.4s ease-out;
+        }
+
+        .sira-called-icon {
+            font-size: clamp(4rem, 10vh, 8rem);
+            margin-bottom: 2vh;
+        }
+
+        .sira-called-icon i {
+            color: #FFD700;
+            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.5));
+        }
+
+        .sira-called-title {
+            font-size: clamp(2rem, 5vh, 4rem);
+            font-weight: bold;
+            letter-spacing: 0.3em;
+            margin-bottom: 3vh;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .sira-called-number {
+            font-size: clamp(6rem, 20vh, 15rem);
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 3vh;
+            text-shadow: 4px 4px 8px rgba(0,0,0,0.3);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        .sira-called-banko {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2vw;
+            margin-bottom: 2vh;
+        }
+
+        .sira-called-banko .banko-label {
+            font-size: clamp(1.5rem, 4vh, 3rem);
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .sira-called-banko .banko-number {
+            font-size: clamp(4rem, 12vh, 10rem);
+            font-weight: 900;
+            background: rgba(255,255,255,0.2);
+            padding: 1vh 3vw;
+            border-radius: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .sira-called-kat {
+            font-size: clamp(1.2rem, 3vh, 2rem);
+            opacity: 0.8;
+            margin-top: 1vh;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @@keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        @@keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @@keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
     </style>
 </HeadContent>
 
@@ -438,10 +557,10 @@
                 }
                 else
                 {
-                    <div id="siraListe">
+                    <div id="siraListe" class="sira-cards-container" data-max-rows="@_maxVisibleRows">
                         @foreach (var sira in siralar)
                         {
-                            <div class="banko-card" id="banko_@sira.BankoId" data-sira="@sira.SiraNo">
+                            <div class="banko-card sira-card" id="banko_@sira.BankoId" data-sira="@sira.SiraNo">
                                 <div class="banko-info">
                                     <div class="banko-label">BANKO</div>
                                     <div class="banko-no">@sira.BankoNo</div>
@@ -486,5 +605,10 @@
             </div>
         </div>
     </div>
+
+<!-- Ding Dong Ses Dosyası -->
+<audio id="dingDongSound" preload="auto">
+    <source src="/Sounds/dingdong.mp3" type="audio/mpeg">
+</audio>
 
 @* JavaScript kodları Display.razor.cs'deki OnAfterRenderAsync'de IJSRuntime ile çalıştırılacak *@

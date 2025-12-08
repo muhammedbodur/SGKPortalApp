@@ -14,14 +14,16 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
     {
         public HubTvConnectionRepository(SGKDbContext context) : base(context) { }
 
-        // TV'ye ait bağlantıları listeler
+        // TV'ye ait bağlantıları listeler (sadece aktif/online olanlar)
         public async Task<IEnumerable<HubTvConnection>> GetByTvAsync(int tvId)
         {
             return await _dbSet
                 .AsNoTracking()
                 .Include(htc => htc.Tv)
                 .Include(htc => htc.HubConnection)
-                .Where(htc => htc.TvId == tvId)
+                .Where(htc => htc.TvId == tvId 
+                           && htc.HubConnection != null 
+                           && htc.HubConnection.ConnectionStatus == ConnectionStatus.online)
                 .ToListAsync();
         }
 

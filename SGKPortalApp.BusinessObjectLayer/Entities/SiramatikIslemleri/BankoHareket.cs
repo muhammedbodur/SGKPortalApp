@@ -19,7 +19,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         public int BankoId { get; set; }
         [ForeignKey("BankoId")]
         [InverseProperty("BankoHareketleri")]
-        public required Banko Banko { get; set; }
+        public Banko? Banko { get; set; }
 
         // ═══════════════════════════════════════════════════════
         // PERSONEL BİLGİSİ (Kim çağırdı/işlem yaptı)
@@ -29,7 +29,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         [StringLength(11)]
         public string PersonelTcKimlikNo { get; set; } = string.Empty;
         [ForeignKey("PersonelTcKimlikNo")]
-        public required Personel Personel { get; set; }
+        public Personel? Personel { get; set; }
 
         // ═══════════════════════════════════════════════════════
         // SIRA BİLGİSİ
@@ -38,7 +38,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         [Required]
         public int SiraId { get; set; }
         [ForeignKey("SiraId")]
-        public required Sira Sira { get; set; }
+        public Sira? Sira { get; set; }
 
         [Required]
         public int SiraNo { get; set; }  // Vatandaşın gördüğü numara (1105, 2045 vb)
@@ -50,12 +50,12 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         [Required]
         public int KanalIslemId { get; set; }
         [ForeignKey("KanalIslemId")]
-        public required KanalIslem KanalIslem { get; set; }
+        public KanalIslem? KanalIslem { get; set; }
 
         [Required]
         public int KanalAltIslemId { get; set; }
         [ForeignKey("KanalAltIslemId")]
-        public required KanalAltIslem KanalAltIslem { get; set; }
+        public KanalAltIslem? KanalAltIslem { get; set; }
 
         // ═══════════════════════════════════════════════════════
         // ZAMAN BİLGİLERİ

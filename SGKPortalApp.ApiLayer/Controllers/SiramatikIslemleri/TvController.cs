@@ -128,6 +128,20 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         }
 
         // ═══════════════════════════════════════════════════════
+        // TV SIRA GÖRÜNTÜLEMESİ
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// TV'ye bağlı bankolardaki aktif (çağrılmış) sıraları getirir
+        /// </summary>
+        [HttpGet("{tvId:int}/siralar")]
+        public async Task<IActionResult> GetActiveSiralarByTvId(int tvId)
+        {
+            var result = await _tvService.GetActiveSiralarByTvIdAsync(tvId);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        // ═══════════════════════════════════════════════════════
         // UTILITY ENDPOINTS
         // ═══════════════════════════════════════════════════════
 

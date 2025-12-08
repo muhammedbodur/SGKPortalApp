@@ -37,5 +37,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
 
         // Hizmet binası için dropdown TV'leri listeler
         Task<IEnumerable<(int Id, string Ad)>> GetByHizmetBinasiDropdownAsync(int hizmetBinasiId);
+
+        // TV'ye bağlı bankoları getirir
+        Task<IEnumerable<TvBanko>> GetTvBankolarAsync(int tvId);
+
+        // Bankoya bağlı TV'leri getirir (TvBanko ilişkisi üzerinden)
+        Task<IEnumerable<TvBanko>> GetTvBankolarByBankoIdAsync(int bankoId);
     }
 }

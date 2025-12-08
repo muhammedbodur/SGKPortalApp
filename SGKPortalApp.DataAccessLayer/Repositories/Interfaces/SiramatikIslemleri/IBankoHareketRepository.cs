@@ -14,8 +14,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
         // Personele ait hareketleri getirir
         Task<IEnumerable<BankoHareket>> GetByPersonelAsync(string tcKimlikNo);
 
-        // Sıraya ait hareketleri getirir
+        // Sıraya ait hareketleri getirir (read-only, detaylı)
         Task<IEnumerable<BankoHareket>> GetBySiraAsync(int siraId);
+
+        // Sıraya ait hareketleri getirir (güncelleme için, navigation property'siz)
+        Task<IEnumerable<BankoHareket>> GetBySiraForUpdateAsync(int siraId);
 
         // Tarih aralığına göre hareketleri getirir
         Task<IEnumerable<BankoHareket>> GetByDateRangeAsync(DateTime startDate, DateTime endDate);
@@ -40,5 +43,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
 
         // Personel istatistiklerini getirir
         Task<(int ToplamIslem, int OrtalamaSure)> GetPersonelStatsAsync(string tcKimlikNo, DateTime startDate, DateTime endDate);
+
+        // Bankodaki bugünkü son çağrılan sırayı getirir (TV için)
+        Task<BankoHareket?> GetSonCagrilanByBankoAsync(int bankoId);
+
+        // Belirtilen bankolardaki bugünkü tüm aktif sıraları getirir (TV için)
+        Task<IEnumerable<BankoHareket>> GetAktifSiralarByBankoIdsAsync(IEnumerable<int> bankoIds);
     }
 }

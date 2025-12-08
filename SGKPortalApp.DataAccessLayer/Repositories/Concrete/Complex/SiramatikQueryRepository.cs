@@ -751,6 +751,21 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         }
 
         /// <summary>
+        /// ⭐ Personelin ilk çağrılabilir sırasını getirir (sadece tek sıra - performans için)
+        /// Çağrılabilir: BeklemeDurum = Beklemede veya Yonlendirildi
+        /// </summary>
+        public async Task<SiraCagirmaResponseDto?> GetIlkCagrilabilirSiraAsync(string tcKimlikNo)
+        {
+            // GetBankoPanelBekleyenSiralarAsync metodunu kullan ve sadece ilk çağrılabilir sırayı döndür
+            var siralar = await GetBankoPanelBekleyenSiralarAsync(tcKimlikNo);
+            
+            // İlk çağrılabilir sıra: Yönlendirildi veya Beklemede durumunda olan
+            return siralar.FirstOrDefault(s => 
+                s.BeklemeDurum == BeklemeDurum.Yonlendirildi || 
+                s.BeklemeDurum == BeklemeDurum.Beklemede);
+        }
+
+        /// <summary>
         /// ⭐ INCREMENTAL UPDATE: Belirli bir sıra alındığında/yönlendirildiğinde,
         /// o sırayı görebilecek TÜM personellerin güncel sıra listelerini getirir.
         /// Her satırda PersonelTc ve ConnectionId bilgisi yer alır.
@@ -758,6 +773,181 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         /// </summary>
         public async Task<List<SiraCagirmaResponseDto>> GetBankoPanelBekleyenSiralarBySiraIdAsync(int siraId)
         {
+            /*
+            DECLARE @VerilmeSiraId INT = 66;
+            DECLARE @Bugun DATE = CAST(GETDATE() AS DATE);
+
+            -- ADIM 1: Verilen sıranın bilgilerini al
+            DECLARE @SiraKanalAltIslemId INT;
+            DECLARE @SiraHizmetBinasiId INT;
+            DECLARE @SiraYonlendirmeTipi INT;
+
+            SELECT 
+                @SiraKanalAltIslemId = s.KanalAltIslemId,
+                @SiraHizmetBinasiId = s.HizmetBinasiId,
+                @SiraYonlendirmeTipi = s.YonlendirmeTipi
+            FROM SIR_Siralar s WITH (NOLOCK)
+            WHERE s.SiraId = @VerilmeSiraId;
+
+            -- ADIM 2: Bu sırayı alabilecek tüm personelleri bul
+            ;WITH HedefPersoneller AS (
+                SELECT DISTINCT kp.TcKimlikNo
+                FROM SIR_KanalPersonelleri kp WITH (NOLOCK)
+                WHERE kp.KanalAltIslemId = @SiraKanalAltIslemId
+                    AND kp.Aktiflik = 1
+                    AND kp.SilindiMi = 0
+                    AND (
+                        -- Normal personeller (kanal uzmanlığı olan)
+                        kp.Uzmanlik IN (1, 2, 3)
+            
+                        -- Veya yönlendirme tipine göre ek kontroller
+                        OR (
+                            @SiraYonlendirmeTipi = 2  -- Şef'e yönlendirildiyse
+                            AND kp.Uzmanlik = 3
+                        )
+                        OR (
+                            @SiraYonlendirmeTipi = 3  -- Uzman personele yönlendirildiyse
+                            AND kp.Uzmanlik = 2
+                        )
+                    )
+            ),
+            -- ADIM 3: Her personelin uzmanlık kayıtları
+            PersonelUzmanlikKayitlari AS (
+                SELECT DISTINCT
+                    hp.TcKimlikNo,
+                    kp.KanalAltIslemId,
+                    kp.Uzmanlik
+                FROM HedefPersoneller hp
+                INNER JOIN SIR_KanalPersonelleri kp WITH (NOLOCK)
+                    ON kp.TcKimlikNo = hp.TcKimlikNo
+                    AND kp.Aktiflik = 1
+                    AND kp.Uzmanlik != 0
+                    AND kp.SilindiMi = 0
+            )
+
+            -- ADIM 4: Tüm hedef personellerin sıralarını getir
+            SELECT DISTINCT
+                hp.TcKimlikNo AS PersonelTc,
+                pPersonel.AdSoyad AS PersonelAdSoyad,
+                s.SiraId,
+                s.SiraNo,
+		            hc.ConnectionId,
+                s.KanalAltAdi,
+                s.SiraAlisZamani,
+                s.IslemBaslamaZamani,
+                s.BeklemeDurum,
+                uzm.Uzmanlik,
+                b.BankoId,
+                hb.HizmetBinasiId,
+                hb.HizmetBinasiAdi,
+                s.YonlendirildiMi,
+                s.YonlendirmeTipi,
+                s.HedefBankoId,
+                s.YonlendirenBankoId,
+                s.YonlendirenPersonelTc,
+                pYonlendiren.AdSoyad AS YonlendirenPersonelAdSoyad,
+                -- Öncelik hesaplamaları
+                CASE 
+                    WHEN s.BeklemeDurum = 1 THEN 0
+                    WHEN s.BeklemeDurum = 3 THEN 1
+                    ELSE 2
+                END AS DurumOnceligi,
+                CASE 
+                    WHEN s.BeklemeDurum = 0 THEN 
+                        CASE uzm.Uzmanlik
+                            WHEN 3 THEN 0
+                            WHEN 2 THEN 1
+                            WHEN 1 THEN 2
+                            ELSE 3
+                        END
+                    ELSE 99
+                END AS UzmanlikOnceligi
+            FROM HedefPersoneller hp
+            INNER JOIN PER_Personeller pPersonel WITH (NOLOCK)
+                ON pPersonel.TcKimlikNo = hp.TcKimlikNo
+                AND pPersonel.PersonelAktiflikDurum = 1
+                AND pPersonel.SilindiMi = 0
+            INNER JOIN SIR_BankoKullanicilari bk WITH (NOLOCK)
+                ON bk.TcKimlikNo = hp.TcKimlikNo
+                AND bk.SilindiMi = 0
+            INNER JOIN SIR_Bankolar b WITH (NOLOCK)
+                ON b.BankoId = bk.BankoId
+                AND b.BankoAktiflik = 1
+                AND b.SilindiMi = 0
+                AND b.HizmetBinasiId = @SiraHizmetBinasiId
+            INNER JOIN CMN_Users u WITH (NOLOCK)
+                ON u.TcKimlikNo = hp.TcKimlikNo
+                AND u.BankoModuAktif = 1
+                AND u.AktifMi = 1
+            INNER JOIN CMN_HubConnections AS hc WITH (NOLOCK)
+		            ON hc.TcKimlikNo = u.TcKimlikNo AND hc.ConnectionStatus = 'online' AND hc.SilindiMi = 0
+            INNER JOIN SIR_HubBankoConnections AS hbc  WITH (NOLOCK)
+		            ON  hbc.HubConnectionId = hc.HubConnectionId
+            INNER JOIN CMN_HizmetBinalari hb WITH (NOLOCK)
+                ON hb.HizmetBinasiId = bk.HizmetBinasiId
+            INNER JOIN PersonelUzmanlikKayitlari uzm
+                ON uzm.TcKimlikNo = hp.TcKimlikNo
+            INNER JOIN SIR_KanalAltIslemleri kai WITH (NOLOCK)
+                ON kai.KanalAltIslemId = uzm.KanalAltIslemId
+                AND kai.Aktiflik = 1
+                AND kai.SilindiMi = 0
+            INNER JOIN SIR_Siralar s WITH (NOLOCK)
+                ON s.KanalAltIslemId = kai.KanalAltIslemId
+                AND s.HizmetBinasiId = bk.HizmetBinasiId
+                AND s.SilindiMi = 0
+            LEFT JOIN PER_Personeller pYonlendiren WITH (NOLOCK)
+                ON pYonlendiren.TcKimlikNo = s.YonlendirenPersonelTc
+                AND pYonlendiren.SilindiMi = 0
+
+            WHERE CAST(s.SiraAlisZamani AS DATE) = @Bugun
+                AND uzm.Uzmanlik IN (1, 2, 3)
+                AND (
+                    -- 1. Normal Bekleyen Sıralar
+                    s.BeklemeDurum = 0
+        
+                    -- 2. Çağrılmış EN SON Sıra (bu personele ait)
+                    OR (s.BeklemeDurum = 1 
+                        AND s.TcKimlikNo = hp.TcKimlikNo
+                        AND s.SiraId = (
+                            SELECT TOP 1 s2.SiraId
+                            FROM SIR_Siralar s2 WITH (NOLOCK)
+                            WHERE s2.TcKimlikNo = hp.TcKimlikNo
+                                AND s2.BeklemeDurum = 1
+                                AND CAST(s2.SiraAlisZamani AS DATE) = @Bugun
+                                AND s2.SilindiMi = 0
+                            ORDER BY s2.SiraNo DESC
+                        ))
+        
+                    -- 3. Şef'e Yönlendirilmiş
+                    OR (s.BeklemeDurum = 3 
+                        AND s.YonlendirildiMi = 1 
+                        AND s.YonlendirmeTipi = 2
+                        AND s.TcKimlikNo != hp.TcKimlikNo 
+                        AND s.HedefBankoId IS NULL 
+                        AND uzm.Uzmanlik = 3)
+        
+                    -- 4. Başka Bankoya Yönlendirilmiş
+                    OR (s.BeklemeDurum = 3 
+                        AND s.YonlendirildiMi = 1 
+                        AND s.YonlendirmeTipi = 1
+                        AND s.TcKimlikNo != hp.TcKimlikNo
+                        AND s.HedefBankoId = bk.BankoId)
+        
+                    -- 5. Genel Uzmana Yönlendirilmiş
+                    OR (s.BeklemeDurum = 3 
+                        AND s.YonlendirildiMi = 1 
+                        AND s.YonlendirmeTipi = 3
+                        AND s.TcKimlikNo != hp.TcKimlikNo
+                        AND s.HedefBankoId IS NULL 
+                        AND uzm.Uzmanlik = 2)
+                )
+            ORDER BY
+                hp.TcKimlikNo ASC,
+                DurumOnceligi ASC,
+                UzmanlikOnceligi ASC,
+                s.SiraAlisZamani ASC,
+		            s.SiraNo ASC;
+            */
             var today = DateTime.Today;
 
             // ADIM 1: Verilen sıranın bilgilerini al
@@ -796,53 +986,22 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             if (!hedefPersoneller.Any())
                 return new List<SiraCagirmaResponseDto>();
 
-            // ADIM 3: Her personelin uzmanlık kayıtları (PersonelUzmanlikKayitlari CTE)
-            var personelUzmanlikKayitlari = await (
-                from kp in _context.KanalPersonelleri
-                where hedefPersoneller.Contains(kp.TcKimlikNo)
-                   && kp.Aktiflik == Aktiflik.Aktif
-                   && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok
-                   && !kp.SilindiMi
-                select new
-                {
-                    kp.TcKimlikNo,
-                    kp.KanalAltIslemId,
-                    kp.Uzmanlik
-                }
-            ).Distinct().ToListAsync();
-
-            // ADIM 4: Tüm hedef personellerin sıralarını getir + ConnectionId
-            // Her personel için çağrılmış EN SON sıra ID'lerini al
-            var sonCagirilanSiraIdler = await (
-                from s in _context.Siralar
-                where hedefPersoneller.Contains(s.TcKimlikNo)
-                   && s.BeklemeDurum == BeklemeDurum.Cagrildi
-                   && s.SiraAlisZamani.Date == today
-                   && !s.SilindiMi
-                group s by s.TcKimlikNo into g
-                select new
-                {
-                    TcKimlikNo = g.Key,
-                    SonCagirilanSiraId = g.OrderByDescending(x => x.SiraNo).Select(x => x.SiraId).FirstOrDefault()
-                }
-            ).ToListAsync();
-
-            var sonCagirilanDict = sonCagirilanSiraIdler.ToDictionary(x => x.TcKimlikNo, x => x.SonCagirilanSiraId);
-
-            // Ana sorgu
-            var query = from hp in hedefPersoneller.AsQueryable()
-                        join pPersonel in _context.Personeller on hp equals pPersonel.TcKimlikNo
-                        join bk in _context.BankoKullanicilari on hp equals bk.TcKimlikNo
+            // Ana sorgu - tamamen veritabanında çalışacak şekilde
+            var query = from pPersonel in _context.Personeller
+                        where hedefPersoneller.Contains(pPersonel.TcKimlikNo)
+                        join bk in _context.BankoKullanicilari on pPersonel.TcKimlikNo equals bk.TcKimlikNo
                         join b in _context.Bankolar on bk.BankoId equals b.BankoId
-                        join u in _context.Users on hp equals u.TcKimlikNo
+                        join u in _context.Users on pPersonel.TcKimlikNo equals u.TcKimlikNo
                         join hc in _context.HubConnections on u.TcKimlikNo equals hc.TcKimlikNo
                         join hbc in _context.HubBankoConnections on hc.HubConnectionId equals hbc.HubConnectionId
                         join hb in _context.HizmetBinalari on bk.HizmetBinasiId equals hb.HizmetBinasiId
-                        from uzm in personelUzmanlikKayitlari.Where(pk => pk.TcKimlikNo == hp).DefaultIfEmpty()
-                        join kai in _context.KanalAltIslemleri on uzm.KanalAltIslemId equals kai.KanalAltIslemId
+                        join kp in _context.KanalPersonelleri on pPersonel.TcKimlikNo equals kp.TcKimlikNo
+                        join kai in _context.KanalAltIslemleri on kp.KanalAltIslemId equals kai.KanalAltIslemId
                         join s in _context.Siralar on kai.KanalAltIslemId equals s.KanalAltIslemId
                         join pYonlendiren in _context.Personeller on s.YonlendirenPersonelTc equals pYonlendiren.TcKimlikNo into yonGroup
                         from pYonlendiren in yonGroup.DefaultIfEmpty()
+                        let hp = pPersonel.TcKimlikNo
+                        let uzm = kp
                         where pPersonel.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif
                            && !pPersonel.SilindiMi
                            && !bk.SilindiMi
@@ -851,23 +1010,23 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                            && b.HizmetBinasiId == siraInfo.HizmetBinasiId
                            && u.BankoModuAktif
                            && u.AktifMi
-                           && hc.ConnectionStatus == "online"
+                           && hc.ConnectionStatus == ConnectionStatus.online
                            && !hc.SilindiMi
+                           && kp.Aktiflik == Aktiflik.Aktif
+                           && !kp.SilindiMi
+                           && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok
                            && kai.Aktiflik == Aktiflik.Aktif
                            && !kai.SilindiMi
                            && s.HizmetBinasiId == bk.HizmetBinasiId
                            && !s.SilindiMi
                            && s.SiraAlisZamani.Date == today
-                           && uzm.Uzmanlik != PersonelUzmanlik.BilgisiYok
                            && (
                                 // 1. Normal Bekleyen Sıralar
                                 s.BeklemeDurum == BeklemeDurum.Beklemede
 
                                 // 2. Çağrılmış EN SON Sıra (bu personele ait)
                                 || (s.BeklemeDurum == BeklemeDurum.Cagrildi
-                                    && s.TcKimlikNo == hp
-                                    && sonCagirilanDict.ContainsKey(hp)
-                                    && s.SiraId == sonCagirilanDict[hp])
+                                    && s.TcKimlikNo == hp)
 
                                 // 3. Şef'e Yönlendirilmiş
                                 || (s.BeklemeDurum == BeklemeDurum.Yonlendirildi

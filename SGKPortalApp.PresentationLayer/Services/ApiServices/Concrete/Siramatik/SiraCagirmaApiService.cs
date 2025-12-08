@@ -47,29 +47,45 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
 
         public async Task<SiraCagirmaResponseDto?> SiradakiCagirAsync(int siraId, string personelTcKimlikNo, int? bankoId = null, string? bankoNo = null, int? firstCallableSiraId = null)
         {
-            try
-            {
-                var queryParams = new List<string> { $"personelTcKimlikNo={personelTcKimlikNo}" };
-                
-                if (bankoId.HasValue)
-                    queryParams.Add($"bankoId={bankoId.Value}");
-                
-                if (!string.IsNullOrEmpty(bankoNo))
-                    queryParams.Add($"bankoNo={Uri.EscapeDataString(bankoNo)}");
-                
-                if (firstCallableSiraId.HasValue)
-                    queryParams.Add($"firstCallableSiraId={firstCallableSiraId.Value}");
+            var queryParams = new List<string> { $"personelTcKimlikNo={personelTcKimlikNo}" };
+            
+            if (bankoId.HasValue)
+                queryParams.Add($"bankoId={bankoId.Value}");
+            
+            if (!string.IsNullOrEmpty(bankoNo))
+                queryParams.Add($"bankoNo={Uri.EscapeDataString(bankoNo)}");
+            
+            if (firstCallableSiraId.HasValue)
+                queryParams.Add($"firstCallableSiraId={firstCallableSiraId.Value}");
 
-                var query = string.Join("&", queryParams);
-                var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/siradaki-cagir/{siraId}?{query}", new { });
-                response.EnsureSuccessStatusCode();
-                return await response.Content.ReadFromJsonAsync<SiraCagirmaResponseDto>();
-            }
-            catch (Exception ex)
+            var query = string.Join("&", queryParams);
+            var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/siradaki-cagir/{siraId}?{query}", new { });
+            
+            // ⭐ Race Condition: 409 Conflict - Sıra başka biri tarafından çağrıldı
+            if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
             {
-                Console.WriteLine($"API Hatası - SiradakiCagirAsync: {ex.Message}");
+                var errorContent = await response.Content.ReadAsStringAsync();
+                try
+                {
+                    var errorObj = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(errorContent);
+                    var message = errorObj.TryGetProperty("message", out var msgProp) 
+                        ? msgProp.GetString() 
+                        : "Bu sıra başka bir personel tarafından çağrıldı.";
+                    throw new InvalidOperationException(message);
+                }
+                catch (System.Text.Json.JsonException)
+                {
+                    throw new InvalidOperationException("Bu sıra başka bir personel tarafından çağrıldı.");
+                }
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"API Hatası - SiradakiCagirAsync: {response.StatusCode}");
                 return null;
             }
+
+            return await response.Content.ReadFromJsonAsync<SiraCagirmaResponseDto>();
         }
 
         public async Task<bool> SiraTamamlaAsync(int siraId)
@@ -111,6 +127,20 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             {
                 Console.WriteLine($"API Hatası - GetBankoPanelSiralarAsync: {ex.Message}");
                 return new List<SiraCagirmaResponseDto>();
+            }
+        }
+
+        public async Task<SiraCagirmaResponseDto?> GetIlkCagrilabilirSiraAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var response = await _httpClient.GetFromJsonAsync<SiraCagirmaResponseDto?>($"{BaseUrl}/ilk-cagrilabilir-sira/{tcKimlikNo}");
+                return response;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"API Hatası - GetIlkCagrilabilirSiraAsync: {ex.Message}");
+                return null;
             }
         }
 

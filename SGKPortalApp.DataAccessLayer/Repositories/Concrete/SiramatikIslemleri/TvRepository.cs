@@ -110,5 +110,23 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .Select(tv => new ValueTuple<int, string>(tv.TvId, tv.TvAciklama ?? tv.TvId.ToString()))
                 .ToListAsync();
         }
+
+        // TV'ye bağlı bankoları getirir
+        public async Task<IEnumerable<TvBanko>> GetTvBankolarAsync(int tvId)
+        {
+            return await _context.TvBankolari
+                .AsNoTracking()
+                .Where(tb => tb.TvId == tvId && !tb.SilindiMi)
+                .ToListAsync();
+        }
+
+        // Bankoya bağlı TV'leri getirir (TvBanko ilişkisi üzerinden)
+        public async Task<IEnumerable<TvBanko>> GetTvBankolarByBankoIdAsync(int bankoId)
+        {
+            return await _context.TvBankolari
+                .AsNoTracking()
+                .Where(tb => tb.BankoId == bankoId && !tb.SilindiMi)
+                .ToListAsync();
+        }
     }
 }

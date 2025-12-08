@@ -8,6 +8,7 @@ using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
+using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
@@ -550,6 +551,56 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 _logger.LogError(ex, $"❌ TV User oluşturulurken hata: TvId={tvId} - Transaction rollback yapılıyor");
                 // Transaction otomatik rollback olacak (using block)
                 throw; // Hatayı üst katmana ilet
+            }
+        }
+
+        /// <summary>
+        /// TV'ye bağlı bankolardaki aktif (çağrılmış) sıraları getirir
+        /// Tüm bankolardan son çağrılan sıralar, çağrılma zamanına göre sıralı döner
+        /// Client-side'da TV resolution'a göre satır sayısı belirlenir
+        /// </summary>
+        public async Task<ApiResponseDto<List<TvSiraDto>>> GetActiveSiralarByTvIdAsync(int tvId)
+        {
+            try
+            {
+                var tvRepo = _unitOfWork.GetRepository<ITvRepository>();
+                var bankoHareketRepo = _unitOfWork.GetRepository<IBankoHareketRepository>();
+
+                // TV'yi kontrol et
+                var tv = await tvRepo.GetByIdAsync(tvId);
+                if (tv == null || tv.SilindiMi)
+                {
+                    return ApiResponseDto<List<TvSiraDto>>.ErrorResult("TV bulunamadı");
+                }
+
+                // TV'ye bağlı bankoları al
+                var tvBankolar = await tvRepo.GetTvBankolarAsync(tvId);
+                if (tvBankolar == null || !tvBankolar.Any())
+                {
+                    return ApiResponseDto<List<TvSiraDto>>.SuccessResult(new List<TvSiraDto>(), "TV'ye bağlı banko bulunamadı");
+                }
+
+                var bankoIds = tvBankolar.Select(tb => tb.BankoId).ToList();
+
+                // Tüm bankolardaki aktif sıraları tek sorguda al
+                var aktifHareketler = await bankoHareketRepo.GetAktifSiralarByBankoIdsAsync(bankoIds);
+
+                // DTO'ya dönüştür (çağrılma zamanına göre zaten sıralı geliyor)
+                var siralar = aktifHareketler.Select(bh => new TvSiraDto
+                {
+                    BankoId = bh.BankoId,
+                    BankoNo = bh.Banko?.BankoNo ?? 0,
+                    KatTipi = bh.Banko?.KatTipi.GetDisplayName() ?? "",
+                    SiraNo = bh.SiraNo
+                }).ToList();
+
+                _logger.LogInformation($"TV#{tvId} için {siralar.Count} aktif sıra bulundu");
+                return ApiResponseDto<List<TvSiraDto>>.SuccessResult(siralar);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"TV sıraları getirilirken hata: TvId={tvId}");
+                return ApiResponseDto<List<TvSiraDto>>.ErrorResult($"Sıralar getirilirken hata oluştu: {ex.Message}");
             }
         }
 

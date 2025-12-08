@@ -146,7 +146,7 @@ window.bankoMode = {
             window.location.href = '/auth/login';
         });
 
-        // ⭐ Sıra listesi güncelleme (Kiosk'tan yeni sıra geldiğinde)
+        // ⭐ Sıra listesi güncelleme (Kiosk'tan yeni sıra geldiğinde) - ESKİ
         connection.on("siraListUpdate", (payload) => {
             console.log('📥 siraListUpdate alındı:', payload);
             
@@ -155,6 +155,19 @@ window.bankoMode = {
                 SiraCagirmaPanel.handleSiraUpdate(payload);
             } else {
                 console.warn('⚠️ SiraCagirmaPanel bulunamadı veya handleSiraUpdate metodu yok');
+            }
+        });
+
+        // ⭐ Banko Panel Sıra Güncellemesi (Kiosk sıra alma veya yönlendirme sonrası)
+        // Her personele kendi güncel sıra listesi gönderilir
+        connection.on("BankoPanelSiraGuncellemesi", (payload) => {
+            console.log('📥 BankoPanelSiraGuncellemesi alındı:', payload);
+            
+            // SiraCagirmaPanel varsa güncelle
+            if (typeof SiraCagirmaPanel !== 'undefined' && typeof SiraCagirmaPanel.handleBankoPanelGuncellemesi === 'function') {
+                SiraCagirmaPanel.handleBankoPanelGuncellemesi(payload);
+            } else {
+                console.warn('⚠️ SiraCagirmaPanel bulunamadı veya handleBankoPanelGuncellemesi metodu yok');
             }
         });
 

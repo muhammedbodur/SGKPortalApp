@@ -219,7 +219,15 @@ namespace SGKPortalApp.DataAccessLayer.Repositories
 
             try
             {
-                await transaction.RollbackAsync();
+                // Transaction zaten commit/rollback edilmiş veya dispose edilmişse tekrar rollback yapma
+                if (_currentTransaction != null && transaction == _currentTransaction)
+                {
+                    await transaction.RollbackAsync();
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                // Transaction zaten tamamlanmış (commit/rollback edilmiş), bu durumu yoksay
             }
             finally
             {

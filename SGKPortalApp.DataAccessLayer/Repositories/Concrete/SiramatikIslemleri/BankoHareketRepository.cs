@@ -40,7 +40,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .ToListAsync();
         }
 
-        // Sıraya ait hareketleri getirir
+        // Sıraya ait hareketleri getirir (read-only, detaylı)
         public async Task<IEnumerable<BankoHareket>> GetBySiraAsync(int siraId)
         {
             return await _dbSet
@@ -48,6 +48,15 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .Include(bh => bh.Banko)
                 .Include(bh => bh.Personel)
                 .Include(bh => bh.Sira)
+                .Where(bh => bh.SiraId == siraId)
+                .OrderBy(bh => bh.IslemBaslamaZamani)
+                .ToListAsync();
+        }
+
+        // Sıraya ait hareketleri getirir (güncelleme için, navigation property'siz)
+        public async Task<IEnumerable<BankoHareket>> GetBySiraForUpdateAsync(int siraId)
+        {
+            return await _dbSet
                 .Where(bh => bh.SiraId == siraId)
                 .OrderBy(bh => bh.IslemBaslamaZamani)
                 .ToListAsync();
@@ -173,6 +182,36 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 : 0;
 
             return (toplamIslem, ortalamaSure);
+        }
+
+        // Bankodaki bugünkü son çağrılan sırayı getirir (TV için)
+        public async Task<BankoHareket?> GetSonCagrilanByBankoAsync(int bankoId)
+        {
+            var today = DateTime.Today;
+            return await _dbSet
+                .AsNoTracking()
+                .Where(bh => bh.BankoId == bankoId 
+                          && bh.IslemBaslamaZamani.Date == today
+                          && !bh.SilindiMi)
+                .OrderByDescending(bh => bh.IslemBaslamaZamani)
+                .FirstOrDefaultAsync();
+        }
+
+        // Belirtilen bankolardaki bugünkü son çağrılan sıraları getirir (TV için)
+        // Tamamlanmış olsa bile gösterilir - son çağrılma zamanına göre sıralı
+        public async Task<IEnumerable<BankoHareket>> GetAktifSiralarByBankoIdsAsync(IEnumerable<int> bankoIds)
+        {
+            var today = DateTime.Today;
+            var bankoIdList = bankoIds.ToList();
+            
+            return await _dbSet
+                .AsNoTracking()
+                .Include(bh => bh.Banko)
+                .Where(bh => bankoIdList.Contains(bh.BankoId) 
+                          && bh.IslemBaslamaZamani.Date == today
+                          && !bh.SilindiMi)
+                .OrderByDescending(bh => bh.IslemBaslamaZamani)
+                .ToListAsync();
         }
     }
 }

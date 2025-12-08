@@ -406,6 +406,19 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                 BankoModeState.ActivateBankoMode(bankoId, tcKimlikNo);
                 Logger.LogInformation("🏦 BankoModeState aktif edildi: Banko#{BankoId}, TcKimlikNo={TcKimlikNo}", bankoId, tcKimlikNo);
 
+                // ⭐ Sıra listesini direkt yükle (state kontrolü bypass)
+                try
+                {
+                    var response = await SiraCagirmaApiService.GetBankoPanelSiralarAsync(tcKimlikNo);
+                    siraListesi = response;
+                    Logger.LogInformation("📋 Banko panel sıraları yüklendi: {Count} sıra", siraListesi.Count);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex, "❌ Banko panel sıraları yüklenemedi");
+                    siraListesi = new();
+                }
+
                 // UI güncelle
                 await InvokeAsync(StateHasChanged);
             }

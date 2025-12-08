@@ -211,47 +211,30 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
                 if (siralarResult.Success && siralarResult.Data != null)
                 {
                     // Sadece maksimum görüntülenebilir sayı kadar sıra al
+                    // En son çağrılan sıralar en üstte olacak şekilde sırala
                     siralar = siralarResult.Data
-                        .OrderBy(s => s.SiraNo)
+                        .OrderByDescending(s => s.SiraNo)
                         .Take(_maxVisibleRows)
                         .ToList();
 
-                    Console.WriteLine($"Toplam {siralarResult.Data.Count()} sıra var, {siralar.Count} tanesi gösteriliyor");
+                    Console.WriteLine($"✅ TV#{TvId} için {siralarResult.Data.Count} sıra bulundu, {siralar.Count} tanesi gösteriliyor");
                 }
                 else
                 {
-                    // API henüz hazır değilse test verisi kullan
-                    Console.WriteLine("API'den sıra alınamadı, test verisi kullanılıyor");
-                    siralar = GetTestSiralar().Take(_maxVisibleRows).ToList();
+                    Console.WriteLine($"⚠️ TV#{TvId} için sıra bulunamadı: {siralarResult.Message}");
+                    siralar = new List<TvSiraDto>();
                 }
             }
             catch (Exception ex)
             {
                 errorMessage = $"Hata: {ex.Message}";
-                Console.WriteLine($"TV data yüklenirken hata: {ex.Message}");
-
-                // Hata durumunda test verisi kullan
-                siralar = GetTestSiralar().Take(_maxVisibleRows).ToList();
+                Console.WriteLine($"❌ TV data yüklenirken hata: {ex.Message}");
+                siralar = new List<TvSiraDto>();
             }
             finally
             {
                 isLoading = false;
             }
-        }
-
-        private List<TvSiraDto> GetTestSiralar()
-        {
-            // Test verisi - API hazır olana kadar
-            return new List<TvSiraDto>
-            {
-                new TvSiraDto { BankoId = 1, BankoNo = 1, KatTipi = "Zemin Kat", SiraNo = 101 },
-                new TvSiraDto { BankoId = 2, BankoNo = 2, KatTipi = "Zemin Kat", SiraNo = 102 },
-                new TvSiraDto { BankoId = 3, BankoNo = 3, KatTipi = "Zemin Kat", SiraNo = 103 },
-                new TvSiraDto { BankoId = 4, BankoNo = 4, KatTipi = "Zemin Kat", SiraNo = 104 },
-                new TvSiraDto { BankoId = 5, BankoNo = 5, KatTipi = "Zemin Kat", SiraNo = 105 },
-                new TvSiraDto { BankoId = 6, BankoNo = 6, KatTipi = "Zemin Kat", SiraNo = 106 },
-                new TvSiraDto { BankoId = 7, BankoNo = 7, KatTipi = "Zemin Kat", SiraNo = 107 }
-            };
         }
 
         public async ValueTask DisposeAsync()

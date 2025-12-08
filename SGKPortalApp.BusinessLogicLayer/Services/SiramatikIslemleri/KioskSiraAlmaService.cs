@@ -138,7 +138,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 _logger.LogInformation("📤 SignalR broadcast başlatılıyor. SiraNo: {SiraNo}, HizmetBinasiId: {HizmetBinasiId}, KanalAltIslemId: {KanalAltIslemId}",
                     yeniSira.SiraNo, siraNoBilgisi.HizmetBinasiId, siraNoBilgisi.KanalAltIslemId);
                 
-                await _hubService.BroadcastNewSiraAsync(siraDto, siraNoBilgisi.HizmetBinasiId, siraNoBilgisi.KanalAltIslemId);
+                // ⭐ INCREMENTAL UPDATE: Etkilenen personellere güncel listeyi gönder
+                await _hubService.BroadcastBankoPanelGuncellemesiAsync(yeniSira.SiraId);
 
                 // Response oluştur
                 var response = new KioskSiraAlResponseDto

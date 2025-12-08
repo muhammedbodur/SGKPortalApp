@@ -53,6 +53,16 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         }
 
         /// <summary>
+        /// ⭐ Personelin ilk çağrılabilir sırasını getirir (sadece tek sıra - performans için)
+        /// </summary>
+        [HttpGet("ilk-cagrilabilir-sira/{tcKimlikNo}")]
+        public async Task<IActionResult> GetIlkCagrilabilirSiraAsync(string tcKimlikNo)
+        {
+            var result = await _siraCagirmaService.GetIlkCagrilabilirSiraAsync(tcKimlikNo);
+            return result != null ? Ok(result) : NoContent();
+        }
+
+        /// <summary>
         /// ⭐ INCREMENTAL UPDATE: Belirli bir sıra için etkilenen personellerin güncel listelerini getirir.
         /// Test/Debug amaçlı kullanılabilir. SignalR otomatik olarak çağırır.
         /// </summary>

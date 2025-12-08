@@ -150,7 +150,7 @@ var SiraCagirmaPanel = (function () {
         }
     }
 
-    // ⭐ SignalR'dan gelen sıra güncellemelerini işle
+    // ⭐ SignalR'dan gelen sıra güncellemelerini işle (ESKİ - tek sıra)
     function handleSiraUpdate(payload) {
         console.log('📥 handleSiraUpdate çağrıldı:', payload);
         
@@ -165,6 +165,25 @@ var SiraCagirmaPanel = (function () {
             console.log('✅ Blazor\'a sıra güncellemesi gönderildi');
         } catch (e) {
             console.error('❌ OnSiraUpdateFromSignalR error:', e);
+        }
+    }
+
+    // ⭐ Banko Panel Sıra Güncellemesi (Kiosk sıra alma veya yönlendirme sonrası)
+    // Payload: { siraId, personelTc, siralar: [...], timestamp }
+    function handleBankoPanelGuncellemesi(payload) {
+        console.log('📥 handleBankoPanelGuncellemesi çağrıldı:', payload);
+        
+        if (!dotNetHelper) {
+            console.warn('⚠️ dotNetHelper bulunamadı');
+            return;
+        }
+
+        try {
+            // Blazor component'e bildir - tüm listeyi gönder
+            dotNetHelper.invokeMethodAsync('OnBankoPanelGuncellemesiFromSignalR', payload);
+            console.log('✅ Blazor\'a banko panel güncellemesi gönderildi. Sıra sayısı:', payload.siralar?.length || 0);
+        } catch (e) {
+            console.error('❌ OnBankoPanelGuncellemesiFromSignalR error:', e);
         }
     }
 
@@ -194,7 +213,8 @@ var SiraCagirmaPanel = (function () {
         togglePanel: togglePanel,
         setPin: setPin,
         destroy: destroy,
-        handleSiraUpdate: handleSiraUpdate
+        handleSiraUpdate: handleSiraUpdate,
+        handleBankoPanelGuncellemesi: handleBankoPanelGuncellemesi
     };
 })();
 

@@ -25,6 +25,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
         Task<ApiResponseDto<bool>> AddBankoToTvAsync(int tvId, int bankoId);
         Task<ApiResponseDto<bool>> RemoveBankoFromTvAsync(int tvId, int bankoId);
 
+        // TV Sıra Görüntüleme
+        /// <summary>
+        /// TV'ye bağlı bankolardaki aktif (çağrılmış) sıraları getirir
+        /// </summary>
+        Task<ApiResponseDto<List<TvSiraDto>>> GetActiveSiralarByTvIdAsync(int tvId);
+
         // Utility Methods
         /// <summary>
         /// Tüm mevcut TV'ler için User oluşturur (Migration sonrası kullanım için)

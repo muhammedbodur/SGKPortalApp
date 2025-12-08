@@ -88,5 +88,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .Where(kai => kai.Aktiflik == Aktiflik.Aktif)
                 .ToListAsync();
         }
+
+        // ID ile işlemi getirir (tracking olmadan)
+        public async Task<KanalAltIslem?> GetByIdNoTrackingAsync(int kanalAltIslemId)
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .FirstOrDefaultAsync(kai => kai.KanalAltIslemId == kanalAltIslemId);
+        }
     }
 }
