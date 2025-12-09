@@ -514,15 +514,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     var tetikleyenSira = group.Siralar.FirstOrDefault(s => s.SiraId == siraId);
                     var pozisyon = tetikleyenSira != null ? group.Siralar.IndexOf(tetikleyenSira) : -1;
 
-                    var payload = new
+                    // ⭐ Profesyonel DTO yapısı (Request/Command Pattern)
+                    var payload = new BankoPanelSiraGuncellemesiDto
                     {
-                        siraId = siraId,
-                        personelTc = group.PersonelTc,
-                        // ⭐ Sadece yeni/değişen sıra gönderiliyor (tüm liste değil!)
-                        sira = tetikleyenSira,
-                        pozisyon = pozisyon, // Listedeki pozisyonu
-                        toplamSiraSayisi = group.Siralar.Count,
-                        timestamp = DateTime.Now
+                        SiraId = siraId,
+                        PersonelTc = group.PersonelTc,
+                        Sira = tetikleyenSira,
+                        Pozisyon = pozisyon,
+                        ToplamSiraSayisi = group.Siralar.Count,
+                        Timestamp = DateTime.Now
                     };
 
                     await _broadcaster.SendToConnectionsAsync(new[] { group.ConnectionId }, "BankoPanelSiraGuncellemesi", payload);
