@@ -209,12 +209,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             // ⭐ Request/Command Pattern
             if (result.Success && siraDto != null)
             {
+                // 1️⃣ Personel panellerine yönlendirme bildirimi gönder
                 await _hubService.BroadcastSiraRedirectedAsync(new BroadcastSiraRedirectedRequest
                 {
                     Sira = siraDto,
                     SourceBankoId = request.YonlendirenBankoId,
                     TargetBankoId = hedefBankoIdForBroadcast,
                     SourcePersonelTc = request.YonlendirenPersonelTc
+                });
+
+                // 2️⃣ Kaynak bankonun TV'lerine güncellenmiş sıra listesi gönder
+                // (Yönlendirilen sıra TV'den kalkacak çünkü BankoHareket tamamlanmış)
+                await _hubService.BroadcastSiraCalledToTvAsync(new BroadcastSiraCalledToTvRequest
+                {
+                    Sira = siraDto,
+                    BankoId = request.YonlendirenBankoId,
+                    BankoNo = string.Empty // GetByIdAsync ile bulunacak
                 });
             }
 
