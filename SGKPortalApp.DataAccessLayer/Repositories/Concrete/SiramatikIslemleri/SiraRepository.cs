@@ -198,7 +198,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         }
 
         // Sırayı yönlendir
-        public async Task<bool> YonlendirSiraAsync(int siraId, int yonlendirenBankoId, int hedefBankoId, string yonlendirenPersonelTc, YonlendirmeTipi yonlendirmeTipi, string? yonlendirmeNedeni)
+        public async Task<bool> YonlendirSiraAsync(int siraId, int yonlendirenBankoId, int? hedefBankoId, string yonlendirenPersonelTc, YonlendirmeTipi yonlendirmeTipi, string? yonlendirmeNedeni)
         {
             var sira = await GetSiraForYonlendirmeAsync(siraId);
             if (sira == null)

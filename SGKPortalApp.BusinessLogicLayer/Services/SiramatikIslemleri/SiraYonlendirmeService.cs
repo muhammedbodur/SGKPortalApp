@@ -52,7 +52,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         {
             // Broadcast için gerekli bilgiler
             SiraCagirmaResponseDto? siraDto = null;
-            int hedefBankoIdForBroadcast = 0;
+            int? hedefBankoIdForBroadcast = null;
 
             var result = await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
@@ -106,32 +106,35 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     // ═══════════════════════════════════════════════════════
                     // YÖNLENDİRME TİPİNE GÖRE VALIDASYONLAR
                     // ═══════════════════════════════════════════════════════
-                    int hedefBankoId;
+                    int? hedefBankoId = null;
 
                     switch (request.YonlendirmeTipi)
                     {
                         case YonlendirmeTipi.BaskaBanko:
-                            hedefBankoId = await ValidateBaskaBankoYonlendirme(request);
-                            if (hedefBankoId <= 0)
+                            var baskaBankoId = await ValidateBaskaBankoYonlendirme(request);
+                            if (baskaBankoId <= 0)
                             {
                                 return ApiResponseDto<bool>.ErrorResult("Hedef banko geçerli değil");
                             }
+                            hedefBankoId = baskaBankoId;
                             break;
 
                         case YonlendirmeTipi.Sef:
-                            hedefBankoId = await ValidateSefYonlendirme(sira.KanalAltIslemId);
-                            if (hedefBankoId <= 0)
+                            var sefResult = await ValidateSefYonlendirme(sira.KanalAltIslemId);
+                            if (sefResult <= 0)
                             {
                                 return ApiResponseDto<bool>.ErrorResult("Şu anda aktif şef personeli bulunmuyor");
                             }
+                            hedefBankoId = null; // Şef yönlendirmelerinde hedef banko bilgisi saklanmaz
                             break;
 
                         case YonlendirmeTipi.UzmanPersonel:
-                            hedefBankoId = await ValidateUzmanYonlendirme(sira.KanalAltIslemId);
-                            if (hedefBankoId <= 0)
+                            var uzmanResult = await ValidateUzmanYonlendirme(sira.KanalAltIslemId);
+                            if (uzmanResult <= 0)
                             {
                                 return ApiResponseDto<bool>.ErrorResult("Şu anda aktif uzman personel bulunmuyor");
                             }
+                            hedefBankoId = null; // Uzman yönlendirmelerinde hedef banko bilgisi saklanmaz
                             break;
 
                         default:
@@ -175,7 +178,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                     _logger.LogInformation(
                         "Sıra yönlendirildi. SiraId: {SiraId}, SiraNo: {SiraNo}, Kaynak: {KaynakBankoId}, Hedef: {HedefBankoId}, Tip: {YonlendirmeTipi}",
-                        sira.SiraId, sira.SiraNo, request.YonlendirenBankoId, hedefBankoId, request.YonlendirmeTipi);
+                        sira.SiraId, sira.SiraNo, request.YonlendirenBankoId, hedefBankoId.HasValue ? hedefBankoId.Value.ToString() : "Yok", request.YonlendirmeTipi);
 
                     // Broadcast için bilgileri kaydet
                     siraDto = new SiraCagirmaResponseDto
@@ -221,8 +224,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         {
             try
             {
+                if (!request.HedefBankoId.HasValue || request.HedefBankoId.Value <= 0)
+                {
+                    _logger.LogWarning("Hedef banko ID boş veya geçersiz. HedefBankoId: {HedefBankoId}", request.HedefBankoId);
+                    return -1;
+                }
+
                 // Hedef banko kontrolü
-                var hedefBanko = await _bankoRepository.GetByIdAsync(request.HedefBankoId);
+                var hedefBanko = await _bankoRepository.GetByIdAsync(request.HedefBankoId.Value);
                 if (hedefBanko == null)
                 {
                     _logger.LogWarning("Hedef banko bulunamadı. HedefBankoId: {HedefBankoId}", request.HedefBankoId);
@@ -230,14 +239,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 }
 
                 // Aynı bankoya yönlendirme kontrolü
-                if (request.YonlendirenBankoId == request.HedefBankoId)
+                if (request.YonlendirenBankoId == request.HedefBankoId.Value)
                 {
                     _logger.LogWarning("Aynı bankoya yönlendirme denemesi. BankoId: {BankoId}", request.HedefBankoId);
                     return -1;
                 }
 
                 // Hedef bankonun personeli var mı ve banko modunda mı?
-                var hedefBankoKullanici = await _bankoKullaniciRepository.GetByBankoAsync(request.HedefBankoId);
+                var hedefBankoKullanici = await _bankoKullaniciRepository.GetByBankoAsync(request.HedefBankoId.Value);
                 if (hedefBankoKullanici == null)
                 {
                     _logger.LogWarning("Hedef bankoda personel atanmamış. HedefBankoId: {HedefBankoId}", request.HedefBankoId);
@@ -246,7 +255,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 // Hedef banko personeli aktif mi? (BankoModuAktif=1 ve AktifBankoId>0)
                 var hedefUser = await _userRepository.GetByTcKimlikNoAsync(hedefBankoKullanici.TcKimlikNo);
-                if (hedefUser == null || !hedefUser.BankoModuAktif || hedefUser.AktifBankoId != request.HedefBankoId)
+                if (hedefUser == null || !hedefUser.BankoModuAktif || hedefUser.AktifBankoId != request.HedefBankoId.Value)
                 {
                     _logger.LogWarning(
                         "Hedef banko personeli aktif değil. PersonelTc: {TcKimlikNo}, BankoModuAktif: {BankoModuAktif}, AktifBankoId: {AktifBankoId}",
@@ -254,7 +263,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     return -1;
                 }
 
-                return request.HedefBankoId;
+                return request.HedefBankoId.Value;
             }
             catch (Exception ex)
             {

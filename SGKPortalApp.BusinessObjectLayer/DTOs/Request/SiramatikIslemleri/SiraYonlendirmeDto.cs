@@ -15,8 +15,8 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri
         [Required(ErrorMessage = "Kaynak banko bilgisi gereklidir")]
         public int YonlendirenBankoId { get; set; }
 
-        [Required(ErrorMessage = "Hedef banko seçilmelidir")]
-        public int HedefBankoId { get; set; }
+        // Hedef banko sadece "Başka Banko" yönlendirmelerinde zorunludur
+        public int? HedefBankoId { get; set; }
 
         [Required(ErrorMessage = "Yönlendirme tipi seçilmelidir")]
         public YonlendirmeTipi YonlendirmeTipi { get; set; }

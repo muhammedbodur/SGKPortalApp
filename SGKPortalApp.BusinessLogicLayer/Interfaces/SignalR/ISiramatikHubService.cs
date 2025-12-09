@@ -40,7 +40,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR
         Task BroadcastSiraRedirectedAsync(
             SiraCagirmaResponseDto sira,
             int sourceBankoId,
-            int targetBankoId,
+            int? targetBankoId,
             string sourcePersonelTc);
 
         /// <summary>

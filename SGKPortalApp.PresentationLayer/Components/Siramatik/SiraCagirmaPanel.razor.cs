@@ -482,9 +482,10 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
         private bool CanSubmitYonlendirme => SelectedYonlendirmeTipi switch
         {
             null => false,
-            YonlendirmeTipi.BaskaBanko => !string.IsNullOrWhiteSpace(selectedBankoId),
-            YonlendirmeTipi.UzmanPersonel => !string.IsNullOrWhiteSpace(selectedUzmanPersonelTc),
-            _ => true
+            // Başka Banko: mutlaka hedef banko seçilmeli
+            YonlendirmeTipi.BaskaBanko => yonlendirmeIcinSecilenSira != null && !string.IsNullOrWhiteSpace(selectedBankoId),
+            // Şef ve Uzman Personel: sadece sıra ve tip seçimi yeterli, hedef banko backend'de bulunacak
+            _ => yonlendirmeIcinSecilenSira != null
         };
 
         /// <summary>
@@ -588,29 +589,15 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
 
             try
             {
-                // Hedef banko ID'yi belirle
-                int hedefBankoId;
-                if (SelectedYonlendirmeTipi == YonlendirmeTipi.BaskaBanko)
-                {
-                    if (!int.TryParse(selectedBankoId, out hedefBankoId))
-                    {
-                        yonlendirmeErrorMessage = "Geçersiz banko seçimi";
-                        return;
-                    }
-                }
-                else
-                {
-                    // Şef veya Uzman Personel için hedef banko ID şimdilik 0
-                    // TODO: Gerçek senaryoda Şef/Uzman masalarının banko ID'leri kullanılabilir
-                    hedefBankoId = AktifBankoId;
-                }
-
                 var request = new SiraYonlendirmeDto
                 {
                     SiraId = yonlendirmeIcinSecilenSira.SiraId,
                     YonlendirenPersonelTc = PersonelTcKimlikNo,
                     YonlendirenBankoId = AktifBankoId,
-                    HedefBankoId = hedefBankoId,
+                    // Yalnızca Başka Banko tipinde hedef banko gönderilir, diğerlerinde backend aktif bankoyu bulur
+                    HedefBankoId = SelectedYonlendirmeTipi == YonlendirmeTipi.BaskaBanko && int.TryParse(selectedBankoId, out var parsedId)
+                        ? parsedId
+                        : (int?)null,
                     YonlendirmeTipi = SelectedYonlendirmeTipi.Value,
                     YonlendirmeNedeni = string.IsNullOrWhiteSpace(yonlendirmeNotu) ? null : yonlendirmeNotu
                 };

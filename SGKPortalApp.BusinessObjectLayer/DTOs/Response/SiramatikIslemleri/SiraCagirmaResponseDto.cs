@@ -17,6 +17,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
         public string? PersonelAdSoyad { get; set; }
         public int HizmetBinasiId { get; set; }
         public string HizmetBinasiAdi { get; set; } = string.Empty;
+        public int? BankoId { get; set; }
         public int KanalAltIslemId { get; set; } // SignalR broadcast için gerekli
         public PersonelUzmanlik Uzmanlik { get; set; }
 

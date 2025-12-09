@@ -145,7 +145,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         public async Task BroadcastSiraRedirectedAsync(
             SiraCagirmaResponseDto sira,
             int sourceBankoId,
-            int targetBankoId,
+            int? targetBankoId,
             string sourcePersonelTc)
         {
             try
@@ -163,9 +163,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
 
                 await SendToPersonelAsync(sourcePersonelTc, SiraListUpdate, removePayload);
 
-                // Hedef personellere INSERT gönder - her personel için komşu sıraları hesapla
+                // Hedef veya müsait tüm personellere INSERT gönder - her personel için komşu sıraları hesapla
                 var targetPersonelSiralar = await _siramatikQueryRepository.GetBankoPanelBekleyenSiralarBySiraIdAsync(sira.SiraId);
                 
+                if (targetBankoId.HasValue)
+                {
+                    targetPersonelSiralar = targetPersonelSiralar
+                        .Where(x => x.BankoId == targetBankoId.Value)
+                        .ToList();
+                }
+
                 if (targetPersonelSiralar.Any())
                 {
                     // PersonelTc'ye göre grupla
@@ -198,11 +205,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                             nextSiraId = siralar[siraIndex + 1].SiraId;
                         }
 
+                        var hedefBanko = targetBankoId ?? siralar.FirstOrDefault()?.BankoId ?? 0;
+
                         var insertPayload = new SiraUpdatePayloadDto
                         {
                             UpdateType = SiraUpdateType.Insert,
                             Sira = guncelSira, // ⭐ Güncel sıra bilgisi (YonlendirmeAciklamasi dahil)
-                            BankoId = targetBankoId,
+                            BankoId = hedefBanko,
                             Position = siraIndex >= 0 ? siraIndex : 0,
                             PreviousSiraId = previousSiraId,
                             NextSiraId = nextSiraId,
@@ -212,13 +221,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
 
                         await SendToPersonelAsync(personelTc!, SiraListUpdate, insertPayload);
                         
-                        _logger.LogInformation("📤 INSERT gönderildi: TC={PersonelTc}, SiraId={SiraId}, Prev={Prev}, Next={Next}",
-                            personelTc, sira.SiraId, previousSiraId, nextSiraId);
+                        _logger.LogInformation("📤 INSERT gönderildi: TC={PersonelTc}, SiraId={SiraId}, BankoId={BankoId}, Prev={Prev}, Next={Next}",
+                            personelTc, sira.SiraId, hedefBanko, previousSiraId, nextSiraId);
                     }
+                }
+                else if (!targetBankoId.HasValue)
+                {
+                    _logger.LogInformation("ℹ️ Şef/Uzman yönlendirmesinde aktif uzman bulunamadı, sadece kaynak personel bilgilendirildi. SiraId: {SiraId}",
+                        sira.SiraId);
                 }
 
                 _logger.LogInformation("📤 SiraRedirected broadcast edildi. SiraId: {SiraId}, Kaynak: {SourceBanko}, Hedef: {TargetBanko}",
-                    sira.SiraId, sourceBankoId, targetBankoId);
+                    sira.SiraId, sourceBankoId, targetBankoId.HasValue ? targetBankoId.Value.ToString() : "Yok");
             }
             catch (Exception ex)
             {
