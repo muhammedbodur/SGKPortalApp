@@ -9,6 +9,7 @@ using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
 {
@@ -296,12 +297,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         {
             try
             {
-                var tvPayload = new
+                // ⭐ Profesyonel DTO yapısı
+                var tvPayload = new TvSiraUpdateDto
                 {
-                    siraNo = sira.SiraNo,
-                    bankoNo = bankoNo,
-                    kanalAltAdi = sira.KanalAltAdi,
-                    timestamp = DateTime.Now
+                    SiraNo = sira.SiraNo,
+                    BankoNo = bankoNo,
+                    KanalAltAdi = sira.KanalAltAdi,
+                    Timestamp = DateTime.Now
                 };
 
                 // Hizmet binasındaki tüm TV'lere gönder
@@ -326,11 +328,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         {
             try
             {
-                // Banko bilgilerini al (katTipi ve bankoNo için)
+                // Banko bilgilerini al (katTipi, bankoNo ve bankoTipi için)
                 var bankoRepo = _unitOfWork.GetRepository<IBankoRepository>();
                 var banko = await bankoRepo.GetByIdAsync(bankoId);
-                
+
                 string katTipi = banko?.KatTipi.GetDisplayName() ?? "";
+                string bankoTipi = banko?.BankoTipi.GetDisplayName() ?? "BANKO";
                 // bankoNo parametresi boş gelebilir, veritabanından al
                 string actualBankoNo = !string.IsNullOrEmpty(bankoNo) ? bankoNo : (banko?.BankoNo.ToString() ?? "");
 
@@ -369,27 +372,26 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
 
                     // Tüm bankolardaki güncel sıraları al (sıra çağırma paneli mantığı)
                     var aktifHareketler = await bankoHareketRepo.GetAktifSiralarByBankoIdsAsync(bankoIds);
-                    var siralar = aktifHareketler.Select(bh => new
+                    var siralar = aktifHareketler.Select(bh => new TvSiraItemDto
                     {
-                        bankoId = bh.BankoId,
-                        bankoNo = bh.Banko?.BankoNo ?? 0,
-                        katTipi = bh.Banko?.KatTipi.GetDisplayName() ?? "",
-                        siraNo = bh.SiraNo
+                        BankoId = bh.BankoId,
+                        BankoNo = bh.Banko?.BankoNo ?? 0,
+                        KatTipi = bh.Banko?.KatTipi.GetDisplayName() ?? "",
+                        SiraNo = bh.SiraNo
                     }).ToList();
 
-                    // Payload: Overlay bilgisi + tüm güncel liste
-                    var tvPayload = new
+                    // ⭐ Profesyonel DTO yapısı (Request/Command Pattern)
+                    var tvPayload = new TvSiraCalledDto
                     {
-                        // Overlay için (yeni çağrılan sıra)
-                        siraNo = sira.SiraNo,
-                        bankoNo = actualBankoNo,
-                        bankoId = bankoId,
-                        katTipi = katTipi,
-                        kanalAltAdi = sira.KanalAltAdi,
-                        updateType = "SiraCalled",
-                        // Tüm güncel liste
-                        siralar = siralar,
-                        timestamp = DateTime.Now
+                        SiraNo = sira.SiraNo,
+                        BankoNo = actualBankoNo,
+                        BankoId = bankoId,
+                        BankoTipi = bankoTipi,
+                        KatTipi = katTipi,
+                        KanalAltAdi = sira.KanalAltAdi,
+                        UpdateType = "SiraCalled",
+                        Siralar = siralar,
+                        Timestamp = DateTime.Now
                     };
 
                     await _broadcaster.SendToConnectionsAsync(connectionIds, "TvSiraGuncellendi", tvPayload);
