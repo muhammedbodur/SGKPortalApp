@@ -183,11 +183,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 // Hedef veya müsait tüm personellere INSERT gönder - her personel için komşu sıraları hesapla
                 var targetPersonelSiralar = await _siramatikQueryRepository.GetBankoPanelBekleyenSiralarBySiraIdAsync(request.Sira.SiraId);
 
+                _logger.LogInformation("🔍 Yönlendirme hedef sorgusu: SiraId={SiraId}, Bulunan={Count} kayıt, TargetBankoId={TargetBankoId}",
+                    request.Sira.SiraId, targetPersonelSiralar.Count, request.TargetBankoId);
+
                 if (request.TargetBankoId.HasValue)
                 {
+                    var beforeFilter = targetPersonelSiralar.Count;
                     targetPersonelSiralar = targetPersonelSiralar
                         .Where(x => x.BankoId == request.TargetBankoId.Value)
                         .ToList();
+
+                    _logger.LogInformation("🔍 Banko filtresi uygulandı: {Before} -> {After} kayıt (BankoId={BankoId})",
+                        beforeFilter, targetPersonelSiralar.Count, request.TargetBankoId.Value);
                 }
 
                 if (targetPersonelSiralar.Any())
@@ -197,6 +204,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                         .Where(x => x.PersonelTc != request.SourcePersonelTc) // Kaynak personeli hariç tut
                         .GroupBy(x => x.PersonelTc)
                         .ToList();
+
+                    _logger.LogInformation("🔍 Hedef personel grupları: {Count} grup (Kaynak personel hariç: {SourceTc})",
+                        personelGroups.Count, request.SourcePersonelTc);
+
+                    if (!personelGroups.Any())
+                    {
+                        _logger.LogWarning("⚠️ Hedef personel bulunamadı! Tüm personeller kaynak personel ({SourceTc}) veya filtrelerden elendi.",
+                            request.SourcePersonelTc);
+                    }
 
                     foreach (var group in personelGroups)
                     {
@@ -242,10 +258,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                             personelTc, request.Sira.SiraId, hedefBanko, previousSiraId, nextSiraId);
                     }
                 }
-                else if (!request.TargetBankoId.HasValue)
+                else
                 {
-                    _logger.LogInformation("ℹ️ Şef/Uzman yönlendirmesinde aktif uzman bulunamadı, sadece kaynak personel bilgilendirildi. SiraId: {SiraId}",
-                        request.Sira.SiraId);
+                    // Liste boş - hedef personel bulunamadı
+                    if (request.TargetBankoId.HasValue)
+                    {
+                        _logger.LogWarning("⚠️ BAŞKA BANKO yönlendirmesi - Hedef bankoda (BankoId={BankoId}) aktif personel bulunamadı! " +
+                            "Olası sebepler: 1) Personel offline, 2) BankoModuAktif=false, 3) Başka binada. SiraId: {SiraId}",
+                            request.TargetBankoId.Value, request.Sira.SiraId);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("⚠️ ŞEF/UZMAN yönlendirmesi - Aktif şef/uzman personel bulunamadı! " +
+                            "Olası sebepler: 1) Personel offline, 2) BankoModuAktif=false, 3) Başka binada, 4) Uzmanlık seviyesi uyumsuz. " +
+                            "YonlendirmeTipi={YonlendirmeTipi}, SiraId: {SiraId}",
+                            request.Sira.YonlendirmeTipi, request.Sira.SiraId);
+                    }
                 }
 
                 _logger.LogInformation("📤 SiraRedirected broadcast edildi. SiraId: {SiraId}, Kaynak: {SourceBanko}, Hedef: {TargetBanko}",
