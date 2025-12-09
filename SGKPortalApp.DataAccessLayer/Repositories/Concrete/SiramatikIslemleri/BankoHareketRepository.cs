@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Generic;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
@@ -207,9 +208,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(bh => bh.Banko)
-                .Where(bh => bankoIdList.Contains(bh.BankoId) 
-                          && bh.IslemBaslamaZamani.Date == today
-                          && !bh.SilindiMi)
+                .Include(bh => bh.Sira)
+                .Where(bh => bankoIdList.Contains(bh.BankoId)
+                    && bh.Sira.BeklemeDurum == BeklemeDurum.Cagrildi
+                    && bh.IslemBaslamaZamani.Date == today
+                    && !bh.SilindiMi)
                 .OrderByDescending(bh => bh.IslemBaslamaZamani)
                 .ToListAsync();
         }
