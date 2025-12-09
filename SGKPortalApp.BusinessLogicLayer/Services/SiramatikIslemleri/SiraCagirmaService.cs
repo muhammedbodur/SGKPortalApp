@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SignalR;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
@@ -229,16 +230,31 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
             // ═══════════════════════════════════════════════════════
             // SIGNALR BROADCAST - Transaction tamamlandıktan sonra
+            // ⭐ Request/Command Pattern
             // ═══════════════════════════════════════════════════════
-            await _hubService.BroadcastSiraCalledAsync(result, bankoId ?? 0, bankoNo ?? "", personelTcKimlikNo);
+            await _hubService.BroadcastSiraCalledAsync(new BroadcastSiraCalledRequest
+            {
+                Sira = result,
+                CallerBankoId = bankoId ?? 0,
+                BankoNo = bankoNo ?? "",
+                CallerPersonelTc = personelTcKimlikNo
+            });
 
             // ⭐ INCREMENTAL UPDATE: Etkilenen personellere güncel listeyi gönder
-            await _hubService.BroadcastBankoPanelGuncellemesiAsync(siraId);
+            await _hubService.BroadcastBankoPanelGuncellemesiAsync(new BroadcastBankoPanelGuncellemesiRequest
+            {
+                SiraId = siraId
+            });
 
             // ⭐ TV'lere bildirim gönder
             if (bankoId.HasValue && bankoId.Value > 0)
             {
-                await _hubService.BroadcastSiraCalledToTvAsync(result, bankoId.Value, bankoNo ?? "");
+                await _hubService.BroadcastSiraCalledToTvAsync(new BroadcastSiraCalledToTvRequest
+                {
+                    Sira = result,
+                    BankoId = bankoId.Value,
+                    BankoNo = bankoNo ?? ""
+                });
             }
 
             return result;
@@ -285,7 +301,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             await _unitOfWork.SaveChangesAsync();
 
             // SignalR broadcast - Business katmanında
-            _ = _hubService.BroadcastSiraCompletedAsync(siraId, hizmetBinasiId, kanalAltIslemId);
+            // ⭐ Request/Command Pattern
+            _ = _hubService.BroadcastSiraCompletedAsync(new BroadcastSiraCompletedRequest
+            {
+                SiraId = siraId,
+                HizmetBinasiId = hizmetBinasiId,
+                KanalAltIslemId = kanalAltIslemId
+            });
 
             return true;
         }
@@ -310,7 +332,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             await _unitOfWork.SaveChangesAsync();
 
             // SignalR broadcast - Business katmanında
-            _ = _hubService.BroadcastSiraCancelledAsync(siraId, hizmetBinasiId, kanalAltIslemId);
+            // ⭐ Request/Command Pattern
+            _ = _hubService.BroadcastSiraCancelledAsync(new BroadcastSiraCancelledRequest
+            {
+                SiraId = siraId,
+                HizmetBinasiId = hizmetBinasiId,
+                KanalAltIslemId = kanalAltIslemId
+            });
 
             return true;
         }
