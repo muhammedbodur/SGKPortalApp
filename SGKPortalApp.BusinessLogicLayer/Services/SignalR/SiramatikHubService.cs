@@ -98,26 +98,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         }
 
         /// <summary>
-        /// Sıra çağrıldığında ilgili banko panellerine bildirim gönder
-        /// [DEPRECATED] Use BroadcastSiraCalledAsync(BroadcastSiraCalledRequest) instead
-        /// </summary>
-        [Obsolete("Use BroadcastSiraCalledAsync(BroadcastSiraCalledRequest) instead. This method will be removed in future versions.")]
-        public async Task BroadcastSiraCalledAsync(
-            SiraCagirmaResponseDto sira,
-            int callerBankoId,
-            string bankoNo,
-            string callerPersonelTc)
-        {
-            await BroadcastSiraCalledAsync(new BroadcastSiraCalledRequest
-            {
-                Sira = sira,
-                CallerBankoId = callerBankoId,
-                BankoNo = bankoNo,
-                CallerPersonelTc = callerPersonelTc
-            });
-        }
-
-        /// <summary>
         /// Sıra tamamlandığında ilgili banko panellerine bildirim gönder
         /// ⭐ Request/Command Pattern
         /// </summary>
@@ -149,21 +129,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         }
 
         /// <summary>
-        /// Sıra tamamlandığında ilgili banko panellerine bildirim gönder
-        /// [DEPRECATED] Use BroadcastSiraCompletedAsync(BroadcastSiraCompletedRequest) instead
-        /// </summary>
-        [Obsolete("Use BroadcastSiraCompletedAsync(BroadcastSiraCompletedRequest) instead.")]
-        public async Task BroadcastSiraCompletedAsync(int siraId, int hizmetBinasiId, int kanalAltIslemId)
-        {
-            await BroadcastSiraCompletedAsync(new BroadcastSiraCompletedRequest
-            {
-                SiraId = siraId,
-                HizmetBinasiId = hizmetBinasiId,
-                KanalAltIslemId = kanalAltIslemId
-            });
-        }
-
-        /// <summary>
         /// Sıra iptal edildiğinde ilgili banko panellerine bildirim gönder
         /// ⭐ Request/Command Pattern
         /// </summary>
@@ -192,21 +157,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             {
                 _logger.LogError(ex, "❌ SiraCancelled broadcast hatası. SiraId: {SiraId}", request.SiraId);
             }
-        }
-
-        /// <summary>
-        /// Sıra iptal edildiğinde ilgili banko panellerine bildirim gönder
-        /// [DEPRECATED] Use BroadcastSiraCancelledAsync(BroadcastSiraCancelledRequest) instead
-        /// </summary>
-        [Obsolete("Use BroadcastSiraCancelledAsync(BroadcastSiraCancelledRequest) instead.")]
-        public async Task BroadcastSiraCancelledAsync(int siraId, int hizmetBinasiId, int kanalAltIslemId)
-        {
-            await BroadcastSiraCancelledAsync(new BroadcastSiraCancelledRequest
-            {
-                SiraId = siraId,
-                HizmetBinasiId = hizmetBinasiId,
-                KanalAltIslemId = kanalAltIslemId
-            });
         }
 
         /// <summary>
@@ -307,26 +257,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             }
         }
 
-        /// <summary>
-        /// Sıra yönlendirildiğinde kaynak ve hedef banko panellerine bildirim gönder
-        /// [DEPRECATED] Use BroadcastSiraRedirectedAsync(BroadcastSiraRedirectedRequest) instead
-        /// </summary>
-        [Obsolete("Use BroadcastSiraRedirectedAsync(BroadcastSiraRedirectedRequest) instead.")]
-        public async Task BroadcastSiraRedirectedAsync(
-            SiraCagirmaResponseDto sira,
-            int sourceBankoId,
-            int? targetBankoId,
-            string sourcePersonelTc)
-        {
-            await BroadcastSiraRedirectedAsync(new BroadcastSiraRedirectedRequest
-            {
-                Sira = sira,
-                SourceBankoId = sourceBankoId,
-                TargetBankoId = targetBankoId,
-                SourcePersonelTc = sourcePersonelTc
-            });
-        }
-
         // ═══════════════════════════════════════════════════════
         // KIOSK / YENİ SIRA BİLDİRİMLERİ
         // ═══════════════════════════════════════════════════════
@@ -374,24 +304,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             }
         }
 
-        /// <summary>
-        /// Yeni sıra alındığında (Kiosk'tan) ilgili banko panellerine bildirim gönder
-        /// [DEPRECATED] Use BroadcastNewSiraAsync(BroadcastNewSiraRequest) instead
-        /// </summary>
-        [Obsolete("Use BroadcastNewSiraAsync(BroadcastNewSiraRequest) instead.")]
-        public async Task BroadcastNewSiraAsync(
-            SiraCagirmaResponseDto sira,
-            int hizmetBinasiId,
-            int kanalAltIslemId)
-        {
-            await BroadcastNewSiraAsync(new BroadcastNewSiraRequest
-            {
-                Sira = sira,
-                HizmetBinasiId = hizmetBinasiId,
-                KanalAltIslemId = kanalAltIslemId
-            });
-        }
-
         // ═══════════════════════════════════════════════════════
         // TV EKRANI BİLDİRİMLERİ
         // ═══════════════════════════════════════════════════════
@@ -424,24 +336,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             {
                 _logger.LogError(ex, "❌ TV broadcast hatası. SiraNo: {SiraNo}", request.Sira.SiraNo);
             }
-        }
-
-        /// <summary>
-        /// Sıra çağrıldığında TV ekranlarına bildirim gönder (eski yapı)
-        /// [DEPRECATED] Use BroadcastSiraToTvAsync(BroadcastSiraToTvRequest) instead
-        /// </summary>
-        [Obsolete("Use BroadcastSiraToTvAsync(BroadcastSiraToTvRequest) instead.")]
-        public async Task BroadcastSiraToTvAsync(
-            SiraCagirmaResponseDto sira,
-            string bankoNo,
-            int hizmetBinasiId)
-        {
-            await BroadcastSiraToTvAsync(new BroadcastSiraToTvRequest
-            {
-                Sira = sira,
-                BankoNo = bankoNo,
-                HizmetBinasiId = hizmetBinasiId
-            });
         }
 
         /// <summary>
@@ -529,21 +423,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             {
                 _logger.LogError(ex, "❌ TV sıra çağırma broadcast hatası. SiraId: {SiraId}, BankoId: {BankoId}", request.Sira.SiraId, request.BankoId);
             }
-        }
-
-        /// <summary>
-        /// Sıra çağırıldığında TV'lere bildirim gönderir
-        /// [DEPRECATED] Use BroadcastSiraCalledToTvAsync(BroadcastSiraCalledToTvRequest) instead
-        /// </summary>
-        [Obsolete("Use BroadcastSiraCalledToTvAsync(BroadcastSiraCalledToTvRequest) instead.")]
-        public async Task BroadcastSiraCalledToTvAsync(SiraCagirmaResponseDto sira, int bankoId, string bankoNo)
-        {
-            await BroadcastSiraCalledToTvAsync(new BroadcastSiraCalledToTvRequest
-            {
-                Sira = sira,
-                BankoId = bankoId,
-                BankoNo = bankoNo
-            });
         }
 
         #region Private Helper Methods
@@ -682,17 +561,5 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             }
         }
 
-        /// <summary>
-        /// Sıra alındığında/yönlendirildiğinde etkilenen personellere güncelleme gönderir
-        /// [DEPRECATED] Use BroadcastBankoPanelGuncellemesiAsync(BroadcastBankoPanelGuncellemesiRequest) instead
-        /// </summary>
-        [Obsolete("Use BroadcastBankoPanelGuncellemesiAsync(BroadcastBankoPanelGuncellemesiRequest) instead.")]
-        public async Task BroadcastBankoPanelGuncellemesiAsync(int siraId)
-        {
-            await BroadcastBankoPanelGuncellemesiAsync(new BroadcastBankoPanelGuncellemesiRequest
-            {
-                SiraId = siraId
-            });
-        }
     }
 }
