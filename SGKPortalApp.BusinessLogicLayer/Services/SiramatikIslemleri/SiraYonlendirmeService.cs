@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SignalR;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
@@ -205,13 +206,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             });
 
             // Transaction tamamlandıktan sonra SignalR broadcast yap
+            // ⭐ Request/Command Pattern
             if (result.Success && siraDto != null)
             {
-                await _hubService.BroadcastSiraRedirectedAsync(
-                    siraDto,
-                    request.YonlendirenBankoId,
-                    hedefBankoIdForBroadcast,
-                    request.YonlendirenPersonelTc);
+                await _hubService.BroadcastSiraRedirectedAsync(new BroadcastSiraRedirectedRequest
+                {
+                    Sira = siraDto,
+                    SourceBankoId = request.YonlendirenBankoId,
+                    TargetBankoId = hedefBankoIdForBroadcast,
+                    SourcePersonelTc = request.YonlendirenPersonelTc
+                });
             }
 
             return result;

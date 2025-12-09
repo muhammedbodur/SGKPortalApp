@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SignalR;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
@@ -137,9 +138,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 _logger.LogInformation("📤 SignalR broadcast başlatılıyor. SiraNo: {SiraNo}, HizmetBinasiId: {HizmetBinasiId}, KanalAltIslemId: {KanalAltIslemId}",
                     yeniSira.SiraNo, siraNoBilgisi.HizmetBinasiId, siraNoBilgisi.KanalAltIslemId);
-                
+
                 // ⭐ INCREMENTAL UPDATE: Etkilenen personellere güncel listeyi gönder
-                await _hubService.BroadcastBankoPanelGuncellemesiAsync(yeniSira.SiraId);
+                // ⭐ Request/Command Pattern
+                await _hubService.BroadcastBankoPanelGuncellemesiAsync(new BroadcastBankoPanelGuncellemesiRequest
+                {
+                    SiraId = yeniSira.SiraId
+                });
 
                 // Response oluştur
                 var response = new KioskSiraAlResponseDto
