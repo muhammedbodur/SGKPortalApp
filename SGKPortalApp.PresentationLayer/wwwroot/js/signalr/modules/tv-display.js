@@ -61,10 +61,23 @@ window.tvDisplay = {
     },
 
     // ⭐ Sıra çağırma overlay popup göster (kuyruk sistemi ile)
-    showSiraCalledOverlay: function (siraNo, bankoNo, katTipi, bankoTipi) {
+    // Request/Command Pattern - Profesyonel yapı
+    showSiraCalledOverlay: function (request) {
+        // Request validasyonu
+        if (!request || !request.siraNo || !request.bankoNo) {
+            console.error('❌ Invalid overlay request:', request);
+            return;
+        }
+
         // Kuyruğa ekle
-        this._overlayQueue.push({ siraNo, bankoNo, katTipi, bankoTipi });
-        console.log('📺 Overlay kuyruğa eklendi: Sıra#' + siraNo + ' -> Banko#' + bankoNo + ' (Kuyruk: ' + this._overlayQueue.length + ')');
+        this._overlayQueue.push({
+            siraNo: request.siraNo,
+            bankoNo: request.bankoNo,
+            katTipi: request.katTipi || '',
+            bankoTipi: request.bankoTipi || 'BANKO'
+        });
+
+        console.log('📺 Overlay kuyruğa eklendi: Sıra#' + request.siraNo + ' -> ' + request.bankoTipi + '#' + request.bankoNo + ' (Kuyruk: ' + this._overlayQueue.length + ')');
 
         // Eğer şu an overlay gösterilmiyorsa, kuyruğu işlemeye başla
         if (!this._isShowingOverlay) {
@@ -379,12 +392,17 @@ window.tvDisplay = {
         });
 
         // ⭐ Event adları: camelCase (SignalREvents.cs ile uyumlu)
-        // Sıra güncelleme event'i (eski)
+        // Sıra güncelleme event'i (eski - basit yapı)
         connection.on("receiveSiraUpdate", function (data) {
             console.log("🔔 Yeni sıra çağrıldı (receiveSiraUpdate):", data);
 
-            // Overlay popup göster (3 saniye)
-            window.tvDisplay.showSiraCalledOverlay(data.siraNo, data.bankoNo, data.katTipi || '', data.bankoTipi || 'BANKO');
+            // ⭐ Request Pattern ile overlay göster
+            window.tvDisplay.showSiraCalledOverlay({
+                siraNo: data.siraNo,
+                bankoNo: data.bankoNo,
+                katTipi: data.katTipi || '',
+                bankoTipi: 'BANKO' // Eski event'te bankoTipi yok
+            });
 
             // Tüm listeyi güncelle (sıra çağırma paneli mantığı)
             if (data.siralar && Array.isArray(data.siralar)) {
@@ -392,12 +410,17 @@ window.tvDisplay = {
             }
         });
 
-        // ⭐ Yeni TV sıra güncelleme event'i
+        // ⭐ Yeni TV sıra güncelleme event'i (TvSiraCalledDto ile)
         connection.on("TvSiraGuncellendi", function (data) {
             console.log("📺 TV Sıra Güncellendi:", data);
 
-            // Overlay popup göster (3 saniye)
-            window.tvDisplay.showSiraCalledOverlay(data.siraNo, data.bankoNo, data.katTipi || '', data.bankoTipi || 'BANKO');
+            // ⭐ Request Pattern ile overlay göster - Backend'den tam data geliyor
+            window.tvDisplay.showSiraCalledOverlay({
+                siraNo: data.siraNo,
+                bankoNo: data.bankoNo,
+                katTipi: data.katTipi || '',
+                bankoTipi: data.bankoTipi || 'BANKO' // Backend'den geliyor artık!
+            });
 
             // Tüm listeyi güncelle (sıra çağırma paneli mantığı)
             if (data.siralar && Array.isArray(data.siralar)) {
