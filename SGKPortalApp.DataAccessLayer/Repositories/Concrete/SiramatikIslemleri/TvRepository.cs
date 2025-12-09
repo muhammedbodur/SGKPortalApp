@@ -116,6 +116,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _context.TvBankolari
                 .AsNoTracking()
+                .Include(tb => tb.Banko)
                 .Where(tb => tb.TvId == tvId && !tb.SilindiMi)
                 .ToListAsync();
         }

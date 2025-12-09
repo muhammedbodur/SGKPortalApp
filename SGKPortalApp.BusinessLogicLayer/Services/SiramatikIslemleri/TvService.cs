@@ -591,6 +591,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     BankoId = bh.BankoId,
                     BankoNo = bh.Banko?.BankoNo ?? 0,
                     KatTipi = bh.Banko?.KatTipi.GetDisplayName() ?? "",
+                    BankoTipi = bh.Banko?.BankoTipi.GetDisplayName() ?? "",
                     SiraNo = bh.SiraNo
                 }).ToList();
 

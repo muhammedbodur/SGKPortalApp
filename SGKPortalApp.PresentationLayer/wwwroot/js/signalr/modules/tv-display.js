@@ -101,7 +101,7 @@ window.tvDisplay = {
                 <div class="sira-called-title">SIRA ÇAĞRILDI</div>
                 <div class="sira-called-number">${item.siraNo}</div>
                 <div class="sira-called-banko">
-                    <span class="banko-label">BANKO</span>
+                    <span class="banko-label">${item.bankoTipi}</span>
                     <span class="banko-number">${item.bankoNo}</span>
                 </div>
                 <div class="sira-called-kat">${item.katTipi || ''}</div>

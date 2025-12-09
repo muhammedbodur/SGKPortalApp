@@ -154,6 +154,7 @@
 
         .banko-label {
             font-size: clamp(0.8rem, 1.5vh, 1.2rem);
+            font-weight: bold;
             opacity: 0.9;
             margin-bottom: 0.5vh;
         }
@@ -166,6 +167,7 @@
 
         .banko-kat {
             font-size: clamp(0.7rem, 1.2vh, 1rem);
+            font-weight: bold;
             opacity: 0.8;
             margin-top: 0.5vh;
         }
@@ -562,7 +564,7 @@
                         {
                             <div class="banko-card sira-card" id="banko_@sira.BankoId" data-sira="@sira.SiraNo">
                                 <div class="banko-info">
-                                    <div class="banko-label">BANKO</div>
+                                    <div class="banko-label">@sira.BankoTipi</div>
                                     <div class="banko-no">@sira.BankoNo</div>
                                     <div class="banko-kat">@sira.KatTipi</div>
                                 </div>

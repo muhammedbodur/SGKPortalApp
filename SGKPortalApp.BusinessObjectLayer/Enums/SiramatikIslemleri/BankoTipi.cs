@@ -4,16 +4,16 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri
 {
     public enum BankoTipi
     {
-        [Display(Name = "Normal")]
+        [Display(Name = "BANKO")]
         Normal = 1,
 
-        [Display(Name = "Öncelikli")]
+        [Display(Name = "ÖNCELİKLİ BANKO")]
         Oncelikli = 2,
 
-        [Display(Name = "Engelli")]
+        [Display(Name = "ENGELLİ BANKO")]
         Engelli = 3,
 
-        [Display(Name = "Şef Masası")]
+        [Display(Name = "ŞEF MASASI")]
         SefMasasi = 4
     }
 }
