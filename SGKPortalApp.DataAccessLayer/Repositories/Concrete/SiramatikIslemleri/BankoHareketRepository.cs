@@ -198,13 +198,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .FirstOrDefaultAsync();
         }
 
-        // Belirtilen bankolardaki bugünkü son çağrılan sıraları getirir (TV için)
-        // Tamamlanmış olsa bile gösterilir - son çağrılma zamanına göre sıralı
+        // Belirtilen bankolardaki bugünkü aktif çağrılan sıraları getirir (TV için)
+        // Sadece devam eden (IslemBitisZamani=NULL) ve çağrılmış durumda (BeklemeDurum=Cagrildi) olan sıralar
         public async Task<IEnumerable<BankoHareket>> GetAktifSiralarByBankoIdsAsync(IEnumerable<int> bankoIds)
         {
             var today = DateTime.Today;
             var bankoIdList = bankoIds.ToList();
-            
+
             return await _dbSet
                 .AsNoTracking()
                 .Include(bh => bh.Banko)
@@ -212,6 +212,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .Where(bh => bankoIdList.Contains(bh.BankoId)
                     && bh.Sira.BeklemeDurum == BeklemeDurum.Cagrildi
                     && bh.IslemBaslamaZamani.Date == today
+                    && bh.IslemBitisZamani == null  // ⭐ Sadece devam eden hareketler (yönlendirilmiş/tamamlanmış olanlar hariç)
                     && !bh.SilindiMi)
                 .OrderByDescending(bh => bh.IslemBaslamaZamani)
                 .ToListAsync();
