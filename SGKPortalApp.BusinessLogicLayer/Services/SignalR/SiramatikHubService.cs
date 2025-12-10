@@ -455,6 +455,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
 
         #region Private Helper Methods
 
+        /// <summary>
+        /// Birden fazla personele SignalR mesajı gönderir
+        /// ⭐ HubBankoConnection, HubConnection ve User ile entegre
+        /// Repository zaten tüm filtreleri yapıyor (BankoMode, BankoModuAktif, User.BankoModuAktif, vb.)
+        /// </summary>
         private async Task SendToPersonelsAsync(List<string> personelTcs, string eventName, object payload)
         {
             if (!personelTcs.Any()) return;
@@ -462,43 +467,59 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             var connectionIds = new List<string>();
             foreach (var tc in personelTcs)
             {
+                // Repository'den gelen bağlantılar zaten filtrelenmiş (BankoMode, aktif, banko modu vb.)
                 var connections = (await _hubConnectionRepository.GetActiveConnectionsByTcKimlikNoAsync(tc)).ToList();
-                var typesList = string.Join(", ", connections.Select(c => $"{c.ConnectionType}:{c.ConnectionId}"));
-                _logger.LogInformation("🔍 TC: {Tc} için {Count} aktif bağlantı bulundu. Tipler: {Types}",
-                    tc, connections.Count, typesList);
-                
-                connectionIds.AddRange(connections
-                    .Where(c => c.ConnectionType == "BankoMode")
-                    .Select(c => c.ConnectionId));
+
+                if (connections.Any())
+                {
+                    var typesList = string.Join(", ", connections.Select(c => $"{c.ConnectionType}:{c.ConnectionId}"));
+                    _logger.LogInformation("🔍 TC: {Tc} için {Count} aktif banko bağlantısı bulundu. Bağlantılar: {Types}",
+                        tc, connections.Count, typesList);
+
+                    connectionIds.AddRange(connections.Select(c => c.ConnectionId));
+                }
+                else
+                {
+                    _logger.LogDebug("ℹ️ TC: {Tc} için aktif banko bağlantısı yok (offline, banko modu kapalı veya filtrelere uymayan)", tc);
+                }
             }
 
             var idsString = string.Join(", ", connectionIds);
-            _logger.LogInformation("🔍 BankoMode connection sayısı: {Count}, IDs: {Ids}",
+            _logger.LogInformation("🔍 Toplam aktif banko bağlantısı: {Count}, IDs: {Ids}",
                 connectionIds.Count, idsString);
 
             if (connectionIds.Any())
             {
                 await _broadcaster.SendToConnectionsAsync(connectionIds, eventName, payload);
-                _logger.LogInformation("📤 {EventName} gönderildi: {Count} connection'a", eventName, connectionIds.Count);
+                _logger.LogInformation("📤 {EventName} gönderildi: {Count} bağlantıya", eventName, connectionIds.Count);
             }
             else
             {
-                _logger.LogWarning("⚠️ {EventName} gönderilemedi: BankoMode connection bulunamadı!", eventName);
+                _logger.LogWarning("⚠️ {EventName} gönderilemedi: Hiçbir personel için aktif banko bağlantısı bulunamadı! Kontrol edilecekler: BankoMode, User.BankoModuAktif, HubBankoConnection.BankoModuAktif", eventName);
             }
         }
 
+        /// <summary>
+        /// Tek bir personele SignalR mesajı gönderir
+        /// ⭐ HubBankoConnection, HubConnection ve User ile entegre
+        /// Repository zaten tüm filtreleri yapıyor (BankoMode, BankoModuAktif, User.BankoModuAktif, vb.)
+        /// </summary>
         private async Task SendToPersonelAsync(string personelTc, string eventName, object payload)
         {
+            // Repository'den gelen bağlantılar zaten filtrelenmiş (BankoMode, aktif, banko modu vb.)
             var connections = await _hubConnectionRepository.GetActiveConnectionsByTcKimlikNoAsync(personelTc);
             var connectionIds = connections
-                .Where(c => c.ConnectionType == "BankoMode")
                 .Select(c => c.ConnectionId)
                 .ToList();
 
             if (connectionIds.Any())
             {
                 await _broadcaster.SendToConnectionsAsync(connectionIds, eventName, payload);
-                _logger.LogDebug("📤 {EventName} gönderildi: {PersonelTc}", eventName, personelTc);
+                _logger.LogDebug("📤 {EventName} gönderildi: {PersonelTc}, {Count} bağlantı", eventName, personelTc, connectionIds.Count);
+            }
+            else
+            {
+                _logger.LogWarning("⚠️ {EventName} gönderilemedi: {PersonelTc} için aktif banko bağlantısı bulunamadı!", eventName, personelTc);
             }
         }
 

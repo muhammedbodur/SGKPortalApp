@@ -67,11 +67,38 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
         }
 
         // Kullanıcının aktif bağlantılarını listeler (BankoMode için)
+        // ⭐ User, HubBankoConnection ve Banko tablolarıyla entegre
+        // SQL: PER_Personeller → SIR_BankoKullanicilari → SIR_Bankolar → CMN_Users → CMN_HubConnections → SIR_HubBankoConnections
         public async Task<IEnumerable<HubConnection>> GetActiveConnectionsByTcKimlikNoAsync(string tcKimlikNo)
         {
             return await _dbSet
                 .AsNoTracking()
-                .Where(hc => hc.TcKimlikNo == tcKimlikNo && hc.ConnectionStatus == ConnectionStatus.online)
+                .Include(hc => hc.User)
+                .Include(hc => hc.HubBankoConnection)
+                    .ThenInclude(hbc => hbc.Banko)
+                .Where(hc =>
+                    // HubConnection filtreleri
+                    hc.TcKimlikNo == tcKimlikNo &&
+                    hc.ConnectionStatus == ConnectionStatus.online &&
+                    hc.ConnectionType == "BankoMode" &&
+                    !hc.SilindiMi &&
+
+                    // User filtreleri
+                    hc.User != null &&
+                    hc.User.UserType == BusinessObjectLayer.Enums.Common.UserType.Personel &&
+                    hc.User.BankoModuAktif &&
+                    hc.User.AktifBankoId.HasValue &&
+                    hc.User.AktifBankoId.Value > 0 &&
+
+                    // HubBankoConnection filtreleri
+                    hc.HubBankoConnection != null &&
+                    hc.HubBankoConnection.BankoModuAktif &&
+                    !hc.HubBankoConnection.SilindiMi &&
+
+                    // Banko filtreleri
+                    hc.HubBankoConnection.Banko != null &&
+                    !hc.HubBankoConnection.Banko.SilindiMi
+                )
                 .ToListAsync();
         }
     }
