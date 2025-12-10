@@ -1011,7 +1011,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                            && u.BankoModuAktif
                            && u.AktifMi
                            && hc.ConnectionStatus == ConnectionStatus.online
+                           && hc.ConnectionType == "BankoMode" // ⭐ YENİ: BankoMode kontrolü
                            && !hc.SilindiMi
+                           && hbc.BankoModuAktif // ⭐ YENİ: HubBankoConnection BankoModuAktif kontrolü
+                           && !hbc.SilindiMi // ⭐ YENİ: HubBankoConnection SilindiMi kontrolü
                            && kp.Aktiflik == Aktiflik.Aktif
                            && !kp.SilindiMi
                            && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok
