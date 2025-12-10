@@ -414,13 +414,18 @@ window.tvDisplay = {
         connection.on("TvSiraGuncellendi", function (data) {
             console.log("📺 TV Sıra Güncellendi:", data);
 
-            // ⭐ Request Pattern ile overlay göster - Backend'den tam data geliyor
-            window.tvDisplay.showSiraCalledOverlay({
-                siraNo: data.siraNo,
-                bankoNo: data.bankoNo,
-                katTipi: data.katTipi || '',
-                bankoTipi: data.bankoTipi || 'BANKO' // Backend'den geliyor artık!
-            });
+            // ⭐ ShowOverlay kontrolü - Yönlendirme durumunda overlay gösterme
+            if (data.showOverlay !== false) {
+                // ⭐ Request Pattern ile overlay göster - Backend'den tam data geliyor
+                window.tvDisplay.showSiraCalledOverlay({
+                    siraNo: data.siraNo,
+                    bankoNo: data.bankoNo,
+                    katTipi: data.katTipi || '',
+                    bankoTipi: data.bankoTipi || 'BANKO' // Backend'den geliyor artık!
+                });
+            } else {
+                console.log("📺 Yönlendirme: Overlay gösterilmedi, sadece liste güncelleniyor");
+            }
 
             // Tüm listeyi güncelle (sıra çağırma paneli mantığı)
             if (data.siralar && Array.isArray(data.siralar)) {

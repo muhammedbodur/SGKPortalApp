@@ -276,12 +276,102 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     }
                 }
 
-                _logger.LogInformation("📤 SiraRedirected broadcast edildi. SiraId: {SiraId}, Kaynak: {SourceBanko}, Hedef: {TargetBanko}",
+                _logger.LogInformation("📤 SiraRedirected panel broadcast edildi. SiraId: {SiraId}, Kaynak: {SourceBanko}, Hedef: {TargetBanko}",
                     request.Sira.SiraId, request.SourceBankoId, request.TargetBankoId.HasValue ? request.TargetBankoId.Value.ToString() : "Yok");
+
+                // ⭐ TV'lere bildirim gönder - Yönlendirilen sıra TV listesinden kalkacak (overlay yok)
+                await BroadcastSiraRedirectedToTvAsync(request);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "❌ SiraRedirected broadcast hatası. SiraId: {SiraId}", request.Sira.SiraId);
+            }
+        }
+
+        /// <summary>
+        /// Sıra yönlendirildiğinde TV'lere bildirim gönderir - Overlay göstermeden sadece liste güncellenir
+        /// ⭐ Request/Command Pattern
+        /// </summary>
+        private async Task BroadcastSiraRedirectedToTvAsync(BroadcastSiraRedirectedRequest request)
+        {
+            try
+            {
+                // Kaynak banko bilgilerini al
+                var bankoRepo = _unitOfWork.GetRepository<IBankoRepository>();
+                var banko = await bankoRepo.GetByIdAsync(request.SourceBankoId);
+
+                if (banko == null)
+                {
+                    _logger.LogWarning("⚠️ TV redirect broadcast: Kaynak banko bulunamadı. BankoId: {BankoId}", request.SourceBankoId);
+                    return;
+                }
+
+                // Bu bankoya bağlı TV'leri bul (TvBanko tablosundan)
+                var tvRepo = _unitOfWork.GetRepository<ITvRepository>();
+                var tvBankolar = await tvRepo.GetTvBankolarByBankoIdAsync(request.SourceBankoId);
+
+                if (tvBankolar == null || !tvBankolar.Any())
+                {
+                    _logger.LogDebug("ℹ️ Banko#{BankoId} için bağlı TV bulunamadı (redirect)", request.SourceBankoId);
+                    return;
+                }
+
+                // HubTvConnection tablosundan aktif TV bağlantılarını al
+                var hubTvConnectionRepo = _unitOfWork.GetRepository<IHubTvConnectionRepository>();
+                var bankoHareketRepo = _unitOfWork.GetRepository<IBankoHareketRepository>();
+
+                foreach (var tvBanko in tvBankolar)
+                {
+                    // Bu TV'nin aktif bağlantılarını bul
+                    var tvConnections = await hubTvConnectionRepo.GetByTvAsync(tvBanko.TvId);
+                    var connectionIds = tvConnections
+                        .Where(tc => tc.HubConnection != null && !string.IsNullOrEmpty(tc.HubConnection.ConnectionId))
+                        .Select(tc => tc.HubConnection!.ConnectionId)
+                        .ToList();
+
+                    if (!connectionIds.Any())
+                    {
+                        _logger.LogDebug("ℹ️ TV#{TvId} için aktif bağlantı bulunamadı (redirect)", tvBanko.TvId);
+                        continue;
+                    }
+
+                    // Bu TV'ye bağlı tüm bankoların ID'lerini al
+                    var tvninBankolari = await tvRepo.GetTvBankolarAsync(tvBanko.TvId);
+                    var bankoIds = tvninBankolari.Select(tb => tb.BankoId).ToList();
+
+                    // Tüm bankolardaki güncel sıraları al (yönlendirilen sıra artık listede olmayacak)
+                    var aktifHareketler = await bankoHareketRepo.GetAktifSiralarByBankoIdsAsync(bankoIds);
+                    var siralar = aktifHareketler.Select(bh => new TvSiraItemDto
+                    {
+                        BankoId = bh.BankoId,
+                        BankoNo = bh.Banko?.BankoNo ?? 0,
+                        KatTipi = bh.Banko?.KatTipi.GetDisplayName() ?? "",
+                        SiraNo = bh.SiraNo
+                    }).ToList();
+
+                    // ⭐ Yönlendirme için özel payload - ShowOverlay = false
+                    var tvPayload = new TvSiraCalledDto
+                    {
+                        SiraNo = request.Sira.SiraNo,
+                        BankoNo = banko.BankoNo.ToString(),
+                        BankoId = request.SourceBankoId,
+                        BankoTipi = banko.BankoTipi.GetDisplayName(),
+                        KatTipi = banko.KatTipi.GetDisplayName(),
+                        KanalAltAdi = request.Sira.KanalAltAdi,
+                        UpdateType = "SiraRedirected", // ⭐ Farklı update type
+                        ShowOverlay = false, // ⭐ Overlay gösterme
+                        Siralar = siralar,
+                        Timestamp = DateTime.Now
+                    };
+
+                    await _broadcaster.SendToConnectionsAsync(connectionIds, "TvSiraGuncellendi", tvPayload);
+                    _logger.LogInformation("📺 TV#{TvId}'ye yönlendirme bildirimi gönderildi: Sıra#{SiraNo} listeden kaldırıldı, Liste: {Count} sıra, {ConnCount} bağlantı",
+                        tvBanko.TvId, request.Sira.SiraNo, siralar.Count, connectionIds.Count);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ TV redirect broadcast hatası. SiraId: {SiraId}", request.Sira.SiraId);
             }
         }
 

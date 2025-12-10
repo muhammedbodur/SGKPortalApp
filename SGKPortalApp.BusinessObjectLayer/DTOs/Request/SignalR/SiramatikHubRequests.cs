@@ -72,6 +72,8 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.SignalR
         public SiraCagirmaResponseDto Sira { get; set; } = null!;
         public int BankoId { get; set; }
         public string BankoNo { get; set; } = string.Empty;
+        public string UpdateType { get; set; } = "SiraCalled";
+        public bool ShowOverlay { get; set; } = true;
     }
 
     /// <summary>

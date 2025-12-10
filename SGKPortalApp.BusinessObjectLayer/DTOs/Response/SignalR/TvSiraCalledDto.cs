@@ -90,6 +90,11 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SignalR
         public string UpdateType { get; set; } = "SiraCalled";
 
         /// <summary>
+        /// TV tarafında çağrı overlayi gösterilsin mi?
+        /// </summary>
+        public bool ShowOverlay { get; set; } = true;
+
+        /// <summary>
         /// TV ekranında gösterilecek tüm aktif sıralar listesi
         /// </summary>
         public List<TvSiraItemDto> Siralar { get; set; } = new();

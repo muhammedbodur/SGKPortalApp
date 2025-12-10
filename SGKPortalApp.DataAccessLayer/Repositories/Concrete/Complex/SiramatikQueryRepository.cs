@@ -1113,6 +1113,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                     HizmetBinasiId = x.HizmetBinasiId,
                     HizmetBinasiAdi = x.HizmetBinasiAdi,
                     Uzmanlik = x.Uzmanlik,
+                    BankoId = x.BankoId,
                     YonlendirildiMi = x.YonlendirildiMi,
                     YonlendirmeTipi = x.YonlendirmeTipi,
                     YonlendirenPersonelTc = x.YonlendirenPersonelTc,
