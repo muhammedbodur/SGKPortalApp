@@ -555,20 +555,6 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             if (!personelKanalAltIslemIds.Any())
                 return new List<SiraCagirmaResponseDto>();
 
-            // Personelin GENEL şef yetkisi var mı?
-            var personelSefMi = await _context.KanalPersonelleri
-                .AnyAsync(kp => kp.TcKimlikNo == tcKimlikNo
-                             && kp.Aktiflik == Aktiflik.Aktif
-                             && kp.Uzmanlik == PersonelUzmanlik.Sef
-                             && !kp.SilindiMi);
-
-            // Personelin GENEL uzman yetkisi var mı?
-            var personelUzmanMi = await _context.KanalPersonelleri
-                .AnyAsync(kp => kp.TcKimlikNo == tcKimlikNo
-                             && kp.Aktiflik == Aktiflik.Aktif
-                             && kp.Uzmanlik == PersonelUzmanlik.Uzman
-                             && !kp.SilindiMi);
-
             // ADIM 2: Çağrılmış EN SON sıra
             var sonCagirilanSiraId = await (
                 from s in _context.Siralar
@@ -586,12 +572,23 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                         join p in _context.Personeller on bk.TcKimlikNo equals p.TcKimlikNo
                         join u in _context.Users on p.TcKimlikNo equals u.TcKimlikNo
                         join hb in _context.HizmetBinalari on bk.HizmetBinasiId equals hb.HizmetBinasiId
+
+                        // ⭐ YENİ: HubConnection ve HubBankoConnection JOIN'leri
+                        join hc in _context.HubConnections on u.TcKimlikNo equals hc.TcKimlikNo
+                        join hbc in _context.HubBankoConnections on hc.HubConnectionId equals hbc.HubConnectionId
+
                         join kai in _context.KanalAltIslemleri on true equals true
                         join kp in _context.KanalPersonelleri on new { kai.KanalAltIslemId, TcKimlikNo = tcKimlikNo }
                             equals new { kp.KanalAltIslemId, kp.TcKimlikNo }
                         join s in _context.Siralar on kai.KanalAltIslemId equals s.KanalAltIslemId
                         join pYonlendiren in _context.Personeller on s.YonlendirenPersonelTc equals pYonlendiren.TcKimlikNo into yonlendirenGroup
                         from pYonlendiren in yonlendirenGroup.DefaultIfEmpty()
+
+                        // ⭐ YENİ: Şef yönlendirmesi için kanal bazlı uzm JOIN
+                        join uzm in _context.KanalPersonelleri on new { s.KanalAltIslemId, TcKimlikNo = tcKimlikNo }
+                            equals new { uzm.KanalAltIslemId, uzm.TcKimlikNo } into uzmGroup
+                        from uzm in uzmGroup.DefaultIfEmpty()
+
                         where bk.TcKimlikNo == tcKimlikNo
                            && !bk.SilindiMi
                            && b.BankoAktiflik == Aktiflik.Aktif
@@ -601,6 +598,14 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                            && !p.SilindiMi
                            && u.BankoModuAktif
                            && u.AktifMi
+
+                           // ⭐ YENİ: HubConnection filtreleri
+                           && hc.ConnectionStatus == ConnectionStatus.online
+                           && hc.ConnectionType == "BankoMode"
+                           && !hc.SilindiMi
+                           && hbc.BankoModuAktif
+                           && !hbc.SilindiMi
+
                            && personelKanalAltIslemIds.Contains(kai.KanalAltIslemId)
                            && kai.Aktiflik == Aktiflik.Aktif
                            && !kai.SilindiMi
@@ -614,18 +619,20 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                                 // 1. Normal Bekleyen Sıralar
                                 s.BeklemeDurum == BeklemeDurum.Beklemede
 
-                                // 2. Çağrılmış EN SON Sıra ⭐ !s.YonlendirildiMi eklendi
+                                // 2. Çağrılmış EN SON Sıra
                                 || (s.BeklemeDurum == BeklemeDurum.Cagrildi
                                     && s.TcKimlikNo == tcKimlikNo
                                     && s.SiraId == sonCagirilanSiraId)
 
                                 // 3. Şef'e Yönlendirilmiş
+                                // ⭐ YENİ: Kanal bazlı kontrol - personelin O kanalda Şef olması gerekiyor
                                 || (s.BeklemeDurum == BeklemeDurum.Yonlendirildi
                                     && s.YonlendirildiMi
                                     && s.YonlendirmeTipi == YonlendirmeTipi.Sef
                                     && s.TcKimlikNo != tcKimlikNo
                                     && s.HedefBankoId == null
-                                    && personelSefMi)
+                                    && uzm.Uzmanlik == PersonelUzmanlik.Sef
+                                    && uzm.KanalAltIslemId == s.KanalAltIslemId)
 
                                 // 4. Başka Bankoya Yönlendirilmiş
                                 || (s.BeklemeDurum == BeklemeDurum.Yonlendirildi
@@ -635,12 +642,14 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                                     && s.HedefBankoId == bk.BankoId)
 
                                 // 5. Genel Uzmana Yönlendirilmiş
+                                // ⭐ YENİ: Kanal bazlı kontrol - personelin O kanalda Uzman olması gerekiyor
                                 || (s.BeklemeDurum == BeklemeDurum.Yonlendirildi
                                     && s.YonlendirildiMi
                                     && s.YonlendirmeTipi == YonlendirmeTipi.UzmanPersonel
                                     && s.TcKimlikNo != tcKimlikNo
                                     && s.HedefBankoId == null
-                                    && personelUzmanMi)
+                                    && uzm.Uzmanlik == PersonelUzmanlik.Uzman
+                                    && uzm.KanalAltIslemId == s.KanalAltIslemId)
                               )
                         select new
                         {
