@@ -472,6 +472,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 // ═══════════════════════════════════════════════════════
                 // ŞEF KONTROLÜ (kendisi hariç)
+                // ⭐ HubConnection, HubBankoConnection ve User ile entegre
                 // ═══════════════════════════════════════════════════════
                 var kanalPersoneller = await _kanalPersonelRepository.GetByKanalAltIslemAsync(sira.KanalAltIslemId);
                 var sefPersoneller = kanalPersoneller
@@ -487,7 +488,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     var user = await _userRepository.GetByTcKimlikNoAsync(sefPersonel.TcKimlikNo);
                     if (user != null && user.BankoModuAktif && user.AktifBankoId.HasValue && user.AktifBankoId.Value > 0)
                     {
-                        aktifSefCount++;
+                        // ⭐ YENİ: HubConnection kontrolü - personel gerçekten online mı?
+                        var activeConnections = await _hubConnectionRepository.GetActiveConnectionsByTcKimlikNoAsync(sefPersonel.TcKimlikNo);
+                        if (activeConnections.Any())
+                        {
+                            aktifSefCount++;
+                        }
                     }
                 }
 
@@ -499,6 +505,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 // ═══════════════════════════════════════════════════════
                 // UZMAN KONTROLÜ (kendisi hariç)
+                // ⭐ HubConnection, HubBankoConnection ve User ile entegre
                 // ═══════════════════════════════════════════════════════
                 var uzmanPersoneller = kanalPersoneller
                     .Where(kp => kp.Uzmanlik == PersonelUzmanlik.Uzman &&
@@ -513,7 +520,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     var user = await _userRepository.GetByTcKimlikNoAsync(uzmanPersonel.TcKimlikNo);
                     if (user != null && user.BankoModuAktif && user.AktifBankoId.HasValue && user.AktifBankoId.Value > 0)
                     {
-                        aktifUzmanCount++;
+                        // ⭐ YENİ: HubConnection kontrolü - personel gerçekten online mı?
+                        var activeConnections = await _hubConnectionRepository.GetActiveConnectionsByTcKimlikNoAsync(uzmanPersonel.TcKimlikNo);
+                        if (activeConnections.Any())
+                        {
+                            aktifUzmanCount++;
+                        }
                     }
                 }
 
@@ -525,6 +537,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 // ═══════════════════════════════════════════════════════
                 // AKTİF BANKOLAR (BaskaBanko için - sadece Uzman personeller)
+                // ⭐ HubConnection, HubBankoConnection ve User ile entegre
                 // ═══════════════════════════════════════════════════════
                 var tumBankolar = await _bankoRepository.GetAllAsync();
                 var aktifBankolar = new List<BankoOptionDto>();
@@ -545,12 +558,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     if (user == null || !user.BankoModuAktif || user.AktifBankoId != banko.BankoId)
                         continue;
 
+                    // ⭐ YENİ: HubConnection kontrolü - personel gerçekten online mı?
+                    var activeConnections = await _hubConnectionRepository.GetActiveConnectionsByTcKimlikNoAsync(bankoKullanici.TcKimlikNo);
+                    if (!activeConnections.Any())
+                        continue;
+
                     // ⭐ Personelin uzmanlığı Uzman mı? (Şef'ler BaskaBanko listesinde görünmemeli)
                     var personelKanalAtama = kanalPersoneller.FirstOrDefault(kp => kp.TcKimlikNo == bankoKullanici.TcKimlikNo);
                     if (personelKanalAtama == null || personelKanalAtama.Uzmanlik != PersonelUzmanlik.Uzman)
                         continue;
 
-                    // Aktif banko bulundu (Uzman personel)
+                    // Aktif banko bulundu (Uzman personel ve online)
                     aktifBankolar.Add(new BankoOptionDto
                     {
                         BankoId = banko.BankoId,
@@ -570,7 +588,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 }
 
                 _logger.LogInformation(
-                    "Yönlendirme seçenekleri hazırlandı. SiraId: {SiraId}, AvailableTypes: {Count}, Bankolar: {BankoCount}, Şef: {SefCount}, Uzman: {UzmanCount}",
+                    "✅ Yönlendirme seçenekleri hazırlandı (HubConnection kontrolü ile). SiraId: {SiraId}, AvailableTypes: {Count}, Bankolar: {BankoCount}, Şef: {SefCount}, Uzman: {UzmanCount}",
                     siraId, result.AvailableTypes.Count, result.Bankolar.Count, aktifSefCount, aktifUzmanCount);
 
                 return ApiResponseDto<YonlendirmeSecenekleriResponseDto>.SuccessResult(
