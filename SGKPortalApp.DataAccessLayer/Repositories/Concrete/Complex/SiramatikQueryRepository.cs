@@ -1037,7 +1037,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                                     && s.YonlendirmeTipi == YonlendirmeTipi.Sef
                                     && s.TcKimlikNo != hp
                                     && s.HedefBankoId == null
-                                    && uzm.Uzmanlik == PersonelUzmanlik.Sef)
+                                    && uzm.Uzmanlik == PersonelUzmanlik.Sef
+                                    && uzm.KanalAltIslemId == s.KanalAltIslemId) // ⭐ YENİ: Sıranın kanalında Şef olmalı
 
                                 // 4. Başka Bankoya Yönlendirilmiş
                                 || (s.BeklemeDurum == BeklemeDurum.Yonlendirildi
@@ -1052,7 +1053,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                                     && s.YonlendirmeTipi == YonlendirmeTipi.UzmanPersonel
                                     && s.TcKimlikNo != hp
                                     && s.HedefBankoId == null
-                                    && uzm.Uzmanlik == PersonelUzmanlik.Uzman)
+                                    && uzm.Uzmanlik == PersonelUzmanlik.Uzman
+                                    && uzm.KanalAltIslemId == s.KanalAltIslemId) // ⭐ YENİ: Sıranın kanalında Uzman olmalı
                               )
                         select new
                         {
