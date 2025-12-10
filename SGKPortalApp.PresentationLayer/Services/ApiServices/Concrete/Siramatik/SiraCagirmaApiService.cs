@@ -17,6 +17,25 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             _httpClient = httpClient;
         }
 
+        public async Task<int> GetGunlukToplamCagrilanAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var result = await _httpClient.GetFromJsonAsync<PanelIstatistikResponse>($"{BaseUrl}/panel-istatistik/{tcKimlikNo}");
+                return result?.ToplamCagrilan ?? 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"API Hatası - GetGunlukToplamCagrilanAsync: {ex.Message}");
+                return 0;
+            }
+        }
+
+        private sealed class PanelIstatistikResponse
+        {
+            public int ToplamCagrilan { get; set; }
+        }
+
         public async Task<List<SiraCagirmaResponseDto>> GetBekleyenSiralarAsync()
         {
             try

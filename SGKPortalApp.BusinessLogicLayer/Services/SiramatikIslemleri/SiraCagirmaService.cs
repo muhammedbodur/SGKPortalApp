@@ -353,6 +353,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             return await _siramatikQueryRepository.GetIlkCagrilabilirSiraAsync(tcKimlikNo);
         }
 
+        public async Task<int> GetPersonelGunlukCagrilanSiraSayisiAsync(string tcKimlikNo)
+        {
+            var bankoHareketRepo = _unitOfWork.GetRepository<IBankoHareketRepository>();
+            return await bankoHareketRepo.GetPersonelGunlukCagrilanSiraSayisiAsync(tcKimlikNo, DateTime.Today);
+        }
+
         public async Task<Dictionary<string, List<SiraCagirmaResponseDto>>> GetBankoPanelSiralarBySiraIdAsync(int siraId)
         {
             // Repository'den tüm satırları al (PersonelTc + ConnectionId içeren)

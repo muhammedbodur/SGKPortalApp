@@ -104,7 +104,7 @@ builder.Services.AddPresentationServices(builder.Configuration);
 builder.Services.AddScoped<Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider,
     SGKPortalApp.PresentationLayer.Services.AuthenticationServices.Concrete.ServerAuthenticationStateProvider>();
 
-Console.WriteLine("✅ ServerAuthenticationStateProvider MANUEL kayıt edildi");
+//Console.WriteLine("✅ ServerAuthenticationStateProvider MANUEL kayıt edildi");
 
 // ═══════════════════════════════════════════════════════
 // 🌐 CORS (API kullanımı için)
@@ -135,6 +135,10 @@ builder.Services.AddMemoryCache();
 builder.Services.AddScoped<SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.SignalR.IHubConnectionApiService,
     SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR.HubConnectionApiService>();
 
+// SignalR Event Log API Service
+builder.Services.AddScoped<SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.SignalR.ISignalREventLogApiService,
+    SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR.SignalREventLogApiService>();
+
 // Banko Mode State Service (Singleton - Tum uygulama boyunca tek instance)
 builder.Services.AddSingleton<SGKPortalApp.PresentationLayer.Services.State.BankoModeStateService>();
 
@@ -159,14 +163,14 @@ builder.Services.AddAuthentication(Microsoft.AspNetCore.Authentication.Cookies.C
         options.LoginPath = "/auth/login";
         options.LogoutPath = "/auth/logout";
         options.AccessDeniedPath = "/auth/access-denied";
-        options.ExpireTimeSpan = TimeSpan.FromHours(8); // Personel için 8 saat
+        options.ExpireTimeSpan = TimeSpan.FromHours(9); // Personel için 9 saat
         options.SlidingExpiration = true;
         options.Cookie.Name = "SGKPortal.Auth";
         options.Cookie.HttpOnly = true;
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         options.Cookie.SameSite = SameSiteMode.Lax;
         
-        // TV kullanıcıları için oturum süresini maksimum yap
+        // TV kullanıcıları için oturum süresi maksimum yapıldı
         options.Events.OnSigningIn = context =>
         {
             var userTypeClaim = context.Principal?.FindFirst("UserType");

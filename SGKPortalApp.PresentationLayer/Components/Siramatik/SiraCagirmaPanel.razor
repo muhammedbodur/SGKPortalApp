@@ -34,7 +34,7 @@
             @if (SiraListesi != null && SiraListesi.Any())
             {
                 <div class="mb-2">
-                    <small class="text-muted">Bekleyen @SiraListesi.Count sıra var</small>
+                    <small class="text-muted">Bekleyen @SiraListesi.Count(s => IsCallableSira(s)) sıra var</small>
                 </div>
 
                 @foreach (var sira in SiraListesi)
@@ -113,12 +113,12 @@
             <div class="px-4 py-3 mt-3 border-top">
                 <div class="row g-2 text-center">
                     <div class="col-6">
-                        <small class="text-muted d-block">Toplam</small>
-                        <strong class="text-primary">@SiraListesi.Count</strong>
+                        <small class="text-muted d-block">Toplam Bekleyen</small>
+                        <strong class="text-primary">@SiraListesi.Count(s => IsCallableSira(s))</strong>
                     </div>
                     <div class="col-6">
-                        <small class="text-muted d-block">Çağrılan</small>
-                        <strong class="text-success">@SiraListesi.Count(s => s.BeklemeDurum == BeklemeDurum.Cagrildi)</strong>
+                        <small class="text-muted d-block">Toplam Çağrılan</small>
+                        <strong class="text-success">@toplamCagrilan</strong>
                     </div>
                 </div>
             </div>

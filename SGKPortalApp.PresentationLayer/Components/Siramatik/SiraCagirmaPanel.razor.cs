@@ -40,6 +40,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
         private List<SelectOption> yonlendirmeTipiOptions = new();
         private List<SelectOption> bankoOptions = new();
         private bool isCallingNext;
+        private int toplamCagrilan;
 
         private string HeaderBackground => IsPinned
             ? "linear-gradient(135deg, #696cff 0%, #5f61e6 100%)"
@@ -76,6 +77,9 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
 
                     // JavaScript'ten mevcut durumu senkronize et
                     await SyncStateFromLocalStorage();
+
+                    // Panel istatistiklerini backend'den yükle
+                    await LoadPanelStatsAsync();
 
                     Console.WriteLine("✅ SiraCagirmaPanel JavaScript initialized");
                 }
@@ -424,6 +428,9 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
                         Console.WriteLine($"✅ Sıra durumu güncellendi: #{cagrilanSira.SiraNo} -> Çağrıldı");
                     }
 
+                    // ⭐ Toplam çağrılan sayısını artır (gereksiz API çağrısı yapmadan)
+                    toplamCagrilan++;
+
                     await OnSiraCagir.InvokeAsync(backendIlkSira.SiraId);
                     await ToastService.ShowSuccessAsync($"Sıra #{response.SiraNo} çağrıldı.", "Sıra Çağırma");
                 }
@@ -462,8 +469,32 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
         {
             SiraListesi.Clear();
             SiraListesi.AddRange(guncelListe);
+            
+            // Panel yenilendiğinde istatistikleri de güncelle
+            await LoadPanelStatsAsync();
+            
             await InvokeAsync(StateHasChanged);
             Console.WriteLine($"🔄 Panel yenilendi. Yeni sıra sayısı: {SiraListesi.Count}");
+        }
+
+        /// <summary>
+        /// Panel istatistiklerini backend'den yükler (ilk yükleme ve panel yenilemede)
+        /// </summary>
+        private async Task LoadPanelStatsAsync()
+        {
+            if (string.IsNullOrWhiteSpace(PersonelTcKimlikNo))
+                return;
+
+            try
+            {
+                toplamCagrilan = await SiraCagirmaApiService.GetGunlukToplamCagrilanAsync(PersonelTcKimlikNo);
+                Console.WriteLine($"✅ Panel istatistikleri yüklendi. Toplam çağrılan: {toplamCagrilan}");
+                await InvokeAsync(StateHasChanged);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Panel istatistikleri yüklenirken hata: {ex.Message}");
+            }
         }
 
         private YonlendirmeTipi? SelectedYonlendirmeTipi

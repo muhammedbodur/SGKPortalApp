@@ -44,6 +44,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
         // Personel istatistiklerini getirir
         Task<(int ToplamIslem, int OrtalamaSure)> GetPersonelStatsAsync(string tcKimlikNo, DateTime startDate, DateTime endDate);
 
+        // Personelin belirtilen günde çağırdığı toplam sıra sayısını getirir
+        Task<int> GetPersonelGunlukCagrilanSiraSayisiAsync(string tcKimlikNo, DateTime tarih);
+
         // Bankodaki bugünkü son çağrılan sırayı getirir (TV için)
         Task<BankoHareket?> GetSonCagrilanByBankoAsync(int bankoId);
 

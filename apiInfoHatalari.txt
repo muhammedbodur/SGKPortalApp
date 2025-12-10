@@ -3,8 +3,8 @@
 ? Connection String alındı: Server=localhost\SQLEXPRESS;Database=SGKPortalDB;User Id=sa***;Password=***;TrustServerCertificate=true;MultipleActiv...
 ?? Repository otomatik kayıt başlıyor...
 ?? Assembly: SGKPortalApp.DataAccessLayer
-?? Bulunan interface'ler: 47
-?? Bulunan implementation'lar: 47
+?? Bulunan interface'ler: 48
+?? Bulunan implementation'lar: 48
   ? IAtanmaNedeniRepository -> AtanmaNedeniRepository
   ? IAtanmaNedenleriRepository -> AtanmaNedenleriRepository
   ? IBankoHareketRepository -> BankoHareketRepository
@@ -45,6 +45,7 @@
   ? IPersonelYetkiRepository -> PersonelYetkiRepository
   ? ISendikaRepository -> SendikaRepository
   ? IServisRepository -> ServisRepository
+  ? ISignalREventLogRepository -> SignalREventLogRepository
   ? ISiramatikQueryRepository -> SiramatikQueryRepository
   ? ISiraRepository -> SiraRepository
   ? ITvBankoRepository -> TvBankoRepository
@@ -52,7 +53,7 @@
   ? IUnvanRepository -> UnvanRepository
   ? IUserRepository -> UserRepository
   ? IYetkiRepository -> YetkiRepository
-? 47 repository otomatik kayıt edildi
+? 48 repository otomatik kayıt edildi
 
 ?? Complex Query Repositories kaydediliyor...
   ? ISiramatikQueryRepository -> SiramatikQueryRepository
@@ -219,7 +220,7 @@
     ?? PersonelIslemleri: 77 servis kayıt edildi
   ?? SiramatikIslemleri servisleri kaydediliyor...
     ?? Bulunan interface'ler: 14
-    ?? Bulunan implementation'lar: 191
+    ?? Bulunan implementation'lar: 198
     ? IBankoService -> BankoService
     ? IKanalAltIslemService -> KanalAltIslemService
     ? IKanalAltService -> KanalAltService
@@ -352,23 +353,28 @@
     ? <SiraAlAsync>d__9 (Concrete - Interface yok)
     ? <TestGetSiraNoAsync>d__17 (Concrete - Interface yok)
     ? <>c (Concrete - Interface yok)
+    ? <>c__DisplayClass8_0 (Concrete - Interface yok)
     ? <GetBankoPanelSiralarAsync>d__12 (Concrete - Interface yok)
+    ? <GetBankoPanelSiralarBySiraIdAsync>d__14 (Concrete - Interface yok)
     ? <GetBekleyenSiralarAsync>d__6 (Concrete - Interface yok)
     ? <GetFirstCallableSiraIdAsync>d__9 (Concrete - Interface yok)
+    ? <GetIlkCagrilabilirSiraAsync>d__13 (Concrete - Interface yok)
     ? <GetPersonelBekleyenSiralarAsync>d__7 (Concrete - Interface yok)
     ? <SiraIptalAsync>d__11 (Concrete - Interface yok)
     ? <SiraTamamlaAsync>d__10 (Concrete - Interface yok)
     ? <SiradakiCagirAsync>d__8 (Concrete - Interface yok)
     ? <>c (Concrete - Interface yok)
-    ? <>c__DisplayClass12_0 (Concrete - Interface yok)
-    ? <>c__DisplayClass8_0 (Concrete - Interface yok)
-    ? <>c__DisplayClass8_1 (Concrete - Interface yok)
-    ? <GetYonlendirilmisSiraCountAsync>d__12 (Concrete - Interface yok)
-    ? <GetYonlendirmeSecenekleriAsync>d__13 (Concrete - Interface yok)
-    ? <ValidateBaskaBankoYonlendirme>d__9 (Concrete - Interface yok)
-    ? <ValidateSefYonlendirme>d__10 (Concrete - Interface yok)
-    ? <ValidateUzmanYonlendirme>d__11 (Concrete - Interface yok)
-    ? <YonlendirSiraAsync>d__8 (Concrete - Interface yok)
+    ? <>c__DisplayClass10_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass10_1 (Concrete - Interface yok)
+    ? <>c__DisplayClass14_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass15_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass15_1 (Concrete - Interface yok)
+    ? <GetYonlendirilmisSiraCountAsync>d__14 (Concrete - Interface yok)
+    ? <GetYonlendirmeSecenekleriAsync>d__15 (Concrete - Interface yok)
+    ? <ValidateBaskaBankoYonlendirme>d__11 (Concrete - Interface yok)
+    ? <ValidateSefYonlendirme>d__12 (Concrete - Interface yok)
+    ? <ValidateUzmanYonlendirme>d__13 (Concrete - Interface yok)
+    ? <YonlendirSiraAsync>d__10 (Concrete - Interface yok)
     ? <>c (Concrete - Interface yok)
     ? <>c__DisplayClass10_0 (Concrete - Interface yok)
     ? <>c__DisplayClass10_1 (Concrete - Interface yok)
@@ -382,6 +388,7 @@
     ? <CreateUsersForAllTvsAsync>d__17 (Concrete - Interface yok)
     ? <DeleteAsync>d__6 (Concrete - Interface yok)
     ? <GetActiveAsync>d__11 (Concrete - Interface yok)
+    ? <GetActiveSiralarByTvIdAsync>d__19 (Concrete - Interface yok)
     ? <GetAllAsync>d__8 (Concrete - Interface yok)
     ? <GetByHizmetBinasiAsync>d__9 (Concrete - Interface yok)
     ? <GetByHizmetBinasiDropdownAsync>d__14 (Concrete - Interface yok)
@@ -410,17 +417,19 @@
     ? <<CreateAsync>b__0>d (Concrete - Interface yok)
     ? <<UpdateAsync>b__0>d (Concrete - Interface yok)
     ? <<DeleteAsync>b__0>d (Concrete - Interface yok)
+    ? <<SiradakiCagirAsync>b__0>d (Concrete - Interface yok)
     ? <<YonlendirSiraAsync>b__0>d (Concrete - Interface yok)
-    ?? SiramatikIslemleri: 191 servis kayıt edildi
+    ?? SiramatikIslemleri: 198 servis kayıt edildi
   ?? PdksIslemleri servisleri kaydediliyor...
     ??  PdksIslemleri modülünde servis bulunamadı
   ?? EshotIslemleri servisleri kaydediliyor...
     ??  EshotIslemleri modülünde servis bulunamadı
   ?? SignalR servisleri kaydediliyor...
     ?? Bulunan interface'ler: 2
-    ?? Bulunan implementation'lar: 75
+    ?? Bulunan implementation'lar: 83
     ? IHubConnectionBusinessService -> HubConnectionBusinessService
     ? ISiramatikHubService -> SiramatikHubService
+    ? SignalRAuditService (Concrete - Interface yok)
     ? <>c (Concrete - Interface yok)
     ? <>c__DisplayClass10_0 (Concrete - Interface yok)
     ? <>c__DisplayClass11_0 (Concrete - Interface yok)
@@ -483,18 +492,25 @@
     ? <TransferBankoConnectionAsync>d__23 (Concrete - Interface yok)
     ? <TransferTvConnectionAsync>d__28 (Concrete - Interface yok)
     ? <UpdateConnectionTypeAsync>d__12 (Concrete - Interface yok)
+    ? <LogEventAsync>d__5 (Concrete - Interface yok)
+    ? <LogEventsAsync>d__6 (Concrete - Interface yok)
+    ? <UpdateEventStatusAsync>d__7 (Concrete - Interface yok)
     ? <>c (Concrete - Interface yok)
-    ? <>c__DisplayClass10_0 (Concrete - Interface yok)
-    ? <>c__DisplayClass7_0 (Concrete - Interface yok)
-    ? <BroadcastNewSiraAsync>d__11 (Concrete - Interface yok)
-    ? <BroadcastSiraCalledAsync>d__7 (Concrete - Interface yok)
-    ? <BroadcastSiraCancelledAsync>d__9 (Concrete - Interface yok)
-    ? <BroadcastSiraCompletedAsync>d__8 (Concrete - Interface yok)
-    ? <BroadcastSiraRedirectedAsync>d__10 (Concrete - Interface yok)
-    ? <BroadcastSiraToTvAsync>d__12 (Concrete - Interface yok)
-    ? <SendToPersonelAsync>d__14 (Concrete - Interface yok)
-    ? <SendToPersonelsAsync>d__13 (Concrete - Interface yok)
-    ?? SignalR: 75 servis kayıt edildi
+    ? <>c__DisplayClass11_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass18_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass8_0 (Concrete - Interface yok)
+    ? <BroadcastBankoPanelGuncellemesiAsync>d__18 (Concrete - Interface yok)
+    ? <BroadcastNewSiraAsync>d__13 (Concrete - Interface yok)
+    ? <BroadcastSiraCalledAsync>d__8 (Concrete - Interface yok)
+    ? <BroadcastSiraCalledToTvAsync>d__15 (Concrete - Interface yok)
+    ? <BroadcastSiraCancelledAsync>d__10 (Concrete - Interface yok)
+    ? <BroadcastSiraCompletedAsync>d__9 (Concrete - Interface yok)
+    ? <BroadcastSiraRedirectedAsync>d__11 (Concrete - Interface yok)
+    ? <BroadcastSiraRedirectedToTvAsync>d__12 (Concrete - Interface yok)
+    ? <BroadcastSiraToTvAsync>d__14 (Concrete - Interface yok)
+    ? <SendToPersonelAsync>d__17 (Concrete - Interface yok)
+    ? <SendToPersonelsAsync>d__16 (Concrete - Interface yok)
+    ?? SignalR: 83 servis kayıt edildi
   ?? Business Logic Layer hazır!
 
 warn: Microsoft.EntityFrameworkCore.Model.Validation[10622]
@@ -524,6 +540,92 @@ warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
 warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
       The 'Aktiflik' property 'TvAktiflik' on entity type 'Tv' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
 ? Veritabanı güncel
+?? SQL Script'leri çalıştırılıyor...
+info: SGKPortalApp.ApiLayer.Program[0]
+      ?? 1 SQL script bulundu: D:\AspNetExamples\SGKPortalApp\SGKPortalApp.ApiLayer\bin\Debug\net9.0\..\..\..\..\SGKPortalApp.DataAccessLayer\Scripts
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (89ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE VIEW vw_SignalREventLogs AS
+      SELECT
+          e.EventLogId,
+          e.EventId,
+          CASE e.EventType
+              WHEN 1 THEN N'Yeni Sıra'
+              WHEN 2 THEN N'Sıra Çağrıldı'
+              WHEN 3 THEN N'Sıra Tamamlandı'
+              WHEN 4 THEN N'Sıra İptal'
+              WHEN 5 THEN N'Sıra Yönlendirildi'
+              WHEN 10 THEN N'Panel Güncelleme'
+              WHEN 20 THEN N'TV Güncelleme'
+              WHEN 30 THEN N'Banko Modu Aktif'
+              WHEN 31 THEN N'Banko Modu Pasif'
+              WHEN 40 THEN N'Zorla Çıkış'
+              WHEN 50 THEN N'Duyuru'
+              ELSE N'Diğer'
+          END AS EventTypeName,
+          e.EventName,
+          CASE e.TargetType
+              WHEN 1 THEN 'Connection'
+              WHEN 2 THEN 'Connections'
+              WHEN 3 THEN 'Group'
+              WHEN 4 THEN 'All'
+              WHEN 5 THEN 'Personel'
+              WHEN 6 THEN 'TV'
+              ELSE N'Bilinmiyor'
+          END AS TargetTypeName,
+          e.TargetId,
+          e.TargetCount,
+          e.SiraId,
+          e.SiraNo,
+          e.BankoId,
+          CONCAT('Banko ', b.BankoNo) AS BankoAdi,
+          e.TvId,
+          t.TvAdi,
+          e.PersonelTc,
+          p.AdSoyad AS PersonelAdSoyad,
+          CASE e.DeliveryStatus
+              WHEN 0 THEN N'Beklemede'
+              WHEN 1 THEN N'Gönderildi'
+              WHEN 2 THEN N'Başarısız'
+              WHEN 3 THEN N'Hedef Yok'
+              WHEN 10 THEN N'Alındı (ACK)'
+              ELSE N'Bilinmiyor'
+          END AS DeliveryStatusName,
+          e.ErrorMessage,
+          e.SentAt,
+          e.AcknowledgedAt,
+          e.DurationMs,
+          e.PayloadSummary,
+          e.HizmetBinasiId,
+          hb.HizmetBinasiAdi,
+          e.CorrelationId
+      FROM [dbo].[SIG_EventLogs] e
+      LEFT JOIN [dbo].[SIR_Bankolar] b ON e.BankoId = b.BankoId
+      LEFT JOIN [dbo].[SIR_Tvler] t ON e.TvId = t.TvId
+      LEFT JOIN [dbo].[PER_Personeller] p ON e.PersonelTc = p.TcKimlikNo
+      LEFT JOIN [dbo].[CMN_HizmetBinalari] hb ON e.HizmetBinasiId = hb.HizmetBinasiId;
+fail: SGKPortalApp.ApiLayer.Program[0]
+      ? Script hatası: D:\AspNetExamples\SGKPortalApp\SGKPortalApp.ApiLayer\bin\Debug\net9.0\..\..\..\..\SGKPortalApp.DataAccessLayer\Scripts\SignalR\001_CreateSignalREventLogViews.sql
+      Microsoft.Data.SqlClient.SqlException (0x80131904): There is already an object named 'vw_SignalREventLogs' in the database.
+         at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+         at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+         at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+         at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+         at Microsoft.Data.SqlClient.SqlCommand.InternalEndExecuteNonQuery(IAsyncResult asyncResult, Boolean isInternal, String endMethod)
+         at Microsoft.Data.SqlClient.SqlCommand.EndExecuteNonQueryInternal(IAsyncResult asyncResult)
+         at Microsoft.Data.SqlClient.SqlCommand.EndExecuteNonQueryAsync(IAsyncResult asyncResult)
+         at Microsoft.Data.SqlClient.SqlCommand.<>c.<InternalExecuteNonQueryAsync>b__210_1(IAsyncResult result)
+         at System.Threading.Tasks.TaskFactory`1.FromAsyncCoreLogic(IAsyncResult iar, Func`2 endFunction, Action`1 endAction, Task`1 promise, Boolean requiresSynchronization)
+      --- End of stack trace from previous location ---
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(DatabaseFacade databaseFacade, String sql, IEnumerable`1 parameters, CancellationToken cancellationToken)
+         at SGKPortalApp.DataAccessLayer.Scripts.DatabaseScriptRunner.RunScriptsFromFolderAsync(DbContext context, String folderPath, ILogger logger) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Scripts\DatabaseScriptRunner.cs:line 111
+      ClientConnectionId:28a9c9d3-660d-4ad4-8c22-a17673c47ebd
+      Error Number:2714,State:3,Class:16
+info: SGKPortalApp.ApiLayer.Program[0]
+      ? Tüm SQL script'leri tamamlandı
 
 ╔════════════════════════════════════════════════════════╗
 ║         SGK PORTAL API BAŞLATILIYOR...                 ║
@@ -547,30 +649,236 @@ info: Microsoft.Hosting.Lifetime[0]
       Hosting environment: Development
 info: Microsoft.Hosting.Lifetime[0]
       Content root path: D:\AspNetExamples\SGKPortalApp\SGKPortalApp.ApiLayer
-warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
-      ?? Kullanıcı farklı bir cihazdan/tarayıcıdan giriş yaptı - TcKimlikNo: 16406457430, Eski SessionID: 039e0703-ca15-452f-9f5d-a4c10b7cd3b0, Yeni SessionID: d5fc7136-f10b-4464-a112-c7a5fe9ed2d1
-info: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
-      Login başarılı - 16406457430 - AHMET DEMİRAL
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: 6UEHyXApxQVhHHuunjOqtA - Kullanıcı: Anonymous (TC: Yok)
+      ?? [SiramatikHub] Yeni bağlantı: Z-2bkUskX7M7tcmuvBCFOQ - Kullanıcı: Anonymous (TC: Yok)
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=740d2ffd-970c-429e-9a32-706649a15289
+      ?? [SiramatikHub] Yeni bağlantı: ZdUbpxoQ1OBstLcU_BkvxA - Kullanıcı: Anonymous (TC: Yok)
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: 09AOPeF5mA0HkZc9qr9Sfg - Kullanıcı: Anonymous (TC: Yok)
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: CKqdrjPCLa9LW6N6_WsYfQ - Kullanıcı: Anonymous (TC: Yok)
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=49de48ec-8cd1-4ebd-9978-c9329ea01c5c
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=4d226632-46bb-4493-95d6-759781f888bf
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=45ea0270-c0a3-4434-b266-2175edf1770e
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=True, tabSessionId=5dfb0c87-cd13-4f48-bbca-7976785c69de
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: 09AOPeF5mA0HkZc9qr9Sfg | TC: 16441799540 | Type: MainLayout | IP: ::1
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: ZdUbpxoQ1OBstLcU_BkvxA | TC: 16406457430 | Type: MainLayout | IP: ::1
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: CKqdrjPCLa9LW6N6_WsYfQ | TC: 28165202398 | Type: MainLayout | IP: ::1
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=True
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=True
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=True
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu algılandı: 16406457430
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu algılandı: 28165202398
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu algılandı: 16441799540
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: Z-2bkUskX7M7tcmuvBCFOQ | TC: TV0000001 | Type: TvMode | IP: 127.0.0.1
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=False
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Aktif banko bulundu: Banko#18, TabId beklenen: , gelen: 4d226632-46bb-4493-95d6-759781f888bf, isRefresh: False
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Aktif banko bulundu: Banko#21, TabId beklenen: , gelen: 49de48ec-8cd1-4ebd-9978-c9329ea01c5c, isRefresh: True
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Aktif banko bulundu: Banko#19, TabId beklenen: , gelen: 45ea0270-c0a3-4434-b266-2175edf1770e, isRefresh: True
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Sayfa yenileme algılandı, tabSessionId güncelleniyor: 16441799540
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Sayfa yenileme algılandı, tabSessionId güncelleniyor: 16406457430
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
+      ? Banko bağlantısı devredildi: 16406457430 -> HubConnection#1424
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
+      ? Banko bağlantısı devredildi: 28165202398 -> HubConnection#1423
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
+      ? Banko bağlantısı devredildi: 16441799540 -> HubConnection#1422
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko bağlantısı yenilendi: 16441799540 -> HubConnection#09AOPeF5mA0HkZc9qr9Sfg
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko bağlantısı yenilendi: 28165202398 -> HubConnection#CKqdrjPCLa9LW6N6_WsYfQ
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko bağlantısı yenilendi: 16406457430 -> HubConnection#ZdUbpxoQ1OBstLcU_BkvxA
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko#19 bağlantısı koptu (geçici olabilir): 16406457430
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Bağlantı koptu: ZdUbpxoQ1OBstLcU_BkvxA - Kullanıcı: Anonymous
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: QSTLTyrCC1PIH9z55pv6Ew - Kullanıcı: Anonymous (TC: Yok)
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=45ea0270-c0a3-4434-b266-2175edf1770e
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: QSTLTyrCC1PIH9z55pv6Ew | TC: 16406457430 | Type: MainLayout | IP: ::1
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=True
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu algılandı: 16406457430
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Aktif banko bulundu: Banko#19, TabId beklenen: 45ea0270-c0a3-4434-b266-2175edf1770e, gelen: 45ea0270-c0a3-4434-b266-2175edf1770e, isRefresh: True
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Sayfa yenileme algılandı, tabSessionId güncelleniyor: 16406457430
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
+      ? Banko bağlantısı devredildi: 16406457430 -> HubConnection#1426
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko bağlantısı yenilendi: 16406457430 -> HubConnection#QSTLTyrCC1PIH9z55pv6Ew
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko#19 bağlantısı koptu (geçici olabilir): 16406457430
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Bağlantı koptu: QSTLTyrCC1PIH9z55pv6Ew - Kullanıcı: Anonymous
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: czP3NuJrOPigxq1-hLTsRQ - Kullanıcı: Anonymous (TC: Yok)
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=45ea0270-c0a3-4434-b266-2175edf1770e
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: czP3NuJrOPigxq1-hLTsRQ | TC: 16406457430 | Type: MainLayout | IP: ::1
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=True
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu algılandı: 16406457430
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Aktif banko bulundu: Banko#19, TabId beklenen: 45ea0270-c0a3-4434-b266-2175edf1770e, gelen: 45ea0270-c0a3-4434-b266-2175edf1770e, isRefresh: True
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Sayfa yenileme algılandı, tabSessionId güncelleniyor: 16406457430
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
+      ? Banko bağlantısı devredildi: 16406457430 -> HubConnection#1427
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko bağlantısı yenilendi: 16406457430 -> HubConnection#czP3NuJrOPigxq1-hLTsRQ
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko#21 bağlantısı koptu (geçici olabilir): 16441799540
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Bağlantı koptu: 09AOPeF5mA0HkZc9qr9Sfg - Kullanıcı: Anonymous
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko#18 bağlantısı koptu (geçici olabilir): 28165202398
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Bağlantı koptu: CKqdrjPCLa9LW6N6_WsYfQ - Kullanıcı: Anonymous
 warn: Microsoft.EntityFrameworkCore.Query[10108]
       Collection navigations are only considered null if their parent entity is null. Use 'Any' to check whether collection navigation 'Banko.BankoKullanicilari' is empty.
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: 6UEHyXApxQVhHHuunjOqtA | TC: 16406457430 | Type: MainLayout | IP: ::1
+      ?? [SiramatikHub] Yeni bağlantı: rPOcu8P47IhLEYHGfYg6DQ - Kullanıcı: Anonymous (TC: Yok)
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=4d226632-46bb-4493-95d6-759781f888bf
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: rPOcu8P47IhLEYHGfYg6DQ | TC: 28165202398 | Type: MainLayout | IP: ::1
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=True
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu algılandı: 28165202398
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Aktif banko bulundu: Banko#18, TabId beklenen: 4d226632-46bb-4493-95d6-759781f888bf, gelen: 4d226632-46bb-4493-95d6-759781f888bf, isRefresh: True
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Sayfa yenileme algılandı, tabSessionId güncelleniyor: 28165202398
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
+      ? Banko bağlantısı devredildi: 28165202398 -> HubConnection#1428
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko bağlantısı yenilendi: 28165202398 -> HubConnection#rPOcu8P47IhLEYHGfYg6DQ
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: h4Vxw_e06WqYxD38wAXGdg - Kullanıcı: Anonymous (TC: Yok)
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=49de48ec-8cd1-4ebd-9978-c9329ea01c5c
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: h4Vxw_e06WqYxD38wAXGdg | TC: 16441799540 | Type: MainLayout | IP: ::1
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=True
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu algılandı: 16441799540
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Aktif banko bulundu: Banko#21, TabId beklenen: 49de48ec-8cd1-4ebd-9978-c9329ea01c5c, gelen: 49de48ec-8cd1-4ebd-9978-c9329ea01c5c, isRefresh: True
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Sayfa yenileme algılandı, tabSessionId güncelleniyor: 16441799540
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
+      ? Banko bağlantısı devredildi: 16441799540 -> HubConnection#1429
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko bağlantısı yenilendi: 16441799540 -> HubConnection#h4Vxw_e06WqYxD38wAXGdg
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? TvMode disconnect başladı: ConnectionId=Z-2bkUskX7M7tcmuvBCFOQ, HubConnectionId=1425
+warn: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? HubTvConnection bulunamadı: HubConnectionId=1425
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Bağlantı koptu: Z-2bkUskX7M7tcmuvBCFOQ - Kullanıcı: Anonymous
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: RQuieJlehAHxhlZqlWm-GA - Kullanıcı: Anonymous (TC: Yok)
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=True, tabSessionId=5dfb0c87-cd13-4f48-bbca-7976785c69de
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: RQuieJlehAHxhlZqlWm-GA | TC: TV0000001 | Type: TvMode | IP: 127.0.0.1
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? Banko modu kontrolü: isBankoMode=False
+warn: Microsoft.EntityFrameworkCore.Query[20504]
+      Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? UpdateConnectionType çağrıldı: RQuieJlehAHxhlZqlWm-GA -> TvMode
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? ConnectionType güncellendi: RQuieJlehAHxhlZqlWm-GA -> TvMode
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
+      ? TV bağlantısı oluşturuldu: TV#1, HubConnectionId=1430, TcKimlikNo=TV0000001
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Gruba katıldı: RQuieJlehAHxhlZqlWm-GA -> TV_1
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?  () -> TV#1 grubuna katıldı
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.TvService[0]
+      TV#1 için 3 aktif sıra bulundu
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko#18 bağlantısı koptu (geçici olabilir): 28165202398
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Bağlantı koptu: rPOcu8P47IhLEYHGfYg6DQ - Kullanıcı: Anonymous
+info: SGKPortalApp.ApiLayer.Controllers.Auth.AuthController[0]
+      ?? Logout: 28165202398 çıkış yapıyor...
+info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
+      ?? Banko modundan çıkılıyor: 28165202398
+info: SGKPortalApp.BusinessLogicLayer.Services.Common.UserService[0]
+      Banko modu deaktif edildi. TC: 28165202398
+info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
+      ? Banko modundan çıkıldı: 28165202398
+info: SGKPortalApp.ApiLayer.Controllers.Auth.AuthController[0]
+      ? Logout: Banko modu temizlendi - 28165202398
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko#21 bağlantısı koptu (geçici olabilir): 16441799540
+info: SGKPortalApp.ApiLayer.Controllers.Auth.AuthController[0]
+      ?? Logout: 16441799540 çıkış yapıyor...
+info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
+      ?? Banko modundan çıkılıyor: 16441799540
+info: SGKPortalApp.BusinessLogicLayer.Services.Common.UserService[0]
+      Banko modu deaktif edildi. TC: 16441799540
+info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
+      ? Banko modundan çıkıldı: 16441799540
+info: SGKPortalApp.ApiLayer.Controllers.Auth.AuthController[0]
+      ? Logout: Banko modu temizlendi - 16441799540
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Bağlantı koptu: h4Vxw_e06WqYxD38wAXGdg - Kullanıcı: Anonymous
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko#19 bağlantısı koptu (geçici olabilir): 16406457430
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Bağlantı koptu: czP3NuJrOPigxq1-hLTsRQ - Kullanıcı: Anonymous
+info: SGKPortalApp.ApiLayer.Controllers.Auth.AuthController[0]
+      ?? Logout: 16406457430 çıkış yapıyor...
+info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
+      ?? Banko modundan çıkılıyor: 16406457430
+info: SGKPortalApp.BusinessLogicLayer.Services.Common.UserService[0]
+      Banko modu deaktif edildi. TC: 16406457430
+info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
+      ? Banko modundan çıkıldı: 16406457430
+info: SGKPortalApp.ApiLayer.Controllers.Auth.AuthController[0]
+      ? Logout: Banko modu temizlendi - 16406457430
 warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
-      ?? Kullanıcı farklı bir cihazdan/tarayıcıdan giriş yaptı - TcKimlikNo: 28165202398, Eski SessionID: d2ff3187-85fd-4d3b-ae94-03c32f6bfeb3, Yeni SessionID: 8ec255b2-aecf-4099-9f5c-ef3e67b48096
+      ?? Kullanıcı farklı bir cihazdan/tarayıcıdan giriş yaptı - TcKimlikNo: 16406457430, Eski SessionID: a3e8e7a3-9d50-4ac0-9303-2ab468810c68, Yeni SessionID: 95fddae0-c8dd-452e-b074-28680c738fe0
 info: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
-      Login başarılı - 28165202398 - Muhammed Bodur
+      Login başarılı - 16406457430 - AHMET DEMİRAL
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: 9JivY4ICk4ms2fSg0xxUzw - Kullanıcı: Anonymous (TC: Yok)
+      ?? [SiramatikHub] Yeni bağlantı: IDHe-7RkgIIYswnZ4aiG8w - Kullanıcı: Anonymous (TC: Yok)
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=76a2ef2f-f594-41bb-9f28-8f4371ae987d
+      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=ed112fca-83eb-4740-a0d6-e6ddd0a3be9b
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: 9JivY4ICk4ms2fSg0xxUzw | TC: 28165202398 | Type: MainLayout | IP: ::1
+      ? Yeni bağlantı oluşturuldu: IDHe-7RkgIIYswnZ4aiG8w | TC: 16406457430 | Type: MainLayout | IP: ::1
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? Banko modu kontrolü: isBankoMode=False
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
@@ -578,9 +886,9 @@ info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? [EnterBankoMode] TcKimlikNo query string'den alındı: '16406457430'
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [EnterBankoMode] Banko moduna geçiliyor: TcKimlikNo='16406457430', BankoId=19, ConnectionId=6UEHyXApxQVhHHuunjOqtA
+      ?? [EnterBankoMode] Banko moduna geçiliyor: TcKimlikNo='16406457430', BankoId=19, ConnectionId=IDHe-7RkgIIYswnZ4aiG8w
 info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
-      ?? Banko moduna geçiliyor: 16406457430 -> Banko#19 | Aktif ConnectionId: 6UEHyXApxQVhHHuunjOqtA
+      ?? Banko moduna geçiliyor: 16406457430 -> Banko#19 | Aktif ConnectionId: IDHe-7RkgIIYswnZ4aiG8w
 [UserRepository] ActivateBankoModeAsync çağrıldı - TcKimlikNo: '16406457430', BankoId: 19
 [UserRepository] Kullanıcı bulundu: 16406457430, Aktif: True
 [UserRepository] Banko modu aktif edildi
@@ -593,17 +901,64 @@ info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
 info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
       ? Banko bağlantısı oluşturuldu: Banko#19, TC#16406457430
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Gruba katıldı: 6UEHyXApxQVhHHuunjOqtA -> BANKO_19
+      ? Gruba katıldı: IDHe-7RkgIIYswnZ4aiG8w -> BANKO_19
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ? 16406457430 -> Banko#19 moduna girdi (Fiziksel)
+warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
+      ?? Kullanıcı farklı bir cihazdan/tarayıcıdan giriş yaptı - TcKimlikNo: 28165202398, Eski SessionID: 24a6ea8f-bf12-40eb-91f5-34d2df1ed7ac, Yeni SessionID: e2c746ba-bd99-4f75-9881-8e920e4c2d79
+info: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
+      Login başarılı - 28165202398 - Muhammed Bodur
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: X4Fxjw_fl9Z9w7C82o1Weg - Kullanıcı: Anonymous (TC: Yok)
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=69cf4d48-04bd-4665-b4d2-46da88835d38
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: X4Fxjw_fl9Z9w7C82o1Weg | TC: 28165202398 | Type: MainLayout | IP: ::1
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=False
+warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
+      ?? Kullanıcı farklı bir cihazdan/tarayıcıdan giriş yaptı - TcKimlikNo: 16441799540, Eski SessionID: c63df93d-6e80-4590-a082-538f343c8125, Yeni SessionID: 9d91cada-ed7e-41d3-8001-915d7446ace9
+info: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
+      Login başarılı - 16441799540 - AYŞE BAŞER
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: IopD_DxaYUIxaB_Kv_bCKQ - Kullanıcı: Anonymous (TC: Yok)
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=dc30e90e-e405-4c18-aa28-cfe8a41cc333
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: IopD_DxaYUIxaB_Kv_bCKQ | TC: 16441799540 | Type: MainLayout | IP: ::1
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=False
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [EnterBankoMode] TcKimlikNo claim'den alındı: ''
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [EnterBankoMode] TcKimlikNo query string'den alındı: '16441799540'
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [EnterBankoMode] Banko moduna geçiliyor: TcKimlikNo='16441799540', BankoId=21, ConnectionId=IopD_DxaYUIxaB_Kv_bCKQ
+info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
+      ?? Banko moduna geçiliyor: 16441799540 -> Banko#21 | Aktif ConnectionId: IopD_DxaYUIxaB_Kv_bCKQ
+[UserRepository] ActivateBankoModeAsync çağrıldı - TcKimlikNo: '16441799540', BankoId: 21
+[UserRepository] Kullanıcı bulundu: 16441799540, Aktif: True
+[UserRepository] Banko modu aktif edildi
+info: SGKPortalApp.BusinessLogicLayer.Services.Common.UserService[0]
+      Banko modu aktif edildi. TC: 16441799540, BankoId: 21
+info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
+      ? Banko modu aktif: 16441799540 -> Banko#21
+info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
+      ? Banko modu aktif edildi. Sayfa yenilendiğinde eski bağlantılar otomatik kapanacak.
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
+      ? Banko bağlantısı oluşturuldu: Banko#21, TC#16441799540
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Gruba katıldı: IopD_DxaYUIxaB_Kv_bCKQ -> BANKO_21
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? 16441799540 -> Banko#21 moduna girdi (Fiziksel)
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? [EnterBankoMode] TcKimlikNo claim'den alındı: ''
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? [EnterBankoMode] TcKimlikNo query string'den alındı: '28165202398'
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [EnterBankoMode] Banko moduna geçiliyor: TcKimlikNo='28165202398', BankoId=18, ConnectionId=9JivY4ICk4ms2fSg0xxUzw
+      ?? [EnterBankoMode] Banko moduna geçiliyor: TcKimlikNo='28165202398', BankoId=18, ConnectionId=X4Fxjw_fl9Z9w7C82o1Weg
 info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
-      ?? Banko moduna geçiliyor: 28165202398 -> Banko#18 | Aktif ConnectionId: 9JivY4ICk4ms2fSg0xxUzw
+      ?? Banko moduna geçiliyor: 28165202398 -> Banko#18 | Aktif ConnectionId: X4Fxjw_fl9Z9w7C82o1Weg
 [UserRepository] ActivateBankoModeAsync çağrıldı - TcKimlikNo: '28165202398', BankoId: 18
 [UserRepository] Kullanıcı bulundu: 28165202398, Aktif: True
 [UserRepository] Banko modu aktif edildi
@@ -616,6 +971,313 @@ info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
 info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
       ? Banko bağlantısı oluşturuldu: Banko#18, TC#28165202398
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Gruba katıldı: 9JivY4ICk4ms2fSg0xxUzw -> BANKO_18
+      ? Gruba katıldı: X4Fxjw_fl9Z9w7C82o1Weg -> BANKO_18
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ? 28165202398 -> Banko#18 moduna girdi (Fiziksel)
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.TvService[0]
+      TV#1 için 3 aktif sıra bulundu
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.SiraCagirmaService[0]
+      ?? BankoHareket kaydı oluşturuldu. BankoId: 19, SiraNo: 4
+warn: Microsoft.EntityFrameworkCore.Database.Transaction[30004]
+      Savepoints are disabled because Multiple Active Result Sets (MARS) is enabled. If 'SaveChanges' fails, then the transaction cannot be automatically rolled back to a known clean state. Instead, the transaction should be rolled back by the application before retrying 'SaveChanges'. See https://go.microsoft.com/fwlink/?linkid=2149338 for more information and examples. To identify the code which triggers this warning, call 'ConfigureWarnings(w => w.Throw(SqlServerEventId.SavepointsDisabledBecauseOfMARS))'.
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.SiraCagirmaService[0]
+      ? Sıra çağrıldı. SiraId: 175, SiraNo: 4, Personel: 16406457430
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? TC: 16441799540 için 1 aktif banko bağlantısı bulundu. Bağlantılar: BankoMode:IopD_DxaYUIxaB_Kv_bCKQ
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? TC: 28165202398 için 1 aktif banko bağlantısı bulundu. Bağlantılar: BankoMode:X4Fxjw_fl9Z9w7C82o1Weg
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? Toplam aktif banko bağlantısı: 2, IDs: IopD_DxaYUIxaB_Kv_bCKQ, X4Fxjw_fl9Z9w7C82o1Weg
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? siraListUpdate gönderildi: 2 bağlantıya
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? SiraCalled panel broadcast edildi. SiraId: 175, Etkilenen: 2 personel
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? BankoPanelGuncellemesi başladı. SiraId: 175
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? Sıra bulundu. KanalAltIslemId: 1, HizmetBinasiId: 6
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? GetBankoPanelBekleyenSiralarBySiraIdAsync sonucu: 9 satır
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? 3 personele mesaj gönderilecek
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? BankoPanelGuncellemesi gönderildi. TC: 16406457430, SiraNo: 4, Pozisyon: 0/3
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? BankoPanelGuncellemesi gönderildi. TC: 16441799540, SiraNo: 0, Pozisyon: -1/3
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? BankoPanelGuncellemesi gönderildi. TC: 28165202398, SiraNo: 0, Pozisyon: -1/3
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ? BankoPanelGuncellemesi tamamlandı. SiraId: 175, Etkilenen: 3 personel
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? TV#1'ye sıra bildirimi gönderildi: Sıra#4, Liste: 3 sıra, 17 bağlantı
+fail: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SignalRAuditService[0]
+      ? SignalR event status güncellenemedi: 5391abbb-7d43-488d-8d96-9f73edf539db
+      System.ObjectDisposedException: Cannot access a disposed object.
+      Object name: 'IServiceProvider'.
+         at Microsoft.Extensions.DependencyInjection.ServiceLookup.ThrowHelper.ThrowObjectDisposedException()
+         at Microsoft.EntityFrameworkCore.Diagnostics.Internal.ScopedLoggerFactory.Create(IServiceProvider internalServiceProvider, IDbContextOptions contextOptions)
+         at ResolveService(ILEmitResolverBuilderRuntimeContext, ServiceProviderEngineScope)
+         at ResolveService(ILEmitResolverBuilderRuntimeContext, ServiceProviderEngineScope)
+         at ResolveService(ILEmitResolverBuilderRuntimeContext, ServiceProviderEngineScope)
+         at ResolveService(ILEmitResolverBuilderRuntimeContext, ServiceProviderEngineScope)
+         at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+         at Microsoft.EntityFrameworkCore.DbContext.get_DbContextDependencies()
+         at Microsoft.EntityFrameworkCore.DbContext.get_ContextServices()
+         at Microsoft.EntityFrameworkCore.Infrastructure.Internal.InfrastructureExtensions.GetService(IInfrastructure`1 accessor, Type serviceType)
+         at Microsoft.EntityFrameworkCore.Infrastructure.Internal.InfrastructureExtensions.GetService[TService](IInfrastructure`1 accessor)
+         at Microsoft.EntityFrameworkCore.Infrastructure.AccessorExtensions.GetService[TService](IInfrastructure`1 accessor)
+         at Microsoft.EntityFrameworkCore.Infrastructure.DatabaseFacade.get_Dependencies()
+         at Microsoft.EntityFrameworkCore.Infrastructure.DatabaseFacade.Microsoft.EntityFrameworkCore.Storage.IDatabaseFacadeDependenciesAccessor.get_Dependencies()
+         at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.GetFacadeDependencies(DatabaseFacade databaseFacade)
+         at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(DatabaseFacade databaseFacade, String sql, IEnumerable`1 parameters, CancellationToken cancellationToken)
+         at SGKPortalApp.DataAccessLayer.Repositories.Concrete.SignalR.SignalREventLogRepository.UpdateStatusDirectAsync(Guid eventId, SignalRDeliveryStatus status, String errorMessage, Nullable`1 durationMs) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Concrete\SignalR\SignalREventLogRepository.cs:line 151
+         at SGKPortalApp.DataAccessLayer.Repositories.Concrete.SignalR.SignalREventLogRepository.UpdateStatusDirectAsync(Guid eventId, SignalRDeliveryStatus status, String errorMessage, Nullable`1 durationMs) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Concrete\SignalR\SignalREventLogRepository.cs:line 151
+         at SGKPortalApp.BusinessLogicLayer.Services.SignalR.SignalRAuditService.UpdateEventStatusAsync(Guid eventId, SignalRDeliveryStatus status, String errorMessage, Nullable`1 durationMs) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\SignalR\SignalRAuditService.cs:line 71
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.SiraCagirmaService[0]
+      ?? BankoHareket kaydı oluşturuldu. BankoId: 18, SiraNo: 4006
+warn: Microsoft.EntityFrameworkCore.Database.Transaction[30004]
+      Savepoints are disabled because Multiple Active Result Sets (MARS) is enabled. If 'SaveChanges' fails, then the transaction cannot be automatically rolled back to a known clean state. Instead, the transaction should be rolled back by the application before retrying 'SaveChanges'. See https://go.microsoft.com/fwlink/?linkid=2149338 for more information and examples. To identify the code which triggers this warning, call 'ConfigureWarnings(w => w.Throw(SqlServerEventId.SavepointsDisabledBecauseOfMARS))'.
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.SiraCagirmaService[0]
+      ? Sıra çağrıldı. SiraId: 177, SiraNo: 4006, Personel: 28165202398
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? TC: 16406457430 için 1 aktif banko bağlantısı bulundu. Bağlantılar: BankoMode:IDHe-7RkgIIYswnZ4aiG8w
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? TC: 16441799540 için 1 aktif banko bağlantısı bulundu. Bağlantılar: BankoMode:IopD_DxaYUIxaB_Kv_bCKQ
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? Toplam aktif banko bağlantısı: 2, IDs: IDHe-7RkgIIYswnZ4aiG8w, IopD_DxaYUIxaB_Kv_bCKQ
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? siraListUpdate gönderildi: 2 bağlantıya
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? SiraCalled panel broadcast edildi. SiraId: 177, Etkilenen: 2 personel
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? BankoPanelGuncellemesi başladı. SiraId: 177
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? Sıra bulundu. KanalAltIslemId: 12, HizmetBinasiId: 6
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? GetBankoPanelBekleyenSiralarBySiraIdAsync sonucu: 6 satır
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? 3 personele mesaj gönderilecek
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? BankoPanelGuncellemesi gönderildi. TC: 16406457430, SiraNo: 0, Pozisyon: -1/2
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? BankoPanelGuncellemesi gönderildi. TC: 16441799540, SiraNo: 0, Pozisyon: -1/2
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? BankoPanelGuncellemesi gönderildi. TC: 28165202398, SiraNo: 4006, Pozisyon: 0/2
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ? BankoPanelGuncellemesi tamamlandı. SiraId: 177, Etkilenen: 3 personel
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? TV#1'ye sıra bildirimi gönderildi: Sıra#4006, Liste: 3 sıra, 17 bağlantı
+fail: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SignalRAuditService[0]
+      ? SignalR event status güncellenemedi: 42365219-c649-493e-a44a-9870ce6643dc
+      System.ObjectDisposedException: Cannot access a disposed object.
+      Object name: 'IServiceProvider'.
+         at Microsoft.Extensions.DependencyInjection.ServiceLookup.ThrowHelper.ThrowObjectDisposedException()
+         at Microsoft.EntityFrameworkCore.Diagnostics.Internal.ScopedLoggerFactory.Create(IServiceProvider internalServiceProvider, IDbContextOptions contextOptions)
+         at ResolveService(ILEmitResolverBuilderRuntimeContext, ServiceProviderEngineScope)
+         at ResolveService(ILEmitResolverBuilderRuntimeContext, ServiceProviderEngineScope)
+         at ResolveService(ILEmitResolverBuilderRuntimeContext, ServiceProviderEngineScope)
+         at ResolveService(ILEmitResolverBuilderRuntimeContext, ServiceProviderEngineScope)
+         at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+         at Microsoft.EntityFrameworkCore.DbContext.get_DbContextDependencies()
+         at Microsoft.EntityFrameworkCore.DbContext.get_ContextServices()
+         at Microsoft.EntityFrameworkCore.Infrastructure.Internal.InfrastructureExtensions.GetService(IInfrastructure`1 accessor, Type serviceType)
+         at Microsoft.EntityFrameworkCore.Infrastructure.Internal.InfrastructureExtensions.GetService[TService](IInfrastructure`1 accessor)
+         at Microsoft.EntityFrameworkCore.Infrastructure.DatabaseFacade.get_Dependencies()
+         at Microsoft.EntityFrameworkCore.Infrastructure.DatabaseFacade.Microsoft.EntityFrameworkCore.Storage.IDatabaseFacadeDependenciesAccessor.get_Dependencies()
+         at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.GetFacadeDependencies(DatabaseFacade databaseFacade)
+         at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(DatabaseFacade databaseFacade, String sql, IEnumerable`1 parameters, CancellationToken cancellationToken)
+         at SGKPortalApp.DataAccessLayer.Repositories.Concrete.SignalR.SignalREventLogRepository.UpdateStatusDirectAsync(Guid eventId, SignalRDeliveryStatus status, String errorMessage, Nullable`1 durationMs) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Concrete\SignalR\SignalREventLogRepository.cs:line 151
+         at SGKPortalApp.DataAccessLayer.Repositories.Concrete.SignalR.SignalREventLogRepository.UpdateStatusDirectAsync(Guid eventId, SignalRDeliveryStatus status, String errorMessage, Nullable`1 durationMs) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Concrete\SignalR\SignalREventLogRepository.cs:line 151
+         at SGKPortalApp.BusinessLogicLayer.Services.SignalR.SignalRAuditService.UpdateEventStatusAsync(Guid eventId, SignalRDeliveryStatus status, String errorMessage, Nullable`1 durationMs) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\SignalR\SignalRAuditService.cs:line 71
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.TvService[0]
+      TV#1 için 3 aktif sıra bulundu
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.SiraCagirmaService[0]
+      ?? BankoHareket kaydı oluşturuldu. BankoId: 21, SiraNo: 4005
+warn: Microsoft.EntityFrameworkCore.Database.Transaction[30004]
+      Savepoints are disabled because Multiple Active Result Sets (MARS) is enabled. If 'SaveChanges' fails, then the transaction cannot be automatically rolled back to a known clean state. Instead, the transaction should be rolled back by the application before retrying 'SaveChanges'. See https://go.microsoft.com/fwlink/?linkid=2149338 for more information and examples. To identify the code which triggers this warning, call 'ConfigureWarnings(w => w.Throw(SqlServerEventId.SavepointsDisabledBecauseOfMARS))'.
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.SiraCagirmaService[0]
+      ? Sıra çağrıldı. SiraId: 176, SiraNo: 4005, Personel: 16441799540
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? TC: 16406457430 için 1 aktif banko bağlantısı bulundu. Bağlantılar: BankoMode:IDHe-7RkgIIYswnZ4aiG8w
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? TC: 28165202398 için 1 aktif banko bağlantısı bulundu. Bağlantılar: BankoMode:X4Fxjw_fl9Z9w7C82o1Weg
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? Toplam aktif banko bağlantısı: 2, IDs: IDHe-7RkgIIYswnZ4aiG8w, X4Fxjw_fl9Z9w7C82o1Weg
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? siraListUpdate gönderildi: 2 bağlantıya
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? SiraCalled panel broadcast edildi. SiraId: 176, Etkilenen: 2 personel
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? BankoPanelGuncellemesi başladı. SiraId: 176
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? Sıra bulundu. KanalAltIslemId: 13, HizmetBinasiId: 6
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? GetBankoPanelBekleyenSiralarBySiraIdAsync sonucu: 3 satır
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? 3 personele mesaj gönderilecek
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? BankoPanelGuncellemesi gönderildi. TC: 16406457430, SiraNo: 0, Pozisyon: -1/1
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? BankoPanelGuncellemesi gönderildi. TC: 16441799540, SiraNo: 4005, Pozisyon: 0/1
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? BankoPanelGuncellemesi gönderildi. TC: 28165202398, SiraNo: 0, Pozisyon: -1/1
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ? BankoPanelGuncellemesi tamamlandı. SiraId: 176, Etkilenen: 3 personel
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.SiramatikHubService[0]
+      ?? TV#1'ye sıra bildirimi gönderildi: Sıra#4005, Liste: 3 sıra, 17 bağlantı
+info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
+      ?? Banko modundan çıkılıyor: 28165202398
+info: SGKPortalApp.BusinessLogicLayer.Services.Common.UserService[0]
+      Banko modu deaktif edildi. TC: 28165202398
+info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
+      ? Banko modundan çıkıldı: 28165202398
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Gruptan ayrıldı: X4Fxjw_fl9Z9w7C82o1Weg -> BANKO_18
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? 28165202398 -> Banko#18 modundan çıktı
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+info: SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri.TvService[0]
+      TV#1 için 2 aktif sıra bulundu
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+fail: Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware[1]
+      An unhandled exception has occurred while executing the request.
+      System.InvalidOperationException: No authenticationScheme was specified, and there was no DefaultChallengeScheme found. The default schemes can be set using either AddAuthentication(string defaultScheme) or AddAuthentication(Action<AuthenticationOptions> configureOptions).
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.ChallengeAsync(HttpContext context, String scheme, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authorization.Policy.AuthorizationMiddlewareResultHandler.<>c__DisplayClass0_0.<<HandleAsync>g__Handle|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+         at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)

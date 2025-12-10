@@ -53,6 +53,16 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         }
 
         /// <summary>
+        /// Banko paneli için istatistikleri döner (günlük toplam çağrılan sıra sayısı).
+        /// </summary>
+        [HttpGet("panel-istatistik/{tcKimlikNo}")]
+        public async Task<IActionResult> GetPanelIstatistikAsync(string tcKimlikNo)
+        {
+            var toplamCagrilan = await _siraCagirmaService.GetPersonelGunlukCagrilanSiraSayisiAsync(tcKimlikNo);
+            return Ok(new { ToplamCagrilan = toplamCagrilan });
+        }
+
+        /// <summary>
         /// ⭐ Personelin ilk çağrılabilir sırasını getirir (sadece tek sıra - performans için)
         /// </summary>
         [HttpGet("ilk-cagrilabilir-sira/{tcKimlikNo}")]

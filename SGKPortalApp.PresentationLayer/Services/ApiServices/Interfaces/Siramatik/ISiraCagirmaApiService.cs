@@ -43,6 +43,11 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramat
         Task<List<SiraCagirmaResponseDto>> GetBankoPanelSiralarAsync(string tcKimlikNo);
 
         /// <summary>
+        /// Banko paneli için istatistikleri döner (günlük toplam çağrılan sıra sayısı).
+        /// </summary>
+        Task<int> GetGunlukToplamCagrilanAsync(string tcKimlikNo);
+
+        /// <summary>
         /// ⭐ Personelin ilk çağrılabilir sırasını getirir (sadece tek sıra - performans için)
         /// </summary>
         Task<SiraCagirmaResponseDto?> GetIlkCagrilabilirSiraAsync(string tcKimlikNo);

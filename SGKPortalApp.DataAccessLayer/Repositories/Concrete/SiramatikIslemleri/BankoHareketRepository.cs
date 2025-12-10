@@ -165,6 +165,18 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return (toplamIslem, ortalamaSure);
         }
 
+        // Personelin belirtilen günde çağırdığı toplam sıra sayısını getirir
+        public async Task<int> GetPersonelGunlukCagrilanSiraSayisiAsync(string tcKimlikNo, DateTime tarih)
+        {
+            var date = tarih.Date;
+            return await _dbSet
+                .AsNoTracking()
+                .Where(bh => bh.PersonelTcKimlikNo == tcKimlikNo
+                             && bh.IslemBaslamaZamani.Date == date
+                             && !bh.SilindiMi)
+                .CountAsync();
+        }
+
         // Personel istatistiklerini getirir
         public async Task<(int ToplamIslem, int OrtalamaSure)> GetPersonelStatsAsync(string tcKimlikNo, DateTime startDate, DateTime endDate)
         {

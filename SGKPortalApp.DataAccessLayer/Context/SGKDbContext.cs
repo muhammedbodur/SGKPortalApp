@@ -5,6 +5,8 @@ using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Configurations.Common;
 using SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri;
 using SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri;
+using SGKPortalApp.DataAccessLayer.Configurations.SignalR;
+using SGKPortalApp.BusinessObjectLayer.Entities.SignalR;
 
 namespace SGKPortalApp.DataAccessLayer.Context
 {
@@ -63,6 +65,10 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<HubConnection> HubConnections { get; set; }
         public DbSet<HubTvConnection> HubTvConnections { get; set; }
         public DbSet<HubBankoConnection> HubBankoConnections { get; set; }
+        #endregion
+
+        #region SignalR
+        public DbSet<SignalREventLog> SignalREventLogs { get; set; }
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -124,6 +130,9 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.ApplyConfiguration(new HubConnectionConfiguration());
             modelBuilder.ApplyConfiguration(new HubTvConnectionConfiguration());
             modelBuilder.ApplyConfiguration(new HubBankoConnectionConfiguration());
+
+            // SignalR
+            modelBuilder.ApplyConfiguration(new SignalREventLogConfiguration());
         }
         #endregion
 

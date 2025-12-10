@@ -76,7 +76,9 @@ namespace SGKPortalApp.ApiLayer
             builder.Services.AddSingleton<BankoModeStateService>();
             builder.Services.AddScoped<IHubConnectionService, HubConnectionService>();
             builder.Services.AddScoped<IBankoModeService, BankoModeService>();
-            builder.Services.AddScoped<ISignalRBroadcaster, SignalRBroadcaster>();
+            // ⭐ Audit destekli SignalR Broadcaster (Decorator Pattern)
+            builder.Services.AddScoped<ISignalRBroadcaster, AuditingSignalRBroadcaster>();
+            builder.Services.AddScoped<ISignalRAuditService, SGKPortalApp.BusinessLogicLayer.Services.SignalR.SignalRAuditService>();
             builder.Services.AddSingleton<IUserIdProvider, TcKimlikNoUserIdProvider>();
 
             // ═══════════════════════════════════════════════════════
@@ -254,13 +256,14 @@ namespace SGKPortalApp.ApiLayer
             }).WithTags("Info");
 
             // ═══════════════════════════════════════════════════════
-            // 🗄️ DATABASE MIGRATION
+            // 🗄️ DATABASE MIGRATION & SCRIPTS
             // ═══════════════════════════════════════════════════════
             using (var scope = app.Services.CreateScope())
             {
                 try
                 {
                     var context = scope.ServiceProvider.GetRequiredService<SGKDbContext>();
+                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
                     if (context.Database.GetPendingMigrations().Any())
                     {
@@ -272,10 +275,21 @@ namespace SGKPortalApp.ApiLayer
                     {
                         Console.WriteLine("✅ Veritabanı güncel");
                     }
+
+                    // SQL Script'leri çalıştır (View, SP, Function)
+                    var scriptsPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", 
+                        "SGKPortalApp.DataAccessLayer", "Scripts");
+                    
+                    if (Directory.Exists(scriptsPath))
+                    {
+                        Console.WriteLine("📜 SQL Script'leri çalıştırılıyor...");
+                        SGKPortalApp.DataAccessLayer.Scripts.DatabaseScriptRunner
+                            .RunScriptsFromFolderAsync(context, scriptsPath, logger).Wait();
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"❌ Migration hatası: {ex.Message}");
+                    Console.WriteLine($"❌ Migration/Script hatası: {ex.Message}");
                 }
             }
 
