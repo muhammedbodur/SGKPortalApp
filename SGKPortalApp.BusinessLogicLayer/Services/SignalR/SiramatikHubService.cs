@@ -668,11 +668,26 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 _logger.LogInformation("🔍 {Count} personele mesaj gönderilecek", personelGroups.Count);
 
                 // Her personele kendi ConnectionId üzerinden direkt mesaj gönder
+                // ⭐ siraRepo zaten yukarıda tanımlı - aktif çağrılmış sıra kontrolü için kullanılacak
                 foreach (var group in personelGroups)
                 {
                     // ⭐ Sadece tetikleyen sırayı bul ve pozisyonunu hesapla
                     var tetikleyenSira = group.Siralar.FirstOrDefault(s => s.SiraId == request.SiraId);
                     var pozisyon = tetikleyenSira != null ? group.Siralar.IndexOf(tetikleyenSira) : -1;
+
+                    // ⭐ Frontend'de çağrılan sıra listenin en üstünde tutuluyor
+                    // Backend listesi sadece Beklemede/Yönlendirildi sıraları içeriyor
+                    // Eğer personelin aktif çağrılmış sırası varsa, pozisyonu +1 artır
+                    if (pozisyon >= 0)
+                    {
+                        var aktifCagrilanSira = await siraRepo.GetCalledByPersonelAsync(group.PersonelTc);
+                        if (aktifCagrilanSira != null)
+                        {
+                            pozisyon += 1; // Çağrılan sıra en üstte olduğu için +1
+                            _logger.LogDebug("📍 Pozisyon düzeltildi: Personel {PersonelTc} için aktif çağrılan sıra var, yeni pozisyon: {Pozisyon}", 
+                                group.PersonelTc, pozisyon);
+                        }
+                    }
 
                     // ⭐ Profesyonel DTO yapısı (Request/Command Pattern)
                     var payload = new BankoPanelSiraGuncellemesiDto

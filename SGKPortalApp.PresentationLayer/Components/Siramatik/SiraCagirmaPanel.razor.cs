@@ -285,18 +285,13 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
                         }
                         else
                         {
-                            // ⭐ Yeni sıra - doğru pozisyona ekle
-                            if (pozisyon >= 0 && pozisyon <= SiraListesi.Count)
-                            {
-                                SiraListesi.Insert(pozisyon, yeniSira);
-                                Console.WriteLine($"✅ Yeni sıra eklendi: #{yeniSira.SiraNo} (pozisyon: {pozisyon})");
-                            }
-                            else
-                            {
-                                // Pozisyon geçersizse sona ekle
-                                SiraListesi.Add(yeniSira);
-                                Console.WriteLine($"✅ Yeni sıra sona eklendi: #{yeniSira.SiraNo}");
-                            }
+                            // ⭐ Yeni sıra - backend'den gelen pozisyona ekle
+                            // Backend zaten çağrılan sırayı hesaba katarak doğru pozisyonu gönderiyor
+                            int insertIndex = (pozisyon >= 0 && pozisyon <= SiraListesi.Count) 
+                                ? pozisyon 
+                                : SiraListesi.Count;
+                            SiraListesi.Insert(insertIndex, yeniSira);
+                            Console.WriteLine($"✅ Yeni sıra eklendi: #{yeniSira.SiraNo} (pozisyon: {insertIndex})");
                         }
 
                         await InvokeAsync(StateHasChanged);
@@ -668,6 +663,27 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
         }
 
         /// <summary>
+        /// Çağrılan sıranın (BeklemeDurum.Cagrildi) her zaman en üstte kalmasını sağlar.
+        /// Yeni sıra eklenirken, çağrılan sıranın üstüne düşerse altına kaydırır.
+        /// </summary>
+        private int EnsureInsertBelowCalledSira(int proposedIndex)
+        {
+            // Çağrılan sıranın index'ini bul
+            var cagrilanSiraIndex = SiraListesi.FindIndex(s => s.BeklemeDurum == BeklemeDurum.Cagrildi);
+            
+            // Eğer çağrılan sıra varsa ve önerilen index onun üstüne düşüyorsa
+            if (cagrilanSiraIndex >= 0 && proposedIndex <= cagrilanSiraIndex)
+            {
+                // Çağrılan sıranın hemen altına ekle
+                var adjustedIndex = cagrilanSiraIndex + 1;
+                Console.WriteLine($"⚠️ Pozisyon düzeltildi: {proposedIndex} → {adjustedIndex} (Çağrılan sıra index: {cagrilanSiraIndex})");
+                return adjustedIndex;
+            }
+            
+            return proposedIndex;
+        }
+
+        /// <summary>
         /// Yönlendirilen sıranın ekleneceği pozisyonu hesaplar.
         /// Tüm ihtimalleri ele alır:
         /// 1. previousSiraId var, nextSiraId var → İkisinin arasına
@@ -677,11 +693,13 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
         /// 5. previousSiraId var ama listede yok → nextSiraId'ye bak
         /// 6. nextSiraId var ama listede yok → previousSiraId'ye bak
         /// 7. İkisi de listede yok → position değerine göre
+        /// ⭐ Her durumda çağrılan sıranın altında kalmasını sağlar.
         /// </summary>
         private int CalculateInsertIndex(int? previousSiraId, int? nextSiraId, int fallbackPosition)
         {
             int prevIndex = -1;
             int nextIndex = -1;
+            int proposedIndex;
 
             // Komşu sıraların mevcut listedeki indexlerini bul
             if (previousSiraId.HasValue)
@@ -698,26 +716,29 @@ namespace SGKPortalApp.PresentationLayer.Components.Siramatik
             {
                 // İkisinin arasına ekle (prev'in hemen sonrasına)
                 Console.WriteLine($"📍 Senaryo 1: İkisi de var. Prev={prevIndex}, Next={nextIndex}");
-                return prevIndex + 1;
+                proposedIndex = prevIndex + 1;
             }
-
             // Senaryo 2: Sadece nextSiraId listede var
-            if (nextIndex >= 0)
+            else if (nextIndex >= 0)
             {
-                Console.WriteLine($"📍 Senaryo 3: Sadece next var. Next={nextIndex}");
-                return nextIndex;
+                Console.WriteLine($"📍 Senaryo 2: Sadece next var. Next={nextIndex}");
+                proposedIndex = nextIndex;
             }
-
             // Senaryo 3: Sadece previousSiraId listede var
-            if (prevIndex >= 0)
+            else if (prevIndex >= 0)
             {
-                Console.WriteLine($"📍 Senaryo 2: Sadece prev var. Prev={prevIndex}");
-                return prevIndex + 1;
+                Console.WriteLine($"📍 Senaryo 3: Sadece prev var. Prev={prevIndex}");
+                proposedIndex = prevIndex + 1;
+            }
+            // Senaryo 4: İkisi de yok veya listede bulunamadı - fallback position kullan
+            else
+            {
+                Console.WriteLine($"📍 Senaryo 4: Hiçbiri yok. Fallback position={fallbackPosition}");
+                proposedIndex = Math.Min(fallbackPosition, SiraListesi.Count);
             }
 
-            // Senaryo 4: İkisi de yok veya listede bulunamadı - fallback position kullan
-            Console.WriteLine($"📍 Senaryo 4: Hiçbiri yok. Fallback position={fallbackPosition}");
-            return Math.Min(fallbackPosition, SiraListesi.Count);
+            // ⭐ Çağrılan sıranın her zaman en üstte kalmasını sağla
+            return EnsureInsertBelowCalledSira(proposedIndex);
         }
 
         public void Dispose()
