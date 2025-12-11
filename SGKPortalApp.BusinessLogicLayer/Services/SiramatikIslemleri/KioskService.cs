@@ -260,7 +260,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         {
             // KioskMenuAtama kayıtlarını soft delete
             var kioskMenuAtamaRepo = _unitOfWork.Repository<KioskMenuAtama>();
-            var kioskMenuAtamalar = await kioskMenuAtamaRepo.GetAllAsync(x => x.KioskId == kioskId);
+            var kioskMenuAtamalar = await kioskMenuAtamaRepo.FindAsync(x => x.KioskId == kioskId);
 
             foreach (var atama in kioskMenuAtamalar)
             {
@@ -280,7 +280,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         {
             // KioskMenuAtama kayıtlarını pasif yap
             var kioskMenuAtamaRepo = _unitOfWork.Repository<KioskMenuAtama>();
-            var kioskMenuAtamalar = await kioskMenuAtamaRepo.GetAllAsync(x => x.KioskId == kioskId && x.Aktiflik == Aktiflik.Aktif);
+            var kioskMenuAtamalar = await kioskMenuAtamaRepo.FindAsync(x => x.KioskId == kioskId && x.Aktiflik == Aktiflik.Aktif);
 
             foreach (var atama in kioskMenuAtamalar)
             {
