@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
+using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
@@ -287,7 +288,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuIslem
                 return assignedIslemler.OrderBy(i => i.MenuSira).ToList();
 
             return assignedIslemler
-                .Where(i => i.KanalAltAdi.Contains(searchAssigned, StringComparison.OrdinalIgnoreCase))
+                .Where(i => i.KanalAltAdi.ContainsTurkish(searchAssigned, StringComparison.OrdinalIgnoreCase))
                 .OrderBy(i => i.MenuSira)
                 .ToList();
         }
@@ -298,8 +299,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuIslem
                 return unassignedIslemler;
 
             return unassignedIslemler
-                .Where(k => k.KanalAltAdi.Contains(searchUnassigned, StringComparison.OrdinalIgnoreCase) ||
-                           k.KanalAdi.Contains(searchUnassigned, StringComparison.OrdinalIgnoreCase))
+                .Where(k => k.KanalAltAdi.ContainsTurkish(searchUnassigned, StringComparison.OrdinalIgnoreCase) ||
+                           k.KanalAdi.ContainsTurkish(searchUnassigned, StringComparison.OrdinalIgnoreCase))
                 .ToList();
         }
 

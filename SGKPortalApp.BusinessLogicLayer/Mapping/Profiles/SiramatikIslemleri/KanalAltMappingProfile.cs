@@ -9,11 +9,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
     {
         public KanalAltMappingProfile()
         {
-            // Request -> Entity
-            CreateMap<KanalAltIslemCreateRequestDto, KanalAlt>()
+            // Request -> Entity (Create)
+            CreateMap<KanalAltKanalCreateRequestDto, KanalAlt>()
                 .ForMember(dest => dest.KanalAltId, opt => opt.Ignore())
                 .ForMember(dest => dest.Aktiflik, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
+                .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
+                .ForMember(dest => dest.Kanal, opt => opt.Ignore())
+                .ForMember(dest => dest.KanalAltIslemleri, opt => opt.Ignore());
+
+            // Request -> Entity (Update)
+            CreateMap<KanalAltKanalUpdateRequestDto, KanalAlt>()
+                .ForMember(dest => dest.KanalAltId, opt => opt.Ignore())
+                .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
                 .ForMember(dest => dest.Kanal, opt => opt.Ignore())

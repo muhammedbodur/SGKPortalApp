@@ -161,11 +161,7 @@
                                                    @bind:event="oninput" />
                                         </div>
 
-                                        @{
-                                            var filteredAssigned = GetFilteredAssignedMenuler();
-                                        }
-
-                                        @if (!filteredAssigned.Any())
+                                        @if (!GetFilteredAssignedMenuler().Any())
                                         {
                                             <div class="text-center py-4">
                                                 <i class="bx bx-search" style="font-size: 2rem; color: #ddd;"></i>
@@ -175,7 +171,7 @@
                                         else
                                         {
                                             <div class="list-group">
-                                                @foreach (var menu in filteredAssigned)
+                                                @foreach (var menu in GetFilteredAssignedMenuler())
                                                 {
                                                     <div class="list-group-item d-flex justify-content-between align-items-center">
                                                         <div class="flex-grow-1">
@@ -232,11 +228,7 @@
                                                    @bind:event="oninput" />
                                         </div>
 
-                                        @{
-                                            var filteredUnassigned = GetFilteredUnassignedMenuler();
-                                        }
-
-                                        @if (!filteredUnassigned.Any())
+                                        @if (!GetFilteredUnassignedMenuler().Any())
                                         {
                                             <div class="text-center py-4">
                                                 <i class="bx bx-search" style="font-size: 2rem; color: #ddd;"></i>
@@ -246,7 +238,7 @@
                                         else
                                         {
                                             <div class="list-group">
-                                                @foreach (var menu in filteredUnassigned)
+                                                @foreach (var menu in GetFilteredUnassignedMenuler())
                                                 {
                                                     <div class="list-group-item d-flex justify-content-between align-items-center">
                                                         <div class="flex-grow-1">

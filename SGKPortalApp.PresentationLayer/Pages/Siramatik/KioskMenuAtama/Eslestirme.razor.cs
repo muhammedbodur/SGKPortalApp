@@ -3,6 +3,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
@@ -364,7 +365,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
                 return assignedMenuler;
 
             return assignedMenuler
-                .Where(m => m.MenuAdi.Contains(searchAssigned, StringComparison.OrdinalIgnoreCase))
+                .Where(m => m.MenuAdi.ContainsTurkish(searchAssigned, StringComparison.OrdinalIgnoreCase))
                 .ToList();
         }
 
@@ -374,7 +375,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
                 return unassignedMenuler;
 
             return unassignedMenuler
-                .Where(m => m.MenuAdi.Contains(searchUnassigned, StringComparison.OrdinalIgnoreCase))
+                .Where(m => m.MenuAdi.ContainsTurkish(searchUnassigned, StringComparison.OrdinalIgnoreCase))
                 .ToList();
         }
 
