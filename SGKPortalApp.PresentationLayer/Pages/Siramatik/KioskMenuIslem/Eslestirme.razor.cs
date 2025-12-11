@@ -31,8 +31,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuIslem
         private List<KioskMenuIslemResponseDto> assignedIslemler = new();
         private List<KanalAltIslemResponseDto> unassignedIslemler = new();
 
+        // Her menünün işlem sayısını tutan dictionary
+        private Dictionary<int, int> menuIslemCounts = new();
+
         private int selectedKioskMenuId = 0;
         private string selectedMenuAdi = string.Empty;
+
+        // Arama filtreleri
+        private string searchAssigned = string.Empty;
+        private string searchUnassigned = string.Empty;
 
         private bool isLoading = true;
         private bool isLoadingIslemler = false;
@@ -57,6 +64,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuIslem
                         .OrderBy(m => m.MenuSira)
                         .ThenBy(m => m.MenuAdi)
                         .ToList();
+
+                    // Her menü için işlem sayısını yükle
+                    await LoadMenuIslemCountsAsync();
                 }
 
                 // Query string'den kioskMenuId geldi mi?
@@ -88,6 +98,24 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuIslem
             finally
             {
                 isLoading = false;
+            }
+        }
+
+        private async Task LoadMenuIslemCountsAsync()
+        {
+            menuIslemCounts.Clear();
+
+            foreach (var menu in kioskMenuleri)
+            {
+                var islemResult = await _kioskMenuIslemService.GetByKioskMenuAsync(menu.KioskMenuId);
+                if (islemResult.Success && islemResult.Data != null)
+                {
+                    menuIslemCounts[menu.KioskMenuId] = islemResult.Data.Count();
+                }
+                else
+                {
+                    menuIslemCounts[menu.KioskMenuId] = 0;
+                }
             }
         }
 
@@ -179,6 +207,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuIslem
                     assignedIslemler.Add(result.Data);
                     unassignedIslemler.Remove(kanalAlt);
 
+                    // İşlem sayacını güncelle
+                    if (menuIslemCounts.ContainsKey(selectedKioskMenuId))
+                    {
+                        menuIslemCounts[selectedKioskMenuId]++;
+                    }
+
                     await _toastService.ShowSuccessAsync($"{kanalAlt.KanalAltAdi} işlemi eklendi");
                 }
                 else
@@ -211,6 +245,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuIslem
                     {
                         assignedIslemler.Remove(islem);
 
+                        // İşlem sayacını güncelle
+                        if (menuIslemCounts.ContainsKey(selectedKioskMenuId))
+                        {
+                            menuIslemCounts[selectedKioskMenuId]--;
+                        }
+
                         // Kaldırılan işlemin kanal alt bilgisini bul ve unassigned'a ekle
                         var kanalAlt = allKanalAltIslemler.FirstOrDefault(k => k.KanalAltId == islem.KanalAltId);
                         if (kanalAlt != null)
@@ -238,6 +278,29 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuIslem
             {
                 isSaving = false;
             }
+        }
+
+        // Arama filtreleme metodları
+        private List<KioskMenuIslemResponseDto> GetFilteredAssignedIslemler()
+        {
+            if (string.IsNullOrWhiteSpace(searchAssigned))
+                return assignedIslemler.OrderBy(i => i.MenuSira).ToList();
+
+            return assignedIslemler
+                .Where(i => i.KanalAltAdi.Contains(searchAssigned, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(i => i.MenuSira)
+                .ToList();
+        }
+
+        private List<KanalAltIslemResponseDto> GetFilteredUnassignedIslemler()
+        {
+            if (string.IsNullOrWhiteSpace(searchUnassigned))
+                return unassignedIslemler;
+
+            return unassignedIslemler
+                .Where(k => k.KanalAltAdi.Contains(searchUnassigned, StringComparison.OrdinalIgnoreCase) ||
+                           k.KanalAdi.Contains(searchUnassigned, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         }
 
         private void NavigateBack()

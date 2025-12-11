@@ -84,7 +84,7 @@
                                                 <small>Sıra: @menu.MenuSira</small>
                                             </div>
                                             <span class="badge bg-label-primary">
-                                                @assignedIslemler.Count İşlem
+                                                @(menuIslemCounts.ContainsKey(menu.KioskMenuId) ? menuIslemCounts[menu.KioskMenuId] : 0) İşlem
                                             </span>
                                         </div>
                                     </button>
@@ -136,23 +136,46 @@
                                     }
                                     else
                                     {
-                                        <div class="list-group">
-                                            @foreach (var islem in assignedIslemler.OrderBy(i => i.MenuSira))
-                                            {
-                                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <div class="flex-grow-1">
-                                                        <strong>@islem.KanalAltAdi</strong>
-                                                        <br />
-                                                        <small class="text-muted">Sıra: @islem.MenuSira</small>
-                                                    </div>
-                                                    <button class="btn btn-sm btn-outline-danger"
-                                                            @onclick="() => RemoveIslem(islem.KioskMenuIslemId)"
-                                                            disabled="@isSaving">
-                                                        <i class="bx bx-x"></i>
-                                                    </button>
-                                                </div>
-                                            }
+                                        <!-- Arama Kutusu -->
+                                        <div class="mb-3">
+                                            <input type="text"
+                                                   class="form-control form-control-sm"
+                                                   placeholder="İşlem ara..."
+                                                   @bind="searchAssigned"
+                                                   @bind:event="oninput" />
                                         </div>
+
+                                        @{
+                                            var filteredAssigned = GetFilteredAssignedIslemler();
+                                        }
+
+                                        @if (!filteredAssigned.Any())
+                                        {
+                                            <div class="text-center py-4">
+                                                <i class="bx bx-search" style="font-size: 2rem; color: #ddd;"></i>
+                                                <p class="mt-2 text-muted small">Sonuç bulunamadı</p>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="list-group">
+                                                @foreach (var islem in filteredAssigned)
+                                                {
+                                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <div class="flex-grow-1">
+                                                            <strong>@islem.KanalAltAdi</strong>
+                                                            <br />
+                                                            <small class="text-muted">Sıra: @islem.MenuSira</small>
+                                                        </div>
+                                                        <button class="btn btn-sm btn-outline-danger"
+                                                                @onclick="() => RemoveIslem(islem.KioskMenuIslemId)"
+                                                                disabled="@isSaving">
+                                                            <i class="bx bx-x"></i>
+                                                        </button>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
                                     }
                                 </div>
                             </div>
@@ -184,23 +207,46 @@
                                     }
                                     else
                                     {
-                                        <div class="list-group">
-                                            @foreach (var kanalAlt in unassignedIslemler)
-                                            {
-                                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <div class="flex-grow-1">
-                                                        <strong>@kanalAlt.KanalAltAdi</strong>
-                                                        <br />
-                                                        <small class="text-muted">@kanalAlt.KanalAdi</small>
-                                                    </div>
-                                                    <button class="btn btn-sm btn-outline-success"
-                                                            @onclick="() => AddIslem(kanalAlt.KanalAltIslemId)"
-                                                            disabled="@isSaving">
-                                                        <i class="bx bx-plus"></i>
-                                                    </button>
-                                                </div>
-                                            }
+                                        <!-- Arama Kutusu -->
+                                        <div class="mb-3">
+                                            <input type="text"
+                                                   class="form-control form-control-sm"
+                                                   placeholder="İşlem veya kanal ara..."
+                                                   @bind="searchUnassigned"
+                                                   @bind:event="oninput" />
                                         </div>
+
+                                        @{
+                                            var filteredUnassigned = GetFilteredUnassignedIslemler();
+                                        }
+
+                                        @if (!filteredUnassigned.Any())
+                                        {
+                                            <div class="text-center py-4">
+                                                <i class="bx bx-search" style="font-size: 2rem; color: #ddd;"></i>
+                                                <p class="mt-2 text-muted small">Sonuç bulunamadı</p>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="list-group">
+                                                @foreach (var kanalAlt in filteredUnassigned)
+                                                {
+                                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <div class="flex-grow-1">
+                                                            <strong>@kanalAlt.KanalAltAdi</strong>
+                                                            <br />
+                                                            <small class="text-muted">@kanalAlt.KanalAdi</small>
+                                                        </div>
+                                                        <button class="btn btn-sm btn-outline-success"
+                                                                @onclick="() => AddIslem(kanalAlt.KanalAltIslemId)"
+                                                                disabled="@isSaving">
+                                                            <i class="bx bx-plus"></i>
+                                                        </button>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
                                     }
                                 </div>
                             </div>
