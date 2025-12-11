@@ -133,10 +133,19 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         }
                     }
 
+                    var oldAktiflik = entity.Aktiflik;
+
                     _mapper.Map(request, entity);
                     entity.DuzenlenmeTarihi = DateTime.Now;
 
                     repo.Update(entity);
+
+                    // Cascade: Aktiflik değişmişse child kayıtları da güncelle
+                    if (oldAktiflik != request.Aktiflik && request.Aktiflik == Aktiflik.Pasif)
+                    {
+                        await CascadeAktiflikUpdateAsync(request.KioskMenuId);
+                    }
+
                     await _unitOfWork.SaveChangesAsync();
 
                     var dto = _mapper.Map<KioskMenuResponseDto>(entity);
@@ -167,6 +176,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     {
                         return ApiResponseDto<bool>.ErrorResult("Kiosk menü bulunamadı");
                     }
+
+                    // Cascade: Child kayıtları da sil (soft delete)
+                    await CascadeDeleteAsync(kioskMenuId);
 
                     entity.SilindiMi = true;
                     entity.Aktiflik = Aktiflik.Pasif;
@@ -199,6 +211,68 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 _logger.LogError(ex, "Aktif kiosk menüler getirilemedi");
                 return ApiResponseDto<List<KioskMenuResponseDto>>.ErrorResult("Aktif kiosk menüler getirilemedi", ex.Message);
             }
+        }
+
+        /// <summary>
+        /// Cascade delete: KioskMenu silindiğinde child kayıtları da siler
+        /// </summary>
+        private async Task CascadeDeleteAsync(int kioskMenuId)
+        {
+            // KioskMenuAtama kayıtlarını soft delete
+            var kioskMenuAtamaRepo = _unitOfWork.Repository<KioskMenuAtama>();
+            var kioskMenuAtamalar = await kioskMenuAtamaRepo.GetAllAsync(x => x.KioskMenuId == kioskMenuId);
+
+            foreach (var atama in kioskMenuAtamalar)
+            {
+                atama.SilindiMi = true;
+                atama.DuzenlenmeTarihi = DateTime.Now;
+                kioskMenuAtamaRepo.Update(atama);
+            }
+
+            // KioskMenuIslem kayıtlarını soft delete
+            var kioskMenuIslemRepo = _unitOfWork.Repository<KioskMenuIslem>();
+            var kioskMenuIslemler = await kioskMenuIslemRepo.GetAllAsync(x => x.KioskMenuId == kioskMenuId);
+
+            foreach (var islem in kioskMenuIslemler)
+            {
+                islem.SilindiMi = true;
+                islem.DuzenlenmeTarihi = DateTime.Now;
+                kioskMenuIslemRepo.Update(islem);
+            }
+
+            _logger.LogInformation("Cascade delete: KioskMenuId={KioskMenuId}, KioskMenuAtama={Count1}, KioskMenuIslem={Count2}",
+                kioskMenuId, kioskMenuAtamalar.Count(), kioskMenuIslemler.Count());
+        }
+
+        /// <summary>
+        /// Cascade update: KioskMenu pasif yapıldığında child kayıtları da günceller
+        /// </summary>
+        private async Task CascadeAktiflikUpdateAsync(int kioskMenuId)
+        {
+            // KioskMenuAtama kayıtlarını pasif yap
+            var kioskMenuAtamaRepo = _unitOfWork.Repository<KioskMenuAtama>();
+            var kioskMenuAtamalar = await kioskMenuAtamaRepo.GetAllAsync(x => x.KioskMenuId == kioskMenuId && x.Aktiflik == Aktiflik.Aktif);
+
+            foreach (var atama in kioskMenuAtamalar)
+            {
+                atama.Aktiflik = Aktiflik.Pasif;
+                atama.DuzenlenmeTarihi = DateTime.Now;
+                kioskMenuAtamaRepo.Update(atama);
+            }
+
+            // KioskMenuIslem kayıtlarını pasif yap
+            var kioskMenuIslemRepo = _unitOfWork.Repository<KioskMenuIslem>();
+            var kioskMenuIslemler = await kioskMenuIslemRepo.GetAllAsync(x => x.KioskMenuId == kioskMenuId && x.Aktiflik == Aktiflik.Aktif);
+
+            foreach (var islem in kioskMenuIslemler)
+            {
+                islem.Aktiflik = Aktiflik.Pasif;
+                islem.DuzenlenmeTarihi = DateTime.Now;
+                kioskMenuIslemRepo.Update(islem);
+            }
+
+            _logger.LogInformation("Cascade pasif: KioskMenuId={KioskMenuId}, KioskMenuAtama={Count1}, KioskMenuIslem={Count2}",
+                kioskMenuId, kioskMenuAtamalar.Count(), kioskMenuIslemler.Count());
         }
     }
 }

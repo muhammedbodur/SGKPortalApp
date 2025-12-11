@@ -252,6 +252,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         .ErrorResult("Kanal alt işlem bulunamadı");
                 }
 
+                var oldAktiflik = kanalAltIslem.Aktiflik;
+
                 // Update
                 kanalAltIslem.KanalAltId = request.KanalAltId;
                 kanalAltIslem.KanalIslemId = request.KanalIslemId;
@@ -260,6 +262,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 kanalAltIslem.DuzenlenmeTarihi = DateTime.Now;
 
                 kanalAltIslemRepo.Update(kanalAltIslem);
+
+                // Cascade: Aktiflik değişmişse child kayıtları da güncelle
+                if (oldAktiflik != request.Aktiflik)
+                {
+                    await CascadeAktiflikUpdateAsync(kanalAltIslemId, request.Aktiflik);
+                }
+
                 await _unitOfWork.SaveChangesAsync();
 
                 var kanalAltIslemDto = _mapper.Map<KanalAltIslemResponseDto>(kanalAltIslem);
@@ -296,6 +305,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     return ApiResponseDto<bool>
                         .ErrorResult("Kanal alt işlem bulunamadı");
                 }
+
+                // Cascade: Child kayıtları da sil (soft delete)
+                await CascadeDeleteAsync(kanalAltIslemId);
 
                 // Soft delete
                 kanalAltIslem.SilindiMi = true;
@@ -347,6 +359,70 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 return ApiResponseDto<KanalAltIslemResponseDto>
                     .ErrorResult("Kanal alt işlem getirilirken bir hata oluştu", ex.Message);
             }
+        }
+
+        /// <summary>
+        /// Cascade delete: KanalAltIslem silindiğinde child kayıtları da siler
+        /// </summary>
+        private async Task CascadeDeleteAsync(int kanalAltIslemId)
+        {
+            // Sira kayıtlarını soft delete
+            var siraRepo = _unitOfWork.Repository<Sira>();
+            var siralar = await siraRepo.GetAllAsync(x => x.KanalAltIslemId == kanalAltIslemId);
+
+            foreach (var sira in siralar)
+            {
+                sira.SilindiMi = true;
+                sira.DuzenlenmeTarihi = DateTime.Now;
+                siraRepo.Update(sira);
+            }
+
+            // KanalPersonel kayıtlarını soft delete
+            var kanalPersonelRepo = _unitOfWork.Repository<KanalPersonel>();
+            var kanalPersoneller = await kanalPersonelRepo.GetAllAsync(x => x.KanalAltIslemId == kanalAltIslemId);
+
+            foreach (var kanalPersonel in kanalPersoneller)
+            {
+                kanalPersonel.SilindiMi = true;
+                kanalPersonel.DuzenlenmeTarihi = DateTime.Now;
+                kanalPersonelRepo.Update(kanalPersonel);
+            }
+
+            _logger.LogInformation("Cascade delete: KanalAltIslemId={KanalAltIslemId}, Sira={Count1}, KanalPersonel={Count2}",
+                kanalAltIslemId, siralar.Count(), kanalPersoneller.Count());
+        }
+
+        /// <summary>
+        /// Cascade update: KanalAltIslem Aktiflik değiştiğinde child kayıtları da günceller
+        /// </summary>
+        private async Task CascadeAktiflikUpdateAsync(int kanalAltIslemId, BusinessObjectLayer.Enums.Common.Aktiflik yeniAktiflik)
+        {
+            // Sira kayıtlarını güncelle - NOT: Sira entity'sinde Aktiflik field'ı yok, sadece SilindiMi var
+            // Bu yüzden sadece SilindiMi durumunu güncelliyoruz
+            var siraRepo = _unitOfWork.Repository<Sira>();
+            var siralar = await siraRepo.GetAllAsync(x => x.KanalAltIslemId == kanalAltIslemId);
+
+            foreach (var sira in siralar)
+            {
+                // Pasif yapıldıysa soft delete, aktif yapıldıysa geri getir
+                sira.SilindiMi = (yeniAktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Pasif);
+                sira.DuzenlenmeTarihi = DateTime.Now;
+                siraRepo.Update(sira);
+            }
+
+            // KanalPersonel kayıtlarını güncelle
+            var kanalPersonelRepo = _unitOfWork.Repository<KanalPersonel>();
+            var kanalPersoneller = await kanalPersonelRepo.GetAllAsync(x => x.KanalAltIslemId == kanalAltIslemId);
+
+            foreach (var kanalPersonel in kanalPersoneller)
+            {
+                kanalPersonel.Aktiflik = yeniAktiflik;
+                kanalPersonel.DuzenlenmeTarihi = DateTime.Now;
+                kanalPersonelRepo.Update(kanalPersonel);
+            }
+
+            _logger.LogInformation("Cascade aktiflik update: KanalAltIslemId={KanalAltIslemId}, YeniAktiflik={Aktiflik}, Sira={Count1}, KanalPersonel={Count2}",
+                kanalAltIslemId, yeniAktiflik, siralar.Count(), kanalPersoneller.Count());
         }
     }
 }

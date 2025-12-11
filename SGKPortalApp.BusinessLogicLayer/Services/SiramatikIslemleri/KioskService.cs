@@ -125,10 +125,19 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         }
                     }
 
+                    var oldAktiflik = entity.Aktiflik;
+
                     _mapper.Map(request, entity);
                     entity.DuzenlenmeTarihi = DateTime.Now;
 
                     repo.Update(entity);
+
+                    // Cascade: Aktiflik değişmişse child kayıtları da güncelle
+                    if (oldAktiflik != request.Aktiflik && request.Aktiflik == Aktiflik.Pasif)
+                    {
+                        await CascadeAktiflikUpdateAsync(request.KioskId);
+                    }
+
                     await _unitOfWork.SaveChangesAsync();
 
                     var dto = _mapper.Map<KioskResponseDto>(entity);
@@ -159,6 +168,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     {
                         return ApiResponseDto<bool>.ErrorResult("Kiosk bulunamadı");
                     }
+
+                    // Cascade: Child kayıtları da sil (soft delete)
+                    await CascadeDeleteAsync(kioskId);
 
                     entity.SilindiMi = true;
                     entity.Aktiflik = Aktiflik.Pasif;
@@ -238,6 +250,46 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 _logger.LogError(ex, "Kiosk detay getirilemedi. ID: {KioskId}", kioskId);
                 return ApiResponseDto<KioskResponseDto>.ErrorResult("Kiosk detay getirilemedi", ex.Message);
             }
+        }
+
+        /// <summary>
+        /// Cascade delete: Kiosk silindiğinde child kayıtları da siler
+        /// </summary>
+        private async Task CascadeDeleteAsync(int kioskId)
+        {
+            // KioskMenuAtama kayıtlarını soft delete
+            var kioskMenuAtamaRepo = _unitOfWork.Repository<KioskMenuAtama>();
+            var kioskMenuAtamalar = await kioskMenuAtamaRepo.GetAllAsync(x => x.KioskId == kioskId);
+
+            foreach (var atama in kioskMenuAtamalar)
+            {
+                atama.SilindiMi = true;
+                atama.DuzenlenmeTarihi = DateTime.Now;
+                kioskMenuAtamaRepo.Update(atama);
+            }
+
+            _logger.LogInformation("Cascade delete: KioskId={KioskId}, KioskMenuAtama={Count}",
+                kioskId, kioskMenuAtamalar.Count());
+        }
+
+        /// <summary>
+        /// Cascade update: Kiosk pasif yapıldığında child kayıtları da soft delete
+        /// </summary>
+        private async Task CascadeAktiflikUpdateAsync(int kioskId)
+        {
+            // KioskMenuAtama kayıtlarını pasif yap
+            var kioskMenuAtamaRepo = _unitOfWork.Repository<KioskMenuAtama>();
+            var kioskMenuAtamalar = await kioskMenuAtamaRepo.GetAllAsync(x => x.KioskId == kioskId && x.Aktiflik == Aktiflik.Aktif);
+
+            foreach (var atama in kioskMenuAtamalar)
+            {
+                atama.Aktiflik = Aktiflik.Pasif;
+                atama.DuzenlenmeTarihi = DateTime.Now;
+                kioskMenuAtamaRepo.Update(atama);
+            }
+
+            _logger.LogInformation("Cascade pasif: KioskId={KioskId}, KioskMenuAtama={Count}",
+                kioskId, kioskMenuAtamalar.Count());
         }
     }
 }

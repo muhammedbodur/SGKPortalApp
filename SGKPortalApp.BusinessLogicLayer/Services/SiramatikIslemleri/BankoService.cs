@@ -205,6 +205,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                             .ErrorResult("Banko bulunamadı");
                     }
 
+                    // Cascade: Child kayıtları da sil (soft delete)
+                    await CascadeDeleteAsync(bankoId);
+
                     // Soft delete
                     banko.SilindiMi = true;
                     banko.DuzenlenmeTarihi = DateTime.Now;
@@ -615,6 +618,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     banko.DuzenlenmeTarihi = DateTime.Now;
 
                     bankoRepo.Update(banko);
+
+                    // Cascade: Pasif yapıldıysa child kayıtları da soft delete
+                    if (yeniDurum == Aktiflik.Pasif)
+                    {
+                        await CascadeAktiflikUpdateAsync(bankoId);
+                    }
+
                     await _unitOfWork.SaveChangesAsync();
 
                     _logger.LogInformation("Banko aktiflik durumu değiştirildi. BankoId: {BankoId}, Durum: {Durum}",
@@ -630,6 +640,102 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         .ErrorResult("Aktiflik durumu değiştirilirken bir hata oluştu", ex.Message);
                 }
             });
+        }
+
+        /// <summary>
+        /// Cascade delete: Banko silindiğinde child kayıtları da siler
+        /// </summary>
+        private async Task CascadeDeleteAsync(int bankoId)
+        {
+            // TvBanko kayıtlarını soft delete (many-to-many join table)
+            var tvBankoRepo = _unitOfWork.Repository<TvBanko>();
+            var tvBankolar = await tvBankoRepo.GetAllAsync(x => x.BankoId == bankoId);
+
+            foreach (var tvBanko in tvBankolar)
+            {
+                tvBanko.SilindiMi = true;
+                tvBanko.DuzenlenmeTarihi = DateTime.Now;
+                tvBankoRepo.Update(tvBanko);
+            }
+
+            // BankoKullanici kayıtlarını soft delete
+            var bankoKullaniciRepo = _unitOfWork.Repository<BankoKullanici>();
+            var bankoKullanicilar = await bankoKullaniciRepo.GetAllAsync(x => x.BankoId == bankoId);
+
+            foreach (var bankoKullanici in bankoKullanicilar)
+            {
+                bankoKullanici.SilindiMi = true;
+                bankoKullanici.DuzenlenmeTarihi = DateTime.Now;
+                bankoKullaniciRepo.Update(bankoKullanici);
+            }
+
+            // BankoHareket kayıtlarını soft delete
+            var bankoHareketRepo = _unitOfWork.Repository<BankoHareket>();
+            var bankoHareketler = await bankoHareketRepo.GetAllAsync(x => x.BankoId == bankoId);
+
+            foreach (var bankoHareket in bankoHareketler)
+            {
+                bankoHareket.SilindiMi = true;
+                bankoHareket.DuzenlenmeTarihi = DateTime.Now;
+                bankoHareketRepo.Update(bankoHareket);
+            }
+
+            // HubBankoConnection kayıtlarını soft delete
+            var hubBankoConnectionRepo = _unitOfWork.Repository<HubBankoConnection>();
+            var hubBankoConnection = await hubBankoConnectionRepo.GetAllAsync(x => x.BankoId == bankoId);
+
+            foreach (var connection in hubBankoConnection)
+            {
+                connection.SilindiMi = true;
+                connection.DuzenlenmeTarihi = DateTime.Now;
+                hubBankoConnectionRepo.Update(connection);
+            }
+
+            _logger.LogInformation("Cascade delete: BankoId={BankoId}, TvBanko={Count1}, BankoKullanici={Count2}, BankoHareket={Count3}, HubBankoConnection={Count4}",
+                bankoId, tvBankolar.Count(), bankoKullanicilar.Count(), bankoHareketler.Count(), hubBankoConnection.Count());
+        }
+
+        /// <summary>
+        /// Cascade update: Banko pasif yapıldığında child kayıtları da soft delete
+        /// NOT: BankoKullanici zaten ToggleAktiflik içinde handle ediliyor
+        /// </summary>
+        private async Task CascadeAktiflikUpdateAsync(int bankoId)
+        {
+            // TvBanko kayıtlarını soft delete (pasif banko TV'den kaldırılmalı)
+            var tvBankoRepo = _unitOfWork.Repository<TvBanko>();
+            var tvBankolar = await tvBankoRepo.GetAllAsync(x => x.BankoId == bankoId && !x.SilindiMi);
+
+            foreach (var tvBanko in tvBankolar)
+            {
+                tvBanko.SilindiMi = true;
+                tvBanko.DuzenlenmeTarihi = DateTime.Now;
+                tvBankoRepo.Update(tvBanko);
+            }
+
+            // BankoHareket kayıtlarını soft delete
+            var bankoHareketRepo = _unitOfWork.Repository<BankoHareket>();
+            var bankoHareketler = await bankoHareketRepo.GetAllAsync(x => x.BankoId == bankoId && !x.SilindiMi);
+
+            foreach (var bankoHareket in bankoHareketler)
+            {
+                bankoHareket.SilindiMi = true;
+                bankoHareket.DuzenlenmeTarihi = DateTime.Now;
+                bankoHareketRepo.Update(bankoHareket);
+            }
+
+            // HubBankoConnection kayıtlarını soft delete
+            var hubBankoConnectionRepo = _unitOfWork.Repository<HubBankoConnection>();
+            var hubBankoConnection = await hubBankoConnectionRepo.GetAllAsync(x => x.BankoId == bankoId && !x.SilindiMi);
+
+            foreach (var connection in hubBankoConnection)
+            {
+                connection.SilindiMi = true;
+                connection.DuzenlenmeTarihi = DateTime.Now;
+                hubBankoConnectionRepo.Update(connection);
+            }
+
+            _logger.LogInformation("Cascade pasif: BankoId={BankoId}, TvBanko={Count1}, BankoHareket={Count2}, HubBankoConnection={Count3}",
+                bankoId, tvBankolar.Count(), bankoHareketler.Count(), hubBankoConnection.Count());
         }
 
     }
