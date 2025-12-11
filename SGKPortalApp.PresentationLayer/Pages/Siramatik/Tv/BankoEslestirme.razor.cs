@@ -28,6 +28,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
         [Inject]
         private NavigationManager _navigationManager { get; set; } = default!;
 
+        [SupplyParameterFromQuery(Name = "tvId")]
+        public int? TvIdFromQuery { get; set; }
+
         private List<HizmetBinasiResponseDto> hizmetBinalari = new();
         private List<TvResponseDto> tvler = new();
         private List<BankoResponseDto> allBankolar = new();
@@ -60,6 +63,57 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
                 if (binaResult.Success && binaResult.Data != null)
                 {
                     hizmetBinalari = binaResult.Data.OrderBy(b => b.HizmetBinasiAdi).ToList();
+                }
+
+                // Query string'den tvId geldi mi?
+                if (TvIdFromQuery.HasValue && TvIdFromQuery.Value > 0)
+                {
+                    // TV detaylarını al
+                    var tvResult = await _tvService.GetWithDetailsAsync(TvIdFromQuery.Value);
+                    if (tvResult.Success && tvResult.Data != null)
+                    {
+                        var tv = tvResult.Data;
+
+                        // TV'nin hizmet binasını seç
+                        selectedHizmetBinasiId = tv.HizmetBinasiId;
+
+                        // O hizmet binasının TV'lerini yükle
+                        var tvListResult = await _tvService.GetByHizmetBinasiAsync(selectedHizmetBinasiId);
+                        if (tvListResult.Success && tvListResult.Data != null)
+                        {
+                            tvler = tvListResult.Data.OrderBy(t => t.TvAdi).ToList();
+                        }
+
+                        // İlgili TV'yi seç
+                        selectedTvId = TvIdFromQuery.Value;
+                        selectedTvName = tv.TvAdi;
+
+                        // Bankoları yükle
+                        await LoadBankolarAsync();
+                    }
+                }
+                else if (hizmetBinalari.Any())
+                {
+                    // Query string yoksa, ilk hizmet binasını seç
+                    selectedHizmetBinasiId = hizmetBinalari.First().HizmetBinasiId;
+
+                    // İlk hizmet binasının TV'lerini yükle
+                    var tvListResult = await _tvService.GetByHizmetBinasiAsync(selectedHizmetBinasiId);
+                    if (tvListResult.Success && tvListResult.Data != null)
+                    {
+                        tvler = tvListResult.Data.OrderBy(t => t.TvAdi).ToList();
+
+                        // İlk TV'yi seç (varsa)
+                        if (tvler.Any())
+                        {
+                            var firstTv = tvler.First();
+                            selectedTvId = firstTv.TvId;
+                            selectedTvName = firstTv.TvAdi;
+
+                            // Bankoları yükle
+                            await LoadBankolarAsync();
+                        }
+                    }
                 }
             }
             catch (Exception ex)

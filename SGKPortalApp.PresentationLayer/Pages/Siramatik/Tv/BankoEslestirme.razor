@@ -63,7 +63,7 @@
                         <!-- Hizmet Binası -->
                         <div class="mb-3">
                             <label class="form-label">Hizmet Binası</label>
-                            <select class="form-select" @onchange="OnHizmetBinasiChanged">
+                            <select class="form-select" value="@selectedHizmetBinasiId" @onchange="OnHizmetBinasiChanged">
                                 <option value="0">-- Hizmet Binası Seçiniz --</option>
                                 @foreach (var bina in hizmetBinalari)
                                 {
