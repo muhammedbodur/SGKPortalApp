@@ -98,7 +98,7 @@
                                                         <strong>@kiosk.KioskAdi</strong>
                                                     </div>
                                                     <span class="badge bg-label-primary">
-                                                        @assignedMenuler.Count Menü
+                                                        @(kioskMenuCounts.ContainsKey(kiosk.KioskId) ? kioskMenuCounts[kiosk.KioskId] : 0) Menü
                                                     </span>
                                                 </div>
                                             </button>
@@ -152,23 +152,46 @@
                                     }
                                     else
                                     {
-                                        <div class="list-group">
-                                            @foreach (var menu in assignedMenuler)
-                                            {
-                                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <div class="flex-grow-1">
-                                                        <strong>@menu.MenuAdi</strong>
-                                                        <br />
-                                                        <small class="text-muted">Sıra: @menu.MenuSira</small>
-                                                    </div>
-                                                    <button class="btn btn-sm btn-outline-danger"
-                                                            @onclick="() => RemoveMenu(menu.KioskMenuId)"
-                                                            disabled="@isSaving">
-                                                        <i class="bx bx-x"></i>
-                                                    </button>
-                                                </div>
-                                            }
+                                        <!-- Arama Kutusu -->
+                                        <div class="mb-3">
+                                            <input type="text"
+                                                   class="form-control form-control-sm"
+                                                   placeholder="Menü ara..."
+                                                   @bind="searchAssigned"
+                                                   @bind:event="oninput" />
                                         </div>
+
+                                        @{
+                                            var filteredAssigned = GetFilteredAssignedMenuler();
+                                        }
+
+                                        @if (!filteredAssigned.Any())
+                                        {
+                                            <div class="text-center py-4">
+                                                <i class="bx bx-search" style="font-size: 2rem; color: #ddd;"></i>
+                                                <p class="mt-2 text-muted small">Sonuç bulunamadı</p>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="list-group">
+                                                @foreach (var menu in filteredAssigned)
+                                                {
+                                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <div class="flex-grow-1">
+                                                            <strong>@menu.MenuAdi</strong>
+                                                            <br />
+                                                            <small class="text-muted">Sıra: @menu.MenuSira</small>
+                                                        </div>
+                                                        <button class="btn btn-sm btn-outline-danger"
+                                                                @onclick="() => RemoveMenu(menu.KioskMenuId)"
+                                                                disabled="@isSaving">
+                                                            <i class="bx bx-x"></i>
+                                                        </button>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
                                     }
                                 </div>
                             </div>
@@ -200,23 +223,46 @@
                                     }
                                     else
                                     {
-                                        <div class="list-group">
-                                            @foreach (var menu in unassignedMenuler)
-                                            {
-                                                <div class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <div class="flex-grow-1">
-                                                        <strong>@menu.MenuAdi</strong>
-                                                        <br />
-                                                        <small class="text-muted">Sıra: @menu.MenuSira</small>
-                                                    </div>
-                                                    <button class="btn btn-sm btn-outline-success"
-                                                            @onclick="() => AddMenu(menu.KioskMenuId)"
-                                                            disabled="@isSaving">
-                                                        <i class="bx bx-plus"></i>
-                                                    </button>
-                                                </div>
-                                            }
+                                        <!-- Arama Kutusu -->
+                                        <div class="mb-3">
+                                            <input type="text"
+                                                   class="form-control form-control-sm"
+                                                   placeholder="Menü ara..."
+                                                   @bind="searchUnassigned"
+                                                   @bind:event="oninput" />
                                         </div>
+
+                                        @{
+                                            var filteredUnassigned = GetFilteredUnassignedMenuler();
+                                        }
+
+                                        @if (!filteredUnassigned.Any())
+                                        {
+                                            <div class="text-center py-4">
+                                                <i class="bx bx-search" style="font-size: 2rem; color: #ddd;"></i>
+                                                <p class="mt-2 text-muted small">Sonuç bulunamadı</p>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="list-group">
+                                                @foreach (var menu in filteredUnassigned)
+                                                {
+                                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <div class="flex-grow-1">
+                                                            <strong>@menu.MenuAdi</strong>
+                                                            <br />
+                                                            <small class="text-muted">Sıra: @menu.MenuSira</small>
+                                                        </div>
+                                                        <button class="btn btn-sm btn-outline-success"
+                                                                @onclick="() => AddMenu(menu.KioskMenuId)"
+                                                                disabled="@isSaving">
+                                                            <i class="bx bx-plus"></i>
+                                                        </button>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
                                     }
                                 </div>
                             </div>

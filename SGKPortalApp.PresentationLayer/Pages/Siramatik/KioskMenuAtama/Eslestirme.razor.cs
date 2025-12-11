@@ -38,9 +38,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
         private List<KioskMenuResponseDto> assignedMenuler = new();
         private List<KioskMenuResponseDto> unassignedMenuler = new();
 
+        // Her kiosk'un menü sayısını tutan dictionary
+        private Dictionary<int, int> kioskMenuCounts = new();
+
         private int selectedHizmetBinasiId = 0;
         private int selectedKioskId = 0;
         private string selectedKioskName = string.Empty;
+
+        // Arama filtreleri
+        private string searchAssigned = string.Empty;
+        private string searchUnassigned = string.Empty;
 
         private bool isLoading = true;
         private bool isLoadingMenuler = false;
@@ -84,6 +91,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
                                 .Where(k => k.Aktiflik == Aktiflik.Aktif)
                                 .OrderBy(k => k.KioskAdi)
                                 .ToList();
+
+                            // Her kiosk için menü sayısını yükle
+                            await LoadKioskMenuCountsAsync();
                         }
 
                         // İlgili kiosk'u seç
@@ -108,6 +118,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
                             .OrderBy(k => k.KioskAdi)
                             .ToList();
 
+                        // Her kiosk için menü sayısını yükle
+                        await LoadKioskMenuCountsAsync();
+
                         // İlk kiosk'u seç (varsa)
                         if (kiosklar.Any())
                         {
@@ -131,6 +144,24 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
             }
         }
 
+        private async Task LoadKioskMenuCountsAsync()
+        {
+            kioskMenuCounts.Clear();
+
+            foreach (var kiosk in kiosklar)
+            {
+                var atamaResult = await _kioskMenuAtamaService.GetByKioskAsync(kiosk.KioskId);
+                if (atamaResult.Success && atamaResult.Data != null)
+                {
+                    kioskMenuCounts[kiosk.KioskId] = atamaResult.Data.Count(a => a.Aktiflik == Aktiflik.Aktif);
+                }
+                else
+                {
+                    kioskMenuCounts[kiosk.KioskId] = 0;
+                }
+            }
+        }
+
         private async Task OnHizmetBinasiChanged(ChangeEventArgs e)
         {
             selectedHizmetBinasiId = int.Parse(e.Value?.ToString() ?? "0");
@@ -151,6 +182,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
                             .Where(k => k.Aktiflik == Aktiflik.Aktif)
                             .OrderBy(k => k.KioskAdi)
                             .ToList();
+
+                        // Her kiosk için menü sayısını yükle
+                        await LoadKioskMenuCountsAsync();
                     }
                 }
                 catch (Exception ex)
@@ -246,6 +280,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
                         assignedMenuler.Add(menu);
                         assignedMenuler = assignedMenuler.OrderBy(m => m.MenuSira).ThenBy(m => m.MenuAdi).ToList();
 
+                        // Menü sayacını güncelle
+                        if (kioskMenuCounts.ContainsKey(selectedKioskId))
+                        {
+                            kioskMenuCounts[selectedKioskId]++;
+                        }
+
                         await _toastService.ShowSuccessAsync($"{menu.MenuAdi} menüsü eklendi");
                     }
                 }
@@ -291,6 +331,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
                                 unassignedMenuler.Add(menu);
                                 unassignedMenuler = unassignedMenuler.OrderBy(m => m.MenuSira).ThenBy(m => m.MenuAdi).ToList();
 
+                                // Menü sayacını güncelle
+                                if (kioskMenuCounts.ContainsKey(selectedKioskId))
+                                {
+                                    kioskMenuCounts[selectedKioskId]--;
+                                }
+
                                 await _toastService.ShowSuccessAsync($"{menu.MenuAdi} menüsü kaldırıldı");
                             }
                         }
@@ -309,6 +355,27 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
             {
                 isSaving = false;
             }
+        }
+
+        // Arama filtreleme metodları
+        private List<KioskMenuResponseDto> GetFilteredAssignedMenuler()
+        {
+            if (string.IsNullOrWhiteSpace(searchAssigned))
+                return assignedMenuler;
+
+            return assignedMenuler
+                .Where(m => m.MenuAdi.Contains(searchAssigned, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        private List<KioskMenuResponseDto> GetFilteredUnassignedMenuler()
+        {
+            if (string.IsNullOrWhiteSpace(searchUnassigned))
+                return unassignedMenuler;
+
+            return unassignedMenuler
+                .Where(m => m.MenuAdi.Contains(searchUnassigned, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         }
 
         private void NavigateBack()
