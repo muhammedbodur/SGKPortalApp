@@ -508,6 +508,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             SELECT 1 
                             FROM SIR_KanalPersonelleri kp2 WITH (NOLOCK)
                             WHERE kp2.TcKimlikNo = @TcKimlikNo
+                                AND kp2.KanalAltIslemId = s.KanalAltIslemId  -- ⭐ Sıranın kanalında
                                 AND kp2.Aktiflik = 1
                                 AND kp2.Uzmanlik = 3  -- Şef
                                 AND kp2.SilindiMi = 0
@@ -530,6 +531,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             SELECT 1 
                             FROM SIR_KanalPersonelleri kp2 WITH (NOLOCK)
                             WHERE kp2.TcKimlikNo = @TcKimlikNo
+                                AND kp2.KanalAltIslemId = s.KanalAltIslemId  -- ⭐ Sıranın kanalında
                                 AND kp2.Aktiflik = 1
                                 AND kp2.Uzmanlik = 2  -- Uzman
                                 AND kp2.SilindiMi = 0
@@ -819,22 +821,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             AND kp.Uzmanlik = 2
                         )
                     )
-            ),
-            -- ADIM 3: Her personelin uzmanlık kayıtları
-            PersonelUzmanlikKayitlari AS (
-                SELECT DISTINCT
-                    hp.TcKimlikNo,
-                    kp.KanalAltIslemId,
-                    kp.Uzmanlik
-                FROM HedefPersoneller hp
-                INNER JOIN SIR_KanalPersonelleri kp WITH (NOLOCK)
-                    ON kp.TcKimlikNo = hp.TcKimlikNo
-                    AND kp.Aktiflik = 1
-                    AND kp.Uzmanlik != 0
-                    AND kp.SilindiMi = 0
             )
+            -- ⭐ PersonelUzmanlikKayitlari CTE kaldırıldı - artık doğrudan sıranın kanalı üzerinden JOIN yapılıyor
 
-            -- ADIM 4: Tüm hedef personellerin sıralarını getir
+            -- ADIM 3: Tüm hedef personellerin sıralarını getir
             SELECT DISTINCT
                 hp.TcKimlikNo AS PersonelTc,
                 pPersonel.AdSoyad AS PersonelAdSoyad,
@@ -845,7 +835,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                 s.SiraAlisZamani,
                 s.IslemBaslamaZamani,
                 s.BeklemeDurum,
-                uzm.Uzmanlik,
+                kp.Uzmanlik,  -- ⭐ uzm yerine kp (sıranın kanalındaki uzmanlık)
                 b.BankoId,
                 hb.HizmetBinasiId,
                 hb.HizmetBinasiAdi,
@@ -863,7 +853,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                 END AS DurumOnceligi,
                 CASE 
                     WHEN s.BeklemeDurum = 0 THEN 
-                        CASE uzm.Uzmanlik
+                        CASE kp.Uzmanlik  -- ⭐ uzm yerine kp
                             WHEN 3 THEN 0
                             WHEN 2 THEN 1
                             WHEN 1 THEN 2
@@ -894,22 +884,27 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
 		            ON  hbc.HubConnectionId = hc.HubConnectionId
             INNER JOIN CMN_HizmetBinalari hb WITH (NOLOCK)
                 ON hb.HizmetBinasiId = bk.HizmetBinasiId
-            INNER JOIN PersonelUzmanlikKayitlari uzm
-                ON uzm.TcKimlikNo = hp.TcKimlikNo
+            -- ⭐ Önce sıraları al, sonra o sıranın kanalında personelin uzmanlığını bul
+            INNER JOIN SIR_Siralar s WITH (NOLOCK)
+                ON s.HizmetBinasiId = bk.HizmetBinasiId
+                AND s.SilindiMi = 0
+            -- ⭐ Personelin O SIRANIN KANALINDA uzmanlığını bul (kritik JOIN)
+            INNER JOIN SIR_KanalPersonelleri kp WITH (NOLOCK)
+                ON kp.TcKimlikNo = hp.TcKimlikNo
+                AND kp.KanalAltIslemId = s.KanalAltIslemId  -- ⭐ Sıranın kanalı ile eşleştir
+                AND kp.Aktiflik = 1
+                AND kp.Uzmanlik != 0
+                AND kp.SilindiMi = 0
             INNER JOIN SIR_KanalAltIslemleri kai WITH (NOLOCK)
-                ON kai.KanalAltIslemId = uzm.KanalAltIslemId
+                ON kai.KanalAltIslemId = s.KanalAltIslemId
                 AND kai.Aktiflik = 1
                 AND kai.SilindiMi = 0
-            INNER JOIN SIR_Siralar s WITH (NOLOCK)
-                ON s.KanalAltIslemId = kai.KanalAltIslemId
-                AND s.HizmetBinasiId = bk.HizmetBinasiId
-                AND s.SilindiMi = 0
             LEFT JOIN PER_Personeller pYonlendiren WITH (NOLOCK)
                 ON pYonlendiren.TcKimlikNo = s.YonlendirenPersonelTc
                 AND pYonlendiren.SilindiMi = 0
 
             WHERE CAST(s.SiraAlisZamani AS DATE) = @Bugun
-                AND uzm.Uzmanlik IN (1, 2, 3)
+                AND kp.Uzmanlik IN (1, 2, 3)  -- ⭐ uzm yerine kp
                 AND (
                     -- 1. Normal Bekleyen Sıralar
                     s.BeklemeDurum = 0
@@ -928,12 +923,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                         ))
         
                     -- 3. Şef'e Yönlendirilmiş
+                    -- ⭐ kp.KanalAltIslemId = s.KanalAltIslemId JOIN'de zaten sağlanıyor
                     OR (s.BeklemeDurum = 3 
                         AND s.YonlendirildiMi = 1 
                         AND s.YonlendirmeTipi = 2
                         AND s.TcKimlikNo != hp.TcKimlikNo 
                         AND s.HedefBankoId IS NULL 
-                        AND uzm.Uzmanlik = 3)
+                        AND kp.Uzmanlik = 3)  -- ⭐ uzm yerine kp
         
                     -- 4. Başka Bankoya Yönlendirilmiş
                     OR (s.BeklemeDurum = 3 
@@ -943,12 +939,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                         AND s.HedefBankoId = bk.BankoId)
         
                     -- 5. Genel Uzmana Yönlendirilmiş
+                    -- ⭐ kp.KanalAltIslemId = s.KanalAltIslemId JOIN'de zaten sağlanıyor
                     OR (s.BeklemeDurum = 3 
                         AND s.YonlendirildiMi = 1 
                         AND s.YonlendirmeTipi = 3
                         AND s.TcKimlikNo != hp.TcKimlikNo
                         AND s.HedefBankoId IS NULL 
-                        AND uzm.Uzmanlik = 2)
+                        AND kp.Uzmanlik = 2)  -- ⭐ uzm yerine kp
                 )
             ORDER BY
                 hp.TcKimlikNo ASC,
@@ -1004,9 +1001,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                         join hc in _context.HubConnections on u.TcKimlikNo equals hc.TcKimlikNo
                         join hbc in _context.HubBankoConnections on hc.HubConnectionId equals hbc.HubConnectionId
                         join hb in _context.HizmetBinalari on bk.HizmetBinasiId equals hb.HizmetBinasiId
-                        join kp in _context.KanalPersonelleri on pPersonel.TcKimlikNo equals kp.TcKimlikNo
-                        join kai in _context.KanalAltIslemleri on kp.KanalAltIslemId equals kai.KanalAltIslemId
-                        join s in _context.Siralar on kai.KanalAltIslemId equals s.KanalAltIslemId
+                        join s in _context.Siralar on bk.HizmetBinasiId equals s.HizmetBinasiId
+                        join kp in _context.KanalPersonelleri on new { TcKimlikNo = pPersonel.TcKimlikNo, s.KanalAltIslemId } equals new { kp.TcKimlikNo, kp.KanalAltIslemId }
+                        join kai in _context.KanalAltIslemleri on s.KanalAltIslemId equals kai.KanalAltIslemId
                         join pYonlendiren in _context.Personeller on s.YonlendirenPersonelTc equals pYonlendiren.TcKimlikNo into yonGroup
                         from pYonlendiren in yonGroup.DefaultIfEmpty()
                         let hp = pPersonel.TcKimlikNo
@@ -1020,10 +1017,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                            && u.BankoModuAktif
                            && u.AktifMi
                            && hc.ConnectionStatus == ConnectionStatus.online
-                           && hc.ConnectionType == "BankoMode" // ⭐ YENİ: BankoMode kontrolü
+                           && hc.ConnectionType == "BankoMode" 
                            && !hc.SilindiMi
-                           && hbc.BankoModuAktif // ⭐ YENİ: HubBankoConnection BankoModuAktif kontrolü
-                           && !hbc.SilindiMi // ⭐ YENİ: HubBankoConnection SilindiMi kontrolü
+                           && hbc.BankoModuAktif 
+                           && !hbc.SilindiMi 
                            && kp.Aktiflik == Aktiflik.Aktif
                            && !kp.SilindiMi
                            && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok
@@ -1041,13 +1038,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                                     && s.TcKimlikNo == hp)
 
                                 // 3. Şef'e Yönlendirilmiş
+                                // ⭐ JOIN'de kp.KanalAltIslemId == s.KanalAltIslemId eşleşmesi zaten yapılıyor
                                 || (s.BeklemeDurum == BeklemeDurum.Yonlendirildi
                                     && s.YonlendirildiMi
                                     && s.YonlendirmeTipi == YonlendirmeTipi.Sef
                                     && s.TcKimlikNo != hp
                                     && s.HedefBankoId == null
-                                    && uzm.Uzmanlik == PersonelUzmanlik.Sef
-                                    && uzm.KanalAltIslemId == s.KanalAltIslemId) // ⭐ YENİ: Sıranın kanalında Şef olmalı
+                                    && uzm.Uzmanlik == PersonelUzmanlik.Sef)
 
                                 // 4. Başka Bankoya Yönlendirilmiş
                                 || (s.BeklemeDurum == BeklemeDurum.Yonlendirildi
@@ -1057,13 +1054,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                                     && s.HedefBankoId == bk.BankoId)
 
                                 // 5. Genel Uzmana Yönlendirilmiş
+                                // ⭐ JOIN'de kp.KanalAltIslemId == s.KanalAltIslemId eşleşmesi zaten yapılıyor
                                 || (s.BeklemeDurum == BeklemeDurum.Yonlendirildi
                                     && s.YonlendirildiMi
                                     && s.YonlendirmeTipi == YonlendirmeTipi.UzmanPersonel
                                     && s.TcKimlikNo != hp
                                     && s.HedefBankoId == null
-                                    && uzm.Uzmanlik == PersonelUzmanlik.Uzman
-                                    && uzm.KanalAltIslemId == s.KanalAltIslemId) // ⭐ YENİ: Sıranın kanalında Uzman olmalı
+                                    && uzm.Uzmanlik == PersonelUzmanlik.Uzman)
                               )
                         select new
                         {
