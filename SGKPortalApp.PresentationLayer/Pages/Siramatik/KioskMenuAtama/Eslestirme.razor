@@ -1,0 +1,235 @@
+@page "/siramatik/kiosk-menu-eslestirme"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+@attribute [Authorize]
+@inject IJSRuntime JS
+
+<PageTitle>Kiosk - Menü Eşleştirme - SGK Portal</PageTitle>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-style1">
+            <li class="breadcrumb-item">
+                <a href="/">
+                    <i class="bx bx-home-alt me-1"></i>Ana Sayfa
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="/siramatik/kiosk-menu-atama">
+                    Kiosk Menü Ataması
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                Menü Eşleştirme
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="bx bx-link me-2"></i>Kiosk - Menü Eşleştirme
+            </h4>
+            <p class="text-muted mb-0">Kiosk cihazlarına menü atayın</p>
+        </div>
+        <button class="btn btn-outline-secondary" @onclick="NavigateBack">
+            <i class="bx bx-arrow-back me-1"></i>Geri Dön
+        </button>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="mt-3 text-muted">Veriler yükleniyor...</p>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <!-- Sol Panel - Kiosk Seçimi -->
+            <div class="col-lg-4 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bx bx-desktop me-2"></i>Kiosk Seçimi
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Hizmet Binası -->
+                        <div class="mb-3">
+                            <label class="form-label">Hizmet Binası</label>
+                            <select class="form-select" value="@selectedHizmetBinasiId" @onchange="OnHizmetBinasiChanged">
+                                <option value="0">-- Hizmet Binası Seçiniz --</option>
+                                @foreach (var bina in hizmetBinalari)
+                                {
+                                    <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Kiosk Listesi -->
+                        @if (selectedHizmetBinasiId > 0)
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Kiosk</label>
+                                @if (!kiosklar.Any())
+                                {
+                                    <div class="alert alert-info">
+                                        <i class="bx bx-info-circle me-1"></i>
+                                        Bu hizmet binasında kiosk bulunmuyor
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="list-group">
+                                        @foreach (var kiosk in kiosklar)
+                                        {
+                                            <button type="button"
+                                                    class="list-group-item list-group-item-action @(selectedKioskId == kiosk.KioskId ? "active" : "")"
+                                                    @onclick="() => SelectKiosk(kiosk.KioskId)">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <i class="bx bx-desktop me-1"></i>
+                                                        <strong>@kiosk.KioskAdi</strong>
+                                                    </div>
+                                                    <span class="badge bg-label-primary">
+                                                        @assignedMenuler.Count Menü
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Panel - Menü Eşleştirme -->
+            <div class="col-lg-8">
+                @if (selectedKioskId == 0)
+                {
+                    <div class="card">
+                        <div class="card-body text-center py-5">
+                            <i class="bx bx-desktop" style="font-size: 4rem; color: #ddd;"></i>
+                            <h5 class="mt-3 text-muted">Kiosk Seçiniz</h5>
+                            <p class="text-muted">Menü eşleştirmek için önce bir kiosk seçin</p>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="row">
+                        <!-- Eşleştirilmiş Menüler -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0">
+                                        <i class="bx bx-check-circle me-1"></i>
+                                        Eşleştirilmiş Menüler (@assignedMenuler.Count)
+                                    </h6>
+                                </div>
+                                <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                                    @if (isLoadingMenuler)
+                                    {
+                                        <div class="text-center py-4">
+                                            <div class="spinner-border spinner-border-sm text-primary"></div>
+                                            <p class="mt-2 text-muted small">Yükleniyor...</p>
+                                        </div>
+                                    }
+                                    else if (!assignedMenuler.Any())
+                                    {
+                                        <div class="text-center py-4">
+                                            <i class="bx bx-info-circle" style="font-size: 2rem; color: #ddd;"></i>
+                                            <p class="mt-2 text-muted small">Henüz menü eşleştirilmemiş</p>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="list-group">
+                                            @foreach (var menu in assignedMenuler)
+                                            {
+                                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <div class="flex-grow-1">
+                                                        <strong>@menu.MenuAdi</strong>
+                                                        <br />
+                                                        <small class="text-muted">Sıra: @menu.MenuSira</small>
+                                                    </div>
+                                                    <button class="btn btn-sm btn-outline-danger"
+                                                            @onclick="() => RemoveMenu(menu.KioskMenuId)"
+                                                            disabled="@isSaving">
+                                                        <i class="bx bx-x"></i>
+                                                    </button>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Eşleştirilmemiş Menüler -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-secondary text-white">
+                                    <h6 class="mb-0">
+                                        <i class="bx bx-x-circle me-1"></i>
+                                        Eşleştirilmemiş Menüler (@unassignedMenuler.Count)
+                                    </h6>
+                                </div>
+                                <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                                    @if (isLoadingMenuler)
+                                    {
+                                        <div class="text-center py-4">
+                                            <div class="spinner-border spinner-border-sm text-primary"></div>
+                                            <p class="mt-2 text-muted small">Yükleniyor...</p>
+                                        </div>
+                                    }
+                                    else if (!unassignedMenuler.Any())
+                                    {
+                                        <div class="text-center py-4">
+                                            <i class="bx bx-check-circle" style="font-size: 2rem; color: #28c76f;"></i>
+                                            <p class="mt-2 text-muted small">Tüm menüler eşleştirilmiş</p>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="list-group">
+                                            @foreach (var menu in unassignedMenuler)
+                                            {
+                                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <div class="flex-grow-1">
+                                                        <strong>@menu.MenuAdi</strong>
+                                                        <br />
+                                                        <small class="text-muted">Sıra: @menu.MenuSira</small>
+                                                    </div>
+                                                    <button class="btn btn-sm btn-outline-success"
+                                                            @onclick="() => AddMenu(menu.KioskMenuId)"
+                                                            disabled="@isSaving">
+                                                        <i class="bx bx-plus"></i>
+                                                    </button>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bilgi Kutusu -->
+                    <div class="alert alert-info">
+                        <i class="bx bx-info-circle me-1"></i>
+                        <strong>İpucu:</strong> <i class="bx bx-plus"></i>/<i class="bx bx-x"></i> butonlarını kullanarak menü eşleştirebilirsiniz.
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
