@@ -17,5 +17,10 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
         
         // Navigation properties için ek bilgiler
         public int PersonelSayisi { get; set; }
+        
+        // Uzmanlık seviyelerine göre personel sayıları
+        public int SefSayisi { get; set; }
+        public int UzmanSayisi { get; set; }
+        public int YrdUzmanSayisi { get; set; }
     }
 }

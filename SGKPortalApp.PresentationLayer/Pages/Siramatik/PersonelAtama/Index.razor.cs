@@ -31,6 +31,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
     public partial class Index : ComponentBase
     {
 
+        // URL Parameters
+        [SupplyParameterFromQuery(Name = "kanalAltIslemId")]
+        public int? KanalAltIslemIdParam { get; set; }
+        
+        [SupplyParameterFromQuery(Name = "hizmetBinasiId")]
+        public int? HizmetBinasiIdParam { get; set; }
+        
+        // Lock state
+        private bool isFiltersLocked = false;
+        private int lockedKanalAltIslemId = 0;
+
         [Inject] private IHizmetBinasiApiService _hizmetBinasiService { get; set; } = default!;
         [Inject] private IPersonelApiService _personelService { get; set; } = default!;
         [Inject] private IKanalAltIslemApiService _kanalAltIslemService { get; set; } = default!;
@@ -110,15 +121,73 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
             try
             {
                 await LoadHizmetBinalari();
+                
+                // URL'den kanalAltIslemId parametresi geldiyse
+                if (KanalAltIslemIdParam.HasValue && KanalAltIslemIdParam.Value > 0)
+                {
+                    await LoadFromKanalAltIslemId(KanalAltIslemIdParam.Value);
+                }
+                // URL'den hizmetBinasiId parametresi geldiyse
+                else if (HizmetBinasiIdParam.HasValue && HizmetBinasiIdParam.Value > 0)
+                {
+                    SelectedHizmetBinasiId = HizmetBinasiIdParam.Value;
+                    await LoadServisler();
+                    await LoadMatrixData();
+                }
             }
             catch (Exception ex)
             {
-                await _toastService.ShowErrorAsync($"Sayfa yüklenmesinde hata: {ex.Message}");
+                await _toastService.ShowErrorAsync($"Sayfa yüklenmesınde hata: {ex.Message}");
             }
             finally
             {
                 IsLoading = false;
             }
+        }
+
+        private async Task LoadFromKanalAltIslemId(int kanalAltIslemId)
+        {
+            try
+            {
+                // Kanal alt işlem bilgisini al
+                var kanalAltIslemResult = await _kanalAltIslemService.GetByIdWithDetailsAsync(kanalAltIslemId);
+                if (kanalAltIslemResult.Success && kanalAltIslemResult.Data != null)
+                {
+                    var kanalAltIslem = kanalAltIslemResult.Data;
+                    
+                    // Hizmet binasını seç
+                    SelectedHizmetBinasiId = kanalAltIslem.HizmetBinasiId;
+                    
+                    // Kilitle
+                    isFiltersLocked = true;
+                    lockedKanalAltIslemId = kanalAltIslemId;
+                    
+                    // Servisleri yükle
+                    await LoadServisler();
+                    
+                    // Matrix verisini yükle
+                    await LoadMatrixData();
+                    
+                    // Kanal alt işlem filtresini ayarla
+                    KanalAltIslemSearchTerm = kanalAltIslemId.ToString();
+                }
+                else
+                {
+                    await _toastService.ShowErrorAsync("Kanal alt işlem bulunamadı");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Kanal alt işlem yüklenirken hata: {KanalAltIslemId}", kanalAltIslemId);
+                await _toastService.ShowErrorAsync("Veriler yüklenirken hata oluştu");
+            }
+        }
+        
+        private void UnlockFilters()
+        {
+            isFiltersLocked = false;
+            lockedKanalAltIslemId = 0;
+            KanalAltIslemSearchTerm = string.Empty;
         }
 
         // ═══════════════════════════════════════════════════════════════════════════════
@@ -230,9 +299,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
                 // 3. Atamaları dictionary'e yükle (hızlı erişim için)
                 LoadAtamalariDictionary();
 
-                // Arama terimlerini temizle
+                // Arama terimlerini temizle (kilitli değilse)
                 PersonelSearchTerm = string.Empty;
-                KanalAltIslemSearchTerm = string.Empty;
+                if (!isFiltersLocked)
+                {
+                    KanalAltIslemSearchTerm = string.Empty;
+                }
             }
             catch (Exception ex)
             {
@@ -515,7 +587,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
         private void ClearAllFilters()
         {
             PersonelSearchTerm = string.Empty;
-            KanalAltIslemSearchTerm = string.Empty;
+            // Kilitli değilse kanal alt işlem filtresini de temizle
+            if (!isFiltersLocked)
+            {
+                KanalAltIslemSearchTerm = string.Empty;
+            }
         }
 
         // ═══════════════════════════════════════════════════════════════════════════════

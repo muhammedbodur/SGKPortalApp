@@ -76,11 +76,15 @@ else
                     <div class="col-md-6">
                         <label class="form-label fw-bold">
                             <i class="bx bx-building me-2"></i>Hizmet Binası
+                            @if (isFiltersLocked)
+                            {
+                                <span class="badge bg-label-secondary ms-1"><i class="bx bx-lock-alt"></i></span>
+                            }
                         </label>
                         <select class="form-select"
                                 value="@SelectedHizmetBinasiId"
                                 @onchange="OnHizmetBinasiChanged"
-                                disabled="@IsLoadingDropdowns">
+                                disabled="@(IsLoadingDropdowns || isFiltersLocked)">
                             <option value="0">-- Hizmet Binası Seçiniz --</option>
                             @foreach (var hb in HizmetBinalari)
                             {
@@ -221,9 +225,16 @@ else
 
                         <!-- Kanal Alt İşlem Filtrele -->
                         <div class="col-md-6">
-                            <label class="form-label">Kanal Alt İşlem Filtrele</label>
+                            <label class="form-label">
+                                Kanal Alt İşlem Filtrele
+                                @if (isFiltersLocked)
+                                {
+                                    <span class="badge bg-label-secondary ms-1"><i class="bx bx-lock-alt"></i></span>
+                                }
+                            </label>
                             <select class="form-select"
-                                    @bind="KanalAltIslemSearchTerm">
+                                    @bind="KanalAltIslemSearchTerm"
+                                    disabled="@isFiltersLocked">
                                 <option value="">-- Tüm İşlemler --</option>
                                 @foreach (var kai in KanalAltIslemler)
                                 {
@@ -232,9 +243,18 @@ else
                                     </option>
                                 }
                             </select>
-                            <small class="text-muted d-block mt-1">
-                                @FilteredKanalAltIslemler.Count / @KanalAltIslemler.Count işlem gösteriliyor
-                            </small>
+                            @if (isFiltersLocked)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-secondary mt-1" @onclick="UnlockFilters">
+                                    <i class="bx bx-lock-open-alt me-1"></i>Kilidi Aç
+                                </button>
+                            }
+                            else
+                            {
+                                <small class="text-muted d-block mt-1">
+                                    @FilteredKanalAltIslemler.Count / @KanalAltIslemler.Count işlem gösteriliyor
+                                </small>
+                            }
                         </div>
                     </div>
                 </div>

@@ -89,15 +89,15 @@
                                 else
                                 {
                                     <!-- Ekleme modunda dropdown -->
-                                    <InputSelect @bind-Value="model.HizmetBinasiId" class="form-select" disabled="@isSaving">
+                                    <select class="form-select" @onchange="OnHizmetBinasiChangedInForm" disabled="@isSaving" value="@model.HizmetBinasiId">
                                         <option value="0">-- Hizmet Binası Seçiniz --</option>
                                         @foreach (var bina in hizmetBinalari)
                                         {
                                             <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
                                         }
-                                    </InputSelect>
+                                    </select>
                                     <ValidationMessage For="@(() => model.HizmetBinasiId)" class="text-danger small mt-1" />
-                                    <small class="text-muted">Lütfen bir hizmet binası seçiniz</small>
+                                    <small class="text-muted">Hizmet binası seçildiğinde değerler otomatik önerilir</small>
                                 }
                             </div>
 
@@ -124,24 +124,30 @@
                                         <i class="bx bx-hash me-1"></i>Başlangıç Numarası
                                     </label>
                                     <InputNumber @bind-Value="model.BaslangicNumara"
-                                                 class="form-control"
+                                                 class="@($"form-control {(numaraAralikHatasi != null ? "is-invalid" : "")}")"
                                                  placeholder="0"
-                                                 disabled="@isSaving" />
+                                                 disabled="@isSaving"
+                                                 @bind-Value:after="OnNumaraChanged" />
                                     <ValidationMessage For="@(() => model.BaslangicNumara)" class="text-danger small mt-1" />
-                                    <small class="text-muted">Sıra aralığının başlangıcı</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label required">
                                         <i class="bx bx-hash me-1"></i>Bitiş Numarası
                                     </label>
                                     <InputNumber @bind-Value="model.BitisNumara"
-                                                 class="form-control"
+                                                 class="@($"form-control {(numaraAralikHatasi != null ? "is-invalid" : "")}")"
                                                  placeholder="9999"
-                                                 disabled="@isSaving" />
+                                                 disabled="@isSaving"
+                                                 @bind-Value:after="OnNumaraChanged" />
                                     <ValidationMessage For="@(() => model.BitisNumara)" class="text-danger small mt-1" />
-                                    <small class="text-muted">Sıra aralığının bitişi</small>
                                 </div>
                             </div>
+                            @if (numaraAralikHatasi != null)
+                            {
+                                <div class="alert alert-danger py-2 mb-3">
+                                    <i class="bx bx-error-circle me-1"></i>@numaraAralikHatasi
+                                </div>
+                            }
 
                             <!-- Sıra -->
                             <div class="mb-3">
@@ -149,11 +155,21 @@
                                     <i class="bx bx-sort me-1"></i>Gösterilme Sırası
                                 </label>
                                 <InputNumber @bind-Value="model.Sira"
-                                             class="form-control"
+                                             class="@($"form-control {(siraHatasi != null ? "is-invalid" : "")}")"
                                              placeholder="1"
-                                             disabled="@isSaving" />
+                                             disabled="@isSaving"
+                                             @bind-Value:after="OnSiraChanged" />
                                 <ValidationMessage For="@(() => model.Sira)" class="text-danger small mt-1" />
-                                <small class="text-muted">Kiosk ekranında gösterilme sırası (1-999)</small>
+                                @if (siraHatasi != null)
+                                {
+                                    <div class="text-danger small mt-1">
+                                        <i class="bx bx-error-circle me-1"></i>@siraHatasi
+                                    </div>
+                                }
+                                else
+                                {
+                                    <small class="text-muted">Kiosk ekranında gösterilme sırası (1-999)</small>
+                                }
                             </div>
 
                             <!-- Aktiflik -->

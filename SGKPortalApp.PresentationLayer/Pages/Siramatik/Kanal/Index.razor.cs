@@ -93,10 +93,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kanal
                 "name-desc" => query.OrderByDescending(k => k.KanalAdi),
                 "date-desc" => query.OrderByDescending(k => k.EklenmeTarihi),
                 "date-asc" => query.OrderBy(k => k.EklenmeTarihi),
+                "altkanal-desc" => query.OrderByDescending(k => k.KanalAltSayisi),
+                "altkanal-asc" => query.OrderBy(k => k.KanalAltSayisi),
                 _ => query.OrderBy(k => k.KanalAdi)
             };
 
             filteredKanallar = query.ToList();
+        }
+
+        private void SetAktiflikFilter(Aktiflik? aktiflik)
+        {
+            selectedAktiflik = aktiflik;
+            FilterKanallar();
         }
 
         private void ClearFilters()

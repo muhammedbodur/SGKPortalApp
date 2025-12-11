@@ -150,6 +150,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             ApplyFilters();
         }
 
+        private void SetAktiflikFilter(Aktiflik? aktiflik)
+        {
+            selectedAktiflik = aktiflik;
+            ApplyFilters();
+        }
+
         private void ApplyFilters()
         {
             var query = allKanallar.Where(k =>

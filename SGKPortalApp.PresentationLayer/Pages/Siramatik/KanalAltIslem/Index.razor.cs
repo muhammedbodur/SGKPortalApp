@@ -23,10 +23,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
         [Inject] private ILogger<Index> _logger { get; set; } = default!;
         [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
+        // URL Parameters
+        [SupplyParameterFromQuery(Name = "kanalIslemId")]
+        public int? KanalIslemIdParam { get; set; }
+        
+        [SupplyParameterFromQuery(Name = "hizmetBinasiId")]
+        public int? HizmetBinasiIdParam { get; set; }
+        
         // State
         private bool isLoading = false;
         private bool isDeleting = false;
         private bool showDeleteModal = false;
+        private bool isKanalIslemLocked = false; // URL'den geldiğinde kilitli
 
         // Data
         private List<KanalAltIslemResponseDto> allAltIslemler = new();
@@ -46,11 +54,66 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
             QuestPDF.Settings.License = LicenseType.Community;
             await LoadDropdownData();
 
-            // Geçici olarak: İlk hizmet binasını seç
-            if (hizmetBinalari.Any())
+            // URL'den kanalIslemId parametresi geldiyse
+            if (KanalIslemIdParam.HasValue && KanalIslemIdParam.Value > 0)
+            {
+                await LoadFromKanalIslemId(KanalIslemIdParam.Value);
+            }
+            // URL'den hizmetBinasiId parametresi geldiyse
+            else if (HizmetBinasiIdParam.HasValue && HizmetBinasiIdParam.Value > 0)
+            {
+                selectedHizmetBinasiId = HizmetBinasiIdParam.Value;
+                await LoadData();
+            }
+            // Varsayılan: İlk hizmet binasını seç
+            else if (hizmetBinalari.Any())
             {
                 selectedHizmetBinasiId = hizmetBinalari.First().HizmetBinasiId;
                 await LoadData();
+            }
+        }
+        
+        private async Task LoadFromKanalIslemId(int kanalIslemId)
+        {
+            try
+            {
+                isLoading = true;
+                
+                // Kanal işlem bilgisini al
+                var kanalIslemResult = await _kanalIslemService.GetByIdAsync(kanalIslemId);
+                if (kanalIslemResult.Success && kanalIslemResult.Data != null)
+                {
+                    var kanalIslem = kanalIslemResult.Data;
+                    
+                    // Hizmet binası ve kanal işlem seç
+                    selectedHizmetBinasiId = kanalIslem.HizmetBinasiId;
+                    selectedKanalIslemId = kanalIslemId;
+                    isKanalIslemLocked = true; // Dropdown'ları kilitle
+                    
+                    // Verileri yükle
+                    await LoadKanalIslemler();
+                    await LoadAltIslemler();
+                    ApplyFilters();
+                }
+                else
+                {
+                    await _toastService.ShowErrorAsync("Kanal işlem bulunamadı");
+                    // Varsayılana dön
+                    if (hizmetBinalari.Any())
+                    {
+                        selectedHizmetBinasiId = hizmetBinalari.First().HizmetBinasiId;
+                        await LoadData();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Kanal işlem yüklenirken hata: {KanalIslemId}", kanalIslemId);
+                await _toastService.ShowErrorAsync("Veriler yüklenirken hata oluştu");
+            }
+            finally
+            {
+                isLoading = false;
             }
         }
 
@@ -161,6 +224,30 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
 
             ApplyFilters();
         }
+        
+        private void UnlockFilters()
+        {
+            isKanalIslemLocked = false;
+            selectedKanalIslemId = 0; // Tüm kanal işlemleri göster
+            ApplyFilters();
+        }
+        
+        private string GetManageUrl()
+        {
+            var url = "/siramatik/kanal-alt-islem/manage";
+            var queryParams = new List<string>();
+            
+            if (selectedHizmetBinasiId > 0)
+                queryParams.Add($"hizmetBinasiId={selectedHizmetBinasiId}");
+            
+            if (selectedKanalIslemId > 0)
+                queryParams.Add($"kanalIslemId={selectedKanalIslemId}");
+            
+            if (queryParams.Any())
+                url += "?" + string.Join("&", queryParams);
+            
+            return url;
+        }
 
         private void OnSearchChanged()
         {
@@ -178,6 +265,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                 selectedAktiflik = null;
             }
 
+            ApplyFilters();
+        }
+
+        private void SetAktiflikFilter(Aktiflik? aktiflik)
+        {
+            selectedAktiflik = aktiflik;
             ApplyFilters();
         }
 
@@ -218,7 +311,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
         private void ClearFilters()
         {
             searchText = string.Empty;
-            selectedKanalIslemId = 0;
+            // Kilitli değilse kanal işlem filtresini de temizle
+            if (!isKanalIslemLocked)
+            {
+                selectedKanalIslemId = 0;
+            }
             selectedAktiflik = null;
             ApplyFilters();
         }

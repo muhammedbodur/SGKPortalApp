@@ -7,58 +7,52 @@
 
 <div class="container-xxl flex-grow-1 container-p-y">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
         <div>
             <h4 class="fw-bold mb-1">
-                <i class="bx bx-list-ul me-2"></i>Kanal İşlem Yönetimi
+                <i class="bx bx-cog me-2"></i>Kanal İşlem Yönetimi
             </h4>
             <p class="text-muted mb-0">
-                Tüm kanal işlemlerini görüntüleyin ve yönetin
+                Hizmet binalarına göre kanal işlemlerini tanımlayın ve numara aralıklarını yönetin.
             </p>
         </div>
 
-        <div class="d-flex gap-2">
-            <!-- Excel Export -->
-            <button class="btn btn-success" @onclick="ExportToExcel" disabled="@isLoading">
-                @if (isLoading)
-                {
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                }
-                else
-                {
-                    <i class="bx bx-download me-1"></i>
-                }
-                Excel
-            </button>
+        <div class="d-flex flex-wrap gap-2">
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" disabled="@isLoading">
+                    @if (isLoading)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    <i class="bx bx-download me-1"></i> Dışa Aktar
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <button class="dropdown-item" @onclick="ExportToExcel">
+                            <i class="bx bx-spreadsheet me-2 text-success"></i>Excel
+                        </button>
+                    </li>
+                    <li>
+                        <button class="dropdown-item" @onclick="ExportToPdf">
+                            <i class="bx bxs-file-pdf me-2 text-danger"></i>PDF
+                        </button>
+                    </li>
+                </ul>
+            </div>
 
-            <!-- PDF Export -->
-            <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@isLoading">
-                @if (isLoading)
-                {
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                }
-                else
-                {
-                    <i class="bx bxs-file-pdf me-1"></i>
-                }
-                PDF
-            </button>
-
-            <!-- Yeni Kanal İşlem -->
-            <a href="/siramatik/kanal-islem/manage?hizmetBinasiId=@selectedHizmetBinasiId" class="btn btn-primary">
+            <a href="/siramatik/kanal-islem/manage?hizmetBinasiId=@selectedHizmetBinasiId" class="btn btn-primary" disabled="@(selectedHizmetBinasiId == 0)">
                 <i class="bx bx-plus me-1"></i>Yeni Kanal İşlem
             </a>
         </div>
     </div>
 
-    <!-- Filter Card -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3">
-                <!-- Hizmet Binası Seçimi -->
-                <div class="col-md-3">
-                    <label class="form-label">
-                        <i class="bx bx-building me-1"></i>Hizmet Binası
+    <!-- Hizmet Binası Seçimi Kartı -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body py-3">
+            <div class="row g-3 align-items-center">
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold mb-1">
+                        <i class="bx bx-building me-1 text-primary"></i>Hizmet Binası Seçimi
                     </label>
                     <select class="form-select" @onchange="OnHizmetBinasiChanged" value="@selectedHizmetBinasiId">
                         <option value="0">-- Hizmet Binası Seçiniz --</option>
@@ -68,61 +62,109 @@
                         }
                     </select>
                 </div>
-
-                <!-- Arama -->
-                <div class="col-md-4">
-                    <label class="form-label">Kanal Ara</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bx bx-search"></i></span>
-                        <input type="text" class="form-control" placeholder="Kanal adı ile arama yapın..."
-                               @bind="searchText" @bind:event="oninput" @onkeyup="OnSearchChanged" />
+                @if (selectedHizmetBinasiId > 0)
+                {
+                    <div class="col-lg-8">
+                        <div class="row g-2">
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="bg-label-primary rounded p-2 text-center">
+                                    <h6 class="mb-0">@allKanallar.Count</h6>
+                                    <small class="text-muted">Toplam İşlem</small>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="bg-label-success rounded p-2 text-center">
+                                    <h6 class="mb-0 text-success">@allKanallar.Count(k => k.Aktiflik == Aktiflik.Aktif)</h6>
+                                    <small class="text-muted">Aktif</small>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="bg-label-warning rounded p-2 text-center">
+                                    <h6 class="mb-0 text-warning">@allKanallar.Sum(k => k.KanalAltIslemSayisi)</h6>
+                                    <small class="text-muted">Alt Kanal İşlem</small>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="bg-label-secondary rounded p-2 text-center">
+                                    <h6 class="mb-0">@filteredKanallar.Count</h6>
+                                    <small class="text-muted">Filtrelenen</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Durum Filtresi -->
-                <div class="col-md-2">
-                    <label class="form-label">Durum</label>
-                    <select class="form-select" @onchange="OnAktiflikChanged">
-                        <option value="">Tümü</option>
-                        <option value="@((int)Aktiflik.Aktif)">Aktif</option>
-                        <option value="@((int)Aktiflik.Pasif)">Pasif</option>
-                    </select>
-                </div>
-
-                <!-- Sıralama -->
-                <div class="col-md-2">
-                    <label class="form-label">Sıralama</label>
-                    <select class="form-select" @onchange="OnSortChanged">
-                        <option value="name-asc">İsim (A-Z)</option>
-                        <option value="name-desc">İsim (Z-A)</option>
-                        <option value="sira-asc" selected>Sıra (Artan)</option>
-                        <option value="sira-desc">Sıra (Azalan)</option>
-                        <option value="date-newest">En Yeni</option>
-                        <option value="date-oldest">En Eski</option>
-                    </select>
-                </div>
-
-                <!-- Temizle -->
-                <div class="col-md-1 d-flex align-items-end">
-                    <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters" title="Filtreleri Temizle">
-                        <i class="bx bx-reset"></i>
-                    </button>
-                </div>
+                }
             </div>
+        </div>
+    </div>
 
-            <!-- İstatistikler -->
-            <div class="row mt-3">
-                <div class="col">
-                    <div class="d-flex gap-4 text-muted small">
-                        <span><i class="bx bx-list-ul text-primary"></i> Toplam: <strong>@allKanallar.Count</strong></span>
-                        <span><i class="bx bx-check-circle text-success"></i> Aktif: <strong>@allKanallar.Count(k => k.Aktiflik == Aktiflik.Aktif)</strong></span>
-                        <span><i class="bx bx-x-circle text-danger"></i> Pasif: <strong>@allKanallar.Count(k => k.Aktiflik == Aktiflik.Pasif)</strong></span>
-                        <span><i class="bx bx-filter-alt text-info"></i> Filtrelenen: <strong>@filteredKanallar.Count</strong></span>
+    @if (selectedHizmetBinasiId > 0)
+    {
+        <!-- Filtreleme Çubuğu -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body py-3">
+                <div class="row g-3 align-items-center">
+                    <!-- Arama -->
+                    <div class="col-lg-3">
+                        <div class="input-group input-group-merge">
+                            <span class="input-group-text"><i class="bx bx-search"></i></span>
+                            <input type="text" 
+                                   class="form-control" 
+                                   placeholder="Kanal adı ara..." 
+                                   @bind="searchText" 
+                                   @bind:event="oninput" 
+                                   @onkeyup="OnSearchChanged" />
+                            @if (!string.IsNullOrEmpty(searchText))
+                            {
+                                <span class="input-group-text cursor-pointer" @onclick="() => { searchText = string.Empty; OnSearchChanged(); }">
+                                    <i class="bx bx-x"></i>
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Aktiflik Filtresi - Button Group -->
+                    <div class="col-lg-auto">
+                        <div class="btn-group" role="group">
+                            <button type="button"
+                                    class="btn btn-sm @(selectedAktiflik == null ? "btn-secondary" : "btn-outline-secondary")"
+                                    @onclick="() => SetAktiflikFilter(null)">
+                                Tümü
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm @(selectedAktiflik == Aktiflik.Aktif ? "btn-label-success" : "btn-outline-secondary")"
+                                    @onclick="() => SetAktiflikFilter(Aktiflik.Aktif)">
+                                Aktif
+                            </button>
+                            <button type="button"
+                                    class="btn btn-sm @(selectedAktiflik == Aktiflik.Pasif ? "btn-label-secondary" : "btn-outline-secondary")"
+                                    @onclick="() => SetAktiflikFilter(Aktiflik.Pasif)">
+                                Pasif
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sıralama -->
+                    <div class="col-lg-auto">
+                        <select class="form-select form-select-sm" style="min-width: 150px;" @onchange="OnSortChanged">
+                            <option value="sira-asc" selected>Sıra (Artan)</option>
+                            <option value="sira-desc">Sıra (Azalan)</option>
+                            <option value="name-asc">İsim (A-Z)</option>
+                            <option value="name-desc">İsim (Z-A)</option>
+                            <option value="date-newest">Son Eklenenler</option>
+                            <option value="date-oldest">İlk Eklenenler</option>
+                        </select>
+                    </div>
+
+                    <!-- Sonuç Bilgisi -->
+                    <div class="col-lg-auto ms-lg-auto">
+                        <span class="badge bg-label-secondary">
+                            <i class="bx bx-filter me-1"></i>@filteredKanallar.Count / @allKanallar.Count kayıt
+                        </span>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    }
 
     <!-- Data Display -->
     @if (isLoading)
@@ -146,75 +188,81 @@
     }
     else if (filteredKanallar.Any())
     {
-        <!-- 4 Sütunlu Grid -->
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
             @foreach (var kanal in filteredKanallar)
             {
                 <div class="col">
-                    <div class="card h-100 @(kanal.Aktiflik == Aktiflik.Pasif ? "border-danger" : "")">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div class="avatar avatar-lg">
-                                    <span class="avatar-initial rounded bg-label-primary">
-                                        <i class="bx bx-list-ul fs-3"></i>
-                                    </span>
-                                </div>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-icon" type="button" data-bs-toggle="dropdown">
-                                        <i class="bx bx-dots-vertical-rounded"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <a class="dropdown-item" href="/siramatik/kanal-islem/manage/@kanal.KanalIslemId">
-                                                <i class="bx bx-edit me-2"></i>Düzenle
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <button class="dropdown-item" @onclick="() => ToggleAktiflik(kanal)">
-                                                <i class="bx @(kanal.Aktiflik == Aktiflik.Aktif ? "bx-x" : "bx-check") me-2"></i>
-                                                @(kanal.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")
-                                            </button>
-                                        </li>
-                                        <li><hr class="dropdown-divider" /></li>
-                                        <li>
-                                            <button class="dropdown-item text-danger" @onclick="() => ShowDeleteConfirm(kanal)">
-                                                <i class="bx bx-trash me-2"></i>Sil
-                                            </button>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <h5 class="card-title mb-2">@kanal.KanalAdi</h5>
-                            <div class="mb-2">
-                                <small class="text-muted"><i class="bx bx-building me-1"></i>@kanal.HizmetBinasiAdi</small>
-                            </div>
-                            <div class="mb-2">
-                                <small class="text-muted"><i class="bx bx-hash me-1"></i>Numara: <strong>@kanal.BaslangicNumara - @kanal.BitisNumara</strong></small>
-                            </div>
-                            <div class="mb-2">
-                                <small class="text-muted"><i class="bx bx-sort me-1"></i>Sıra: <strong>@kanal.Sira</strong></small>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="badge @(kanal.Aktiflik == Aktiflik.Aktif ? "bg-label-success" : "bg-label-danger")">
+                    <div class="card h-100 shadow-sm border-0 card-hover @(kanal.Aktiflik == Aktiflik.Pasif ? "opacity-75" : "")">
+                        <div class="card-header border-0 pb-0 d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge @(kanal.Aktiflik == Aktiflik.Aktif ? "bg-label-success" : "bg-label-secondary")">
                                     @(kanal.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif")
                                 </span>
-                                <small class="text-muted"><i class="bx bx-time me-1"></i>@kanal.EklenmeTarihi.ToString("dd.MM.yyyy")</small>
+                                <span class="badge bg-label-primary">
+                                    Sıra: @kanal.Sira
+                                </span>
                             </div>
-
-                            <div class="border-top pt-3">
-                                <small class="text-muted d-block">
-                                    <i class="bx bx-subdirectory-right me-1"></i>
-                                    @if (kanal.KanalAltIslemSayisi > 0)
-                                    {
-                                        <span>Alt İşlemler: <strong>@kanal.KanalAltIslemSayisi</strong></span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-warning">Alt işlem tanımlanmamış</span>
-                                    }
-                                </small>
+                            <div class="dropdown">
+                                <button class="btn btn-text-secondary btn-icon btn-sm rounded-pill" type="button" data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="/siramatik/kanal-islem/manage/@kanal.KanalIslemId">
+                                            <i class="bx bx-edit-alt me-2 text-primary"></i>Düzenle
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider my-1" /></li>
+                                    <li>
+                                        <a class="dropdown-item" href="/siramatik/kanal-alt-islem?kanalIslemId=@kanal.KanalIslemId">
+                                            <i class="bx bx-subdirectory-right me-2 text-info"></i>Alt Kanal İşlemleri Gör
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider my-1" /></li>
+                                    <li>
+                                        <button class="dropdown-item" @onclick="() => ToggleAktiflik(kanal)">
+                                            <i class="bx @(kanal.Aktiflik == Aktiflik.Aktif ? "bx-pause" : "bx-play") me-2"></i>
+                                            @(kanal.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item text-danger" @onclick="() => ShowDeleteConfirm(kanal)">
+                                            <i class="bx bx-trash me-2"></i>Sil
+                                        </button>
+                                    </li>
+                                </ul>
                             </div>
+                        </div>
+                        
+                        <div class="card-body pt-3">
+                            <h5 class="card-title fw-semibold mb-1">@kanal.KanalAdi</h5>
+                            <small class="text-muted d-block mb-3">
+                                <i class="bx bx-calendar me-1"></i>@kanal.EklenmeTarihi.ToString("dd MMM yyyy")
+                            </small>
+                            
+                            <!-- Numara Aralığı -->
+                            <div class="bg-light rounded p-2 mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small">Numara Aralığı</span>
+                                    <span class="fw-semibold text-primary">@kanal.BaslangicNumara - @kanal.BitisNumara</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Alt İşlem Sayısı -->
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="bg-label-info rounded p-2 text-center flex-grow-1">
+                                    <h6 class="mb-0 text-info">@kanal.KanalAltIslemSayisi</h6>
+                                    <small class="text-muted">Alt Kanal İşlem</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Hızlı Aksiyon -->
+                        <div class="card-footer border-0 pt-0">
+                            <a href="/siramatik/kanal-alt-islem?kanalIslemId=@kanal.KanalIslemId" 
+                               class="btn btn-sm btn-outline-info w-100">
+                                <i class="bx bx-subdirectory-right me-1"></i>Alt İşlemleri Yönet
+                            </a>
                         </div>
                     </div>
                 </div>

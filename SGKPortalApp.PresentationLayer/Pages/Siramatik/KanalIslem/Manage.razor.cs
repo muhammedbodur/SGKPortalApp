@@ -38,9 +38,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
         private List<KanalResponseDto> anaKanallar = new();
         private List<HizmetBinasiResponseDto> hizmetBinalari = new();
         
+        // Mevcut Kanal İşlemler (validasyon için)
+        private List<KanalIslemResponseDto> mevcutKanalIslemler = new();
+        
         // Hizmet Binası Bilgisi
         private int selectedHizmetBinasiId = 0;
         private string hizmetBinasiAdi = string.Empty;
+        
+        // Validasyon mesajları
+        private string? numaraAralikHatasi = null;
+        private string? siraHatasi = null;
 
         // Edit Mode Data
         private DateTime eklenmeTarihi = DateTime.Now;
@@ -70,9 +77,131 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 if (HizmetBinasiId.HasValue && HizmetBinasiId.Value > 0)
                 {
                     model.HizmetBinasiId = HizmetBinasiId.Value;
+                    await LoadMevcutKanalIslemler(HizmetBinasiId.Value);
+                    SuggestNextValues();
                 }
 
                 isAktif = true;
+            }
+        }
+        
+        private async Task LoadMevcutKanalIslemler(int hizmetBinasiId)
+        {
+            try
+            {
+                var result = await _kanalIslemService.GetByHizmetBinasiIdAsync(hizmetBinasiId);
+                if (result.Success && result.Data != null)
+                {
+                    mevcutKanalIslemler = result.Data;
+                }
+                else
+                {
+                    mevcutKanalIslemler = new();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Mevcut kanal işlemler yüklenirken hata");
+                mevcutKanalIslemler = new();
+            }
+        }
+        
+        private void SuggestNextValues()
+        {
+            if (!mevcutKanalIslemler.Any())
+            {
+                model.Sira = 1;
+                model.BaslangicNumara = 1;
+                model.BitisNumara = 999;
+                return;
+            }
+            
+            // Sonraki sırayı öner
+            var maxSira = mevcutKanalIslemler.Max(k => k.Sira);
+            model.Sira = maxSira + 1;
+            
+            // Sonraki numara aralığını öner
+            var maxBitisNumara = mevcutKanalIslemler.Max(k => k.BitisNumara);
+            model.BaslangicNumara = maxBitisNumara + 1;
+            model.BitisNumara = maxBitisNumara + 1000;
+        }
+        
+        private bool ValidateNumaraAraligi()
+        {
+            numaraAralikHatasi = null;
+            
+            // Temel kontroller
+            if (model.BaslangicNumara < 0)
+            {
+                numaraAralikHatasi = "Başlangıç numarası 0'dan küçük olamaz.";
+                return false;
+            }
+            
+            if (model.BitisNumara <= model.BaslangicNumara)
+            {
+                numaraAralikHatasi = "Bitiş numarası, başlangıç numarasından büyük olmalıdır.";
+                return false;
+            }
+            
+            // Çakışma kontrolü
+            var cakisanKayit = mevcutKanalIslemler
+                .Where(k => !IsEditMode || k.KanalIslemId != KanalIslemId)
+                .FirstOrDefault(k => 
+                    (model.BaslangicNumara >= k.BaslangicNumara && model.BaslangicNumara <= k.BitisNumara) ||
+                    (model.BitisNumara >= k.BaslangicNumara && model.BitisNumara <= k.BitisNumara) ||
+                    (model.BaslangicNumara <= k.BaslangicNumara && model.BitisNumara >= k.BitisNumara));
+            
+            if (cakisanKayit != null)
+            {
+                numaraAralikHatasi = $"Bu numara aralığı '{cakisanKayit.KanalAdi}' ({cakisanKayit.BaslangicNumara}-{cakisanKayit.BitisNumara}) ile çakışıyor!";
+                return false;
+            }
+            
+            return true;
+        }
+        
+        private bool ValidateSira()
+        {
+            siraHatasi = null;
+            
+            if (model.Sira < 1 || model.Sira > 999)
+            {
+                siraHatasi = "Sıra 1-999 arasında olmalıdır.";
+                return false;
+            }
+            
+            // Aynı sıra numarası kontrolü
+            var ayniSira = mevcutKanalIslemler
+                .Where(k => !IsEditMode || k.KanalIslemId != KanalIslemId)
+                .FirstOrDefault(k => k.Sira == model.Sira);
+            
+            if (ayniSira != null)
+            {
+                siraHatasi = $"Bu sıra numarası '{ayniSira.KanalAdi}' tarafından kullanılıyor!";
+                return false;
+            }
+            
+            return true;
+        }
+        
+        private void OnNumaraChanged()
+        {
+            ValidateNumaraAraligi();
+        }
+        
+        private void OnSiraChanged()
+        {
+            ValidateSira();
+        }
+        
+        private async Task OnHizmetBinasiChangedInForm(ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out int binaId) && binaId > 0)
+            {
+                model.HizmetBinasiId = binaId;
+                await LoadMevcutKanalIslemler(binaId);
+                SuggestNextValues();
+                StateHasChanged();
             }
         }
 
@@ -138,6 +267,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                     isAktif = kanalIslem.Aktiflik == Aktiflik.Aktif;
                     eklenmeTarihi = kanalIslem.EklenmeTarihi;
                     duzenlenmeTarihi = kanalIslem.DuzenlenmeTarihi;
+                    
+                    // Mevcut kayıtları yükle (validasyon için)
+                    await LoadMevcutKanalIslemler(kanalIslem.HizmetBinasiId);
 
                     _logger.LogInformation($"📝 Model güncellendi - KanalId: {model.KanalId}, HizmetBinasiId: {model.HizmetBinasiId}");
                 }
@@ -183,6 +315,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 {
                     _logger.LogWarning("⚠️ Kanal ID geçersiz");
                     await _toastService.ShowErrorAsync("Lütfen bir kanal seçiniz");
+                    return;
+                }
+                
+                // Numara aralığı ve sıra validasyonu
+                if (!ValidateNumaraAraligi())
+                {
+                    await _toastService.ShowErrorAsync(numaraAralikHatasi ?? "Numara aralığı geçersiz");
+                    return;
+                }
+                
+                if (!ValidateSira())
+                {
+                    await _toastService.ShowErrorAsync(siraHatasi ?? "Sıra numarası geçersiz");
                     return;
                 }
 

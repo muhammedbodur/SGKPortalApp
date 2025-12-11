@@ -7,122 +7,193 @@
 
 <div class="container-xxl flex-grow-1 container-p-y">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
         <div>
             <h4 class="fw-bold mb-1">
-                <i class="bx bx-category me-2"></i>Alt Kanal Yönetimi
+                <i class="bx bx-git-branch me-2"></i>Alt Kanal Yönetimi
             </h4>
             <p class="text-muted mb-0">
-                Sıramatik sisteminde kullanılacak alt kanal tanımlarını yönetin
+                Ana kanallara bağlı alt kanal tanımlarını yönetin ve işlemlerini takip edin.
             </p>
         </div>
 
-        <div class="d-flex gap-2">
-            <!-- Excel Export -->
-            <button class="btn btn-success" @onclick="ExportToExcel" disabled="@isLoading">
-                @if (isLoading)
-                {
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                }
-                else
-                {
-                    <i class="bx bx-download me-1"></i>
-                }
-                Excel
-            </button>
+        <div class="d-flex flex-wrap gap-2">
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" disabled="@isLoading">
+                    @if (isLoading)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    <i class="bx bx-download me-1"></i> Dışa Aktar
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <button class="dropdown-item" @onclick="ExportToExcel">
+                            <i class="bx bx-spreadsheet me-2 text-success"></i>Excel
+                        </button>
+                    </li>
+                    <li>
+                        <button class="dropdown-item" @onclick="ExportToPdf">
+                            <i class="bx bxs-file-pdf me-2 text-danger"></i>PDF
+                        </button>
+                    </li>
+                </ul>
+            </div>
 
-            <!-- PDF Export -->
-            <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@isLoading">
-                @if (isLoading)
-                {
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                }
-                else
-                {
-                    <i class="bx bxs-file-pdf me-1"></i>
-                }
-                PDF
-            </button>
-
-            <!-- Yeni Alt Kanal -->
             <a href="/siramatik/alt-kanal/manage" class="btn btn-primary">
                 <i class="bx bx-plus me-1"></i>Yeni Alt Kanal
             </a>
         </div>
     </div>
 
-    <!-- Filtreleme -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3">
+    <!-- İstatistik Kartları -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-sm me-3 bg-label-primary">
+                            <span class="avatar-initial rounded"><i class="bx bx-git-branch"></i></span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Toplam Alt Kanal</small>
+                            <h5 class="mb-0">@allKanalAltlar.Count</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-sm me-3 bg-label-success">
+                            <span class="avatar-initial rounded"><i class="bx bx-check-circle"></i></span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Aktif Alt Kanal</small>
+                            <h5 class="mb-0 text-success">@allKanalAltlar.Count(k => k.Aktiflik == Aktiflik.Aktif)</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-sm me-3 bg-label-warning">
+                            <span class="avatar-initial rounded"><i class="bx bx-category"></i></span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Ana Kanal Sayısı</small>
+                            <h5 class="mb-0 text-warning">@anaKanallar.Count</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-sm me-3 bg-label-info">
+                            <span class="avatar-initial rounded"><i class="bx bx-cog"></i></span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Toplam Alt İşlem</small>
+                            <h5 class="mb-0 text-info">@allKanalAltlar.Sum(k => k.KanalAltIslemSayisi)</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtreleme Çubuğu -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body py-3">
+            <div class="row g-3 align-items-center">
                 <!-- Arama -->
-                <div class="col-md-4">
-                    <div class="input-group">
+                <div class="col-lg-3">
+                    <div class="input-group input-group-merge">
                         <span class="input-group-text"><i class="bx bx-search"></i></span>
-                        <input type="text" class="form-control" placeholder="Alt kanal adı ara..." 
-                               @bind="searchText" @bind:event="oninput" @onkeyup="FilterKanalAltlar" />
+                        <input type="text" 
+                               class="form-control" 
+                               placeholder="Alt kanal adı ara..." 
+                               @bind="searchText" 
+                               @bind:event="oninput" 
+                               @onkeyup="FilterKanalAltlar" />
+                        @if (!string.IsNullOrEmpty(searchText))
+                        {
+                            <span class="input-group-text cursor-pointer" @onclick="() => { searchText = string.Empty; FilterKanalAltlar(); }">
+                                <i class="bx bx-x"></i>
+                            </span>
+                        }
                     </div>
                 </div>
 
                 <!-- Ana Kanal Filtresi -->
-                <div class="col-md-3">
-                    <select class="form-select" @bind="selectedKanalId" @bind:after="FilterKanalAltlar">
-                        <option value="0">Tüm Ana Kanallar</option>
-                        @foreach (var kanal in anaKanallar)
+                <div class="col-lg-auto">
+                    <div class="d-flex align-items-center gap-2">
+                        @if (isKanalLocked)
                         {
-                            <option value="@kanal.KanalId">@kanal.KanalAdi</option>
+                            <i class="bx bx-lock-alt text-warning" title="Kanal kilitli"></i>
                         }
-                    </select>
+                        <select class="form-select form-select-sm" style="min-width: 160px;" @bind="selectedKanalId" @bind:after="FilterKanalAltlar" disabled="@isKanalLocked">
+                            <option value="0">Tüm Ana Kanallar</option>
+                            @foreach (var kanal in anaKanallar)
+                            {
+                                <option value="@kanal.KanalId">@kanal.KanalAdi</option>
+                            }
+                        </select>
+                        @if (isKanalLocked)
+                        {
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="UnlockFilters">
+                                <i class="bx bx-lock-open-alt me-1"></i>Kilidi Aç
+                            </button>
+                        }
+                    </div>
                 </div>
 
-                <!-- Aktiflik Filtresi -->
-                <div class="col-md-2">
-                    <select class="form-select" @bind="selectedAktiflik" @bind:after="FilterKanalAltlar">
-                        <option value="">Tüm Durumlar</option>
-                        <option value="@Aktiflik.Aktif">Aktif</option>
-                        <option value="@Aktiflik.Pasif">Pasif</option>
-                    </select>
+                <!-- Aktiflik Filtresi - Button Group -->
+                <div class="col-lg-auto">
+                    <div class="btn-group" role="group">
+                        <button type="button"
+                                class="btn btn-sm @(selectedAktiflik == null ? "btn-secondary" : "btn-outline-secondary")"
+                                @onclick="() => SetAktiflikFilter(null)">
+                            Tümü
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm @(selectedAktiflik == Aktiflik.Aktif ? "btn-label-success" : "btn-outline-secondary")"
+                                @onclick="() => SetAktiflikFilter(Aktiflik.Aktif)">
+                            Aktif
+                        </button>
+                        <button type="button"
+                                class="btn btn-sm @(selectedAktiflik == Aktiflik.Pasif ? "btn-label-secondary" : "btn-outline-secondary")"
+                                @onclick="() => SetAktiflikFilter(Aktiflik.Pasif)">
+                            Pasif
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Sıralama -->
-                <div class="col-md-2">
-                    <select class="form-select" @bind="sortBy" @bind:after="FilterKanalAltlar">
+                <div class="col-lg-auto">
+                    <select class="form-select form-select-sm" style="min-width: 150px;" @bind="sortBy" @bind:after="FilterKanalAltlar">
                         <option value="name-asc">İsim (A-Z)</option>
                         <option value="name-desc">İsim (Z-A)</option>
-                        <option value="date-desc">En Yeni</option>
-                        <option value="date-asc">En Eski</option>
+                        <option value="date-desc">Son Eklenenler</option>
+                        <option value="date-asc">İlk Eklenenler</option>
+                        <option value="islem-desc">İşlem (Çok-Az)</option>
+                        <option value="islem-asc">İşlem (Az-Çok)</option>
                     </select>
                 </div>
 
-                <!-- Temizle -->
-                <div class="col-md-1">
-                    <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
-                        <i class="bx bx-x"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- İstatistikler -->
-            <div class="row mt-3">
-                <div class="col">
-                    <div class="d-flex gap-4">
-                        <small class="text-muted">
-                            <i class="bx bx-list-ul me-1"></i>
-                            Toplam: <strong>@allKanalAltlar.Count</strong>
-                        </small>
-                        <small class="text-muted">
-                            <i class="bx bx-check-circle me-1 text-success"></i>
-                            Aktif: <strong>@allKanalAltlar.Count(k => k.Aktiflik == Aktiflik.Aktif)</strong>
-                        </small>
-                        <small class="text-muted">
-                            <i class="bx bx-x-circle me-1 text-danger"></i>
-                            Pasif: <strong>@allKanalAltlar.Count(k => k.Aktiflik == Aktiflik.Pasif)</strong>
-                        </small>
-                        <small class="text-muted">
-                            <i class="bx bx-filter me-1"></i>
-                            Filtrelenen: <strong>@filteredKanalAltlar.Count</strong>
-                        </small>
-                    </div>
+                <!-- Sonuç Bilgisi -->
+                <div class="col-lg-auto ms-lg-auto">
+                    <span class="badge bg-label-secondary">
+                        <i class="bx bx-filter me-1"></i>@filteredKanalAltlar.Count / @allKanalAltlar.Count kayıt
+                    </span>
                 </div>
             </div>
         </div>
@@ -162,71 +233,59 @@
     }
     else
     {
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
             @foreach (var kanalAlt in filteredKanalAltlar)
             {
                 <div class="col">
-                    <div class="card h-100 @(kanalAlt.Aktiflik == Aktiflik.Pasif ? "border-danger" : "")">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div class="flex-grow-1">
-                                    <span class="badge @(kanalAlt.Aktiflik == Aktiflik.Aktif ? "bg-label-success" : "bg-label-danger") mb-2">
-                                        @(kanalAlt.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif")
-                                    </span>
-                                </div>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-icon" type="button" data-bs-toggle="dropdown">
-                                        <i class="bx bx-dots-vertical-rounded"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <a class="dropdown-item" href="/siramatik/alt-kanal/manage/@kanalAlt.KanalAltId">
-                                                <i class="bx bx-edit me-2"></i>
-                                                Düzenle
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <button class="dropdown-item" @onclick="() => ToggleAktiflik(kanalAlt)">
-                                                <i class="bx @(kanalAlt.Aktiflik == Aktiflik.Aktif ? "bx-x" : "bx-check") me-2"></i>
-                                                @(kanalAlt.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")
-                                            </button>
-                                        </li>
-                                        <li><hr class="dropdown-divider" /></li>
-                                        <li>
-                                            <button class="dropdown-item text-danger" @onclick="() => ShowDeleteConfirm(kanalAlt)">
-                                                <i class="bx bx-trash me-2"></i>
-                                                Sil
-                                            </button>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <h5 class="card-title mb-2">
-                                <i class="bx bx-category me-2"></i>@kanalAlt.KanalAltAdi
-                            </h5>
-
-                            <p class="text-muted small mb-3">
-                                <i class="bx bx-sitemap me-1"></i>
-                                Ana Kanal: <strong>@kanalAlt.KanalAdi</strong>
-                            </p>
-
-                            <div class="border-top pt-3">
-                                <div class="row text-center">
-                                    <div class="col-12">
-                                        <small class="text-muted d-block">Alt İşlem Sayısı</small>
-                                        <strong class="text-primary">@kanalAlt.KanalAltIslemSayisi</strong>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="border-top mt-3 pt-3">
-                                <small class="text-muted">
-                                    <i class="bx bx-time me-1"></i>
-                                    @kanalAlt.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm")
-                                </small>
+                    <div class="card h-100 shadow-sm border-0 card-hover @(kanalAlt.Aktiflik == Aktiflik.Pasif ? "opacity-75" : "")">
+                        <div class="card-header border-0 pb-0 d-flex justify-content-between align-items-center">
+                            <span class="badge @(kanalAlt.Aktiflik == Aktiflik.Aktif ? "bg-label-success" : "bg-label-secondary")">
+                                @(kanalAlt.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif")
+                            </span>
+                            <div class="dropdown">
+                                <button class="btn btn-text-secondary btn-icon btn-sm rounded-pill" type="button" data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="/siramatik/alt-kanal/manage/@kanalAlt.KanalAltId">
+                                            <i class="bx bx-edit-alt me-2 text-primary"></i>Düzenle
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider my-1" /></li>
+                                    <li>
+                                        <button class="dropdown-item" @onclick="() => ToggleAktiflik(kanalAlt)">
+                                            <i class="bx @(kanalAlt.Aktiflik == Aktiflik.Aktif ? "bx-pause" : "bx-play") me-2"></i>
+                                            @(kanalAlt.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item text-danger" @onclick="() => ShowDeleteConfirm(kanalAlt)">
+                                            <i class="bx bx-trash me-2"></i>Sil
+                                        </button>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
+                        
+                        <div class="card-body pt-3">
+                            <h5 class="card-title fw-semibold mb-1">@kanalAlt.KanalAltAdi</h5>
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="badge bg-label-warning me-2">
+                                    <i class="bx bx-category me-1"></i>@kanalAlt.KanalAdi
+                                </span>
+                                <small class="text-muted">
+                                    <i class="bx bx-calendar me-1"></i>@kanalAlt.EklenmeTarihi.ToString("dd MMM yyyy")
+                                </small>
+                            </div>
+                            
+                            <!-- İstatistik -->
+                            <div class="bg-label-info rounded p-2 text-center">
+                                <h6 class="mb-0 text-info">@kanalAlt.KanalAltIslemSayisi</h6>
+                                <small class="text-muted">Alt İşlem</small>
+                            </div>
+                        </div>
+                        
                     </div>
                 </div>
             }

@@ -21,6 +21,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAlt
         [Inject] private ILogger<Index> _logger { get; set; } = default!;
         [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
+        // URL Parameters
+        [SupplyParameterFromQuery(Name = "kanalId")]
+        public int? KanalIdParam { get; set; }
+        
+        // Lock state
+        private bool isKanalLocked = false;
+
         // State
         private bool isLoading = false;
         private bool isDeleting = false;
@@ -42,6 +49,21 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAlt
         {
             QuestPDF.Settings.License = LicenseType.Community;
             await LoadData();
+            
+            // URL'den kanalId parametresi geldiyse
+            if (KanalIdParam.HasValue && KanalIdParam.Value > 0)
+            {
+                selectedKanalId = KanalIdParam.Value;
+                isKanalLocked = true;
+                FilterKanalAltlar();
+            }
+        }
+        
+        private void UnlockFilters()
+        {
+            isKanalLocked = false;
+            selectedKanalId = 0;
+            FilterKanalAltlar();
         }
 
         private async Task LoadData()
@@ -110,10 +132,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAlt
                 "name-desc" => query.OrderByDescending(k => k.KanalAltAdi),
                 "date-desc" => query.OrderByDescending(k => k.EklenmeTarihi),
                 "date-asc" => query.OrderBy(k => k.EklenmeTarihi),
+                "islem-desc" => query.OrderByDescending(k => k.KanalAltIslemSayisi),
+                "islem-asc" => query.OrderBy(k => k.KanalAltIslemSayisi),
                 _ => query.OrderBy(k => k.KanalAltAdi)
             };
 
             filteredKanalAltlar = query.ToList();
+        }
+
+        private void SetAktiflikFilter(Aktiflik? aktiflik)
+        {
+            selectedAktiflik = aktiflik;
+            FilterKanalAltlar();
         }
 
         private void ClearFilters()
