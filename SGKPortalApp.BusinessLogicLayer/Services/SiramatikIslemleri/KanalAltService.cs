@@ -195,7 +195,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         {
             // KanalAltIslem kayıtlarını soft delete
             var kanalAltIslemRepo = _unitOfWork.Repository<KanalAltIslem>();
-            var kanalAltIslemler = await kanalAltIslemRepo.GetAllAsync(x => x.KanalAltId == kanalAltId);
+            var kanalAltIslemler = await kanalAltIslemRepo.FindAsync(x => x.KanalAltId == kanalAltId);
 
             foreach (var islem in kanalAltIslemler)
             {
@@ -206,7 +206,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
             // KioskMenuIslem kayıtlarını soft delete
             var kioskMenuIslemRepo = _unitOfWork.Repository<KioskMenuIslem>();
-            var kioskMenuIslemler = await kioskMenuIslemRepo.GetAllAsync(x => x.KanalAltId == kanalAltId);
+            var kioskMenuIslemler = await kioskMenuIslemRepo.FindAsync(x => x.KanalAltId == kanalAltId);
 
             foreach (var islem in kioskMenuIslemler)
             {
@@ -226,7 +226,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         {
             // KanalAltIslem kayıtlarını güncelle
             var kanalAltIslemRepo = _unitOfWork.Repository<KanalAltIslem>();
-            var kanalAltIslemler = await kanalAltIslemRepo.GetAllAsync(x => x.KanalAltId == kanalAltId);
+            var kanalAltIslemler = await kanalAltIslemRepo.FindAsync(x => x.KanalAltId == kanalAltId);
 
             foreach (var islem in kanalAltIslemler)
             {
@@ -237,7 +237,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
             // KioskMenuIslem kayıtlarını güncelle
             var kioskMenuIslemRepo = _unitOfWork.Repository<KioskMenuIslem>();
-            var kioskMenuIslemler = await kioskMenuIslemRepo.GetAllAsync(x => x.KanalAltId == kanalAltId);
+            var kioskMenuIslemler = await kioskMenuIslemRepo.FindAsync(x => x.KanalAltId == kanalAltId);
 
             foreach (var islem in kioskMenuIslemler)
             {

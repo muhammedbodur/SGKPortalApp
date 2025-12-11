@@ -628,7 +628,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         {
             // TvBanko kayıtlarını soft delete (many-to-many join table)
             var tvBankoRepo = _unitOfWork.Repository<TvBanko>();
-            var tvBankolar = await tvBankoRepo.GetAllAsync(x => x.TvId == tvId);
+            var tvBankolar = await tvBankoRepo.FindAsync(x => x.TvId == tvId);
 
             foreach (var tvBanko in tvBankolar)
             {
@@ -639,7 +639,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
             // HubTvConnection kayıtlarını soft delete
             var hubTvConnectionRepo = _unitOfWork.Repository<HubTvConnection>();
-            var hubTvConnections = await hubTvConnectionRepo.GetAllAsync(x => x.TvId == tvId);
+            var hubTvConnections = await hubTvConnectionRepo.FindAsync(x => x.TvId == tvId);
 
             foreach (var connection in hubTvConnections)
             {
@@ -659,7 +659,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         {
             // TvBanko kayıtlarını soft delete (pasif TV'nin bankoları kaldırılmalı)
             var tvBankoRepo = _unitOfWork.Repository<TvBanko>();
-            var tvBankolar = await tvBankoRepo.GetAllAsync(x => x.TvId == tvId && !x.SilindiMi);
+            var tvBankolar = await tvBankoRepo.FindAsync(x => x.TvId == tvId && !x.SilindiMi);
 
             foreach (var tvBanko in tvBankolar)
             {
@@ -670,7 +670,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
             // HubTvConnection kayıtlarını soft delete
             var hubTvConnectionRepo = _unitOfWork.Repository<HubTvConnection>();
-            var hubTvConnections = await hubTvConnectionRepo.GetAllAsync(x => x.TvId == tvId && !x.SilindiMi);
+            var hubTvConnections = await hubTvConnectionRepo.FindAsync(x => x.TvId == tvId && !x.SilindiMi);
 
             foreach (var connection in hubTvConnections)
             {

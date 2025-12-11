@@ -329,7 +329,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         {
             // KanalAltIslem kayıtlarını soft delete
             var kanalAltIslemRepo = _unitOfWork.Repository<KanalAltIslem>();
-            var kanalAltIslemler = await kanalAltIslemRepo.GetAllAsync(x => x.KanalIslemId == kanalIslemId);
+            var kanalAltIslemler = await kanalAltIslemRepo.FindAsync(x => x.KanalIslemId == kanalIslemId);
 
             foreach (var islem in kanalAltIslemler)
             {
@@ -349,7 +349,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         {
             // KanalAltIslem kayıtlarını güncelle
             var kanalAltIslemRepo = _unitOfWork.Repository<KanalAltIslem>();
-            var kanalAltIslemler = await kanalAltIslemRepo.GetAllAsync(x => x.KanalIslemId == kanalIslemId);
+            var kanalAltIslemler = await kanalAltIslemRepo.FindAsync(x => x.KanalIslemId == kanalIslemId);
 
             foreach (var islem in kanalAltIslemler)
             {

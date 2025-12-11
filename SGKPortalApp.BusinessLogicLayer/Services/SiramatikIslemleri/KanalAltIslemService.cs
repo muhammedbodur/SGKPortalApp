@@ -368,7 +368,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         {
             // Sira kayıtlarını soft delete
             var siraRepo = _unitOfWork.Repository<Sira>();
-            var siralar = await siraRepo.GetAllAsync(x => x.KanalAltIslemId == kanalAltIslemId);
+            var siralar = await siraRepo.FindAsync(x => x.KanalAltIslemId == kanalAltIslemId);
 
             foreach (var sira in siralar)
             {
@@ -379,7 +379,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
             // KanalPersonel kayıtlarını soft delete
             var kanalPersonelRepo = _unitOfWork.Repository<KanalPersonel>();
-            var kanalPersoneller = await kanalPersonelRepo.GetAllAsync(x => x.KanalAltIslemId == kanalAltIslemId);
+            var kanalPersoneller = await kanalPersonelRepo.FindAsync(x => x.KanalAltIslemId == kanalAltIslemId);
 
             foreach (var kanalPersonel in kanalPersoneller)
             {
@@ -400,7 +400,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             // Sira kayıtlarını güncelle - NOT: Sira entity'sinde Aktiflik field'ı yok, sadece SilindiMi var
             // Bu yüzden sadece SilindiMi durumunu güncelliyoruz
             var siraRepo = _unitOfWork.Repository<Sira>();
-            var siralar = await siraRepo.GetAllAsync(x => x.KanalAltIslemId == kanalAltIslemId);
+            var siralar = await siraRepo.FindAsync(x => x.KanalAltIslemId == kanalAltIslemId);
 
             foreach (var sira in siralar)
             {
@@ -412,7 +412,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
             // KanalPersonel kayıtlarını güncelle
             var kanalPersonelRepo = _unitOfWork.Repository<KanalPersonel>();
-            var kanalPersoneller = await kanalPersonelRepo.GetAllAsync(x => x.KanalAltIslemId == kanalAltIslemId);
+            var kanalPersoneller = await kanalPersonelRepo.FindAsync(x => x.KanalAltIslemId == kanalAltIslemId);
 
             foreach (var kanalPersonel in kanalPersoneller)
             {

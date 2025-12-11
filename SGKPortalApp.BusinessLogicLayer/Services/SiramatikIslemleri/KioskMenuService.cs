@@ -220,7 +220,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         {
             // KioskMenuAtama kayıtlarını soft delete
             var kioskMenuAtamaRepo = _unitOfWork.Repository<KioskMenuAtama>();
-            var kioskMenuAtamalar = await kioskMenuAtamaRepo.GetAllAsync(x => x.KioskMenuId == kioskMenuId);
+            var kioskMenuAtamalar = await kioskMenuAtamaRepo.FindAsync(x => x.KioskMenuId == kioskMenuId);
 
             foreach (var atama in kioskMenuAtamalar)
             {
@@ -231,7 +231,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
             // KioskMenuIslem kayıtlarını soft delete
             var kioskMenuIslemRepo = _unitOfWork.Repository<KioskMenuIslem>();
-            var kioskMenuIslemler = await kioskMenuIslemRepo.GetAllAsync(x => x.KioskMenuId == kioskMenuId);
+            var kioskMenuIslemler = await kioskMenuIslemRepo.FindAsync(x => x.KioskMenuId == kioskMenuId);
 
             foreach (var islem in kioskMenuIslemler)
             {
@@ -251,7 +251,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         {
             // KioskMenuAtama kayıtlarını pasif yap
             var kioskMenuAtamaRepo = _unitOfWork.Repository<KioskMenuAtama>();
-            var kioskMenuAtamalar = await kioskMenuAtamaRepo.GetAllAsync(x => x.KioskMenuId == kioskMenuId && x.Aktiflik == Aktiflik.Aktif);
+            var kioskMenuAtamalar = await kioskMenuAtamaRepo.FindAsync(x => x.KioskMenuId == kioskMenuId && x.Aktiflik == Aktiflik.Aktif);
 
             foreach (var atama in kioskMenuAtamalar)
             {
@@ -262,7 +262,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
             // KioskMenuIslem kayıtlarını pasif yap
             var kioskMenuIslemRepo = _unitOfWork.Repository<KioskMenuIslem>();
-            var kioskMenuIslemler = await kioskMenuIslemRepo.GetAllAsync(x => x.KioskMenuId == kioskMenuId && x.Aktiflik == Aktiflik.Aktif);
+            var kioskMenuIslemler = await kioskMenuIslemRepo.FindAsync(x => x.KioskMenuId == kioskMenuId && x.Aktiflik == Aktiflik.Aktif);
 
             foreach (var islem in kioskMenuIslemler)
             {
