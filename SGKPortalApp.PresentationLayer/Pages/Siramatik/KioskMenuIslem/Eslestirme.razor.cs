@@ -124,10 +124,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuIslem
                 {
                     assignedIslemler = islemResult.Data.ToList();
 
-                    var assignedKanalAltIds = assignedIslemler.Select(i => i.KanalAltIslemId).ToList();
+                    var assignedKanalAltIds = assignedIslemler.Select(i => i.KanalAltId).ToList();
 
                     unassignedIslemler = allKanalAltIslemler
-                        .Where(k => !assignedKanalAltIds.Contains(k.KanalAltIslemId))
+                        .Where(k => !assignedKanalAltIds.Contains(k.KanalAltId))
                         .ToList();
                 }
                 else
@@ -153,13 +153,21 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuIslem
 
             try
             {
+                var kanalAlt = unassignedIslemler.FirstOrDefault(k => k.KanalAltIslemId == kanalAltIslemId);
+                if (kanalAlt == null)
+                {
+                    await _toastService.ShowErrorAsync("İşlem bulunamadı");
+                    return;
+                }
+
                 // Yeni sıra numarası: mevcut işlemlerin max sırası + 1
                 int yeniSira = assignedIslemler.Any() ? assignedIslemler.Max(i => i.MenuSira) + 1 : 1;
 
                 var createDto = new KioskMenuIslemCreateRequestDto
                 {
                     KioskMenuId = selectedKioskMenuId,
-                    KanalAltIslemId = kanalAltIslemId,
+                    KanalAltId = kanalAlt.KanalAltId,
+                    IslemAdi = kanalAlt.KanalAltAdi,
                     MenuSira = yeniSira
                 };
 
@@ -167,15 +175,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuIslem
 
                 if (result.Success && result.Data != null)
                 {
-                    var kanalAlt = unassignedIslemler.FirstOrDefault(k => k.KanalAltIslemId == kanalAltIslemId);
-                    if (kanalAlt != null)
-                    {
-                        // Yeni eklenen işlemi assignedIslemler'e ekle
-                        assignedIslemler.Add(result.Data);
-                        unassignedIslemler.Remove(kanalAlt);
+                    // Yeni eklenen işlemi assignedIslemler'e ekle
+                    assignedIslemler.Add(result.Data);
+                    unassignedIslemler.Remove(kanalAlt);
 
-                        await _toastService.ShowSuccessAsync($"{kanalAlt.KanalAltAdi} işlemi eklendi");
-                    }
+                    await _toastService.ShowSuccessAsync($"{kanalAlt.KanalAltAdi} işlemi eklendi");
                 }
                 else
                 {
@@ -208,7 +212,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuIslem
                         assignedIslemler.Remove(islem);
 
                         // Kaldırılan işlemin kanal alt bilgisini bul ve unassigned'a ekle
-                        var kanalAlt = allKanalAltIslemler.FirstOrDefault(k => k.KanalAltIslemId == islem.KanalAltIslemId);
+                        var kanalAlt = allKanalAltIslemler.FirstOrDefault(k => k.KanalAltId == islem.KanalAltId);
                         if (kanalAlt != null)
                         {
                             unassignedIslemler.Add(kanalAlt);
