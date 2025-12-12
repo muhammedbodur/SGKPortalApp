@@ -63,6 +63,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Servis
         private int ToggleServisId { get; set; }
         private string ToggleServisAdi { get; set; } = string.Empty;
         private Aktiflik ToggleServisCurrentStatus { get; set; }
+        private int ToggleServisPersonelSayisi { get; set; }
         private bool IsToggling { get; set; } = false;
 
         // ═══════════════════════════════════════════════════════
@@ -197,11 +198,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Servis
         // TOGGLE STATUS MODAL
         // ═══════════════════════════════════════════════════════
 
-        private void ShowToggleStatusConfirmation(int ServisId, string ServisAdi, Aktiflik currentStatus)
+        private async Task ShowToggleStatusConfirmation(int ServisId, string ServisAdi, Aktiflik currentStatus)
         {
             ToggleServisId = ServisId;
             ToggleServisAdi = ServisAdi;
             ToggleServisCurrentStatus = currentStatus;
+
+            // Personel sayısını al
+            var personelCountResult = await _servisService.GetPersonelCountAsync(ServisId);
+            ToggleServisPersonelSayisi = personelCountResult.Success ? personelCountResult.Data : 0;
+
             ShowToggleModal = true;
         }
 
@@ -217,26 +223,32 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Servis
             IsToggling = true;
             try
             {
-                var Servis = Servisler.FirstOrDefault(d => d.ServisId == ToggleServisId);
-                if (Servis == null)
+                var servis = Servisler.FirstOrDefault(d => d.ServisId == ToggleServisId);
+                if (servis == null) return;
+
+                var newStatus = servis.Aktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif;
+                var updateDto = new BusinessObjectLayer.DTOs.Request.PersonelIslemleri.ServisUpdateRequestDto
                 {
-                    await _toastService.ShowErrorAsync("Servis bulunamadı!");
-                    return;
+                    ServisAdi = servis.ServisAdi,
+                    Aktiflik = newStatus
+                };
+
+                var result = await _servisService.UpdateAsync(ToggleServisId, updateDto);
+
+                if (result.Success)
+                {
+                    await _toastService.ShowSuccessAsync($"Servis {(newStatus == Aktiflik.Aktif ? "aktif" : "pasif")} yapıldı!");
+                    CloseToggleModal();
+                    await LoadServisler();
                 }
-
-                Servis.Aktiflik = Servis.Aktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif;
-                Servis.DuzenlenmeTarihi = DateTime.Now;
-
-                var statusText = Servis.Aktiflik == Aktiflik.Aktif ? "aktif" : "pasif";
-                await _toastService.ShowSuccessAsync($"Servis {statusText} yapıldı.");
-
-                ApplyFiltersAndSort();
-                CloseToggleModal();
+                else
+                {
+                    await _toastService.ShowErrorAsync(result.Message ?? "Durum değiştirilemedi!");
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Hata: {ex.Message}");
-                await _toastService.ShowErrorAsync("Durum değiştirme işlemi başarısız!");
+                await _toastService.ShowErrorAsync($"Hata: {ex.Message}");
             }
             finally
             {

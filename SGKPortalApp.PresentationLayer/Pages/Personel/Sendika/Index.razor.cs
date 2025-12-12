@@ -63,6 +63,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Sendika
         private string ExportType { get; set; } = string.Empty;
 
         // ═══════════════════════════════════════════════════════
+        // TOGGLE STATUS MODAL PROPERTIES
+        // ═══════════════════════════════════════════════════════
+
+        private bool ShowToggleModal { get; set; } = false;
+        private int ToggleSendikaId { get; set; }
+        private string ToggleSendikaAdi { get; set; } = string.Empty;
+        private Aktiflik ToggleSendikaCurrentStatus { get; set; }
+        private int ToggleSendikaPersonelSayisi { get; set; }
+        private bool IsToggling { get; set; } = false;
+
+        // ═══════════════════════════════════════════════════════
         // DELETE MODAL PROPERTIES
         // ═══════════════════════════════════════════════════════
 
@@ -182,6 +193,68 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Sendika
         private void NavigateToEdit(int id)
         {
             _navigationManager.NavigateTo($"/personel/sendika/manage/{id}");
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // TOGGLE STATUS MODAL
+        // ═══════════════════════════════════════════════════════
+
+        private async Task ShowToggleStatusConfirmation(int sendikaId, string sendikaAdi, Aktiflik currentStatus)
+        {
+            ToggleSendikaId = sendikaId;
+            ToggleSendikaAdi = sendikaAdi;
+            ToggleSendikaCurrentStatus = currentStatus;
+
+            // Personel sayısını al
+            var personelCountResult = await _sendikaService.GetPersonelCountAsync(sendikaId);
+            ToggleSendikaPersonelSayisi = personelCountResult.Success ? personelCountResult.Data : 0;
+
+            ShowToggleModal = true;
+        }
+
+        private void CloseToggleModal()
+        {
+            ShowToggleModal = false;
+            ToggleSendikaId = 0;
+            ToggleSendikaAdi = string.Empty;
+        }
+
+        private async Task ConfirmToggleStatus()
+        {
+            IsToggling = true;
+            try
+            {
+                var sendika = Sendikalar.FirstOrDefault(s => s.SendikaId == ToggleSendikaId);
+                if (sendika == null) return;
+
+                var newStatus = sendika.Aktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif;
+                var updateDto = new BusinessObjectLayer.DTOs.Request.PersonelIslemleri.SendikaUpdateRequestDto
+                {
+                    SendikaAdi = sendika.SendikaAdi,
+                    Aktiflik = newStatus
+                };
+
+                var result = await _sendikaService.UpdateAsync(ToggleSendikaId, updateDto);
+
+                if (result.Success)
+                {
+                    await _toastService.ShowSuccessAsync($"Sendika {(newStatus == Aktiflik.Aktif ? "aktif" : "pasif")} yapıldı!");
+                    CloseToggleModal();
+                    await LoadSendikalar();
+                }
+                else
+                {
+                    await _toastService.ShowErrorAsync(result.Message ?? "Durum değiştirilemedi!");
+                }
+            }
+            catch (Exception ex)
+            {
+                await _toastService.ShowErrorAsync($"Hata: {ex.Message}");
+            }
+            finally
+            {
+                IsToggling = false;
+            }
         }
 
         // ═══════════════════════════════════════════════════════

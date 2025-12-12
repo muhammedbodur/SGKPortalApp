@@ -62,6 +62,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         private int ToggleDepartmanId { get; set; }
         private string ToggleDepartmanAdi { get; set; } = string.Empty;
         private Aktiflik ToggleDepartmanCurrentStatus { get; set; }
+        private int ToggleDepartmanPersonelSayisi { get; set; }
         private bool IsToggling { get; set; } = false;
 
         // ═══════════════════════════════════════════════════════
@@ -204,11 +205,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         // TOGGLE STATUS METHODS
         // ═══════════════════════════════════════════════════════
 
-        private void ShowToggleStatusConfirmation(int id, string departmanAdi, Aktiflik currentStatus)
+        private async Task ShowToggleStatusConfirmation(int id, string departmanAdi, Aktiflik currentStatus)
         {
             ToggleDepartmanId = id;
             ToggleDepartmanAdi = departmanAdi;
             ToggleDepartmanCurrentStatus = currentStatus;
+
+            // Personel sayısını al
+            var personelCountResult = await _departmanService.GetPersonelCountAsync(id);
+            ToggleDepartmanPersonelSayisi = personelCountResult.Success ? personelCountResult.Data : 0;
+
             ShowToggleModal = true;
         }
 

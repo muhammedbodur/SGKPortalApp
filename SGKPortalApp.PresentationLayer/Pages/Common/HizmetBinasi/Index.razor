@@ -372,28 +372,45 @@
                     @if (ToggleHizmetBinasiCurrentStatus == Aktiflik.Aktif)
                     {
                         <div class="alert alert-warning mb-3">
-                            <i class="bx bx-info-circle me-2"></i>
-                            <strong>Dikkat!</strong> HizmetBinasiı pasif hale getirmek üzeresiniz.
+                            <div class="d-flex align-items-start">
+                                <i class="bx bx-error-circle me-2 fs-5"></i>
+                                <div>
+                                    <strong>⚠️ Dikkat!</strong> Hizmet Binasını pasif hale getirmek üzeresiniz.
+                                    <p class="mb-0 mt-2">
+                                        <strong>@ToggleHizmetBinasiAdi</strong> Hizmet Binasını pasif yapmak istediğinizden emin misiniz?
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                        <p>
-                            <strong>@ToggleHizmetBinasiAdi</strong> hizmetbinasiını <strong>pasif</strong> yapmak istediğinizden emin misiniz?
-                        </p>
-                        <p class="text-muted small mb-0">
-                            Pasif hizmet binası listede görünmeye devam edecek ancak yeni personel ataması yapılamayacaktır.
-                        </p>
+
+                        <p class="mb-2"><strong>Pasif yapıldığında:</strong></p>
+                        <ul class="text-muted mb-0">
+                            <li>Hizmet binası listede görünmeye devam edecektir</li>
+                            <li>Mevcut personeller konumlarını koruyacaktır</li>
+                            <li>Yeni personel ataması yapılamayacaktır</li>
+                            <li>Hizmet binası seçim listelerinde görünmeyecektir</li>
+                        </ul>
                     }
                     else
                     {
                         <div class="alert alert-success mb-3">
-                            <i class="bx bx-check-circle me-2"></i>
-                            <strong>Bilgi:</strong> HizmetBinasını aktif hale getirmek üzeresiniz.
+                            <div class="d-flex align-items-start">
+                                <i class="bx bx-check-circle me-2 fs-5"></i>
+                                <div>
+                                    <strong>Bilgi:</strong> Hizmet Binasını aktif hale getirmek üzeresiniz.
+                                    <p class="mb-0 mt-2">
+                                        <strong>@ToggleHizmetBinasiAdi</strong> Hizmet Binasını aktif yapmak istediğinizden emin misiniz?
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                        <p>
-                            <strong>@ToggleHizmetBinasiAdi</strong> hizmetbinasiını <strong>aktif</strong> yapmak istediğinizden emin misiniz?
-                        </p>
-                        <p class="text-muted small mb-0">
-                            Aktif hizmetbinasilara yeni personel ataması yapılabilir.
-                        </p>
+
+                        <p class="mb-2"><strong>Aktif yapıldığında:</strong></p>
+                        <ul class="text-muted mb-0">
+                            <li>Hizmet binası tüm listelerde görünecektir</li>
+                            <li>Yeni personel ataması yapılabilecektir</li>
+                            <li>Tüm özellikler kullanılabilir olacaktır</li>
+                        </ul>
                     }
                 </div>
                 <div class="modal-footer">
@@ -445,18 +462,44 @@
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-danger mb-3">
-                        <i class="bx bx-error-circle me-2"></i>
-                        <strong>Dikkat!</strong> Bu işlem geri alınamaz.
+                        <div class="d-flex align-items-start">
+                            <i class="bx bx-error-circle me-2 fs-5"></i>
+                            <div>
+                                <strong>🗑️ Dikkat!</strong> Kalıcı silme işlemi yapıyorsunuz.
+                                <p class="mb-0 mt-2">
+                                    <strong>@DeleteHizmetBinasiAdi</strong> Hizmet Binasını silmek istediğinizden emin misiniz?
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    <p class="mb-0">
-                        <strong>@DeleteHizmetBinasiAdi</strong> hizmet binasını silmek istediğinizden emin misiniz?
-                    </p>
+
                     @if (DeleteHizmetBinasiPersonelSayisi > 0)
                     {
-                        <div class="alert alert-warning mt-3 mb-0">
-                            <i class="bx bx-info-circle me-2"></i>
-                            Bu hizmetbinasida <strong>@DeleteHizmetBinasiPersonelSayisi personel</strong> bulunmaktadır. Silme işleminden önce personelleri başka bir hizmetbinasia aktarmanız önerilir.
+                        <div class="alert alert-warning mb-3">
+                            <i class="bx bx-error-circle me-2"></i>
+                            <strong>Uyarı:</strong> Bu hizmet binasında <strong>@DeleteHizmetBinasiPersonelSayisi aktif personel</strong> bulunmaktadır!
                         </div>
+                    }
+
+                    <p class="mb-2"><strong>Silme işlemi sonrasında:</strong></p>
+                    <ul class="text-muted mb-3">
+                        <li><strong>Hizmet binası kaydı kalıcı olarak silinecektir</strong></li>
+                        @if (DeleteHizmetBinasiPersonelSayisi > 0)
+                        {
+                            <li class="text-danger"><strong>Bu işlem personel sayısı nedeniyle başarısız olacaktır</strong></li>
+                            <li>Önce tüm personelleri başka bir hizmet binasına aktarmalısınız</li>
+                        }
+                        else
+                        {
+                            <li>Bu işlem geri alınamaz</li>
+                        }
+                    </ul>
+
+                    @if (DeleteHizmetBinasiPersonelSayisi > 0)
+                    {
+                        <p class="text-danger mb-0">
+                            <small><strong>Not:</strong> Silme işlemine devam etmek için önce tüm personelleri başka bir hizmet binasına aktarmanız gerekmektedir.</small>
+                        </p>
                     }
                 </div>
                 <div class="modal-footer">

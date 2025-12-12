@@ -218,25 +218,33 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
             try
             {
                 var hizmetBinasi = HizmetBinalari.FirstOrDefault(d => d.HizmetBinasiId == ToggleHizmetBinasiId);
-                if (hizmetBinasi == null)
+                if (hizmetBinasi == null) return;
+
+                var newStatus = hizmetBinasi.Aktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif;
+                var updateDto = new BusinessObjectLayer.DTOs.Request.Common.HizmetBinasiUpdateRequestDto
                 {
-                    await _toastService.ShowErrorAsync("HizmetBinasi bulunamadı!");
-                    return;
+                    HizmetBinasiAdi = hizmetBinasi.HizmetBinasiAdi,
+                    DepartmanId = hizmetBinasi.DepartmanId,
+                    Adres = hizmetBinasi.Adres ?? string.Empty,
+                    Aktiflik = newStatus
+                };
+
+                var result = await _hizmetBinasiService.UpdateAsync(ToggleHizmetBinasiId, updateDto);
+
+                if (result.Success)
+                {
+                    await _toastService.ShowSuccessAsync($"Hizmet Binası {(newStatus == Aktiflik.Aktif ? "aktif" : "pasif")} yapıldı!");
+                    CloseToggleModal();
+                    await LoadHizmetBinalari();
                 }
-
-                hizmetBinasi.Aktiflik = hizmetBinasi.Aktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif;
-                hizmetBinasi.DuzenlenmeTarihi = DateTime.Now;
-
-                var statusText = hizmetBinasi.Aktiflik == Aktiflik.Aktif ? "aktif" : "pasif";
-                await _toastService.ShowSuccessAsync($"HizmetBinasi {statusText} yapıldı.");
-
-                ApplyFiltersAndSort();
-                CloseToggleModal();
+                else
+                {
+                    await _toastService.ShowErrorAsync(result.Message ?? "Durum değiştirilemedi!");
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Hata: {ex.Message}");
-                await _toastService.ShowErrorAsync("Durum değiştirme işlemi başarısız!");
+                await _toastService.ShowErrorAsync($"Hata: {ex.Message}");
             }
             finally
             {

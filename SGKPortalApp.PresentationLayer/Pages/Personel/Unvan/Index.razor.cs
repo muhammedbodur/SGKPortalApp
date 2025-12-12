@@ -63,6 +63,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Unvan
         private int ToggleUnvanId { get; set; }
         private string ToggleUnvanAdi { get; set; } = string.Empty;
         private Aktiflik ToggleUnvanCurrentStatus { get; set; }
+        private int ToggleUnvanPersonelSayisi { get; set; }
         private bool IsToggling { get; set; } = false;
 
         // ═══════════════════════════════════════════════════════
@@ -196,11 +197,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Unvan
         // TOGGLE STATUS MODAL
         // ═══════════════════════════════════════════════════════
 
-        private void ShowToggleStatusConfirmation(int unvanId, string unvanAdi, Aktiflik currentStatus)
+        private async Task ShowToggleStatusConfirmation(int unvanId, string unvanAdi, Aktiflik currentStatus)
         {
             ToggleUnvanId = unvanId;
             ToggleUnvanAdi = unvanAdi;
             ToggleUnvanCurrentStatus = currentStatus;
+
+            // Personel sayısını al
+            var personelCountResult = await _unvanService.GetPersonelCountAsync(unvanId);
+            ToggleUnvanPersonelSayisi = personelCountResult.Success ? personelCountResult.Data : 0;
+
             ShowToggleModal = true;
         }
 
@@ -217,25 +223,31 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Unvan
             try
             {
                 var unvan = Unvanlar.FirstOrDefault(d => d.UnvanId == ToggleUnvanId);
-                if (unvan == null)
+                if (unvan == null) return;
+
+                var newStatus = unvan.Aktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif;
+                var updateDto = new BusinessObjectLayer.DTOs.Request.PersonelIslemleri.UnvanUpdateRequestDto
                 {
-                    await _toastService.ShowErrorAsync("Unvan bulunamadı!");
-                    return;
+                    UnvanAdi = unvan.UnvanAdi,
+                    Aktiflik = newStatus
+                };
+
+                var result = await _unvanService.UpdateAsync(ToggleUnvanId, updateDto);
+
+                if (result.Success)
+                {
+                    await _toastService.ShowSuccessAsync($"Unvan {(newStatus == Aktiflik.Aktif ? "aktif" : "pasif")} yapıldı!");
+                    CloseToggleModal();
+                    await LoadUnvanlar();
                 }
-
-                unvan.Aktiflik = unvan.Aktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif;
-                unvan.DuzenlenmeTarihi = DateTime.Now;
-
-                var statusText = unvan.Aktiflik == Aktiflik.Aktif ? "aktif" : "pasif";
-                await _toastService.ShowSuccessAsync($"Unvan {statusText} yapıldı.");
-
-                ApplyFiltersAndSort();
-                CloseToggleModal();
+                else
+                {
+                    await _toastService.ShowErrorAsync(result.Message ?? "Durum değiştirilemedi!");
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Hata: {ex.Message}");
-                await _toastService.ShowErrorAsync("Durum değiştirme işlemi başarısız!");
+                await _toastService.ShowErrorAsync($"Hata: {ex.Message}");
             }
             finally
             {
