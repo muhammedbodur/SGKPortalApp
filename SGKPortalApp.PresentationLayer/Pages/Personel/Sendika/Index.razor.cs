@@ -135,6 +135,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Sendika
                 "name-desc" => filtered.OrderByDescending(s => s.SendikaAdi),
                 "date-newest" => filtered.OrderByDescending(s => s.EklenmeTarihi),
                 "date-oldest" => filtered.OrderBy(s => s.EklenmeTarihi),
+                "personel-most" => filtered.OrderByDescending(s => s.PersonelSayisi),
+                "personel-least" => filtered.OrderBy(s => s.PersonelSayisi),
                 _ => filtered.OrderBy(s => s.SendikaAdi)
             };
 
@@ -242,12 +244,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Sendika
 
                 // Header
                 worksheet.Cell(1, 1).Value = "Sendika Adı";
-                worksheet.Cell(1, 2).Value = "Durum";
-                worksheet.Cell(1, 3).Value = "Eklenme Tarihi";
-                worksheet.Cell(1, 4).Value = "Güncelleme Tarihi";
+                worksheet.Cell(1, 2).Value = "Personel Sayısı";
+                worksheet.Cell(1, 3).Value = "Durum";
+                worksheet.Cell(1, 4).Value = "Eklenme Tarihi";
+                worksheet.Cell(1, 5).Value = "Güncelleme Tarihi";
 
                 // Header style
-                var headerRange = worksheet.Range(1, 1, 1, 4);
+                var headerRange = worksheet.Range(1, 1, 1, 5);
                 headerRange.Style.Font.Bold = true;
                 headerRange.Style.Fill.BackgroundColor = XLColor.LightBlue;
 
@@ -256,9 +259,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Sendika
                 foreach (var sendika in FilteredSendikalar)
                 {
                     worksheet.Cell(row, 1).Value = sendika.SendikaAdi;
-                    worksheet.Cell(row, 2).Value = sendika.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
-                    worksheet.Cell(row, 3).Value = sendika.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm");
-                    worksheet.Cell(row, 4).Value = sendika.DuzenlenmeTarihi.ToString("dd.MM.yyyy HH:mm");
+                    worksheet.Cell(row, 2).Value = sendika.PersonelSayisi;
+                    worksheet.Cell(row, 3).Value = sendika.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
+                    worksheet.Cell(row, 4).Value = sendika.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm");
+                    worksheet.Cell(row, 5).Value = sendika.DuzenlenmeTarihi.ToString("dd.MM.yyyy HH:mm");
                     row++;
                 }
 
@@ -310,6 +314,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Sendika
                                 {
                                     columns.RelativeColumn(3);
                                     columns.RelativeColumn(1);
+                                    columns.RelativeColumn(1);
                                     columns.RelativeColumn(2);
                                     columns.RelativeColumn(2);
                                 });
@@ -317,6 +322,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Sendika
                                 table.Header(header =>
                                 {
                                     header.Cell().Element(CellStyle).Text("Sendika Adı").SemiBold();
+                                    header.Cell().Element(CellStyle).Text("Personel").SemiBold();
                                     header.Cell().Element(CellStyle).Text("Durum").SemiBold();
                                     header.Cell().Element(CellStyle).Text("Eklenme").SemiBold();
                                     header.Cell().Element(CellStyle).Text("Güncelleme").SemiBold();
@@ -331,6 +337,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Sendika
                                 foreach (var sendika in FilteredSendikalar)
                                 {
                                     table.Cell().Element(CellStyle).Text(sendika.SendikaAdi);
+                                    table.Cell().Element(CellStyle).Text(sendika.PersonelSayisi.ToString());
                                     table.Cell().Element(CellStyle).Text(sendika.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif");
                                     table.Cell().Element(CellStyle).Text(sendika.EklenmeTarihi.ToString("dd.MM.yyyy"));
                                     table.Cell().Element(CellStyle).Text(sendika.DuzenlenmeTarihi.ToString("dd.MM.yyyy"));
