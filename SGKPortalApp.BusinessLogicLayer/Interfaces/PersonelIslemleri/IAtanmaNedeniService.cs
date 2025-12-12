@@ -11,5 +11,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri
         Task<ApiResponseDto<AtanmaNedeniResponseDto>> CreateAsync(AtanmaNedeniCreateRequestDto request);
         Task<ApiResponseDto<AtanmaNedeniResponseDto>> UpdateAsync(int id, AtanmaNedeniUpdateRequestDto request);
         Task<ApiResponseDto<bool>> DeleteAsync(int id);
+        Task<ApiResponseDto<int>> GetPersonelCountAsync(int atanmaNedeniId);
     }
 }
