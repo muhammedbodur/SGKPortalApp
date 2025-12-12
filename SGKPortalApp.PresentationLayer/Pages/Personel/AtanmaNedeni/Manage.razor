@@ -161,12 +161,45 @@
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-danger mb-3">
-                        <i class="bx bx-error-circle me-2"></i>
-                        <strong>Dikkat!</strong> Bu işlem geri alınamaz.
+                        <div class="d-flex align-items-start">
+                            <i class="bx bx-error-circle me-2 fs-5"></i>
+                            <div>
+                                <strong>🗑️ Dikkat!</strong> Kalıcı silme işlemi yapıyorsunuz.
+                                <p class="mb-0 mt-2">
+                                    <strong>@FormModel.AtanmaNedeni</strong> Atanma Nedenini silmek istediğinizden emin misiniz?
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    <p class="mb-0">
-                        <strong>@FormModel.AtanmaNedeni</strong> atanma nedenini silmek istediğinizden emin misiniz?
-                    </p>
+
+                    @if (DeletePersonelSayisi > 0)
+                    {
+                        <div class="alert alert-warning mb-3">
+                            <i class="bx bx-error-circle me-2"></i>
+                            <strong>Uyarı:</strong> Bu atanma nedenine bağlı <strong>@DeletePersonelSayisi aktif personel</strong> bulunmaktadır!
+                        </div>
+                    }
+
+                    <p class="mb-2"><strong>Silme işlemi sonrasında:</strong></p>
+                    <ul class="text-muted mb-3">
+                        <li><strong>Atanma nedeni kaydı kalıcı olarak silinecektir</strong></li>
+                        @if (DeletePersonelSayisi > 0)
+                        {
+                            <li class="text-danger"><strong>Bu işlem personel sayısı nedeniyle başarısız olacaktır</strong></li>
+                            <li>Önce tüm personellerin atanma nedenlerini değiştirmelisiniz</li>
+                        }
+                        else
+                        {
+                            <li>Bu işlem geri alınamaz</li>
+                        }
+                    </ul>
+
+                    @if (DeletePersonelSayisi > 0)
+                    {
+                        <p class="text-danger mb-0">
+                            <small><strong>Not:</strong> Silme işlemine devam etmek için önce tüm personellerin atanma nedenlerini değiştirmeniz gerekmektedir.</small>
+                        </p>
+                    }
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="CloseDeleteModal" disabled="@IsDeleting">
