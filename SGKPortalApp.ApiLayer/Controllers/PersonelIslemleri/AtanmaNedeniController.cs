@@ -59,5 +59,12 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
             var result = await _atanmaNedeniService.DeleteAsync(id);
             return result.Success ? Ok(result) : BadRequest(result);
         }
+
+        [HttpGet("{id}/personel-count")]
+        public async Task<IActionResult> GetPersonelCount(int id)
+        {
+            var result = await _atanmaNedeniService.GetPersonelCountAsync(id);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
     }
 }

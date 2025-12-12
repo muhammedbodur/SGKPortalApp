@@ -159,5 +159,23 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     .ErrorResult("Atanma nedeni silinirken bir hata oluştu", ex.Message);
             }
         }
+
+        public async Task<ApiResponseDto<int>> GetPersonelCountAsync(int atanmaNedeniId)
+        {
+            try
+            {
+                var count = await _unitOfWork.Repository<Personel>()
+                    .CountAsync(p => p.AtanmaNedeniId == atanmaNedeniId && !p.SilindiMi && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif);
+
+                return ApiResponseDto<int>
+                    .SuccessResult(count, "Personel sayısı başarıyla getirildi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Personel sayısı alınırken hata oluştu. AtanmaNedeniId: {Id}", atanmaNedeniId);
+                return ApiResponseDto<int>
+                    .ErrorResult("Personel sayısı alınırken bir hata oluştu", ex.Message);
+            }
+        }
     }
 }
