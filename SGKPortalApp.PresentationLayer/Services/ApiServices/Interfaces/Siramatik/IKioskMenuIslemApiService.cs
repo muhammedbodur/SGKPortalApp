@@ -6,6 +6,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramat
 {
     public interface IKioskMenuIslemApiService
     {
+        Task<ServiceResult<List<KioskMenuIslemResponseDto>>> GetAllAsync();
         Task<ServiceResult<List<KioskMenuIslemResponseDto>>> GetByKioskMenuAsync(int kioskMenuId);
         Task<ServiceResult<KioskMenuIslemResponseDto>> GetByIdAsync(int kioskMenuIslemId);
         Task<ServiceResult<KioskMenuIslemResponseDto>> CreateAsync(KioskMenuIslemCreateRequestDto request);

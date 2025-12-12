@@ -91,15 +91,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             try
             {
                 var response = await _httpClient.PostAsJsonAsync("kanalalt", dto);
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<KanalAltResponseDto>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("CreateAsync failed: {Error}", errorContent);
-                    return ServiceResult<KanalAltResponseDto>.Fail("Alt kanal eklenemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Alt kanal eklenemedi.";
+                    _logger.LogError("CreateAsync failed: {Error}", errorMessage);
+                    return ServiceResult<KanalAltResponseDto>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<KanalAltResponseDto>>();
 
                 if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
@@ -125,15 +124,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             try
             {
                 var response = await _httpClient.PutAsJsonAsync($"kanalalt/{id}", dto);
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<KanalAltResponseDto>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("UpdateAsync failed: {Error}", errorContent);
-                    return ServiceResult<KanalAltResponseDto>.Fail("Alt kanal güncellenemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Alt kanal güncellenemedi.";
+                    _logger.LogError("UpdateAsync failed: {Error}", errorMessage);
+                    return ServiceResult<KanalAltResponseDto>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<KanalAltResponseDto>>();
 
                 if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
@@ -159,15 +157,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             try
             {
                 var response = await _httpClient.DeleteAsync($"kanalalt/{id}");
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("DeleteAsync failed: {Error}", errorContent);
-                    return ServiceResult<bool>.Fail("Alt kanal silinemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Alt kanal silinemedi.";
+                    _logger.LogError("DeleteAsync failed: {Error}", errorMessage);
+                    return ServiceResult<bool>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (apiResponse?.Success == true)
                 {

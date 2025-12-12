@@ -17,6 +17,29 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             _logger = logger;
         }
 
+        public async Task<ServiceResult<List<KioskMenuIslemResponseDto>>> GetAllAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("kiosk-menu-islem");
+                
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetAllAsync failed: {Error}", errorContent);
+                    return ServiceResult<List<KioskMenuIslemResponseDto>>.Fail("Menü işlemleri alınamadı.");
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<List<KioskMenuIslemResponseDto>>>();
+                return result ?? ServiceResult<List<KioskMenuIslemResponseDto>>.Fail("Yanıt alınamadı");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Tüm menü işlemleri getirilemedi");
+                return ServiceResult<List<KioskMenuIslemResponseDto>>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
         public async Task<ServiceResult<List<KioskMenuIslemResponseDto>>> GetByKioskMenuAsync(int kioskMenuId)
         {
             try

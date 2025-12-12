@@ -47,7 +47,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
                 if (binaResult.Success && binaResult.Data != null)
                 {
                     hizmetBinalari = binaResult.Data
-                        .Where(x => x.HizmetBinasiAktiflik == Aktiflik.Aktif)
+                        .Where(x => x.Aktiflik == Aktiflik.Aktif)
                         .OrderBy(x => x.HizmetBinasiAdi)
                         .ToList();
 

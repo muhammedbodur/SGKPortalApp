@@ -159,15 +159,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             try
             {
                 var response = await _httpClient.PostAsJsonAsync("kanalpersonel", dto);
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<KanalPersonelResponseDto>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("CreateAsync failed: {Error}", errorContent);
-                    return ServiceResult<KanalPersonelResponseDto>.Fail("Personel ataması oluşturulamadı.");
+                    var errorMessage = apiResponse?.Message ?? "Personel ataması oluşturulamadı.";
+                    _logger.LogError("CreateAsync failed: {Error}", errorMessage);
+                    return ServiceResult<KanalPersonelResponseDto>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<KanalPersonelResponseDto>>();
 
                 if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
@@ -193,15 +192,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             try
             {
                 var response = await _httpClient.PutAsJsonAsync($"kanalpersonel/{id}", dto);
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<KanalPersonelResponseDto>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("UpdateAsync failed: {Error}", errorContent);
-                    return ServiceResult<KanalPersonelResponseDto>.Fail("Personel ataması güncellenemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Personel ataması güncellenemedi.";
+                    _logger.LogError("UpdateAsync failed: {Error}", errorMessage);
+                    return ServiceResult<KanalPersonelResponseDto>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<KanalPersonelResponseDto>>();
 
                 if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
@@ -227,15 +225,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             try
             {
                 var response = await _httpClient.DeleteAsync($"kanalpersonel/{id}");
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("DeleteAsync failed: {Error}", errorContent);
-                    return ServiceResult<bool>.Fail("Personel ataması silinemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Personel ataması silinemedi.";
+                    _logger.LogError("DeleteAsync failed: {Error}", errorMessage);
+                    return ServiceResult<bool>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (apiResponse?.Success == true)
                 {

@@ -17,7 +17,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         /// <summary>
         /// Aktiflik durumu filtresi
         /// </summary>
-        public Aktiflik? ServisAktiflik { get; set; }
+        public Aktiflik? Aktiflik { get; set; }
 
         /// <summary>
         /// Sayfa numarası (Pagination)

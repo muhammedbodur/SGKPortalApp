@@ -41,6 +41,13 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
             builder.HasIndex(kmi => kmi.KanalAltId)
                 .HasDatabaseName("IX_SIR_KioskMenuIslem_KanalAltId");
 
+            // KanalAltId unique constraint (silinmemiş kayıtlar için)
+            // Her alt kanal sadece bir menüye atanabilir
+            builder.HasIndex(kmi => kmi.KanalAltId)
+                .IsUnique()
+                .HasDatabaseName("IX_SIR_KioskMenuIslem_KanalAltId_Unique")
+                .HasFilter("[SilindiMi] = 0");
+
             builder.HasIndex(kmi => new { kmi.KioskMenuId, kmi.MenuSira })
                 .HasDatabaseName("IX_SIR_KioskMenuIslem_Menu_Sira");
 

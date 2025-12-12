@@ -36,6 +36,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
 
         // Dropdown Data
         private List<KanalResponseDto> anaKanallar = new();
+        private List<KanalResponseDto> filteredAnaKanallar = new();
         private List<HizmetBinasiResponseDto> hizmetBinalari = new();
         
         // Mevcut Kanal İşlemler (validasyon için)
@@ -44,6 +45,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
         // Hizmet Binası Bilgisi
         private int selectedHizmetBinasiId = 0;
         private string hizmetBinasiAdi = string.Empty;
+        private bool isHizmetBinasiFromUrl = false;
         
         // Validasyon mesajları
         private string? numaraAralikHatasi = null;
@@ -77,6 +79,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 if (HizmetBinasiId.HasValue && HizmetBinasiId.Value > 0)
                 {
                     model.HizmetBinasiId = HizmetBinasiId.Value;
+                    isHizmetBinasiFromUrl = true;
+                    var bina = hizmetBinalari.FirstOrDefault(b => b.HizmetBinasiId == HizmetBinasiId.Value);
+                    hizmetBinasiAdi = bina?.HizmetBinasiAdi ?? "Bilinmeyen";
                     await LoadMevcutKanalIslemler(HizmetBinasiId.Value);
                     SuggestNextValues();
                 }
@@ -98,12 +103,37 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 {
                     mevcutKanalIslemler = new();
                 }
+                
+                // Zaten eklenmiş kanalları filtrele
+                FilterAnaKanallar();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Mevcut kanal işlemler yüklenirken hata");
                 mevcutKanalIslemler = new();
+                filteredAnaKanallar = anaKanallar.ToList();
             }
+        }
+        
+        private void FilterAnaKanallar()
+        {
+            // Mevcut kanal işlemlerde kullanılan KanalId'leri al
+            var kullanilmisKanalIds = mevcutKanalIslemler
+                .Select(k => k.KanalId)
+                .ToHashSet();
+            
+            // Edit modunda, düzenlenen kaydın kanalını listeden çıkarma
+            if (IsEditMode && model.KanalId > 0)
+            {
+                kullanilmisKanalIds.Remove(model.KanalId);
+            }
+            
+            // Kullanılmamış kanalları filtrele
+            filteredAnaKanallar = anaKanallar
+                .Where(k => !kullanilmisKanalIds.Contains(k.KanalId))
+                .ToList();
+            
+            _logger.LogInformation($"📋 Filtreleme: {anaKanallar.Count} toplam kanal, {kullanilmisKanalIds.Count} kullanılmış, {filteredAnaKanallar.Count} kullanılabilir");
         }
         
         private void SuggestNextValues()
@@ -270,12 +300,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                     
                     // Mevcut kayıtları yükle (validasyon için)
                     await LoadMevcutKanalIslemler(kanalIslem.HizmetBinasiId);
+                    
+                    // Edit modunda mevcut değerler için validasyon çalıştır
+                    ValidateNumaraAraligi();
+                    ValidateSira();
 
-                    _logger.LogInformation($"📝 Model güncellendi - KanalId: {model.KanalId}, HizmetBinasiId: {model.HizmetBinasiId}");
+                    _logger.LogInformation($" Model güncellendi - KanalId: {model.KanalId}, HizmetBinasiId: {model.HizmetBinasiId}");
                 }
                 else
                 {
-                    _logger.LogWarning($"⚠️ Kanal işlem bulunamadı: {result.Message}");
+                    _logger.LogWarning($" Kanal işlem bulunamadı: {result.Message}");
                     await _toastService.ShowErrorAsync(result.Message ?? "Kanal işlem bulunamadı");
                     _navigationManager.NavigateTo("/siramatik/kanal-islem");
                 }

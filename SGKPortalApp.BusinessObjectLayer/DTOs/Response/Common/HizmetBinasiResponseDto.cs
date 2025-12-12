@@ -9,7 +9,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
         public int DepartmanId { get; set; }
         public string DepartmanAdi { get; set; } = string.Empty;
         public string Adres { get; set; } = string.Empty;
-        public Aktiflik HizmetBinasiAktiflik { get; set; }
+        public Aktiflik Aktiflik { get; set; }
         public int PersonelSayisi { get; set; }
         public int BankoSayisi { get; set; }
         public int TvSayisi { get; set; }

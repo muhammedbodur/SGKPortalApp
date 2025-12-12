@@ -87,7 +87,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Servis
                         FormModel = new ServisFormModel
                         {
                             ServisAdi = Servis.ServisAdi,
-                            IsActive = Servis.ServisAktiflik == Aktiflik.Aktif
+                            IsActive = Servis.Aktiflik == Aktiflik.Aktif
                         };
 
                         CurrentPersonelSayisi = Servis.PersonelSayisi;
@@ -129,7 +129,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Servis
                     var updateDto = new ServisUpdateRequestDto
                     {
                         ServisAdi = FormModel.ServisAdi.Trim(),
-                        ServisAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
+                        Aktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
                     var result = await _ServisService.UpdateAsync(Id!.Value, updateDto);
@@ -149,7 +149,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Servis
                     var createDto = new ServisCreateRequestDto
                     {
                         ServisAdi = FormModel.ServisAdi.Trim(),
-                        ServisAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
+                        Aktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
                     var result = await _ServisService.CreateAsync(createDto);

@@ -30,7 +30,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         public KatTipi KatTipi { get; set; } = KatTipi.zemin;
 
         [Required]
-        public Aktiflik BankoAktiflik { get; set; } = Aktiflik.Aktif;
+        public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
 
         [StringLength(500)]
         public string? BankoAciklama { get; set; }

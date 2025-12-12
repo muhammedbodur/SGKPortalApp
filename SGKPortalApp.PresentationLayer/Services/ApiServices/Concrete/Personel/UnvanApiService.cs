@@ -99,15 +99,24 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
                 _logger.LogInformation("📡 Status: {Status}, Content: {Content}",
                     response.StatusCode, responseContent);
 
+                var jsonOptions = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogError("❌ API Hatası: {Error}", responseContent);
-                    return ServiceResult<UnvanResponseDto>.Fail(
-                        $"Unvan eklenemedi. Detay: {responseContent}"
-                    );
+                    try
+                    {
+                        var errorResponse = System.Text.Json.JsonSerializer.Deserialize<ApiResponseDto<UnvanResponseDto>>(responseContent, jsonOptions);
+                        var errorMessage = errorResponse?.Message ?? "Unvan eklenemedi.";
+                        return ServiceResult<UnvanResponseDto>.Fail(errorMessage);
+                    }
+                    catch
+                    {
+                        return ServiceResult<UnvanResponseDto>.Fail("Unvan eklenemedi.");
+                    }
                 }
 
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<UnvanResponseDto>>();
+                var apiResponse = System.Text.Json.JsonSerializer.Deserialize<ApiResponseDto<UnvanResponseDto>>(responseContent, jsonOptions);
 
                 if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
@@ -123,11 +132,11 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
                     );
                 }
 
-                var errorMessage = !string.IsNullOrWhiteSpace(apiResponse?.Message)
+                var failMessage = !string.IsNullOrWhiteSpace(apiResponse?.Message)
                     ? apiResponse.Message
                     : "Unvan oluşturulamadı";
 
-                return ServiceResult<UnvanResponseDto>.Fail(errorMessage);
+                return ServiceResult<UnvanResponseDto>.Fail(failMessage);
             }
             catch (Exception ex)
             {
@@ -141,15 +150,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
             try
             {
                 var response = await _httpClient.PutAsJsonAsync($"unvan/{id}", request);
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<UnvanResponseDto>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("UpdateAsync failed: {Error}", errorContent);
-                    return ServiceResult<UnvanResponseDto>.Fail("Unvan güncellenemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Unvan güncellenemedi.";
+                    _logger.LogError("UpdateAsync failed: {Error}", errorMessage);
+                    return ServiceResult<UnvanResponseDto>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<UnvanResponseDto>>();
 
                 if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
@@ -179,15 +187,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
             try
             {
                 var response = await _httpClient.DeleteAsync($"unvan/{id}");
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("DeleteAsync failed: {Error}", errorContent);
-                    return ServiceResult<bool>.Fail("Unvan silinemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Unvan silinemedi.";
+                    _logger.LogError("DeleteAsync failed: {Error}", errorMessage);
+                    return ServiceResult<bool>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (apiResponse?.Success == true)
                 {

@@ -115,11 +115,11 @@
                         </span>
                         <span>
                             <i class="bx bx-check-circle text-success"></i>
-                            Aktif: <strong>@Unvanlar.Count(d => d.UnvanAktiflik == Aktiflik.Aktif)</strong>
+                            Aktif: <strong>@Unvanlar.Count(d => d.Aktiflik == Aktiflik.Aktif)</strong>
                         </span>
                         <span>
                             <i class="bx bx-x-circle text-danger"></i>
-                            Pasif: <strong>@Unvanlar.Count(d => d.UnvanAktiflik == Aktiflik.Pasif)</strong>
+                            Pasif: <strong>@Unvanlar.Count(d => d.Aktiflik == Aktiflik.Pasif)</strong>
                         </span>
                         <span>
                             <i class="bx bx-filter-alt text-info"></i>
@@ -219,7 +219,7 @@
                                         </span>
                                     </td>
                                     <td class="text-center">
-                                        @if (unvan.UnvanAktiflik == Aktiflik.Aktif)
+                                        @if (unvan.Aktiflik == Aktiflik.Aktif)
                                         {
                                             <span class="badge bg-label-success">
                                                 <i class="bx bx-check-circle me-1"></i>Aktif
@@ -248,10 +248,10 @@
                                             </button>
 
                                             <!-- Aktif/Pasif Toggle -->
-                                            <button class="btn btn-sm btn-icon @(unvan.UnvanAktiflik == Aktiflik.Aktif ? "btn-outline-warning" : "btn-outline-success")"
-                                                    @onclick="() => ShowToggleStatusConfirmation(unvan.UnvanId, unvan.UnvanAdi, unvan.UnvanAktiflik)"
-                                                    title="@(unvan.UnvanAktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")">
-                                                <i class="bx @(unvan.UnvanAktiflik == Aktiflik.Aktif ? "bx-toggle-right" : "bx-toggle-left")"></i>
+                                            <button class="btn btn-sm btn-icon @(unvan.Aktiflik == Aktiflik.Aktif ? "btn-outline-warning" : "btn-outline-success")"
+                                                    @onclick="() => ShowToggleStatusConfirmation(unvan.UnvanId, unvan.UnvanAdi, unvan.Aktiflik)"
+                                                    title="@(unvan.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")">
+                                                <i class="bx @(unvan.Aktiflik == Aktiflik.Aktif ? "bx-toggle-right" : "bx-toggle-left")"></i>
                                             </button>
 
                                             <!-- Sil -->

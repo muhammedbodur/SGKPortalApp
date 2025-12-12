@@ -6,6 +6,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
 {
     public interface IKioskMenuIslemService
     {
+        Task<ApiResponseDto<List<KioskMenuIslemResponseDto>>> GetAllAsync();
         Task<ApiResponseDto<List<KioskMenuIslemResponseDto>>> GetByKioskMenuAsync(int kioskMenuId);
         Task<ApiResponseDto<KioskMenuIslemResponseDto>> GetByIdAsync(int kioskMenuIslemId);
         Task<ApiResponseDto<KioskMenuIslemResponseDto>> CreateAsync(KioskMenuIslemCreateRequestDto request);

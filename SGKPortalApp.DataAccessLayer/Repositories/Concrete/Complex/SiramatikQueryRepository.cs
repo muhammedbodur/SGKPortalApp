@@ -54,6 +54,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                         join ki in _context.KanalIslemleri on kai.KanalIslemId equals ki.KanalIslemId
                         join hb in _context.HizmetBinalari on kai.HizmetBinasiId equals hb.HizmetBinasiId
                         where kai.HizmetBinasiId == hizmetBinasiId
+                              && !kai.SilindiMi
                         select new KanalAltIslemResponseDto
                         {
                             KanalAltIslemId = kai.KanalAltIslemId,
@@ -506,7 +507,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             FROM SIR_BankoKullanicilari AS bk WITH (NOLOCK)
             INNER JOIN SIR_Bankolar AS b WITH (NOLOCK) 
                 ON b.BankoId = bk.BankoId
-                AND b.BankoAktiflik = 1
+                AND b.Aktiflik = 1
                 AND b.SilindiMi = 0
             INNER JOIN PER_Personeller AS p WITH (NOLOCK) 
                 ON p.TcKimlikNo = bk.TcKimlikNo 
@@ -648,7 +649,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
 
                         where bk.TcKimlikNo == tcKimlikNo
                            && !bk.SilindiMi
-                           && b.BankoAktiflik == Aktiflik.Aktif
+                           && b.Aktiflik == Aktiflik.Aktif
                            && !b.SilindiMi
                            && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif
                            && p.HizmetBinasiId == b.HizmetBinasiId
@@ -926,7 +927,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                 AND bk.SilindiMi = 0
             INNER JOIN SIR_Bankolar b WITH (NOLOCK)
                 ON b.BankoId = bk.BankoId
-                AND b.BankoAktiflik = 1
+                AND b.Aktiflik = 1
                 AND b.SilindiMi = 0
                 AND b.HizmetBinasiId = @SiraHizmetBinasiId
             INNER JOIN CMN_Users u WITH (NOLOCK)
@@ -1066,7 +1067,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                         where pPersonel.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif
                            && !pPersonel.SilindiMi
                            && !bk.SilindiMi
-                           && b.BankoAktiflik == Aktiflik.Aktif
+                           && b.Aktiflik == Aktiflik.Aktif
                            && !b.SilindiMi
                            && b.HizmetBinasiId == siraInfo.HizmetBinasiId
                            && u.BankoModuAktif
@@ -1313,7 +1314,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                    && !kp.SilindiMi                                   // Personel ataması silinmemiş
                    && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok      // En az Yrd.Uzman (1, 2, 3)
                    && u.BankoModuAktif == true                        // ⭐ ŞU AN banko modunda
-                   && b.BankoAktiflik == Aktiflik.Aktif               // Banko aktif
+                   && b.Aktiflik == Aktiflik.Aktif               // Banko aktif
                    && !b.SilindiMi                                    // Banko silinmemiş
                 select kp.TcKimlikNo
             ).Distinct().ToListAsync();
@@ -1389,7 +1390,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             AND ka.SilindiMi = 0
     
             -- Aktiflik kontrolleri
-            AND hb.HizmetBinasiAktiflik = 1  -- Aktif
+            AND hb.Aktiflik = 1  -- Aktif
             AND k.Aktiflik = 1               -- Aktif
             AND kma.Aktiflik = 1             -- Aktif
             AND km.Aktiflik = 1              -- Aktif
@@ -1434,7 +1435,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                            && !ka.SilindiMi
                            && !kp.SilindiMi
                            // Aktiflik kontrolleri
-                           && hb.HizmetBinasiAktiflik == Aktiflik.Aktif
+                           && hb.Aktiflik == Aktiflik.Aktif
                            && k.Aktiflik == Aktiflik.Aktif
                            && kma.Aktiflik == Aktiflik.Aktif
                            && km.Aktiflik == Aktiflik.Aktif
@@ -1539,7 +1540,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                 AND ka.SilindiMi = 0
 
                 -- Aktiflik kontrolleri
-                AND hb.HizmetBinasiAktiflik = 1
+                AND hb.Aktiflik = 1
                 AND k.Aktiflik = 1
                 AND kma.Aktiflik = 1
                 AND km.Aktiflik = 1
@@ -1576,7 +1577,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                            && !ka.SilindiMi
                            && !kp.SilindiMi
                            // Aktiflik kontrolleri
-                           && hb.HizmetBinasiAktiflik == Aktiflik.Aktif
+                           && hb.Aktiflik == Aktiflik.Aktif
                            && k.Aktiflik == Aktiflik.Aktif
                            && kma.Aktiflik == Aktiflik.Aktif
                            && km.Aktiflik == Aktiflik.Aktif

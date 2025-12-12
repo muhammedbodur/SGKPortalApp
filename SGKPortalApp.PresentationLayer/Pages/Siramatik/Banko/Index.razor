@@ -133,8 +133,8 @@
                 <div class="col">
                     <div class="d-flex gap-4 text-muted small">
                         <span><i class="bx bx-list-ul text-primary"></i> Toplam: <strong>@allBankolar.Count</strong></span>
-                        <span><i class="bx bx-check-circle text-success"></i> Aktif: <strong>@allBankolar.Count(b => b.BankoAktiflik == Aktiflik.Aktif)</strong></span>
-                        <span><i class="bx bx-x-circle text-danger"></i> Pasif: <strong>@allBankolar.Count(b => b.BankoAktiflik == Aktiflik.Pasif)</strong></span>
+                        <span><i class="bx bx-check-circle text-success"></i> Aktif: <strong>@allBankolar.Count(b => b.Aktiflik == Aktiflik.Aktif)</strong></span>
+                        <span><i class="bx bx-x-circle text-danger"></i> Pasif: <strong>@allBankolar.Count(b => b.Aktiflik == Aktiflik.Pasif)</strong></span>
                         <span><i class="bx bx-user-check text-info"></i> Atanmış: <strong>@allBankolar.Count(b => !b.BankoMusaitMi)</strong></span>
                         <span><i class="bx bx-filter-alt text-warning"></i> Filtrelenen: <strong>@filteredBankolar.Count</strong></span>
                     </div>
@@ -199,7 +199,7 @@
                                     <tbody>
                                         @foreach (var banko in katGroup.Bankolar)
                                         {
-                                            <tr class="@(banko.BankoAktiflik == Aktiflik.Pasif ? "table-danger" : "")">
+                                            <tr class="@(banko.Aktiflik == Aktiflik.Pasif ? "table-danger" : "")">
                                                 <td>
                                                     <strong class="text-primary">@banko.BankoNo</strong>
                                                 </td>
@@ -245,8 +245,8 @@
                                                     }
                                                 </td>
                                                 <td>
-                                                    <span class="badge @(banko.BankoAktiflik == Aktiflik.Aktif ? "bg-label-success" : "bg-label-danger")">
-                                                        @(banko.BankoAktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif")
+                                                    <span class="badge @(banko.Aktiflik == Aktiflik.Aktif ? "bg-label-success" : "bg-label-danger")">
+                                                        @(banko.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif")
                                                     </span>
                                                 </td>
                                                 <td>
@@ -261,10 +261,10 @@
                                                                 title="Personel Ata">
                                                             <i class="bx bx-user-plus"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-icon btn-outline-@(banko.BankoAktiflik == Aktiflik.Aktif ? "warning" : "success")" 
+                                                        <button class="btn btn-sm btn-icon btn-outline-@(banko.Aktiflik == Aktiflik.Aktif ? "warning" : "success")" 
                                                                 @onclick="() => ToggleAktiflik(banko)" 
-                                                                title="@(banko.BankoAktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")">
-                                                            <i class="bx @(banko.BankoAktiflik == Aktiflik.Aktif ? "bx-x" : "bx-check")"></i>
+                                                                title="@(banko.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")">
+                                                            <i class="bx @(banko.Aktiflik == Aktiflik.Aktif ? "bx-x" : "bx-check")"></i>
                                                         </button>
                                                         <button class="btn btn-sm btn-icon btn-outline-danger" 
                                                                 @onclick="() => ShowDeleteConfirm(banko)" 

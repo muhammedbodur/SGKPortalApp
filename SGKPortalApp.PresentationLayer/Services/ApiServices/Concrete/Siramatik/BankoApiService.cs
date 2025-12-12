@@ -269,15 +269,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             try
             {
                 var response = await _httpClient.PostAsJsonAsync("banko", dto);
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<BankoResponseDto>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("CreateAsync failed: {Error}", errorContent);
-                    return ServiceResult<BankoResponseDto>.Fail("Banko eklenemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Banko eklenemedi.";
+                    _logger.LogError("CreateAsync failed: {Error}", errorMessage);
+                    return ServiceResult<BankoResponseDto>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<BankoResponseDto>>();
 
                 if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
@@ -303,15 +302,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             try
             {
                 var response = await _httpClient.PutAsJsonAsync($"banko/{id}", dto);
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<BankoResponseDto>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("UpdateAsync failed: {Error}", errorContent);
-                    return ServiceResult<BankoResponseDto>.Fail("Banko güncellenemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Banko güncellenemedi.";
+                    _logger.LogError("UpdateAsync failed: {Error}", errorMessage);
+                    return ServiceResult<BankoResponseDto>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<BankoResponseDto>>();
 
                 if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
@@ -337,15 +335,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             try
             {
                 var response = await _httpClient.DeleteAsync($"banko/{id}");
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("DeleteAsync failed: {Error}", errorContent);
-                    return ServiceResult<bool>.Fail("Banko silinemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Banko silinemedi.";
+                    _logger.LogError("DeleteAsync failed: {Error}", errorMessage);
+                    return ServiceResult<bool>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (apiResponse?.Success == true)
                 {
@@ -375,15 +372,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             try
             {
                 var response = await _httpClient.PostAsJsonAsync("banko/ata", dto);
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("PersonelAtaAsync failed: {Error}", errorContent);
-                    return ServiceResult<bool>.Fail("Personel atanamadı.");
+                    var errorMessage = apiResponse?.Message ?? "Personel atanamadı.";
+                    _logger.LogError("PersonelAtaAsync failed: {Error}", errorMessage);
+                    return ServiceResult<bool>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (apiResponse?.Success == true)
                 {
@@ -409,15 +405,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             try
             {
                 var response = await _httpClient.DeleteAsync($"banko/personel/{tcKimlikNo}");
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("PersonelCikarAsync failed: {Error}", errorContent);
-                    return ServiceResult<bool>.Fail("Personel çıkarılamadı.");
+                    var errorMessage = apiResponse?.Message ?? "Personel çıkarılamadı.";
+                    _logger.LogError("PersonelCikarAsync failed: {Error}", errorMessage);
+                    return ServiceResult<bool>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (apiResponse?.Success == true)
                 {
@@ -443,15 +438,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             try
             {
                 var response = await _httpClient.DeleteAsync($"banko/{bankoId}/bosalt");
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("BankoBoşaltAsync failed: {Error}", errorContent);
-                    return ServiceResult<bool>.Fail("Banko boşaltılamadı.");
+                    var errorMessage = apiResponse?.Message ?? "Banko boşaltılamadı.";
+                    _logger.LogError("BankoBoşaltAsync failed: {Error}", errorMessage);
+                    return ServiceResult<bool>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (apiResponse?.Success == true)
                 {
@@ -481,15 +475,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             try
             {
                 var response = await _httpClient.PatchAsync($"banko/{bankoId}/toggle-aktiflik", null);
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("ToggleAktiflikAsync failed: {Error}", errorContent);
-                    return ServiceResult<bool>.Fail("Aktiflik durumu değiştirilemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Aktiflik durumu değiştirilemedi.";
+                    _logger.LogError("ToggleAktiflikAsync failed: {Error}", errorMessage);
+                    return ServiceResult<bool>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (apiResponse?.Success == true)
                 {

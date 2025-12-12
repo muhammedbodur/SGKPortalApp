@@ -165,7 +165,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
             // Aktiflik filtresi
             if (selectedAktiflik.HasValue)
             {
-                filteredBankolar = filteredBankolar.Where(b => b.BankoAktiflik == selectedAktiflik.Value).ToList();
+                filteredBankolar = filteredBankolar.Where(b => b.Aktiflik == selectedAktiflik.Value).ToList();
             }
 
             // Arama filtresi
@@ -499,7 +499,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
                 var result = await _bankoService.ToggleAktiflikAsync(banko.BankoId);
                 if (result.Success)
                 {
-                    await _toastService.ShowSuccessAsync($"Banko {(banko.BankoAktiflik == Aktiflik.Aktif ? "pasif" : "aktif")} yapıldı");
+                    await _toastService.ShowSuccessAsync($"Banko {(banko.Aktiflik == Aktiflik.Aktif ? "pasif" : "aktif")} yapıldı");
                     await LoadData();
                 }
                 else
@@ -620,7 +620,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
                     worksheet.Cell(row, 3).Value = banko.BankoTipiAdi;
                     worksheet.Cell(row, 4).Value = banko.BankoAciklama ?? "-";
                     worksheet.Cell(row, 5).Value = banko.AtananPersonel?.AdSoyad ?? "Atanmamış";
-                    worksheet.Cell(row, 6).Value = banko.BankoAktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
+                    worksheet.Cell(row, 6).Value = banko.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
                     row++;
                 }
 
@@ -689,7 +689,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
                                 table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).Text(banko.BankoTipiAdi);
                                 table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).Text(banko.BankoAciklama ?? "-");
                                 table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).Text(banko.AtananPersonel?.AdSoyad ?? "Atanmamış");
-                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).Text(banko.BankoAktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif");
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).Text(banko.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif");
                             }
                         });
 

@@ -18,7 +18,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
 
             CreateMap<BankoCreateRequestDto, Banko>()
                 .ForMember(dest => dest.BankoId, opt => opt.Ignore())
-                .ForMember(dest => dest.BankoAktiflik, opt => opt.MapFrom(src => Aktiflik.Aktif))
+                .ForMember(dest => dest.Aktiflik, opt => opt.MapFrom(src => Aktiflik.Aktif))
                 .ForMember(dest => dest.BankoSira, opt => opt.MapFrom(src => 0))
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))

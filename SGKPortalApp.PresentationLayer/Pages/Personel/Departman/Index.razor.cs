@@ -130,7 +130,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             if (filterStatus != "all")
             {
                 var status = filterStatus == "active" ? Aktiflik.Aktif : Aktiflik.Pasif;
-                filtered = filtered.Where(d => d.DepartmanAktiflik == status);
+                filtered = filtered.Where(d => d.Aktiflik == status);
             }
 
             // Sıralama
@@ -227,11 +227,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                 var departman = Departmanlar.FirstOrDefault(d => d.DepartmanId == ToggleDepartmanId);
                 if (departman == null) return;
 
-                var newStatus = departman.DepartmanAktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif;
+                var newStatus = departman.Aktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif;
                 var updateDto = new BusinessObjectLayer.DTOs.Request.PersonelIslemleri.DepartmanUpdateRequestDto
                 {
                     DepartmanAdi = departman.DepartmanAdi,
-                    DepartmanAktiflik = newStatus
+                    Aktiflik = newStatus
                 };
 
                 var result = await _departmanService.UpdateAsync(ToggleDepartmanId, updateDto);
@@ -337,7 +337,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                 {
                     worksheet.Cell(row, 1).Value = departman.DepartmanAdi;
                     worksheet.Cell(row, 2).Value = departman.PersonelSayisi;
-                    worksheet.Cell(row, 3).Value = departman.DepartmanAktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
+                    worksheet.Cell(row, 3).Value = departman.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
                     worksheet.Cell(row, 4).Value = departman.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm");
                     worksheet.Cell(row, 5).Value = departman.DuzenlenmeTarihi.ToString("dd.MM.yyyy HH:mm");
                     row++;
@@ -405,7 +405,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                             {
                                 table.Cell().Padding(5).Text(departman.DepartmanAdi);
                                 table.Cell().Padding(5).Text(departman.PersonelSayisi.ToString());
-                                table.Cell().Padding(5).Text(departman.DepartmanAktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif");
+                                table.Cell().Padding(5).Text(departman.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif");
                                 table.Cell().Padding(5).Text(departman.EklenmeTarihi.ToString("dd.MM.yyyy"));
                                 table.Cell().Padding(5).Text(departman.DuzenlenmeTarihi.ToString("dd.MM.yyyy"));
                             }

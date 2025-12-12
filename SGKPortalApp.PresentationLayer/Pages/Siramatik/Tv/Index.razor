@@ -71,8 +71,8 @@
                 <div class="col">
                     <div class="d-flex gap-4 text-muted small flex-wrap">
                         <span><i class="bx bx-tv text-primary"></i> Toplam: <strong>@allTvler.Count</strong></span>
-                        <span><i class="bx bx-check-circle text-success"></i> Aktif: <strong>@allTvler.Count(t => t.TvAktiflik == Aktiflik.Aktif)</strong></span>
-                        <span><i class="bx bx-x-circle text-danger"></i> Pasif: <strong>@allTvler.Count(t => t.TvAktiflik == Aktiflik.Pasif)</strong></span>
+                        <span><i class="bx bx-check-circle text-success"></i> Aktif: <strong>@allTvler.Count(t => t.Aktiflik == Aktiflik.Aktif)</strong></span>
+                        <span><i class="bx bx-x-circle text-danger"></i> Pasif: <strong>@allTvler.Count(t => t.Aktiflik == Aktiflik.Pasif)</strong></span>
                         <span><i class="bx bx-wifi text-info"></i> Bağlı: <strong>@allTvler.Count(t => t.IsConnected)</strong></span>
                         <span><i class="bx bx-filter-alt text-warning"></i> Filtrelenen: <strong>@filteredTvler.Count</strong></span>
                     </div>
@@ -109,7 +109,7 @@
             @foreach (var tv in filteredTvler)
             {
                 <div class="col">
-                    <div class="card h-100 @(tv.TvAktiflik == Aktiflik.Pasif ? "border-warning" : "")">
+                    <div class="card h-100 @(tv.Aktiflik == Aktiflik.Pasif ? "border-warning" : "")">
                         <div class="card-body d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div class="flex-grow-1">
@@ -136,8 +136,8 @@
                                         </li>
                                         <li>
                                             <button class="dropdown-item" @onclick="() => ToggleAktiflik(tv)">
-                                                <i class="bx @(tv.TvAktiflik == Aktiflik.Aktif ? "bx-x-circle" : "bx-check-circle") me-2"></i>
-                                                @(tv.TvAktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")
+                                                <i class="bx @(tv.Aktiflik == Aktiflik.Aktif ? "bx-x-circle" : "bx-check-circle") me-2"></i>
+                                                @(tv.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")
                                             </button>
                                         </li>
                                         <li><hr class="dropdown-divider"></li>
@@ -152,8 +152,8 @@
 
                             <div class="mb-3">
                                 <div class="d-flex justify-content-between mb-2">
-                                    <span class="badge bg-label-@(tv.TvAktiflik == Aktiflik.Aktif ? "success" : "danger")">
-                                        @tv.TvAktiflik
+                                    <span class="badge bg-label-@(tv.Aktiflik == Aktiflik.Aktif ? "success" : "danger")">
+                                        @tv.Aktiflik
                                     </span>
                                     <span class="badge bg-label-@(tv.IsConnected ? "info" : "secondary")">
                                         <i class="bx bx-wifi me-1"></i>@(tv.IsConnected ? "Bağlı" : "Bağlı Değil")

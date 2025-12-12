@@ -15,7 +15,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
 
         public required string UnvanAdi { get; set; }
 
-        public Aktiflik UnvanAktiflik { get; set; } = Aktiflik.Aktif;
+        public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
 
         [InverseProperty("Unvan")]
         public ICollection<Personel>? Personeller { get; set; } = new List<Personel>();

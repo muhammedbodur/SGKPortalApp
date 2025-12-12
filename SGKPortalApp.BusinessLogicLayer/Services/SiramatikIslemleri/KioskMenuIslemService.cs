@@ -27,6 +27,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             _logger = logger;
         }
 
+        public async Task<ApiResponseDto<List<KioskMenuIslemResponseDto>>> GetAllAsync()
+        {
+            try
+            {
+                var repo = _unitOfWork.GetRepository<IKioskMenuIslemRepository>();
+                var entities = await repo.FindAsync(x => !x.SilindiMi);
+                var dtos = _mapper.Map<List<KioskMenuIslemResponseDto>>(entities);
+                return ApiResponseDto<List<KioskMenuIslemResponseDto>>.SuccessResult(dtos, "Tüm menü işlemleri getirildi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Tüm menü işlemleri getirilemedi");
+                return ApiResponseDto<List<KioskMenuIslemResponseDto>>.ErrorResult("Menü işlemleri getirilemedi", ex.Message);
+            }
+        }
+
         public async Task<ApiResponseDto<List<KioskMenuIslemResponseDto>>> GetByKioskMenuAsync(int kioskMenuId)
         {
             try
@@ -72,6 +88,45 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 try
                 {
                     var repo = _unitOfWork.GetRepository<IKioskMenuIslemRepository>();
+
+                    // Üst kayıtların silinmiş veya pasif olup olmadığını kontrol et
+                    var kioskMenuRepo = _unitOfWork.GetRepository<IKioskMenuRepository>();
+                    var kioskMenu = await kioskMenuRepo.GetByIdAsync(request.KioskMenuId);
+                    
+                    if (kioskMenu == null || kioskMenu.SilindiMi)
+                    {
+                        return ApiResponseDto<KioskMenuIslemResponseDto>.ErrorResult("Bağlı olduğu Kiosk Menü silinmiş olduğu için bu menü işlemi eklenemez.");
+                    }
+                    
+                    var kanalAltRepo = _unitOfWork.GetRepository<IKanalAltRepository>();
+                    var kanalAlt = await kanalAltRepo.GetByIdAsync(request.KanalAltId);
+                    
+                    if (kanalAlt == null || kanalAlt.SilindiMi)
+                    {
+                        return ApiResponseDto<KioskMenuIslemResponseDto>.ErrorResult("Bağlı olduğu Alt Kanal silinmiş olduğu için bu menü işlemi eklenemez.");
+                    }
+                    
+                    // Aktif olarak eklenmeye çalışılıyorsa, üst kayıtların aktif olup olmadığını kontrol et
+                    if (request.Aktiflik == Aktiflik.Aktif)
+                    {
+                        if (kioskMenu.Aktiflik != Aktiflik.Aktif)
+                        {
+                            return ApiResponseDto<KioskMenuIslemResponseDto>.ErrorResult("Bağlı olduğu Kiosk Menü pasif durumda olduğu için bu menü işlemi aktif olarak eklenemez. Önce Kiosk Menü'yü aktif ediniz.");
+                        }
+                        
+                        if (kanalAlt.Aktiflik != Aktiflik.Aktif)
+                        {
+                            return ApiResponseDto<KioskMenuIslemResponseDto>.ErrorResult("Bağlı olduğu Alt Kanal pasif durumda olduğu için bu menü işlemi aktif olarak eklenemez. Önce Alt Kanal'ı aktif ediniz.");
+                        }
+                    }
+
+                    // Aynı KanalAltId başka bir menüde zaten kullanılıyor mu kontrol et
+                    var existingIslem = await repo.FindAsync(x => x.KanalAltId == request.KanalAltId && !x.SilindiMi);
+                    if (existingIslem.Any())
+                    {
+                        var mevcutMenu = existingIslem.First();
+                        return ApiResponseDto<KioskMenuIslemResponseDto>.ErrorResult($"Bu alt kanal zaten başka bir menüye atanmış. Her alt kanal sadece bir menüye atanabilir.");
+                    }
 
                     // Eğer sıra 0 veya belirtilmemişse, otomatik sıra ata
                     if (request.MenuSira <= 0)
@@ -123,6 +178,47 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     if (siraExists)
                     {
                         return ApiResponseDto<KioskMenuIslemResponseDto>.ErrorResult("Bu sıra numarası zaten kullanılıyor");
+                    }
+
+                    // Üst kayıtların silinmiş veya pasif olup olmadığını kontrol et
+                    var kioskMenuRepo = _unitOfWork.GetRepository<IKioskMenuRepository>();
+                    var kioskMenu = await kioskMenuRepo.GetByIdAsync(request.KioskMenuId);
+                    
+                    if (kioskMenu == null || kioskMenu.SilindiMi)
+                    {
+                        return ApiResponseDto<KioskMenuIslemResponseDto>.ErrorResult("Bağlı olduğu Kiosk Menü silinmiş olduğu için bu menü işlemi güncellenemez.");
+                    }
+                    
+                    var kanalAltRepo = _unitOfWork.GetRepository<IKanalAltRepository>();
+                    var kanalAlt = await kanalAltRepo.GetByIdAsync(request.KanalAltId);
+                    
+                    if (kanalAlt == null || kanalAlt.SilindiMi)
+                    {
+                        return ApiResponseDto<KioskMenuIslemResponseDto>.ErrorResult("Bağlı olduğu Alt Kanal silinmiş olduğu için bu menü işlemi güncellenemez.");
+                    }
+                    
+                    // Aktif edilmeye çalışılıyorsa, üst kayıtların aktif olup olmadığını kontrol et
+                    if (request.Aktiflik == Aktiflik.Aktif)
+                    {
+                        if (kioskMenu.Aktiflik != Aktiflik.Aktif)
+                        {
+                            return ApiResponseDto<KioskMenuIslemResponseDto>.ErrorResult("Bağlı olduğu Kiosk Menü pasif durumda olduğu için bu menü işlemi aktif edilemez. Önce Kiosk Menü'yü aktif ediniz.");
+                        }
+                        
+                        if (kanalAlt.Aktiflik != Aktiflik.Aktif)
+                        {
+                            return ApiResponseDto<KioskMenuIslemResponseDto>.ErrorResult("Bağlı olduğu Alt Kanal pasif durumda olduğu için bu menü işlemi aktif edilemez. Önce Alt Kanal'ı aktif ediniz.");
+                        }
+                    }
+
+                    // KanalAltId değiştirildiyse, yeni KanalAltId başka bir menüde kullanılıyor mu kontrol et
+                    if (entity.KanalAltId != request.KanalAltId)
+                    {
+                        var existingIslem = await repo.FindAsync(x => x.KanalAltId == request.KanalAltId && !x.SilindiMi);
+                        if (existingIslem.Any())
+                        {
+                            return ApiResponseDto<KioskMenuIslemResponseDto>.ErrorResult($"Bu alt kanal zaten başka bir menüye atanmış. Her alt kanal sadece bir menüye atanabilir.");
+                        }
                     }
 
                     _mapper.Map(request, entity);

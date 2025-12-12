@@ -19,6 +19,6 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri
         [StringLength(500, ErrorMessage = "Açıklama en fazla 500 karakter olabilir")]
         public string? TvAciklama { get; set; }
 
-        public Aktiflik TvAktiflik { get; set; } = Aktiflik.Aktif;
+        public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
     }
 }

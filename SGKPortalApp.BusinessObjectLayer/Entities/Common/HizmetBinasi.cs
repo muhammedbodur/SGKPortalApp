@@ -24,7 +24,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
 
         public string Adres { get; set; } = string.Empty;
 
-        public Aktiflik HizmetBinasiAktiflik { get; set; }
+        public Aktiflik Aktiflik { get; set; }
 
         [InverseProperty("HizmetBinasi")]
         public ICollection<Banko>? Bankolar { get; set; } = new List<Banko>();

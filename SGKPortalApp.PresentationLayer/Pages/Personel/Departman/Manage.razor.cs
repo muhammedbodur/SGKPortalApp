@@ -69,7 +69,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                         FormModel = new DepartmanFormModel
                         {
                             DepartmanAdi = departman.DepartmanAdi,
-                            IsActive = departman.DepartmanAktiflik == Aktiflik.Aktif
+                            IsActive = departman.Aktiflik == Aktiflik.Aktif
                         };
 
                         CurrentPersonelSayisi = departman.PersonelSayisi;
@@ -117,7 +117,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                     var updateDto = new DepartmanUpdateRequestDto
                     {
                         DepartmanAdi = FormModel.DepartmanAdi.Trim(),
-                        DepartmanAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
+                        Aktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
                     var result = await _departmanService.UpdateAsync(Id!.Value, updateDto);
@@ -137,7 +137,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                     var createDto = new DepartmanCreateRequestDto
                     {
                         DepartmanAdi = FormModel.DepartmanAdi.Trim(),
-                        DepartmanAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
+                        Aktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
                     var result = await _departmanService.CreateAsync(createDto);

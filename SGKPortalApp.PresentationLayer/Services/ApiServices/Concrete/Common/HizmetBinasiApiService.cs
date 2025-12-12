@@ -8,6 +8,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
 {
@@ -136,15 +137,24 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
                 _logger.LogInformation("📡 Status: {Status}, Content: {Content}",
                     response.StatusCode, responseContent);
 
+                var jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogError("❌ API Hatası: {Error}", responseContent);
-                    return ServiceResult<HizmetBinasiResponseDto>.Fail(
-                        $"Hizmet binası eklenemedi. Detay: {responseContent}"
-                    );
+                    try
+                    {
+                        var errorResponse = JsonSerializer.Deserialize<ApiResponseDto<HizmetBinasiResponseDto>>(responseContent, jsonOptions);
+                        var errorMessage = errorResponse?.Message ?? "Hizmet binası eklenemedi.";
+                        return ServiceResult<HizmetBinasiResponseDto>.Fail(errorMessage);
+                    }
+                    catch
+                    {
+                        return ServiceResult<HizmetBinasiResponseDto>.Fail("Hizmet binası eklenemedi.");
+                    }
                 }
 
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<HizmetBinasiResponseDto>>();
+                var apiResponse = JsonSerializer.Deserialize<ApiResponseDto<HizmetBinasiResponseDto>>(responseContent, jsonOptions);
 
                 if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
@@ -160,11 +170,11 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
                     );
                 }
 
-                var errorMessage = !string.IsNullOrWhiteSpace(apiResponse?.Message)
+                var failMessage = !string.IsNullOrWhiteSpace(apiResponse?.Message)
                     ? apiResponse.Message
                     : "Hizmet binası oluşturulamadı";
 
-                return ServiceResult<HizmetBinasiResponseDto>.Fail(errorMessage);
+                return ServiceResult<HizmetBinasiResponseDto>.Fail(failMessage);
             }
             catch (Exception ex)
             {
@@ -178,15 +188,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
             try
             {
                 var response = await _httpClient.PutAsJsonAsync($"hizmetbinasi/{id}", request);
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<HizmetBinasiResponseDto>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("UpdateAsync failed: {Error}", errorContent);
-                    return ServiceResult<HizmetBinasiResponseDto>.Fail("Hizmet binası güncellenemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Hizmet binası güncellenemedi.";
+                    _logger.LogError("UpdateAsync failed: {Error}", errorMessage);
+                    return ServiceResult<HizmetBinasiResponseDto>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<HizmetBinasiResponseDto>>();
 
                 if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
@@ -216,15 +225,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
             try
             {
                 var response = await _httpClient.DeleteAsync($"hizmetbinasi/{id}");
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("DeleteAsync failed: {Error}", errorContent);
-                    return ServiceResult<bool>.Fail("Hizmet binası silinemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Hizmet binası silinemedi.";
+                    _logger.LogError("DeleteAsync failed: {Error}", errorMessage);
+                    return ServiceResult<bool>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (apiResponse?.Success == true)
                 {

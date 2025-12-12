@@ -80,7 +80,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Where(tv => tv.TvAktiflik == Aktiflik.Aktif)
+                .Where(tv => tv.Aktiflik == Aktiflik.Aktif)
                 .ToListAsync();
         }
 

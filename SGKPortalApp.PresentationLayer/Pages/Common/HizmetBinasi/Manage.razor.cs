@@ -66,7 +66,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                 {
                     // Sadece aktif departmanları al
                     Departmanlar = result.Data
-                        .Where(d => d.DepartmanAktiflik == Aktiflik.Aktif)
+                        .Where(d => d.Aktiflik == Aktiflik.Aktif)
                         .OrderBy(d => d.DepartmanAdi)
                         .ToList();
                 }
@@ -103,7 +103,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                             HizmetBinasiAdi = hizmetBinasi.HizmetBinasiAdi,
                             DepartmanId = hizmetBinasi.DepartmanId,
                             Adres = hizmetBinasi.Adres,
-                            IsActive = hizmetBinasi.HizmetBinasiAktiflik == Aktiflik.Aktif
+                            IsActive = hizmetBinasi.Aktiflik == Aktiflik.Aktif
                         };
 
                         CurrentPersonelSayisi = hizmetBinasi.PersonelSayisi;
@@ -168,7 +168,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                         HizmetBinasiAdi = FormModel.HizmetBinasiAdi.Trim(),
                         DepartmanId = FormModel.DepartmanId,
                         Adres = FormModel.Adres?.Trim(),
-                        HizmetBinasiAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
+                        Aktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
                     var result = await _hizmetBinasiService.UpdateAsync(Id!.Value, updateDto);
@@ -192,7 +192,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                         HizmetBinasiAdi = FormModel.HizmetBinasiAdi.Trim(),
                         DepartmanId = FormModel.DepartmanId,
                         Adres = FormModel.Adres?.Trim(),
-                        HizmetBinasiAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
+                        Aktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
                     var result = await _hizmetBinasiService.CreateAsync(createDto);

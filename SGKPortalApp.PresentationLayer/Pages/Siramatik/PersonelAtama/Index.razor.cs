@@ -421,8 +421,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
         // #11 TOGGLE/HÜCRE CLICK METHODS - ANA İŞLEV
         // ═══════════════════════════════════════════════════════════════════════════════
 
-        private async Task OnHucreClicked(string personelTc, int kanalAltIslemId)
+        private async Task OnHucreClicked(string personelTc, int kanalAltIslemId, bool isPasif = false)
         {
+            // Pasif kanal alt işlem kontrolü
+            if (isPasif)
+            {
+                await _toastService.ShowWarningAsync("Bu Alt Kanal İşlemi Pasif durumdadır. Lütfen önce aktif edin.");
+                return;
+            }
+
             var key = GetHucreKey(personelTc, kanalAltIslemId);
 
             if (YuklenenHucreler.Contains(key))

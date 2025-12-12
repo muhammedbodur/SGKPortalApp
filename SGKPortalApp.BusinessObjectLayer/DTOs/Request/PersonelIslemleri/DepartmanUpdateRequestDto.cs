@@ -19,6 +19,6 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         /// Departman aktiflik durumu
         /// </summary>
         [Required(ErrorMessage = "Aktiflik durumu zorunludur")]
-        public Aktiflik DepartmanAktiflik { get; set; } = Aktiflik.Aktif;
+        public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
     }
 }

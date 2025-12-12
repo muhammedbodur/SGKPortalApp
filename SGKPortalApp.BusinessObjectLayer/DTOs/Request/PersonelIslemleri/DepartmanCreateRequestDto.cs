@@ -10,6 +10,6 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         public string DepartmanAdi { get; set; } = string.Empty;
         
         [Required(ErrorMessage = "Aktiflik durumu zorunludur")]
-        public Aktiflik DepartmanAktiflik { get; set; } = Aktiflik.Aktif;
+        public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
     }
 }

@@ -239,7 +239,7 @@ else
                                 @foreach (var kai in KanalAltIslemler)
                                 {
                                     <option value="@kai.KanalAltIslemId">
-                                        @kai.KanalAdi - @kai.KanalAltAdi
+                                        @kai.KanalAdi - @kai.KanalAltAdi @(kai.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Pasif ? "(PASİF)" : "")
                                     </option>
                                 }
                             </select>
@@ -299,8 +299,15 @@ else
                                         </th>
                                         @foreach (var kai in FilteredKanalAltIslemler)
                                         {
-                                            <th class="text-center bg-light" style="position: sticky; left: 0; z-index: 5; min-width: 140px; max-width: 140px;">
+                                            var isPasif = kai.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Pasif;
+                                            <th class="text-center @(isPasif ? "bg-warning-subtle" : "bg-light")" 
+                                                style="position: sticky; left: 0; z-index: 5; min-width: 140px; max-width: 140px; @(isPasif ? "opacity: 0.7;" : "")">
                                                 <strong>@kai.KanalAltAdi</strong>
+                                                @if (isPasif)
+                                                {
+                                                    <br />
+                                                    <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">PASİF</span>
+                                                }
                                             </th>
                                         }
                                     </tr>
@@ -344,14 +351,15 @@ else
                                                 var buttonClass = GetHucreButtonClass(mevcutValue);
                                                 var displayName = GetUzmanlikDisplayName(mevcutValue);
                                                 var hucreId = GetHucreId(personel.TcKimlikNo, kai.KanalAltIslemId);
+                                                var isPasif = kai.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Pasif;
 
-                                                <td class="text-center align-middle p-2">
+                                                <td class="text-center align-middle p-2 @(isPasif ? "bg-warning-subtle" : "")" style="@(isPasif ? "opacity: 0.6;" : "")">
                                                     <button class="@buttonClass btn-block w-100 h-auto py-2 px-1"
                                                             style="min-height: 60px; font-size: 0.85rem;"
-                                                            @onclick="() => OnHucreClicked(personel.TcKimlikNo, kai.KanalAltIslemId)"
+                                                            @onclick="() => OnHucreClicked(personel.TcKimlikNo, kai.KanalAltIslemId, isPasif)"
                                                             disabled="@isLoading"
                                                             id="@hucreId"
-                                                            title="Tıkla: Bilgisi Yok → Şef → Uzman → Yrd. Uzman → Bilgisi Yok">
+                                                            title="@(isPasif ? "Bu işlem pasif durumda - işlem yapılamaz" : "Tıkla: Bilgisi Yok → Şef → Uzman → Yrd. Uzman → Bilgisi Yok")">
 
                                                         @if (isLoading)
                                                         {

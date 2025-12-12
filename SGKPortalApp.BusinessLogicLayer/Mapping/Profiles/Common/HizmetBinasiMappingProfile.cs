@@ -41,8 +41,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
                     opt => opt.MapFrom(src => src.HizmetBinasiAdi))
                 .ForMember(dest => dest.Adres,
                     opt => opt.MapFrom(src => src.Adres)) // ✅ EKLEME
-                .ForMember(dest => dest.HizmetBinasiAktiflik,
-                    opt => opt.MapFrom(src => src.HizmetBinasiAktiflik))
+                .ForMember(dest => dest.Aktiflik,
+                    opt => opt.MapFrom(src => src.Aktiflik))
                 .ForMember(dest => dest.DepartmanId,
                     opt => opt.MapFrom(src => src.DepartmanId))
                 .ForMember(dest => dest.DepartmanAdi,
@@ -63,7 +63,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
                     opt => opt.MapFrom(src => src.Bankolar != null ? src.Bankolar.Count : 0))
                 .ForMember(dest => dest.AktifBankoSayisi,
                     opt => opt.MapFrom(src => src.Bankolar != null
-                        ? src.Bankolar.Count(b => b.BankoAktiflik == Aktiflik.Aktif)
+                        ? src.Bankolar.Count(b => b.Aktiflik == Aktiflik.Aktif)
                         : 0)) // ✅ EKLEME
                 .ForMember(dest => dest.ToplamTvSayisi,
                     opt => opt.MapFrom(src => src.Tvler != null ? src.Tvler.Count : 0))
@@ -101,8 +101,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
                     opt => opt.MapFrom(src => src.TvAdi))
                 .ForMember(dest => dest.TvAciklama,
                     opt => opt.MapFrom(src => src.TvAciklama))
-                .ForMember(dest => dest.TvAktiflik,
-                    opt => opt.MapFrom(src => src.TvAktiflik))
+                .ForMember(dest => dest.Aktiflik,
+                    opt => opt.MapFrom(src => src.Aktiflik))
                 .ForMember(dest => dest.HizmetBinasiId,
                     opt => opt.MapFrom(src => src.HizmetBinasiId))
                 .ForMember(dest => dest.HizmetBinasiAdi,

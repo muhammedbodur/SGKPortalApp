@@ -24,7 +24,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .HasConversion<string>()
                 .HasMaxLength(50);
 
-            builder.Property(bi => bi.BankoIslemAktiflik)
+            builder.Property(bi => bi.Aktiflik)
                 .IsRequired()
                 .HasConversion<int>()
                 .HasDefaultValue(Aktiflik.Aktif);

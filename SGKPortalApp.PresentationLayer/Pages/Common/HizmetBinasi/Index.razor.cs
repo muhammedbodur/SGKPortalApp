@@ -155,8 +155,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
 
             query = filterStatus switch
             {
-                "active" => query.Where(d => d.HizmetBinasiAktiflik == Aktiflik.Aktif),
-                "passive" => query.Where(d => d.HizmetBinasiAktiflik == Aktiflik.Pasif),
+                "active" => query.Where(d => d.Aktiflik == Aktiflik.Aktif),
+                "passive" => query.Where(d => d.Aktiflik == Aktiflik.Pasif),
                 _ => query
             };
 
@@ -224,10 +224,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                     return;
                 }
 
-                hizmetBinasi.HizmetBinasiAktiflik = hizmetBinasi.HizmetBinasiAktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif;
+                hizmetBinasi.Aktiflik = hizmetBinasi.Aktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif;
                 hizmetBinasi.DuzenlenmeTarihi = DateTime.Now;
 
-                var statusText = hizmetBinasi.HizmetBinasiAktiflik == Aktiflik.Aktif ? "aktif" : "pasif";
+                var statusText = hizmetBinasi.Aktiflik == Aktiflik.Aktif ? "aktif" : "pasif";
                 await _toastService.ShowSuccessAsync($"HizmetBinasi {statusText} yapıldı.");
 
                 ApplyFiltersAndSort();
@@ -324,12 +324,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                 {
                     worksheet.Cell(row, 1).Value = hizmetBinasi.HizmetBinasiAdi;
                     worksheet.Cell(row, 2).Value = hizmetBinasi.PersonelSayisi;
-                    worksheet.Cell(row, 3).Value = hizmetBinasi.HizmetBinasiAktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
+                    worksheet.Cell(row, 3).Value = hizmetBinasi.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif";
                     worksheet.Cell(row, 4).Value = hizmetBinasi.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm");
                     worksheet.Cell(row, 5).Value = hizmetBinasi.DuzenlenmeTarihi.ToString("dd.MM.yyyy HH:mm");
 
                     worksheet.Cell(row, 3).Style.Fill.BackgroundColor =
-                        hizmetBinasi.HizmetBinasiAktiflik == Aktiflik.Aktif ? XLColor.LightGreen : XLColor.LightPink;
+                        hizmetBinasi.Aktiflik == Aktiflik.Aktif ? XLColor.LightGreen : XLColor.LightPink;
                     row++;
                 }
 
@@ -398,13 +398,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                                 row.RelativeItem().Border(1).Padding(5).Column(col =>
                                 {
                                     col.Item().Text("Aktif").Bold();
-                                    col.Item().Text(HizmetBinalari.Count(d => d.HizmetBinasiAktiflik == Aktiflik.Aktif).ToString()).FontSize(14).FontColor(Colors.Green.Darken2);
+                                    col.Item().Text(HizmetBinalari.Count(d => d.Aktiflik == Aktiflik.Aktif).ToString()).FontSize(14).FontColor(Colors.Green.Darken2);
                                 });
 
                                 row.RelativeItem().Border(1).Padding(5).Column(col =>
                                 {
                                     col.Item().Text("Pasif").Bold();
-                                    col.Item().Text(HizmetBinalari.Count(d => d.HizmetBinasiAktiflik == Aktiflik.Pasif).ToString()).FontSize(14).FontColor(Colors.Red.Darken2);
+                                    col.Item().Text(HizmetBinalari.Count(d => d.Aktiflik == Aktiflik.Pasif).ToString()).FontSize(14).FontColor(Colors.Red.Darken2);
                                 });
                             });
 
@@ -434,7 +434,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                                 {
                                     table.Cell().Border(1).Padding(5).Text(d.HizmetBinasiAdi);
                                     table.Cell().Border(1).Padding(5).AlignCenter().Text(d.PersonelSayisi.ToString());
-                                    table.Cell().Border(1).Padding(5).AlignCenter().Text(d.HizmetBinasiAktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif").FontColor(d.HizmetBinasiAktiflik == Aktiflik.Aktif ? Colors.Green.Darken2 : Colors.Red.Darken2);
+                                    table.Cell().Border(1).Padding(5).AlignCenter().Text(d.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif").FontColor(d.Aktiflik == Aktiflik.Aktif ? Colors.Green.Darken2 : Colors.Red.Darken2);
                                     table.Cell().Border(1).Padding(5).AlignCenter().Text(d.EklenmeTarihi.ToString("dd.MM.yyyy"));
                                 }
                             });

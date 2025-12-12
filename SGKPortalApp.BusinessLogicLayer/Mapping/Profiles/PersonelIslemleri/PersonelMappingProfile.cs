@@ -19,7 +19,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
 
             CreateMap<DepartmanCreateRequestDto, Departman>()
                 .ForMember(dest => dest.DepartmanId, opt => opt.Ignore())
-                .ForMember(dest => dest.DepartmanAktiflik,
+                .ForMember(dest => dest.Aktiflik,
                     opt => opt.MapFrom(src => BusinessObjectLayer.Enums.Common.Aktiflik.Aktif))
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
@@ -45,7 +45,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
 
             CreateMap<ServisCreateRequestDto, Servis>()
                 .ForMember(dest => dest.ServisId, opt => opt.Ignore())
-                .ForMember(dest => dest.ServisAktiflik,
+                .ForMember(dest => dest.Aktiflik,
                     opt => opt.MapFrom(src => BusinessObjectLayer.Enums.Common.Aktiflik.Aktif))
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
@@ -68,7 +68,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
 
             CreateMap<UnvanCreateRequestDto, Unvan>()
                 .ForMember(dest => dest.UnvanId, opt => opt.Ignore())
-                .ForMember(dest => dest.UnvanAktiflik,
+                .ForMember(dest => dest.Aktiflik,
                     opt => opt.MapFrom(src => BusinessObjectLayer.Enums.Common.Aktiflik.Aktif))
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))

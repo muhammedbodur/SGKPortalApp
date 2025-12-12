@@ -78,13 +78,13 @@
                                 <label class="form-label required">
                                     <i class="bx bx-building me-1"></i>Hizmet Binası
                                 </label>
-                                @if (IsEditMode)
+                                @if (IsEditMode || isHizmetBinasiFromUrl)
                                 {
-                                    <!-- Düzenleme modunda readonly -->
+                                    <!-- Düzenleme modunda veya URL'den parametre geldiyse readonly -->
                                     <input type="text" class="form-control"
                                            value="@hizmetBinasiAdi"
                                            disabled readonly />
-                                    <small class="text-muted">Düzenleme sırasında hizmet binası değiştirilemez</small>
+                                    <small class="text-muted">@(IsEditMode ? "Düzenleme sırasında hizmet binası değiştirilemez" : "Index sayfasından seçilen hizmet binası")</small>
                                 }
                                 else
                                 {
@@ -106,15 +106,26 @@
                                 <label class="form-label required">
                                     <i class="bx bx-category me-1"></i>Ana Kanal
                                 </label>
-                                <InputSelect @bind-Value="model.KanalId" class="form-select" disabled="@isSaving">
-                                    <option value="0">-- Kanal Seçiniz --</option>
-                                    @foreach (var kanal in anaKanallar)
-                                    {
-                                        <option value="@kanal.KanalId">@kanal.KanalAdi</option>
-                                    }
-                                </InputSelect>
-                                <ValidationMessage For="@(() => model.KanalId)" class="text-danger small mt-1" />
-                                <small class="text-muted">Önce ana kanal tanımlanmalıdır</small>
+                                @if (IsEditMode)
+                                {
+                                    <!-- Düzenleme modunda readonly -->
+                                    <input type="text" class="form-control"
+                                           value="@model.KanalAdi"
+                                           disabled readonly />
+                                    <small class="text-muted">Düzenleme sırasında ana kanal değiştirilemez</small>
+                                }
+                                else
+                                {
+                                    <InputSelect @bind-Value="model.KanalId" class="form-select" disabled="@isSaving">
+                                        <option value="0">-- Kanal Seçiniz --</option>
+                                        @foreach (var kanal in filteredAnaKanallar)
+                                        {
+                                            <option value="@kanal.KanalId">@kanal.KanalAdi</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => model.KanalId)" class="text-danger small mt-1" />
+                                    <small class="text-muted">Önce ana kanal tanımlanmalıdır</small>
+                                }
                             </div>
 
                             <!-- Başlangıç ve Bitiş Numarası -->

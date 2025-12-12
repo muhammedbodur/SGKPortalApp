@@ -19,6 +19,13 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
             _logger = logger;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _kioskMenuIslemService.GetAllAsync();
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
         [HttpGet("menu/{kioskMenuId:int}")]
         public async Task<IActionResult> GetByKioskMenu(int kioskMenuId)
         {

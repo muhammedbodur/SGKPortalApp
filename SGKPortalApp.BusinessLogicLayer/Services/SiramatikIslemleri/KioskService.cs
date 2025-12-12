@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
@@ -16,15 +17,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<KioskService> _logger;
+        private readonly ICascadeHelper _cascadeHelper;
 
         public KioskService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<KioskService> logger)
+            ILogger<KioskService> logger,
+            ICascadeHelper cascadeHelper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _cascadeHelper = cascadeHelper;
         }
 
         public async Task<ApiResponseDto<List<KioskResponseDto>>> GetAllAsync()
@@ -255,42 +259,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
         /// <summary>
         /// Cascade delete: Kiosk silindiğinde child kayıtları da siler
+        /// CascadeHelper kullanarak tracking conflict'leri otomatik handle eder
         /// </summary>
         private async Task CascadeDeleteAsync(int kioskId)
         {
-            // KioskMenuAtama kayıtlarını soft delete
-            var kioskMenuAtamaRepo = _unitOfWork.Repository<KioskMenuAtama>();
-            var kioskMenuAtamalar = await kioskMenuAtamaRepo.FindAsync(x => x.KioskId == kioskId);
-
-            foreach (var atama in kioskMenuAtamalar)
-            {
-                atama.SilindiMi = true;
-                atama.DuzenlenmeTarihi = DateTime.Now;
-                kioskMenuAtamaRepo.Update(atama);
-            }
-
-            _logger.LogInformation("Cascade delete: KioskId={KioskId}, KioskMenuAtama={Count}",
-                kioskId, kioskMenuAtamalar.Count());
+            await _cascadeHelper.CascadeSoftDeleteAsync<KioskMenuAtama>(x => x.KioskId == kioskId);
+            _logger.LogInformation("Cascade delete: KioskId={KioskId}", kioskId);
         }
 
         /// <summary>
-        /// Cascade update: Kiosk pasif yapıldığında child kayıtları da soft delete
+        /// Cascade update: Kiosk pasif yapıldığında child kayıtları da pasif yap
+        /// CascadeHelper kullanarak tracking conflict'leri otomatik handle eder
         /// </summary>
         private async Task CascadeAktiflikUpdateAsync(int kioskId)
         {
-            // KioskMenuAtama kayıtlarını pasif yap
-            var kioskMenuAtamaRepo = _unitOfWork.Repository<KioskMenuAtama>();
-            var kioskMenuAtamalar = await kioskMenuAtamaRepo.FindAsync(x => x.KioskId == kioskId && x.Aktiflik == Aktiflik.Aktif);
-
-            foreach (var atama in kioskMenuAtamalar)
-            {
-                atama.Aktiflik = Aktiflik.Pasif;
-                atama.DuzenlenmeTarihi = DateTime.Now;
-                kioskMenuAtamaRepo.Update(atama);
-            }
-
-            _logger.LogInformation("Cascade pasif: KioskId={KioskId}, KioskMenuAtama={Count}",
-                kioskId, kioskMenuAtamalar.Count());
+            await _cascadeHelper.CascadeAktiflikUpdateAsync<KioskMenuAtama>(x => x.KioskId == kioskId, Aktiflik.Pasif);
+            _logger.LogInformation("Cascade pasif: KioskId={KioskId}", kioskId);
         }
     }
 }

@@ -29,7 +29,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .HasConversion<int>()
                 .HasComment("Kat bilgisi");
 
-            builder.Property(b => b.BankoAktiflik)
+            builder.Property(b => b.Aktiflik)
                 .IsRequired()
                 .HasConversion<int>()
                 .HasDefaultValue(Aktiflik.Aktif)
@@ -62,8 +62,8 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .HasDatabaseName("IX_SIR_Bankolar_HizmetBinasi_Kat_BankoNo")
                 .HasFilter("[SilindiMi] = 0");
 
-            builder.HasIndex(b => b.BankoAktiflik)
-                .HasDatabaseName("IX_SIR_Bankolar_BankoAktiflik");
+            builder.HasIndex(b => b.Aktiflik)
+                .HasDatabaseName("IX_SIR_Bankolar_Aktiflik");
 
             builder.HasQueryFilter(b => !b.SilindiMi);
 

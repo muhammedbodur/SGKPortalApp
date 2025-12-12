@@ -115,11 +115,11 @@
                         </span>
                         <span>
                             <i class="bx bx-check-circle text-success"></i>
-                            Aktif: <strong>@Servisler.Count(d => d.ServisAktiflik == Aktiflik.Aktif)</strong>
+                            Aktif: <strong>@Servisler.Count(d => d.Aktiflik == Aktiflik.Aktif)</strong>
                         </span>
                         <span>
                             <i class="bx bx-x-circle text-danger"></i>
-                            Pasif: <strong>@Servisler.Count(d => d.ServisAktiflik == Aktiflik.Pasif)</strong>
+                            Pasif: <strong>@Servisler.Count(d => d.Aktiflik == Aktiflik.Pasif)</strong>
                         </span>
                         <span>
                             <i class="bx bx-filter-alt text-info"></i>
@@ -219,7 +219,7 @@
                                         </span>
                                     </td>
                                     <td class="text-center">
-                                        @if (Servis.ServisAktiflik == Aktiflik.Aktif)
+                                        @if (Servis.Aktiflik == Aktiflik.Aktif)
                                         {
                                             <span class="badge bg-label-success">
                                                 <i class="bx bx-check-circle me-1"></i>Aktif
@@ -248,10 +248,10 @@
                                             </button>
 
                                             <!-- Aktif/Pasif Toggle -->
-                                            <button class="btn btn-sm btn-icon @(Servis.ServisAktiflik == Aktiflik.Aktif ? "btn-outline-warning" : "btn-outline-success")"
-                                                    @onclick="() => ShowToggleStatusConfirmation(Servis.ServisId, Servis.ServisAdi, Servis.ServisAktiflik)"
-                                                    title="@(Servis.ServisAktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")">
-                                                <i class="bx @(Servis.ServisAktiflik == Aktiflik.Aktif ? "bx-toggle-right" : "bx-toggle-left")"></i>
+                                            <button class="btn btn-sm btn-icon @(Servis.Aktiflik == Aktiflik.Aktif ? "btn-outline-warning" : "btn-outline-success")"
+                                                    @onclick="() => ShowToggleStatusConfirmation(Servis.ServisId, Servis.ServisAdi, Servis.Aktiflik)"
+                                                    title="@(Servis.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")">
+                                                <i class="bx @(Servis.Aktiflik == Aktiflik.Aktif ? "bx-toggle-right" : "bx-toggle-left")"></i>
                                             </button>
 
                                             <!-- Sil -->

@@ -15,6 +15,6 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common
         [StringLength(500, ErrorMessage = "Adres en fazla 500 karakter olabilir")]
         public string Adres { get; set; } = string.Empty;
 
-        public Aktiflik HizmetBinasiAktiflik { get; set; } = Aktiflik.Aktif;
+        public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
     }
 }

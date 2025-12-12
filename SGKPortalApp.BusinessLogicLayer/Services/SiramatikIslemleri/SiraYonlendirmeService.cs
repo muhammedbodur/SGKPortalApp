@@ -542,7 +542,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 var tumBankolar = await _bankoRepository.GetAllAsync();
                 var aktifBankolar = new List<BankoOptionDto>();
 
-                foreach (var banko in tumBankolar.Where(b => !b.SilindiMi && b.BankoAktiflik == Aktiflik.Aktif))
+                foreach (var banko in tumBankolar.Where(b => !b.SilindiMi && b.Aktiflik == Aktiflik.Aktif))
                 {
                     // Kaynak banko hariç (aynı bankoya yönlendirme yapılmaz)
                     if (banko.BankoId == kaynakBankoId)

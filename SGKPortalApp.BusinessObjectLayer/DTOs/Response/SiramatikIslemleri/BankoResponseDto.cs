@@ -14,7 +14,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
         public string BankoTipiAdi { get; set; } = string.Empty;
         public KatTipi KatTipi { get; set; }
         public string KatTipiAdi { get; set; } = string.Empty;
-        public Aktiflik BankoAktiflik { get; set; }
+        public Aktiflik Aktiflik { get; set; }
         public string? BankoAciklama { get; set; }
         public int BankoSira { get; set; }
 

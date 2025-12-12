@@ -5,6 +5,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
@@ -18,17 +19,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly ICommonQueryRepository _commonQueryRepository;
         private readonly IMapper _mapper;
         private readonly ILogger<HizmetBinasiService> _logger;
+        private readonly ICascadeHelper _cascadeHelper;
 
         public HizmetBinasiService(
             IUnitOfWork unitOfWork,
             ICommonQueryRepository commonQueryRepository,
             IMapper mapper,
-            ILogger<HizmetBinasiService> logger)
+            ILogger<HizmetBinasiService> logger,
+            ICascadeHelper cascadeHelper)
         {
             _unitOfWork = unitOfWork;
             _commonQueryRepository = commonQueryRepository;
             _mapper = mapper;
             _logger = logger;
+            _cascadeHelper = cascadeHelper;
         }
 
         public async Task<ApiResponseDto<List<HizmetBinasiResponseDto>>> GetAllAsync()
@@ -53,7 +57,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                         DepartmanId = hb.DepartmanId,
                         DepartmanAdi = hb.Departman?.DepartmanAdi ?? string.Empty,
                         Adres = hb.Adres,
-                        HizmetBinasiAktiflik = hb.HizmetBinasiAktiflik,
+                        Aktiflik = hb.Aktiflik,
                         PersonelSayisi = personelCount,
                         BankoSayisi = bankoCount,
                         TvSayisi = tvCount,
@@ -94,7 +98,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     DepartmanId = entity.DepartmanId,
                     DepartmanAdi = entity.Departman?.DepartmanAdi ?? string.Empty,
                     Adres = entity.Adres,
-                    HizmetBinasiAktiflik = entity.HizmetBinasiAktiflik,
+                    Aktiflik = entity.Aktiflik,
                     PersonelSayisi = personelCount,
                     BankoSayisi = bankoCount,
                     TvSayisi = tvCount,
@@ -301,14 +305,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 if (entity == null)
                     return ApiResponseDto<bool>.ErrorResult("Hizmet binası bulunamadı");
 
-                entity.HizmetBinasiAktiflik = entity.HizmetBinasiAktiflik == Aktiflik.Aktif
+                var yeniDurum = entity.Aktiflik == Aktiflik.Aktif
                     ? Aktiflik.Pasif
                     : Aktiflik.Aktif;
 
+                entity.Aktiflik = yeniDurum;
                 hizmetBinasiRepo.Update(entity);
+
+                // Cascade: Pasif yapıldıysa child kayıtları da pasif yap
+                if (yeniDurum == Aktiflik.Pasif)
+                {
+                    await CascadeAktiflikUpdateAsync(id);
+                }
+
                 await _unitOfWork.SaveChangesAsync();
 
-                var statusText = entity.HizmetBinasiAktiflik == Aktiflik.Aktif ? "aktif" : "pasif";
+                var statusText = yeniDurum == Aktiflik.Aktif ? "aktif" : "pasif";
                 _logger.LogInformation("Hizmet binası durumu değiştirildi. ID: {Id}, Yeni Durum: {Status}", id, statusText);
 
                 return ApiResponseDto<bool>
@@ -339,7 +351,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     ServisId = s.ServisId,
                     ServisAdi = s.ServisAdi,
                     PersonelSayisi = s.PersonelSayisi,
-                    ServisAktiflik = Aktiflik.Aktif, // Repository'den gelen veriler zaten aktif
+                    Aktiflik = Aktiflik.Aktif, // Repository'den gelen veriler zaten aktif
                     EklenmeTarihi = DateTime.Now,
                     DuzenlenmeTarihi = DateTime.Now
                 }).ToList();
@@ -359,6 +371,21 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 return ApiResponseDto<List<ServisResponseDto>>
                     .ErrorResult("Hizmet binası servisleri getirilirken bir hata oluştu", ex.Message);
             }
+        }
+
+        /// <summary>
+        /// Cascade update: HizmetBinasi pasif yapıldığında child kayıtları da pasif yap
+        /// CascadeHelper kullanarak tracking conflict'leri otomatik handle eder
+        /// </summary>
+        private async Task CascadeAktiflikUpdateAsync(int hizmetBinasiId)
+        {
+            // Banko kayıtlarını pasif yap
+            await _cascadeHelper.CascadeAktiflikUpdateAsync<Banko>(x => x.HizmetBinasiId == hizmetBinasiId, Aktiflik.Pasif);
+            
+            // Tv kayıtlarını pasif yap
+            await _cascadeHelper.CascadeAktiflikUpdateAsync<Tv>(x => x.HizmetBinasiId == hizmetBinasiId, Aktiflik.Pasif);
+
+            _logger.LogInformation("Cascade pasif: HizmetBinasiId={HizmetBinasiId}", hizmetBinasiId);
         }
     }
 }

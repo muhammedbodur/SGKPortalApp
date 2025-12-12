@@ -10,6 +10,6 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels.PersonelIslemleri
         [MinLength(2, ErrorMessage = "Departman adı en az 2 karakter olmalıdır")]
         public string DepartmanAdi { get; set; } = string.Empty;
 
-        public Aktiflik DepartmanAktiflik { get; set; } = Aktiflik.Aktif;
+        public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
     }
 }

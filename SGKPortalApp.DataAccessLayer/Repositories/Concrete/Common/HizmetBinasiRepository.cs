@@ -87,7 +87,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
         {
             return await _dbSet
                 .AsNoTracking()
-                .Where(hb => hb.HizmetBinasiAktiflik == Aktiflik.Aktif)
+                .Where(hb => hb.Aktiflik == Aktiflik.Aktif)
                 .OrderBy(hb => hb.HizmetBinasiAdi)
                 .ToListAsync();
         }
@@ -114,7 +114,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
         {
             return await _dbSet
                 .AsNoTracking()
-                .Where(hb => hb.HizmetBinasiAktiflik == Aktiflik.Aktif)
+                .Where(hb => hb.Aktiflik == Aktiflik.Aktif)
                 .OrderBy(hb => hb.HizmetBinasiAdi)
                 .Select(hb => new ValueTuple<int, string>(hb.HizmetBinasiId, hb.HizmetBinasiAdi))
                 .ToListAsync();

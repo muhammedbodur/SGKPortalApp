@@ -14,7 +14,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
         public string TvAdi { get; set; } = string.Empty;
         public string? TvAciklama { get; set; }
         public KatTipi KatTipi { get; set; }
-        public Aktiflik TvAktiflik { get; set; }
+        public Aktiflik Aktiflik { get; set; }
 
         // Foreign Key - Hizmet Binası
         public int HizmetBinasiId { get; set; }

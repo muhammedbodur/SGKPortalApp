@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
@@ -16,15 +17,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<KanalIslemService> _logger;
+        private readonly ICascadeHelper _cascadeHelper;
 
         public KanalIslemService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<KanalIslemService> logger)
+            ILogger<KanalIslemService> logger,
+            ICascadeHelper cascadeHelper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _cascadeHelper = cascadeHelper;
         }
 
         public async Task<ApiResponseDto<List<KanalIslemResponseDto>>> GetAllAsync()
@@ -58,7 +62,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 }
 
                 var kanalIslemRepo = _unitOfWork.GetRepository<IKanalIslemRepository>();
-                var kanalIslem = await kanalIslemRepo.GetByIdAsync(kanalIslemId);
+                // GetWithDetailsAsync kullanarak Kanal ve HizmetBinasi navigation property'lerini include et
+                var kanalIslem = await kanalIslemRepo.GetWithDetailsAsync(kanalIslemId);
 
                 if (kanalIslem == null)
                 {
@@ -100,6 +105,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 {
                     return ApiResponseDto<KanalIslemResponseDto>
                         .ErrorResult("Başlangıç numarası, bitiş numarasından küçük olmalıdır");
+                }
+
+                // Üst kaydın (Kanal) silinmiş veya pasif olup olmadığını kontrol et
+                var kanalRepo = _unitOfWork.GetRepository<IKanalRepository>();
+                var kanal = await kanalRepo.GetByIdAsync(request.KanalId);
+                
+                if (kanal == null || kanal.SilindiMi)
+                {
+                    return ApiResponseDto<KanalIslemResponseDto>
+                        .ErrorResult("Bağlı olduğu Kanal silinmiş olduğu için bu kanal işlem eklenemez.");
+                }
+                
+                if (kanal.Aktiflik != Aktiflik.Aktif)
+                {
+                    return ApiResponseDto<KanalIslemResponseDto>
+                        .ErrorResult("Bağlı olduğu Kanal pasif durumda olduğu için bu kanal işlem eklenemez. Önce Kanal'ı aktif ediniz.");
                 }
 
                 var kanalIslemRepo = _unitOfWork.GetRepository<IKanalIslemRepository>();
@@ -171,7 +192,29 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         .ErrorResult("Kanal işlem bulunamadı");
                 }
 
+                if (kanalIslem.SilindiMi)
+                {
+                    return ApiResponseDto<KanalIslemResponseDto>
+                        .ErrorResult("Kanal işlem silinmiş olduğu için güncellenemez.");
+                }
+
                 var oldAktiflik = kanalIslem.Aktiflik;
+
+                // Üst kaydın (Kanal) silinmiş veya pasif olup olmadığını kontrol et
+                var kanalRepo = _unitOfWork.GetRepository<IKanalRepository>();
+                var kanal = await kanalRepo.GetByIdAsync(request.KanalId);
+                
+                if (kanal == null || kanal.SilindiMi)
+                {
+                    return ApiResponseDto<KanalIslemResponseDto>
+                        .ErrorResult("Bağlı olduğu Kanal silinmiş olduğu için bu kanal işlem güncellenemez.");
+                }
+                
+                if (request.Aktiflik == Aktiflik.Aktif && kanal.Aktiflik != Aktiflik.Aktif)
+                {
+                    return ApiResponseDto<KanalIslemResponseDto>
+                        .ErrorResult("Bağlı olduğu Kanal pasif durumda olduğu için bu kanal işlem aktif edilemez. Önce Kanal'ı aktif ediniz.");
+                }
 
                 // Update
                 kanalIslem.KanalId = request.KanalId;
@@ -324,42 +367,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
         /// <summary>
         /// Cascade delete: KanalIslem silindiğinde child kayıtları da siler
+        /// CascadeHelper kullanarak tracking conflict'leri otomatik handle eder
         /// </summary>
         private async Task CascadeDeleteAsync(int kanalIslemId)
         {
-            // KanalAltIslem kayıtlarını soft delete
-            var kanalAltIslemRepo = _unitOfWork.Repository<KanalAltIslem>();
-            var kanalAltIslemler = await kanalAltIslemRepo.FindAsync(x => x.KanalIslemId == kanalIslemId);
-
-            foreach (var islem in kanalAltIslemler)
-            {
-                islem.SilindiMi = true;
-                islem.DuzenlenmeTarihi = DateTime.Now;
-                kanalAltIslemRepo.Update(islem);
-            }
-
-            _logger.LogInformation("Cascade delete: KanalIslemId={KanalIslemId}, KanalAltIslem={Count}",
-                kanalIslemId, kanalAltIslemler.Count());
+            await _cascadeHelper.CascadeSoftDeleteAsync<KanalAltIslem>(x => x.KanalIslemId == kanalIslemId);
+            _logger.LogInformation("Cascade delete: KanalIslemId={KanalIslemId}", kanalIslemId);
         }
 
         /// <summary>
         /// Cascade update: KanalIslem Aktiflik değiştiğinde child kayıtları da günceller
+        /// CascadeHelper kullanarak tracking conflict'leri otomatik handle eder
         /// </summary>
         private async Task CascadeAktiflikUpdateAsync(int kanalIslemId, Aktiflik yeniAktiflik)
         {
-            // KanalAltIslem kayıtlarını güncelle
-            var kanalAltIslemRepo = _unitOfWork.Repository<KanalAltIslem>();
-            var kanalAltIslemler = await kanalAltIslemRepo.FindAsync(x => x.KanalIslemId == kanalIslemId);
-
-            foreach (var islem in kanalAltIslemler)
-            {
-                islem.Aktiflik = yeniAktiflik;
-                islem.DuzenlenmeTarihi = DateTime.Now;
-                kanalAltIslemRepo.Update(islem);
-            }
-
-            _logger.LogInformation("Cascade aktiflik update: KanalIslemId={KanalIslemId}, YeniAktiflik={Aktiflik}, KanalAltIslem={Count}",
-                kanalIslemId, yeniAktiflik, kanalAltIslemler.Count());
+            await _cascadeHelper.CascadeAktiflikUpdateAsync<KanalAltIslem>(x => x.KanalIslemId == kanalIslemId, yeniAktiflik);
+            _logger.LogInformation("Cascade aktiflik update: KanalIslemId={KanalIslemId}, YeniAktiflik={Aktiflik}", kanalIslemId, yeniAktiflik);
         }
     }
 }

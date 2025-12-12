@@ -87,7 +87,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Unvan
                         FormModel = new UnvanFormModel
                         {
                             UnvanAdi = unvan.UnvanAdi,
-                            IsActive = unvan.UnvanAktiflik == Aktiflik.Aktif
+                            IsActive = unvan.Aktiflik == Aktiflik.Aktif
                         };
 
                         CurrentPersonelSayisi = unvan.PersonelSayisi;
@@ -129,7 +129,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Unvan
                     var updateDto = new UnvanUpdateRequestDto
                     {
                         UnvanAdi = FormModel.UnvanAdi.Trim(),
-                        UnvanAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
+                        Aktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
                     var result = await _unvanService.UpdateAsync(Id!.Value, updateDto);
@@ -149,7 +149,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Unvan
                     var createDto = new UnvanCreateRequestDto
                     {
                         UnvanAdi = FormModel.UnvanAdi.Trim(),
-                        UnvanAktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
+                        Aktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
                     var result = await _unvanService.CreateAsync(createDto);

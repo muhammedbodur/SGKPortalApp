@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
@@ -24,15 +25,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<TvService> _logger;
+        private readonly ICascadeHelper _cascadeHelper;
 
         public TvService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<TvService> logger)
+            ILogger<TvService> logger,
+            ICascadeHelper cascadeHelper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _cascadeHelper = cascadeHelper;
         }
 
         public async Task<ApiResponseDto<TvResponseDto>> CreateAsync(TvCreateRequestDto request)
@@ -40,6 +44,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             try
             {
                 var tvRepo = _unitOfWork.GetRepository<ITvRepository>();
+
+                // Aynı isimde TV var mı kontrol et
+                var existingTv = await tvRepo.FindAsync(t => t.TvAdi == request.TvAdi && !t.SilindiMi);
+                if (existingTv.Any())
+                {
+                    return ApiResponseDto<TvResponseDto>.ErrorResult("Bu isimde bir TV zaten mevcut");
+                }
                 
                 var tv = _mapper.Map<Tv>(request);
                 tv.IslemZamani = DateTime.Now;
@@ -73,7 +84,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     return ApiResponseDto<TvResponseDto>.ErrorResult("TV bulunamadı");
                 }
 
-                var oldAktiflik = existingTv.TvAktiflik;
+                // Aynı isimde başka TV var mı kontrol et (kendisi hariç)
+                var duplicateTv = await tvRepo.FindAsync(t => t.TvAdi == request.TvAdi && t.TvId != request.TvId && !t.SilindiMi);
+                if (duplicateTv.Any())
+                {
+                    return ApiResponseDto<TvResponseDto>.ErrorResult("Bu isimde bir TV zaten mevcut");
+                }
+
+                var oldAktiflik = existingTv.Aktiflik;
 
                 _mapper.Map(request, existingTv);
                 existingTv.DuzenlenmeTarihi = DateTime.Now;
@@ -82,7 +100,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 tvRepo.Update(existingTv);
 
                 // Cascade: Aktiflik değişmişse child kayıtları da güncelle
-                if (oldAktiflik != existingTv.TvAktiflik && existingTv.TvAktiflik == Aktiflik.Pasif)
+                if (oldAktiflik != existingTv.Aktiflik && existingTv.Aktiflik == Aktiflik.Pasif)
                 {
                     await CascadeAktiflikUpdateAsync(existingTv.TvId);
                 }
@@ -256,7 +274,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             {
                 var tvRepo = _unitOfWork.GetRepository<ITvRepository>();
                 var tvler = await tvRepo.GetAllWithDetailsAsync();
-                var filteredTvler = tvler.Where(t => t.TvAktiflik == Aktiflik.Aktif).ToList();
+                var filteredTvler = tvler.Where(t => t.Aktiflik == Aktiflik.Aktif).ToList();
                 var response = _mapper.Map<List<TvResponseDto>>(filteredTvler);
                 
                 // Her TV için banko sayısını ve bağlantı durumunu set et
@@ -623,65 +641,32 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
         /// <summary>
         /// Cascade delete: TV silindiğinde child kayıtları da siler
+        /// CascadeHelper kullanarak tracking conflict'leri otomatik handle eder
         /// </summary>
         private async Task CascadeDeleteAsync(int tvId)
         {
-            // TvBanko kayıtlarını soft delete (many-to-many join table)
-            var tvBankoRepo = _unitOfWork.Repository<TvBanko>();
-            var tvBankolar = await tvBankoRepo.FindAsync(x => x.TvId == tvId);
-
-            foreach (var tvBanko in tvBankolar)
-            {
-                tvBanko.SilindiMi = true;
-                tvBanko.DuzenlenmeTarihi = DateTime.Now;
-                tvBankoRepo.Update(tvBanko);
-            }
-
+            // TvBanko kayıtlarını soft delete
+            await _cascadeHelper.CascadeSoftDeleteAsync<TvBanko>(x => x.TvId == tvId);
+            
             // HubTvConnection kayıtlarını soft delete
-            var hubTvConnectionRepo = _unitOfWork.Repository<HubTvConnection>();
-            var hubTvConnections = await hubTvConnectionRepo.FindAsync(x => x.TvId == tvId);
+            await _cascadeHelper.CascadeSoftDeleteAsync<HubTvConnection>(x => x.TvId == tvId);
 
-            foreach (var connection in hubTvConnections)
-            {
-                connection.SilindiMi = true;
-                connection.DuzenlenmeTarihi = DateTime.Now;
-                hubTvConnectionRepo.Update(connection);
-            }
-
-            _logger.LogInformation("Cascade delete: TvId={TvId}, TvBanko={Count1}, HubTvConnection={Count2}",
-                tvId, tvBankolar.Count(), hubTvConnections.Count());
+            _logger.LogInformation("Cascade delete: TvId={TvId}", tvId);
         }
 
         /// <summary>
         /// Cascade update: TV pasif yapıldığında child kayıtları da soft delete
+        /// CascadeHelper kullanarak tracking conflict'leri otomatik handle eder
         /// </summary>
         private async Task CascadeAktiflikUpdateAsync(int tvId)
         {
             // TvBanko kayıtlarını soft delete (pasif TV'nin bankoları kaldırılmalı)
-            var tvBankoRepo = _unitOfWork.Repository<TvBanko>();
-            var tvBankolar = await tvBankoRepo.FindAsync(x => x.TvId == tvId && !x.SilindiMi);
-
-            foreach (var tvBanko in tvBankolar)
-            {
-                tvBanko.SilindiMi = true;
-                tvBanko.DuzenlenmeTarihi = DateTime.Now;
-                tvBankoRepo.Update(tvBanko);
-            }
-
+            await _cascadeHelper.CascadeSoftDeleteAsync<TvBanko>(x => x.TvId == tvId);
+            
             // HubTvConnection kayıtlarını soft delete
-            var hubTvConnectionRepo = _unitOfWork.Repository<HubTvConnection>();
-            var hubTvConnections = await hubTvConnectionRepo.FindAsync(x => x.TvId == tvId && !x.SilindiMi);
+            await _cascadeHelper.CascadeSoftDeleteAsync<HubTvConnection>(x => x.TvId == tvId);
 
-            foreach (var connection in hubTvConnections)
-            {
-                connection.SilindiMi = true;
-                connection.DuzenlenmeTarihi = DateTime.Now;
-                hubTvConnectionRepo.Update(connection);
-            }
-
-            _logger.LogInformation("Cascade pasif: TvId={TvId}, TvBanko={Count1}, HubTvConnection={Count2}",
-                tvId, tvBankolar.Count(), hubTvConnections.Count());
+            _logger.LogInformation("Cascade pasif: TvId={TvId}", tvId);
         }
-
     }
 }

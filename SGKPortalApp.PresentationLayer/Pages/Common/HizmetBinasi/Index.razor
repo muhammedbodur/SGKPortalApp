@@ -115,11 +115,11 @@
                         </span>
                         <span>
                             <i class="bx bx-check-circle text-success"></i>
-                            Aktif: <strong>@HizmetBinalari.Count(d => d.HizmetBinasiAktiflik == Aktiflik.Aktif)</strong>
+                            Aktif: <strong>@HizmetBinalari.Count(d => d.Aktiflik == Aktiflik.Aktif)</strong>
                         </span>
                         <span>
                             <i class="bx bx-x-circle text-danger"></i>
-                            Pasif: <strong>@HizmetBinalari.Count(d => d.HizmetBinasiAktiflik == Aktiflik.Pasif)</strong>
+                            Pasif: <strong>@HizmetBinalari.Count(d => d.Aktiflik == Aktiflik.Pasif)</strong>
                         </span>
                         <span>
                             <i class="bx bx-filter-alt text-info"></i>
@@ -222,7 +222,7 @@
                                         </span>
                                     </td>
                                     <td class="text-center">
-                                        @if (hizmetbinasi.HizmetBinasiAktiflik == Aktiflik.Aktif)
+                                        @if (hizmetbinasi.Aktiflik == Aktiflik.Aktif)
                                         {
                                             <span class="badge bg-label-success">
                                                 <i class="bx bx-check-circle me-1"></i>Aktif
@@ -251,10 +251,10 @@
                                             </button>
 
                                             <!-- Aktif/Pasif Toggle -->
-                                            <button class="btn btn-sm btn-icon @(hizmetbinasi.HizmetBinasiAktiflik == Aktiflik.Aktif ? "btn-outline-warning" : "btn-outline-success")"
-                                                    @onclick="() => ShowToggleStatusConfirmation(hizmetbinasi.HizmetBinasiId, hizmetbinasi.HizmetBinasiAdi, hizmetbinasi.HizmetBinasiAktiflik)"
-                                                    title="@(hizmetbinasi.HizmetBinasiAktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")">
-                                                <i class="bx @(hizmetbinasi.HizmetBinasiAktiflik == Aktiflik.Aktif ? "bx-toggle-right" : "bx-toggle-left")"></i>
+                                            <button class="btn btn-sm btn-icon @(hizmetbinasi.Aktiflik == Aktiflik.Aktif ? "btn-outline-warning" : "btn-outline-success")"
+                                                    @onclick="() => ShowToggleStatusConfirmation(hizmetbinasi.HizmetBinasiId, hizmetbinasi.HizmetBinasiAdi, hizmetbinasi.Aktiflik)"
+                                                    title="@(hizmetbinasi.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")">
+                                                <i class="bx @(hizmetbinasi.Aktiflik == Aktiflik.Aktif ? "bx-toggle-right" : "bx-toggle-left")"></i>
                                             </button>
 
                                             <!-- Sil -->

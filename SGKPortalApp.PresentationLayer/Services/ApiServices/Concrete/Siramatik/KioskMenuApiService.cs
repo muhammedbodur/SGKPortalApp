@@ -70,14 +70,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             try
             {
                 var response = await _httpClient.DeleteAsync($"kioskmenu/{kioskMenuId}");
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    var error = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("DeleteAsync failed: {Error}", error);
-                    return ServiceResult<bool>.Fail("Kiosk menü silinemedi");
+                    var errorMessage = apiResponse?.Message ?? "Kiosk menü silinemedi";
+                    _logger.LogError("DeleteAsync failed: {Error}", errorMessage);
+                    return ServiceResult<bool>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
                 if (apiResponse?.Success == true)
                 {
                     return ServiceResult<bool>.Ok(true, apiResponse.Message ?? "Kiosk menü silindi");
@@ -124,14 +124,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             try
             {
                 var response = await httpAction();
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<KioskMenuResponseDto>>();
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    var error = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("KioskMenu mutation failed: {Error}", error);
-                    return ServiceResult<KioskMenuResponseDto>.Fail("İşlem gerçekleştirilemedi");
+                    var errorMessage = apiResponse?.Message ?? "İşlem gerçekleştirilemedi";
+                    _logger.LogError("KioskMenu mutation failed: {Error}", errorMessage);
+                    return ServiceResult<KioskMenuResponseDto>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<KioskMenuResponseDto>>();
                 if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
                     return ServiceResult<KioskMenuResponseDto>.Ok(apiResponse.Data, apiResponse.Message ?? "İşlem başarılı");

@@ -98,7 +98,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
 
             if (selectedAktiflik.HasValue)
             {
-                filteredTvler = filteredTvler.Where(t => t.TvAktiflik == selectedAktiflik.Value).ToList();
+                filteredTvler = filteredTvler.Where(t => t.Aktiflik == selectedAktiflik.Value).ToList();
             }
 
             if (selectedConnection.HasValue)
@@ -150,13 +150,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
                     HizmetBinasiId = tv.HizmetBinasiId,
                     KatTipi = tv.KatTipi,
                     TvAciklama = tv.TvAciklama,
-                    TvAktiflik = tv.TvAktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif
+                    Aktiflik = tv.Aktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif
                 };
 
                 var result = await _tvService.UpdateAsync(updateDto);
                 if (result.Success)
                 {
-                    await _toastService.ShowSuccessAsync($"TV {updateDto.TvAktiflik} yapıldı");
+                    await _toastService.ShowSuccessAsync($"TV {updateDto.Aktiflik} yapıldı");
                     await LoadDataAsync();
                 }
                 else

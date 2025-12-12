@@ -109,18 +109,29 @@
                                 <label class="form-label required">
                                     <i class="bx bx-list-ul me-1"></i>Kanal İşlem
                                 </label>
-                                <select class="form-select"
-                                        value="@model.KanalIslemId"
-                                        @onchange="OnKanalIslemChanged"
-                                        disabled="@(isSaving || selectedHizmetBinasiId == 0)">
-                                    <option value="0">-- Kanal İşlem Seçin --</option>
-                                    @foreach (var kanal in kanalIslemler)
-                                    {
-                                        <option value="@kanal.KanalIslemId">@kanal.KanalAdi</option>
-                                    }
-                                </select>
-                                <ValidationMessage For="@(() => model.KanalIslemId)" class="text-danger small mt-1" />
-                                <small class="text-muted">Seçili hizmet binasına ait kanal işlemler</small>
+                                @if (IsEditMode || isKanalIslemFromUrl)
+                                {
+                                    <!-- Düzenleme modunda veya URL'den parametre geldiyse readonly -->
+                                    <input type="text" class="form-control"
+                                           value="@kanalIslemAdi"
+                                           disabled readonly />
+                                    <small class="text-muted">@(IsEditMode ? "Düzenleme sırasında kanal işlem değiştirilemez" : "Index sayfasından seçilen kanal işlem")</small>
+                                }
+                                else
+                                {
+                                    <select class="form-select"
+                                            value="@model.KanalIslemId"
+                                            @onchange="OnKanalIslemChanged"
+                                            disabled="@(isSaving || selectedHizmetBinasiId == 0)">
+                                        <option value="0">-- Kanal İşlem Seçin --</option>
+                                        @foreach (var kanal in kanalIslemler)
+                                        {
+                                            <option value="@kanal.KanalIslemId">@kanal.KanalAdi</option>
+                                        }
+                                    </select>
+                                    <ValidationMessage For="@(() => model.KanalIslemId)" class="text-danger small mt-1" />
+                                    <small class="text-muted">Seçili hizmet binasına ait kanal işlemler</small>
+                                }
                             </div>
 
                             <!-- Alt İşlem Seçimi -->
@@ -132,13 +143,13 @@
                                              class="form-select"
                                              disabled="@(isSaving || model.KanalIslemId == 0)">
                                     <option value="0">-- Alt İşlem Seçin --</option>
-                                    @foreach (var kanalAlt in kanalAltlar)
+                                    @foreach (var kanalAlt in filteredKanalAltlar)
                                     {
                                         <option value="@kanalAlt.KanalAltId">@kanalAlt.KanalAltAdi</option>
                                     }
                                 </InputSelect>
                                 <ValidationMessage For="@(() => model.KanalAltId)" class="text-danger small mt-1" />
-                                <small class="text-muted">Seçili kanala ait alt işlemler</small>
+                                <small class="text-muted">Seçili kanala ait alt işlemler (zaten eklenmiş olanlar hariç)</small>
                             </div>
 
                             <!-- Aktiflik -->

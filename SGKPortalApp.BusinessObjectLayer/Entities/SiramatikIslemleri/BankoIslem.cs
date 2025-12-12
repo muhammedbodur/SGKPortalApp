@@ -32,7 +32,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
 
         public int BankoIslemSira { get; set; }
 
-        public Aktiflik BankoIslemAktiflik { get; set; }
+        public Aktiflik Aktiflik { get; set; }
 
         [StringLength(10)]
         public string? DiffLang { get; set; }

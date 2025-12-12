@@ -131,8 +131,8 @@
                                     <span class="badge @GetBankoTipiBadgeClass(banko.BankoTipi)">
                                         @banko.BankoTipiAdi
                                     </span>
-                                    <span class="badge @(banko.BankoAktiflik == Aktiflik.Aktif ? "bg-label-success" : "bg-label-secondary")">
-                                        @(banko.BankoAktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif")
+                                    <span class="badge @(banko.Aktiflik == Aktiflik.Aktif ? "bg-label-success" : "bg-label-secondary")">
+                                        @(banko.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif")
                                     </span>
                                 </div>
                             </div>
@@ -169,7 +169,7 @@
                             else
                             {
                                 <!-- Boş Banko -->
-                                @if (banko.BankoAktiflik == Aktiflik.Pasif)
+                                @if (banko.Aktiflik == Aktiflik.Pasif)
                                 {
                                     <div class="alert alert-secondary mb-3">
                                         <i class="bx bx-info-circle me-2"></i>

@@ -81,7 +81,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Where(b => b.BankoAktiflik == Aktiflik.Aktif)
+                .Where(b => b.Aktiflik == Aktiflik.Aktif)
                 .ToListAsync();
         }
 
@@ -117,7 +117,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .CountAsync(b => b.HizmetBinasiId == hizmetBinasiId && b.BankoAktiflik == Aktiflik.Aktif);
+                .CountAsync(b => b.HizmetBinasiId == hizmetBinasiId && b.Aktiflik == Aktiflik.Aktif);
         }
 
         // Banko tipine göre bankoları listeler
@@ -146,7 +146,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .Include(b => b.HizmetBinasi)
                 .Include(b => b.BankoKullanicilari.Where(bk => !bk.SilindiMi))
                 .Where(b => b.HizmetBinasiId == hizmetBinasiId
-                         && b.BankoAktiflik == Aktiflik.Aktif
+                         && b.Aktiflik == Aktiflik.Aktif
                          && (b.BankoKullanicilari == null || !b.BankoKullanicilari.Any()))
                 .OrderBy(b => b.KatTipi)
                 .ThenBy(b => b.BankoNo)

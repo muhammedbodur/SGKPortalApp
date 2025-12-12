@@ -21,7 +21,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
                 .HasMaxLength(100)
                 .HasComment("Unvan adı");
 
-            builder.Property(u => u.UnvanAktiflik)
+            builder.Property(u => u.Aktiflik)
                 .IsRequired()
                 .HasConversion<int>()
                 .HasDefaultValue(Aktiflik.Aktif)
@@ -44,8 +44,8 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
                 .HasDatabaseName("IX_PER_Unvanlar_UnvanAdi")
                 .HasFilter("[SilindiMi] = 0");
 
-            builder.HasIndex(u => u.UnvanAktiflik)
-                .HasDatabaseName("IX_PER_Unvanlar_UnvanAktiflik");
+            builder.HasIndex(u => u.Aktiflik)
+                .HasDatabaseName("IX_PER_Unvanlar_Aktiflik");
 
             builder.HasQueryFilter(u => !u.SilindiMi);
 

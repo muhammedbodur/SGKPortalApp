@@ -99,15 +99,24 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
                 _logger.LogInformation("📡 Status: {Status}, Content: {Content}",
                     response.StatusCode, responseContent);
 
+                var jsonOptions = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogError("❌ API Hatası: {Error}", responseContent);
-                    return ServiceResult<ServisResponseDto>.Fail(
-                        $"Servis eklenemedi. Detay: {responseContent}"
-                    );
+                    try
+                    {
+                        var errorResponse = System.Text.Json.JsonSerializer.Deserialize<ApiResponseDto<ServisResponseDto>>(responseContent, jsonOptions);
+                        var errorMessage = errorResponse?.Message ?? "Servis eklenemedi.";
+                        return ServiceResult<ServisResponseDto>.Fail(errorMessage);
+                    }
+                    catch
+                    {
+                        return ServiceResult<ServisResponseDto>.Fail("Servis eklenemedi.");
+                    }
                 }
 
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<ServisResponseDto>>();
+                var apiResponse = System.Text.Json.JsonSerializer.Deserialize<ApiResponseDto<ServisResponseDto>>(responseContent, jsonOptions);
 
                 if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
@@ -123,11 +132,11 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
                     );
                 }
 
-                var errorMessage = !string.IsNullOrWhiteSpace(apiResponse?.Message)
+                var failMessage = !string.IsNullOrWhiteSpace(apiResponse?.Message)
                     ? apiResponse.Message
                     : "Servis oluşturulamadı";
 
-                return ServiceResult<ServisResponseDto>.Fail(errorMessage);
+                return ServiceResult<ServisResponseDto>.Fail(failMessage);
             }
             catch (Exception ex)
             {
@@ -141,15 +150,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
             try
             {
                 var response = await _httpClient.PutAsJsonAsync($"servis/{id}", request);
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<ServisResponseDto>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("UpdateAsync failed: {Error}", errorContent);
-                    return ServiceResult<ServisResponseDto>.Fail("Servis güncellenemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Servis güncellenemedi.";
+                    _logger.LogError("UpdateAsync failed: {Error}", errorMessage);
+                    return ServiceResult<ServisResponseDto>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<ServisResponseDto>>();
 
                 if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
@@ -179,15 +187,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
             try
             {
                 var response = await _httpClient.DeleteAsync($"servis/{id}");
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("DeleteAsync failed: {Error}", errorContent);
-                    return ServiceResult<bool>.Fail("Servis silinemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Servis silinemedi.";
+                    _logger.LogError("DeleteAsync failed: {Error}", errorMessage);
+                    return ServiceResult<bool>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (apiResponse?.Success == true)
                 {

@@ -104,7 +104,7 @@
 
                             <dt class="col-sm-4">Durum:</dt>
                             <dd class="col-sm-8">
-                                @if (HizmetBinasi.HizmetBinasiAktiflik == Aktiflik.Aktif)
+                                @if (HizmetBinasi.Aktiflik == Aktiflik.Aktif)
                                 {
                                     <span class="badge bg-label-success">
                                         <i class="bx bx-check-circle me-1"></i>Aktif
@@ -275,7 +275,7 @@
                                                 <td>Banko @banko.BankoNo</td>
                                                 <td>@banko.KatTipiAdi</td>
                                                 <td>
-                                                    @if (banko.BankoAktiflik == Aktiflik.Aktif)
+                                                    @if (banko.Aktiflik == Aktiflik.Aktif)
                                                     {
                                                         <span class="badge bg-label-success">Aktif</span>
                                                     }
@@ -327,7 +327,7 @@
                                             <tr>
                                                 <td>@tv.TvAdi</td>
                                                 <td>
-                                                    @if (tv.TvAktiflik == Aktiflik.Aktif)
+                                                    @if (tv.Aktiflik == Aktiflik.Aktif)
                                                     {
                                                         <span class="badge bg-label-success">Aktif</span>
                                                     }

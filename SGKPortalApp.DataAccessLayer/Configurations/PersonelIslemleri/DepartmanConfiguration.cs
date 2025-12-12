@@ -24,7 +24,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
                 .HasMaxLength(150)
                 .HasComment("Departman adı");
 
-            builder.Property(d => d.DepartmanAktiflik)
+            builder.Property(d => d.Aktiflik)
                 .IsRequired()
                 .HasConversion<int>()
                 .HasDefaultValue(Aktiflik.Aktif)
@@ -52,10 +52,10 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
                 .HasDatabaseName("IX_PER_Departmanlar_DepartmanAdi")
                 .HasFilter("[SilindiMi] = 0");
 
-            builder.HasIndex(d => d.DepartmanAktiflik)
-                .HasDatabaseName("IX_PER_Departmanlar_DepartmanAktiflik");
+            builder.HasIndex(d => d.Aktiflik)
+                .HasDatabaseName("IX_PER_Departmanlar_Aktiflik");
 
-            builder.HasIndex(d => new { d.DepartmanAktiflik, d.SilindiMi })
+            builder.HasIndex(d => new { d.Aktiflik, d.SilindiMi })
                 .HasDatabaseName("IX_PER_Departmanlar_Aktiflik_SilindiMi");
 
             // Soft Delete Query Filter

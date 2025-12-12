@@ -64,7 +64,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Where(bi => bi.BankoIslemAktiflik == Aktiflik.Aktif)
+                .Where(bi => bi.Aktiflik == Aktiflik.Aktif)
                 .ToListAsync();
         }
 

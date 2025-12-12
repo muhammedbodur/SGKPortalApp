@@ -58,7 +58,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
                 if (binaResult.Success && binaResult.Data != null)
                 {
                     hizmetBinalari = binaResult.Data
-                        .Where(b => b.HizmetBinasiAktiflik == Aktiflik.Aktif)
+                        .Where(b => b.Aktiflik == Aktiflik.Aktif)
                         .OrderBy(b => b.HizmetBinasiAdi)
                         .ToList();
                 }
@@ -77,7 +77,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
                             KatTipi = tv.KatTipi,
                             TvAciklama = tv.TvAciklama
                         };
-                        isAktif = tv.TvAktiflik == Aktiflik.Aktif;
+                        isAktif = tv.Aktiflik == Aktiflik.Aktif;
                         eklenmeTarihi = tv.EklenmeTarihi;
                         duzenlenmeTarihi = tv.DuzenlenmeTarihi;
                     }
@@ -119,7 +119,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
                         HizmetBinasiId = model.HizmetBinasiId,
                         KatTipi = model.KatTipi,
                         TvAciklama = model.TvAciklama,
-                        TvAktiflik = isAktif ? Aktiflik.Aktif : Aktiflik.Pasif
+                        Aktiflik = isAktif ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
                     var result = await _tvService.UpdateAsync(updateDto);
@@ -141,7 +141,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
                         HizmetBinasiId = model.HizmetBinasiId,
                         KatTipi = model.KatTipi,
                         TvAciklama = model.TvAciklama,
-                        TvAktiflik = isAktif ? Aktiflik.Aktif : Aktiflik.Pasif
+                        Aktiflik = isAktif ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
                     var result = await _tvService.CreateAsync(createDto);

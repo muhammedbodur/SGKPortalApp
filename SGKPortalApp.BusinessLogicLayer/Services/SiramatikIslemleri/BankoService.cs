@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
@@ -20,15 +21,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<BankoService> _logger;
+        private readonly ICascadeHelper _cascadeHelper;
 
         public BankoService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<BankoService> logger)
+            ILogger<BankoService> logger,
+            ICascadeHelper cascadeHelper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _cascadeHelper = cascadeHelper;
         }
 
         // ═══════════════════════════════════════════════════════
@@ -116,7 +120,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     }
 
                     var banko = _mapper.Map<Banko>(request);
-                    banko.BankoAktiflik = Aktiflik.Aktif;
+                    banko.Aktiflik = Aktiflik.Aktif;
 
                     await bankoRepo.AddAsync(banko);
                     await _unitOfWork.SaveChangesAsync();
@@ -354,7 +358,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     return ApiResponseDto<bool>.ErrorResult("Banko bulunamadı");
                 }
 
-                if (bankoExists.BankoAktiflik != Aktiflik.Aktif)
+                if (bankoExists.Aktiflik != Aktiflik.Aktif)
                 {
                     return ApiResponseDto<bool>.ErrorResult("Banko aktif değil");
                 }
@@ -597,7 +601,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         return ApiResponseDto<bool>.ErrorResult("Banko bulunamadı");
                     }
 
-                    var yeniDurum = banko.BankoAktiflik == Aktiflik.Aktif
+                    var yeniDurum = banko.Aktiflik == Aktiflik.Aktif
                         ? Aktiflik.Pasif
                         : Aktiflik.Aktif;
 
@@ -614,7 +618,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         }
                     }
 
-                    banko.BankoAktiflik = yeniDurum;
+                    banko.Aktiflik = yeniDurum;
                     banko.DuzenlenmeTarihi = DateTime.Now;
 
                     bankoRepo.Update(banko);
@@ -628,10 +632,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     await _unitOfWork.SaveChangesAsync();
 
                     _logger.LogInformation("Banko aktiflik durumu değiştirildi. BankoId: {BankoId}, Durum: {Durum}",
-                        bankoId, banko.BankoAktiflik);
+                        bankoId, banko.Aktiflik);
 
                     return ApiResponseDto<bool>
-                        .SuccessResult(true, $"Banko {(banko.BankoAktiflik == Aktiflik.Aktif ? "aktif" : "pasif")} yapıldı");
+                        .SuccessResult(true, $"Banko {(banko.Aktiflik == Aktiflik.Aktif ? "aktif" : "pasif")} yapıldı");
                 }
                 catch (Exception ex)
                 {
@@ -644,99 +648,29 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
         /// <summary>
         /// Cascade delete: Banko silindiğinde child kayıtları da siler
+        /// CascadeHelper kullanarak tracking conflict'leri otomatik handle eder
         /// </summary>
         private async Task CascadeDeleteAsync(int bankoId)
         {
-            // TvBanko kayıtlarını soft delete (many-to-many join table)
-            var tvBankoRepo = _unitOfWork.Repository<TvBanko>();
-            var tvBankolar = await tvBankoRepo.FindAsync(x => x.BankoId == bankoId);
+            await _cascadeHelper.CascadeSoftDeleteAsync<TvBanko>(x => x.BankoId == bankoId);
+            await _cascadeHelper.CascadeSoftDeleteAsync<BankoKullanici>(x => x.BankoId == bankoId);
+            await _cascadeHelper.CascadeSoftDeleteAsync<BankoHareket>(x => x.BankoId == bankoId);
+            await _cascadeHelper.CascadeSoftDeleteAsync<HubBankoConnection>(x => x.BankoId == bankoId);
 
-            foreach (var tvBanko in tvBankolar)
-            {
-                tvBanko.SilindiMi = true;
-                tvBanko.DuzenlenmeTarihi = DateTime.Now;
-                tvBankoRepo.Update(tvBanko);
-            }
-
-            // BankoKullanici kayıtlarını soft delete
-            var bankoKullaniciRepo = _unitOfWork.Repository<BankoKullanici>();
-            var bankoKullanicilar = await bankoKullaniciRepo.FindAsync(x => x.BankoId == bankoId);
-
-            foreach (var bankoKullanici in bankoKullanicilar)
-            {
-                bankoKullanici.SilindiMi = true;
-                bankoKullanici.DuzenlenmeTarihi = DateTime.Now;
-                bankoKullaniciRepo.Update(bankoKullanici);
-            }
-
-            // BankoHareket kayıtlarını soft delete
-            var bankoHareketRepo = _unitOfWork.Repository<BankoHareket>();
-            var bankoHareketler = await bankoHareketRepo.FindAsync(x => x.BankoId == bankoId);
-
-            foreach (var bankoHareket in bankoHareketler)
-            {
-                bankoHareket.SilindiMi = true;
-                bankoHareket.DuzenlenmeTarihi = DateTime.Now;
-                bankoHareketRepo.Update(bankoHareket);
-            }
-
-            // HubBankoConnection kayıtlarını soft delete
-            var hubBankoConnectionRepo = _unitOfWork.Repository<HubBankoConnection>();
-            var hubBankoConnection = await hubBankoConnectionRepo.FindAsync(x => x.BankoId == bankoId);
-
-            foreach (var connection in hubBankoConnection)
-            {
-                connection.SilindiMi = true;
-                connection.DuzenlenmeTarihi = DateTime.Now;
-                hubBankoConnectionRepo.Update(connection);
-            }
-
-            _logger.LogInformation("Cascade delete: BankoId={BankoId}, TvBanko={Count1}, BankoKullanici={Count2}, BankoHareket={Count3}, HubBankoConnection={Count4}",
-                bankoId, tvBankolar.Count(), bankoKullanicilar.Count(), bankoHareketler.Count(), hubBankoConnection.Count());
+            _logger.LogInformation("Cascade delete: BankoId={BankoId}", bankoId);
         }
 
         /// <summary>
         /// Cascade update: Banko pasif yapıldığında child kayıtları da soft delete
-        /// NOT: BankoKullanici zaten ToggleAktiflik içinde handle ediliyor
+        /// CascadeHelper kullanarak tracking conflict'leri otomatik handle eder
         /// </summary>
         private async Task CascadeAktiflikUpdateAsync(int bankoId)
         {
-            // TvBanko kayıtlarını soft delete (pasif banko TV'den kaldırılmalı)
-            var tvBankoRepo = _unitOfWork.Repository<TvBanko>();
-            var tvBankolar = await tvBankoRepo.FindAsync(x => x.BankoId == bankoId && !x.SilindiMi);
+            await _cascadeHelper.CascadeSoftDeleteAsync<TvBanko>(x => x.BankoId == bankoId);
+            await _cascadeHelper.CascadeSoftDeleteAsync<BankoHareket>(x => x.BankoId == bankoId);
+            await _cascadeHelper.CascadeSoftDeleteAsync<HubBankoConnection>(x => x.BankoId == bankoId);
 
-            foreach (var tvBanko in tvBankolar)
-            {
-                tvBanko.SilindiMi = true;
-                tvBanko.DuzenlenmeTarihi = DateTime.Now;
-                tvBankoRepo.Update(tvBanko);
-            }
-
-            // BankoHareket kayıtlarını soft delete
-            var bankoHareketRepo = _unitOfWork.Repository<BankoHareket>();
-            var bankoHareketler = await bankoHareketRepo.FindAsync(x => x.BankoId == bankoId && !x.SilindiMi);
-
-            foreach (var bankoHareket in bankoHareketler)
-            {
-                bankoHareket.SilindiMi = true;
-                bankoHareket.DuzenlenmeTarihi = DateTime.Now;
-                bankoHareketRepo.Update(bankoHareket);
-            }
-
-            // HubBankoConnection kayıtlarını soft delete
-            var hubBankoConnectionRepo = _unitOfWork.Repository<HubBankoConnection>();
-            var hubBankoConnection = await hubBankoConnectionRepo.FindAsync(x => x.BankoId == bankoId && !x.SilindiMi);
-
-            foreach (var connection in hubBankoConnection)
-            {
-                connection.SilindiMi = true;
-                connection.DuzenlenmeTarihi = DateTime.Now;
-                hubBankoConnectionRepo.Update(connection);
-            }
-
-            _logger.LogInformation("Cascade pasif: BankoId={BankoId}, TvBanko={Count1}, BankoHareket={Count2}, HubBankoConnection={Count3}",
-                bankoId, tvBankolar.Count(), bankoHareketler.Count(), hubBankoConnection.Count());
+            _logger.LogInformation("Cascade pasif: BankoId={BankoId}", bankoId);
         }
-
     }
 }

@@ -69,7 +69,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .AsNoTracking()
                 .Include(bk => bk.Banko)
                 .Include(bk => bk.Personel)
-                .Where(bk => !bk.SilindiMi && bk.Banko.BankoAktiflik == Aktiflik.Aktif)
+                .Where(bk => !bk.SilindiMi && bk.Banko.Aktiflik == Aktiflik.Aktif)
                 .ToListAsync();
         }
 

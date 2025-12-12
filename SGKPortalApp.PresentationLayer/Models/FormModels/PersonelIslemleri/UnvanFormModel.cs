@@ -10,6 +10,6 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels.PersonelIslemleri
         [MinLength(2, ErrorMessage = "Unvan adı en az 2 karakter olmalıdır")]
         public string UnvanAdi { get; set; } = string.Empty;
 
-        public Aktiflik UnvanAktiflik { get; set; } = Aktiflik.Aktif;
+        public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
     }
 }

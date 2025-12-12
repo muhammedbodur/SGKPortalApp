@@ -18,7 +18,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
         public int HizmetBinasiId { get; set; }
         public string HizmetBinasiAdi { get; set; } = string.Empty;
         public string? Adres { get; set; } // ✅ EKLEME
-        public Aktiflik HizmetBinasiAktiflik { get; set; }
+        public Aktiflik Aktiflik { get; set; }
         public int DepartmanId { get; set; }
         public string DepartmanAdi { get; set; } = string.Empty;
         public DateTime EklenmeTarihi { get; set; }

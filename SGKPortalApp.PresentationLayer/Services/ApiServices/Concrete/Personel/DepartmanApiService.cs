@@ -99,15 +99,24 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
                 _logger.LogInformation("📡 Status: {Status}, Content: {Content}",
                     response.StatusCode, responseContent);
 
+                var jsonOptions = new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogError("❌ API Hatası: {Error}", responseContent);
-                    return ServiceResult<DepartmanResponseDto>.Fail(
-                        $"Departman eklenemedi. Detay: {responseContent}"
-                    );
+                    try
+                    {
+                        var errorResponse = System.Text.Json.JsonSerializer.Deserialize<ApiResponseDto<DepartmanResponseDto>>(responseContent, jsonOptions);
+                        var errorMessage = errorResponse?.Message ?? "Departman eklenemedi.";
+                        return ServiceResult<DepartmanResponseDto>.Fail(errorMessage);
+                    }
+                    catch
+                    {
+                        return ServiceResult<DepartmanResponseDto>.Fail("Departman eklenemedi.");
+                    }
                 }
 
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<DepartmanResponseDto>>();
+                var apiResponse = System.Text.Json.JsonSerializer.Deserialize<ApiResponseDto<DepartmanResponseDto>>(responseContent, jsonOptions);
 
                 if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
@@ -125,11 +134,11 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
                 }
 
                 // ❌ API'den success=false geldi
-                var errorMessage = !string.IsNullOrWhiteSpace(apiResponse?.Message)
+                var failMessage = !string.IsNullOrWhiteSpace(apiResponse?.Message)
                     ? apiResponse.Message
                     : "Departman oluşturulamadı";
 
-                return ServiceResult<DepartmanResponseDto>.Fail(errorMessage);
+                return ServiceResult<DepartmanResponseDto>.Fail(failMessage);
             }
             catch (Exception ex)
             {
@@ -143,15 +152,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
             try
             {
                 var response = await _httpClient.PutAsJsonAsync($"departman/{id}", request);
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<DepartmanResponseDto>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("UpdateAsync failed: {Error}", errorContent);
-                    return ServiceResult<DepartmanResponseDto>.Fail("Departman güncellenemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Departman güncellenemedi.";
+                    _logger.LogError("UpdateAsync failed: {Error}", errorMessage);
+                    return ServiceResult<DepartmanResponseDto>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<DepartmanResponseDto>>();
 
                 if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
@@ -181,15 +189,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
             try
             {
                 var response = await _httpClient.DeleteAsync($"departman/{id}");
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("DeleteAsync failed: {Error}", errorContent);
-                    return ServiceResult<bool>.Fail("Departman silinemedi.");
+                    var errorMessage = apiResponse?.Message ?? "Departman silinemedi.";
+                    _logger.LogError("DeleteAsync failed: {Error}", errorMessage);
+                    return ServiceResult<bool>.Fail(errorMessage);
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (apiResponse?.Success == true)
                 {

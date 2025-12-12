@@ -25,6 +25,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
         [Parameter]
         [SupplyParameterFromQuery]
         public int? HizmetBinasiId { get; set; }
+        
+        [Parameter]
+        [SupplyParameterFromQuery]
+        public int? KanalIslemId { get; set; }
 
         // State
         private bool isLoading = false;
@@ -39,8 +43,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
         private List<HizmetBinasiResponseDto> hizmetBinalari = new();
         private List<KanalIslemResponseDto> kanalIslemler = new();
         private List<KanalAltResponseDto> kanalAltlar = new();
+        private List<KanalAltResponseDto> filteredKanalAltlar = new();
+        private List<KanalAltIslemResponseDto> mevcutKanalAltIslemler = new();
         private int selectedHizmetBinasiId = 0;
         private string hizmetBinasiAdi = string.Empty;
+        private string kanalIslemAdi = string.Empty;
+        private bool isKanalIslemFromUrl = false;
 
         // Edit Mode Data
         private DateTime eklenmeTarihi = DateTime.Now;
@@ -72,6 +80,27 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                     model.HizmetBinasiId = HizmetBinasiId.Value;
                     await LoadKanalIslemler();
                     _logger.LogInformation($"🔗 URL'den HizmetBinasiId alındı: {HizmetBinasiId.Value}");
+                    
+                    // URL'den kanal işlem parametresi geldiyse otomatik seç
+                    if (KanalIslemId.HasValue && KanalIslemId.Value > 0)
+                    {
+                        model.KanalIslemId = KanalIslemId.Value;
+                        isKanalIslemFromUrl = true;
+                        var kanalIslem = kanalIslemler.FirstOrDefault(k => k.KanalIslemId == KanalIslemId.Value);
+                        kanalIslemAdi = kanalIslem?.KanalAdi ?? "Bilinmeyen";
+                        await LoadKanalAltlar();
+                        await LoadMevcutKanalAltIslemler();
+                        _logger.LogInformation($"🔗 URL'den KanalIslemId alındı: {KanalIslemId.Value}");
+                    }
+                }
+                // URL'den parametre gelmediyse ilk hizmet binasını otomatik seç
+                else if (hizmetBinalari.Any())
+                {
+                    var ilkBina = hizmetBinalari.First();
+                    selectedHizmetBinasiId = ilkBina.HizmetBinasiId;
+                    model.HizmetBinasiId = ilkBina.HizmetBinasiId;
+                    await LoadKanalIslemler();
+                    _logger.LogInformation($"🏢 İlk hizmet binası otomatik seçildi: {ilkBina.HizmetBinasiAdi} (ID: {ilkBina.HizmetBinasiId})");
                 }
 
                 isAktif = true;
@@ -149,7 +178,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
             {
                 model.KanalIslemId = kanalIslemId;
                 model.KanalAltId = 0; // Alt işlem seçimini sıfırla
+                mevcutKanalAltIslemler = new(); // Mevcut kayıtları sıfırla
                 await LoadKanalAltlar();
+                await LoadMevcutKanalAltIslemler();
                 StateHasChanged();
             }
         }
@@ -159,6 +190,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
             if (model.KanalIslemId <= 0)
             {
                 kanalAltlar = new();
+                filteredKanalAltlar = new();
                 return;
             }
 
@@ -170,6 +202,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                 if (kanalIslem == null || kanalIslem.KanalId <= 0)
                 {
                     kanalAltlar = new();
+                    filteredKanalAltlar = new();
                     return;
                 }
 
@@ -179,10 +212,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                 {
                     kanalAltlar = result.Data.Where(k => k.Aktiflik == Aktiflik.Aktif).ToList();
                     _logger.LogInformation($"✅ {kanalAltlar.Count} aktif kanal alt yüklendi (KanalId: {kanalIslem.KanalId})");
+                    
+                    // Zaten eklenmiş alt kanalları filtrele
+                    FilterKanalAltlar();
                 }
                 else
                 {
                     kanalAltlar = new();
+                    filteredKanalAltlar = new();
                     if (!string.IsNullOrEmpty(result.Message))
                     {
                         _logger.LogWarning($"⚠️ KanalAlt'lar yüklenemedi: {result.Message}");
@@ -193,7 +230,61 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
             {
                 _logger.LogError(ex, "❌ KanalAlt'lar yüklenirken hata oluştu");
                 kanalAltlar = new();
+                filteredKanalAltlar = new();
             }
+        }
+        
+        private async Task LoadMevcutKanalAltIslemler()
+        {
+            if (model.KanalIslemId <= 0)
+            {
+                mevcutKanalAltIslemler = new();
+                return;
+            }
+
+            try
+            {
+                var result = await _kanalAltIslemService.GetByKanalIslemIdAsync(model.KanalIslemId);
+                if (result.Success && result.Data != null)
+                {
+                    mevcutKanalAltIslemler = result.Data;
+                    _logger.LogInformation($"📋 {mevcutKanalAltIslemler.Count} mevcut kanal alt işlem yüklendi (KanalIslemId: {model.KanalIslemId})");
+                }
+                else
+                {
+                    mevcutKanalAltIslemler = new();
+                }
+                
+                // Zaten eklenmiş alt kanalları filtrele
+                FilterKanalAltlar();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Mevcut kanal alt işlemler yüklenirken hata");
+                mevcutKanalAltIslemler = new();
+                filteredKanalAltlar = kanalAltlar.ToList();
+            }
+        }
+        
+        private void FilterKanalAltlar()
+        {
+            // Mevcut kanal alt işlemlerde kullanılan KanalAltId'leri al
+            var kullanilmisKanalAltIds = mevcutKanalAltIslemler
+                .Select(k => k.KanalAltId)
+                .ToHashSet();
+            
+            // Edit modunda, düzenlenen kaydın alt kanalını listeden çıkarma
+            if (IsEditMode && model.KanalAltId > 0)
+            {
+                kullanilmisKanalAltIds.Remove(model.KanalAltId);
+            }
+            
+            // Kullanılmamış alt kanalları filtrele
+            filteredKanalAltlar = kanalAltlar
+                .Where(k => !kullanilmisKanalAltIds.Contains(k.KanalAltId))
+                .ToList();
+            
+            _logger.LogInformation($"📋 Filtreleme: {kanalAltlar.Count} toplam alt kanal, {kullanilmisKanalAltIds.Count} kullanılmış, {filteredKanalAltlar.Count} kullanılabilir");
         }
 
         private async Task LoadKanalAltIslem()
@@ -222,9 +313,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
 
                     // Kanal işlemleri yükle
                     await LoadKanalIslemler();
+                    
+                    // Kanal işlem adını bul (edit modda readonly input için)
+                    var kanalIslem = kanalIslemler.FirstOrDefault(k => k.KanalIslemId == altIslem.KanalIslemId);
+                    kanalIslemAdi = kanalIslem?.KanalAdi ?? "Bilinmeyen";
 
                     // Kanal işlem seçili olduğunda KanalAlt'ları da yükle
                     await LoadKanalAltlar();
+                    
+                    // Mevcut kayıtları yükle (filtreleme için)
+                    await LoadMevcutKanalAltIslemler();
 
                     isAktif = altIslem.Aktiflik == Aktiflik.Aktif;
                     eklenmeTarihi = altIslem.EklenmeTarihi;

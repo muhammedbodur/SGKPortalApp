@@ -224,7 +224,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     pageSize: filter.PageSize,
                     filter: s =>
                         (string.IsNullOrEmpty(filter.SearchTerm) || s.ServisAdi.Contains(filter.SearchTerm)) &&
-                        (!filter.ServisAktiflik.HasValue || s.ServisAktiflik == filter.ServisAktiflik),
+                        (!filter.Aktiflik.HasValue || s.Aktiflik == filter.Aktiflik),
                     orderBy: s => s.ServisAdi,
                     ascending: filter.OrderDirection == "asc"
                 );

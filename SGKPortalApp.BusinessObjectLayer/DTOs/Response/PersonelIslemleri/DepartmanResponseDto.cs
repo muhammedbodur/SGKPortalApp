@@ -6,7 +6,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
     {
         public int DepartmanId { get; set; }
         public string DepartmanAdi { get; set; } = string.Empty;
-        public Aktiflik DepartmanAktiflik { get; set; }
+        public Aktiflik Aktiflik { get; set; }
         public int PersonelSayisi { get; set; }
         public DateTime EklenmeTarihi { get; set; }
         public DateTime DuzenlenmeTarihi { get; set; }

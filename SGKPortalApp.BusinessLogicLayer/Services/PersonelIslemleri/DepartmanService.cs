@@ -223,7 +223,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     pageSize: filter.PageSize,
                     filter: d =>
                         (string.IsNullOrEmpty(filter.SearchTerm) || d.DepartmanAdi.Contains(filter.SearchTerm)) &&
-                        (!filter.DepartmanAktiflik.HasValue || d.DepartmanAktiflik == filter.DepartmanAktiflik),
+                        (!filter.Aktiflik.HasValue || d.Aktiflik == filter.Aktiflik),
                     orderBy: d => d.DepartmanAdi,
                     ascending: filter.OrderDirection == "asc"
                 );

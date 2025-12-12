@@ -30,7 +30,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Where(s => s.ServisAktiflik == Aktiflik.Aktif && !s.SilindiMi)
+                .Where(s => s.Aktiflik == Aktiflik.Aktif && !s.SilindiMi)
                 .ToListAsync();
         }
 
@@ -38,7 +38,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Where(s => s.ServisAktiflik == Aktiflik.Aktif && !s.SilindiMi)
+                .Where(s => s.Aktiflik == Aktiflik.Aktif && !s.SilindiMi)
                 .Select(s => new ValueTuple<int, string>(s.ServisId, s.ServisAdi))
                 .ToListAsync();
         }

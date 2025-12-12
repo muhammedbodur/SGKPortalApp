@@ -21,7 +21,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
                 .HasMaxLength(150)
                 .HasComment("Servis adı");
 
-            builder.Property(s => s.ServisAktiflik)
+            builder.Property(s => s.Aktiflik)
                 .IsRequired()
                 .HasConversion<int>()
                 .HasDefaultValue(Aktiflik.Aktif)
@@ -44,8 +44,8 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
                 .HasDatabaseName("IX_PER_Servisler_ServisAdi")
                 .HasFilter("[SilindiMi] = 0");
 
-            builder.HasIndex(s => s.ServisAktiflik)
-                .HasDatabaseName("IX_PER_Servisler_ServisAktiflik");
+            builder.HasIndex(s => s.Aktiflik)
+                .HasDatabaseName("IX_PER_Servisler_Aktiflik");
 
             builder.HasQueryFilter(s => !s.SilindiMi);
 
