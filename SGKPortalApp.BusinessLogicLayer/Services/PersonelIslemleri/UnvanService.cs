@@ -123,6 +123,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 if (unvan.Aktiflik == Aktiflik.Aktif && request.Aktiflik == Aktiflik.Pasif)
                 {
                     var personelCount = await GetPersonelCountAsync(id);
+                    if (!personelCount.Success)
+                        return ApiResponseDto<UnvanResponseDto>
+                            .ErrorResult(personelCount.Message);
+
                     if (personelCount.Data > 0)
                         return ApiResponseDto<UnvanResponseDto>
                             .ErrorResult($"Bu unvanda {personelCount.Data} personel bulunmaktadır. Önce personelleri başka unvana taşıyınız");
@@ -154,6 +158,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
                 // Unvanda personel var mı kontrol et
                 var personelCount = await GetPersonelCountAsync(id);
+                if (!personelCount.Success)
+                    return ApiResponseDto<bool>
+                        .ErrorResult(personelCount.Message);
+
                 if (personelCount.Data > 0)
                     return ApiResponseDto<bool>
                         .ErrorResult($"Bu unvanda {personelCount.Data} personel bulunmaktadır. Önce personelleri başka unvana taşıyınız");

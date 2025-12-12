@@ -126,15 +126,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
             try
             {
                 var response = await _httpClient.PutAsJsonAsync($"sendika/{id}", request);
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<SendikaResponseDto>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
                     _logger.LogError("UpdateAsync failed: {Error}", errorContent);
-                    return ServiceResult<SendikaResponseDto>.Fail("Sendika güncellenemedi.");
+                    return ServiceResult<SendikaResponseDto>.Fail(apiResponse?.Message ?? "Sendika güncellenemedi.");
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<SendikaResponseDto>>();
 
                 if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
@@ -160,15 +159,14 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
             try
             {
                 var response = await _httpClient.DeleteAsync($"sendika/{id}");
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (!response.IsSuccessStatusCode)
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
                     _logger.LogError("DeleteAsync failed: {Error}", errorContent);
-                    return ServiceResult<bool>.Fail("Sendika silinemedi.");
+                    return ServiceResult<bool>.Fail(apiResponse?.Message ?? "Sendika silinemedi.");
                 }
-
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                 if (apiResponse?.Success == true)
                 {
