@@ -186,5 +186,39 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
                 return ServiceResult<bool>.Fail($"Hata: {ex.Message}");
             }
         }
+
+        public async Task<ServiceResult<int>> GetPersonelCountAsync(int sendikaId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"sendika/{sendikaId}/personel-count");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetPersonelCountAsync failed: {Error}", errorContent);
+                    return ServiceResult<int>.Fail("Personel sayısı alınamadı.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<int>>();
+
+                if (apiResponse?.Success == true)
+                {
+                    return ServiceResult<int>.Ok(
+                        apiResponse.Data,
+                        apiResponse.Message ?? "İşlem başarılı"
+                    );
+                }
+
+                return ServiceResult<int>.Fail(
+                    apiResponse?.Message ?? "Personel sayısı alınamadı"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetPersonelCountAsync Exception");
+                return ServiceResult<int>.Fail($"Hata: {ex.Message}");
+            }
+        }
     }
 }
