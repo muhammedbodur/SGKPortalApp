@@ -120,9 +120,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         .ErrorResult("Bu isimde başka bir servis zaten mevcut");
 
                 // Aktiflik durumu pasif yapılıyorsa personel kontrolü
+                _logger.LogInformation("Servis UpdateAsync - ID: {Id}, Mevcut Aktiflik: {CurrentAktiflik}, İstenen Aktiflik: {RequestAktiflik}",
+                    id, servis.Aktiflik, request.Aktiflik);
+
                 if (servis.Aktiflik == Aktiflik.Aktif && request.Aktiflik == Aktiflik.Pasif)
                 {
+                    _logger.LogInformation("Aktiflik kontrolü yapılıyor - ServisId: {Id}", id);
                     var personelCount = await GetPersonelCountAsync(id);
+                    _logger.LogInformation("Personel sayısı kontrolü - ServisId: {Id}, Success: {Success}, Count: {Count}",
+                        id, personelCount.Success, personelCount.Data);
+
                     if (!personelCount.Success)
                         return ApiResponseDto<ServisResponseDto>
                             .ErrorResult(personelCount.Message);
@@ -130,6 +137,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     if (personelCount.Data > 0)
                         return ApiResponseDto<ServisResponseDto>
                             .ErrorResult($"Bu serviste {personelCount.Data} personel bulunmaktadır. Önce personelleri başka servise taşıyınız");
+                }
+                else
+                {
+                    _logger.LogInformation("Aktiflik kontrolü atlandı - Koşul sağlanmadı");
                 }
 
                 _mapper.Map(request, servis);
