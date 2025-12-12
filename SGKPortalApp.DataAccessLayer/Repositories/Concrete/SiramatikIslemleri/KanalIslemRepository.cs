@@ -35,7 +35,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .Include(ki => ki.Kanal)
                 .Include(ki => ki.HizmetBinasi)
                 .Include(ki => ki.KanalAltIslemleri)
-                .Where(ki => ki.HizmetBinasiId == hizmetBinasiId)
+                .Where(ki => ki.HizmetBinasiId == hizmetBinasiId && !ki.SilindiMi)
                 .OrderBy(ki => ki.Sira)
                 .ToListAsync();
         }
