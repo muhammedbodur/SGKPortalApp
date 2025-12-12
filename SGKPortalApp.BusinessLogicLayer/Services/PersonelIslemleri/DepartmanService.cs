@@ -117,6 +117,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     return ApiResponseDto<DepartmanResponseDto>
                         .ErrorResult("Bu isimde başka bir departman zaten mevcut");
 
+                // Aktiflik durumu pasif yapılıyorsa personel kontrolü
+                if (departman.Aktiflik == Aktiflik.Aktif && request.Aktiflik == Aktiflik.Pasif)
+                {
+                    var personelCount = await departmanRepo.GetPersonelCountAsync(id);
+                    if (personelCount > 0)
+                        return ApiResponseDto<DepartmanResponseDto>
+                            .ErrorResult($"Bu departmanda {personelCount} personel bulunmaktadır. Önce personelleri başka departmana taşıyınız");
+                }
+
                 _mapper.Map(request, departman);
                 departmanRepo.Update(departman);
                 await _unitOfWork.SaveChangesAsync();

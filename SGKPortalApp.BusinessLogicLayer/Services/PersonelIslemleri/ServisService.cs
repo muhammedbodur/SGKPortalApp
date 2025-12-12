@@ -5,6 +5,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 
@@ -116,6 +117,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 if (existingServis != null && existingServis.ServisId != id)
                     return ApiResponseDto<ServisResponseDto>
                         .ErrorResult("Bu isimde başka bir servis zaten mevcut");
+
+                // Aktiflik durumu pasif yapılıyorsa personel kontrolü
+                if (servis.Aktiflik == Aktiflik.Aktif && request.Aktiflik == Aktiflik.Pasif)
+                {
+                    var personelCount = await GetPersonelCountAsync(id);
+                    if (personelCount.Data > 0)
+                        return ApiResponseDto<ServisResponseDto>
+                            .ErrorResult($"Bu serviste {personelCount.Data} personel bulunmaktadır. Önce personelleri başka servise taşıyınız");
+                }
 
                 _mapper.Map(request, servis);
                 servisRepo.Update(servis);
@@ -256,9 +266,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     return ApiResponseDto<int>
                         .ErrorResult("Geçersiz servis ID");
 
-                // Serviste personel sayısı hesapla
+                // Serviste aktif personel sayısı hesapla
                 var count = await _unitOfWork.Repository<Personel>()
-                    .CountAsync(p => p.ServisId == servisId && !p.SilindiMi);
+                    .CountAsync(p => p.ServisId == servisId && !p.SilindiMi && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif);
 
                 return ApiResponseDto<int>
                     .SuccessResult(count, "Personel sayısı başarıyla getirildi");
