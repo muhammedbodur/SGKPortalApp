@@ -123,6 +123,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 if (servis.Aktiflik == Aktiflik.Aktif && request.Aktiflik == Aktiflik.Pasif)
                 {
                     var personelCount = await GetPersonelCountAsync(id);
+                    if (!personelCount.Success)
+                        return ApiResponseDto<ServisResponseDto>
+                            .ErrorResult(personelCount.Message);
+
                     if (personelCount.Data > 0)
                         return ApiResponseDto<ServisResponseDto>
                             .ErrorResult($"Bu serviste {personelCount.Data} personel bulunmaktadır. Önce personelleri başka servise taşıyınız");
@@ -154,6 +158,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
                 // Serviste personel var mı kontrol et
                 var personelCount = await GetPersonelCountAsync(id);
+                if (!personelCount.Success)
+                    return ApiResponseDto<bool>
+                        .ErrorResult(personelCount.Message);
+
                 if (personelCount.Data > 0)
                     return ApiResponseDto<bool>
                         .ErrorResult($"Bu serviste {personelCount.Data} personel bulunmaktadır. Önce personelleri başka servise taşıyınız");
