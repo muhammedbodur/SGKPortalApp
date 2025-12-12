@@ -70,6 +70,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Sendika
         private int ToggleSendikaId { get; set; }
         private string ToggleSendikaAdi { get; set; } = string.Empty;
         private Aktiflik ToggleSendikaCurrentStatus { get; set; }
+        private int ToggleSendikaPersonelSayisi { get; set; }
         private bool IsToggling { get; set; } = false;
 
         // ═══════════════════════════════════════════════════════
@@ -198,11 +199,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Sendika
         // TOGGLE STATUS MODAL
         // ═══════════════════════════════════════════════════════
 
-        private void ShowToggleStatusConfirmation(int sendikaId, string sendikaAdi, Aktiflik currentStatus)
+        private async Task ShowToggleStatusConfirmation(int sendikaId, string sendikaAdi, Aktiflik currentStatus)
         {
             ToggleSendikaId = sendikaId;
             ToggleSendikaAdi = sendikaAdi;
             ToggleSendikaCurrentStatus = currentStatus;
+
+            // Personel sayısını al
+            var personelCountResult = await _sendikaService.GetPersonelCountAsync(sendikaId);
+            ToggleSendikaPersonelSayisi = personelCountResult.Success ? personelCountResult.Data : 0;
+
             ShowToggleModal = true;
         }
 

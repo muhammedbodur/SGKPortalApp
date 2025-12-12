@@ -63,6 +63,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Unvan
         private int ToggleUnvanId { get; set; }
         private string ToggleUnvanAdi { get; set; } = string.Empty;
         private Aktiflik ToggleUnvanCurrentStatus { get; set; }
+        private int ToggleUnvanPersonelSayisi { get; set; }
         private bool IsToggling { get; set; } = false;
 
         // ═══════════════════════════════════════════════════════
@@ -196,11 +197,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Unvan
         // TOGGLE STATUS MODAL
         // ═══════════════════════════════════════════════════════
 
-        private void ShowToggleStatusConfirmation(int unvanId, string unvanAdi, Aktiflik currentStatus)
+        private async Task ShowToggleStatusConfirmation(int unvanId, string unvanAdi, Aktiflik currentStatus)
         {
             ToggleUnvanId = unvanId;
             ToggleUnvanAdi = unvanAdi;
             ToggleUnvanCurrentStatus = currentStatus;
+
+            // Personel sayısını al
+            var personelCountResult = await _unvanService.GetPersonelCountAsync(unvanId);
+            ToggleUnvanPersonelSayisi = personelCountResult.Success ? personelCountResult.Data : 0;
+
             ShowToggleModal = true;
         }
 

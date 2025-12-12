@@ -369,28 +369,53 @@
                     @if (ToggleServisCurrentStatus == Aktiflik.Aktif)
                     {
                         <div class="alert alert-warning mb-3">
-                            <i class="bx bx-info-circle me-2"></i>
-                            <strong>Dikkat!</strong> Servisi pasif hale getirmek üzeresiniz.
+                            <div class="d-flex align-items-start">
+                                <i class="bx bx-error-circle me-2 fs-5"></i>
+                                <div>
+                                    <strong>⚠️ Dikkat!</strong> Servisi pasif hale getirmek üzeresiniz.
+                                    <p class="mb-0 mt-2">
+                                        <strong>@ToggleServisAdi</strong> Servisini pasif yapmak istediğinizden emin misiniz?
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                        <p>
-                            <strong>@ToggleServisAdi</strong> Servisini <strong>pasif</strong> yapmak istediğinizden emin misiniz?
-                        </p>
-                        <p class="text-muted small mb-0">
-                            Pasif Servisler listede görünmeye devam edecek ancak yeni personel ataması yapılamayacaktır.
-                        </p>
+
+                        @if (ToggleServisPersonelSayisi > 0)
+                        {
+                            <div class="alert alert-info mb-3">
+                                <i class="bx bx-info-circle me-2"></i>
+                                Bu serviste <strong>@ToggleServisPersonelSayisi aktif personel</strong> bulunmaktadır.
+                            </div>
+                        }
+
+                        <p class="mb-2"><strong>Pasif yapıldığında:</strong></p>
+                        <ul class="text-muted mb-0">
+                            <li>Servis listede görünmeye devam edecektir</li>
+                            <li>Mevcut personeller serviste kalmaya devam edecektir</li>
+                            <li>Yeni personel ataması yapılamayacaktır</li>
+                            <li>Servis seçim listelerinde görünmeyecektir</li>
+                        </ul>
                     }
                     else
                     {
                         <div class="alert alert-success mb-3">
-                            <i class="bx bx-check-circle me-2"></i>
-                            <strong>Bilgi:</strong> Servisi aktif hale getirmek üzeresiniz.
+                            <div class="d-flex align-items-start">
+                                <i class="bx bx-check-circle me-2 fs-5"></i>
+                                <div>
+                                    <strong>Bilgi:</strong> Servisi aktif hale getirmek üzeresiniz.
+                                    <p class="mb-0 mt-2">
+                                        <strong>@ToggleServisAdi</strong> Servisini aktif yapmak istediğinizden emin misiniz?
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                        <p>
-                            <strong>@ToggleServisAdi</strong> Servisini <strong>aktif</strong> yapmak istediğinizden emin misiniz?
-                        </p>
-                        <p class="text-muted small mb-0">
-                            Aktif Servislera yeni personel ataması yapılabilir.
-                        </p>
+
+                        <p class="mb-2"><strong>Aktif yapıldığında:</strong></p>
+                        <ul class="text-muted mb-0">
+                            <li>Servis tüm listelerde görünecektir</li>
+                            <li>Yeni personel ataması yapılabilecektir</li>
+                            <li>Tüm özellikler kullanılabilir olacaktır</li>
+                        </ul>
                     }
                 </div>
                 <div class="modal-footer">
@@ -442,18 +467,44 @@
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-danger mb-3">
-                        <i class="bx bx-error-circle me-2"></i>
-                        <strong>Dikkat!</strong> Bu işlem geri alınamaz.
+                        <div class="d-flex align-items-start">
+                            <i class="bx bx-error-circle me-2 fs-5"></i>
+                            <div>
+                                <strong>🗑️ Dikkat!</strong> Kalıcı silme işlemi yapıyorsunuz.
+                                <p class="mb-0 mt-2">
+                                    <strong>@DeleteServisAdi</strong> Servisini silmek istediğinizden emin misiniz?
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    <p class="mb-0">
-                        <strong>@DeleteServisAdi</strong> Servisini silmek istediğinizden emin misiniz?
-                    </p>
+
                     @if (DeleteServisPersonelSayisi > 0)
                     {
-                        <div class="alert alert-warning mt-3 mb-0">
-                            <i class="bx bx-info-circle me-2"></i>
-                            Bu Servisda <strong>@DeleteServisPersonelSayisi personel</strong> bulunmaktadır. Silme işleminden önce personelleri başka bir Servisa aktarmanız önerilir.
+                        <div class="alert alert-warning mb-3">
+                            <i class="bx bx-error-circle me-2"></i>
+                            <strong>Uyarı:</strong> Bu serviste <strong>@DeleteServisPersonelSayisi aktif personel</strong> bulunmaktadır!
                         </div>
+                    }
+
+                    <p class="mb-2"><strong>Silme işlemi sonrasında:</strong></p>
+                    <ul class="text-muted mb-3">
+                        <li><strong>Servis kaydı kalıcı olarak silinecektir</strong></li>
+                        @if (DeleteServisPersonelSayisi > 0)
+                        {
+                            <li class="text-danger"><strong>Bu işlem personel sayısı nedeniyle başarısız olacaktır</strong></li>
+                            <li>Önce tüm personelleri başka bir servise aktarmalısınız</li>
+                        }
+                        else
+                        {
+                            <li>Bu işlem geri alınamaz</li>
+                        }
+                    </ul>
+
+                    @if (DeleteServisPersonelSayisi > 0)
+                    {
+                        <p class="text-danger mb-0">
+                            <small><strong>Not:</strong> Silme işlemine devam etmek için önce tüm personelleri başka bir servise aktarmanız gerekmektedir.</small>
+                        </p>
                     }
                 </div>
                 <div class="modal-footer">
