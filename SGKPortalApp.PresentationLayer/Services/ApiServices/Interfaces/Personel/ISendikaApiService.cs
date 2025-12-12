@@ -11,5 +11,6 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Persone
         Task<ServiceResult<SendikaResponseDto>> CreateAsync(SendikaCreateRequestDto request);
         Task<ServiceResult<SendikaResponseDto>> UpdateAsync(int id, SendikaUpdateRequestDto request);
         Task<ServiceResult<bool>> DeleteAsync(int id);
+        Task<ServiceResult<int>> GetPersonelCountAsync(int sendikaId);
     }
 }
