@@ -5,6 +5,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Exceptions;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 
@@ -127,9 +128,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             try
             {
                 var atanmaNedeni = await _unitOfWork.Repository<AtanmaNedenleri>().GetByIdAsync(id);
-                
+
                 if (atanmaNedeni == null)
                     return ApiResponseDto<bool>.ErrorResult("Atanma nedeni bulunamadı");
+
+                // Atanma nedenine bağlı aktif personel var mı kontrol et
+                var personelCount = await _unitOfWork.Repository<Personel>()
+                    .CountAsync(p => p.AtanmaNedeniId == id && !p.SilindiMi && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif);
+
+                if (personelCount > 0)
+                    return ApiResponseDto<bool>
+                        .ErrorResult($"Bu atanma nedenine bağlı {personelCount} personel bulunmaktadır. Önce personelleri düzenleyiniz");
 
                 _unitOfWork.Repository<AtanmaNedenleri>().Delete(atanmaNedeni);
                 await _unitOfWork.SaveChangesAsync();

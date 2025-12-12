@@ -187,6 +187,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     return ApiResponseDto<HizmetBinasiResponseDto>
                         .ErrorResult("Bu isimde başka bir hizmet binası zaten mevcut");
 
+                // Aktiflik durumu pasif yapılıyorsa personel kontrolü
+                if (entity.Aktiflik == Aktiflik.Aktif && request.Aktiflik == Aktiflik.Pasif)
+                {
+                    var personelCount = await hizmetBinasiRepo.GetPersonelCountAsync(id);
+                    if (personelCount > 0)
+                        return ApiResponseDto<HizmetBinasiResponseDto>
+                            .ErrorResult($"Bu hizmet binasında {personelCount} personel bulunmaktadır. Önce personelleri başka hizmet binasına taşıyınız");
+                }
+
                 _mapper.Map(request, entity);
                 hizmetBinasiRepo.Update(entity);
                 await _unitOfWork.SaveChangesAsync();

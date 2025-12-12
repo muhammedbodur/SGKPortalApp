@@ -128,6 +128,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                             .ErrorResult("Bu isimde bir sendika zaten mevcut");
                 }
 
+                // Aktiflik durumu pasif yapılıyorsa personel kontrolü
+                if (sendika.Aktiflik == Aktiflik.Aktif && request.Aktiflik == Aktiflik.Pasif)
+                {
+                    var personelCount = await sendikaRepo.GetPersonelCountAsync(id);
+                    if (personelCount > 0)
+                        return ApiResponseDto<SendikaResponseDto>
+                            .ErrorResult($"Bu sendikaya bağlı {personelCount} personel bulunmaktadır. Önce personelleri düzenleyiniz");
+                }
+
                 _mapper.Map(request, sendika);
                 sendikaRepo.Update(sendika);
                 await _unitOfWork.SaveChangesAsync();
