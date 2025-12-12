@@ -92,6 +92,8 @@
                         <option value="name-desc">İsim (Z-A)</option>
                         <option value="date-newest">En Yeni</option>
                         <option value="date-oldest">En Eski</option>
+                        <option value="personel-most">En Çok Personel</option>
+                        <option value="personel-least">En Az Personel</option>
                     </select>
                 </div>
 
@@ -227,10 +229,11 @@
                     <thead>
                         <tr>
                             <th style="width: 5%">#</th>
-                            <th style="width: 35%">Sendika Adı</th>
-                            <th style="width: 15%">Durum</th>
-                            <th style="width: 20%">Eklenme Tarihi</th>
-                            <th style="width: 20%">Güncelleme Tarihi</th>
+                            <th style="width: 30%">Sendika Adı</th>
+                            <th style="width: 10%">Personel Sayısı</th>
+                            <th style="width: 10%">Durum</th>
+                            <th style="width: 17%">Eklenme Tarihi</th>
+                            <th style="width: 17%">Güncelleme Tarihi</th>
                             <th style="width: 5%" class="text-end">İşlemler</th>
                         </tr>
                     </thead>
@@ -247,6 +250,12 @@
                                             </span>
                                         </div>
                                         <strong>@sendika.SendikaAdi</strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bx bx-user me-2 text-primary"></i>
+                                        <strong>@sendika.PersonelSayisi</strong>
                                     </div>
                                 </td>
                                 <td>
