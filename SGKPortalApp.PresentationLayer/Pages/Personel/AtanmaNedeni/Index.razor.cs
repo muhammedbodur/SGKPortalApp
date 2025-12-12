@@ -21,6 +21,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.AtanmaNedeni
         private string ExportType { get; set; } = "";
         private bool ShowDeleteConfirmation { get; set; } = false;
         private AtanmaNedeniResponseDto? DeleteAtanmaNedeni { get; set; }
+        private int DeleteAtanmaNedeniPersonelSayisi { get; set; }
 
         // Filtreleme
         private string searchTerm = "";
@@ -159,9 +160,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.AtanmaNedeni
             _navigationManager.NavigateTo($"/personel/atanma-nedeni/manage/{id}");
         }
 
-        private void ShowDeleteModal(AtanmaNedeniResponseDto atanmaNedeni)
+        private async Task ShowDeleteModal(AtanmaNedeniResponseDto atanmaNedeni)
         {
             DeleteAtanmaNedeni = atanmaNedeni;
+
+            // Personel sayısını al
+            var personelCountResponse = await _atanmaNedeniApiService.GetPersonelCountAsync(atanmaNedeni.AtanmaNedeniId);
+            DeleteAtanmaNedeniPersonelSayisi = personelCountResponse?.Data ?? 0;
+
             ShowDeleteConfirmation = true;
         }
 
@@ -169,6 +175,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.AtanmaNedeni
         {
             ShowDeleteConfirmation = false;
             DeleteAtanmaNedeni = null;
+            DeleteAtanmaNedeniPersonelSayisi = 0;
         }
 
         private async Task ConfirmDelete()

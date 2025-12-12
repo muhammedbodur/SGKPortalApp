@@ -42,5 +42,10 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
             }
             return null;
         }
+
+        public async Task<ApiResponseDto<int>?> GetPersonelCountAsync(int atanmaNedeniId)
+        {
+            return await GetAsync<ApiResponseDto<int>>($"atanma-nedeni/{atanmaNedeniId}/personel-count");
+        }
     }
 }

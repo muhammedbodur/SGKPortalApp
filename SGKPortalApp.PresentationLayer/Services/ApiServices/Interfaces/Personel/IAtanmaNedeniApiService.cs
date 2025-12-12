@@ -11,5 +11,6 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Persone
         Task<ApiResponseDto<AtanmaNedeniResponseDto>?> CreateAsync(AtanmaNedeniCreateRequestDto dto);
         Task<ApiResponseDto<AtanmaNedeniResponseDto>?> UpdateAsync(int id, AtanmaNedeniUpdateRequestDto dto);
         Task<ApiResponseDto<bool>?> DeleteAsync(int id);
+        Task<ApiResponseDto<int>?> GetPersonelCountAsync(int atanmaNedeniId);
     }
 }
