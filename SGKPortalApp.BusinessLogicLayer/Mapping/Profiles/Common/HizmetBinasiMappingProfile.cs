@@ -23,11 +23,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
                 .ForMember(dest => dest.DepartmanAdi,
                     opt => opt.MapFrom(src => src.Departman != null ? src.Departman.DepartmanAdi : string.Empty))
                 .ForMember(dest => dest.PersonelSayisi,
-                    opt => opt.MapFrom(src => src.Personeller != null ? src.Personeller.Count : 0))
+                    opt => opt.MapFrom(src => src.Personeller != null
+                        ? src.Personeller.Count(p => !p.SilindiMi && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif)
+                        : 0))
                 .ForMember(dest => dest.BankoSayisi,
-                    opt => opt.MapFrom(src => src.Bankolar != null ? src.Bankolar.Count : 0))
+                    opt => opt.MapFrom(src => src.Bankolar != null
+                        ? src.Bankolar.Count(b => !b.SilindiMi && b.Aktiflik == Aktiflik.Aktif)
+                        : 0))
                 .ForMember(dest => dest.TvSayisi,
-                    opt => opt.MapFrom(src => src.Tvler != null ? src.Tvler.Count : 0));
+                    opt => opt.MapFrom(src => src.Tvler != null
+                        ? src.Tvler.Count(t => !t.SilindiMi && t.Aktiflik == Aktiflik.Aktif)
+                        : 0));
 
             // ═══════════════════════════════════════════════════════
             // HİZMET BİNASI - DETAYLI MAPPING (Entity -> Detail Response DTO)
@@ -108,7 +114,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
                 .ForMember(dest => dest.HizmetBinasiAdi,
                     opt => opt.MapFrom(src => src.HizmetBinasi != null ? src.HizmetBinasi.HizmetBinasiAdi : null))
                 .ForMember(dest => dest.BankoSayisi,
-                    opt => opt.MapFrom(src => src.TvBankolar != null ? src.TvBankolar.Count : 0))
+                    opt => opt.MapFrom(src => src.TvBankolar != null
+                        ? src.TvBankolar.Count(tb => tb.Aktiflik == Aktiflik.Aktif)
+                        : 0))
                 .ForMember(dest => dest.EklenmeTarihi,
                     opt => opt.MapFrom(src => src.EklenmeTarihi))
                 .ForMember(dest => dest.DuzenlenmeTarihi,

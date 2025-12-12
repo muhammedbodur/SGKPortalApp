@@ -80,6 +80,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
+                .Include(tv => tv.HizmetBinasi)
+                .Include(tv => tv.TvBankolar.Where(tb => tb.Aktiflik == Aktiflik.Aktif))
                 .Where(tv => tv.Aktiflik == Aktiflik.Aktif)
                 .ToListAsync();
         }
@@ -89,6 +91,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
+                .Include(tv => tv.HizmetBinasi)
+                .Include(tv => tv.TvBankolar.Where(tb => tb.Aktiflik == Aktiflik.Aktif))
                 .ToListAsync();
         }
 

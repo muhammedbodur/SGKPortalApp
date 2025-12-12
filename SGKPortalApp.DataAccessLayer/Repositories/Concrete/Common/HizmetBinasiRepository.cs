@@ -87,6 +87,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
         {
             return await _dbSet
                 .AsNoTracking()
+                .Include(hb => hb.Departman)
+                .Include(hb => hb.Personeller.Where(p => !p.SilindiMi && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif))
+                .Include(hb => hb.Bankolar.Where(b => !b.SilindiMi && b.Aktiflik == Aktiflik.Aktif))
+                .Include(hb => hb.Tvler.Where(t => !t.SilindiMi && t.Aktiflik == Aktiflik.Aktif))
                 .Where(hb => hb.Aktiflik == Aktiflik.Aktif)
                 .OrderBy(hb => hb.HizmetBinasiAdi)
                 .ToListAsync();
@@ -95,19 +99,19 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
         public async Task<int> GetPersonelCountAsync(int hizmetBinasiId)
         {
             return await _context.Set<Personel>()
-                .CountAsync(p => p.HizmetBinasiId == hizmetBinasiId);
+                .CountAsync(p => p.HizmetBinasiId == hizmetBinasiId && !p.SilindiMi && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif);
         }
 
         public async Task<int> GetBankoCountAsync(int hizmetBinasiId)
         {
             return await _context.Set<Banko>()
-                .CountAsync(b => b.HizmetBinasiId == hizmetBinasiId);
+                .CountAsync(b => b.HizmetBinasiId == hizmetBinasiId && !b.SilindiMi && b.Aktiflik == Aktiflik.Aktif);
         }
 
         public async Task<int> GetTvCountAsync(int hizmetBinasiId)
         {
             return await _context.Set<Tv>()
-                .CountAsync(t => t.HizmetBinasiId == hizmetBinasiId);
+                .CountAsync(t => t.HizmetBinasiId == hizmetBinasiId && !t.SilindiMi && t.Aktiflik == Aktiflik.Aktif);
         }
 
         public async Task<IEnumerable<(int Id, string Ad)>> GetDropdownAsync()
