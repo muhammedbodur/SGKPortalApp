@@ -120,9 +120,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         .ErrorResult("Bu isimde başka bir unvan zaten mevcut");
 
                 // Aktiflik durumu pasif yapılıyorsa personel kontrolü
+                _logger.LogInformation("Unvan UpdateAsync - ID: {Id}, Mevcut Aktiflik: {CurrentAktiflik}, İstenen Aktiflik: {RequestAktiflik}",
+                    id, unvan.Aktiflik, request.Aktiflik);
+
                 if (unvan.Aktiflik == Aktiflik.Aktif && request.Aktiflik == Aktiflik.Pasif)
                 {
+                    _logger.LogInformation("Aktiflik kontrolü yapılıyor - UnvanId: {Id}", id);
                     var personelCount = await GetPersonelCountAsync(id);
+                    _logger.LogInformation("Personel sayısı kontrolü - UnvanId: {Id}, Success: {Success}, Count: {Count}",
+                        id, personelCount.Success, personelCount.Data);
+
                     if (!personelCount.Success)
                         return ApiResponseDto<UnvanResponseDto>
                             .ErrorResult(personelCount.Message);
@@ -130,6 +137,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     if (personelCount.Data > 0)
                         return ApiResponseDto<UnvanResponseDto>
                             .ErrorResult($"Bu unvanda {personelCount.Data} personel bulunmaktadır. Önce personelleri başka unvana taşıyınız");
+                }
+                else
+                {
+                    _logger.LogInformation("Aktiflik kontrolü atlandı - Koşul sağlanmadı");
                 }
 
                 _mapper.Map(request, unvan);
