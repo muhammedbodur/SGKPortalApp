@@ -22,10 +22,6 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
             builder.Property(y => y.ControllerAdi)
                 .HasMaxLength(100);
 
-            builder.Property(y => y.YetkiTuru)
-                .HasConversion<string>()
-                .HasMaxLength(50);
-
             builder.Property(y => y.EklenmeTarihi)
                 .IsRequired()
                 .HasDefaultValueSql("GETDATE()");

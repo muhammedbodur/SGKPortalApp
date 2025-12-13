@@ -11,6 +11,9 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.Common
         View = 1,
 
         [Display(Name = "Düzenle")]
-        Edit = 2
+        Edit = 2,
+
+        [Display(Name = "Silme")]
+        Delete = 3
     }
 }

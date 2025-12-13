@@ -101,7 +101,7 @@ StyleCopReport.xml
 *.jpg
 *.png
 *.md
-
+!YetkiYapisi.md
 
 # Migration dosyalarını engelle
 **/Migrations/

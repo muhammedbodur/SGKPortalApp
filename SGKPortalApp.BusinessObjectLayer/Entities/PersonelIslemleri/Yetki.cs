@@ -12,9 +12,6 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         [Key]
         public int YetkiId { get; set; }
 
-        // Yetki türü (Ana, Orta, Alt Yetki)
-        public required YetkiTurleri YetkiTuru { get; set; }
-
         [Required]
         [StringLength(100)]
         public string YetkiAdi { get; set; } = null!;
