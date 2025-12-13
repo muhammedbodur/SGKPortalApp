@@ -547,4 +547,243 @@ Ancak hedef “refresh olmadan” da yansıtmaksa 10.3 (push) yaklaşımına iht
    - Kullanıcının artık erişemediği route’larda forbidden/redirect uygulanır
 
 Not:
- - Authentication cookie içindeki claim’lere permission set’i gömmek yerine (güncellenmesi zor), permission’ı DB/cached servis üzerinden çözmek ve `PermissionStamp` ile invalidate etmek daha esnektir.
+ - Authentication cookie içindeki claim'lere permission set'i gömmek yerine (güncellenmesi zor), permission'ı DB/cached servis üzerinden çözmek ve `PermissionStamp` ile invalidate etmek daha esnektir.
+
+---
+
+## 14) Personel Alt Modülleri – Örnek Yetkiler
+
+### 14.1 Sendika
+- `PER.SENDIKA.LIST` (View)
+- `PER.SENDIKA.CREATE` (Edit)
+- `PER.SENDIKA.EDIT` (Edit)
+- `PER.SENDIKA.DELETE` (Delete)
+- `PER.SENDIKA.EXPORT` (View)
+
+### 14.2 Servis
+- `PER.SERVIS.LIST` (View)
+- `PER.SERVIS.CREATE` (Edit)
+- `PER.SERVIS.EDIT` (Edit)
+- `PER.SERVIS.DELETE` (Delete)
+- `PER.SERVIS.EXPORT` (View)
+
+### 14.3 Ünvan
+- `PER.UNVAN.LIST` (View)
+- `PER.UNVAN.CREATE` (Edit)
+- `PER.UNVAN.EDIT` (Edit)
+- `PER.UNVAN.DELETE` (Delete)
+- `PER.UNVAN.EXPORT` (View)
+
+### 14.4 Atanma Nedeni
+- `PER.ATANMA_NEDENI.LIST` (View)
+- `PER.ATANMA_NEDENI.CREATE` (Edit)
+- `PER.ATANMA_NEDENI.EDIT` (Edit)
+- `PER.ATANMA_NEDENI.DELETE` (Delete)
+
+---
+
+## 15) Common Modülü – Örnek Yetkiler
+
+### 15.1 Hizmet Binası Liste
+- `COMMON.HIZMET_BINASI.LIST` (View)
+- `COMMON.HIZMET_BINASI.CREATE` (Edit)
+- `COMMON.HIZMET_BINASI.EDIT` (Edit)
+- `COMMON.HIZMET_BINASI.DELETE` (Delete)
+- `COMMON.HIZMET_BINASI.EXPORT` (View)
+
+### 15.2 Hizmet Binası Detay (TAB: Personeller + Bankolar)
+**Personeller Tab**
+- `COMMON.HIZMET_BINASI.DETAIL.TAB.PERSONELLER.VIEW` (View)
+
+**Bankolar Tab**
+- `COMMON.HIZMET_BINASI.DETAIL.TAB.BANKOLAR.VIEW` (View)
+
+### 15.3 İl / İlçe
+**İl**
+- `COMMON.IL.LIST` (View)
+- `COMMON.IL.CREATE` (Edit)
+- `COMMON.IL.EDIT` (Edit)
+- `COMMON.IL.DELETE` (Delete)
+
+**İlçe**
+- `COMMON.ILCE.LIST` (View)
+- `COMMON.ILCE.CREATE` (Edit)
+- `COMMON.ILCE.EDIT` (Edit)
+- `COMMON.ILCE.DELETE` (Delete)
+
+---
+
+## 16) PDKS Modülü – Örnek Yetkiler
+
+### 16.1 Giriş/Çıkış
+- `PDKS.GIRIS_CIKIS.LIST` (View)
+- `PDKS.GIRIS_CIKIS.DETAIL` (View)
+- `PDKS.GIRIS_CIKIS.EXPORT` (View)
+
+### 16.2 İzin
+**Taleplerim**
+- `PDKS.IZIN.TALEPLERIM.VIEW` (View)
+
+**Yeni Talep**
+- `PDKS.IZIN.YENI_TALEP.CREATE` (Edit)
+
+**Onay Bekleyenler**
+- `PDKS.IZIN.ONAY_BEKLEYENLER.VIEW` (View)
+- `PDKS.IZIN.ONAY_BEKLEYENLER.APPROVE` (Edit)
+- `PDKS.IZIN.ONAY_BEKLEYENLER.REJECT` (Edit)
+
+**Sorumlu Atama**
+- `PDKS.IZIN.SORUMLU_ATAMA.VIEW` (View)
+- `PDKS.IZIN.SORUMLU_ATAMA.EDIT` (Edit)
+
+### 16.3 Mesai
+**Çalışma Günleri**
+- `PDKS.MESAI.CALISMA_GUNLERI.VIEW` (View)
+- `PDKS.MESAI.CALISMA_GUNLERI.EDIT` (Edit)
+
+**SGM Mesai**
+- `PDKS.MESAI.SGM_MESAI.VIEW` (View)
+- `PDKS.MESAI.SGM_MESAI.EDIT` (Edit)
+
+### 16.4 Raporlar
+- `PDKS.RAPORLAR.PERSONEL_MESAI.VIEW` (View)
+- `PDKS.RAPORLAR.PERSONEL_MESAI.EXPORT` (View)
+- `PDKS.RAPORLAR.DEPARTMAN_MESAI.VIEW` (View)
+- `PDKS.RAPORLAR.DEPARTMAN_MESAI.EXPORT` (View)
+- `PDKS.RAPORLAR.IZIN_RAPORU.VIEW` (View)
+- `PDKS.RAPORLAR.IZIN_RAPORU.EXPORT` (View)
+
+---
+
+## 17) Eshot Modülü – Örnek Yetkiler
+
+### 17.1 Hareketler
+- `ESHOT.HAREKETLER.LIST` (View)
+- `ESHOT.HAREKETLER.DETAIL` (View)
+- `ESHOT.HAREKETLER.EXPORT` (View)
+
+### 17.2 Kullanım Hakkı
+- `ESHOT.KULLANIM_HAKKI.LIST` (View)
+- `ESHOT.KULLANIM_HAKKI.TANIMLA` (Edit)
+
+### 17.3 Ücret Bilgisi
+- `ESHOT.UCRET_BILGISI.VIEW` (View)
+
+---
+
+## 18) Sıramatik Modülü – Örnek Yetkiler
+
+### 18.1 Banko
+- `SIRA.BANKO.LIST` (View)
+- `SIRA.BANKO.CREATE` (Edit)
+- `SIRA.BANKO.EDIT` (Edit)
+- `SIRA.BANKO.DELETE` (Delete)
+- `SIRA.BANKO.PERSONEL_ATAMA` (Edit)
+
+### 18.2 Kanal Yönetimi
+**Kanal**
+- `SIRA.KANAL.LIST` (View)
+- `SIRA.KANAL.CREATE` (Edit)
+- `SIRA.KANAL.EDIT` (Edit)
+- `SIRA.KANAL.DELETE` (Delete)
+
+**Kanal Alt**
+- `SIRA.KANAL_ALT.LIST` (View)
+- `SIRA.KANAL_ALT.CREATE` (Edit)
+- `SIRA.KANAL_ALT.EDIT` (Edit)
+- `SIRA.KANAL_ALT.DELETE` (Delete)
+
+**Kanal Alt İşlem**
+- `SIRA.KANAL_ALT_ISLEM.LIST` (View)
+- `SIRA.KANAL_ALT_ISLEM.CREATE` (Edit)
+- `SIRA.KANAL_ALT_ISLEM.EDIT` (Edit)
+- `SIRA.KANAL_ALT_ISLEM.DELETE` (Delete)
+
+**Kanal İşlem**
+- `SIRA.KANAL_ISLEM.LIST` (View)
+- `SIRA.KANAL_ISLEM.CREATE` (Edit)
+- `SIRA.KANAL_ISLEM.EDIT` (Edit)
+- `SIRA.KANAL_ISLEM.DELETE` (Delete)
+
+### 18.3 Kiosk Yönetimi
+**Kiosk**
+- `SIRA.KIOSK.LIST` (View)
+- `SIRA.KIOSK.CREATE` (Edit)
+- `SIRA.KIOSK.EDIT` (Edit)
+- `SIRA.KIOSK.DELETE` (Delete)
+- `SIRA.KIOSK.SIMULATOR` (View)
+
+**Kiosk Menü**
+- `SIRA.KIOSK_MENU.LIST` (View)
+- `SIRA.KIOSK_MENU.CREATE` (Edit)
+- `SIRA.KIOSK_MENU.EDIT` (Edit)
+- `SIRA.KIOSK_MENU.DELETE` (Delete)
+
+**Kiosk Menü Atama**
+- `SIRA.KIOSK_MENU_ATAMA.LIST` (View)
+- `SIRA.KIOSK_MENU_ATAMA.ESLESTIRME` (Edit)
+
+**Kiosk Menü İşlem**
+- `SIRA.KIOSK_MENU_ISLEM.LIST` (View)
+- `SIRA.KIOSK_MENU_ISLEM.ESLESTIRME` (Edit)
+
+### 18.4 TV ve Ekran Yönetimi
+- `SIRA.TV.LIST` (View)
+- `SIRA.TV.CREATE` (Edit)
+- `SIRA.TV.EDIT` (Edit)
+- `SIRA.TV.DELETE` (Delete)
+- `SIRA.TV.DISPLAY` (View)
+- `SIRA.TV.BANKO_ESLESTIRME` (Edit)
+
+### 18.5 Diğer
+**Personel Atama**
+- `SIRA.PERSONEL_ATAMA.VIEW` (View)
+- `SIRA.PERSONEL_ATAMA.EDIT` (Edit)
+
+**SignalR Logları**
+- `SIRA.SIGNALR_LOGS.VIEW` (View)
+
+---
+
+## 19) Modül Özet Tablosu
+
+| Modül Kısaltması | Açıklama | Sayfa Sayısı | Tab Var mı? |
+|------------------|----------|--------------|-------------|
+| PER | Personel İşlemleri | 11 | ✅ (Personel Manage: 11 tab) |
+| COMMON | Ortak Tanımlar | 6 | ✅ (HizmetBinasi Detail: 2 tab) |
+| PDKS | Puantaj/İzin Sistemi | 10 | ❌ |
+| ESHOT | Ulaşım Kartları | 4 | ❌ |
+| SIRA | Sıramatik Sistemi | 29 | ❌ |
+
+**Toplam:** 60 sayfa (Auth sayfaları hariç)
+
+---
+
+## 20) Permission Key Quick Reference
+
+### Sayfa Seviyesi (Basit CRUD)
+```
+{MODUL}.{RESOURCE}.LIST
+{MODUL}.{RESOURCE}.CREATE
+{MODUL}.{RESOURCE}.EDIT
+{MODUL}.{RESOURCE}.DELETE
+{MODUL}.{RESOURCE}.EXPORT
+```
+
+### Tab Seviyesi (Kompleks Sayfalar)
+```
+{MODUL}.{RESOURCE}.TAB.{TAB_NAME}.VIEW
+{MODUL}.{RESOURCE}.TAB.{TAB_NAME}.EDIT
+```
+
+### Field Seviyesi (Hassas Alanlar)
+```
+{MODUL}.{RESOURCE}.FIELD.{FIELD_NAME}.VIEW
+{MODUL}.{RESOURCE}.FIELD.{FIELD_NAME}.EDIT
+```
+
+### Özel Aksiyonlar
+```
+{MODUL}.{RESOURCE}.{ACTION}
+Örnek: PDKS.IZIN.ONAY_BEKLEYENLER.APPROVE
+```
