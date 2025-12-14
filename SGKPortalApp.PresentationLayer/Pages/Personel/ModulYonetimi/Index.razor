@@ -1,0 +1,338 @@
+@page "/personel/modul-yonetimi"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common
+@inject IModulApiService ModulApiService
+@inject IJSRuntime JS
+
+<PageTitle>Modül Yönetimi - SGK Portal</PageTitle>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="bx bx-folder me-2"></i>Modül Yönetimi
+            </h4>
+            <p class="text-muted mb-0">
+                Sistem modüllerini görüntüleyin ve yönetin
+            </p>
+        </div>
+        <button class="btn btn-primary" @onclick="ShowAddModal">
+            <i class="bx bx-plus me-1"></i>Yeni Modül
+        </button>
+    </div>
+
+    <!-- Table Card -->
+    <div class="card">
+        <div class="card-body">
+            @if (IsLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Modüller yükleniyor...</p>
+                </div>
+            }
+            else if (!Moduller.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bx bx-folder-open" style="font-size: 3rem; color: #ccc;"></i>
+                    <p class="mt-2 text-muted">Henüz modül eklenmemiş</p>
+                    <button class="btn btn-primary btn-sm" @onclick="ShowAddModal">
+                        <i class="bx bx-plus me-1"></i>İlk Modülü Ekle
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th style="width: 40%">Modül Adı</th>
+                                <th style="width: 15%">Controller Sayısı</th>
+                                <th style="width: 20%">Oluşturulma</th>
+                                <th style="width: 20%" class="text-end">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var modul in Moduller)
+                            {
+                                <tr>
+                                    <td>@modul.ModulId</td>
+                                    <td>
+                                        @if (EditingId == modul.ModulId)
+                                        {
+                                            <input type="text"
+                                                   class="form-control form-control-sm"
+                                                   @bind="EditingModulAdi"
+                                                   placeholder="Modül adı..." />
+                                        }
+                                        else
+                                        {
+                                            <strong>@modul.ModulAdi</strong>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-label-info">
+                                            @modul.ControllerCount Controller
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            @modul.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm")
+                                        </small>
+                                    </td>
+                                    <td class="text-end">
+                                        @if (EditingId == modul.ModulId)
+                                        {
+                                            <button class="btn btn-sm btn-success me-1"
+                                                    @onclick="() => SaveEdit(modul.ModulId)"
+                                                    disabled="@IsSaving">
+                                                @if (IsSaving)
+                                                {
+                                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                                }
+                                                <i class="bx bx-check"></i> Kaydet
+                                            </button>
+                                            <button class="btn btn-sm btn-secondary"
+                                                    @onclick="CancelEdit"
+                                                    disabled="@IsSaving">
+                                                <i class="bx bx-x"></i> İptal
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-icon btn-outline-primary me-1"
+                                                    @onclick="() => StartEdit(modul)"
+                                                    title="Düzenle">
+                                                <i class="bx bx-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-icon btn-outline-danger"
+                                                    @onclick="() => DeleteModul(modul)"
+                                                    title="Sil">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Stats -->
+                <div class="mt-3 text-muted small">
+                    <i class="bx bx-folder text-primary"></i>
+                    Toplam: <strong>@Moduller.Count</strong> modül
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Add Modal -->
+@if (ShowModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bx bx-plus-circle me-2"></i>Yeni Modül Ekle
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal" disabled="@IsSaving"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Modül Adı <span class="text-danger">*</span></label>
+                        <input type="text"
+                               class="form-control"
+                               @bind="NewModulAdi"
+                               placeholder="Örn: personel, siramatik, pdks..."
+                               disabled="@IsSaving" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal" disabled="@IsSaving">
+                        <i class="bx bx-x me-1"></i>İptal
+                    </button>
+                    <button type="button" class="btn btn-primary" @onclick="AddModul" disabled="@IsSaving">
+                        @if (IsSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        else
+                        {
+                            <i class="bx bx-check me-1"></i>
+                        }
+                        Ekle
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ModulResponseDto> Moduller = new();
+    private bool IsLoading = true;
+    private bool IsSaving = false;
+    private bool ShowModal = false;
+
+    // Add Modal
+    private string NewModulAdi = string.Empty;
+
+    // Edit Mode
+    private int? EditingId = null;
+    private string EditingModulAdi = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        IsLoading = true;
+        StateHasChanged();
+
+        var result = await ModulApiService.GetAllAsync();
+        if (result.IsSuccess && result.Data != null)
+        {
+            Moduller = result.Data;
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", result.Message ?? "Modüller yüklenemedi");
+        }
+
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    private void ShowAddModal()
+    {
+        NewModulAdi = string.Empty;
+        ShowModal = true;
+    }
+
+    private void CloseModal()
+    {
+        ShowModal = false;
+        NewModulAdi = string.Empty;
+    }
+
+    private async Task AddModul()
+    {
+        if (string.IsNullOrWhiteSpace(NewModulAdi))
+        {
+            await JS.InvokeVoidAsync("alert", "Modül adı boş olamaz");
+            return;
+        }
+
+        IsSaving = true;
+        StateHasChanged();
+
+        var request = new ModulCreateRequestDto
+        {
+            ModulAdi = NewModulAdi.Trim()
+        };
+
+        var result = await ModulApiService.CreateAsync(request);
+
+        if (result.IsSuccess)
+        {
+            await JS.InvokeVoidAsync("alert", result.Message ?? "Modül başarıyla eklendi");
+            CloseModal();
+            await LoadData();
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", result.Message ?? "Modül eklenemedi");
+        }
+
+        IsSaving = false;
+        StateHasChanged();
+    }
+
+    private void StartEdit(ModulResponseDto modul)
+    {
+        EditingId = modul.ModulId;
+        EditingModulAdi = modul.ModulAdi;
+    }
+
+    private void CancelEdit()
+    {
+        EditingId = null;
+        EditingModulAdi = string.Empty;
+    }
+
+    private async Task SaveEdit(int id)
+    {
+        if (string.IsNullOrWhiteSpace(EditingModulAdi))
+        {
+            await JS.InvokeVoidAsync("alert", "Modül adı boş olamaz");
+            return;
+        }
+
+        IsSaving = true;
+        StateHasChanged();
+
+        var request = new ModulUpdateRequestDto
+        {
+            ModulAdi = EditingModulAdi.Trim()
+        };
+
+        var result = await ModulApiService.UpdateAsync(id, request);
+
+        if (result.IsSuccess)
+        {
+            await JS.InvokeVoidAsync("alert", result.Message ?? "Modül başarıyla güncellendi");
+            CancelEdit();
+            await LoadData();
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", result.Message ?? "Modül güncellenemedi");
+        }
+
+        IsSaving = false;
+        StateHasChanged();
+    }
+
+    private async Task DeleteModul(ModulResponseDto modul)
+    {
+        if (modul.ControllerCount > 0)
+        {
+            await JS.InvokeVoidAsync("alert",
+                $"Bu modüle bağlı {modul.ControllerCount} controller bulunmaktadır. Önce onları silmelisiniz.");
+            return;
+        }
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm",
+            $"'{modul.ModulAdi}' modülünü silmek istediğinizden emin misiniz?");
+
+        if (!confirmed) return;
+
+        IsSaving = true;
+        StateHasChanged();
+
+        var result = await ModulApiService.DeleteAsync(modul.ModulId);
+
+        if (result.IsSuccess)
+        {
+            await JS.InvokeVoidAsync("alert", result.Message ?? "Modül başarıyla silindi");
+            await LoadData();
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("alert", result.Message ?? "Modül silinemedi");
+        }
+
+        IsSaving = false;
+        StateHasChanged();
+    }
+}
