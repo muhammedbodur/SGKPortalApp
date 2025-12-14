@@ -107,7 +107,7 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
                 && string.Equals(y.ActionAdi, actionAdi, StringComparison.OrdinalIgnoreCase));
 
             if (yetki == null)
-                return YetkiTipleri.Delete;
+                return YetkiTipleri.None;
 
             var allForYetki = _permissions
                 .Where(p => p.YetkiId == yetki.YetkiId)
