@@ -1,5 +1,6 @@
 ﻿using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -26,7 +27,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common
         Task<IEnumerable<ModulControllerIslem>> GetAllAsync();
 
         // Dropdown için
-        Task<IEnumerable<(int Id, string Ad)>> GetDropdownAsync();
-        Task<IEnumerable<(int Id, string Ad)>> GetByControllerDropdownAsync(int modulControllerId);
+        Task<IEnumerable<DropdownItemDto>> GetDropdownAsync();
+        Task<IEnumerable<DropdownItemDto>> GetByControllerDropdownAsync(int modulControllerId);
     }
 }

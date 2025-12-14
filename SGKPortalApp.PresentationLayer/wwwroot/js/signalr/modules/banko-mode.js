@@ -146,6 +146,17 @@ window.bankoMode = {
             window.location.href = '/auth/login';
         });
 
+        // Permissions changed
+        connection.on("permissionsChanged", (data) => {
+            console.log('🔑 permissionsChanged:', data);
+            if (this.dotNetHelper) {
+                this.dotNetHelper.invokeMethodAsync('OnPermissionsChanged')
+                    .catch(err => {
+                        console.error('❌ OnPermissionsChanged çağrısı başarısız:', err);
+                    });
+            }
+        });
+
         // ⭐ Sıra listesi güncelleme (Kiosk'tan yeni sıra geldiğinde) - ESKİ
         connection.on("siraListUpdate", (payload) => {
             console.log('📥 siraListUpdate alındı:', payload);

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 
@@ -31,6 +32,19 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
         {
             var result = await _personelService.GetByTcKimlikNoAsync(tcKimlikNo);
             return result.Success ? Ok(result) : NotFound(result);
+        }
+
+        [HttpPut("{tcKimlikNo}")]
+        public async Task<IActionResult> Update(string tcKimlikNo, [FromBody] PersonelUpdateRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            request.RequestorTcKimlikNo = User?.FindFirst("TcKimlikNo")?.Value;
+            request.RequestorSessionId = User?.FindFirst("SessionID")?.Value;
+
+            var result = await _personelService.UpdateAsync(tcKimlikNo, request);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         [HttpDelete("{tcKimlikNo}")]
@@ -82,6 +96,9 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            request.RequestorTcKimlikNo = User?.FindFirst("TcKimlikNo")?.Value;
+            request.RequestorSessionId = User?.FindFirst("SessionID")?.Value;
+
             var result = await _personelService.CreateCompleteAsync(request);
             return result.Success ? CreatedAtAction(nameof(GetByTcKimlikNo), new { tcKimlikNo = result.Data?.TcKimlikNo }, result) : BadRequest(result);
         }
@@ -91,6 +108,9 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            request.RequestorTcKimlikNo = User?.FindFirst("TcKimlikNo")?.Value;
+            request.RequestorSessionId = User?.FindFirst("SessionID")?.Value;
 
             var result = await _personelService.UpdateCompleteAsync(tcKimlikNo, request);
             return result.Success ? Ok(result) : BadRequest(result);

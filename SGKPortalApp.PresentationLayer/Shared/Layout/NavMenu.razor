@@ -110,6 +110,18 @@
                             <div>Unvanlar</div>
                         </a>
                     </li>
+                    <li class="menu-item @(IsSectionActive("/personel/yetki") ? "active" : "")">
+                        <a href="/personel/yetki" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-key"></i>
+                            <div>Yetkiler</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(IsSectionActive("/personel/yetki-atama") ? "active" : "")">
+                        <a href="/personel/yetki-atama" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-user-check"></i>
+                            <div>Yetki Atama</div>
+                        </a>
+                    </li>
                     <li class="menu-item @(IsSectionActive("/personel/sendika") ? "active" : "")">
                         <a href="/personel/sendika" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-unite"></i>

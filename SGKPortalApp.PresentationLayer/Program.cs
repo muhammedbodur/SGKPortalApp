@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.DataAccessLayer.Context;
@@ -88,7 +89,8 @@ builder.Services.AddHttpClient("ApiClient", client =>
 {
     client.BaseAddress = new Uri(apiUrl);
     client.Timeout = TimeSpan.FromSeconds(30);
-});
+})
+    .AddHttpMessageHandler<SGKPortalApp.PresentationLayer.Services.ApiServices.Handlers.ApiAuthCookieForwardingHandler>();
 
 Console.WriteLine($"✅ HttpClient configured - BaseAddress: {apiUrl}");
 
@@ -153,6 +155,16 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 // 🔐 HTTP CONTEXT ACCESSOR (Blazor'da user bilgileri için)
 // ═══════════════════════════════════════════════════════
 builder.Services.AddHttpContextAccessor();
+
+var sharedKeysPath = Path.Combine(
+    Directory.GetParent(builder.Environment.ContentRootPath)!.FullName,
+    "SharedDataProtectionKeys");
+Directory.CreateDirectory(sharedKeysPath);
+
+builder.Services
+    .AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(sharedKeysPath))
+    .SetApplicationName("SGKPortalApp");
 
 // ═══════════════════════════════════════════════════════
 // 🔒 AUTHENTICATION & AUTHORIZATION

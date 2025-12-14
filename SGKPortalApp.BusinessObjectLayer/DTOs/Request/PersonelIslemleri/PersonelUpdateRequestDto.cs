@@ -6,6 +6,9 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
 {
     public class PersonelUpdateRequestDto
     {
+        public string? RequestorTcKimlikNo { get; set; }
+        public string? RequestorSessionId { get; set; }
+
         [Required]
         [StringLength(200)]
         public string AdSoyad { get; set; } = string.Empty;

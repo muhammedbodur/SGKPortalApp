@@ -62,6 +62,11 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.Common
             builder.Property(u => u.BankoModuBaslangic)
                 .HasComment("Banko moduna geçiş zamanı");
 
+            builder.Property(u => u.PermissionStamp)
+                .IsRequired()
+                .HasDefaultValueSql("NEWID()")
+                .HasComment("Permission cache invalidation stamp");
+
             builder.Property(u => u.EklenmeTarihi)
                 .IsRequired()
                 .HasDefaultValueSql("GETDATE()");

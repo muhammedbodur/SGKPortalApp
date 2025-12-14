@@ -68,7 +68,7 @@
                                 <button type="button" class="btn btn-outline-secondary" @onclick="NavigateToPersonelList" disabled="@IsSaving">
                                     İptal
                                 </button>
-                                <button type="submit" class="btn btn-primary" disabled="@IsSaving">
+                                <button type="submit" class="btn btn-primary" disabled="@(IsSaving || !CanEditManage)">
                                     @if (IsSaving)
                                     {
                                         <span class="spinner-border spinner-border-sm me-1"></span>
@@ -88,8 +88,16 @@
         <!-- ═══════════════════════════════════════════════════════ -->
         <!-- ADIM 2: TÜM BİLGİLER (Sol Kart + Sağ Tabs) -->
         <!-- ═══════════════════════════════════════════════════════ -->
-        <EditForm Model="@FormModel" OnValidSubmit="HandleFinalSubmit">
-            <DataAnnotationsValidator />
+        @if (!CanViewManage)
+        {
+            <div class="alert alert-danger" role="alert">
+                Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+            </div>
+        }
+        else
+        {
+            <EditForm Model="@FormModel" OnValidSubmit="HandleFinalSubmit">
+                <DataAnnotationsValidator />
 
             <div class="row">
                 <!-- ═══════════════════════════════════════════════════════ -->
@@ -255,7 +263,8 @@
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Sicil No</label>
                                         <InputNumber @bind-Value="FormModel.SicilNo"
-                                                     class="form-control" />
+                                                     class="form-control"
+                                                     disabled="@(!CanEditManage || IsSaving || (IsEditMode && !CanDeleteManage))" />
                                     </div>
 
                                     <!-- Ad Soyad -->
@@ -475,7 +484,8 @@
                                         <label class="form-label">E-Posta</label>
                                         <InputText @bind-Value="FormModel.Email"
                                                    class="form-control"
-                                                   type="email" />
+                                                   type="email"
+                                                   disabled="@(!CanEditManage || IsSaving || (IsEditMode && !CanDeleteManage))" />
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Dahili Tel No</label>
@@ -1146,7 +1156,7 @@
                                 @if (!string.IsNullOrEmpty(FormModel.Resim))
                                 {
                                     <div class="d-flex gap-2 justify-content-center mt-3">
-                                        <button type="button" class="btn btn-outline-danger btn-sm" @onclick="RemovePhoto">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" @onclick="RemovePhoto" disabled="@(IsEditMode && (!CanDeleteManage || IsSaving))">
                                             <i class="bx bx-trash me-1"></i>Fotoğrafı Kaldır
                                         </button>
                                     </div>
@@ -1175,6 +1185,7 @@
                     </div>
                 </div>
             </div>
-        </EditForm>
+            </EditForm>
+        }
     }
 </div>

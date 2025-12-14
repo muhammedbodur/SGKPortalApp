@@ -17,10 +17,11 @@ using AutoMapper;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Models.FormModels.PersonelIslemleri;
+using SGKPortalApp.PresentationLayer.Services.StateServices;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel
 {
-    public partial class Manage : BasePageComponent
+    public partial class Manage : BasePageComponent, IDisposable
     {
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
@@ -42,6 +43,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         [Inject] private IAtanmaNedeniApiService _atanmaNedeniApiService { get; set; } = default!;
         [Inject] private IMapper _mapper { get; set; } = default!;
         [Inject] private IUserInfoService _userInfoService { get; set; } = default!;
+        [Inject] private PermissionStateService _permissionStateService { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════
         // PARAMETERS
@@ -54,6 +56,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         // ═══════════════════════════════════════════════════════
 
         private bool IsEditMode => !string.IsNullOrEmpty(TcKimlikNo);
+
+        private const string PermissionControllerAdi = "Personel";
+        private const string PermissionActionAdi = "Manage";
+
+        private bool CanViewManage => _permissionStateService.CanView(PermissionControllerAdi, PermissionActionAdi);
+        private bool CanEditManage => !IsEditMode || _permissionStateService.CanEdit(PermissionControllerAdi, PermissionActionAdi);
+        private bool CanDeleteManage => !IsEditMode || _permissionStateService.CanDelete(PermissionControllerAdi, PermissionActionAdi);
 
         // Lookup Lists
         private List<DepartmanResponseDto> Departmanlar { get; set; } = new();
@@ -96,6 +105,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             // Lookup listelerini yükle
             await LoadLookupData();
 
+            try
+            {
+                await _permissionStateService.EnsureLoadedAsync();
+                _permissionStateService.OnChange += HandlePermissionStateChanged;
+            }
+            catch
+            {
+            }
+
             if (IsEditMode)
             {
                 // Düzenleme modu: Direkt adım 2'ye geç
@@ -124,6 +142,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                     // Yeni ekleme modu: Adım 1'den başla
                     CurrentStep = 1;
                 }
+            }
+        }
+
+        private void HandlePermissionStateChanged()
+        {
+            _ = InvokeAsync(StateHasChanged);
+        }
+
+        public void Dispose()
+        {
+            try
+            {
+                _permissionStateService.OnChange -= HandlePermissionStateChanged;
+            }
+            catch
+            {
             }
         }
 
@@ -505,6 +539,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
         private async Task HandleFinalSubmit()
         {
+            if (!CanEditManage)
+            {
+                await _toastService.ShowErrorAsync("Bu işlem için yetkiniz bulunmuyor.");
+                return;
+            }
+
             //  DETAYLI VALİDASYON + DEBUG LOG
             Console.WriteLine("═══════════════════════════════════════════════════════");
             Console.WriteLine("🚀 FORM SUBMIT BAŞLADI");
@@ -1098,6 +1138,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         {
             try
             {
+                if (IsEditMode && !CanDeleteManage)
+                {
+                    await _toastService.ShowErrorAsync("Bu işlem için yetkiniz bulunmuyor.");
+                    return;
+                }
+
                 if (string.IsNullOrEmpty(FormModel.Resim))
                 {
                     await _toastService.ShowWarningAsync(" Silinecek fotoğraf bulunmuyor.");

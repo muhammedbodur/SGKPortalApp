@@ -3,6 +3,7 @@ using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Generic;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -89,22 +90,22 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<(int Id, string Ad)>> GetDropdownAsync()
+        public async Task<IEnumerable<DropdownItemDto>> GetDropdownAsync()
         {
             return await _dbSet
                 .AsNoTracking()
                 .OrderBy(mci => mci.ModulControllerIslemAdi)
-                .Select(mci => new ValueTuple<int, string>(mci.ModulControllerIslemId, mci.ModulControllerIslemAdi))
+                .Select(mci => new DropdownItemDto { Id = mci.ModulControllerIslemId, Ad = mci.ModulControllerIslemAdi })
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<(int Id, string Ad)>> GetByControllerDropdownAsync(int modulControllerId)
+        public async Task<IEnumerable<DropdownItemDto>> GetByControllerDropdownAsync(int modulControllerId)
         {
             return await _dbSet
                 .AsNoTracking()
                 .Where(mci => mci.ModulControllerId == modulControllerId)
                 .OrderBy(mci => mci.ModulControllerIslemAdi)
-                .Select(mci => new ValueTuple<int, string>(mci.ModulControllerIslemId, mci.ModulControllerIslemAdi))
+                .Select(mci => new DropdownItemDto { Id = mci.ModulControllerIslemId, Ad = mci.ModulControllerIslemAdi })
                 .ToListAsync();
         }
     }

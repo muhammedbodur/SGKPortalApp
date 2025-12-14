@@ -1,0 +1,189 @@
+@page "/personel/yetki/manage"
+@page "/personel/yetki/manage/{id:int}"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
+
+<PageTitle>@(IsEditMode ? "Yetki Düzenle" : "Yeni Yetki") - SGK Portal</PageTitle>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="bx @(IsEditMode ? "bx-edit" : "bx-plus-circle") me-2"></i>
+                @(IsEditMode ? "Yetki Düzenle" : "Yeni Yetki Ekle")
+            </h4>
+            <p class="text-muted mb-0">
+                @(IsEditMode ? "Yetki bilgilerini güncelleyin" : "Yeni bir yetki oluşturun")
+            </p>
+        </div>
+
+        <button class="btn btn-outline-secondary" @onclick="NavigateToYetkiList">
+            <i class="bx bx-arrow-back me-1"></i>Geri Dön
+        </button>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <p class="text-muted">@(IsEditMode ? "Yetki bilgileri yükleniyor..." : "Hazırlanıyor...")</p>
+            </div>
+        </div>
+    }
+    else if (NotFound)
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bx bx-error-circle display-1 text-danger mb-3"></i>
+                <h5 class="mb-3">Yetki Bulunamadı</h5>
+                <p class="text-muted mb-4">Aradığınız yetki bulunamadı veya silinmiş olabilir.</p>
+                <button class="btn btn-primary" @onclick="NavigateToYetkiList">
+                    <i class="bx bx-list-ul me-1"></i>Yetki Listesine Dön
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-lg-8 col-xl-7 mx-auto">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="mb-0">
+                            <i class="bx bx-info-circle me-2"></i>Yetki Bilgileri
+                        </h5>
+                        @if (IsEditMode)
+                        {
+                            <span class="badge bg-label-info">ID: @Id</span>
+                        }
+                    </div>
+
+                    <div class="card-body">
+                        <EditForm Model="@FormModel" OnValidSubmit="HandleSubmit">
+                            <DataAnnotationsValidator />
+
+                            <div class="mb-3">
+                                <label class="form-label required">Yetki Adı</label>
+                                <InputText @bind-Value="FormModel.YetkiAdi" class="form-control" disabled="@IsSaving" maxlength="100" />
+                                <ValidationMessage For="@(() => FormModel.YetkiAdi)" class="text-danger small mt-1" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label required">Açıklama</label>
+                                <InputTextArea @bind-Value="FormModel.Aciklama" class="form-control" disabled="@IsSaving" maxlength="500" rows="3" />
+                                <ValidationMessage For="@(() => FormModel.Aciklama)" class="text-danger small mt-1" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Üst Yetki</label>
+                                <select class="form-select" @bind="FormModel.UstYetkiId" disabled="@IsSaving">
+                                    <option value="">-- Yok --</option>
+                                    @foreach (var item in YetkiDropdown)
+                                    {
+                                        <option value="@item.YetkiId">@item.YetkiAdi</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Controller Adı</label>
+                                    <InputText @bind-Value="FormModel.ControllerAdi" class="form-control" disabled="@IsSaving" maxlength="100" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Action Adı</label>
+                                    <InputText @bind-Value="FormModel.ActionAdi" class="form-control" disabled="@IsSaving" maxlength="100" />
+                                </div>
+                            </div>
+
+                            <ValidationSummary class="alert alert-danger mt-3" />
+
+                            <div class="d-flex gap-2 justify-content-end pt-3 border-top mt-4">
+                                <button type="button" class="btn btn-outline-secondary" @onclick="NavigateToYetkiList" disabled="@IsSaving">
+                                    <i class="bx bx-x me-1"></i>İptal
+                                </button>
+
+                                <button type="submit" class="btn btn-primary" disabled="@IsSaving">
+                                    @if (IsSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1"></span>
+                                        <span>Kaydediliyor...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bx bx-check me-1"></i>
+                                        <span>@(IsEditMode ? "Güncelle" : "Kaydet")</span>
+                                    }
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+
+                @if (IsEditMode)
+                {
+                    <div class="card border-danger mt-4">
+                        <div class="card-body">
+                            <h6 class="text-danger mb-2">
+                                <i class="bx bx-error-circle me-1"></i>Tehlikeli Bölge
+                            </h6>
+                            <p class="text-muted mb-3 small">Bu yetkiyi silmek istiyorsanız aşağıdaki butona tıklayın.</p>
+                            <button class="btn btn-outline-danger" @onclick="ShowDeleteConfirmation" disabled="@IsSaving">
+                                <i class="bx bx-trash me-1"></i>Yetkiyi Sil
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@if (ShowDeleteModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bx bx-trash text-danger me-2"></i>Yetki Sil
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeleteModal" disabled="@IsDeleting"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger mb-3">
+                        <i class="bx bx-error-circle me-2"></i>
+                        <strong>Dikkat!</strong> Bu işlem geri alınamaz.
+                    </div>
+                    <p class="mb-0">
+                        <strong>@FormModel.YetkiAdi</strong> yetkisini silmek istediğinizden emin misiniz?
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDeleteModal" disabled="@IsDeleting">İptal</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDelete" disabled="@IsDeleting">
+                        @if (IsDeleting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                            <span>Siliniyor...</span>
+                        }
+                        else
+                        {
+                            <i class="bx bx-trash me-1"></i>
+                            <span>Evet, Sil</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .required::after {
+        content: " *";
+        color: #ff0000;
+    }
+</style>

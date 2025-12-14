@@ -74,6 +74,8 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
         /// </summary>
         public DateTime? BankoModuBaslangic { get; set; }
 
+        public Guid PermissionStamp { get; set; } = Guid.NewGuid();
+
         // SignalR Bağlantısı (One-to-One)
         public HubConnection? HubConnection { get; set; }
 

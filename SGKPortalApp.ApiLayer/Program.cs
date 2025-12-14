@@ -1,4 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using SGKPortalApp.ApiLayer.Services.Hubs;
@@ -52,7 +56,14 @@ namespace SGKPortalApp.ApiLayer
             // ═══════════════════════════════════════════════════════
             // 📦 CONTROLLERS & JSON SERİALİZATİON
             // ═══════════════════════════════════════════════════════
-            builder.Services.AddControllers()
+            builder.Services.AddControllers(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder()
+                        .RequireAuthenticatedUser()
+                        .Build();
+
+                    options.Filters.Add(new AuthorizeFilter(policy));
+                })
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
@@ -65,6 +76,42 @@ namespace SGKPortalApp.ApiLayer
             // 🎯 SGK PORTAL SERVİSLERİ
             // ═══════════════════════════════════════════════════════
             builder.Services.AddSGKPortalServices(builder.Configuration);
+
+            builder.Services.AddHttpContextAccessor();
+
+            var sharedKeysPath = Path.Combine(
+                Directory.GetParent(builder.Environment.ContentRootPath)!.FullName,
+                "SharedDataProtectionKeys");
+            Directory.CreateDirectory(sharedKeysPath);
+
+            builder.Services
+                .AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(sharedKeysPath))
+                .SetApplicationName("SGKPortalApp");
+
+            builder.Services
+                .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.Cookie.Name = "SGKPortal.Auth";
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+
+                    options.Events.OnRedirectToLogin = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        return Task.CompletedTask;
+                    };
+
+                    options.Events.OnRedirectToAccessDenied = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        return Task.CompletedTask;
+                    };
+                });
+
+            builder.Services.AddAuthorization();
 
             // Business Logic Layer
             builder.Services.AddBusinessLogicLayer();
@@ -199,6 +246,7 @@ namespace SGKPortalApp.ApiLayer
 
             app.UseHttpsRedirection();
             app.UseCors("SGKPortalPolicy");
+            app.UseAuthentication();
             app.UseAuthorization();
 
             // ═══════════════════════════════════════════════════════

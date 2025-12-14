@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SGKPortalApp.PresentationLayer.Services.StateServices;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Handlers;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System.Reflection;
 
@@ -32,7 +33,8 @@ namespace SGKPortalApp.PresentationLayer.Extensions
             services.AddScoped<AppStateService>();
             services.AddScoped<UserStateService>();
             services.AddScoped<NavigationStateService>();
-            Console.WriteLine("  ✅ 3 State Service kayıt edildi");
+            services.AddScoped<PermissionStateService>();
+            Console.WriteLine("  ✅ 4 State Service kayıt edildi");
 
             // ═══════════════════════════════════════════════════════
             // 1️⃣ AUTHENTICATION SERVICES (Cookie Management)
@@ -57,6 +59,8 @@ namespace SGKPortalApp.PresentationLayer.Extensions
             // ═══════════════════════════════════════════════════════
             // 5️⃣ API SERVICES - Modül Bazında Otomatik Kayıt
             // ═══════════════════════════════════════════════════════
+            services.AddTransient<ApiAuthCookieForwardingHandler>();
+
             services.RegisterApiServices(assembly, apiUrl, "Auth");
             services.RegisterApiServices(assembly, apiUrl, "Common");
             services.RegisterApiServices(assembly, apiUrl, "Personel");
@@ -157,7 +161,13 @@ namespace SGKPortalApp.PresentationLayer.Extensions
                         };
 
                         // Metodu çağır: services.AddHttpClient<TInterface, TImplementation>(configureClient)
-                        genericMethod.Invoke(null, new object[] { services, configureClient });
+                        var builderObj = genericMethod.Invoke(null, new object[] { services, configureClient });
+
+                        // Cookie forward handler'ını Typed HttpClient pipeline'ına ekle
+                        if (builderObj is IHttpClientBuilder httpClientBuilder)
+                        {
+                            httpClientBuilder.AddHttpMessageHandler<ApiAuthCookieForwardingHandler>();
+                        }
 
                         registeredCount++;
                         Console.WriteLine($"    ✅ {interfaceType.Name} -> {implementationType.Name} (Typed HttpClient)");

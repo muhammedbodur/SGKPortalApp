@@ -6,6 +6,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Exceptions;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
@@ -34,6 +35,58 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             _logger = logger;
         }
 
+        private async Task<(bool Ok, string? ErrorMessage)> ValidateRequestorAsync(string? requestorTcKimlikNo, string? requestorSessionId)
+        {
+            if (string.IsNullOrWhiteSpace(requestorTcKimlikNo))
+                return (false, "Oturum bilgisi bulunamadı");
+
+            if (string.IsNullOrWhiteSpace(requestorSessionId))
+                return (false, "Oturum bilgisi bulunamadı");
+
+            var userRepo = _unitOfWork.Repository<User>();
+            var user = await userRepo.FirstOrDefaultAsync(u => u.TcKimlikNo == requestorTcKimlikNo);
+
+            if (user == null)
+                return (false, "Kullanıcı bulunamadı");
+
+            if (string.IsNullOrWhiteSpace(user.SessionID) || !string.Equals(user.SessionID, requestorSessionId, StringComparison.Ordinal))
+                return (false, "Oturum süresi dolmuş olabilir. Lütfen tekrar giriş yapın");
+
+            return (true, null);
+        }
+
+        private async Task<YetkiTipleri> GetPermissionLevelAsync(string tcKimlikNo, string controllerAdi, string actionAdi, string? modulControllerIslemAdi = null)
+        {
+            if (string.IsNullOrWhiteSpace(tcKimlikNo) || string.IsNullOrWhiteSpace(controllerAdi) || string.IsNullOrWhiteSpace(actionAdi))
+                return YetkiTipleri.None;
+
+            var yetki = await _unitOfWork.Repository<Yetki>()
+                .FirstOrDefaultAsync(y => y.ControllerAdi == controllerAdi && y.ActionAdi == actionAdi);
+
+            if (yetki == null)
+                return YetkiTipleri.Delete;
+
+            var perms = (await _unitOfWork.Repository<PersonelYetki>()
+                .FindAsync(py => py.TcKimlikNo == tcKimlikNo && py.YetkiId == yetki.YetkiId, py => py.ModulControllerIslem))
+                .ToList();
+
+            if (!perms.Any())
+                return YetkiTipleri.None;
+
+            if (string.IsNullOrWhiteSpace(modulControllerIslemAdi))
+                return perms.Max(p => p.YetkiTipleri);
+
+            var matching = perms
+                .Where(p => p.ModulControllerIslem != null
+                    && string.Equals(p.ModulControllerIslem.ModulControllerIslemAdi, modulControllerIslemAdi, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (!matching.Any())
+                return YetkiTipleri.None;
+
+            return matching.Max(p => p.YetkiTipleri);
+        }
+
         public async Task<ApiResponseDto<List<PersonelResponseDto>>> GetAllAsync()
         {
             try
@@ -51,6 +104,58 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 _logger.LogError(ex, "Personel listesi getirilirken hata oluştu");
                 return ApiResponseDto<List<PersonelResponseDto>>
                     .ErrorResult("Personeller getirilirken bir hata oluştu", ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<PersonelResponseDto>> UpdateAsync(string tcKimlikNo, PersonelUpdateRequestDto request)
+        {
+            try
+            {
+                var validation = await ValidateRequestorAsync(request.RequestorTcKimlikNo, request.RequestorSessionId);
+                if (!validation.Ok)
+                    return ApiResponseDto<PersonelResponseDto>.ErrorResult(validation.ErrorMessage ?? "Yetkisiz işlem");
+
+                var level = await GetPermissionLevelAsync(request.RequestorTcKimlikNo!, "Personel", "Manage");
+                if (level < YetkiTipleri.Edit)
+                    return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
+
+                var canDelete = level >= YetkiTipleri.Delete;
+
+                var personel = await _unitOfWork.Repository<Personel>().GetByIdAsync(tcKimlikNo);
+                if (personel == null)
+                    return ApiResponseDto<PersonelResponseDto>.ErrorResult("Personel bulunamadı");
+
+                if (!canDelete)
+                {
+                    if (!string.Equals(request.Email, personel.Email, StringComparison.OrdinalIgnoreCase))
+                        return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
+
+                    if (!string.IsNullOrWhiteSpace(personel.Resim) && string.IsNullOrWhiteSpace(request.Resim))
+                        return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
+                }
+
+                _mapper.Map(request, personel);
+
+                _unitOfWork.Repository<Personel>().Update(personel);
+                await _unitOfWork.SaveChangesAsync();
+
+                var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
+                var savedPersonel = await personelRepo.GetByTcKimlikNoWithDetailsAsync(tcKimlikNo);
+                var dto = _mapper.Map<PersonelResponseDto>(savedPersonel);
+
+                return ApiResponseDto<PersonelResponseDto>.SuccessResult(dto, "Personel başarıyla güncellendi");
+            }
+            catch (DatabaseException ex)
+            {
+                _logger.LogWarning(ex, "Veritabanı kısıtlama hatası: {ErrorType}", ex.ErrorType);
+                return ApiResponseDto<PersonelResponseDto>
+                    .ErrorResult(ex.UserFriendlyMessage, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Personel güncellenirken hata oluştu. TC: {TcKimlikNo}", tcKimlikNo);
+                return ApiResponseDto<PersonelResponseDto>
+                    .ErrorResult("Personel güncellenirken bir hata oluştu", ex.Message);
             }
         }
 
@@ -280,6 +385,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             {
                 try
                 {
+                    var validation = await ValidateRequestorAsync(request.RequestorTcKimlikNo, request.RequestorSessionId);
+                    if (!validation.Ok)
+                        return ApiResponseDto<PersonelResponseDto>.ErrorResult(validation.ErrorMessage ?? "Yetkisiz işlem");
+
+                    var level = await GetPermissionLevelAsync(request.RequestorTcKimlikNo!, "Personel", "Manage");
+                    if (level < YetkiTipleri.Edit)
+                        return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
+
                     // 1. Personel kaydet
                     var personel = _mapper.Map<Personel>(request.Personel);
                     await _unitOfWork.Repository<Personel>().AddAsync(personel);
@@ -399,16 +512,39 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             {
                 try
                 {
+                    var validation = await ValidateRequestorAsync(request.RequestorTcKimlikNo, request.RequestorSessionId);
+                    if (!validation.Ok)
+                        return ApiResponseDto<PersonelResponseDto>.ErrorResult(validation.ErrorMessage ?? "Yetkisiz işlem");
+
+                    var level = await GetPermissionLevelAsync(request.RequestorTcKimlikNo!, "Personel", "Manage");
+                    if (level < YetkiTipleri.Edit)
+                        return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
+
+                    var canDelete = level >= YetkiTipleri.Delete;
+
                     // 1. Personel güncelle
                     var personel = await _unitOfWork.Repository<Personel>().GetByIdAsync(tcKimlikNo);
                     if (personel == null)
                         return ApiResponseDto<PersonelResponseDto>.ErrorResult("Personel bulunamadı");
+
+                    if (!canDelete)
+                    {
+                        if (request.Personel.SicilNo != personel.SicilNo)
+                            return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
+
+                        if (!string.Equals(request.Personel.Email, personel.Email, StringComparison.OrdinalIgnoreCase))
+                            return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
+
+                        if (!string.IsNullOrWhiteSpace(personel.Resim) && string.IsNullOrWhiteSpace(request.Personel.Resim))
+                            return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
+                    }
 
                     // Hizmet binası veya departman değişikliği kontrolü
                     var eskiHizmetBinasiId = personel.HizmetBinasiId;
                     var eskiDepartmanId = personel.DepartmanId;
 
                     _mapper.Map(request.Personel, personel);
+
                     _unitOfWork.Repository<Personel>().Update(personel);
                     await _unitOfWork.SaveChangesAsync();
 

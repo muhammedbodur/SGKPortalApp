@@ -3,6 +3,7 @@ using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Generic;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -63,12 +64,12 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<(int Id, string Ad)>> GetDropdownAsync()
+        public async Task<IEnumerable<DropdownItemDto>> GetDropdownAsync()
         {
             return await _dbSet
                 .AsNoTracking()
                 .OrderBy(y => y.YetkiAdi)
-                .Select(y => new ValueTuple<int, string>(y.YetkiId, y.YetkiAdi))
+                .Select(y => new DropdownItemDto { Id = y.YetkiId, Ad = y.YetkiAdi })
                 .ToListAsync();
         }
     }

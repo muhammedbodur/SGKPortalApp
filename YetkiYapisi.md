@@ -106,9 +106,9 @@ Butonlar (örn. **Sil**, **Düzenle**, **Excel’e Aktar**) birer “aksiyon”d
 Örnek (senaryon):
  - Sayfa: `https://localhost:8080/personel/manage/16406457430`
  - Alan: `Personel.Adres`
-   - Yetki: `PER.PERSONEL.FIELD.ADRES.EDIT` = `Edit` ise input
-   - Yetki: `...` = `View` ise text
-   - Yetki: `...` = `None` ise hiç render edilmez
+   - Yetki: `PER.PERSONEL.MANAGE.FIELD.ADRES.EDIT` = `Edit` ise input
+   - Yetki: `PER.PERSONEL.MANAGE.FIELD.ADRES.VIEW` = `View` ise text
+   - Yetki: `PER.PERSONEL.MANAGE.FIELD.ADRES` = `None` ise hiç render edilmez
 
 ### 3.3 “Yetkisiz alanlar bozulmadan güncellensin” kuralı
 Bu kuralı sağlamak için önerilen yaklaşım:
@@ -159,7 +159,7 @@ Tavsiye edilen hiyerarşik path yaklaşımı:
  - `PER.PERSONEL.MANAGE.EDIT`
  - `PER.PERSONEL.MANAGE.FIELD.EMAIL.VIEW`
  - `PER.PERSONEL.MANAGE.FIELD.EMAIL.EDIT`
- - `PER.PERSONEL.DELETE.DELETE`
+ - `PER.PERSONEL.DELETE`
 
 Bu dokümanda kısaltma:
 - `PER` = Personel işlemleri modülü
@@ -298,7 +298,7 @@ Butonlar:
 
 Bu doküman yalnızca yapı/standardı tanımlar. Bunu kodda işletmek için önerilen minimum teknik bileşenler:
 - `PermissionService` (TcKimlikNo → permission cache)
-- Razor için helper/component:
+- Blazor için helper/component:
   - `PermissionView` (render/hide)
   - `PermissionField` (edit/text/hide)
 - API tarafında kritik endpoint’lere `[Authorize]` + kontrol (opsiyonel, mimariye göre)
@@ -774,12 +774,20 @@ Not:
 ```
 {MODUL}.{RESOURCE}.TAB.{TAB_NAME}.VIEW
 {MODUL}.{RESOURCE}.TAB.{TAB_NAME}.EDIT
+
+Opsiyonel sayfa context:
+{MODUL}.{RESOURCE}.DETAIL.TAB.{TAB_NAME}.VIEW
+{MODUL}.{RESOURCE}.DETAIL.TAB.{TAB_NAME}.EDIT
 ```
 
 ### Field Seviyesi (Hassas Alanlar)
 ```
 {MODUL}.{RESOURCE}.FIELD.{FIELD_NAME}.VIEW
 {MODUL}.{RESOURCE}.FIELD.{FIELD_NAME}.EDIT
+
+Opsiyonel sayfa context:
+{MODUL}.{RESOURCE}.MANAGE.FIELD.{FIELD_NAME}.VIEW
+{MODUL}.{RESOURCE}.MANAGE.FIELD.{FIELD_NAME}.EDIT
 ```
 
 ### Özel Aksiyonlar
@@ -787,3 +795,69 @@ Not:
 {MODUL}.{RESOURCE}.{ACTION}
 Örnek: PDKS.IZIN.ONAY_BEKLEYENLER.APPROVE
 ```
+
+---
+
+## 21) Uygulananlar (Kod Durumu Raporu)
+
+### 21.1 Yetki / PersonelYetki API + BLL + DTO (Sendika Pattern)
+
+**DTO (BusinessObjectLayer)**
+- `SGKPortalApp.BusinessObjectLayer/DTOs/Request/PersonelIslemleri/YetkiCreateRequestDto.cs`
+- `SGKPortalApp.BusinessObjectLayer/DTOs/Request/PersonelIslemleri/YetkiUpdateRequestDto.cs`
+- `SGKPortalApp.BusinessObjectLayer/DTOs/Response/PersonelIslemleri/YetkiResponseDto.cs`
+- `SGKPortalApp.BusinessObjectLayer/DTOs/Request/PersonelIslemleri/PersonelYetkiCreateRequestDto.cs`
+- `SGKPortalApp.BusinessObjectLayer/DTOs/Request/PersonelIslemleri/PersonelYetkiUpdateRequestDto.cs`
+- `SGKPortalApp.BusinessObjectLayer/DTOs/Response/PersonelIslemleri/PersonelYetkiResponseDto.cs`
+
+**AutoMapper (BusinessLogicLayer)**
+- `SGKPortalApp.BusinessLogicLayer/Mapping/Profiles/PersonelIslemleri/YetkiMappingProfile.cs`
+- `SGKPortalApp.BusinessLogicLayer/Mapping/Profiles/PersonelIslemleri/PersonelYetkiMappingProfile.cs`
+
+**Service Interface + Implementation (BusinessLogicLayer)**
+- `SGKPortalApp.BusinessLogicLayer/Interfaces/PersonelIslemleri/IYetkiService.cs`
+- `SGKPortalApp.BusinessLogicLayer/Services/PersonelIslemleri/YetkiService.cs`
+- `SGKPortalApp.BusinessLogicLayer/Interfaces/PersonelIslemleri/IPersonelYetkiService.cs`
+- `SGKPortalApp.BusinessLogicLayer/Services/PersonelIslemleri/PersonelYetkiService.cs`
+
+**API Controller (ApiLayer)**
+- `SGKPortalApp.ApiLayer/Controllers/PersonelIslemleri/YetkiController.cs`
+- `SGKPortalApp.ApiLayer/Controllers/PersonelIslemleri/PersonelYetkiController.cs`
+
+### 21.2 Yeni API Endpoint’leri
+
+**Yetki**
+- `GET /api/yetki`
+- `GET /api/yetki/{id}`
+- `POST /api/yetki`
+- `PUT /api/yetki/{id}`
+- `DELETE /api/yetki/{id}`
+- `GET /api/yetki/root`
+- `GET /api/yetki/{ustYetkiId}/children`
+- `GET /api/yetki/dropdown`
+
+**PersonelYetki (Dinamik Permission Atama)**
+- `GET /api/personelyetki/{id}`
+- `GET /api/personelyetki/by-tc/{tcKimlikNo}`
+- `GET /api/personelyetki/by-yetki/{yetkiId}`
+- `POST /api/personelyetki`
+- `PUT /api/personelyetki/{id}`
+- `DELETE /api/personelyetki/{id}`
+
+### 21.3 PermissionStamp + SignalR Invalidasyon
+
+**User tablosu (CMN_Users)**
+- `SGKPortalApp.BusinessObjectLayer/Entities/Common/User.cs` içine `PermissionStamp` alanı eklendi.
+- `SGKPortalApp.DataAccessLayer/Configurations/Common/UserConfiguration.cs` içinde `PermissionStamp` kolon mapping’i eklendi (`NEWID()` default).
+
+**PersonelYetki değişince anında yansıma**
+- `PersonelYetkiService` içinde `Create/Update/Delete` sonrası:
+  - İlgili user için `PermissionStamp = Guid.NewGuid()` güncellenir.
+  - Kullanıcının aktif connection’larına `permissionsChanged` event’i SignalR ile gönderilir.
+
+**SignalR Event sabiti**
+- `SGKPortalApp.ApiLayer/Services/Hubs/Constants/SignalREvents.cs` içine `PermissionsChanged = "permissionsChanged"` eklendi.
+
+### 21.4 Önemli Not (İsim Çakışması)
+
+`/personel/manage/{tc}` sayfasındaki “Yetki” tabı mevcut kodda **dinamik permission** (`PersonelYetki`) değil, **İmza Yetkileri** (`PersonelImzaYetkisi`) konseptini yönetmektedir. Dinamik permission UI’si ayrı ekran/sekme olarak ele alınmalıdır.

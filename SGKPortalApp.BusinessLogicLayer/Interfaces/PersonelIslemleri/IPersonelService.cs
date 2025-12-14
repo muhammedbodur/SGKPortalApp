@@ -8,6 +8,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri
     {
         Task<ApiResponseDto<List<PersonelResponseDto>>> GetAllAsync();
         Task<ApiResponseDto<PersonelResponseDto>> GetByTcKimlikNoAsync(string tcKimlikNo);
+        Task<ApiResponseDto<PersonelResponseDto>> UpdateAsync(string tcKimlikNo, PersonelUpdateRequestDto request);
         Task<ApiResponseDto<bool>> DeleteAsync(string tcKimlikNo);
         Task<ApiResponseDto<List<PersonelResponseDto>>> GetActiveAsync();
         Task<ApiResponseDto<PagedResponseDto<PersonelListResponseDto>>> GetPagedAsync(PersonelFilterRequestDto filter);

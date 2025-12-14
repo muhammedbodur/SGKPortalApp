@@ -4,6 +4,7 @@ using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.PresentationLayer.Services.State;
+using SGKPortalApp.PresentationLayer.Services.StateServices;
 using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
@@ -22,6 +23,7 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         [Inject] private IUserInfoService UserInfoService { get; set; } = default!;
         [Inject] private IUserApiService UserApiService { get; set; } = default!;
         [Inject] private ISiraCagirmaApiService SiraCagirmaApiService { get; set; } = default!;
+        [Inject] private PermissionStateService PermissionStateService { get; set; } = default!;
 
         [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
         [Inject] private ILogger<MainLayout> Logger { get; set; } = default!;
@@ -74,6 +76,16 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
 
                 // 3. Panel verisini yalnızca banko modundaysa yükle
                 await LoadBankoPanelSiralarAsync();
+
+                // 🔑 Permission cache'i ilk açılışta yükle
+                try
+                {
+                    await PermissionStateService.EnsureLoadedAsync();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogWarning(ex, "PermissionStateService initial load hatası");
+                }
 
                 // 4. Event listener'ları kaydet
                 NavigationManager.LocationChanged += OnLocationChanged;
@@ -320,6 +332,20 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
 
             // Tam sayfa yenileme ile login'e yönlendir
             NavigationManager.NavigateTo("/auth/login", forceLoad: true);
+        }
+
+        [JSInvokable]
+        public async Task OnPermissionsChanged()
+        {
+            try
+            {
+                await PermissionStateService.RefreshAsync();
+                await InvokeAsync(StateHasChanged);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "OnPermissionsChanged hatası");
+            }
         }
 
         private async Task LoadBankoPanelSiralarAsync()

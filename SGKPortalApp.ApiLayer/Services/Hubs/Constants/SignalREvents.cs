@@ -30,6 +30,13 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs.Constants
         public const string ConnectionStatusChanged = "connectionStatusChanged";
 
         // ═══════════════════════════════════════════════════════
+        // PERMISSION EVENTS
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>Kullanıcının permission cache'i invalid olduğunda tetiklenir</summary>
+        public const string PermissionsChanged = "permissionsChanged";
+
+        // ═══════════════════════════════════════════════════════
         // SIRA (QUEUE) EVENTS
         // ═══════════════════════════════════════════════════════
         
