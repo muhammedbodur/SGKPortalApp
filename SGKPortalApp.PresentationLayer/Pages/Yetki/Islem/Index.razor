@@ -150,11 +150,12 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">İşlem Adı <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" @bind="IslemAdi" placeholder="Örn: LIST, CREATE, DELETE..." />
+                            <input type="text" class="form-control" @bind="IslemAdi" @bind:after="OnIslemAdiChanged" placeholder="Örn: LIST, CREATE, DELETE..." />
+                            <small class="text-muted">Field tipi seçiliyse DTO Field Name'den otomatik doldurulur</small>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">İşlem Tipi</label>
-                            <select class="form-select" @bind="SelectedIslemTipi">
+                            <select class="form-select" @bind="SelectedIslemTipi" @bind:after="OnIslemTipiChanged">
                                 <option value="@YetkiIslemTipi.Grup">📁 Grup</option>
                                 <option value="@YetkiIslemTipi.Page">📄 Sayfa</option>
                                 <option value="@YetkiIslemTipi.Tab">📑 Tab</option>
@@ -166,7 +167,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Üst İşlem (Opsiyonel)</label>
-                        <select class="form-select" @bind="SelectedUstIslemId" disabled="@(SelectedControllerId <= 0)">
+                        <select class="form-select" @bind="SelectedUstIslemId" @bind:after="OnUstIslemChanged" disabled="@(SelectedControllerId <= 0)">
                             <option value="0">-- Üst İşlem Yok (Kök Seviye) --</option>
                             @foreach (var i in FilteredIslemler)
                             {
@@ -175,32 +176,45 @@
                         </select>
                         <small class="text-muted">Bu işlem başka bir işlemin altında mı? (Örn: Buton → Sayfa altında)</small>
                     </div>
-                    <hr class="my-3" />
-                    <h6 class="mb-3"><i class="bx bx-code me-1"></i>DTO/Backend Mapping</h6>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">DTO Type Name</label>
-                            <input type="text" class="form-control" @bind="DtoTypeName" placeholder="PersonelUpdateRequestDto" />
-                            <small class="text-muted">Backend DTO sınıf adı (örn: PersonelUpdateRequestDto)</small>
+
+                    @* DTO Mapping - Sadece Field/FormField için göster *@
+                    @if (IsFieldType)
+                    {
+                        <hr class="my-3" />
+                        <h6 class="mb-3"><i class="bx bx-code me-1"></i>DTO/Backend Mapping</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">DTO Type Name</label>
+                                <input type="text" class="form-control" @bind="DtoTypeName" placeholder="PersonelCreateRequestDto" />
+                                <small class="text-muted">Backend DTO sınıf adı (örn: PersonelCreateRequestDto)</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">DTO Field Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" @bind="DtoFieldName" @bind:after="OnDtoFieldNameChanged" placeholder="SicilNo" />
+                                <small class="text-muted">Property adı - İşlem Adı otomatik doldurulur</small>
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">DTO Field Name</label>
-                            <input type="text" class="form-control" @bind="DtoFieldName" placeholder="SicilNo" />
-                            <small class="text-muted">Property adı - case sensitive (örn: SicilNo, Email, IlId)</small>
-                        </div>
-                    </div>
-                    <hr class="my-3" />
-                    <h6 class="mb-3"><i class="bx bx-shield me-1"></i>Sayfa Yetki Ayarları</h6>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                    }
+
+                    @* Route - Sadece Page için göster *@
+                    @if (ShowRouteField)
+                    {
+                        <hr class="my-3" />
+                        <h6 class="mb-3"><i class="bx bx-map me-1"></i>Sayfa Bilgileri</h6>
+                        <div class="mb-3">
                             <label class="form-label">Route (Sayfa Yolu)</label>
-                            <input type="text" class="form-control" @bind="Route" placeholder="Örn: /personel, /siramatik/banko/list" />
-                            <small class="text-muted">Bu işlemin bağlı olduğu sayfa URL'i</small>
+                            <input type="text" class="form-control" @bind="Route" placeholder="Örn: /personel/manage, /siramatik/banko/list" />
+                            <small class="text-muted">Bu sayfanın URL yolu</small>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Permission Key</label>
-                            <input type="text" class="form-control" @bind="PermissionKey" placeholder="Örn: PER.PERSONEL.LIST" />
-                            <small class="text-muted">Yetki anahtarı (otomatik oluşturulabilir)</small>
+                    }
+
+                    <hr class="my-3" />
+                    <h6 class="mb-3"><i class="bx bx-shield me-1"></i>Yetki Ayarları</h6>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Permission Key <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" @bind="PermissionKey" placeholder="Otomatik oluşturulacak" readonly style="background-color: #f0f0f0;" />
+                            <small class="text-muted">Otomatik oluşturulur: ModulKodu.ControllerAdi.ÜstIslem.IslemAdi</small>
                         </div>
                     </div>
                     <div class="row">
@@ -255,6 +269,10 @@
     private string? DtoTypeName = null;
     private string? DtoFieldName = null;
 
+    // Computed properties for conditional rendering
+    private bool IsFieldType => SelectedIslemTipi == YetkiIslemTipi.Field || SelectedIslemTipi == YetkiIslemTipi.FormField;
+    private bool ShowRouteField => SelectedIslemTipi == YetkiIslemTipi.Page;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadModulDropdown();
@@ -290,6 +308,89 @@
             .Where(i => i.ModulControllerId == SelectedControllerId && i.ModulControllerIslemId != EditingId)
             .OrderBy(i => i.ModulControllerIslemAdi)
             .ToList();
+
+        GeneratePermissionKey();
+    }
+
+    private void OnDtoFieldNameChanged()
+    {
+        // DTO Field Name girildiğinde İşlem Adı'nı otomatik doldur (uppercase)
+        if (!string.IsNullOrWhiteSpace(DtoFieldName) && string.IsNullOrWhiteSpace(IslemAdi))
+        {
+            IslemAdi = DtoFieldName.ToUpperInvariant();
+        }
+        GeneratePermissionKey();
+    }
+
+    private void OnIslemAdiChanged()
+    {
+        GeneratePermissionKey();
+    }
+
+    private void OnUstIslemChanged()
+    {
+        GeneratePermissionKey();
+    }
+
+    private void OnIslemTipiChanged()
+    {
+        // İşlem tipi değiştiğinde ilgili alanları temizle
+        if (!IsFieldType)
+        {
+            DtoTypeName = null;
+            DtoFieldName = null;
+        }
+
+        if (!ShowRouteField)
+        {
+            Route = null;
+        }
+
+        GeneratePermissionKey();
+    }
+
+    private void GeneratePermissionKey()
+    {
+        // Permission Key'i otomatik oluştur
+        if (SelectedModulId == 0 || SelectedControllerId == 0 || string.IsNullOrWhiteSpace(IslemAdi))
+        {
+            PermissionKey = null;
+            return;
+        }
+
+        var modul = Moduller.FirstOrDefault(m => m.Id == SelectedModulId);
+        var controller = FilteredControllers.FirstOrDefault(c => c.Id == SelectedControllerId);
+
+        if (modul == null || controller == null)
+        {
+            PermissionKey = null;
+            return;
+        }
+
+        // ModulKodu (örn: PER)
+        var modulKodu = modul.Ad?.Split(' ').FirstOrDefault()?.ToUpperInvariant() ?? "UNKNOWN";
+
+        // Controller adı (örn: PERSONEL)
+        var controllerAdi = controller.Ad?.ToUpperInvariant() ?? "UNKNOWN";
+
+        // İşlem adı (zaten uppercase)
+        var islemAdi = IslemAdi.Trim().ToUpperInvariant();
+
+        // Üst işlem varsa onun adını al
+        if (SelectedUstIslemId > 0)
+        {
+            var ustIslem = FilteredIslemler.FirstOrDefault(i => i.ModulControllerIslemId == SelectedUstIslemId);
+            if (ustIslem != null)
+            {
+                // Üst işlemin permission key'inden son parçayı al
+                var ustIslemAdi = ustIslem.ModulControllerIslemAdi?.ToUpperInvariant() ?? "";
+                PermissionKey = $"{modulKodu}.{controllerAdi}.{ustIslemAdi}.{islemAdi}";
+                return;
+            }
+        }
+
+        // Üst işlem yoksa direkt oluştur
+        PermissionKey = $"{modulKodu}.{controllerAdi}.{islemAdi}";
     }
 
     private string GetIslemPrefix(ModulControllerIslemResponseDto islem)
@@ -364,6 +465,19 @@
         if (SelectedControllerId <= 0 || string.IsNullOrWhiteSpace(IslemAdi))
         {
             await ToastService.ShowWarningAsync("Controller ve İşlem adı zorunludur");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(PermissionKey))
+        {
+            await ToastService.ShowWarningAsync("Permission Key otomatik oluşturulamadı. Lütfen gerekli alanları doldurun.");
+            return;
+        }
+
+        // Field tipi için DTO Field Name zorunlu
+        if (IsFieldType && string.IsNullOrWhiteSpace(DtoFieldName))
+        {
+            await ToastService.ShowWarningAsync("Field tipi için DTO Field Name zorunludur");
             return;
         }
 
