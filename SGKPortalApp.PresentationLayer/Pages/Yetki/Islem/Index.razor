@@ -376,21 +376,41 @@
         // İşlem adı (zaten uppercase)
         var islemAdi = IslemAdi.Trim().ToUpperInvariant();
 
+        // İşlem tipine göre prefix belirle
+        string tipPrefix = SelectedIslemTipi switch
+        {
+            YetkiIslemTipi.Field => "FIELD",
+            YetkiIslemTipi.FormField => "FIELD",
+            YetkiIslemTipi.Buton => "ACTION",
+            YetkiIslemTipi.Tab => "TAB",
+            YetkiIslemTipi.Grup => "GROUP",
+            YetkiIslemTipi.Page => "", // Page için prefix yok
+            _ => ""
+        };
+
         // Üst işlem varsa onun adını al
         if (SelectedUstIslemId > 0)
         {
             var ustIslem = FilteredIslemler.FirstOrDefault(i => i.ModulControllerIslemId == SelectedUstIslemId);
             if (ustIslem != null)
             {
-                // Üst işlemin permission key'inden son parçayı al
+                // Üst işlemin adını al
                 var ustIslemAdi = ustIslem.ModulControllerIslemAdi?.ToUpperInvariant() ?? "";
-                PermissionKey = $"{modulKodu}.{controllerAdi}.{ustIslemAdi}.{islemAdi}";
+
+                // Tip prefix varsa ekle
+                if (!string.IsNullOrEmpty(tipPrefix))
+                    PermissionKey = $"{modulKodu}.{controllerAdi}.{ustIslemAdi}.{tipPrefix}.{islemAdi}";
+                else
+                    PermissionKey = $"{modulKodu}.{controllerAdi}.{ustIslemAdi}.{islemAdi}";
                 return;
             }
         }
 
         // Üst işlem yoksa direkt oluştur
-        PermissionKey = $"{modulKodu}.{controllerAdi}.{islemAdi}";
+        if (!string.IsNullOrEmpty(tipPrefix))
+            PermissionKey = $"{modulKodu}.{controllerAdi}.{tipPrefix}.{islemAdi}";
+        else
+            PermissionKey = $"{modulKodu}.{controllerAdi}.{islemAdi}";
     }
 
     private string GetIslemPrefix(ModulControllerIslemResponseDto islem)
