@@ -407,7 +407,12 @@
         // DTO Field Name seçildiğinde İşlem Adı'nı otomatik doldur (uppercase)
         if (!string.IsNullOrWhiteSpace(DtoFieldName) && string.IsNullOrWhiteSpace(IslemAdi))
         {
-            IslemAdi = DtoFieldName.ToUpperInvariant();
+            // Nested field ise (Personel.DepartmanId) sadece son kısmı al (DepartmanId)
+            var fieldName = DtoFieldName.Contains(".")
+                ? DtoFieldName.Split('.').Last()
+                : DtoFieldName;
+
+            IslemAdi = fieldName.ToUpperInvariant();
         }
         GeneratePermissionKey();
     }
