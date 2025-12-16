@@ -29,7 +29,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
                     return new ServiceResult<List<DtoTypeInfo>>
                     {
                         Success = false,
-                        Message = new[] { $"API hatası: {response.StatusCode}" }
+                        Message = $"API hatası: {response.StatusCode}"
                     };
                 }
 
@@ -37,7 +37,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
                 return result ?? new ServiceResult<List<DtoTypeInfo>>
                 {
                     Success = false,
-                    Message = new[] { "Response deserialize edilemedi" }
+                    Message = "Response deserialize edilemedi"
                 };
             }
             catch (Exception ex)
@@ -46,7 +46,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
                 return new ServiceResult<List<DtoTypeInfo>>
                 {
                     Success = false,
-                    Message = new[] { $"Hata: {ex.Message}" }
+                    Message = $"Hata: {ex.Message}"
                 };
             }
         }
@@ -64,7 +64,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
                     return new ServiceResult<List<DtoPropertyInfo>>
                     {
                         Success = false,
-                        Message = new[] { $"API hatası: {response.StatusCode}" }
+                        Message = $"API hatası: {response.StatusCode}"
                     };
                 }
 
@@ -72,7 +72,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
                 return result ?? new ServiceResult<List<DtoPropertyInfo>>
                 {
                     Success = false,
-                    Message = new[] { "Response deserialize edilemedi" }
+                    Message = "Response deserialize edilemedi"
                 };
             }
             catch (Exception ex)
@@ -81,7 +81,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
                 return new ServiceResult<List<DtoPropertyInfo>>
                 {
                     Success = false,
-                    Message = new[] { $"Hata: {ex.Message}" }
+                    Message = $"Hata: {ex.Message}"
                 };
             }
         }
@@ -99,7 +99,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
                     return new ServiceResult<FieldAnalysisResult>
                     {
                         Success = false,
-                        Message = new[] { $"API hatası: {response.StatusCode}" }
+                        Message = $"API hatası: {response.StatusCode}"
                     };
                 }
 
@@ -107,7 +107,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
                 return result ?? new ServiceResult<FieldAnalysisResult>
                 {
                     Success = false,
-                    Message = new[] { "Response deserialize edilemedi" }
+                    Message = "Response deserialize edilemedi"
                 };
             }
             catch (Exception ex)
@@ -116,7 +116,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
                 return new ServiceResult<FieldAnalysisResult>
                 {
                     Success = false,
-                    Message = new[] { $"Hata: {ex.Message}" }
+                    Message = $"Hata: {ex.Message}"
                 };
             }
         }
