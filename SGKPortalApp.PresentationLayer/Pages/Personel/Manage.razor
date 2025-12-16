@@ -262,12 +262,12 @@
                                     </div>
 
                                     <!-- Sicil No (PermissionField component ile) -->
-                                    <PermissionField FieldName="@nameof(FormModel.SicilNo)">
+                                    <PermissionField FieldName="@nameof(FormModel.SicilNo)" Context="perm">
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">Sicil No</label>
                                             <InputNumber @bind-Value="FormModel.SicilNo"
                                                          class="form-control"
-                                                         disabled="@(context.IsDisabled || IsSaving)" />
+                                                         disabled="@(perm.IsDisabled || IsSaving)" />
                                         </div>
                                     </PermissionField>
 
@@ -490,13 +490,13 @@
                             <h5 class="card-header">İletişim Bilgileri</h5>
                             <div class="card-body">
                                 <div class="row">
-                                    <PermissionField FieldName="@nameof(FormModel.Email)">
+                                    <PermissionField FieldName="@nameof(FormModel.Email)" Context="perm">
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label">E-Posta</label>
                                             <InputText @bind-Value="FormModel.Email"
                                                        class="form-control"
                                                        type="email"
-                                                       disabled="@(context.IsDisabled || IsSaving)" />
+                                                       disabled="@(perm.IsDisabled || IsSaving)" />
                                         </div>
                                     </PermissionField>
                                     <div class="col-md-6 mb-3">
