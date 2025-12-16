@@ -132,7 +132,7 @@
                                 <option value="0">-- Modül Seçiniz --</option>
                                 @foreach (var m in Moduller)
                                 {
-                                    <option value="@m.Id">@m.Ad</option>
+                                    <option value="@m.ModulId">@m.ModulAdi (@m.ModulKodu)</option>
                                 }
                             </select>
                         </div>
@@ -250,7 +250,7 @@
 @code {
     private List<ModulControllerIslemResponseDto> Islemler = new();
     private List<ModulControllerIslemResponseDto> FilteredIslemler = new();
-    private List<DropdownItemDto> Moduller = new();
+    private List<ModulResponseDto> Moduller = new(); // ← ModulKodu için ModulResponseDto kullan
     private List<DropdownItemDto> FilteredControllers = new();
     private bool IsLoading = true;
     private bool IsSaving = false;
@@ -280,7 +280,7 @@
 
     private async Task LoadModulDropdown()
     {
-        var result = await ModulApiService.GetDropdownAsync();
+        var result = await ModulApiService.GetAllAsync(); // ← ModulKodu'ya erişim için GetAllAsync kullan
         if (result.Success && result.Data != null)
             Moduller = result.Data;
     }
@@ -357,7 +357,7 @@
             return;
         }
 
-        var modul = Moduller.FirstOrDefault(m => m.Id == SelectedModulId);
+        var modul = Moduller.FirstOrDefault(m => m.ModulId == SelectedModulId);
         var controller = FilteredControllers.FirstOrDefault(c => c.Id == SelectedControllerId);
 
         if (modul == null || controller == null)
@@ -366,8 +366,8 @@
             return;
         }
 
-        // ModulKodu (örn: PER)
-        var modulKodu = modul.Ad?.Split(' ').FirstOrDefault()?.ToUpperInvariant() ?? "UNKNOWN";
+        // ModulKodu (örn: PER) - Artık doğrudan ModulKodu'dan alınıyor
+        var modulKodu = modul.ModulKodu?.ToUpperInvariant() ?? "UNKNOWN";
 
         // Controller adı (örn: PERSONEL)
         var controllerAdi = controller.Ad?.ToUpperInvariant() ?? "UNKNOWN";

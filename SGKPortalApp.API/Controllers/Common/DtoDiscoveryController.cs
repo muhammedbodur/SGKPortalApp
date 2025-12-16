@@ -133,6 +133,117 @@ namespace SGKPortalApp.API.Controllers.Common
             }
         }
 
+        /// <summary>
+        /// Field Analysis - Hibrit Endpoint
+        /// DTO'daki tüm field'ları + hangilerinin korumalı olduğunu döner
+        /// </summary>
+        [HttpGet("field-analysis")]
+        public async Task<IActionResult> GetFieldAnalysis(string pageKey, string dtoTypeName)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(pageKey) || string.IsNullOrWhiteSpace(dtoTypeName))
+                {
+                    return BadRequest(new ServiceResult<FieldAnalysisResult>
+                    {
+                        Success = false,
+                        Message = new[] { "pageKey ve dtoTypeName parametreleri zorunludur" }
+                    });
+                }
+
+                // 1️⃣ DTO'nun tüm property'lerini al (Reflection)
+                var assembly = Assembly.GetAssembly(typeof(PersonelCreateRequestDto));
+                if (assembly == null)
+                {
+                    return BadRequest("DTO assembly bulunamadı");
+                }
+
+                var dtoType = assembly.GetTypes()
+                    .FirstOrDefault(t => t.Name == dtoTypeName);
+
+                if (dtoType == null)
+                {
+                    return NotFound(new ServiceResult<FieldAnalysisResult>
+                    {
+                        Success = false,
+                        Message = new[] { $"'{dtoTypeName}' bulunamadı" }
+                    });
+                }
+
+                var allFields = dtoType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(p =>
+                        !p.PropertyType.IsGenericType ||
+                        !p.PropertyType.GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>)))
+                    .Select(p => new
+                    {
+                        PropertyName = p.Name,
+                        PropertyType = GetFriendlyTypeName(p.PropertyType),
+                        DisplayName = FormatDisplayName(p.Name),
+                        IsRequired = p.GetCustomAttribute<RequiredAttribute>() != null
+                    })
+                    .ToList();
+
+                // 2️⃣ Veritabanından korumalı field'ları al
+                var protectedFields = await _context.ModulControllerIslemler
+                    .Where(i => i.PermissionKey != null &&
+                                i.PermissionKey.StartsWith(pageKey + ".FIELD.") &&
+                                i.DtoFieldName != null)
+                    .Select(i => new
+                    {
+                        i.DtoFieldName,
+                        i.PermissionKey,
+                        i.ModulControllerIslemAdi,
+                        i.MinYetkiSeviyesi
+                    })
+                    .ToListAsync();
+
+                // 3️⃣ Birleştir - Her field için korumalı mı değil mi?
+                var analysisResult = allFields.Select(f => new FieldAnalysisInfo
+                {
+                    FieldName = f.PropertyName,
+                    DisplayName = f.DisplayName,
+                    PropertyType = f.PropertyType,
+                    IsRequired = f.IsRequired,
+                    IsProtected = protectedFields.Any(pf =>
+                        pf.DtoFieldName != null &&
+                        pf.DtoFieldName.Equals(f.PropertyName, StringComparison.OrdinalIgnoreCase)),
+                    CanAddPermission = !protectedFields.Any(pf =>
+                        pf.DtoFieldName != null &&
+                        pf.DtoFieldName.Equals(f.PropertyName, StringComparison.OrdinalIgnoreCase)),
+                    ExistingPermissionKey = protectedFields
+                        .FirstOrDefault(pf =>
+                            pf.DtoFieldName != null &&
+                            pf.DtoFieldName.Equals(f.PropertyName, StringComparison.OrdinalIgnoreCase))
+                        ?.PermissionKey
+                }).ToList();
+
+                var result = new FieldAnalysisResult
+                {
+                    PageKey = pageKey,
+                    DtoTypeName = dtoTypeName,
+                    TotalFields = analysisResult.Count,
+                    ProtectedFields = analysisResult.Count(f => f.IsProtected),
+                    AvailableFields = analysisResult.Count(f => !f.IsProtected),
+                    Fields = analysisResult
+                };
+
+                return Ok(new ServiceResult<FieldAnalysisResult>
+                {
+                    Success = true,
+                    Data = result,
+                    Message = new[] { $"{result.TotalFields} field bulundu ({result.ProtectedFields} korumalı, {result.AvailableFields} eklenebilir)" }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ServiceResult<FieldAnalysisResult>
+                {
+                    Success = false,
+                    Message = new[] { $"Field analysis sırasında hata: {ex.Message}" }
+                });
+            }
+        }
+
         #region Helper Methods
 
         /// <summary>
@@ -236,6 +347,27 @@ namespace SGKPortalApp.API.Controllers.Common
         public string DisplayName { get; set; } = string.Empty;
         public bool IsRequired { get; set; }
         public int? MaxLength { get; set; }
+    }
+
+    public class FieldAnalysisResult
+    {
+        public string PageKey { get; set; } = string.Empty;
+        public string DtoTypeName { get; set; } = string.Empty;
+        public int TotalFields { get; set; }
+        public int ProtectedFields { get; set; }
+        public int AvailableFields { get; set; }
+        public List<FieldAnalysisInfo> Fields { get; set; } = new();
+    }
+
+    public class FieldAnalysisInfo
+    {
+        public string FieldName { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
+        public string PropertyType { get; set; } = string.Empty;
+        public bool IsRequired { get; set; }
+        public bool IsProtected { get; set; }
+        public bool CanAddPermission { get; set; }
+        public string? ExistingPermissionKey { get; set; }
     }
 
     #endregion
