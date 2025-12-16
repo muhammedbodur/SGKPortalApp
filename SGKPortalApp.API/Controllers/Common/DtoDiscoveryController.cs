@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using System.ComponentModel.DataAnnotations;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.DataAccessLayer.Context;
 
 namespace SGKPortalApp.API.Controllers.Common
 {
@@ -10,6 +12,12 @@ namespace SGKPortalApp.API.Controllers.Common
     [ApiController]
     public class DtoDiscoveryController : ControllerBase
     {
+        private readonly AppDbContext _context;
+
+        public DtoDiscoveryController(AppDbContext context)
+        {
+            _context = context;
+        }
         /// <summary>
         /// Tüm *RequestDto sınıflarını listeler (Reflection ile)
         /// </summary>
