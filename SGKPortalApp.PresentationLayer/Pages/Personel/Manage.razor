@@ -97,11 +97,11 @@
         else
         {
             <CascadingValue Name="FieldPermissionPageKey" Value="@FieldPermissionKeyPrefix">
-            <CascadingValue Name="FieldPermissionIsEditMode" Value="@IsEditMode">
-            <EditForm Model="@FormModel" OnValidSubmit="HandleFinalSubmit">
-                <DataAnnotationsValidator />
+                <CascadingValue Name="FieldPermissionIsEditMode" Value="@IsEditMode">
+                    <EditForm Model="@FormModel" OnValidSubmit="HandleFinalSubmit">
+                        <DataAnnotationsValidator />
 
-            <div class="row">
+                        <div class="row">
                 <!-- ═══════════════════════════════════════════════════════ -->
                 <!-- SOL TARAF: PERSONEL KARTI -->
                 <!-- ═══════════════════════════════════════════════════════ -->
@@ -292,64 +292,70 @@
                                     </div>
 
                                     <!-- Departman -->
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Departman</label>
-                                        <select value="@FormModel.DepartmanId"
-                                                @onchange="OnDepartmanChanged"
-                                                class="form-select @(FormModel.DepartmanId == 0 ? "border-warning" : "")"
-                                                data-placeholder="Departman seçiniz"
-                                                disabled="@IsSaving">
-                                            <option value="0">Seçiniz</option>
-                                            @foreach (var departman in Departmanlar)
+                                    <PermissionField FieldName="@nameof(FormModel.DepartmanId)" Context="perm">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Departman</label>
+                                            <select value="@FormModel.DepartmanId"
+                                                    @onchange="OnDepartmanChanged"
+                                                    class="form-select @(FormModel.DepartmanId == 0 ? "border-warning" : "")"
+                                                    data-placeholder="Departman seçiniz"
+                                                    disabled="@(perm.IsDisabled || IsSaving)">
+                                                <option value="0">Seçiniz</option>
+                                                @foreach (var departman in Departmanlar)
+                                                {
+                                                    <option value="@departman.DepartmanId">@departman.DepartmanAdi</option>
+                                                }
+                                            </select>
+                                            @if (FormModel.DepartmanId == 0)
                                             {
-                                                <option value="@departman.DepartmanId">@departman.DepartmanAdi</option>
+                                                <small class="text-muted">📦 @Departmanlar.Count departman yüklendi</small>
                                             }
-                                        </select>
-                                        @if (FormModel.DepartmanId == 0)
-                                        {
-                                            <small class="text-muted">📦 @Departmanlar.Count departman yüklendi</small>
-                                        }
-                                    </div>
+                                        </div>
+                                    </PermissionField>
 
                                     <!-- Servis -->
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Servis</label>
-                                        <select value="@FormModel.ServisId"
-                                                @onchange="OnServisChanged"
-                                                class="form-select @(FormModel.ServisId == 0 ? "border-warning" : "")"
-                                                data-placeholder="Servis seçiniz"
-                                                disabled="@IsSaving">
-                                            <option value="0">Seçiniz</option>
-                                            @foreach (var servis in Servisler)
+                                    <PermissionField FieldName="@nameof(FormModel.ServisId)" Context="perm">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Servis</label>
+                                            <select value="@FormModel.ServisId"
+                                                    @onchange="OnServisChanged"
+                                                    class="form-select @(FormModel.ServisId == 0 ? "border-warning" : "")"
+                                                    data-placeholder="Servis seçiniz"
+                                                    disabled="@(perm.IsDisabled || IsSaving)">
+                                                <option value="0">Seçiniz</option>
+                                                @foreach (var servis in Servisler)
+                                                {
+                                                    <option value="@servis.ServisId">@servis.ServisAdi</option>
+                                                }
+                                            </select>
+                                            @if (FormModel.ServisId == 0)
                                             {
-                                                <option value="@servis.ServisId">@servis.ServisAdi</option>
+                                                <small class="text-muted">📦 @Servisler.Count servis yüklendi</small>
                                             }
-                                        </select>
-                                        @if (FormModel.ServisId == 0)
-                                        {
-                                            <small class="text-muted">📦 @Servisler.Count servis yüklendi</small>
-                                        }
-                                    </div>
+                                        </div>
+                                    </PermissionField>
 
                                     <!-- Unvan -->
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Unvan</label>
-                                        <select value="@FormModel.UnvanId"
-                                                @onchange="OnUnvanChanged"
-                                                class="form-select @(FormModel.UnvanId == 0 ? "border-warning" : "")"
-                                                data-placeholder="Ünvan seçiniz"
-                                                disabled="@IsSaving">
-                                            <option value="0">Seçiniz</option>
-                                            @foreach (var unvan in Unvanlar)
+                                    <PermissionField FieldName="@nameof(FormModel.UnvanId)" Context="perm">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Unvan</label>
+                                            <select value="@FormModel.UnvanId"
+                                                    @onchange="OnUnvanChanged"
+                                                    class="form-select @(FormModel.UnvanId == 0 ? "border-warning" : "")"
+                                                    data-placeholder="Ünvan seçiniz"
+                                                    disabled="@(perm.IsDisabled || IsSaving)">
+                                                <option value="0">Seçiniz</option>
+                                                @foreach (var unvan in Unvanlar)
+                                                {
+                                                    <option value="@unvan.UnvanId">@unvan.UnvanAdi</option>
+                                                }
+                                            </select>
+                                            @if (FormModel.UnvanId == 0)
                                             {
-                                                <option value="@unvan.UnvanId">@unvan.UnvanAdi</option>
+                                                <small class="text-muted">📦 @Unvanlar.Count ünvan yüklendi</small>
                                             }
-                                        </select>
-                                        @if (FormModel.UnvanId == 0)
-                                        {
-                                            <small class="text-muted">📦 @Unvanlar.Count ünvan yüklendi</small>
-                                        }
-                                    </div>
+                                        </div>
+                                    </PermissionField>
 
                                     <!-- Hizmet Binası -->
                                     <div class="col-md-6 mb-3">
@@ -1190,9 +1196,9 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            </EditForm>
-            </CascadingValue>
+                        </div>
+                    </EditForm>
+                </CascadingValue>
             </CascadingValue>
         }
     }
