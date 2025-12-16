@@ -1,40 +1,44 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Reflection;
-using System.ComponentModel.DataAnnotations;
+using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
-using SGKPortalApp.DataAccessLayer.Context;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
+using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 
-namespace SGKPortalApp.API.Controllers.Common
+namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 {
-    [Route("api/common/dto-discovery")]
-    [ApiController]
-    public class DtoDiscoveryController : ControllerBase
+    /// <summary>
+    /// DTO Discovery Service - Reflection ile DTO tiplerini ve property'lerini keşfeder
+    /// </summary>
+    public class DtoDiscoveryService : IDtoDiscoveryService
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<DtoDiscoveryService> _logger;
 
-        public DtoDiscoveryController(AppDbContext context)
+        public DtoDiscoveryService(IUnitOfWork unitOfWork, ILogger<DtoDiscoveryService> logger)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
+            _logger = logger;
         }
+
         /// <summary>
         /// Tüm *RequestDto sınıflarını listeler (Reflection ile)
         /// </summary>
-        [HttpGet("dto-types")]
-        public IActionResult GetAllDtoTypes()
+        public ApiResponseDto<List<DtoTypeInfo>> GetAllDtoTypes()
         {
             try
             {
-                // 1️⃣ Assembly'yi al - PersonelCreateRequestDto'nun bulunduğu assembly
+                // Assembly'yi al - PersonelCreateRequestDto'nun bulunduğu assembly
                 var assembly = Assembly.GetAssembly(typeof(PersonelCreateRequestDto));
 
                 if (assembly == null)
                 {
-                    return BadRequest("DTO assembly bulunamadı");
+                    return ApiResponseDto<List<DtoTypeInfo>>.ErrorResult("DTO assembly bulunamadı");
                 }
 
-                // 2️⃣ Assembly'deki tüm tipleri tara ve RequestDto olanları filtrele
+                // Assembly'deki tüm tipleri tara ve RequestDto olanları filtrele
                 var dtoTypes = assembly.GetTypes()
                     .Where(t =>
                         t.Name.EndsWith("RequestDto") &&  // İsim kontrolü
@@ -54,53 +58,42 @@ namespace SGKPortalApp.API.Controllers.Common
                     .ThenBy(d => d.DisplayName)
                     .ToList();
 
-                return Ok(new ServiceResult<List<DtoTypeInfo>>
-                {
-                    Success = true,
-                    Data = dtoTypes,
-                    Message = $"{dtoTypes.Count} DTO bulundu"
-                });
+                _logger.LogDebug("GetAllDtoTypes: {Count} DTO bulundu", dtoTypes.Count);
+
+                return ApiResponseDto<List<DtoTypeInfo>>.SuccessResult(dtoTypes, $"{dtoTypes.Count} DTO bulundu");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ServiceResult<List<DtoTypeInfo>>
-                {
-                    Success = false,
-                    Message = $"DTO'lar yüklenirken hata: {ex.Message}"
-                });
+                _logger.LogError(ex, "GetAllDtoTypes hatası");
+                return ApiResponseDto<List<DtoTypeInfo>>.ErrorResult($"DTO'lar yüklenirken hata: {ex.Message}");
             }
         }
 
         /// <summary>
         /// Belirtilen DTO'nun tüm property'lerini döner (Reflection ile)
         /// </summary>
-        [HttpGet("dto-properties/{dtoTypeName}")]
-        public IActionResult GetDtoProperties(string dtoTypeName)
+        public ApiResponseDto<List<DtoPropertyInfo>> GetDtoProperties(string dtoTypeName)
         {
             try
             {
-                // 1️⃣ Assembly'yi al
+                // Assembly'yi al
                 var assembly = Assembly.GetAssembly(typeof(PersonelCreateRequestDto));
 
                 if (assembly == null)
                 {
-                    return BadRequest("DTO assembly bulunamadı");
+                    return ApiResponseDto<List<DtoPropertyInfo>>.ErrorResult("DTO assembly bulunamadı");
                 }
 
-                // 2️⃣ Tip adıyla DTO'yu bul
+                // Tip adıyla DTO'yu bul
                 var dtoType = assembly.GetTypes()
                     .FirstOrDefault(t => t.Name == dtoTypeName);
 
                 if (dtoType == null)
                 {
-                    return NotFound(new ServiceResult<List<DtoPropertyInfo>>
-                    {
-                        Success = false,
-                        Message = $"'{dtoTypeName}' bulunamadı"
-                    });
+                    return ApiResponseDto<List<DtoPropertyInfo>>.ErrorResult($"'{dtoTypeName}' bulunamadı");
                 }
 
-                // 3️⃣ DTO'nun tüm property'lerini al (Reflection)
+                // DTO'nun tüm property'lerini al (Reflection)
                 var properties = dtoType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(p =>
                         !p.PropertyType.IsGenericType ||  // List<> gibi collection'ları atla
@@ -116,46 +109,34 @@ namespace SGKPortalApp.API.Controllers.Common
                     .OrderBy(p => p.DisplayName)
                     .ToList();
 
-                return Ok(new ServiceResult<List<DtoPropertyInfo>>
-                {
-                    Success = true,
-                    Data = properties,
-                    Message = $"{properties.Count} property bulundu"
-                });
+                _logger.LogDebug("GetDtoProperties: {DtoTypeName} için {Count} property bulundu", dtoTypeName, properties.Count);
+
+                return ApiResponseDto<List<DtoPropertyInfo>>.SuccessResult(properties, $"{properties.Count} property bulundu");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ServiceResult<List<DtoPropertyInfo>>
-                {
-                    Success = false,
-                    Message = $"Property'ler yüklenirken hata: {ex.Message}"
-                });
+                _logger.LogError(ex, "GetDtoProperties hatası: {DtoTypeName}", dtoTypeName);
+                return ApiResponseDto<List<DtoPropertyInfo>>.ErrorResult($"Property'ler yüklenirken hata: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Field Analysis - Hibrit Endpoint
-        /// DTO'daki tüm field'ları + hangilerinin korumalı olduğunu döner
+        /// Field Analysis - DTO'daki tüm field'ları + hangilerinin korumalı olduğunu döner
         /// </summary>
-        [HttpGet("field-analysis")]
-        public async Task<IActionResult> GetFieldAnalysis(string pageKey, string dtoTypeName)
+        public async Task<ApiResponseDto<FieldAnalysisResult>> GetFieldAnalysisAsync(string pageKey, string dtoTypeName)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(pageKey) || string.IsNullOrWhiteSpace(dtoTypeName))
                 {
-                    return BadRequest(new ServiceResult<FieldAnalysisResult>
-                    {
-                        Success = false,
-                        Message = "pageKey ve dtoTypeName parametreleri zorunludur"
-                    });
+                    return ApiResponseDto<FieldAnalysisResult>.ErrorResult("pageKey ve dtoTypeName parametreleri zorunludur");
                 }
 
                 // 1️⃣ DTO'nun tüm property'lerini al (Reflection)
                 var assembly = Assembly.GetAssembly(typeof(PersonelCreateRequestDto));
                 if (assembly == null)
                 {
-                    return BadRequest("DTO assembly bulunamadı");
+                    return ApiResponseDto<FieldAnalysisResult>.ErrorResult("DTO assembly bulunamadı");
                 }
 
                 var dtoType = assembly.GetTypes()
@@ -163,11 +144,7 @@ namespace SGKPortalApp.API.Controllers.Common
 
                 if (dtoType == null)
                 {
-                    return NotFound(new ServiceResult<FieldAnalysisResult>
-                    {
-                        Success = false,
-                        Message = $"'{dtoTypeName}' bulunamadı"
-                    });
+                    return ApiResponseDto<FieldAnalysisResult>.ErrorResult($"'{dtoTypeName}' bulunamadı");
                 }
 
                 var allFields = dtoType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -184,18 +161,18 @@ namespace SGKPortalApp.API.Controllers.Common
                     .ToList();
 
                 // 2️⃣ Veritabanından korumalı field'ları al
-                var protectedFields = await _context.ModulControllerIslemler
-                    .Where(i => i.PermissionKey != null &&
+                var protectedFields = await _unitOfWork.Repository<BusinessObjectLayer.Entities.Common.ModulControllerIslem>()
+                    .FindAsync(i => i.PermissionKey != null &&
                                 i.PermissionKey.StartsWith(pageKey + ".FIELD.") &&
-                                i.DtoFieldName != null)
-                    .Select(i => new
-                    {
-                        i.DtoFieldName,
-                        i.PermissionKey,
-                        i.ModulControllerIslemAdi,
-                        i.MinYetkiSeviyesi
-                    })
-                    .ToListAsync();
+                                i.DtoFieldName != null);
+
+                var protectedFieldsList = protectedFields.Select(i => new
+                {
+                    i.DtoFieldName,
+                    i.PermissionKey,
+                    i.ModulControllerIslemAdi,
+                    i.MinYetkiSeviyesi
+                }).ToList();
 
                 // 3️⃣ Birleştir - Her field için korumalı mı değil mi?
                 var analysisResult = allFields.Select(f => new FieldAnalysisInfo
@@ -204,13 +181,13 @@ namespace SGKPortalApp.API.Controllers.Common
                     DisplayName = f.DisplayName,
                     PropertyType = f.PropertyType,
                     IsRequired = f.IsRequired,
-                    IsProtected = protectedFields.Any(pf =>
+                    IsProtected = protectedFieldsList.Any(pf =>
                         pf.DtoFieldName != null &&
                         pf.DtoFieldName.Equals(f.PropertyName, StringComparison.OrdinalIgnoreCase)),
-                    CanAddPermission = !protectedFields.Any(pf =>
+                    CanAddPermission = !protectedFieldsList.Any(pf =>
                         pf.DtoFieldName != null &&
                         pf.DtoFieldName.Equals(f.PropertyName, StringComparison.OrdinalIgnoreCase)),
-                    ExistingPermissionKey = protectedFields
+                    ExistingPermissionKey = protectedFieldsList
                         .FirstOrDefault(pf =>
                             pf.DtoFieldName != null &&
                             pf.DtoFieldName.Equals(f.PropertyName, StringComparison.OrdinalIgnoreCase))
@@ -227,20 +204,16 @@ namespace SGKPortalApp.API.Controllers.Common
                     Fields = analysisResult
                 };
 
-                return Ok(new ServiceResult<FieldAnalysisResult>
-                {
-                    Success = true,
-                    Data = result,
-                    Message = $"{result.TotalFields} field bulundu ({result.ProtectedFields} korumalı, {result.AvailableFields} eklenebilir)"
-                });
+                _logger.LogDebug("GetFieldAnalysisAsync: {PageKey}/{DtoTypeName} - {Total} field ({Protected} korumalı)", 
+                    pageKey, dtoTypeName, result.TotalFields, result.ProtectedFields);
+
+                return ApiResponseDto<FieldAnalysisResult>.SuccessResult(result, 
+                    $"{result.TotalFields} field bulundu ({result.ProtectedFields} korumalı, {result.AvailableFields} eklenebilir)");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new ServiceResult<FieldAnalysisResult>
-                {
-                    Success = false,
-                    Message = $"Field analysis sırasında hata: {ex.Message}"
-                });
+                _logger.LogError(ex, "GetFieldAnalysisAsync hatası: {PageKey}, {DtoTypeName}", pageKey, dtoTypeName);
+                return ApiResponseDto<FieldAnalysisResult>.ErrorResult($"Field analysis sırasında hata: {ex.Message}");
             }
         }
 
@@ -250,7 +223,7 @@ namespace SGKPortalApp.API.Controllers.Common
         /// DTO adını kullanıcı dostu formata çevirir
         /// Örnek: "PersonelCreateRequestDto" → "Personel - Create"
         /// </summary>
-        private string FormatDisplayName(string name)
+        private static string FormatDisplayName(string name)
         {
             // "RequestDto" sonekini kaldır
             if (name.EndsWith("RequestDto"))
@@ -259,7 +232,6 @@ namespace SGKPortalApp.API.Controllers.Common
             }
 
             // PascalCase'i boşluklarla ayır
-            // "PersonelCreate" → "Personel Create"
             var spaced = System.Text.RegularExpressions.Regex.Replace(
                 name,
                 "([a-z])([A-Z])",
@@ -278,7 +250,7 @@ namespace SGKPortalApp.API.Controllers.Common
         /// Namespace'den kategori çıkarır
         /// Örnek: "SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri" → "Personel İşlemleri"
         /// </summary>
-        private string GetCategory(string? ns)
+        private static string GetCategory(string? ns)
         {
             if (string.IsNullOrEmpty(ns))
                 return "Diğer";
@@ -298,7 +270,7 @@ namespace SGKPortalApp.API.Controllers.Common
         /// Type adını kullanıcı dostu formata çevirir
         /// Örnek: "System.String" → "string", "System.Int32" → "int"
         /// </summary>
-        private string GetFriendlyTypeName(Type type)
+        private static string GetFriendlyTypeName(Type type)
         {
             if (type == typeof(string)) return "string";
             if (type == typeof(int)) return "int";
@@ -328,47 +300,4 @@ namespace SGKPortalApp.API.Controllers.Common
 
         #endregion
     }
-
-    #region Response Models
-
-    public class DtoTypeInfo
-    {
-        public string TypeName { get; set; } = string.Empty;
-        public string FullName { get; set; } = string.Empty;
-        public string DisplayName { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
-        public string? Namespace { get; set; }
-    }
-
-    public class DtoPropertyInfo
-    {
-        public string PropertyName { get; set; } = string.Empty;
-        public string PropertyType { get; set; } = string.Empty;
-        public string DisplayName { get; set; } = string.Empty;
-        public bool IsRequired { get; set; }
-        public int? MaxLength { get; set; }
-    }
-
-    public class FieldAnalysisResult
-    {
-        public string PageKey { get; set; } = string.Empty;
-        public string DtoTypeName { get; set; } = string.Empty;
-        public int TotalFields { get; set; }
-        public int ProtectedFields { get; set; }
-        public int AvailableFields { get; set; }
-        public List<FieldAnalysisInfo> Fields { get; set; } = new();
-    }
-
-    public class FieldAnalysisInfo
-    {
-        public string FieldName { get; set; } = string.Empty;
-        public string DisplayName { get; set; } = string.Empty;
-        public string PropertyType { get; set; } = string.Empty;
-        public bool IsRequired { get; set; }
-        public bool IsProtected { get; set; }
-        public bool CanAddPermission { get; set; }
-        public string? ExistingPermissionKey { get; set; }
-    }
-
-    #endregion
 }

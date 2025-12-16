@@ -2,6 +2,10 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
 {
+    /// <summary>
+    /// DTO Discovery API Service - Backend DtoDiscoveryController'a HTTP çağrıları yapar
+    /// DTO'lar BusinessObjectLayer.DTOs.Common.DtoDiscoveryDtos'da tanımlı
+    /// </summary>
     public interface IDtoDiscoveryApiService
     {
         /// <summary>
@@ -19,47 +23,4 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
         /// </summary>
         Task<ServiceResult<FieldAnalysisResult>> GetFieldAnalysisAsync(string pageKey, string dtoTypeName);
     }
-
-    #region Response Models
-
-    public class DtoTypeInfo
-    {
-        public string TypeName { get; set; } = string.Empty;
-        public string FullName { get; set; } = string.Empty;
-        public string DisplayName { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
-        public string? Namespace { get; set; }
-    }
-
-    public class DtoPropertyInfo
-    {
-        public string PropertyName { get; set; } = string.Empty;
-        public string PropertyType { get; set; } = string.Empty;
-        public string DisplayName { get; set; } = string.Empty;
-        public bool IsRequired { get; set; }
-        public int? MaxLength { get; set; }
-    }
-
-    public class FieldAnalysisResult
-    {
-        public string PageKey { get; set; } = string.Empty;
-        public string DtoTypeName { get; set; } = string.Empty;
-        public int TotalFields { get; set; }
-        public int ProtectedFields { get; set; }
-        public int AvailableFields { get; set; }
-        public List<FieldAnalysisInfo> Fields { get; set; } = new();
-    }
-
-    public class FieldAnalysisInfo
-    {
-        public string FieldName { get; set; } = string.Empty;
-        public string DisplayName { get; set; } = string.Empty;
-        public string PropertyType { get; set; } = string.Empty;
-        public bool IsRequired { get; set; }
-        public bool IsProtected { get; set; }
-        public bool CanAddPermission { get; set; }
-        public string? ExistingPermissionKey { get; set; }
-    }
-
-    #endregion
 }
