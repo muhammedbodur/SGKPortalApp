@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces;
 using System.Text.Json;
@@ -10,14 +11,18 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
     public class PermissionStateService
     {
         private readonly IPersonelYetkiApiService _personelYetkiApiService;
+        private readonly IModulControllerIslemApiService _modulControllerIslemApiService;
         private readonly IUserInfoService _userInfoService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<PermissionStateService> _logger;
 
         private readonly SemaphoreSlim _loadLock = new(1, 1);
 
-        // PermissionKey -> YetkiSeviyesi dictionary
+        // PermissionKey -> YetkiSeviyesi dictionary (kullanıcının yetkileri)
         private Dictionary<string, YetkiSeviyesi> _permissions = new();
+        
+        // Sistemde tanımlı tüm permission key'ler (ModulControllerIslem tablosundan)
+        private HashSet<string> _definedPermissionKeys = new(StringComparer.OrdinalIgnoreCase);
 
         public event Action? OnChange;
 
@@ -25,11 +30,13 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
 
         public PermissionStateService(
             IPersonelYetkiApiService personelYetkiApiService,
+            IModulControllerIslemApiService modulControllerIslemApiService,
             IUserInfoService userInfoService,
             IHttpContextAccessor httpContextAccessor,
             ILogger<PermissionStateService> logger)
         {
             _personelYetkiApiService = personelYetkiApiService;
+            _modulControllerIslemApiService = modulControllerIslemApiService;
             _userInfoService = userInfoService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
@@ -52,6 +59,12 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
                 // Double-check: Lock aldıktan sonra tekrar kontrol
                 if (IsLoaded && !force)
                     return;
+
+                // 0. Sistemde tanımlı tüm permission key'leri yükle (bir kez)
+                if (_definedPermissionKeys.Count == 0)
+                {
+                    await LoadDefinedPermissionKeysAsync();
+                }
 
                 // 1. Önce claims'den okumayı dene (DB'ye gitmeden)
                 if (TryLoadFromClaims())
@@ -99,6 +112,30 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
             finally
             {
                 _loadLock.Release();
+            }
+        }
+
+        /// <summary>
+        /// Sistemde tanımlı tüm permission key'leri yükler (ModulControllerIslem tablosundan)
+        /// </summary>
+        private async Task LoadDefinedPermissionKeysAsync()
+        {
+            try
+            {
+                var result = await _modulControllerIslemApiService.GetAllAsync();
+                if (result.Success && result.Data != null)
+                {
+                    _definedPermissionKeys = result.Data
+                        .Where(x => !string.IsNullOrEmpty(x.PermissionKey))
+                        .Select(x => x.PermissionKey!)
+                        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                    
+                    _logger.LogDebug("🔑 Sistemde tanımlı {Count} permission key yüklendi", _definedPermissionKeys.Count);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "LoadDefinedPermissionKeysAsync hata");
             }
         }
 
@@ -175,24 +212,38 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
         /// <summary>
         /// Permission key bazlı yetki seviyesi döner (örn: "PER.PERSONEL.LIST")
         /// Senkron versiyon - EnsureLoadedAsync önceden çağrılmış olmalı
+        /// 
+        /// Mantık:
+        /// - Key sistemde tanımlı DEĞİLSE → Edit (henüz permission uygulanmamış, tam yetki)
+        /// - Key sistemde tanımlı VE kullanıcıya verilmişse → Verilen seviye
+        /// - Key sistemde tanımlı VE kullanıcıya verilmemişse → None (yetki yok)
         /// </summary>
         public YetkiSeviyesi GetLevel(string permissionKey)
         {
             if (string.IsNullOrWhiteSpace(permissionKey))
                 return YetkiSeviyesi.None;
 
-            // Case-insensitive arama için key'i normalize et
+            // 1. Kullanıcının bu key için yetkisi var mı?
             var matchingKey = _permissions.Keys.FirstOrDefault(k => 
                 string.Equals(k, permissionKey, StringComparison.OrdinalIgnoreCase));
 
             if (matchingKey != null && _permissions.TryGetValue(matchingKey, out var level))
             {
-                _logger.LogDebug("GetLevel: Key={Key}, Level={Level}", permissionKey, level);
+                _logger.LogDebug("GetLevel: Key={Key}, Level={Level} (kullanıcıya verilmiş)", permissionKey, level);
                 return level;
             }
 
-            _logger.LogDebug("GetLevel: Key={Key}, NOT FOUND", permissionKey);
-            return YetkiSeviyesi.None;
+            // 2. Kullanıcıya verilmemiş - sistemde tanımlı mı kontrol et
+            if (_definedPermissionKeys.Contains(permissionKey))
+            {
+                // Sistemde tanımlı ama kullanıcıya verilmemiş → None
+                _logger.LogDebug("GetLevel: Key={Key}, Level=None (sistemde tanımlı, kullanıcıya verilmemiş)", permissionKey);
+                return YetkiSeviyesi.None;
+            }
+
+            // 3. Sistemde tanımlı değil → Edit (henüz permission uygulanmamış)
+            _logger.LogDebug("GetLevel: Key={Key}, Level=Edit (sistemde tanımlı değil, tam yetki)", permissionKey);
+            return YetkiSeviyesi.Edit;
         }
 
         /// <summary>

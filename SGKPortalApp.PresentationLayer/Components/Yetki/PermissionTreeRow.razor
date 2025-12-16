@@ -3,26 +3,28 @@
 
 @{
     var prefix = Depth == 0 ? "" : string.Concat(Enumerable.Repeat("↳", Depth));
-    var icon = Node.IslemTipi switch
-    {
-        YetkiIslemTipi.Grup => "bx-folder text-warning",
-        YetkiIslemTipi.Page => "bx-file text-primary",
-        YetkiIslemTipi.Tab => "bx-tab text-info",
-        YetkiIslemTipi.Buton => "bx-pointer text-success",
-        YetkiIslemTipi.Field => "bx-text text-secondary",
-        YetkiIslemTipi.FormField => "bx-edit text-purple",
-        _ => "bx-circle"
-    };
-    var tipBadge = Node.IslemTipi switch
-    {
-        YetkiIslemTipi.Grup => ("bg-label-warning", "Grup"),
-        YetkiIslemTipi.Page => ("bg-label-primary", "Sayfa"),
-        YetkiIslemTipi.Tab => ("bg-label-info", "Tab"),
-        YetkiIslemTipi.Buton => ("bg-label-success", "Buton"),
-        YetkiIslemTipi.Field => ("bg-label-secondary", "Field"),
-        YetkiIslemTipi.FormField => ("bg-label-dark", "Input"),
-        _ => ("bg-label-secondary", "?")
-    };
+    var icon = Node.IsGroupNode
+        ? (Depth == 0 ? "bx-package text-warning" : "bx-folder text-warning")
+        : Node.IslemTipi switch
+        {
+            YetkiIslemTipi.Page => "bx-file text-primary",
+            YetkiIslemTipi.Tab => "bx-tab text-info",
+            YetkiIslemTipi.Buton => "bx-pointer text-success",
+            YetkiIslemTipi.Field => "bx-text text-secondary",
+            YetkiIslemTipi.FormField => "bx-edit text-purple",
+            _ => "bx-circle"
+        };
+    var tipBadge = Node.IsGroupNode
+        ? (Depth == 0 ? ("bg-label-warning", "Modül") : ("bg-label-warning", "Controller"))
+        : Node.IslemTipi switch
+        {
+            YetkiIslemTipi.Page => ("bg-label-primary", "Sayfa"),
+            YetkiIslemTipi.Tab => ("bg-label-info", "Tab"),
+            YetkiIslemTipi.Buton => ("bg-label-success", "Buton"),
+            YetkiIslemTipi.Field => ("bg-label-secondary", "Field"),
+            YetkiIslemTipi.FormField => ("bg-label-dark", "Input"),
+            _ => ("bg-label-secondary", "?")
+        };
 }
 
 <tr class="@(Node.HasChanges ? "table-warning" : "") @(Node.IsGroupNode ? "table-light" : "")">

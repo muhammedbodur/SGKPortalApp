@@ -8,13 +8,6 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.Common
     public enum YetkiIslemTipi
     {
         /// <summary>
-        /// Grup - Mantıksal gruplama (örn: Personel, Departman)
-        /// Yetki Seçenekleri: None, View
-        /// </summary>
-        [Display(Name = "Grup")]
-        Grup = 0,
-
-        /// <summary>
         /// Sayfa seviyesi yetki (örn: Index, Detail, Manage)
         /// Yetki Seçenekleri: None, View
         /// </summary>

@@ -12,11 +12,21 @@ using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using System.ComponentModel.DataAnnotations;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
+using SGKPortalApp.PresentationLayer.Components.Base;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel
 {
-    public partial class Index : ComponentBase
+    public partial class Index : FieldPermissionPageBase
     {
+        // ═══════════════════════════════════════════════════════════
+        // PERMISSION CONFIGURATION (FieldPermissionPageBase)
+        // ═══════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Sayfa permission key: PER.PERSONEL.INDEX
+        /// Action permission'lar: PER.PERSONEL.INDEX.ACTION.DETAIL, PER.PERSONEL.INDEX.ACTION.EDIT, vb.
+        /// </summary>
+        protected override string PagePermissionKey => "PER.PERSONEL.INDEX";
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
         // ═══════════════════════════════════════════════════════
@@ -95,6 +105,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
         protected override async Task OnInitializedAsync()
         {
+            // Base class permission yükleme ve event subscription'ı yapar
+            await base.OnInitializedAsync();
+            
             QuestPDF.Settings.License = LicenseType.Community;
             await LoadData();
         }
@@ -266,6 +279,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private void NavigateToDetail(string tcKimlikNo)
         {
             _navigationManager.NavigateTo($"/personel/detail/{tcKimlikNo}");
+        }
+
+        /// <summary>
+        /// Satır tıklamasında DETAIL yetkisi varsa detaya git
+        /// </summary>
+        private void TryNavigateToDetail(string tcKimlikNo)
+        {
+            if (CanAction("DETAIL"))
+                NavigateToDetail(tcKimlikNo);
         }
 
         private void NavigateToEdit(string tcKimlikNo)

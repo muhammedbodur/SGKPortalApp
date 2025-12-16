@@ -156,7 +156,6 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">İşlem Tipi</label>
                             <select class="form-select" @bind="SelectedIslemTipi" @bind:after="OnIslemTipiChanged">
-                                <option value="@YetkiIslemTipi.Grup">📁 Grup</option>
                                 <option value="@YetkiIslemTipi.Page">📄 Sayfa</option>
                                 <option value="@YetkiIslemTipi.Tab">📑 Tab</option>
                                 <option value="@YetkiIslemTipi.Buton">🔘 Buton</option>
@@ -383,7 +382,6 @@
             YetkiIslemTipi.FormField => "FIELD",
             YetkiIslemTipi.Buton => "ACTION",
             YetkiIslemTipi.Tab => "TAB",
-            YetkiIslemTipi.Grup => "GROUP",
             YetkiIslemTipi.Page => "", // Page için prefix yok
             _ => ""
         };
@@ -417,7 +415,6 @@
     {
         return islem.IslemTipi switch
         {
-            YetkiIslemTipi.Grup => "📁",
             YetkiIslemTipi.Page => "📄",
             YetkiIslemTipi.Tab => "📑",
             YetkiIslemTipi.Buton => "🔘",

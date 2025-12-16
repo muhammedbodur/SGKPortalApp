@@ -21,11 +21,11 @@ using SGKPortalApp.PresentationLayer.Services.StateServices;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel
 {
-    public partial class Manage : BasePageComponent, IDisposable
+    public partial class Manage : FieldPermissionPageBase
     {
-        // ═══════════════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
-        // ═══════════════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════════
 
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
@@ -43,29 +43,35 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         [Inject] private IAtanmaNedeniApiService _atanmaNedeniApiService { get; set; } = default!;
         [Inject] private IMapper _mapper { get; set; } = default!;
         [Inject] private IUserInfoService _userInfoService { get; set; } = default!;
-        [Inject] private PermissionStateService _permissionStateService { get; set; } = default!;
 
-        // ═══════════════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════════
         // PARAMETERS
-        // ═══════════════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════════
 
         [Parameter] public string? TcKimlikNo { get; set; }
 
-        // ═══════════════════════════════════════════════════════
-        // PROPERTIES
-        // ═══════════════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════════
+        // FIELD PERMISSION CONFIGURATION (FieldPermissionPageBase)
+        // ═══════════════════════════════════════════════════════════
 
-        private bool IsEditMode => !string.IsNullOrEmpty(TcKimlikNo);
+        // Permission Keys - Create ve Edit için ayrı
+        private const string PermissionKeyCreate = "PER.PERSONEL.CREATE";
+        private const string PermissionKeyManage = "PER.PERSONEL.MANAGE";
 
-        private const string PermissionKey = "PER.PERSONEL.MANAGE";
-        private const string PermissionKeySicilNo = "PER.PERSONEL.MANAGE.FIELD.SICILNO";
+        /// <summary>
+        /// Edit modu: TcKimlikNo parametresi varsa true
+        /// </summary>
+        protected override bool IsEditMode => !string.IsNullOrEmpty(TcKimlikNo);
 
-        private bool CanViewManage => _permissionStateService.CanView(PermissionKey);
-        private bool CanEditManage => !IsEditMode || _permissionStateService.CanEdit(PermissionKey);
-        private bool CanDeleteManage => !IsEditMode || _permissionStateService.CanEdit(PermissionKey);
-        
-        // Field-level permissions
-        private bool CanEditSicilNo => _permissionStateService.CanEdit(PermissionKeySicilNo);
+        /// <summary>
+        /// Sayfa yetkisi: Create modunda PER.PERSONEL.CREATE, Edit modunda PER.PERSONEL.MANAGE
+        /// </summary>
+        protected override string PagePermissionKey => IsEditMode ? PermissionKeyManage : PermissionKeyCreate;
+
+        /// <summary>
+        /// Field permission prefix'i: Her zaman PER.PERSONEL.MANAGE (field permission sadece Edit'te aktif)
+        /// </summary>
+        protected override string FieldPermissionKeyPrefix => PermissionKeyManage;
 
         // Lookup Lists
         private List<DepartmanResponseDto> Departmanlar { get; set; } = new();
@@ -105,15 +111,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
         protected override async Task OnInitializedAsync()
         {
-            // Önce yetkileri yükle - UI render'dan önce hazır olmalı
-            try
-            {
-                await _permissionStateService.EnsureLoadedAsync();
-                _permissionStateService.OnChange += HandlePermissionStateChanged;
-            }
-            catch
-            {
-            }
+            // Base class permission yükleme ve event subscription'ı yapar
+            await base.OnInitializedAsync();
 
             // Lookup listelerini yükle
             await LoadLookupData();
@@ -149,20 +148,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             }
         }
 
-        private void HandlePermissionStateChanged()
+        public override void Dispose()
         {
-            _ = InvokeAsync(StateHasChanged);
-        }
-
-        public void Dispose()
-        {
-            try
-            {
-                _permissionStateService.OnChange -= HandlePermissionStateChanged;
-            }
-            catch
-            {
-            }
+            base.Dispose();
         }
 
         private async Task LoadLookupData()
@@ -543,7 +531,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
         private async Task HandleFinalSubmit()
         {
-            if (!CanEditManage)
+            if (!CanEditPage)
             {
                 await _toastService.ShowErrorAsync("Bu işlem için yetkiniz bulunmuyor.");
                 return;
@@ -1142,7 +1130,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         {
             try
             {
-                if (IsEditMode && !CanDeleteManage)
+                if (!CanEditPage)
                 {
                     await _toastService.ShowErrorAsync("Bu işlem için yetkiniz bulunmuyor.");
                     return;

@@ -1,6 +1,6 @@
-@page "/personel/manage"
+@page "/personel/create"
 @page "/personel/manage/{tcKimlikNo}"
-@inherits SGKPortalApp.PresentationLayer.Components.Base.BasePageComponent
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
 
@@ -68,7 +68,7 @@
                                 <button type="button" class="btn btn-outline-secondary" @onclick="NavigateToPersonelList" disabled="@IsSaving">
                                     İptal
                                 </button>
-                                <button type="submit" class="btn btn-primary" disabled="@(IsSaving || !CanEditManage)">
+                                <button type="submit" class="btn btn-primary" disabled="@(IsSaving || !CanEditPage)">
                                     @if (IsSaving)
                                     {
                                         <span class="spinner-border spinner-border-sm me-1"></span>
@@ -88,7 +88,7 @@
         <!-- ═══════════════════════════════════════════════════════ -->
         <!-- ADIM 2: TÜM BİLGİLER (Sol Kart + Sağ Tabs) -->
         <!-- ═══════════════════════════════════════════════════════ -->
-        @if (!CanViewManage)
+        @if (!CanViewPage)
         {
             <div class="alert alert-danger" role="alert">
                 Bu sayfayı görüntüleme yetkiniz bulunmuyor.
@@ -96,6 +96,8 @@
         }
         else
         {
+            <CascadingValue Name="FieldPermissionPageKey" Value="@FieldPermissionKeyPrefix">
+            <CascadingValue Name="FieldPermissionIsEditMode" Value="@IsEditMode">
             <EditForm Model="@FormModel" OnValidSubmit="HandleFinalSubmit">
                 <DataAnnotationsValidator />
 
@@ -259,13 +261,15 @@
                                         <ValidationMessage For="@(() => FormModel.TcKimlikNo)" class="text-danger small" />
                                     </div>
 
-                                    <!-- Sicil No -->
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Sicil No</label>
-                                        <InputNumber @bind-Value="FormModel.SicilNo"
-                                                     class="form-control"
-                                                     disabled="@(!CanEditSicilNo || IsSaving)" />
-                                    </div>
+                                    <!-- Sicil No (PermissionField component ile) -->
+                                    <PermissionField FieldName="@nameof(FormModel.SicilNo)" Context="perm">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Sicil No</label>
+                                            <InputNumber @bind-Value="FormModel.SicilNo"
+                                                         class="form-control"
+                                                         disabled="@(perm.IsDisabled || IsSaving)" />
+                                        </div>
+                                    </PermissionField>
 
                                     <!-- Ad Soyad -->
                                     <div class="col-md-6 mb-3">
@@ -480,13 +484,15 @@
                             <h5 class="card-header">İletişim Bilgileri</h5>
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">E-Posta</label>
-                                        <InputText @bind-Value="FormModel.Email"
-                                                   class="form-control"
-                                                   type="email"
-                                                   disabled="@(!CanEditManage || IsSaving || (IsEditMode && !CanDeleteManage))" />
-                                    </div>
+                                    <PermissionField FieldName="@nameof(FormModel.Email)" Context="perm">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">E-Posta</label>
+                                            <InputText @bind-Value="FormModel.Email"
+                                                       class="form-control"
+                                                       type="email"
+                                                       disabled="@(perm.IsDisabled || IsSaving)" />
+                                        </div>
+                                    </PermissionField>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Dahili Tel No</label>
                                         <InputNumber @bind-Value="FormModel.Dahili"
@@ -1156,7 +1162,7 @@
                                 @if (!string.IsNullOrEmpty(FormModel.Resim))
                                 {
                                     <div class="d-flex gap-2 justify-content-center mt-3">
-                                        <button type="button" class="btn btn-outline-danger btn-sm" @onclick="RemovePhoto" disabled="@(IsEditMode && (!CanDeleteManage || IsSaving))">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" @onclick="RemovePhoto" disabled="@(!CanEditPage || IsSaving)">
                                             <i class="bx bx-trash me-1"></i>Fotoğrafı Kaldır
                                         </button>
                                     </div>
@@ -1186,6 +1192,8 @@
                 </div>
             </div>
             </EditForm>
+            </CascadingValue>
+            </CascadingValue>
         }
     }
 </div>

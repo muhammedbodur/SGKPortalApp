@@ -14,6 +14,7 @@ using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using System.Text;
 using System.Text.Json;
 
@@ -24,15 +25,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<PersonelService> _logger;
+        private readonly IFieldPermissionValidationService _fieldPermissionService;
 
         public PersonelService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<PersonelService> logger)
+            ILogger<PersonelService> logger,
+            IFieldPermissionValidationService fieldPermissionService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _fieldPermissionService = fieldPermissionService;
         }
 
         private async Task<(bool Ok, string? ErrorMessage)> ValidateRequestorAsync(string? requestorTcKimlikNo, string? requestorSessionId)
@@ -75,6 +79,35 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 return YetkiSeviyesi.None;
 
             return personelYetki.YetkiSeviyesi;
+        }
+
+        /// <summary>
+        /// Kullanıcının tüm field permission'larını dictionary olarak döndürür
+        /// Key: PermissionKey, Value: YetkiSeviyesi
+        /// </summary>
+        private async Task<Dictionary<string, YetkiSeviyesi>> GetUserFieldPermissionsAsync(string tcKimlikNo)
+        {
+            var result = new Dictionary<string, YetkiSeviyesi>();
+            
+            if (string.IsNullOrWhiteSpace(tcKimlikNo))
+                return result;
+
+            // Kullanıcının tüm yetkilerini çek (filter ile)
+            var personelYetkiler = await _unitOfWork.Repository<PersonelYetki>()
+                .FindAsync(py => py.TcKimlikNo == tcKimlikNo && !py.SilindiMi);
+
+            foreach (var yetki in personelYetkiler)
+            {
+                var islem = await _unitOfWork.Repository<ModulControllerIslem>()
+                    .GetByIdAsync(yetki.ModulControllerIslemId);
+                
+                if (islem != null && !string.IsNullOrEmpty(islem.PermissionKey))
+                {
+                    result[islem.PermissionKey] = yetki.YetkiSeviyesi;
+                }
+            }
+
+            return result;
         }
 
         public async Task<ApiResponseDto<List<PersonelResponseDto>>> GetAllAsync()
@@ -510,23 +543,32 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     if (level < YetkiSeviyesi.Edit)
                         return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
 
-                    var canDelete = level >= YetkiSeviyesi.Edit;
-
                     // 1. Personel güncelle
                     var personel = await _unitOfWork.Repository<Personel>().GetByIdAsync(tcKimlikNo);
                     if (personel == null)
                         return ApiResponseDto<PersonelResponseDto>.ErrorResult("Personel bulunamadı");
 
-                    if (!canDelete)
+                    // ⭐ Field-level permission enforcement (B seçeneği: yetkisiz alanları sessizce revert et)
+                    // Kullanıcının tüm field permission'larını yükle
+                    var userPermissions = await GetUserFieldPermissionsAsync(request.RequestorTcKimlikNo!);
+                    
+                    // Orijinal DTO'yu oluştur (mevcut entity'den)
+                    var originalDto = _mapper.Map<PersonelCreateRequestDto>(personel);
+                    
+                    // Yetkisiz field değişikliklerini tespit et (convention-based: PER.PERSONEL.MANAGE.FIELD.{FIELDNAME})
+                    var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                        request.Personel, 
+                        userPermissions, 
+                        originalDto,
+                        "PER.PERSONEL.MANAGE"); // pagePermissionKey
+                    
+                    // Yetkisiz alanları orijinal değerlere geri al (sessiz revert)
+                    if (unauthorizedFields.Any())
                     {
-                        if (request.Personel.SicilNo != personel.SicilNo)
-                            return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
-
-                        if (!string.Equals(request.Personel.Email, personel.Email, StringComparison.OrdinalIgnoreCase))
-                            return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
-
-                        if (!string.IsNullOrWhiteSpace(personel.Resim) && string.IsNullOrWhiteSpace(request.Personel.Resim))
-                            return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
+                        _fieldPermissionService.RevertUnauthorizedFields(request.Personel, originalDto, unauthorizedFields);
+                        _logger.LogWarning(
+                            "Field-level permission enforcement: {Count} alan revert edildi. TC: {TcKimlikNo}, Alanlar: {Fields}",
+                            unauthorizedFields.Count, tcKimlikNo, string.Join(", ", unauthorizedFields));
                     }
 
                     // Hizmet binası veya departman değişikliği kontrolü
@@ -699,8 +741,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     var updatedPersonel = await personelRepo.GetByTcKimlikNoWithDetailsAsync(tcKimlikNo);
                     var personelDto = _mapper.Map<PersonelResponseDto>(updatedPersonel);
 
-                    return ApiResponseDto<PersonelResponseDto>
-                        .SuccessResult(personelDto, "Personel ve tüm bilgileri başarıyla güncellendi");
+                    // Mesajı oluştur - revert edilen alanlar varsa bildir
+                    var message = "Personel ve tüm bilgileri başarıyla güncellendi";
+                    if (unauthorizedFields.Any())
+                    {
+                        message += $". Uyarı: Yetkiniz olmayan {unauthorizedFields.Count} alan değişikliği geri alındı ({string.Join(", ", unauthorizedFields)})";
+                    }
+
+                    return ApiResponseDto<PersonelResponseDto>.SuccessResult(personelDto, message);
                 }
                 catch (DatabaseException ex)
                 {

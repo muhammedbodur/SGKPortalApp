@@ -1,24 +1,41 @@
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
 
 @* 
-    PermissionField Component
-    Kullanım:
+    PermissionField Component - Field-level permission wrapper
+    
+    Kullanım 1 (Convention-based - Önerilen):
+    <PermissionField FieldName="@nameof(FormModel.SicilNo)" PageKey="PER.PERSONEL.MANAGE" IsEditMode="@IsEditMode">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Sicil No</label>
+            <InputNumber @bind-Value="FormModel.SicilNo" class="form-control" disabled="@context.IsDisabled" />
+        </div>
+    </PermissionField>
+    
+    Kullanım 2 (Explicit key - Geriye uyumluluk):
     <PermissionField PermissionKey="PER.PERSONEL.MANAGE.FIELD.EMAIL">
-        <ViewTemplate>
-            <span>@Model.Email</span>
-        </ViewTemplate>
-        <EditTemplate>
-            <input type="text" @bind="Model.Email" class="form-control" />
-        </EditTemplate>
+        <ViewTemplate><span>@Model.Email</span></ViewTemplate>
+        <EditTemplate><input @bind="Model.Email" /></EditTemplate>
     </PermissionField>
 *@
 
-@if (_level >= YetkiSeviyesi.Edit && EditTemplate != null)
+@* Convention-based kullanım (ChildContent ile) *@
+@if (ChildContent != null)
 {
-    @EditTemplate
+    @if (_context.IsVisible)
+    {
+        @ChildContent(_context)
+    }
 }
-else if (_level >= YetkiSeviyesi.View && ViewTemplate != null)
+else
 {
-    @ViewTemplate
+    @* Eski kullanım (ViewTemplate/EditTemplate ile) *@
+    @if (_level >= YetkiSeviyesi.Edit && EditTemplate != null)
+    {
+        @EditTemplate
+    }
+    else if (_level >= YetkiSeviyesi.View && ViewTemplate != null)
+    {
+        @ViewTemplate
+    }
+    @* None = hiçbir şey gösterme *@
 }
-@* None = hiçbir şey gösterme *@

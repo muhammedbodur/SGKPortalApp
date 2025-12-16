@@ -1,4 +1,5 @@
 @page "/personel"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
 @using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
@@ -248,7 +249,7 @@
 
                             @foreach (var (personel, index) in pagedData.Select((p, i) => (p, i)))
                             {
-                                <tr style="cursor: pointer;" @onclick="() => NavigateToDetail(personel.TcKimlikNo)">
+                                <tr style="@(CanAction("DETAIL") ? "cursor: pointer;" : "")" @onclick="() => TryNavigateToDetail(personel.TcKimlikNo)">
                                     <td>@((CurrentPage - 1) * PageSize + index + 1)</td>
                                     <td>
                                         <span class="fw-medium">@personel.TcKimlikNo</span>
@@ -304,24 +305,33 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-1">
-                                            <button class="btn btn-sm btn-icon btn-outline-primary"
-                                                    @onclick:stopPropagation="true"
-                                                    @onclick="() => NavigateToDetail(personel.TcKimlikNo)"
-                                                    title="Detay">
-                                                <i class="bx bx-show"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-icon btn-outline-info"
-                                                    @onclick:stopPropagation="true"
-                                                    @onclick="() => NavigateToEdit(personel.TcKimlikNo)"
-                                                    title="Düzenle">
-                                                <i class="bx bx-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-icon btn-outline-danger"
-                                                    @onclick:stopPropagation="true"
-                                                    @onclick="() => OpenDeleteModal(personel)"
-                                                    title="Sil">
-                                                <i class="bx bx-trash"></i>
-                                            </button>
+                                            @if (IsActionVisible("DETAIL"))
+                                            {
+                                                <button class="btn btn-sm btn-icon btn-outline-primary"
+                                                        @onclick:stopPropagation="true"
+                                                        @onclick="() => NavigateToDetail(personel.TcKimlikNo)"
+                                                        title="Detay">
+                                                    <i class="bx bx-show"></i>
+                                                </button>
+                                            }
+                                            @if (IsActionVisible("EDIT"))
+                                            {
+                                                <button class="btn btn-sm btn-icon btn-outline-info"
+                                                        @onclick:stopPropagation="true"
+                                                        @onclick="() => NavigateToEdit(personel.TcKimlikNo)"
+                                                        title="Düzenle">
+                                                    <i class="bx bx-edit"></i>
+                                                </button>
+                                            }
+                                            @if (IsActionVisible("DELETE"))
+                                            {
+                                                <button class="btn btn-sm btn-icon btn-outline-danger"
+                                                        @onclick:stopPropagation="true"
+                                                        @onclick="() => OpenDeleteModal(personel)"
+                                                        title="Sil">
+                                                    <i class="bx bx-trash"></i>
+                                                </button>
+                                            }
                                         </div>
                                     </td>
                                 </tr>

@@ -211,7 +211,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.YetkiAtama
                 {
                     ModulControllerIslemId = -modulGroup.Key.ModulId, // Negatif ID (grup için)
                     IslemAdi = modulGroup.Key.ModulAdi,
-                    IslemTipi = YetkiIslemTipi.Grup,
+                    IslemTipi = YetkiIslemTipi.Page,
                     IsGroupNode = true
                 };
 
@@ -226,7 +226,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.YetkiAtama
                     {
                         ModulControllerIslemId = -controllerGroup.Key.ModulControllerId - 10000, // Negatif ID (grup için)
                         IslemAdi = controllerGroup.Key.ModulControllerAdi,
-                        IslemTipi = YetkiIslemTipi.Grup,
+                        IslemTipi = YetkiIslemTipi.Page,
                         IsGroupNode = true
                     };
 

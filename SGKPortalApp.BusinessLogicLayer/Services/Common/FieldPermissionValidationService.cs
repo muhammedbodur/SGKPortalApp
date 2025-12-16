@@ -92,11 +92,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         /// <summary>
         /// Validates multiple fields in a DTO
         /// Returns list of fields that user cannot edit
+        /// 
+        /// Yeni mantık: Convention-based permission key kullanır
+        /// Örnek: pagePermissionKey = "PER.PERSONEL.MANAGE" ve fieldName = "SicilNo"
+        ///        -> Permission key: "PER.PERSONEL.MANAGE.FIELD.SICILNO"
         /// </summary>
         public async Task<List<string>> ValidateFieldPermissionsAsync<TDto>(
             TDto dto,
             Dictionary<string, YetkiSeviyesi> userPermissions,
-            TDto? originalDto = null) where TDto : class
+            TDto? originalDto = null,
+            string? pagePermissionKey = null) where TDto : class
         {
             var unauthorizedFields = new List<string>();
             var dtoTypeName = typeof(TDto).Name;
@@ -121,7 +126,32 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                         continue;
                 }
 
-                // Validate permission for this field
+                // Convention-based permission key kontrolü (pagePermissionKey verilmişse)
+                if (!string.IsNullOrEmpty(pagePermissionKey))
+                {
+                    var fieldPermissionKey = $"{pagePermissionKey}.FIELD.{prop.Name.ToUpperInvariant()}";
+                    
+                    // Case-insensitive arama
+                    var matchingKey = userPermissions.Keys.FirstOrDefault(k => 
+                        string.Equals(k, fieldPermissionKey, StringComparison.OrdinalIgnoreCase));
+                    
+                    // Kullanıcının bu field için yetkisi var mı?
+                    if (matchingKey != null && userPermissions.TryGetValue(matchingKey, out var userLevel))
+                    {
+                        // Yetki var ama Edit değil (View veya None)
+                        if (userLevel < YetkiSeviyesi.Edit)
+                        {
+                            _logger.LogWarning(
+                                "User attempted to edit field without Edit permission. Field: {Field}, UserLevel: {Level}, RequiredPermission: {Permission}",
+                                prop.Name, userLevel, fieldPermissionKey);
+                            unauthorizedFields.Add(prop.Name);
+                        }
+                        continue; // Yetki kontrolü yapıldı, sonraki field'a geç
+                    }
+                    // Field permission tanımlı değil -> izin ver (sayfa seviyesi kontrolü olmalı)
+                }
+
+                // Eski yöntem: Cache-based kontrol (DtoTypeName:DtoFieldName)
                 if (!CanEditField(dtoTypeName, prop.Name, userPermissions, out var permissionKey))
                 {
                     _logger.LogWarning(

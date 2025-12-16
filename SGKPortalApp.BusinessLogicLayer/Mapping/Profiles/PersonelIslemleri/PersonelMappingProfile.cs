@@ -179,6 +179,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.User, opt => opt.Ignore());
 
 
+            //  Entity → Create Request DTO (Field-level permission revert için)
+            CreateMap<Personel, PersonelCreateRequestDto>()
+                .ForMember(dest => dest.Cocuklar, opt => opt.Ignore())
+                .ForMember(dest => dest.Hizmetler, opt => opt.Ignore())
+                .ForMember(dest => dest.Egitimler, opt => opt.Ignore())
+                .ForMember(dest => dest.Yetkiler, opt => opt.Ignore())
+                .ForMember(dest => dest.Cezalar, opt => opt.Ignore())
+                .ForMember(dest => dest.Engeller, opt => opt.Ignore());
+
+
             //  Update Request DTO → Entity
             CreateMap<PersonelUpdateRequestDto, Personel>()
                 // ═══ KORUNMASI GEREKEN ALANLAR ═══
