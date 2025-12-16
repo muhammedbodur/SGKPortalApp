@@ -58,7 +58,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private bool IsEditMode => !string.IsNullOrEmpty(TcKimlikNo);
 
         private const string PermissionKey = "PER.PERSONEL.MANAGE";
-        private const string PermissionKeySicilNo = "PER.PERSONEL.MANAGE.FIELD.SICIL_NO";
+        private const string PermissionKeySicilNo = "PER.PERSONEL.MANAGE.SICILNO";
 
         private bool CanViewManage => _permissionStateService.CanView(PermissionKey);
         private bool CanEditManage => !IsEditMode || _permissionStateService.CanEdit(PermissionKey);
