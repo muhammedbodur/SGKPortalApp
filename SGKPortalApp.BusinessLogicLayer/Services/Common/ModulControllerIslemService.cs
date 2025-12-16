@@ -40,6 +40,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     UstIslemId = i.UstIslemId,
                     UstIslemAdi = i.UstIslem?.ModulControllerIslemAdi,
                     Aciklama = i.Aciklama,
+                    DtoTypeName = i.DtoTypeName,
+                    DtoFieldName = i.DtoFieldName,
                     ModulControllerId = i.ModulControllerId,
                     ModulControllerAdi = i.ModulController?.ModulControllerAdi ?? string.Empty,
                     ModulId = i.ModulController?.ModulId ?? 0,
@@ -79,6 +81,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     UstIslemId = i.UstIslemId,
                     UstIslemAdi = i.UstIslem?.ModulControllerIslemAdi,
                     Aciklama = i.Aciklama,
+                    DtoTypeName = i.DtoTypeName,
+                    DtoFieldName = i.DtoFieldName,
                     ModulControllerId = i.ModulControllerId,
                     ModulControllerAdi = controller?.ModulControllerAdi ?? string.Empty,
                     ModulId = controller?.ModulId ?? 0,
@@ -118,6 +122,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     UstIslemId = islem.UstIslemId,
                     UstIslemAdi = islem.UstIslem?.ModulControllerIslemAdi,
                     Aciklama = islem.Aciklama,
+                    DtoTypeName = islem.DtoTypeName,
+                    DtoFieldName = islem.DtoFieldName,
                     ModulControllerId = islem.ModulControllerId,
                     ModulControllerAdi = islem.ModulController?.ModulControllerAdi ?? string.Empty,
                     ModulId = islem.ModulController?.ModulId ?? 0,
@@ -160,7 +166,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     MinYetkiSeviyesi = request.MinYetkiSeviyesi,
                     SayfaTipi = request.SayfaTipi,
                     UstIslemId = request.UstIslemId,
-                    Aciklama = request.Aciklama
+                    Aciklama = request.Aciklama,
+                    DtoTypeName = request.DtoTypeName,
+                    DtoFieldName = request.DtoFieldName
                 };
 
                 await repo.AddAsync(entity);
@@ -177,6 +185,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     SayfaTipi = entity.SayfaTipi,
                     UstIslemId = entity.UstIslemId,
                     Aciklama = entity.Aciklama,
+                    DtoTypeName = entity.DtoTypeName,
+                    DtoFieldName = entity.DtoFieldName,
                     ModulControllerId = entity.ModulControllerId,
                     ModulControllerAdi = controller.ModulControllerAdi,
                     ModulId = controller.ModulId,
@@ -218,6 +228,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 entity.SayfaTipi = request.SayfaTipi;
                 entity.UstIslemId = request.UstIslemId;
                 entity.Aciklama = request.Aciklama;
+                entity.DtoTypeName = request.DtoTypeName;
+                entity.DtoFieldName = request.DtoFieldName;
                 entity.DuzenlenmeTarihi = DateTime.Now;
 
                 repo.Update(entity);
@@ -234,6 +246,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     SayfaTipi = entity.SayfaTipi,
                     UstIslemId = entity.UstIslemId,
                     Aciklama = entity.Aciklama,
+                    DtoTypeName = entity.DtoTypeName,
+                    DtoFieldName = entity.DtoFieldName,
                     ModulControllerId = entity.ModulControllerId,
                     ModulControllerAdi = controller.ModulControllerAdi,
                     ModulId = controller.ModulId,
