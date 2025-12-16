@@ -7,6 +7,7 @@
 @inject IModulControllerIslemApiService IslemApiService
 @inject IModulControllerApiService ControllerApiService
 @inject IModulApiService ModulApiService
+@inject IDtoDiscoveryApiService DtoDiscoveryApiService
 @inject IJSRuntime JS
 @inject IToastService ToastService
 
@@ -184,13 +185,81 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">DTO Type Name</label>
-                                <input type="text" class="form-control" @bind="DtoTypeName" placeholder="PersonelCreateRequestDto" />
-                                <small class="text-muted">Backend DTO sınıf adı (örn: PersonelCreateRequestDto)</small>
+                                <select class="form-select" @bind="DtoTypeName" @bind:after="OnDtoTypeChanged" disabled="@IsLoadingDtoTypes">
+                                    <option value="">-- DTO Seçiniz --</option>
+                                    @if (IsLoadingDtoTypes)
+                                    {
+                                        <option value="">⏳ Yükleniyor...</option>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var group in DtoTypes.GroupBy(d => d.Category))
+                                        {
+                                            <optgroup label="@group.Key">
+                                                @foreach (var dto in group)
+                                                {
+                                                    <option value="@dto.TypeName">@dto.DisplayName</option>
+                                                }
+                                            </optgroup>
+                                        }
+                                    }
+                                </select>
+                                <small class="text-muted">
+                                    @if (IsLoadingDtoTypes)
+                                    {
+                                        <i class="bx bx-loader-alt bx-spin"></i> <text>DTO'lar yükleniyor...</text>
+                                    }
+                                    else if (!string.IsNullOrEmpty(DtoTypeName))
+                                    {
+                                        <i class="bx bx-check-circle text-success"></i> <text>Seçilen: @DtoTypeName</text>
+                                    }
+                                    else
+                                    {
+                                        <i class="bx bx-info-circle"></i> <text>Backend DTO sınıfı</text>
+                                    }
+                                </small>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">DTO Field Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" @bind="DtoFieldName" @bind:after="OnDtoFieldNameChanged" placeholder="SicilNo" />
-                                <small class="text-muted">Property adı - İşlem Adı otomatik doldurulur</small>
+                                <select class="form-select" @bind="DtoFieldName" @bind:after="OnDtoFieldNameChanged"
+                                        disabled="@(string.IsNullOrEmpty(DtoTypeName) || IsLoadingDtoFields)">
+                                    <option value="">-- Field Seçiniz --</option>
+                                    @if (IsLoadingDtoFields)
+                                    {
+                                        <option value="">⏳ Yükleniyor...</option>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var field in DtoFields)
+                                        {
+                                            <option value="@field.PropertyName">
+                                                @field.DisplayName (@field.PropertyType)@(field.IsRequired ? " *" : "")
+                                            </option>
+                                        }
+                                    }
+                                </select>
+                                <small class="text-muted">
+                                    @if (string.IsNullOrEmpty(DtoTypeName))
+                                    {
+                                        <i class="bx bx-info-circle"></i> <text>Önce DTO Type seçiniz</text>
+                                    }
+                                    else if (IsLoadingDtoFields)
+                                    {
+                                        <i class="bx bx-loader-alt bx-spin"></i> <text>Field'lar yükleniyor...</text>
+                                    }
+                                    else if (!DtoFields.Any())
+                                    {
+                                        <i class="bx bx-error text-warning"></i> <text>Field bulunamadı</text>
+                                    }
+                                    else if (!string.IsNullOrEmpty(DtoFieldName))
+                                    {
+                                        <i class="bx bx-check-circle text-success"></i> <text>Seçilen: @DtoFieldName (İşlem Adı otomatik doldurulacak)</text>
+                                    }
+                                    else
+                                    {
+                                        <i class="bx bx-info-circle"></i> <text>@DtoFields.Count field mevcut</text>
+                                    }
+                                </small>
                             </div>
                         </div>
                     }
@@ -268,6 +337,12 @@
     private string? DtoTypeName = null;
     private string? DtoFieldName = null;
 
+    // DTO Discovery states
+    private List<DtoTypeInfo> DtoTypes = new();
+    private List<DtoPropertyInfo> DtoFields = new();
+    private bool IsLoadingDtoTypes = false;
+    private bool IsLoadingDtoFields = false;
+
     // Computed properties for conditional rendering
     private bool IsFieldType => SelectedIslemTipi == YetkiIslemTipi.Field || SelectedIslemTipi == YetkiIslemTipi.FormField;
     private bool ShowRouteField => SelectedIslemTipi == YetkiIslemTipi.Page;
@@ -275,6 +350,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadModulDropdown();
+        await LoadDtoTypes();
         await LoadData();
     }
 
@@ -311,9 +387,23 @@
         GeneratePermissionKey();
     }
 
+    private async Task OnDtoTypeChanged()
+    {
+        // DTO Type değiştiğinde field'ları temizle ve yeni DTO'nun field'larını yükle
+        DtoFieldName = null;
+        DtoFields = new();
+
+        if (!string.IsNullOrEmpty(DtoTypeName))
+        {
+            await LoadDtoFields(DtoTypeName);
+        }
+
+        GeneratePermissionKey();
+    }
+
     private void OnDtoFieldNameChanged()
     {
-        // DTO Field Name girildiğinde İşlem Adı'nı otomatik doldur (uppercase)
+        // DTO Field Name seçildiğinde İşlem Adı'nı otomatik doldur (uppercase)
         if (!string.IsNullOrWhiteSpace(DtoFieldName) && string.IsNullOrWhiteSpace(IslemAdi))
         {
             IslemAdi = DtoFieldName.ToUpperInvariant();
@@ -433,6 +523,56 @@
         IsLoading = false;
     }
 
+    private async Task LoadDtoTypes()
+    {
+        IsLoadingDtoTypes = true;
+        try
+        {
+            var result = await DtoDiscoveryApiService.GetAllDtoTypesAsync();
+            if (result.Success && result.Data != null)
+            {
+                DtoTypes = result.Data;
+            }
+            else
+            {
+                await ToastService.ShowErrorAsync(result.Message?.FirstOrDefault() ?? "DTO'lar yüklenemedi");
+            }
+        }
+        catch (Exception ex)
+        {
+            await ToastService.ShowErrorAsync($"DTO yükleme hatası: {ex.Message}");
+        }
+        finally
+        {
+            IsLoadingDtoTypes = false;
+        }
+    }
+
+    private async Task LoadDtoFields(string dtoTypeName)
+    {
+        IsLoadingDtoFields = true;
+        try
+        {
+            var result = await DtoDiscoveryApiService.GetDtoPropertiesAsync(dtoTypeName);
+            if (result.Success && result.Data != null)
+            {
+                DtoFields = result.Data;
+            }
+            else
+            {
+                await ToastService.ShowErrorAsync(result.Message?.FirstOrDefault() ?? "Field'lar yüklenemedi");
+            }
+        }
+        catch (Exception ex)
+        {
+            await ToastService.ShowErrorAsync($"Field yükleme hatası: {ex.Message}");
+        }
+        finally
+        {
+            IsLoadingDtoFields = false;
+        }
+    }
+
     private void ShowAddModal()
     {
         EditingId = null;
@@ -468,6 +608,13 @@
         SelectedUstIslemId = i.UstIslemId ?? 0;
         DtoTypeName = i.DtoTypeName;
         DtoFieldName = i.DtoFieldName;
+
+        // DTO Type varsa field'ları yükle
+        if (!string.IsNullOrEmpty(DtoTypeName))
+        {
+            await LoadDtoFields(DtoTypeName);
+        }
+
         ShowModal = true;
     }
 
