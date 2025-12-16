@@ -72,6 +72,18 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
         [StringLength(500)]
         public string? Aciklama { get; set; }
 
+        /// <summary>
+        /// DTO Type adı - Backend validation için (örn: PersonelUpdateRequestDto)
+        /// </summary>
+        [StringLength(200)]
+        public string? DtoTypeName { get; set; }
+
+        /// <summary>
+        /// DTO Property adı - Backend validation için (örn: SicilNo, Email, IlId)
+        /// </summary>
+        [StringLength(100)]
+        public string? DtoFieldName { get; set; }
+
         public int ModulControllerId { get; set; }
         [ForeignKey("ModulControllerId")]
         [InverseProperty("ModulControllerIslemler")]
