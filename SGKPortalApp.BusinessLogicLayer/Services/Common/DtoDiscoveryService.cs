@@ -71,6 +71,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 
         /// <summary>
         /// Belirtilen DTO'nun tüm property'lerini döner (Reflection ile)
+        /// Nested DTO'ları flatten eder (örn: Personel.DepartmanId)
         /// </summary>
         public ApiResponseDto<List<DtoPropertyInfo>> GetDtoProperties(string dtoTypeName)
         {
@@ -93,23 +94,85 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     return ApiResponseDto<List<DtoPropertyInfo>>.ErrorResult($"'{dtoTypeName}' bulunamadı");
                 }
 
-                // DTO'nun tüm property'lerini al (Reflection)
-                var properties = dtoType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(p =>
-                        !p.PropertyType.IsGenericType ||  // List<> gibi collection'ları atla
-                        !p.PropertyType.GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>)))
-                    .Select(p => new DtoPropertyInfo
-                    {
-                        PropertyName = p.Name,
-                        PropertyType = GetFriendlyTypeName(p.PropertyType),
-                        DisplayName = FormatDisplayName(p.Name),
-                        IsRequired = p.GetCustomAttribute<RequiredAttribute>() != null,
-                        MaxLength = p.GetCustomAttribute<StringLengthAttribute>()?.MaximumLength
-                    })
-                    .OrderBy(p => p.DisplayName)
-                    .ToList();
+                var properties = new List<DtoPropertyInfo>();
 
-                _logger.LogDebug("GetDtoProperties: {DtoTypeName} için {Count} property bulundu", dtoTypeName, properties.Count);
+                // DTO'nun tüm property'lerini al (Reflection)
+                var allProperties = dtoType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+                foreach (var prop in allProperties)
+                {
+                    // List<> gibi collection'ları atla
+                    if (prop.PropertyType.IsGenericType &&
+                        prop.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+                    {
+                        continue;
+                    }
+
+                    // Eğer property başka bir RequestDto ise (nested DTO), onun içindekileri de ekle
+                    if (prop.PropertyType.IsClass &&
+                        prop.PropertyType != typeof(string) &&
+                        prop.PropertyType.Name.EndsWith("RequestDto"))
+                    {
+                        // Nested DTO'nun kendi property'sini ekle (grup header olarak)
+                        properties.Add(new DtoPropertyInfo
+                        {
+                            PropertyName = prop.Name,
+                            PropertyType = GetFriendlyTypeName(prop.PropertyType),
+                            DisplayName = $"{FormatDisplayName(prop.Name)} ({prop.PropertyType.Name})",
+                            IsRequired = false,
+                            MaxLength = null
+                        });
+
+                        // Nested DTO'nun içindeki field'ları ekle (flatten)
+                        var nestedProperties = prop.PropertyType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+                        foreach (var nestedProp in nestedProperties)
+                        {
+                            // Nested içinde de collection varsa atla
+                            if (nestedProp.PropertyType.IsGenericType &&
+                                nestedProp.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
+                            {
+                                continue;
+                            }
+
+                            // Nested içinde başka nested DTO varsa atla (sadece 1 seviye derinlik)
+                            if (nestedProp.PropertyType.IsClass &&
+                                nestedProp.PropertyType != typeof(string) &&
+                                nestedProp.PropertyType.Name.EndsWith("RequestDto"))
+                            {
+                                continue;
+                            }
+
+                            // Nested property'yi "ParentName.PropertyName" formatında ekle
+                            properties.Add(new DtoPropertyInfo
+                            {
+                                PropertyName = $"{prop.Name}.{nestedProp.Name}",
+                                PropertyType = GetFriendlyTypeName(nestedProp.PropertyType),
+                                DisplayName = FormatDisplayName(nestedProp.Name),
+                                IsRequired = nestedProp.GetCustomAttribute<RequiredAttribute>() != null,
+                                MaxLength = nestedProp.GetCustomAttribute<StringLengthAttribute>()?.MaximumLength
+                            });
+                        }
+                    }
+                    else
+                    {
+                        // Normal property (primitive, string, enum, vb.)
+                        properties.Add(new DtoPropertyInfo
+                        {
+                            PropertyName = prop.Name,
+                            PropertyType = GetFriendlyTypeName(prop.PropertyType),
+                            DisplayName = FormatDisplayName(prop.Name),
+                            IsRequired = prop.GetCustomAttribute<RequiredAttribute>() != null,
+                            MaxLength = prop.GetCustomAttribute<StringLengthAttribute>()?.MaximumLength
+                        });
+                    }
+                }
+
+                // Sıralama: Normal property'ler önce, sonra nested'lar
+                properties = properties.OrderBy(p => p.PropertyName.Contains(".") ? 1 : 0)
+                                       .ThenBy(p => p.DisplayName)
+                                       .ToList();
+
+                _logger.LogDebug("GetDtoProperties: {DtoTypeName} için {Count} property bulundu (nested flatten ile)", dtoTypeName, properties.Count);
 
                 return ApiResponseDto<List<DtoPropertyInfo>>.SuccessResult(properties, $"{properties.Count} property bulundu");
             }
