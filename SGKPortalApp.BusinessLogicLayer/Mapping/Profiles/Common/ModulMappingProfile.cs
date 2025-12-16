@@ -21,7 +21,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
                 .ForMember(dest => dest.SilenKullanici, opt => opt.Ignore())
                 .ForMember(dest => dest.EkleyenKullanici, opt => opt.Ignore())
                 .ForMember(dest => dest.DuzenleyenKullanici, opt => opt.Ignore())
-                .ForMember(dest => dest.ModulAltlari, opt => opt.Ignore())
                 .ForMember(dest => dest.ModulControllers, opt => opt.Ignore());
 
             CreateMap<ModulUpdateRequestDto, Modul>()
@@ -33,7 +32,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
                 .ForMember(dest => dest.SilenKullanici, opt => opt.Ignore())
                 .ForMember(dest => dest.EkleyenKullanici, opt => opt.Ignore())
                 .ForMember(dest => dest.DuzenleyenKullanici, opt => opt.Ignore())
-                .ForMember(dest => dest.ModulAltlari, opt => opt.Ignore())
                 .ForMember(dest => dest.ModulControllers, opt => opt.Ignore());
         }
     }
