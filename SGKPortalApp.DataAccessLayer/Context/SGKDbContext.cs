@@ -40,7 +40,6 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<Unvan> Unvanlar { get; set; }
         public DbSet<Sendika> Sendikalar { get; set; }
         public DbSet<AtanmaNedenleri> AtanmaNedenleri { get; set; }
-        public DbSet<Yetki> Yetkiler { get; set; }
         public DbSet<Modul> Moduller { get; set; }
         public DbSet<ModulController> ModulControllers { get; set; }
         public DbSet<ModulControllerIslem> ModulControllerIslemleri { get; set; }
@@ -100,7 +99,6 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.ApplyConfiguration(new UnvanConfiguration());
             modelBuilder.ApplyConfiguration(new SendikaConfiguration());
             modelBuilder.ApplyConfiguration(new AtanmaNedenleriConfiguration());
-            modelBuilder.ApplyConfiguration(new YetkiConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelCocukConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelDepartmanConfiguration());

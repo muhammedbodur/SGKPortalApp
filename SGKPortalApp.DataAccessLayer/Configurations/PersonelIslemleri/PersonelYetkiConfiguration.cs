@@ -19,7 +19,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
                 .IsRequired()
                 .HasMaxLength(11);
 
-            builder.Property(py => py.YetkiTipleri)
+            builder.Property(py => py.YetkiSeviyesi)
                 .HasConversion<string>()
                 .HasMaxLength(50);
 
@@ -35,25 +35,26 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
                 .IsRequired()
                 .HasDefaultValue(false);
 
-            builder.HasIndex(py => new { py.TcKimlikNo, py.YetkiId })
+            // Unique index: Bir personel bir işlem için tek yetki kaydı olabilir
+            builder.HasIndex(py => new { py.TcKimlikNo, py.ModulControllerIslemId })
                 .IsUnique()
-                .HasDatabaseName("IX_PER_PersonelYetkileri_Tc_Yetki")
+                .HasDatabaseName("IX_PER_PersonelYetkileri_Tc_Islem")
                 .HasFilter("[SilindiMi] = 0");
 
             builder.HasQueryFilter(py => !py.SilindiMi);
 
             // Relationships
             builder.HasOne(py => py.Personel)
-                .WithMany()
+                .WithMany(p => p.PersonelYetkileri)
                 .HasForeignKey(py => py.TcKimlikNo)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_PER_PersonelYetkileri_PER_Personeller");
 
-            builder.HasOne(py => py.Yetki)
-                .WithMany()
-                .HasForeignKey(py => py.YetkiId)
+            builder.HasOne(py => py.ModulControllerIslem)
+                .WithMany(mci => mci.PersonelYetkileri)
+                .HasForeignKey(py => py.ModulControllerIslemId)
                 .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_PER_PersonelYetkileri_PER_Yetkiler");
+                .HasConstraintName("FK_PER_PersonelYetkileri_COM_ModulControllerIslemler");
         }
     }
 }

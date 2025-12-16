@@ -1,0 +1,409 @@
+@page "/yetki/islem"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+@using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces
+@using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
+@inject IModulControllerIslemApiService IslemApiService
+@inject IModulControllerApiService ControllerApiService
+@inject IModulApiService ModulApiService
+@inject IJSRuntime JS
+@inject IToastService ToastService
+
+<PageTitle>İşlem Yönetimi - SGK Portal</PageTitle>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="bx bx-list-ul me-2"></i>İşlem Yönetimi
+            </h4>
+            <p class="text-muted mb-0">Controller işlemlerini yönetin (Action'lar)</p>
+        </div>
+        <button class="btn btn-primary" @onclick="ShowAddModal">
+            <i class="bx bx-plus me-1"></i>Yeni İşlem
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            @if (IsLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary"></div>
+                    <p class="mt-2 text-muted">Yükleniyor...</p>
+                </div>
+            }
+            else if (!Islemler.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bx bx-list-ul" style="font-size: 3rem; color: #ccc;"></i>
+                    <p class="mt-2 text-muted">Henüz işlem eklenmemiş</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>İşlem Adı</th>
+                                <th>Route</th>
+                                <th>Permission Key</th>
+                                <th>Sayfa Tipi</th>
+                                <th>Min. Yetki</th>
+                                <th>Controller / Modül</th>
+                                <th class="text-end">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var i in Islemler)
+                            {
+                                <tr>
+                                    <td>@i.ModulControllerIslemId</td>
+                                    <td><strong>@i.ModulControllerIslemAdi</strong></td>
+                                    <td><code class="text-primary">@(i.Route ?? "-")</code></td>
+                                    <td><code class="text-secondary">@(i.PermissionKey ?? "-")</code></td>
+                                    <td>
+                                        @switch (i.SayfaTipi)
+                                        {
+                                            case SayfaTipi.Public:
+                                                <span class="badge bg-success">Public</span>
+                                                break;
+                                            case SayfaTipi.Authenticated:
+                                                <span class="badge bg-info">Authenticated</span>
+                                                break;
+                                            case SayfaTipi.Protected:
+                                                <span class="badge bg-warning">Protected</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        @switch (i.MinYetkiSeviyesi)
+                                        {
+                                            case YetkiSeviyesi.None:
+                                                <span class="badge bg-label-secondary">None</span>
+                                                break;
+                                            case YetkiSeviyesi.View:
+                                                <span class="badge bg-label-info">View</span>
+                                                break;
+                                            case YetkiSeviyesi.Edit:
+                                                <span class="badge bg-label-primary">Edit</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-label-info">@i.ModulControllerAdi</span>
+                                        <span class="badge bg-label-primary">@i.ModulAdi</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-icon btn-outline-primary me-1" @onclick="() => StartEdit(i)">
+                                            <i class="bx bx-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-icon btn-outline-danger" @onclick="() => DeleteIslem(i)">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@if (ShowModal)
+{
+    <div class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(EditingId.HasValue ? "İşlem Düzenle" : "Yeni İşlem")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Modül <span class="text-danger">*</span></label>
+                            <select class="form-select" @bind="SelectedModulId" @bind:after="OnModulChanged">
+                                <option value="0">-- Modül Seçiniz --</option>
+                                @foreach (var m in Moduller)
+                                {
+                                    <option value="@m.Id">@m.Ad</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Controller <span class="text-danger">*</span></label>
+                            <select class="form-select" @bind="SelectedControllerId" @bind:after="OnControllerChanged" disabled="@(SelectedModulId <= 0)">
+                                <option value="0">-- Controller Seçiniz --</option>
+                                @foreach (var c in FilteredControllers)
+                                {
+                                    <option value="@c.Id">@c.Ad</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">İşlem Adı <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" @bind="IslemAdi" placeholder="Örn: LIST, CREATE, DELETE..." />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">İşlem Tipi</label>
+                            <select class="form-select" @bind="SelectedIslemTipi">
+                                <option value="@YetkiIslemTipi.Grup">📁 Grup</option>
+                                <option value="@YetkiIslemTipi.Page">📄 Sayfa</option>
+                                <option value="@YetkiIslemTipi.Tab">📑 Tab</option>
+                                <option value="@YetkiIslemTipi.Buton">🔘 Buton</option>
+                                <option value="@YetkiIslemTipi.Field">📝 Field (Görüntüleme)</option>
+                                <option value="@YetkiIslemTipi.FormField">✏️ Input (Form Alanı)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Üst İşlem (Opsiyonel)</label>
+                        <select class="form-select" @bind="SelectedUstIslemId" disabled="@(SelectedControllerId <= 0)">
+                            <option value="0">-- Üst İşlem Yok (Kök Seviye) --</option>
+                            @foreach (var i in FilteredIslemler)
+                            {
+                                <option value="@i.ModulControllerIslemId">@GetIslemPrefix(i) @i.ModulControllerIslemAdi</option>
+                            }
+                        </select>
+                        <small class="text-muted">Bu işlem başka bir işlemin altında mı? (Örn: Buton → Sayfa altında)</small>
+                    </div>
+                    <hr class="my-3" />
+                    <h6 class="mb-3"><i class="bx bx-shield me-1"></i>Sayfa Yetki Ayarları</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Route (Sayfa Yolu)</label>
+                            <input type="text" class="form-control" @bind="Route" placeholder="Örn: /personel, /siramatik/banko/list" />
+                            <small class="text-muted">Bu işlemin bağlı olduğu sayfa URL'i</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Permission Key</label>
+                            <input type="text" class="form-control" @bind="PermissionKey" placeholder="Örn: PER.PERSONEL.LIST" />
+                            <small class="text-muted">Yetki anahtarı (otomatik oluşturulabilir)</small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Sayfa Tipi</label>
+                            <select class="form-select" @bind="SelectedSayfaTipi">
+                                <option value="@SayfaTipi.Public">Public (Herkes erişebilir)</option>
+                                <option value="@SayfaTipi.Authenticated">Authenticated (Login yeterli)</option>
+                                <option value="@SayfaTipi.Protected">Protected (Yetki gerekli)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Minimum Yetki Seviyesi</label>
+                            <select class="form-select" @bind="SelectedMinYetki" disabled="@(SelectedSayfaTipi != SayfaTipi.Protected)">
+                                <option value="@YetkiSeviyesi.None">None (Erişim Yok)</option>
+                                <option value="@YetkiSeviyesi.View">View (Görüntüleme)</option>
+                                <option value="@YetkiSeviyesi.Edit">Edit (Düzenleme)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseModal">İptal</button>
+                    <button class="btn btn-primary" @onclick="SaveIslem" disabled="@IsSaving">
+                        @if (IsSaving) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                        Kaydet
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ModulControllerIslemResponseDto> Islemler = new();
+    private List<ModulControllerIslemResponseDto> FilteredIslemler = new();
+    private List<DropdownItemDto> Moduller = new();
+    private List<DropdownItemDto> FilteredControllers = new();
+    private bool IsLoading = true;
+    private bool IsSaving = false;
+    private bool ShowModal = false;
+    private int? EditingId = null;
+    private int SelectedModulId = 0;
+    private int SelectedControllerId = 0;
+    private string IslemAdi = string.Empty;
+    private string? Route = null;
+    private string? PermissionKey = null;
+    private SayfaTipi SelectedSayfaTipi = SayfaTipi.Protected;
+    private YetkiSeviyesi SelectedMinYetki = YetkiSeviyesi.View;
+    private YetkiIslemTipi SelectedIslemTipi = YetkiIslemTipi.Page;
+    private int SelectedUstIslemId = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadModulDropdown();
+        await LoadData();
+    }
+
+    private async Task LoadModulDropdown()
+    {
+        var result = await ModulApiService.GetDropdownAsync();
+        if (result.Success && result.Data != null)
+            Moduller = result.Data;
+    }
+
+    private async Task OnModulChanged()
+    {
+        SelectedControllerId = 0;
+        SelectedUstIslemId = 0;
+        FilteredControllers = new();
+        FilteredIslemler = new();
+
+        if (SelectedModulId > 0)
+        {
+            var result = await ControllerApiService.GetDropdownByModulIdAsync(SelectedModulId);
+            if (result.Success && result.Data != null)
+                FilteredControllers = result.Data;
+        }
+    }
+
+    private void OnControllerChanged()
+    {
+        SelectedUstIslemId = 0;
+        FilteredIslemler = Islemler
+            .Where(i => i.ModulControllerId == SelectedControllerId && i.ModulControllerIslemId != EditingId)
+            .OrderBy(i => i.ModulControllerIslemAdi)
+            .ToList();
+    }
+
+    private string GetIslemPrefix(ModulControllerIslemResponseDto islem)
+    {
+        return islem.IslemTipi switch
+        {
+            YetkiIslemTipi.Grup => "📁",
+            YetkiIslemTipi.Page => "📄",
+            YetkiIslemTipi.Tab => "📑",
+            YetkiIslemTipi.Buton => "🔘",
+            YetkiIslemTipi.Field => "📝",
+            YetkiIslemTipi.FormField => "✏️",
+            _ => "•"
+        };
+    }
+
+    private async Task LoadData()
+    {
+        IsLoading = true;
+        var result = await IslemApiService.GetAllAsync();
+        if (result.Success && result.Data != null)
+            Islemler = result.Data;
+        IsLoading = false;
+    }
+
+    private void ShowAddModal()
+    {
+        EditingId = null;
+        SelectedModulId = 0;
+        SelectedControllerId = 0;
+        SelectedUstIslemId = 0;
+        FilteredControllers = new();
+        FilteredIslemler = new();
+        IslemAdi = string.Empty;
+        Route = null;
+        PermissionKey = null;
+        SelectedSayfaTipi = SayfaTipi.Protected;
+        SelectedMinYetki = YetkiSeviyesi.View;
+        SelectedIslemTipi = YetkiIslemTipi.Page;
+        ShowModal = true;
+    }
+
+    private async Task StartEdit(ModulControllerIslemResponseDto i)
+    {
+        EditingId = i.ModulControllerIslemId;
+        SelectedModulId = i.ModulId;
+        await OnModulChanged();
+        SelectedControllerId = i.ModulControllerId;
+        OnControllerChanged();
+        IslemAdi = i.ModulControllerIslemAdi;
+        Route = i.Route;
+        PermissionKey = i.PermissionKey;
+        SelectedSayfaTipi = i.SayfaTipi;
+        SelectedMinYetki = i.MinYetkiSeviyesi;
+        SelectedIslemTipi = i.IslemTipi;
+        SelectedUstIslemId = i.UstIslemId ?? 0;
+        ShowModal = true;
+    }
+
+    private void CloseModal()
+    {
+        ShowModal = false;
+        EditingId = null;
+    }
+
+    private async Task SaveIslem()
+    {
+        if (SelectedControllerId <= 0 || string.IsNullOrWhiteSpace(IslemAdi))
+        {
+            await ToastService.ShowWarningAsync("Controller ve İşlem adı zorunludur");
+            return;
+        }
+
+        IsSaving = true;
+        StateHasChanged();
+
+        if (EditingId.HasValue)
+        {
+            var request = new ModulControllerIslemUpdateRequestDto 
+            { 
+                ModulControllerId = SelectedControllerId, 
+                ModulControllerIslemAdi = IslemAdi.Trim(),
+                IslemTipi = SelectedIslemTipi,
+                UstIslemId = SelectedUstIslemId > 0 ? SelectedUstIslemId : null,
+                Route = string.IsNullOrWhiteSpace(Route) ? null : Route.Trim(),
+                PermissionKey = string.IsNullOrWhiteSpace(PermissionKey) ? null : PermissionKey.Trim(),
+                SayfaTipi = SelectedSayfaTipi,
+                MinYetkiSeviyesi = SelectedMinYetki
+            };
+            var result = await IslemApiService.UpdateAsync(EditingId.Value, request);
+            if (result.Success)
+                await ToastService.ShowSuccessAsync(result.Message ?? "İşlem güncellendi");
+            else
+                await ToastService.ShowErrorAsync(result.Message ?? "İşlem güncellenemedi");
+        }
+        else
+        {
+            var request = new ModulControllerIslemCreateRequestDto 
+            { 
+                ModulControllerId = SelectedControllerId, 
+                ModulControllerIslemAdi = IslemAdi.Trim(),
+                IslemTipi = SelectedIslemTipi,
+                UstIslemId = SelectedUstIslemId > 0 ? SelectedUstIslemId : null,
+                Route = string.IsNullOrWhiteSpace(Route) ? null : Route.Trim(),
+                PermissionKey = string.IsNullOrWhiteSpace(PermissionKey) ? null : PermissionKey.Trim(),
+                SayfaTipi = SelectedSayfaTipi,
+                MinYetkiSeviyesi = SelectedMinYetki
+            };
+            var result = await IslemApiService.CreateAsync(request);
+            if (result.Success)
+                await ToastService.ShowSuccessAsync(result.Message ?? "İşlem eklendi");
+            else
+                await ToastService.ShowErrorAsync(result.Message ?? "İşlem eklenemedi");
+        }
+
+        IsSaving = false;
+        CloseModal();
+        await LoadData();
+    }
+
+    private async Task DeleteIslem(ModulControllerIslemResponseDto i)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"'{i.ModulControllerIslemAdi}' silinsin mi?");
+        if (!confirmed) return;
+
+        var result = await IslemApiService.DeleteAsync(i.ModulControllerIslemId);
+        if (result.Success)
+            await ToastService.ShowSuccessAsync(result.Message ?? "İşlem silindi");
+        else
+            await ToastService.ShowErrorAsync(result.Message ?? "İşlem silinemedi");
+        await LoadData();
+    }
+}

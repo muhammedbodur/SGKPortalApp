@@ -33,10 +33,10 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        [HttpGet("by-yetki/{yetkiId:int}")]
-        public async Task<IActionResult> GetByYetkiId(int yetkiId)
+        [HttpGet("by-islem/{modulControllerIslemId:int}")]
+        public async Task<IActionResult> GetByModulControllerIslemId(int modulControllerIslemId)
         {
-            var result = await _personelYetkiService.GetByYetkiIdAsync(yetkiId);
+            var result = await _personelYetkiService.GetByModulControllerIslemIdAsync(modulControllerIslemId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 

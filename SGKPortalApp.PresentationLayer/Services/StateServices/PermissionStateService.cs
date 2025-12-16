@@ -1,27 +1,23 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace SGKPortalApp.PresentationLayer.Services.StateServices
 {
     public class PermissionStateService
     {
         private readonly IPersonelYetkiApiService _personelYetkiApiService;
-        private readonly IYetkiApiService _yetkiApiService;
         private readonly IUserInfoService _userInfoService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<PermissionStateService> _logger;
 
         private readonly SemaphoreSlim _loadLock = new(1, 1);
 
-        private List<PersonelYetkiResponseDto> _permissions = new();
-        private List<YetkiResponseDto> _yetkiler = new();
+        // PermissionKey -> YetkiSeviyesi dictionary
+        private Dictionary<string, YetkiSeviyesi> _permissions = new();
 
         public event Action? OnChange;
 
@@ -29,40 +25,53 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
 
         public PermissionStateService(
             IPersonelYetkiApiService personelYetkiApiService,
-            IYetkiApiService yetkiApiService,
             IUserInfoService userInfoService,
+            IHttpContextAccessor httpContextAccessor,
             ILogger<PermissionStateService> logger)
         {
             _personelYetkiApiService = personelYetkiApiService;
-            _yetkiApiService = yetkiApiService;
             _userInfoService = userInfoService;
+            _httpContextAccessor = httpContextAccessor;
             _logger = logger;
         }
 
-        public async Task EnsureLoadedAsync(bool force = false)
+        public Task EnsureLoadedAsync(bool force = false)
         {
-            var tcKimlikNo = _userInfoService.GetTcKimlikNo();
-            if (string.IsNullOrWhiteSpace(tcKimlikNo))
-                return;
-
+            // Zaten yüklüyse ve force değilse, hemen dön
             if (IsLoaded && !force)
-                return;
+                return Task.CompletedTask;
 
+            return LoadPermissionsInternalAsync(force);
+        }
+
+        private async Task LoadPermissionsInternalAsync(bool force)
+        {
             await _loadLock.WaitAsync();
             try
             {
+                // Double-check: Lock aldıktan sonra tekrar kontrol
                 if (IsLoaded && !force)
                     return;
 
-                var yetkilerResult = await _yetkiApiService.GetAllAsync();
-                if (!yetkilerResult.Success || yetkilerResult.Data == null)
+                // 1. Önce claims'den okumayı dene (DB'ye gitmeden)
+                if (TryLoadFromClaims())
                 {
-                    _yetkiler = new();
+                    IsLoaded = true;
+                    _logger.LogDebug("🔑 Yetkiler claims'den yüklendi. Toplam: {Count}", _permissions.Count);
+                    OnChange?.Invoke();
+                    return;
                 }
-                else
+
+                // 2. Claims'de yoksa DB'den çek
+                var tcKimlikNo = _userInfoService.GetTcKimlikNo();
+                if (string.IsNullOrWhiteSpace(tcKimlikNo))
                 {
-                    _yetkiler = yetkilerResult.Data;
+                    _permissions = new();
+                    IsLoaded = true;
+                    return;
                 }
+
+                _logger.LogDebug("🔑 Yetkiler DB'den yükleniyor. TcKimlikNo: {TcKimlikNo}", tcKimlikNo);
 
                 var permsResult = await _personelYetkiApiService.GetByTcKimlikNoAsync(tcKimlikNo);
                 if (!permsResult.Success || permsResult.Data == null)
@@ -71,16 +80,18 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
                 }
                 else
                 {
-                    _permissions = permsResult.Data;
+                    _permissions = permsResult.Data
+                        .Where(p => !string.IsNullOrEmpty(p.PermissionKey))
+                        .ToDictionary(p => p.PermissionKey, p => p.YetkiSeviyesi);
                 }
 
                 IsLoaded = true;
+                _logger.LogDebug("🔑 Yetkiler DB'den yüklendi. Toplam: {Count}", _permissions.Count);
                 OnChange?.Invoke();
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "PermissionStateService.EnsureLoadedAsync hata");
-                _yetkiler = new();
+                _logger.LogWarning(ex, "PermissionStateService.LoadPermissionsInternalAsync hata");
                 _permissions = new();
                 IsLoaded = true;
                 OnChange?.Invoke();
@@ -91,51 +102,145 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
             }
         }
 
-        public Task RefreshAsync()
+        /// <summary>
+        /// Claims'den yetkileri okur. Başarılıysa true döner.
+        /// </summary>
+        private bool TryLoadFromClaims()
+        {
+            try
+            {
+                var httpContext = _httpContextAccessor.HttpContext;
+                var permissionsClaim = httpContext?.User?.FindFirst("Permissions")?.Value;
+
+                if (string.IsNullOrEmpty(permissionsClaim))
+                    return false;
+
+                var permissionsDict = JsonSerializer.Deserialize<Dictionary<string, int>>(permissionsClaim);
+                if (permissionsDict == null)
+                    return false;
+
+                _permissions = permissionsDict.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => (YetkiSeviyesi)kvp.Value);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Claims'den yetki okuma hatası");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Yetkileri DB'den yeniden çeker (SignalR bildirimi geldiğinde çağrılır)
+        /// NOT: Cookie güncellemesi JS tarafından /auth/refreshpermissions endpoint'i ile yapılır
+        /// </summary>
+        public async Task RefreshAsync()
         {
             IsLoaded = false;
-            return EnsureLoadedAsync(force: true);
+            
+            // DB'den yeniden çek
+            var tcKimlikNo = _userInfoService.GetTcKimlikNo();
+            if (string.IsNullOrWhiteSpace(tcKimlikNo))
+                return;
+
+            await _loadLock.WaitAsync();
+            try
+            {
+                _logger.LogInformation("🔑 Yetkiler SignalR ile yenileniyor. TcKimlikNo: {TcKimlikNo}", tcKimlikNo);
+
+                var permsResult = await _personelYetkiApiService.GetByTcKimlikNoAsync(tcKimlikNo);
+                if (permsResult.Success && permsResult.Data != null)
+                {
+                    _permissions = permsResult.Data
+                        .Where(p => !string.IsNullOrEmpty(p.PermissionKey))
+                        .ToDictionary(p => p.PermissionKey, p => p.YetkiSeviyesi);
+                }
+
+                IsLoaded = true;
+                _logger.LogInformation("🔑 Yetkiler yenilendi. Toplam: {Count}", _permissions.Count);
+                OnChange?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "RefreshAsync hatası");
+            }
+            finally
+            {
+                _loadLock.Release();
+            }
         }
 
-        public YetkiTipleri GetLevel(string controllerAdi, string actionAdi, string? modulControllerIslemAdi = null)
+        /// <summary>
+        /// Permission key bazlı yetki seviyesi döner (örn: "PER.PERSONEL.LIST")
+        /// Senkron versiyon - EnsureLoadedAsync önceden çağrılmış olmalı
+        /// </summary>
+        public YetkiSeviyesi GetLevel(string permissionKey)
         {
-            if (string.IsNullOrWhiteSpace(controllerAdi) || string.IsNullOrWhiteSpace(actionAdi))
-                return YetkiTipleri.None;
+            if (string.IsNullOrWhiteSpace(permissionKey))
+                return YetkiSeviyesi.None;
 
-            var yetki = _yetkiler.FirstOrDefault(y =>
-                string.Equals(y.ControllerAdi, controllerAdi, StringComparison.OrdinalIgnoreCase)
-                && string.Equals(y.ActionAdi, actionAdi, StringComparison.OrdinalIgnoreCase));
+            // Case-insensitive arama için key'i normalize et
+            var matchingKey = _permissions.Keys.FirstOrDefault(k => 
+                string.Equals(k, permissionKey, StringComparison.OrdinalIgnoreCase));
 
-            if (yetki == null)
-                return YetkiTipleri.None;
+            if (matchingKey != null && _permissions.TryGetValue(matchingKey, out var level))
+            {
+                _logger.LogDebug("GetLevel: Key={Key}, Level={Level}", permissionKey, level);
+                return level;
+            }
 
-            var allForYetki = _permissions
-                .Where(p => p.YetkiId == yetki.YetkiId)
-                .ToList();
-
-            if (!allForYetki.Any())
-                return YetkiTipleri.None;
-
-            if (string.IsNullOrWhiteSpace(modulControllerIslemAdi))
-                return allForYetki.Max(p => p.YetkiTipleri);
-
-            var matching = allForYetki
-                .Where(p => string.Equals(p.ModulControllerIslemAdi, modulControllerIslemAdi, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            if (!matching.Any())
-                return YetkiTipleri.None;
-
-            return matching.Max(p => p.YetkiTipleri);
+            _logger.LogDebug("GetLevel: Key={Key}, NOT FOUND", permissionKey);
+            return YetkiSeviyesi.None;
         }
 
-        public bool CanView(string controllerAdi, string actionAdi, string? modulControllerIslemAdi = null)
-            => GetLevel(controllerAdi, actionAdi, modulControllerIslemAdi) >= YetkiTipleri.View;
+        /// <summary>
+        /// Permission key bazlı görüntüleme yetkisi kontrolü
+        /// </summary>
+        public bool CanView(string permissionKey)
+            => GetLevel(permissionKey) >= YetkiSeviyesi.View;
 
-        public bool CanEdit(string controllerAdi, string actionAdi, string? modulControllerIslemAdi = null)
-            => GetLevel(controllerAdi, actionAdi, modulControllerIslemAdi) >= YetkiTipleri.Edit;
+        /// <summary>
+        /// Permission key bazlı düzenleme yetkisi kontrolü
+        /// </summary>
+        public bool CanEdit(string permissionKey)
+            => GetLevel(permissionKey) >= YetkiSeviyesi.Edit;
 
-        public bool CanDelete(string controllerAdi, string actionAdi, string? modulControllerIslemAdi = null)
-            => GetLevel(controllerAdi, actionAdi, modulControllerIslemAdi) >= YetkiTipleri.Delete;
+        /// <summary>
+        /// Permission key bazlı yetki seviyesi döner (async versiyon)
+        /// </summary>
+        public async Task<YetkiSeviyesi> GetPermissionLevelAsync(string permissionKey)
+        {
+            await EnsureLoadedAsync();
+            return GetLevel(permissionKey);
+        }
+
+        /// <summary>
+        /// Permission key bazlı yetki kontrolü
+        /// </summary>
+        public async Task<bool> HasPermissionAsync(string permissionKey, YetkiSeviyesi minLevel)
+        {
+            var level = await GetPermissionLevelAsync(permissionKey);
+            return level >= minLevel;
+        }
+
+        /// <summary>
+        /// Belirli bir permission key için kullanıcının yetkisi var mı?
+        /// </summary>
+        public async Task<bool> CanViewAsync(string permissionKey)
+        {
+            await EnsureLoadedAsync();
+            return CanView(permissionKey);
+        }
+
+        /// <summary>
+        /// Belirli bir permission key için kullanıcının düzenleme yetkisi var mı?
+        /// </summary>
+        public async Task<bool> CanEditAsync(string permissionKey)
+        {
+            await EnsureLoadedAsync();
+            return CanEdit(permissionKey);
+        }
     }
 }

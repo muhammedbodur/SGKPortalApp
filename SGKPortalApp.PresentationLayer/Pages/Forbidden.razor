@@ -1,0 +1,30 @@
+@page "/forbidden"
+@layout SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout
+
+<PageTitle>Erişim Engellendi - SGK Portal</PageTitle>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="misc-wrapper text-center">
+        <h2 class="mb-2 mx-2">Erişim Engellendi</h2>
+        <p class="mb-4 mx-2">Bu sayfaya erişim yetkiniz bulunmamaktadır.</p>
+        
+        <div class="mb-4">
+            <img src="/img/illustrations/page-misc-error-light.png" 
+                 alt="Erişim Engellendi" 
+                 class="img-fluid" 
+                 style="max-width: 400px;" />
+        </div>
+        
+        <a href="/" class="btn btn-primary">Ana Sayfaya Dön</a>
+    </div>
+</div>
+
+<style>
+    .misc-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 60vh;
+    }
+</style>

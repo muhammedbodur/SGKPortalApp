@@ -34,7 +34,8 @@ namespace SGKPortalApp.PresentationLayer.Extensions
             services.AddScoped<UserStateService>();
             services.AddScoped<NavigationStateService>();
             services.AddScoped<PermissionStateService>();
-            Console.WriteLine("  ✅ 4 State Service kayıt edildi");
+            services.AddScoped<PagePermissionService>();
+            Console.WriteLine("  ✅ 5 State Service kayıt edildi");
 
             // ═══════════════════════════════════════════════════════
             // 1️⃣ AUTHENTICATION SERVICES (Cookie Management)

@@ -57,12 +57,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
         private bool IsEditMode => !string.IsNullOrEmpty(TcKimlikNo);
 
-        private const string PermissionControllerAdi = "Personel";
-        private const string PermissionActionAdi = "Manage";
+        private const string PermissionKey = "PER.PERSONEL.MANAGE";
+        private const string PermissionKeySicilNo = "PER.PERSONEL.MANAGE.FIELD.SICIL_NO";
 
-        private bool CanViewManage => _permissionStateService.CanView(PermissionControllerAdi, PermissionActionAdi);
-        private bool CanEditManage => !IsEditMode || _permissionStateService.CanEdit(PermissionControllerAdi, PermissionActionAdi);
-        private bool CanDeleteManage => !IsEditMode || _permissionStateService.CanDelete(PermissionControllerAdi, PermissionActionAdi);
+        private bool CanViewManage => _permissionStateService.CanView(PermissionKey);
+        private bool CanEditManage => !IsEditMode || _permissionStateService.CanEdit(PermissionKey);
+        private bool CanDeleteManage => !IsEditMode || _permissionStateService.CanEdit(PermissionKey);
+        
+        // Field-level permissions
+        private bool CanEditSicilNo => _permissionStateService.CanEdit(PermissionKeySicilNo);
 
         // Lookup Lists
         private List<DepartmanResponseDto> Departmanlar { get; set; } = new();
@@ -92,7 +95,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private List<CocukModel> Cocuklar { get; set; } = new();
         private List<HizmetModel> Hizmetler { get; set; } = new();
         private List<EgitimModel> Egitimler { get; set; } = new();
-        private List<YetkiModel> Yetkiler { get; set; } = new();
+        private List<ImzaYetkisiModel> Yetkiler { get; set; } = new();
         private List<CezaModel> Cezalar { get; set; } = new();
         private List<EngelModel> Engeller { get; set; } = new();
 
@@ -102,9 +105,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
         protected override async Task OnInitializedAsync()
         {
-            // Lookup listelerini yükle
-            await LoadLookupData();
-
+            // Önce yetkileri yükle - UI render'dan önce hazır olmalı
             try
             {
                 await _permissionStateService.EnsureLoadedAsync();
@@ -113,6 +114,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             catch
             {
             }
+
+            // Lookup listelerini yükle
+            await LoadLookupData();
 
             if (IsEditMode)
             {
@@ -250,14 +254,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                     BitisTarihi = e.EgitimBitisTarihi
                 }).ToList() ?? new List<EgitimModel>();
 
-                Yetkiler = result.Data.ImzaYetkileriDetay?.Select(y => new YetkiModel
+                Yetkiler = result.Data.ImzaYetkileriDetay?.Select(y => new ImzaYetkisiModel
                 {
                     DepartmanId = y.DepartmanId,
                     ServisId = y.ServisId,
                     GorevDegisimSebebi = y.GorevDegisimSebebi,
                     ImzaYetkisiBaslamaTarihi = y.ImzaYetkisiBaslamaTarihi,
                     ImzaYetkisiBitisTarihi = y.ImzaYetkisiBitisTarihi
-                }).ToList() ?? new List<YetkiModel>();
+                }).ToList() ?? new List<ImzaYetkisiModel>();
 
                 Cezalar = result.Data.Cezalar?.Select(c => new CezaModel
                 {
@@ -753,8 +757,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 ImzaYetkileri = Yetkiler.Where(y => y.ImzaYetkisiBaslamaTarihi.HasValue && y.DepartmanId > 0 && y.ServisId > 0).Select(y => new PersonelImzaYetkisiCreateRequestDto
                 {
                     TcKimlikNo = model.TcKimlikNo,
-                    DepartmanId = y.DepartmanId,
-                    ServisId = y.ServisId,
+                    DepartmanId = y.DepartmanId!.Value,
+                    ServisId = y.ServisId!.Value,
                     GorevDegisimSebebi = y.GorevDegisimSebebi,
                     ImzaYetkisiBaslamaTarihi = y.ImzaYetkisiBaslamaTarihi!.Value,
                     ImzaYetkisiBitisTarihi = y.ImzaYetkisiBitisTarihi,
@@ -854,7 +858,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         // Yetki
         private void AddYetki()
         {
-            Yetkiler.Add(new YetkiModel());
+            Yetkiler.Add(new ImzaYetkisiModel());
             StateHasChanged();
         }
         

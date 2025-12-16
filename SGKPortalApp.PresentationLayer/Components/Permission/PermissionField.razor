@@ -1,0 +1,24 @@
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+
+@* 
+    PermissionField Component
+    Kullanım:
+    <PermissionField PermissionKey="PER.PERSONEL.MANAGE.FIELD.EMAIL">
+        <ViewTemplate>
+            <span>@Model.Email</span>
+        </ViewTemplate>
+        <EditTemplate>
+            <input type="text" @bind="Model.Email" class="form-control" />
+        </EditTemplate>
+    </PermissionField>
+*@
+
+@if (_level >= YetkiSeviyesi.Edit && EditTemplate != null)
+{
+    @EditTemplate
+}
+else if (_level >= YetkiSeviyesi.View && ViewTemplate != null)
+{
+    @ViewTemplate
+}
+@* None = hiçbir şey gösterme *@

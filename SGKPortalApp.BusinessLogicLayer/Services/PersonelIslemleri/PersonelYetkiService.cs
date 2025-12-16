@@ -87,7 +87,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             }
             catch (Exception ex)
             {
-                // Broadcast hatası ana işlemi bozmamalı
                 _logger.LogWarning(ex, "permissionsChanged broadcast hatası. TcKimlikNo: {TcKimlikNo}", tcKimlikNo);
             }
         }
@@ -100,7 +99,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("Geçersiz personel yetki ID");
 
                 var repo = _unitOfWork.Repository<PersonelYetki>();
-                var entity = await repo.FirstOrDefaultAsync(py => py.PersonelYetkiId == id, py => py.Yetki, py => py.ModulControllerIslem);
+                var entity = await repo.FirstOrDefaultAsync(py => py.PersonelYetkiId == id, py => py.ModulControllerIslem);
 
                 if (entity == null)
                     return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("Personel yetkisi bulunamadı");
@@ -123,7 +122,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     return ApiResponseDto<List<PersonelYetkiResponseDto>>.ErrorResult("TcKimlikNo boş olamaz");
 
                 var repo = _unitOfWork.Repository<PersonelYetki>();
-                var entities = await repo.FindAsync(py => py.TcKimlikNo == tcKimlikNo, py => py.Yetki, py => py.ModulControllerIslem);
+                var entities = await repo.FindAsync(py => py.TcKimlikNo == tcKimlikNo, py => py.ModulControllerIslem);
                 var dtos = _mapper.Map<List<PersonelYetkiResponseDto>>(entities);
 
                 return ApiResponseDto<List<PersonelYetkiResponseDto>>.SuccessResult(dtos, "Personel yetkileri başarıyla getirildi");
@@ -135,22 +134,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             }
         }
 
-        public async Task<ApiResponseDto<List<PersonelYetkiResponseDto>>> GetByYetkiIdAsync(int yetkiId)
+        public async Task<ApiResponseDto<List<PersonelYetkiResponseDto>>> GetByModulControllerIslemIdAsync(int modulControllerIslemId)
         {
             try
             {
-                if (yetkiId <= 0)
-                    return ApiResponseDto<List<PersonelYetkiResponseDto>>.ErrorResult("Geçersiz YetkiId");
+                if (modulControllerIslemId <= 0)
+                    return ApiResponseDto<List<PersonelYetkiResponseDto>>.ErrorResult("Geçersiz ModulControllerIslemId");
 
                 var repo = _unitOfWork.Repository<PersonelYetki>();
-                var entities = await repo.FindAsync(py => py.YetkiId == yetkiId, py => py.Yetki, py => py.ModulControllerIslem);
+                var entities = await repo.FindAsync(py => py.ModulControllerIslemId == modulControllerIslemId, py => py.ModulControllerIslem);
                 var dtos = _mapper.Map<List<PersonelYetkiResponseDto>>(entities);
 
-                return ApiResponseDto<List<PersonelYetkiResponseDto>>.SuccessResult(dtos, "Yetkiye bağlı personel yetkileri başarıyla getirildi");
+                return ApiResponseDto<List<PersonelYetkiResponseDto>>.SuccessResult(dtos, "İşleme bağlı personel yetkileri başarıyla getirildi");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Yetkiye bağlı personel yetkileri getirilirken hata oluştu. YetkiId: {YetkiId}", yetkiId);
+                _logger.LogError(ex, "İşleme bağlı personel yetkileri getirilirken hata oluştu. ModulControllerIslemId: {Id}", modulControllerIslemId);
                 return ApiResponseDto<List<PersonelYetkiResponseDto>>.ErrorResult("Personel yetkileri getirilirken bir hata oluştu", ex.Message);
             }
         }
@@ -163,27 +162,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("TcKimlikNo boş olamaz");
 
                 var repo = _unitOfWork.Repository<PersonelYetki>();
-                var exists = await repo.ExistsAsync(py => py.TcKimlikNo == request.TcKimlikNo && py.YetkiId == request.YetkiId);
+                var exists = await repo.ExistsAsync(py => py.TcKimlikNo == request.TcKimlikNo && py.ModulControllerIslemId == request.ModulControllerIslemId);
                 if (exists)
-                    return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("Bu personele bu yetki zaten atanmış");
+                    return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("Bu personele bu işlem için yetki zaten atanmış");
 
                 var personel = await _unitOfWork.Repository<Personel>()
                     .FirstOrDefaultAsync(p => p.TcKimlikNo == request.TcKimlikNo);
                 if (personel == null)
                     return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("Personel bulunamadı");
 
-                var yetki = await _unitOfWork.Repository<Yetki>().GetByIdAsync(request.YetkiId);
-                if (yetki == null)
-                    return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("Yetki bulunamadı");
-
                 var islem = await _unitOfWork.Repository<ModulControllerIslem>().GetByIdAsync(request.ModulControllerIslemId);
                 if (islem == null)
-                    return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("ModulControllerIslem bulunamadı");
+                    return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("İşlem bulunamadı");
 
                 var entity = _mapper.Map<PersonelYetki>(request);
-                entity.Personel = personel;
-                entity.Yetki = yetki;
-                entity.ModulControllerIslem = islem;
+                // Navigation property'leri set etmiyoruz - EF Core duplicate key hatası verir
+                // Sadece FK'lar (TcKimlikNo, ModulControllerIslemId) mapper tarafından set ediliyor
 
                 await repo.AddAsync(entity);
                 await _unitOfWork.SaveChangesAsync();
@@ -191,7 +185,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 var stamp = await TouchPermissionStampAsync(request.TcKimlikNo);
                 await BroadcastPermissionsChangedAsync(request.TcKimlikNo, stamp);
 
-                var saved = await repo.FirstOrDefaultAsync(py => py.PersonelYetkiId == entity.PersonelYetkiId, py => py.Yetki, py => py.ModulControllerIslem);
+                var saved = await repo.FirstOrDefaultAsync(py => py.PersonelYetkiId == entity.PersonelYetkiId, py => py.ModulControllerIslem);
                 if (saved == null)
                     return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("Personel yetkisi oluşturuldu fakat tekrar okunamadı");
 
@@ -220,17 +214,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 if (entity == null)
                     return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("Personel yetkisi bulunamadı");
 
-                var exists = await repo.ExistsAsync(py => py.PersonelYetkiId != id && py.TcKimlikNo == entity.TcKimlikNo && py.YetkiId == request.YetkiId);
+                var exists = await repo.ExistsAsync(py => py.PersonelYetkiId != id && py.TcKimlikNo == entity.TcKimlikNo && py.ModulControllerIslemId == request.ModulControllerIslemId);
                 if (exists)
-                    return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("Bu personele bu yetki zaten atanmış");
-
-                var yetki = await _unitOfWork.Repository<Yetki>().GetByIdAsync(request.YetkiId);
-                if (yetki == null)
-                    return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("Yetki bulunamadı");
+                    return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("Bu personele bu işlem için yetki zaten atanmış");
 
                 var islem = await _unitOfWork.Repository<ModulControllerIslem>().GetByIdAsync(request.ModulControllerIslemId);
                 if (islem == null)
-                    return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("ModulControllerIslem bulunamadı");
+                    return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("İşlem bulunamadı");
 
                 _mapper.Map(request, entity);
                 repo.Update(entity);
@@ -239,7 +229,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 var stamp = await TouchPermissionStampAsync(entity.TcKimlikNo);
                 await BroadcastPermissionsChangedAsync(entity.TcKimlikNo, stamp);
 
-                var saved = await repo.FirstOrDefaultAsync(py => py.PersonelYetkiId == id, py => py.Yetki, py => py.ModulControllerIslem);
+                var saved = await repo.FirstOrDefaultAsync(py => py.PersonelYetkiId == id, py => py.ModulControllerIslem);
                 if (saved == null)
                     return ApiResponseDto<PersonelYetkiResponseDto>.ErrorResult("Personel yetkisi güncellendi fakat tekrar okunamadı");
 

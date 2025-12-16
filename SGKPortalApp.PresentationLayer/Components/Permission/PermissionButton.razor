@@ -1,0 +1,20 @@
+@* 
+    PermissionButton Component
+    Kullanım:
+    <PermissionButton PermissionKey="PER.PERSONEL.MANAGE.ACTION.DELETE" 
+                      RequiredLevel="YetkiSeviyesi.Edit"
+                      CssClass="btn btn-danger"
+                      OnClick="DeletePersonel">
+        <i class="bx bx-trash me-1"></i>Sil
+    </PermissionButton>
+*@
+
+@if (_hasPermission)
+{
+    <button type="@ButtonType" 
+            class="@CssClass" 
+            disabled="@Disabled"
+            @onclick="HandleClick">
+        @ChildContent
+    </button>
+}

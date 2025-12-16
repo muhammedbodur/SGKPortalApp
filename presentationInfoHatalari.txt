@@ -47,13 +47,13 @@
   ? IPersonelYetkiRepository -> PersonelYetkiRepository
   ? ISendikaRepository -> SendikaRepository
   ? IServisRepository -> ServisRepository
+  ? ISignalREventLogRepository -> SignalREventLogRepository
   ? ISiramatikQueryRepository -> SiramatikQueryRepository
   ? ISiraRepository -> SiraRepository
   ? ITvBankoRepository -> TvBankoRepository
   ? ITvRepository -> TvRepository
   ? IUnvanRepository -> UnvanRepository
   ? IUserRepository -> UserRepository
-  ? IYetkiRepository -> YetkiRepository
 ? 47 repository otomatik kayıt edildi
 
 ?? Complex Query Repositories kaydediliyor...
@@ -65,10 +65,10 @@
 ?? Presentation Layer başlatılıyor...
 ?? API URL: https://localhost:9080
 ?? State Services kaydediliyor...
-  ? 3 State Service kayıt edildi
+  ? 5 State Service kayıt edildi
 ?? AuthenticationServices servisleri kaydediliyor...
     ?? Bulunan interface'ler: 1
-    ?? Bulunan implementation'lar: 4
+    ?? Bulunan implementation'lar: 6
     ? ICookieAuthService -> CookieAuthService
     ?? AuthenticationServices: 1 servis kayıt edildi
 ?? UserSessionServices servisleri kaydediliyor...
@@ -93,27 +93,31 @@
     ? IAuthApiService -> AuthApiService (Typed HttpClient)
     ?? Auth: 1 API service kayıt edildi
 ?? Common API Services kaydediliyor...
-    ?? Bulunan interface'ler: 4
-    ?? Bulunan implementation'lar: 35
+    ?? Bulunan interface'ler: 7
+    ?? Bulunan implementation'lar: 60
     ? IHizmetBinasiApiService -> HizmetBinasiApiService (Typed HttpClient)
     ? IIlApiService -> IlApiService (Typed HttpClient)
     ? IIlceApiService -> IlceApiService (Typed HttpClient)
+    ? IModulApiService -> ModulApiService (Typed HttpClient)
+    ? IModulControllerApiService -> ModulControllerApiService (Typed HttpClient)
+    ? IModulControllerIslemApiService -> ModulControllerIslemApiService (Typed HttpClient)
     ? IUserApiService -> UserApiService (Typed HttpClient)
-    ?? Common: 4 API service kayıt edildi
+    ?? Common: 7 API service kayıt edildi
 ?? Personel API Services kaydediliyor...
-    ?? Bulunan interface'ler: 7
-    ?? Bulunan implementation'lar: 55
+    ?? Bulunan interface'ler: 8
+    ?? Bulunan implementation'lar: 64
     ? IAtanmaNedeniApiService -> AtanmaNedeniApiService (Typed HttpClient)
     ? IDepartmanApiService -> DepartmanApiService (Typed HttpClient)
     ? IPersonelApiService -> PersonelApiService (Typed HttpClient)
     ? IPersonelCocukApiService -> PersonelCocukApiService (Typed HttpClient)
+    ? IPersonelYetkiApiService -> PersonelYetkiApiService (Typed HttpClient)
     ? ISendikaApiService -> SendikaApiService (Typed HttpClient)
     ? IServisApiService -> ServisApiService (Typed HttpClient)
     ? IUnvanApiService -> UnvanApiService (Typed HttpClient)
-    ?? Personel: 7 API service kayıt edildi
+    ?? Personel: 8 API service kayıt edildi
 ?? Siramatik API Services kaydediliyor...
     ?? Bulunan interface'ler: 14
-    ?? Bulunan implementation'lar: 135
+    ?? Bulunan implementation'lar: 140
     ? IBankoApiService -> BankoApiService (Typed HttpClient)
     ? IKanalAltApiService -> KanalAltApiService (Typed HttpClient)
     ? IKanalAltIslemApiService -> KanalAltIslemApiService (Typed HttpClient)
@@ -135,7 +139,6 @@
     ??  Eshot modülünde API service bulunamadı
 ?? Presentation Layer hazır!
 
-? ServerAuthenticationStateProvider MANUEL kayıt edildi
 SignalR Hub: API katmaninda (https://localhost:9080/hubs/siramatik)
 ?? SignalR Hub: API katmanında (https://localhost:9080/hubs/siramatik)
 warn: Microsoft.EntityFrameworkCore.Model.Validation[10622]
@@ -143,29 +146,27 @@ warn: Microsoft.EntityFrameworkCore.Model.Validation[10622]
 warn: Microsoft.EntityFrameworkCore.Model.Validation[10400]
       Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[10625]
-      The foreign key property 'PersonelYetki.YetkiId1' was created in shadow state because a conflicting property with the simple name 'YetkiId' exists in the entity type, but is either not mapped, is already used for another relationship, or is incompatible with the associated primary key type. See https://aka.ms/efcore-relationships for information on mapping relationships in EF Core.
-warn: Microsoft.EntityFrameworkCore.Model.Validation[10625]
       The foreign key property 'Banko.HizmetBinasiId1' was created in shadow state because a conflicting property with the simple name 'HizmetBinasiId' exists in the entity type, but is either not mapped, is already used for another relationship, or is incompatible with the associated primary key type. See https://aka.ms/efcore-relationships for information on mapping relationships in EF Core.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[10625]
       The foreign key property 'Tv.HizmetBinasiId1' was created in shadow state because a conflicting property with the simple name 'HizmetBinasiId' exists in the entity type, but is either not mapped, is already used for another relationship, or is incompatible with the associated primary key type. See https://aka.ms/efcore-relationships for information on mapping relationships in EF Core.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
       The 'UserType' property 'UserType' on entity type 'User' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value '0', since this is the CLR default for the 'UserType' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
-      The 'Aktiflik' property 'DepartmanAktiflik' on entity type 'Departman' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+      The 'Aktiflik' property 'Aktiflik' on entity type 'Departman' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
-      The 'Aktiflik' property 'ServisAktiflik' on entity type 'Servis' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+      The 'Aktiflik' property 'Aktiflik' on entity type 'Servis' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
-      The 'Aktiflik' property 'UnvanAktiflik' on entity type 'Unvan' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+      The 'Aktiflik' property 'Aktiflik' on entity type 'Unvan' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
-      The 'Aktiflik' property 'BankoAktiflik' on entity type 'Banko' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+      The 'Aktiflik' property 'Aktiflik' on entity type 'Banko' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
       The 'Aktiflik' property 'Aktiflik' on entity type 'Kiosk' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
       The 'Aktiflik' property 'Aktiflik' on entity type 'KioskMenu' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
-      The 'Aktiflik' property 'TvAktiflik' on entity type 'Tv' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+      The 'Aktiflik' property 'Aktiflik' on entity type 'Tv' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
 info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (55ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      Executed DbCommand (50ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
       SELECT 1
 info: Microsoft.EntityFrameworkCore.Database.Command[20101]
       Executed DbCommand (30ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
@@ -197,92 +198,350 @@ info: Microsoft.Hosting.Lifetime[0]
       Hosting environment: Development
 info: Microsoft.Hosting.Lifetime[0]
       Content root path: D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer
-warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
-      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
-      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
-      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
-      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
-      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
-      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-info: SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth.AuthApiService[0]
-      POST: https://localhost:9080/api/auth/login
-info: System.Net.Http.HttpClient.IAuthApiService.LogicalHandler[100]
-      Start processing HTTP request POST https://localhost:9080/api/auth/login
-info: System.Net.Http.HttpClient.IAuthApiService.ClientHandler[100]
-      Sending HTTP request POST https://localhost:9080/api/auth/login
-info: System.Net.Http.HttpClient.IAuthApiService.ClientHandler[101]
-      Received HTTP response headers after 3517.0088ms - 200
-info: System.Net.Http.HttpClient.IAuthApiService.LogicalHandler[101]
-      End processing HTTP request after 3538.2339ms - 200
-info: SGKPortalApp.PresentationLayer.Pages.Auth.LoginHandlerModel[0]
-      ? Kullanıcı giriş yaptı: AHMET DEMİRAL (16406457430) - Personel
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 358.6768ms - 200
+      Received HTTP response headers after 545.0731ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 358.842ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/16406457430
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 26.4748ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 26.6365ms - 200
+      End processing HTTP request after 566.3625ms - 200
 warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
       Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
 warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
       Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 16.3817ms - 200
+      Received HTTP response headers after 38.5073ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 16.5433ms - 200
+      End processing HTTP request after 38.8035ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/16406457430
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/16406457430
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 14.2769ms - 200
+      Received HTTP response headers after 14.1205ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 14.4396ms - 200
+      End processing HTTP request after 14.302ms - 200
 info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/banko/personel/16406457430/banko
+      Start processing HTTP request GET https://localhost:9080/api/banko/personel/28165202398/banko
 info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/banko/personel/16406457430/banko
+      Sending HTTP request GET https://localhost:9080/api/banko/personel/28165202398/banko
 info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
       ? MainLayout başarıyla initialize edildi
 info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
       ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
+info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[101]
+      Received HTTP response headers after 307.7729ms - 200
+info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[101]
+      End processing HTTP request after 307.9812ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 15.9631ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 16.1401ms - 200
+info: SGKPortalApp.PresentationLayer.Components.Siramatik.BankoModeWidget[0]
+      ?? BankoModeWidget LoadData: 28165202398 - DB Banko Modu: False, State Banko Modu: False
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 11.7063ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 11.8976ms - 200
 warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
       Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
 warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
       Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[101]
-      Received HTTP response headers after 517.3114ms - 200
-info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[101]
-      End processing HTTP request after 517.5506ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/16406457430/banko-mode/is-active
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 25.9675ms - 200
+      Received HTTP response headers after 18.1314ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 26.5387ms - 200
-info: SGKPortalApp.PresentationLayer.Components.Siramatik.BankoModeWidget[0]
-      ?? BankoModeWidget LoadData: 16406457430 - DB Banko Modu: False, State Banko Modu: False
+      End processing HTTP request after 18.2669ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 10.6691ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 10.8474ms - 200
+info: System.Net.Http.HttpClient.IDepartmanApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/departman/active
+info: System.Net.Http.HttpClient.IDepartmanApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/departman/active
+info: System.Net.Http.HttpClient.IServisApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/servis/active
+info: System.Net.Http.HttpClient.IServisApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/servis/active
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
+info: System.Net.Http.HttpClient.IServisApiService.ClientHandler[101]
+      Received HTTP response headers after 233.6654ms - 200
+info: System.Net.Http.HttpClient.IServisApiService.LogicalHandler[101]
+      End processing HTTP request after 233.8451ms - 200
+info: System.Net.Http.HttpClient.IDepartmanApiService.ClientHandler[101]
+      Received HTTP response headers after 240.9687ms - 200
+info: System.Net.Http.HttpClient.IDepartmanApiService.LogicalHandler[101]
+      End processing HTTP request after 241.1184ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 11.9923ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 12.1637ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 11.4957ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 11.636ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 16.824ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 16.9941ms - 200
+info: System.Net.Http.HttpClient.IPersonelApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/personel
+info: System.Net.Http.HttpClient.IPersonelApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/personel
+info: System.Net.Http.HttpClient.IDepartmanApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/departman
+info: System.Net.Http.HttpClient.IDepartmanApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/departman
+info: System.Net.Http.HttpClient.IServisApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/servis
+info: System.Net.Http.HttpClient.IServisApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/servis
+info: System.Net.Http.HttpClient.IUnvanApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/unvan
+info: System.Net.Http.HttpClient.IUnvanApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/unvan
+info: System.Net.Http.HttpClient.IHizmetBinasiApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hizmetbinasi
+info: System.Net.Http.HttpClient.IHizmetBinasiApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hizmetbinasi
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: System.Net.Http.HttpClient.IDepartmanApiService.ClientHandler[101]
+      Received HTTP response headers after 142.8139ms - 200
+info: System.Net.Http.HttpClient.IDepartmanApiService.LogicalHandler[101]
+      End processing HTTP request after 142.9667ms - 200
+info: System.Net.Http.HttpClient.IServisApiService.ClientHandler[101]
+      Received HTTP response headers after 151.2465ms - 200
+info: System.Net.Http.HttpClient.IServisApiService.LogicalHandler[101]
+      End processing HTTP request after 151.9557ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
+info: System.Net.Http.HttpClient.IHizmetBinasiApiService.ClientHandler[101]
+      Received HTTP response headers after 351.9241ms - 200
+info: System.Net.Http.HttpClient.IHizmetBinasiApiService.LogicalHandler[101]
+      End processing HTTP request after 352.0873ms - 200
+info: System.Net.Http.HttpClient.IUnvanApiService.ClientHandler[101]
+      Received HTTP response headers after 403.4143ms - 200
+info: System.Net.Http.HttpClient.IUnvanApiService.LogicalHandler[101]
+      End processing HTTP request after 403.5337ms - 200
+info: System.Net.Http.HttpClient.IPersonelApiService.ClientHandler[101]
+      Received HTTP response headers after 614.53ms - 200
+info: System.Net.Http.HttpClient.IPersonelApiService.LogicalHandler[101]
+      End processing HTTP request after 614.6577ms - 200
+info: System.Net.Http.HttpClient.IPersonelApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/personel/16406457430
+info: System.Net.Http.HttpClient.IPersonelApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/personel/16406457430
+info: System.Net.Http.HttpClient.IPersonelApiService.ClientHandler[101]
+      Received HTTP response headers after 1068.3933ms - 200
+info: System.Net.Http.HttpClient.IPersonelApiService.LogicalHandler[101]
+      End processing HTTP request after 1068.8519ms - 200
+info: SGKPortalApp.PresentationLayer.Helpers.ImageHelper[0]
+      ? ImageHelper (Cache Service entegre) başlatıldı
+info: System.Net.Http.HttpClient.IDepartmanApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/departman
+info: System.Net.Http.HttpClient.IDepartmanApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/departman
+info: System.Net.Http.HttpClient.IServisApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/servis
+info: System.Net.Http.HttpClient.IServisApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/servis
+info: System.Net.Http.HttpClient.IUnvanApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/unvan
+info: System.Net.Http.HttpClient.IUnvanApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/unvan
+info: System.Net.Http.HttpClient.IHizmetBinasiApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hizmetbinasi
+info: System.Net.Http.HttpClient.IHizmetBinasiApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hizmetbinasi
+info: System.Net.Http.HttpClient.ISendikaApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/sendika
+info: System.Net.Http.HttpClient.ISendikaApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/sendika
+info: System.Net.Http.HttpClient.IIlApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/il
+info: System.Net.Http.HttpClient.IIlApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/il
+info: System.Net.Http.HttpClient.IIlceApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/ilce
+info: System.Net.Http.HttpClient.IIlceApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/ilce
+info: SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel.AtanmaNedeniApiService[0]
+      GET: atanma-nedeni
+info: System.Net.Http.HttpClient.IAtanmaNedeniApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/atanma-nedeni
+info: System.Net.Http.HttpClient.IAtanmaNedeniApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/atanma-nedeni
+info: System.Net.Http.HttpClient.IServisApiService.ClientHandler[101]
+      Received HTTP response headers after 85.8015ms - 200
+info: System.Net.Http.HttpClient.IServisApiService.LogicalHandler[101]
+      End processing HTTP request after 86.1109ms - 200
+info: System.Net.Http.HttpClient.IUnvanApiService.ClientHandler[101]
+      Received HTTP response headers after 85.4458ms - 200
+info: System.Net.Http.HttpClient.IUnvanApiService.LogicalHandler[101]
+      End processing HTTP request after 85.5432ms - 200
+info: System.Net.Http.HttpClient.IDepartmanApiService.ClientHandler[101]
+      Received HTTP response headers after 141.5123ms - 200
+info: System.Net.Http.HttpClient.IDepartmanApiService.LogicalHandler[101]
+      End processing HTTP request after 141.6819ms - 200
+info: System.Net.Http.HttpClient.IHizmetBinasiApiService.ClientHandler[101]
+      Received HTTP response headers after 151.3524ms - 200
+info: System.Net.Http.HttpClient.IHizmetBinasiApiService.LogicalHandler[101]
+      End processing HTTP request after 151.637ms - 200
+info: System.Net.Http.HttpClient.IAtanmaNedeniApiService.ClientHandler[101]
+      Received HTTP response headers after 144.0605ms - 200
+info: System.Net.Http.HttpClient.IAtanmaNedeniApiService.LogicalHandler[101]
+      End processing HTTP request after 144.2197ms - 200
+info: System.Net.Http.HttpClient.IIlApiService.ClientHandler[101]
+      Received HTTP response headers after 207.9486ms - 200
+info: System.Net.Http.HttpClient.IIlApiService.LogicalHandler[101]
+      End processing HTTP request after 208.1505ms - 200
+info: System.Net.Http.HttpClient.IIlceApiService.ClientHandler[101]
+      Received HTTP response headers after 222.3406ms - 200
+info: System.Net.Http.HttpClient.IIlceApiService.LogicalHandler[101]
+      End processing HTTP request after 222.4735ms - 200
+info: System.Net.Http.HttpClient.ISendikaApiService.ClientHandler[101]
+      Received HTTP response headers after 318.1183ms - 200
+info: System.Net.Http.HttpClient.ISendikaApiService.LogicalHandler[101]
+      End processing HTTP request after 318.2411ms - 200
+    Hizmet Binaları:
+       ID: 5, Adı: İl Müdürlüğü
+       ID: 6, Adı: ALİAĞA SGM
+info: System.Net.Http.HttpClient.IPersonelApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/personel/16406457430
+info: System.Net.Http.HttpClient.IPersonelApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/personel/16406457430
+info: System.Net.Http.HttpClient.IPersonelApiService.ClientHandler[101]
+      Received HTTP response headers after 19.5782ms - 200
+info: System.Net.Http.HttpClient.IPersonelApiService.LogicalHandler[101]
+      End processing HTTP request after 19.7338ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 73.554ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 73.6804ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 14.4987ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 14.6184ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 52.0602ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 52.216ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
+info: System.Net.Http.HttpClient.IPersonelApiService.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/personel/paged
+info: System.Net.Http.HttpClient.IPersonelApiService.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/personel/paged
+info: System.Net.Http.HttpClient.IPersonelApiService.ClientHandler[101]
+      Received HTTP response headers after 319.7069ms - 200
+info: System.Net.Http.HttpClient.IPersonelApiService.LogicalHandler[101]
+      End processing HTTP request after 319.8269ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
+      Received HTTP response headers after 138.8823ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
+      End processing HTTP request after 139.1109ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[101]
+      Received HTTP response headers after 91.9577ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[101]
+      End processing HTTP request after 92.0581ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel[0]
+      ?? Logout: Muhammed Bodur çıkış yapıyor...
+info: System.Net.Http.HttpClient.Default.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/auth/logout
+info: System.Net.Http.HttpClient.Default.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/auth/logout
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 114.9884ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 115.0939ms - 200
+info: System.Net.Http.HttpClient.Default.ClientHandler[101]
+      Received HTTP response headers after 257.7812ms - 200
+info: System.Net.Http.HttpClient.Default.LogicalHandler[101]
+      End processing HTTP request after 257.8557ms - 200
+info: SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel[0]
+      ? API Logout başarılı - 28165202398
+warn: SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel[0]
+      ?? Session temizlenirken hata
+      System.InvalidOperationException: Session has not been configured for this application or request.
+         at Microsoft.AspNetCore.Http.DefaultHttpContext.get_Session()
+         at SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel.OnGetAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer\Pages\Auth\Logout.cshtml.cs:line 85
+info: SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel[0]
+      ? Logout: Muhammed Bodur başarıyla çıkış yaptı
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
 info: SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth.AuthApiService[0]
       POST: https://localhost:9080/api/auth/login
 info: System.Net.Http.HttpClient.IAuthApiService.LogicalHandler[100]
@@ -290,9 +549,11 @@ info: System.Net.Http.HttpClient.IAuthApiService.LogicalHandler[100]
 info: System.Net.Http.HttpClient.IAuthApiService.ClientHandler[100]
       Sending HTTP request POST https://localhost:9080/api/auth/login
 info: System.Net.Http.HttpClient.IAuthApiService.ClientHandler[101]
-      Received HTTP response headers after 35.9256ms - 200
+      Received HTTP response headers after 999.7108ms - 200
 info: System.Net.Http.HttpClient.IAuthApiService.LogicalHandler[101]
-      End processing HTTP request after 36.0295ms - 200
+      End processing HTTP request after 999.778ms - 200
+info: SGKPortalApp.PresentationLayer.Pages.Auth.LoginHandlerModel[0]
+      ?? 1 yetki claims'e eklendi
 info: SGKPortalApp.PresentationLayer.Pages.Auth.LoginHandlerModel[0]
       ? Kullanıcı giriş yaptı: Muhammed Bodur (28165202398) - Personel
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
@@ -300,17 +561,17 @@ info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
       Sending HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 10.9611ms - 200
+      Received HTTP response headers after 9.4166ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 11.076ms - 200
+      End processing HTTP request after 9.4898ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
       Start processing HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
       Sending HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 8.9842ms - 200
+      Received HTTP response headers after 8.2404ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 9.1298ms - 200
+      End processing HTTP request after 8.3353ms - 200
 warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
       Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
 warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
@@ -320,9 +581,9 @@ info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
       Sending HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 11.66ms - 200
+      Received HTTP response headers after 11.6793ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 11.8385ms - 200
+      End processing HTTP request after 11.7616ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
       Start processing HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
@@ -332,40 +593,683 @@ info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[100]
 info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[100]
       Sending HTTP request GET https://localhost:9080/api/banko/personel/28165202398/banko
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 54.7789ms - 200
+      Received HTTP response headers after 10.018ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 54.9863ms - 200
+      End processing HTTP request after 10.1234ms - 200
 info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
       ? MainLayout başarıyla initialize edildi
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
 info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[101]
-      Received HTTP response headers after 74.6899ms - 200
+      Received HTTP response headers after 98.1558ms - 200
 info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[101]
-      End processing HTTP request after 74.8501ms - 200
+      End processing HTTP request after 98.2358ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
       Start processing HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
       Sending HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 18.2563ms - 200
+      Received HTTP response headers after 11.3997ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 18.4053ms - 200
+      End processing HTTP request after 11.4992ms - 200
 info: SGKPortalApp.PresentationLayer.Components.Siramatik.BankoModeWidget[0]
       ?? BankoModeWidget LoadData: 28165202398 - DB Banko Modu: False, State Banko Modu: False
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 8.4108ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 8.486ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 16.5706ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 16.6677ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IDepartmanApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/departman/active
+info: System.Net.Http.HttpClient.IDepartmanApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/departman/active
+info: System.Net.Http.HttpClient.IServisApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/servis/active
+info: System.Net.Http.HttpClient.IServisApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/servis/active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 11.894ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 12.0374ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: System.Net.Http.HttpClient.IDepartmanApiService.ClientHandler[101]
+      Received HTTP response headers after 52.7243ms - 200
+info: System.Net.Http.HttpClient.IDepartmanApiService.LogicalHandler[101]
+      End processing HTTP request after 52.8048ms - 200
+info: System.Net.Http.HttpClient.IServisApiService.ClientHandler[101]
+      Received HTTP response headers after 59.461ms - 200
+info: System.Net.Http.HttpClient.IServisApiService.LogicalHandler[101]
+      End processing HTTP request after 59.5719ms - 200
 info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
       ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 12.7277ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 12.8314ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 9.7856ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 9.8643ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 8.4624ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 8.5526ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/SignalREventLog/filter
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/SignalREventLog/filter
 info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
-      ? MainLayout - Banko modu aktif: Banko#19
+      ? MainLayout başarıyla initialize edildi
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 144.0947ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 144.1822ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/SignalREventLog/stats?*
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/SignalREventLog/stats?*
 info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
-      ?? BankoModeState aktif edildi: Banko#19, TcKimlikNo=16406457430
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 58.0637ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 58.1958ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 11.7758ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 11.8707ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 10.6334ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 10.7338ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 10.3697ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 10.4598ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
+info: System.Net.Http.HttpClient.IPersonelApiService.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/personel/paged
+info: System.Net.Http.HttpClient.IPersonelApiService.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/personel/paged
+info: System.Net.Http.HttpClient.IPersonelApiService.ClientHandler[101]
+      Received HTTP response headers after 17.0863ms - 200
+info: System.Net.Http.HttpClient.IPersonelApiService.LogicalHandler[101]
+      End processing HTTP request after 17.1981ms - 200
+info: System.Net.Http.HttpClient.IPersonelApiService.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/personel/paged
+info: System.Net.Http.HttpClient.IPersonelApiService.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/personel/paged
+info: System.Net.Http.HttpClient.IPersonelApiService.ClientHandler[101]
+      Received HTTP response headers after 15.3422ms - 200
+info: System.Net.Http.HttpClient.IPersonelApiService.LogicalHandler[101]
+      End processing HTTP request after 15.4977ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
+      Received HTTP response headers after 138.7666ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
+      End processing HTTP request after 138.8946ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[101]
+      Received HTTP response headers after 14.2551ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[101]
+      End processing HTTP request after 14.3958ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 44.6045ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 44.7131ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 40.4665ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 40.5447ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/SignalREventLog/filter
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/SignalREventLog/filter
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 16.8037ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 16.9161ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 29.0458ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 29.1835ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/SignalREventLog/stats?*
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/SignalREventLog/stats?*
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 12.6196ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 12.7119ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/SignalREventLog/filter
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/SignalREventLog/filter
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 31.1042ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 31.2243ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/SignalREventLog/stats?*
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/SignalREventLog/stats?*
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 13.1597ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 13.3165ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/SignalREventLog/filter
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/SignalREventLog/filter
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 5.8261ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 5.9166ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/SignalREventLog/stats?*
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/SignalREventLog/stats?*
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 3.5688ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 3.6641ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[100]
+      Start processing HTTP request PUT https://localhost:9080/api/personelyetki/2
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[100]
+      Sending HTTP request PUT https://localhost:9080/api/personelyetki/2
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? Yetkiler SignalR ile yenileniyor. TcKimlikNo: 28165202398
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? Yetkiler SignalR ile yenileniyor. TcKimlikNo: 28165202398
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? Yetkiler SignalR ile yenileniyor. TcKimlikNo: 28165202398
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? Yetkiler SignalR ile yenileniyor. TcKimlikNo: 28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[101]
+      Received HTTP response headers after 80.5356ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[101]
+      End processing HTTP request after 80.6485ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[101]
+      Received HTTP response headers after 80.6575ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[101]
+      End processing HTTP request after 80.7315ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[101]
+      Received HTTP response headers after 81.1873ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[101]
+      End processing HTTP request after 81.2599ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[101]
+      Received HTTP response headers after 359.0813ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[101]
+      End processing HTTP request after 359.147ms - 200
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      RefreshAsync hatası
+      System.InvalidOperationException: Headers are read-only, response has already started.
+         at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpHeaders.ThrowHeadersReadOnlyException()
+         at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpResponseHeaders.Microsoft.AspNetCore.Http.IHeaderDictionary.set_SetCookie(StringValues value)
+         at Microsoft.AspNetCore.Http.ResponseCookies.Append(String key, String value, CookieOptions options)
+         at Microsoft.AspNetCore.Authentication.Cookies.ChunkingCookieManager.AppendResponseCookie(HttpContext context, String key, String value, CookieOptions options)
+         at Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationHandler.HandleSignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.SignInAsync(HttpContext context, String scheme, ClaimsPrincipal principal, AuthenticationProperties properties)
+         at SGKPortalApp.PresentationLayer.Services.AuthenticationServices.Concrete.CookieAuthService.UpdatePermissionsClaimAsync(Dictionary`2 permissions) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer\Services\AuthenticationServices\Concrete\CookieAuthService.cs:line 130
+         at SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService.RefreshAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer\Services\StateServices\PermissionStateService.cs:line 167
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      RefreshAsync hatası
+      System.InvalidOperationException: Headers are read-only, response has already started.
+         at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpHeaders.ThrowHeadersReadOnlyException()
+         at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpResponseHeaders.Microsoft.AspNetCore.Http.IHeaderDictionary.set_SetCookie(StringValues value)
+         at Microsoft.AspNetCore.Http.ResponseCookies.Append(String key, String value, CookieOptions options)
+         at Microsoft.AspNetCore.Authentication.Cookies.ChunkingCookieManager.AppendResponseCookie(HttpContext context, String key, String value, CookieOptions options)
+         at Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationHandler.HandleSignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.SignInAsync(HttpContext context, String scheme, ClaimsPrincipal principal, AuthenticationProperties properties)
+         at SGKPortalApp.PresentationLayer.Services.AuthenticationServices.Concrete.CookieAuthService.UpdatePermissionsClaimAsync(Dictionary`2 permissions) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer\Services\AuthenticationServices\Concrete\CookieAuthService.cs:line 130
+         at SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService.RefreshAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer\Services\StateServices\PermissionStateService.cs:line 167
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      RefreshAsync hatası
+      System.InvalidOperationException: Headers are read-only, response has already started.
+         at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpHeaders.ThrowHeadersReadOnlyException()
+         at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpResponseHeaders.Microsoft.AspNetCore.Http.IHeaderDictionary.set_SetCookie(StringValues value)
+         at Microsoft.AspNetCore.Http.ResponseCookies.Append(String key, String value, CookieOptions options)
+         at Microsoft.AspNetCore.Authentication.Cookies.ChunkingCookieManager.AppendResponseCookie(HttpContext context, String key, String value, CookieOptions options)
+         at Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationHandler.HandleSignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.SignInAsync(HttpContext context, String scheme, ClaimsPrincipal principal, AuthenticationProperties properties)
+         at SGKPortalApp.PresentationLayer.Services.AuthenticationServices.Concrete.CookieAuthService.UpdatePermissionsClaimAsync(Dictionary`2 permissions) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer\Services\AuthenticationServices\Concrete\CookieAuthService.cs:line 130
+         at SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService.RefreshAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer\Services\StateServices\PermissionStateService.cs:line 167
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      RefreshAsync hatası
+      System.InvalidOperationException: Headers are read-only, response has already started.
+         at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpHeaders.ThrowHeadersReadOnlyException()
+         at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http.HttpResponseHeaders.Microsoft.AspNetCore.Http.IHeaderDictionary.set_SetCookie(StringValues value)
+         at Microsoft.AspNetCore.Http.ResponseCookies.Append(String key, String value, CookieOptions options)
+         at Microsoft.AspNetCore.Authentication.Cookies.ChunkingCookieManager.AppendResponseCookie(HttpContext context, String key, String value, CookieOptions options)
+         at Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationHandler.HandleSignInAsync(ClaimsPrincipal user, AuthenticationProperties properties)
+         at Microsoft.AspNetCore.Authentication.AuthenticationService.SignInAsync(HttpContext context, String scheme, ClaimsPrincipal principal, AuthenticationProperties properties)
+         at SGKPortalApp.PresentationLayer.Services.AuthenticationServices.Concrete.CookieAuthService.UpdatePermissionsClaimAsync(Dictionary`2 permissions) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer\Services\AuthenticationServices\Concrete\CookieAuthService.cs:line 130
+         at SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService.RefreshAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer\Services\StateServices\PermissionStateService.cs:line 167
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[101]
+      Received HTTP response headers after 1797.9952ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[101]
+      End processing HTTP request after 1798.0672ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
+      Received HTTP response headers after 22.755ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
+      End processing HTTP request after 22.8421ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[101]
+      Received HTTP response headers after 9.897ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[101]
+      End processing HTTP request after 10.0024ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/SignalREventLog/filter
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/SignalREventLog/filter
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 5.1319ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 5.2122ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/SignalREventLog/stats?*
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/SignalREventLog/stats?*
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 4.9421ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 5.0664ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 10.3427ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 10.4289ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 11.2727ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 11.3742ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/SignalREventLog/filter
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/SignalREventLog/filter
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 12.3115ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 12.4039ms - 200
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 9.8159ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 9.9832ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/SignalREventLog/stats?*
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/SignalREventLog/stats?*
+info: System.Net.Http.HttpClient.ApiClient.ClientHandler[101]
+      Received HTTP response headers after 4.0896ms - 200
+info: System.Net.Http.HttpClient.ApiClient.LogicalHandler[101]
+      End processing HTTP request after 4.1989ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 12.6922ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 12.7546ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 7.3746ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 7.4514ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 9.0409ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 9.1306ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 7.5711ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 7.6603ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 6.9726ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 7.0536ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 12.5666ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 12.6703ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
+      Received HTTP response headers after 10.3983ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
+      End processing HTTP request after 10.5041ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[101]
+      Received HTTP response headers after 9.2369ms - 200
+info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[101]
+      End processing HTTP request after 9.329ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 38.0283ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 38.2138ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 7.4502ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 7.5154ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 13.4292ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 13.5184ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 22.1693ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 22.3042ms - 200
+info: SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel[0]
+      ?? Logout: Muhammed Bodur çıkış yapıyor...
+info: System.Net.Http.HttpClient.Default.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/auth/logout
+info: System.Net.Http.HttpClient.Default.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/auth/logout
+info: System.Net.Http.HttpClient.Default.ClientHandler[101]
+      Received HTTP response headers after 27.8213ms - 200
+info: System.Net.Http.HttpClient.Default.LogicalHandler[101]
+      End processing HTTP request after 27.8852ms - 200
+info: SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel[0]
+      ? API Logout başarılı - 28165202398
+warn: SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel[0]
+      ?? Session temizlenirken hata
+      System.InvalidOperationException: Session has not been configured for this application or request.
+         at Microsoft.AspNetCore.Http.DefaultHttpContext.get_Session()
+         at SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel.OnGetAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer\Pages\Auth\Logout.cshtml.cs:line 85
+info: SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel[0]
+      ? Logout: Muhammed Bodur başarıyla çıkış yaptı
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth.AuthApiService[0]
+      POST: https://localhost:9080/api/auth/login
+info: System.Net.Http.HttpClient.IAuthApiService.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/auth/login
+info: System.Net.Http.HttpClient.IAuthApiService.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/auth/login
+info: System.Net.Http.HttpClient.IAuthApiService.ClientHandler[101]
+      Received HTTP response headers after 106.3259ms - 200
+info: System.Net.Http.HttpClient.IAuthApiService.LogicalHandler[101]
+      End processing HTTP request after 106.4135ms - 200
+info: SGKPortalApp.PresentationLayer.Pages.Auth.LoginHandlerModel[0]
+      ?? 1 yetki claims'e eklendi
+info: SGKPortalApp.PresentationLayer.Pages.Auth.LoginHandlerModel[0]
+      ? Kullanıcı giriş yaptı: Muhammed Bodur (28165202398) - Personel
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 14.681ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 14.7544ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 9.7377ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 9.8244ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 10.2705ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 10.353ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/banko/personel/28165202398/banko
+info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/banko/personel/28165202398/banko
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 13.8768ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 13.9683ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
+info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[101]
+      Received HTTP response headers after 101.7376ms - 200
+info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[101]
+      End processing HTTP request after 101.8202ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 7.0689ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 7.184ms - 200
 info: SGKPortalApp.PresentationLayer.Components.Siramatik.BankoModeWidget[0]
-      ? Banko moduna geçiş isteği gönderildi: Banko#2
-?? State senkronize edildi - Pinned: False, Visible: False
-? SiraCagirmaPanel JavaScript initialized
+      ?? BankoModeWidget LoadData: 28165202398 - DB Banko Modu: False, State Banko Modu: False
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 12.349ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 12.4261ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 10.7829ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 10.867ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 17.0286ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 17.1584ms - 200
 info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
-      ? MainLayout - Banko modu aktif: Banko#18
+      ? MainLayout başarıyla initialize edildi
 info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
-      ?? BankoModeState aktif edildi: Banko#18, TcKimlikNo=28165202398
-info: SGKPortalApp.PresentationLayer.Components.Siramatik.BankoModeWidget[0]
-      ? Banko moduna geçiş isteği gönderildi: Banko#1
-?? State senkronize edildi - Pinned: False, Visible: False
-? SiraCagirmaPanel JavaScript initialized
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)

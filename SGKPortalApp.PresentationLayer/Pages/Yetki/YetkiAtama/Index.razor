@@ -1,0 +1,209 @@
+@page "/yetki/atama"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+@using SGKPortalApp.Common.Extensions
+@using SGKPortalApp.PresentationLayer.Models.ViewModels
+@using SGKPortalApp.PresentationLayer.Components.Yetki
+
+<PageTitle>Yetki Atama - SGK Portal</PageTitle>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    @* amamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamam *@
+    @* HEADER *@
+    @* amamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamam *@
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="bx bx-user-check me-2"></i>Yetki Atama
+            </h4>
+            <p class="text-muted mb-0">Personellere dinamik yetkiler atayın ve yönetin</p>
+        </div>
+    </div>
+
+    <div class="row">
+        @* amamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamam *@
+        @* SOL PANEL - PERSONEL SEÇİMİ *@
+        @* amamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamam *@
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bx bx-user me-2"></i>Personel Seçimi</h5>
+                </div>
+                <div class="card-body">
+                    @* Filtreler *@
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Arama (Ad, Soyad, TC veya Sicil)</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control" @bind="SearchTerm" @bind:event="oninput" 
+                                   @onkeypress="HandleSearchKeyPress" placeholder="Ara..." />
+                            <button class="btn btn-outline-primary" @onclick="SearchPersonel" disabled="@IsSearching">
+                                <i class="bx bx-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small text-muted">Departman</label>
+                            <select class="form-select form-select-sm" @bind="FilterDepartmanId" @bind:after="SearchPersonel">
+                                <option value="0">Tümü</option>
+                                @foreach (var d in DepartmanDropdown)
+                                {
+                                    <option value="@d.Id">@d.Ad</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small text-muted">Servis</label>
+                            <select class="form-select form-select-sm" @bind="FilterServisId" @bind:after="SearchPersonel">
+                                <option value="0">Tümü</option>
+                                @foreach (var s in ServisDropdown)
+                                {
+                                    <option value="@s.Id">@s.Ad</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    @* Personel Listesi *@
+                    <div class="border rounded" style="max-height: 400px; overflow-y: auto;">
+                        @if (IsSearching)
+                        {
+                            <div class="text-center py-4">
+                                <div class="spinner-border spinner-border-sm text-primary"></div>
+                            </div>
+                        }
+                        else if (!PersonelList.Any())
+                        {
+                            <div class="text-center py-4 text-muted small">
+                                <i class="bx bx-search" style="font-size: 2rem;"></i>
+                                <p class="mb-0 mt-2">Personel aramak için filtre kullanın</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="list-group list-group-flush">
+                                @foreach (var p in PersonelList)
+                                {
+                                    <button type="button" 
+                                            class="list-group-item list-group-item-action @(SelectedPersonel?.TcKimlikNo == p.TcKimlikNo ? "active" : "")"
+                                            @onclick="() => SelectPersonel(p)">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1 small">@p.AdSoyad</h6>
+                                        </div>
+                                        <small class="@(SelectedPersonel?.TcKimlikNo == p.TcKimlikNo ? "text-white-50" : "text-muted")">
+                                            @p.ServisAdi
+                                        </small>
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* amamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamam *@
+        @* SAĞ PANEL - YETKİ AĞACI *@
+        @* amamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamam *@
+        <div class="col-md-8">
+            @if (SelectedPersonel == null)
+            {
+                <div class="card h-100">
+                    <div class="card-body d-flex align-items-center justify-content-center">
+                        <div class="text-center text-muted">
+                            <i class="bx bx-user-check" style="font-size: 4rem;"></i>
+                            <p class="mt-3">Yetki atamak için sol panelden bir personel seçin</p>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card">
+                    @* Seçili Personel Bilgisi *@
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0">
+                                    <i class="bx bx-user-circle me-2"></i>@SelectedPersonel.AdSoyad
+                                </h5>
+                                <small class="opacity-75">@SelectedPersonel.ServisAdi - @SelectedPersonel.DepartmanAdi</small>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-light me-2" @onclick="SaveAllPermissions" disabled="@IsSaving">
+                                    @if (IsSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1"></span>
+                                    }
+                                    <i class="bx bx-save me-1"></i>Kaydet
+                                </button>
+                                <button class="btn btn-sm btn-outline-light" @onclick="LoadPermissionTree" disabled="@IsLoading">
+                                    <i class="bx bx-refresh"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    @* Yetki Ağacı - Excel Görünümü *@
+                    <div class="card-body p-0">
+                        @if (IsLoading)
+                        {
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary"></div>
+                                <p class="mt-2 text-muted">Yetkiler yükleniyor...</p>
+                            </div>
+                        }
+                        else if (!PermissionTree.Any())
+                        {
+                            <div class="text-center py-5 text-muted">
+                                <i class="bx bx-folder-open" style="font-size: 3rem;"></i>
+                                <p class="mt-2">Henüz yetki tanımı bulunmuyor</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0 permission-tree-table">
+                                    <thead class="table-light sticky-top">
+                                        <tr>
+                                            <th style="width: 50%;">Yetki Adı</th>
+                                            <th class="text-center" style="width: 15%;">Tip</th>
+                                            <th class="text-center" style="width: 11.66%;">None</th>
+                                            <th class="text-center" style="width: 11.66%;">View</th>
+                                            <th class="text-center" style="width: 11.66%;">Edit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var node in PermissionTree)
+                                        {
+                                            <PermissionTreeRow Node="node" Depth="0" OnLevelChanged="HandleLevelChanged" />
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .permission-tree-table tbody tr:hover {
+        background-color: rgba(105, 108, 255, 0.08) !important;
+    }
+    .permission-tree-table .form-check-input {
+        cursor: pointer;
+        width: 1.2em;
+        height: 1.2em;
+    }
+    .permission-tree-table .form-check-input:checked {
+        background-color: #696cff;
+        border-color: #696cff;
+    }
+    .text-purple {
+        color: #9c27b0 !important;
+    }
+</style>

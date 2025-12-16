@@ -860,4 +860,188 @@ Opsiyonel sayfa context:
 
 ### 21.4 Önemli Not (İsim Çakışması)
 
-`/personel/manage/{tc}` sayfasındaki “Yetki” tabı mevcut kodda **dinamik permission** (`PersonelYetki`) değil, **İmza Yetkileri** (`PersonelImzaYetkisi`) konseptini yönetmektedir. Dinamik permission UI’si ayrı ekran/sekme olarak ele alınmalıdır.
+`/personel/manage/{tc}` sayfasındaki "Yetki" tabı mevcut kodda **dinamik permission** (`PersonelYetki`) değil, **İmza Yetkileri** (`PersonelImzaYetkisi`) konseptini yönetmektedir. Dinamik permission UI'si ayrı ekran/sekme olarak ele alınmalıdır.
+
+---
+
+## 22) Sayfa Erişim Kontrolü (Page-Level Authorization)
+
+### 22.1 Temel İlke: "Yetkisiz kullanıcı sadece izin verilen sayfalara erişebilir"
+
+Sistemde üç tip sayfa vardır:
+
+| Tip | Açıklama | Örnek |
+|-----|----------|-------|
+| **Public** | Herkes erişebilir (login bile gerekmez) | Login, ForgotPassword |
+| **Authenticated** | Login gerekir ama özel yetki gerekmez | Dashboard, Profil |
+| **Protected** | Login + Spesifik yetki gerekir | Personel Listesi, Banko Yönetimi |
+
+### 22.2 Public Sayfalar (AllowAnonymous)
+
+Bu sayfalar **login olmadan** erişilebilir:
+- `/auth/login`
+- `/auth/forgot-password`
+- `/auth/reset-password`
+
+### 22.3 Authenticated Sayfalar (Login Yeterli, Yetki Gerekmez)
+
+Bu sayfalar **sadece login** gerektirir, özel yetki kontrolü yapılmaz:
+- `/` (Dashboard/Ana Sayfa)
+- `/account/profile`
+- `/account/change-password`
+
+> **Not:** Dashboard'da bazı widget'lar yetki bazlı gösterilebilir (örn: "Bugünkü Sıra Sayısı" widget'ı sadece `SIRA.DASHBOARD.VIEW` yetkisi olanlara).
+
+### 22.4 Protected Sayfalar (Yetki Gerekli)
+
+Diğer tüm sayfalar **spesifik yetki** gerektirir. Yetki yoksa:
+- **Menüde görünmez**
+- **Sayfaya doğrudan URL ile gidilirse** → `/forbidden` veya `/` redirect
+
+#### Sayfa → Yetki Eşleştirme Tablosu
+
+| Route | Gerekli Yetki Key | Min Seviye |
+|-------|-------------------|------------|
+| `/personel` | `PER.PERSONEL.LIST` | View |
+| `/personel/manage` | `PER.PERSONEL.CREATE` | Edit |
+| `/personel/manage/{tc}` | `PER.PERSONEL.EDIT` | View |
+| `/personel/departman` | `PER.DEPARTMAN.LIST` | View |
+| `/personel/servis` | `PER.SERVIS.LIST` | View |
+| `/personel/unvan` | `PER.UNVAN.LIST` | View |
+| `/personel/sendika` | `PER.SENDIKA.LIST` | View |
+| `/personel/atanma-nedeni` | `PER.ATANMA_NEDENI.LIST` | View |
+| `/personel/yetki` | `PER.YETKI.LIST` | View |
+| `/personel/yetki-atama` | `PER.YETKI_ATAMA.LIST` | View |
+| `/personel/modul-yonetimi` | `PER.MODUL.LIST` | View |
+| `/personel/controller-yonetimi` | `PER.CONTROLLER.LIST` | View |
+| `/personel/islem-yonetimi` | `PER.ISLEM.LIST` | View |
+| `/common/hizmetbinasi` | `COMMON.HIZMET_BINASI.LIST` | View |
+| `/common/il` | `COMMON.IL.LIST` | View |
+| `/common/ilce` | `COMMON.ILCE.LIST` | View |
+| `/siramatik/banko/list` | `SIRA.BANKO.LIST` | View |
+| `/siramatik/kanal` | `SIRA.KANAL.LIST` | View |
+| `/siramatik/kiosk-yonetimi` | `SIRA.KIOSK.LIST` | View |
+| `/siramatik/tv` | `SIRA.TV.LIST` | View |
+| `/pdks/giris-cikis` | `PDKS.GIRIS_CIKIS.LIST` | View |
+| `/pdks/izin/taleplerim` | `PDKS.IZIN.TALEPLERIM.VIEW` | View |
+| `/eshot/hareketler` | `ESHOT.HAREKETLER.LIST` | View |
+
+### 22.5 NavMenu Davranışı
+
+NavMenu'daki her menü öğesi için:
+1. İlgili yetki key'i kontrol edilir
+2. Yetki **yoksa** → menü öğesi **render edilmez**
+3. Yetki **varsa** → menü öğesi gösterilir
+
+Örnek:
+```razor
+@if (await PermissionService.HasPermissionAsync("PER.PERSONEL.LIST", YetkiTipleri.View))
+{
+    <li class="menu-item">
+        <a href="/personel" class="menu-link">Personel Listesi</a>
+    </li>
+}
+```
+
+### 22.6 Sayfa Koruma Mekanizması
+
+Her protected sayfa için:
+1. `OnInitializedAsync` içinde yetki kontrolü
+2. Yetki yoksa → redirect veya forbidden göster
+
+Örnek:
+```csharp
+protected override async Task OnInitializedAsync()
+{
+    if (!await PermissionService.HasPermissionAsync("PER.PERSONEL.LIST", YetkiTipleri.View))
+    {
+        NavigationManager.NavigateTo("/forbidden");
+        return;
+    }
+    // Normal sayfa yükleme...
+}
+```
+
+---
+
+## 23) Banko Modu Yetkisi
+
+### 23.1 Banko Modu Nedir?
+
+Banko modu, personelin sıramatik sisteminde aktif olarak müşteri çağırabilmesi için girdiği özel moddur.
+
+### 23.2 Banko Moduna Giriş Yetkisi
+
+Banko moduna girmek için özel yetki gerekir:
+- **Yetki Key:** `SIRA.BANKO.MODE`
+- **Min Seviye:** `Edit`
+
+Yetki yoksa:
+- Banko modu butonu görünmez
+- API üzerinden banko moduna geçiş engellenir
+
+### 23.3 İlgili Yetkiler
+
+| Aksiyon | Yetki Key | Min Seviye |
+|---------|-----------|------------|
+| Banko moduna giriş | `SIRA.BANKO.MODE` | Edit |
+| Sıra çağırma | `SIRA.BANKO.SIRA_CAGIR` | Edit |
+| Sıra tamamlama | `SIRA.BANKO.SIRA_TAMAMLA` | Edit |
+| Sıra iptal | `SIRA.BANKO.SIRA_IPTAL` | Edit |
+| Sıra bekletme | `SIRA.BANKO.SIRA_BEKLET` | Edit |
+| Uzman personele yönlendirme | `SIRA.BANKO.UZMAN_YONLENDIR` | Edit |
+
+---
+
+## 24) Varsayılan Yetki Durumu (Default Deny)
+
+### 24.1 Temel İlke
+
+Sistemde **varsayılan olarak hiçbir yetki yoktur** (Default Deny).
+
+- Yeni oluşturulan kullanıcı → Sadece Dashboard'a erişebilir
+- Yetki atanmamış sayfa → Erişim engellenir
+- Yetki atanmamış alan → Gizlenir veya readonly
+
+### 24.2 Minimum Yetki Seti (Yeni Kullanıcı)
+
+Yeni kullanıcıya otomatik atanabilecek minimum yetkiler:
+- Dashboard erişimi (Authenticated sayfa, yetki gerekmez)
+- Profil görüntüleme (Authenticated sayfa, yetki gerekmez)
+- Şifre değiştirme (Authenticated sayfa, yetki gerekmez)
+
+### 24.3 Admin Kullanıcı
+
+Admin kullanıcılar için özel bir "süper yetki" tanımlanabilir:
+- **Yetki Key:** `SYSTEM.ADMIN`
+- Bu yetki varsa → Tüm sayfalara/alanlara erişim
+
+Alternatif: Her modül için ayrı admin yetkisi:
+- `PER.ADMIN` → Personel modülü tam yetki
+- `SIRA.ADMIN` → Sıramatik modülü tam yetki
+- `PDKS.ADMIN` → PDKS modülü tam yetki
+
+---
+
+## 25) Uygulama Planı (Implementation Checklist)
+
+### 25.1 Altyapı Bileşenleri
+
+- [ ] `PagePermissionAttribute` veya `AuthorizedPage` base component
+- [ ] `PermissionStateService` güncellemesi (sayfa bazlı kontrol)
+- [ ] `NavMenu.razor` güncelleme (yetki bazlı menü render)
+- [ ] `/forbidden` sayfası oluşturma
+- [ ] Banko modu yetki kontrolü ekleme
+
+### 25.2 Sayfa Güncellemeleri
+
+Her protected sayfa için:
+- [ ] Yetki key tanımlama
+- [ ] `OnInitializedAsync` içinde yetki kontrolü
+- [ ] Menü öğesi yetki kontrolü
+
+### 25.3 Veritabanı
+
+- [ ] Sayfa yetkilerini `PER_Yetkiler` tablosuna ekleme
+- [ ] Modul/Controller/Islem kayıtlarını oluşturma
+- [ ] Test kullanıcılarına yetki atama

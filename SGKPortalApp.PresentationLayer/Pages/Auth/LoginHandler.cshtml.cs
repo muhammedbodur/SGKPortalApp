@@ -87,6 +87,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                     {
                         claims.Add(new Claim("Resim", loginResponse.Resim));
                     }
+
+                    // 🔑 Yetkileri login response'dan al ve claims'e ekle
+                    if (loginResponse.Permissions != null && loginResponse.Permissions.Count > 0)
+                    {
+                        var permissionsJson = JsonSerializer.Serialize(loginResponse.Permissions);
+                        claims.Add(new Claim("Permissions", permissionsJson));
+                        _logger.LogInformation("🔑 {Count} yetki claims'e eklendi", loginResponse.Permissions.Count);
+                    }
+                    else
+                    {
+                        claims.Add(new Claim("Permissions", "{}"));
+                        _logger.LogWarning("⚠️ Login response'da yetki bulunamadı");
+                    }
                 }
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

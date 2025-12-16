@@ -1,0 +1,17 @@
+@* 
+    PermissionSection Component
+    Bir bölümü (tab, card, section) yetki bazlı gösterir/gizler
+    
+    Kullanım:
+    <PermissionSection PermissionKey="PER.PERSONEL.MANAGE.SECTION.YETKI">
+        <div class="card">
+            <div class="card-header">Yetki Bilgileri</div>
+            <div class="card-body">...</div>
+        </div>
+    </PermissionSection>
+*@
+
+@if (_hasPermission)
+{
+    @ChildContent
+}

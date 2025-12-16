@@ -32,5 +32,8 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth
         
         // Yönlendirme URL'i
         public string? RedirectUrl { get; set; }
+        
+        // Yetkiler (PermissionKey -> YetkiSeviyesi)
+        public Dictionary<string, int>? Permissions { get; set; }
     }
 }

@@ -55,36 +55,26 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             return (true, null);
         }
 
-        private async Task<YetkiTipleri> GetPermissionLevelAsync(string tcKimlikNo, string controllerAdi, string actionAdi, string? modulControllerIslemAdi = null)
+        private async Task<YetkiSeviyesi> GetPermissionLevelAsync(string tcKimlikNo, string permissionKey)
         {
-            if (string.IsNullOrWhiteSpace(tcKimlikNo) || string.IsNullOrWhiteSpace(controllerAdi) || string.IsNullOrWhiteSpace(actionAdi))
-                return YetkiTipleri.None;
+            if (string.IsNullOrWhiteSpace(tcKimlikNo) || string.IsNullOrWhiteSpace(permissionKey))
+                return YetkiSeviyesi.None;
 
-            var yetki = await _unitOfWork.Repository<Yetki>()
-                .FirstOrDefaultAsync(y => y.ControllerAdi == controllerAdi && y.ActionAdi == actionAdi);
+            // PermissionKey ile eşleşen ModulControllerIslem'i bul
+            var islem = await _unitOfWork.Repository<ModulControllerIslem>()
+                .FirstOrDefaultAsync(m => m.PermissionKey == permissionKey);
 
-            if (yetki == null)
-                return YetkiTipleri.Delete;
+            if (islem == null)
+                return YetkiSeviyesi.Edit; // Tanımsız permission key = full access
 
-            var perms = (await _unitOfWork.Repository<PersonelYetki>()
-                .FindAsync(py => py.TcKimlikNo == tcKimlikNo && py.YetkiId == yetki.YetkiId, py => py.ModulControllerIslem))
-                .ToList();
+            // Personelin bu işlem için atanmış seviyesini bul
+            var personelYetki = await _unitOfWork.Repository<PersonelYetki>()
+                .FirstOrDefaultAsync(py => py.TcKimlikNo == tcKimlikNo && py.ModulControllerIslemId == islem.ModulControllerIslemId);
 
-            if (!perms.Any())
-                return YetkiTipleri.None;
+            if (personelYetki == null)
+                return YetkiSeviyesi.None;
 
-            if (string.IsNullOrWhiteSpace(modulControllerIslemAdi))
-                return perms.Max(p => p.YetkiTipleri);
-
-            var matching = perms
-                .Where(p => p.ModulControllerIslem != null
-                    && string.Equals(p.ModulControllerIslem.ModulControllerIslemAdi, modulControllerIslemAdi, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            if (!matching.Any())
-                return YetkiTipleri.None;
-
-            return matching.Max(p => p.YetkiTipleri);
+            return personelYetki.YetkiSeviyesi;
         }
 
         public async Task<ApiResponseDto<List<PersonelResponseDto>>> GetAllAsync()
@@ -115,11 +105,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 if (!validation.Ok)
                     return ApiResponseDto<PersonelResponseDto>.ErrorResult(validation.ErrorMessage ?? "Yetkisiz işlem");
 
-                var level = await GetPermissionLevelAsync(request.RequestorTcKimlikNo!, "Personel", "Manage");
-                if (level < YetkiTipleri.Edit)
+                var level = await GetPermissionLevelAsync(request.RequestorTcKimlikNo!, "PER.PERSONEL.MANAGE");
+                if (level < YetkiSeviyesi.Edit)
                     return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
 
-                var canDelete = level >= YetkiTipleri.Delete;
+                var canDelete = level >= YetkiSeviyesi.Edit;
 
                 var personel = await _unitOfWork.Repository<Personel>().GetByIdAsync(tcKimlikNo);
                 if (personel == null)
@@ -389,8 +379,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     if (!validation.Ok)
                         return ApiResponseDto<PersonelResponseDto>.ErrorResult(validation.ErrorMessage ?? "Yetkisiz işlem");
 
-                    var level = await GetPermissionLevelAsync(request.RequestorTcKimlikNo!, "Personel", "Manage");
-                    if (level < YetkiTipleri.Edit)
+                    var level = await GetPermissionLevelAsync(request.RequestorTcKimlikNo!, "PER.PERSONEL.MANAGE");
+                    if (level < YetkiSeviyesi.Edit)
                         return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
 
                     // 1. Personel kaydet
@@ -516,11 +506,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     if (!validation.Ok)
                         return ApiResponseDto<PersonelResponseDto>.ErrorResult(validation.ErrorMessage ?? "Yetkisiz işlem");
 
-                    var level = await GetPermissionLevelAsync(request.RequestorTcKimlikNo!, "Personel", "Manage");
-                    if (level < YetkiTipleri.Edit)
+                    var level = await GetPermissionLevelAsync(request.RequestorTcKimlikNo!, "PER.PERSONEL.MANAGE");
+                    if (level < YetkiSeviyesi.Edit)
                         return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
 
-                    var canDelete = level >= YetkiTipleri.Delete;
+                    var canDelete = level >= YetkiSeviyesi.Edit;
 
                     // 1. Personel güncelle
                     var personel = await _unitOfWork.Repository<Personel>().GetByIdAsync(tcKimlikNo);

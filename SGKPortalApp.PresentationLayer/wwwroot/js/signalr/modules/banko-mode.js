@@ -147,8 +147,26 @@ window.bankoMode = {
         });
 
         // Permissions changed
-        connection.on("permissionsChanged", (data) => {
+        connection.on("permissionsChanged", async (data) => {
             console.log('🔑 permissionsChanged:', data);
+            
+            // 1. Önce HTTP endpoint ile cookie'yi güncelle
+            try {
+                const response = await fetch('/auth/refreshpermissions', {
+                    method: 'GET',
+                    credentials: 'same-origin'
+                });
+                const result = await response.json();
+                if (result.success) {
+                    console.log('✅ Permissions cookie güncellendi:', result.count, 'yetki');
+                } else {
+                    console.error('❌ Permissions cookie güncellenemedi:', result.error);
+                }
+            } catch (err) {
+                console.error('❌ RefreshPermissions endpoint hatası:', err);
+            }
+            
+            // 2. Sonra Blazor component'i bilgilendir (UI güncellemesi için)
             if (this.dotNetHelper) {
                 this.dotNetHelper.invokeMethodAsync('OnPermissionsChanged')
                     .catch(err => {

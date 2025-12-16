@@ -1,8 +1,10 @@
-@page "/personel/modul-yonetimi"
+@page "/yetki/modul"
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common
+@using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces
 @inject IModulApiService ModulApiService
 @inject IJSRuntime JS
+@inject IToastService ToastService
 
 <PageTitle>Modül Yönetimi - SGK Portal</PageTitle>
 
@@ -200,13 +202,13 @@
         StateHasChanged();
 
         var result = await ModulApiService.GetAllAsync();
-        if (result.IsSuccess && result.Data != null)
+        if (result.Success && result.Data != null)
         {
             Moduller = result.Data;
         }
         else
         {
-            await JS.InvokeVoidAsync("alert", result.Message ?? "Modüller yüklenemedi");
+            await ToastService.ShowErrorAsync(result.Message ?? "Modüller yüklenemedi");
         }
 
         IsLoading = false;
@@ -229,7 +231,7 @@
     {
         if (string.IsNullOrWhiteSpace(NewModulAdi))
         {
-            await JS.InvokeVoidAsync("alert", "Modül adı boş olamaz");
+            await ToastService.ShowWarningAsync("Modül adı boş olamaz");
             return;
         }
 
@@ -243,15 +245,15 @@
 
         var result = await ModulApiService.CreateAsync(request);
 
-        if (result.IsSuccess)
+        if (result.Success)
         {
-            await JS.InvokeVoidAsync("alert", result.Message ?? "Modül başarıyla eklendi");
+            await ToastService.ShowSuccessAsync(result.Message ?? "Modül başarıyla eklendi");
             CloseModal();
             await LoadData();
         }
         else
         {
-            await JS.InvokeVoidAsync("alert", result.Message ?? "Modül eklenemedi");
+            await ToastService.ShowErrorAsync(result.Message ?? "Modül eklenemedi");
         }
 
         IsSaving = false;
@@ -274,7 +276,7 @@
     {
         if (string.IsNullOrWhiteSpace(EditingModulAdi))
         {
-            await JS.InvokeVoidAsync("alert", "Modül adı boş olamaz");
+            await ToastService.ShowWarningAsync("Modül adı boş olamaz");
             return;
         }
 
@@ -288,15 +290,15 @@
 
         var result = await ModulApiService.UpdateAsync(id, request);
 
-        if (result.IsSuccess)
+        if (result.Success)
         {
-            await JS.InvokeVoidAsync("alert", result.Message ?? "Modül başarıyla güncellendi");
+            await ToastService.ShowSuccessAsync(result.Message ?? "Modül başarıyla güncellendi");
             CancelEdit();
             await LoadData();
         }
         else
         {
-            await JS.InvokeVoidAsync("alert", result.Message ?? "Modül güncellenemedi");
+            await ToastService.ShowErrorAsync(result.Message ?? "Modül güncellenemedi");
         }
 
         IsSaving = false;
@@ -307,8 +309,7 @@
     {
         if (modul.ControllerCount > 0)
         {
-            await JS.InvokeVoidAsync("alert",
-                $"Bu modüle bağlı {modul.ControllerCount} controller bulunmaktadır. Önce onları silmelisiniz.");
+            await ToastService.ShowWarningAsync($"Bu modüle bağlı {modul.ControllerCount} controller bulunmaktadır. Önce onları silmelisiniz.");
             return;
         }
 
@@ -322,14 +323,14 @@
 
         var result = await ModulApiService.DeleteAsync(modul.ModulId);
 
-        if (result.IsSuccess)
+        if (result.Success)
         {
-            await JS.InvokeVoidAsync("alert", result.Message ?? "Modül başarıyla silindi");
+            await ToastService.ShowSuccessAsync(result.Message ?? "Modül başarıyla silindi");
             await LoadData();
         }
         else
         {
-            await JS.InvokeVoidAsync("alert", result.Message ?? "Modül silinemedi");
+            await ToastService.ShowErrorAsync(result.Message ?? "Modül silinemedi");
         }
 
         IsSaving = false;

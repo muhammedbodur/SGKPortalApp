@@ -3,6 +3,7 @@ using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Generic;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,19 +22,21 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                 return Enumerable.Empty<PersonelYetki>();
 
             return await _dbSet
-                .Include(py => py.Yetki)
+                .Include(py => py.ModulControllerIslem)
+                    .ThenInclude(mci => mci.ModulController)
+                        .ThenInclude(mc => mc.Modul)
                 .AsNoTracking()
                 .Where(py => py.TcKimlikNo == tcKimlikNo)
-                .OrderBy(py => py.Yetki.YetkiAdi)
+                .OrderBy(py => py.ModulControllerIslem.ModulControllerIslemAdi)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<PersonelYetki>> GetByYetkiAsync(int yetkiId)
+        public async Task<IEnumerable<PersonelYetki>> GetByModulControllerIslemAsync(int modulControllerIslemId)
         {
             return await _dbSet
                 .Include(py => py.Personel)
                 .AsNoTracking()
-                .Where(py => py.YetkiId == yetkiId)
+                .Where(py => py.ModulControllerIslemId == modulControllerIslemId)
                 .OrderBy(py => py.Personel.AdSoyad)
                 .ToListAsync();
         }
@@ -42,22 +45,38 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
         {
             return await _dbSet
                 .Include(py => py.Personel)
-                .Include(py => py.Yetki)
+                .Include(py => py.ModulControllerIslem)
+                    .ThenInclude(mci => mci.ModulController)
+                        .ThenInclude(mc => mc.Modul)
                 .AsNoTracking()
                 .Where(py => !py.Personel.SilindiMi)
                 .OrderBy(py => py.Personel.AdSoyad)
-                .ThenBy(py => py.Yetki.YetkiAdi)
+                .ThenBy(py => py.ModulControllerIslem.ModulControllerIslemAdi)
                 .ToListAsync();
         }
 
-        public async Task<bool> HasPermissionAsync(string tcKimlikNo, int yetkiId)
+        public async Task<bool> HasPermissionAsync(string tcKimlikNo, int modulControllerIslemId)
         {
-            if (string.IsNullOrWhiteSpace(tcKimlikNo) || yetkiId <= 0)
+            if (string.IsNullOrWhiteSpace(tcKimlikNo) || modulControllerIslemId <= 0)
                 return false;
 
             return await _dbSet
                 .AsNoTracking()
-                .AnyAsync(py => py.TcKimlikNo == tcKimlikNo && py.YetkiId == yetkiId);
+                .AnyAsync(py => py.TcKimlikNo == tcKimlikNo && py.ModulControllerIslemId == modulControllerIslemId);
+        }
+
+        public async Task<YetkiSeviyesi> GetPermissionLevelAsync(string tcKimlikNo, string permissionKey)
+        {
+            if (string.IsNullOrWhiteSpace(tcKimlikNo) || string.IsNullOrWhiteSpace(permissionKey))
+                return YetkiSeviyesi.None;
+
+            var permission = await _dbSet
+                .Include(py => py.ModulControllerIslem)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(py => py.TcKimlikNo == tcKimlikNo 
+                    && py.ModulControllerIslem.PermissionKey == permissionKey);
+
+            return permission?.YetkiSeviyesi ?? YetkiSeviyesi.None;
         }
     }
 }

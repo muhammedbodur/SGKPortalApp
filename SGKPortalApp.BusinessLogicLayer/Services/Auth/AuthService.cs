@@ -149,6 +149,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                     _logger.LogInformation("Login başarılı - {TcKimlikNo} - {AdSoyad}",
                         user.TcKimlikNo, user.Personel.AdSoyad);
 
+                    // 🔑 Yetkileri çek
+                    var permissions = await _context.PersonelYetkileri
+                        .Where(py => py.TcKimlikNo == user.TcKimlikNo && !py.SilindiMi)
+                        .Include(py => py.ModulControllerIslem)
+                        .Where(py => py.ModulControllerIslem != null && !string.IsNullOrEmpty(py.ModulControllerIslem.PermissionKey))
+                        .ToDictionaryAsync(
+                            py => py.ModulControllerIslem!.PermissionKey,
+                            py => (int)py.YetkiSeviyesi);
+
+                    _logger.LogDebug("🔑 Login: {Count} yetki yüklendi - {TcKimlikNo}", permissions.Count, user.TcKimlikNo);
+
                     return new LoginResponseDto
                     {
                         Success = true,
@@ -166,7 +177,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                         Resim = user.Personel.Resim,
                         SessionId = sessionId,
                         UserType = "Personel", // 🎯 Personel kullanıcısı
-                        RedirectUrl = "/" // Ana dashboard'a yönlendir
+                        RedirectUrl = "/", // Ana dashboard'a yönlendir
+                        Permissions = permissions // 🔑 Yetkiler
                     };
                 }
             }

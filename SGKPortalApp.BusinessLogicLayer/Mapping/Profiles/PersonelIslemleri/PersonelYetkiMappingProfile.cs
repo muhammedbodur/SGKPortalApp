@@ -10,8 +10,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
         public PersonelYetkiMappingProfile()
         {
             CreateMap<PersonelYetki, PersonelYetkiResponseDto>()
-                .ForMember(dest => dest.YetkiAdi, opt => opt.MapFrom(src => src.Yetki != null ? src.Yetki.YetkiAdi : null))
-                .ForMember(dest => dest.ModulControllerIslemAdi, opt => opt.MapFrom(src => src.ModulControllerIslem != null ? src.ModulControllerIslem.ModulControllerIslemAdi : null));
+                .ForMember(dest => dest.ModulControllerIslemAdi, opt => opt.MapFrom(src => src.ModulControllerIslem != null ? src.ModulControllerIslem.ModulControllerIslemAdi : string.Empty))
+                .ForMember(dest => dest.PermissionKey, opt => opt.MapFrom(src => src.ModulControllerIslem != null ? src.ModulControllerIslem.PermissionKey : string.Empty))
+                .ForMember(dest => dest.IslemTipi, opt => opt.MapFrom(src => src.ModulControllerIslem != null ? src.ModulControllerIslem.IslemTipi : default));
 
             CreateMap<PersonelYetkiCreateRequestDto, PersonelYetki>()
                 .ForMember(dest => dest.PersonelYetkiId, opt => opt.Ignore())
@@ -23,7 +24,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.EkleyenKullanici, opt => opt.Ignore())
                 .ForMember(dest => dest.DuzenleyenKullanici, opt => opt.Ignore())
                 .ForMember(dest => dest.Personel, opt => opt.Ignore())
-                .ForMember(dest => dest.Yetki, opt => opt.Ignore())
                 .ForMember(dest => dest.ModulControllerIslem, opt => opt.Ignore());
 
             CreateMap<PersonelYetkiUpdateRequestDto, PersonelYetki>()
@@ -37,7 +37,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.EkleyenKullanici, opt => opt.Ignore())
                 .ForMember(dest => dest.DuzenleyenKullanici, opt => opt.Ignore())
                 .ForMember(dest => dest.Personel, opt => opt.Ignore())
-                .ForMember(dest => dest.Yetki, opt => opt.Ignore())
                 .ForMember(dest => dest.ModulControllerIslem, opt => opt.Ignore());
         }
     }

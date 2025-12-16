@@ -8,7 +8,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri
     {
         Task<ApiResponseDto<PersonelYetkiResponseDto>> GetByIdAsync(int id);
         Task<ApiResponseDto<List<PersonelYetkiResponseDto>>> GetByTcKimlikNoAsync(string tcKimlikNo);
-        Task<ApiResponseDto<List<PersonelYetkiResponseDto>>> GetByYetkiIdAsync(int yetkiId);
+        Task<ApiResponseDto<List<PersonelYetkiResponseDto>>> GetByModulControllerIslemIdAsync(int modulControllerIslemId);
 
         Task<ApiResponseDto<PersonelYetkiResponseDto>> CreateAsync(PersonelYetkiCreateRequestDto request);
         Task<ApiResponseDto<PersonelYetkiResponseDto>> UpdateAsync(int id, PersonelYetkiUpdateRequestDto request);

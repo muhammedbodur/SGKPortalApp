@@ -9,13 +9,11 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         [StringLength(11, MinimumLength = 11, ErrorMessage = "TC Kimlik No 11 karakter olmalıdır")]
         public string TcKimlikNo { get; set; } = string.Empty;
 
-        [Range(1, int.MaxValue, ErrorMessage = "Geçerli bir YetkiId giriniz")]
-        public int YetkiId { get; set; }
-
+        [Required(ErrorMessage = "ModulControllerIslemId zorunludur")]
         [Range(1, int.MaxValue, ErrorMessage = "Geçerli bir ModulControllerIslemId giriniz")]
         public int ModulControllerIslemId { get; set; }
 
-        [Required(ErrorMessage = "YetkiTipleri zorunludur")]
-        public YetkiTipleri YetkiTipleri { get; set; } = YetkiTipleri.View;
+        [Required(ErrorMessage = "YetkiSeviyesi zorunludur")]
+        public YetkiSeviyesi YetkiSeviyesi { get; set; } = YetkiSeviyesi.View;
     }
 }
