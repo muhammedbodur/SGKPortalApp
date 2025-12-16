@@ -30,5 +30,11 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common
 
         [StringLength(500, ErrorMessage = "Açıklama en fazla 500 karakter olabilir")]
         public string? Aciklama { get; set; }
+
+        [StringLength(200, ErrorMessage = "DTO Type adı en fazla 200 karakter olabilir")]
+        public string? DtoTypeName { get; set; }
+
+        [StringLength(100, ErrorMessage = "DTO Field adı en fazla 100 karakter olabilir")]
+        public string? DtoFieldName { get; set; }
     }
 }

@@ -176,6 +176,20 @@
                         <small class="text-muted">Bu işlem başka bir işlemin altında mı? (Örn: Buton → Sayfa altında)</small>
                     </div>
                     <hr class="my-3" />
+                    <h6 class="mb-3"><i class="bx bx-code me-1"></i>DTO/Backend Mapping</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">DTO Type Name</label>
+                            <input type="text" class="form-control" @bind="DtoTypeName" placeholder="PersonelUpdateRequestDto" />
+                            <small class="text-muted">Backend DTO sınıf adı (örn: PersonelUpdateRequestDto)</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">DTO Field Name</label>
+                            <input type="text" class="form-control" @bind="DtoFieldName" placeholder="SicilNo" />
+                            <small class="text-muted">Property adı - case sensitive (örn: SicilNo, Email, IlId)</small>
+                        </div>
+                    </div>
+                    <hr class="my-3" />
                     <h6 class="mb-3"><i class="bx bx-shield me-1"></i>Sayfa Yetki Ayarları</h6>
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -238,6 +252,8 @@
     private YetkiSeviyesi SelectedMinYetki = YetkiSeviyesi.View;
     private YetkiIslemTipi SelectedIslemTipi = YetkiIslemTipi.Page;
     private int SelectedUstIslemId = 0;
+    private string? DtoTypeName = null;
+    private string? DtoFieldName = null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -313,6 +329,8 @@
         SelectedSayfaTipi = SayfaTipi.Protected;
         SelectedMinYetki = YetkiSeviyesi.View;
         SelectedIslemTipi = YetkiIslemTipi.Page;
+        DtoTypeName = null;
+        DtoFieldName = null;
         ShowModal = true;
     }
 
@@ -330,6 +348,8 @@
         SelectedMinYetki = i.MinYetkiSeviyesi;
         SelectedIslemTipi = i.IslemTipi;
         SelectedUstIslemId = i.UstIslemId ?? 0;
+        DtoTypeName = i.DtoTypeName;
+        DtoFieldName = i.DtoFieldName;
         ShowModal = true;
     }
 
@@ -352,16 +372,18 @@
 
         if (EditingId.HasValue)
         {
-            var request = new ModulControllerIslemUpdateRequestDto 
-            { 
-                ModulControllerId = SelectedControllerId, 
+            var request = new ModulControllerIslemUpdateRequestDto
+            {
+                ModulControllerId = SelectedControllerId,
                 ModulControllerIslemAdi = IslemAdi.Trim(),
                 IslemTipi = SelectedIslemTipi,
                 UstIslemId = SelectedUstIslemId > 0 ? SelectedUstIslemId : null,
                 Route = string.IsNullOrWhiteSpace(Route) ? null : Route.Trim(),
                 PermissionKey = string.IsNullOrWhiteSpace(PermissionKey) ? null : PermissionKey.Trim(),
                 SayfaTipi = SelectedSayfaTipi,
-                MinYetkiSeviyesi = SelectedMinYetki
+                MinYetkiSeviyesi = SelectedMinYetki,
+                DtoTypeName = string.IsNullOrWhiteSpace(DtoTypeName) ? null : DtoTypeName.Trim(),
+                DtoFieldName = string.IsNullOrWhiteSpace(DtoFieldName) ? null : DtoFieldName.Trim()
             };
             var result = await IslemApiService.UpdateAsync(EditingId.Value, request);
             if (result.Success)
@@ -371,16 +393,18 @@
         }
         else
         {
-            var request = new ModulControllerIslemCreateRequestDto 
-            { 
-                ModulControllerId = SelectedControllerId, 
+            var request = new ModulControllerIslemCreateRequestDto
+            {
+                ModulControllerId = SelectedControllerId,
                 ModulControllerIslemAdi = IslemAdi.Trim(),
                 IslemTipi = SelectedIslemTipi,
                 UstIslemId = SelectedUstIslemId > 0 ? SelectedUstIslemId : null,
                 Route = string.IsNullOrWhiteSpace(Route) ? null : Route.Trim(),
                 PermissionKey = string.IsNullOrWhiteSpace(PermissionKey) ? null : PermissionKey.Trim(),
                 SayfaTipi = SelectedSayfaTipi,
-                MinYetkiSeviyesi = SelectedMinYetki
+                MinYetkiSeviyesi = SelectedMinYetki,
+                DtoTypeName = string.IsNullOrWhiteSpace(DtoTypeName) ? null : DtoTypeName.Trim(),
+                DtoFieldName = string.IsNullOrWhiteSpace(DtoFieldName) ? null : DtoFieldName.Trim()
             };
             var result = await IslemApiService.CreateAsync(request);
             if (result.Success)
