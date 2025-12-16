@@ -535,7 +535,7 @@
             }
             else
             {
-                await ToastService.ShowErrorAsync(result.Message?.FirstOrDefault() ?? "DTO'lar yüklenemedi");
+                await ToastService.ShowErrorAsync(result.Message ?? "DTO'lar yüklenemedi");
             }
         }
         catch (Exception ex)
@@ -560,7 +560,7 @@
             }
             else
             {
-                await ToastService.ShowErrorAsync(result.Message?.FirstOrDefault() ?? "Field'lar yüklenemedi");
+                await ToastService.ShowErrorAsync(result.Message ?? "Field'lar yüklenemedi");
             }
         }
         catch (Exception ex)

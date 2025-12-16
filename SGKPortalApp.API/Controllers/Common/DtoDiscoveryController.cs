@@ -58,7 +58,7 @@ namespace SGKPortalApp.API.Controllers.Common
                 {
                     Success = true,
                     Data = dtoTypes,
-                    Message = new[] { $"{dtoTypes.Count} DTO bulundu" }
+                    Message = $"{dtoTypes.Count} DTO bulundu"
                 });
             }
             catch (Exception ex)
@@ -66,7 +66,7 @@ namespace SGKPortalApp.API.Controllers.Common
                 return StatusCode(500, new ServiceResult<List<DtoTypeInfo>>
                 {
                     Success = false,
-                    Message = new[] { $"DTO'lar yüklenirken hata: {ex.Message}" }
+                    Message = $"DTO'lar yüklenirken hata: {ex.Message}"
                 });
             }
         }
@@ -96,7 +96,7 @@ namespace SGKPortalApp.API.Controllers.Common
                     return NotFound(new ServiceResult<List<DtoPropertyInfo>>
                     {
                         Success = false,
-                        Message = new[] { $"'{dtoTypeName}' bulunamadı" }
+                        Message = $"'{dtoTypeName}' bulunamadı"
                     });
                 }
 
@@ -120,7 +120,7 @@ namespace SGKPortalApp.API.Controllers.Common
                 {
                     Success = true,
                     Data = properties,
-                    Message = new[] { $"{properties.Count} property bulundu" }
+                    Message = $"{properties.Count} property bulundu"
                 });
             }
             catch (Exception ex)
@@ -128,7 +128,7 @@ namespace SGKPortalApp.API.Controllers.Common
                 return StatusCode(500, new ServiceResult<List<DtoPropertyInfo>>
                 {
                     Success = false,
-                    Message = new[] { $"Property'ler yüklenirken hata: {ex.Message}" }
+                    Message = $"Property'ler yüklenirken hata: {ex.Message}"
                 });
             }
         }
@@ -147,7 +147,7 @@ namespace SGKPortalApp.API.Controllers.Common
                     return BadRequest(new ServiceResult<FieldAnalysisResult>
                     {
                         Success = false,
-                        Message = new[] { "pageKey ve dtoTypeName parametreleri zorunludur" }
+                        Message = "pageKey ve dtoTypeName parametreleri zorunludur"
                     });
                 }
 
@@ -166,7 +166,7 @@ namespace SGKPortalApp.API.Controllers.Common
                     return NotFound(new ServiceResult<FieldAnalysisResult>
                     {
                         Success = false,
-                        Message = new[] { $"'{dtoTypeName}' bulunamadı" }
+                        Message = $"'{dtoTypeName}' bulunamadı"
                     });
                 }
 
@@ -231,7 +231,7 @@ namespace SGKPortalApp.API.Controllers.Common
                 {
                     Success = true,
                     Data = result,
-                    Message = new[] { $"{result.TotalFields} field bulundu ({result.ProtectedFields} korumalı, {result.AvailableFields} eklenebilir)" }
+                    Message = $"{result.TotalFields} field bulundu ({result.ProtectedFields} korumalı, {result.AvailableFields} eklenebilir)"
                 });
             }
             catch (Exception ex)
@@ -239,7 +239,7 @@ namespace SGKPortalApp.API.Controllers.Common
                 return StatusCode(500, new ServiceResult<FieldAnalysisResult>
                 {
                     Success = false,
-                    Message = new[] { $"Field analysis sırasında hata: {ex.Message}" }
+                    Message = $"Field analysis sırasında hata: {ex.Message}"
                 });
             }
         }
