@@ -31,34 +31,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         }
 
         /// <summary>
-        /// Kullanıcının PermissionStamp'ini günceller (yetki tanımı değişikliği için)
-        /// </summary>
-        private async Task<Guid?> TouchPermissionStampAsync(string tcKimlikNo)
-        {
-            try
-            {
-                var userRepo = _unitOfWork.Repository<User>();
-                var user = await userRepo.FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo);
-                if (user == null)
-                {
-                    _logger.LogWarning("PermissionStamp güncellenecek User bulunamadı. TcKimlikNo: {TcKimlikNo}", tcKimlikNo);
-                    return null;
-                }
-
-                user.PermissionStamp = Guid.NewGuid();
-                user.DuzenlenmeTarihi = DateTime.Now;
-                userRepo.Update(user);
-                await _unitOfWork.SaveChangesAsync();
-                return user.PermissionStamp;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "PermissionStamp güncellenirken hata oluştu. TcKimlikNo: {TcKimlikNo}", tcKimlikNo);
-                return null;
-            }
-        }
-
-        /// <summary>
         /// Tüm aktif kullanıcılara yetki tanımlarının değiştiğini bildirir.
         /// Her kullanıcının PermissionStamp'i güncellenir ve permissionsChanged event'i gönderilir (claims güncellemesi için)
         /// </summary>
@@ -69,7 +41,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 var connections = await _hubConnectionRepository.GetActiveConnectionsAsync();
 
                 // Sadece online ve silinmemiş connection'ları al
-                // Her kullanıcı için ayrı ayrı permissionsChanged gönder
                 var userConnections = connections
                     .Where(c => c.ConnectionStatus == ConnectionStatus.online && !c.SilindiMi)
                     .GroupBy(c => c.TcKimlikNo)
@@ -81,18 +52,38 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     return;
                 }
 
-                // Her kullanıcıya permissionsChanged event'i gönder
-                // Bu event zaten JS tarafında /auth/refreshpermissions çağrısı yapıyor
+                // 1. Önce tüm kullanıcıların PermissionStamp'lerini toplu güncelle (performans için)
+                var userRepo = _unitOfWork.Repository<User>();
+                var tcKimlikNoList = userConnections.Select(ug => ug.Key).ToList();
+                var users = await userRepo.FindAsync(u => tcKimlikNoList.Contains(u.TcKimlikNo));
+
+                var stampMap = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+                foreach (var user in users)
+                {
+                    user.PermissionStamp = Guid.NewGuid();
+                    user.DuzenlenmeTarihi = DateTime.Now;
+                    userRepo.Update(user);
+                    stampMap[user.TcKimlikNo] = user.PermissionStamp;
+                }
+
+                // Tek seferde tüm değişiklikleri kaydet (batch update)
+                await _unitOfWork.SaveChangesAsync();
+
+                // 2. Her kullanıcıya permissionsChanged event'i gönder
+                // Bu event JS tarafında /auth/refreshpermissions çağrısı yapıyor
                 foreach (var userGroup in userConnections)
                 {
                     var tcKimlikNo = userGroup.Key;
-                    var connectionId = userGroup.First().ConnectionId;
+                    var connectionIds = userGroup
+                        .Select(c => c.ConnectionId)
+                        .Distinct()
+                        .ToList();
 
-                    // PermissionStamp'i güncelle (bu kritik!)
-                    var stamp = await TouchPermissionStampAsync(tcKimlikNo);
+                    // Güncellenmiş stamp'i al
+                    var stamp = stampMap.GetValueOrDefault(tcKimlikNo);
 
                     await _broadcaster.SendToConnectionsAsync(
-                        new List<string> { connectionId },
+                        connectionIds,
                         "permissionsChanged",
                         new
                         {
