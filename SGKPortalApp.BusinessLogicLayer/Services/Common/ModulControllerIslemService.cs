@@ -268,6 +268,26 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 if (existing != null && existing.ModulControllerId == request.ModulControllerId)
                     return ApiResponseDto<ModulControllerIslemResponseDto>.ErrorResult("Bu controller'da aynı isimde işlem zaten mevcut");
 
+                // Page dışı tipler için üst işlem zorunlu
+                if (request.IslemTipi != YetkiIslemTipi.Page && !request.UstIslemId.HasValue)
+                {
+                    return ApiResponseDto<ModulControllerIslemResponseDto>.ErrorResult("Tab, Buton, Field ve FormField tipleri için üst işlem (Page) seçimi zorunludur");
+                }
+
+                // Üst işlem seçilmişse, Page tipinde olmalı
+                if (request.UstIslemId.HasValue)
+                {
+                    var ustIslem = await repo.GetByIdAsync(request.UstIslemId.Value);
+                    if (ustIslem == null)
+                    {
+                        return ApiResponseDto<ModulControllerIslemResponseDto>.ErrorResult("Seçilen üst işlem bulunamadı");
+                    }
+                    if (ustIslem.IslemTipi != YetkiIslemTipi.Page)
+                    {
+                        return ApiResponseDto<ModulControllerIslemResponseDto>.ErrorResult("Üst işlem sadece Page tipinde olabilir");
+                    }
+                }
+
                 var entity = new ModulControllerIslem
                 {
                     ModulControllerIslemAdi = request.ModulControllerIslemAdi,
@@ -333,6 +353,26 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 var controller = await controllerRepo.GetWithIslemlerAsync(request.ModulControllerId);
                 if (controller == null)
                     return ApiResponseDto<ModulControllerIslemResponseDto>.ErrorResult("Seçilen controller bulunamadı");
+
+                // Page dışı tipler için üst işlem zorunlu
+                if (request.IslemTipi != YetkiIslemTipi.Page && !request.UstIslemId.HasValue)
+                {
+                    return ApiResponseDto<ModulControllerIslemResponseDto>.ErrorResult("Tab, Buton, Field ve FormField tipleri için üst işlem (Page) seçimi zorunludur");
+                }
+
+                // Üst işlem seçilmişse, Page tipinde olmalı
+                if (request.UstIslemId.HasValue)
+                {
+                    var ustIslem = await repo.GetByIdAsync(request.UstIslemId.Value);
+                    if (ustIslem == null)
+                    {
+                        return ApiResponseDto<ModulControllerIslemResponseDto>.ErrorResult("Seçilen üst işlem bulunamadı");
+                    }
+                    if (ustIslem.IslemTipi != YetkiIslemTipi.Page)
+                    {
+                        return ApiResponseDto<ModulControllerIslemResponseDto>.ErrorResult("Üst işlem sadece Page tipinde olabilir");
+                    }
+                }
 
                 entity.ModulControllerIslemAdi = request.ModulControllerIslemAdi;
                 entity.ModulControllerId = request.ModulControllerId;

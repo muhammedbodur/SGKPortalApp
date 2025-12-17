@@ -88,8 +88,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
         private void OnControllerChanged()
         {
             SelectedUstIslemId = 0;
+            // Üst işlem dropdown'ında sadece Page tipindeki işlemler gösterilir
             FilteredIslemler = Islemler
-                .Where(i => i.ModulControllerId == SelectedControllerId && i.ModulControllerIslemId != EditingId)
+                .Where(i => i.ModulControllerId == SelectedControllerId
+                    && i.ModulControllerIslemId != EditingId
+                    && i.IslemTipi == YetkiIslemTipi.Page) // Sadece Page tipi
                 .OrderBy(i => i.ModulControllerIslemAdi)
                 .ToList();
 
@@ -147,6 +150,20 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
             if (!ShowRouteField)
             {
                 Route = null;
+            }
+
+            // Page dışı tipler için üst işlem seçimi temizlenir (zorunlu olacak)
+            if (SelectedIslemTipi != YetkiIslemTipi.Page)
+            {
+                // Eğer mevcut üst işlem Page değilse temizle
+                if (SelectedUstIslemId > 0)
+                {
+                    var ustIslem = FilteredIslemler.FirstOrDefault(i => i.ModulControllerIslemId == SelectedUstIslemId);
+                    if (ustIslem?.IslemTipi != YetkiIslemTipi.Page)
+                    {
+                        SelectedUstIslemId = 0;
+                    }
+                }
             }
 
             // İşlem tipine göre MinYetki varsayılan değerini ayarla
@@ -368,6 +385,24 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
             {
                 await ToastService.ShowWarningAsync("Field tipi için DTO Field Name zorunludur");
                 return;
+            }
+
+            // Page dışı tipler için üst işlem zorunlu
+            if (SelectedIslemTipi != YetkiIslemTipi.Page && SelectedUstIslemId <= 0)
+            {
+                await ToastService.ShowWarningAsync("Tab, Buton, Field ve FormField tipleri için üst işlem (Page) seçimi zorunludur");
+                return;
+            }
+
+            // Üst işlem seçilmişse, Page tipinde olmalı
+            if (SelectedUstIslemId > 0)
+            {
+                var ustIslem = FilteredIslemler.FirstOrDefault(i => i.ModulControllerIslemId == SelectedUstIslemId);
+                if (ustIslem == null || ustIslem.IslemTipi != YetkiIslemTipi.Page)
+                {
+                    await ToastService.ShowWarningAsync("Üst işlem sadece Page tipinde olabilir");
+                    return;
+                }
             }
 
             IsSaving = true;
