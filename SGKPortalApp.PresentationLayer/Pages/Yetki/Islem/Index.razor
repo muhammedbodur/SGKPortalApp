@@ -170,15 +170,30 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Üst İşlem (Opsiyonel)</label>
+                        <label class="form-label">
+                            Üst İşlem (Sayfa)
+                            @if (SelectedIslemTipi != YetkiIslemTipi.Page)
+                            {
+                                <span class="text-danger">*</span>
+                            }
+                        </label>
                         <select class="form-select" @bind="SelectedUstIslemId" @bind:after="OnUstIslemChanged" disabled="@(SelectedControllerId <= 0)">
-                            <option value="0">-- Üst İşlem Yok (Kök Seviye) --</option>
+                            <option value="0">-- @(SelectedIslemTipi == YetkiIslemTipi.Page ? "Üst İşlem Yok (Kök Seviye)" : "Sayfa Seçiniz") --</option>
                             @foreach (var i in FilteredIslemler)
                             {
                                 <option value="@i.ModulControllerIslemId">@GetIslemPrefix(i) @i.ModulControllerIslemAdi</option>
                             }
                         </select>
-                        <small class="text-muted">Bu işlem başka bir işlemin altında mı? (Örn: Buton → Sayfa altında)</small>
+                        <small class="text-muted">
+                            @if (SelectedIslemTipi == YetkiIslemTipi.Page)
+                            {
+                                <text>Sayfalar kök seviyede olabilir veya başka bir sayfanın altında</text>
+                            }
+                            else
+                            {
+                                <text>Tab, Buton, Field ve FormField mutlaka bir sayfa altında olmalıdır (Sadece Page tipindeki işlemler gösterilir)</text>
+                            }
+                        </small>
                     </div>
 
                     @* DTO Mapping - Sadece Field/FormField için göster *@
