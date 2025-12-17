@@ -63,7 +63,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                         new
                         {
                             TcKimlikNo = userGroup.Key,
-                            Reason = "PermissionDefinitionChanged",
+                            Reason = "permissionsChanged",
                             Timestamp = DateTime.Now
                         });
                 }
