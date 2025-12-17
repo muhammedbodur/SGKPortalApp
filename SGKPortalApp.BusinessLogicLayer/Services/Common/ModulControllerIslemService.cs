@@ -3,6 +3,7 @@ using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Entities.Auth;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Interfaces.SignalR;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
@@ -30,15 +31,43 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         }
 
         /// <summary>
+        /// Kullanıcının PermissionStamp'ini günceller (yetki tanımı değişikliği için)
+        /// </summary>
+        private async Task<Guid?> TouchPermissionStampAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var userRepo = _unitOfWork.Repository<User>();
+                var user = await userRepo.FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo);
+                if (user == null)
+                {
+                    _logger.LogWarning("PermissionStamp güncellenecek User bulunamadı. TcKimlikNo: {TcKimlikNo}", tcKimlikNo);
+                    return null;
+                }
+
+                user.PermissionStamp = Guid.NewGuid();
+                user.DuzenlenmeTarihi = DateTime.Now;
+                userRepo.Update(user);
+                await _unitOfWork.SaveChangesAsync();
+                return user.PermissionStamp;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "PermissionStamp güncellenirken hata oluştu. TcKimlikNo: {TcKimlikNo}", tcKimlikNo);
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Tüm aktif kullanıcılara yetki tanımlarının değiştiğini bildirir.
-        /// Her kullanıcıya permissionsChanged event'i gönderilir (claims güncellemesi için)
+        /// Her kullanıcının PermissionStamp'i güncellenir ve permissionsChanged event'i gönderilir (claims güncellemesi için)
         /// </summary>
         private async Task BroadcastPermissionDefinitionsChangedAsync()
         {
             try
             {
                 var connections = await _hubConnectionRepository.GetActiveConnectionsAsync();
-                
+
                 // Sadece online ve silinmemiş connection'ları al
                 // Her kullanıcı için ayrı ayrı permissionsChanged gönder
                 var userConnections = connections
@@ -56,13 +85,19 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 // Bu event zaten JS tarafında /auth/refreshpermissions çağrısı yapıyor
                 foreach (var userGroup in userConnections)
                 {
+                    var tcKimlikNo = userGroup.Key;
                     var connectionId = userGroup.First().ConnectionId;
+
+                    // PermissionStamp'i güncelle (bu kritik!)
+                    var stamp = await TouchPermissionStampAsync(tcKimlikNo);
+
                     await _broadcaster.SendToConnectionsAsync(
                         new List<string> { connectionId },
                         "permissionsChanged",
                         new
                         {
-                            TcKimlikNo = userGroup.Key,
+                            TcKimlikNo = tcKimlikNo,
+                            PermissionStamp = stamp,
                             Reason = "PermissionDefinitionChanged",
                             Timestamp = DateTime.Now
                         });
