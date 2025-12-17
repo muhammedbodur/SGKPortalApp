@@ -261,8 +261,66 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
             IsLoading = true;
             var result = await IslemApiService.GetAllAsync();
             if (result.Success && result.Data != null)
-                Islemler = result.Data;
+            {
+                Islemler = BuildHierarchicalList(result.Data);
+            }
             IsLoading = false;
+        }
+
+        /// <summary>
+        /// İşlemleri hiyerarşik sıraya koyar (Page > Alt işlemler)
+        /// YetkiAtama sayfasındaki gibi üst işlem altında alt işlemler gösterilir
+        /// </summary>
+        private List<ModulControllerIslemResponseDto> BuildHierarchicalList(List<ModulControllerIslemResponseDto> items)
+        {
+            var result = new List<ModulControllerIslemResponseDto>();
+
+            // Modül ve Controller bazında grupla
+            var grouped = items
+                .GroupBy(i => new { i.ModulId, i.ModulAdi, i.ModulControllerId, i.ModulControllerAdi })
+                .OrderBy(g => g.Key.ModulAdi)
+                .ThenBy(g => g.Key.ModulControllerAdi);
+
+            foreach (var group in grouped)
+            {
+                // Önce kök seviyedeki Page'leri ekle (UstIslemId yok)
+                var rootPages = group
+                    .Where(i => i.IslemTipi == YetkiIslemTipi.Page && !i.UstIslemId.HasValue)
+                    .OrderBy(i => i.ModulControllerIslemAdi)
+                    .ToList();
+
+                foreach (var rootPage in rootPages)
+                {
+                    result.Add(rootPage);
+
+                    // Bu Page'in altındaki işlemleri ekle (recursive değil, sadece 1 seviye)
+                    var children = group
+                        .Where(i => i.UstIslemId == rootPage.ModulControllerIslemId)
+                        .OrderBy(i => i.IslemTipi) // Page, Tab, Buton, Field, FormField sırası
+                        .ThenBy(i => i.ModulControllerIslemAdi)
+                        .ToList();
+
+                    result.AddRange(children);
+                }
+
+                // Üst işlemi olan ama üst işlemi bulunamayan işlemler (yanlış veri)
+                var orphans = group
+                    .Where(i => i.UstIslemId.HasValue && !result.Any(r => r.ModulControllerIslemId == i.UstIslemId))
+                    .OrderBy(i => i.ModulControllerIslemAdi)
+                    .ToList();
+
+                result.AddRange(orphans);
+
+                // Hiç üst işlem ilişkisi olmayan non-Page işlemler (yanlış veri)
+                var standalone = group
+                    .Where(i => i.IslemTipi != YetkiIslemTipi.Page && !i.UstIslemId.HasValue && !result.Contains(i))
+                    .OrderBy(i => i.ModulControllerIslemAdi)
+                    .ToList();
+
+                result.AddRange(standalone);
+            }
+
+            return result;
         }
 
         private async Task LoadDtoTypes()

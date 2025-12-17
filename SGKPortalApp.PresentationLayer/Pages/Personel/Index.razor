@@ -310,7 +310,8 @@
                                                 <button class="btn btn-sm btn-icon btn-outline-primary"
                                                         @onclick:stopPropagation="true"
                                                         @onclick="() => NavigateToDetail(personel.TcKimlikNo)"
-                                                        title="Detay">
+                                                        disabled="@(!CanAction("DETAIL"))"
+                                                        title="@(CanAction("DETAIL") ? "Detay" : "Detay (Yetki Yok)")">
                                                     <i class="bx bx-show"></i>
                                                 </button>
                                             }
@@ -319,7 +320,8 @@
                                                 <button class="btn btn-sm btn-icon btn-outline-info"
                                                         @onclick:stopPropagation="true"
                                                         @onclick="() => NavigateToEdit(personel.TcKimlikNo)"
-                                                        title="Düzenle">
+                                                        disabled="@(!CanEditAction("EDIT"))"
+                                                        title="@(CanEditAction("EDIT") ? "Düzenle" : "Düzenle (Yetki Yok)")">
                                                     <i class="bx bx-edit"></i>
                                                 </button>
                                             }
@@ -328,7 +330,8 @@
                                                 <button class="btn btn-sm btn-icon btn-outline-danger"
                                                         @onclick:stopPropagation="true"
                                                         @onclick="() => OpenDeleteModal(personel)"
-                                                        title="Sil">
+                                                        disabled="@(!CanEditAction("DELETE"))"
+                                                        title="@(CanEditAction("DELETE") ? "Sil" : "Sil (Yetki Yok)")">
                                                     <i class="bx bx-trash"></i>
                                                 </button>
                                             }
