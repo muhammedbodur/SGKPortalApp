@@ -51,24 +51,57 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th style="width: 50px;">#</th>
                                 <th>İşlem Adı</th>
+                                <th style="width: 120px;">İşlem Tipi</th>
                                 <th>Route</th>
                                 <th>Permission Key</th>
-                                <th>Sayfa Tipi</th>
-                                <th>Min. Yetki</th>
+                                <th style="width: 120px;">Sayfa Tipi</th>
+                                <th style="width: 100px;">Min. Yetki</th>
                                 <th>Controller / Modül</th>
-                                <th class="text-end">İşlemler</th>
+                                <th class="text-end" style="width: 120px;">İşlemler</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var i in Islemler)
                             {
+                                var isChild = i.UstIslemId.HasValue;
+                                var indent = isChild ? "ps-4" : "";
                                 <tr>
                                     <td>@i.ModulControllerIslemId</td>
-                                    <td><strong>@i.ModulControllerIslemAdi</strong></td>
+                                    <td class="@indent">
+                                        @if (isChild)
+                                        {
+                                            <span class="text-muted me-1">└─</span>
+                                        }
+                                        <strong>@i.ModulControllerIslemAdi</strong>
+                                        @if (!string.IsNullOrEmpty(i.UstIslemAdi))
+                                        {
+                                            <br /><small class="text-muted">Üst: @i.UstIslemAdi</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @switch (i.IslemTipi)
+                                        {
+                                            case YetkiIslemTipi.Page:
+                                                <span class="badge bg-label-primary">📄 Sayfa</span>
+                                                break;
+                                            case YetkiIslemTipi.Tab:
+                                                <span class="badge bg-label-info">📑 Tab</span>
+                                                break;
+                                            case YetkiIslemTipi.Buton:
+                                                <span class="badge bg-label-warning">🔘 Buton</span>
+                                                break;
+                                            case YetkiIslemTipi.Field:
+                                                <span class="badge bg-label-success">📝 Field</span>
+                                                break;
+                                            case YetkiIslemTipi.FormField:
+                                                <span class="badge bg-label-secondary">✏️ FormField</span>
+                                                break;
+                                        }
+                                    </td>
                                     <td><code class="text-primary">@(i.Route ?? "-")</code></td>
-                                    <td><code class="text-secondary">@(i.PermissionKey ?? "-")</code></td>
+                                    <td><code class="text-secondary small">@(i.PermissionKey ?? "-")</code></td>
                                     <td>
                                         @switch (i.SayfaTipi)
                                         {
