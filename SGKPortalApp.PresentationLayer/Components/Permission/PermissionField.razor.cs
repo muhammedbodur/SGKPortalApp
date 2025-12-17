@@ -115,8 +115,9 @@ namespace SGKPortalApp.PresentationLayer.Components.Permission
                     return PermissionKey;
 
                 // Convention-based key üret
+                // Manage sayfası form alanları için FORMFIELD prefix kullan
                 if (!string.IsNullOrWhiteSpace(FieldName) && !string.IsNullOrWhiteSpace(EffectivePageKey))
-                    return $"{EffectivePageKey}.FIELD.{FieldName.ToUpperInvariant()}";
+                    return $"{EffectivePageKey}.FORMFIELD.{FieldName.ToUpperInvariant()}";
 
                 return string.Empty;
             }
