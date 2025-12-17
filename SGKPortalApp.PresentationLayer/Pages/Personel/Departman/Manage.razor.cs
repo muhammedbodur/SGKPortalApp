@@ -7,8 +7,19 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
 {
-    public partial class Manage : ComponentBase
+    public partial class Manage
     {
+        // ═══════════════════════════════════════════════════════
+        // PERMISSION CONFIGURATION
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Permission Key: PER.PERSONELDEPARTMAN.MANAGE
+        /// Route: /personel-departman/manage/{id}
+        /// Convention: {MODUL_KODU}.{URL_TIRESIZ}.{ACTION}
+        /// </summary>
+        protected override string PagePermissionKey => "PER.PERSONELDEPARTMAN.MANAGE";
+
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
         // ═══════════════════════════════════════════════════════

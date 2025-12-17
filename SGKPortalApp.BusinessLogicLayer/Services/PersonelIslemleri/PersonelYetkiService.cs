@@ -275,5 +275,52 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 return ApiResponseDto<bool>.ErrorResult("Personel yetkisi silinirken bir hata oluştu", ex.Message);
             }
         }
+
+        /// <summary>
+        /// Kullanıcının tüm yetkilerini döner (atanmış + MinYetkiSeviyesi > None olan varsayılanlar)
+        /// Claims'e eklenecek dictionary formatında döner
+        /// </summary>
+        public async Task<Dictionary<string, int>> GetUserPermissionsWithDefaultsAsync(string tcKimlikNo)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(tcKimlikNo))
+                    return new Dictionary<string, int>();
+
+                var personelYetkiRepo = _unitOfWork.GetRepository<IPersonelYetkiRepository>();
+                var modulControllerIslemRepo = _unitOfWork.GetRepository<IModulControllerIslemRepository>();
+
+                // 1. Kullanıcıya atanmış yetkiler
+                var assignedPermissions = await personelYetkiRepo.GetAssignedPermissionsAsync(tcKimlikNo);
+
+                // 2. MinYetkiSeviyesi > None olan varsayılan yetkiler (atanmamış olanlar)
+                var defaultPermissions = await modulControllerIslemRepo.GetDefaultPermissionsAsync();
+
+                // 3. Birleştir: Atanmış yetkiler öncelikli, atanmamışlar için varsayılan
+                var result = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+                // Önce varsayılanları ekle
+                foreach (var kvp in defaultPermissions)
+                {
+                    result[kvp.Key] = kvp.Value;
+                }
+
+                // Sonra atanmış yetkileri ekle (override)
+                foreach (var kvp in assignedPermissions)
+                {
+                    result[kvp.Key] = kvp.Value;
+                }
+
+                _logger.LogDebug("GetUserPermissionsWithDefaultsAsync: TC={TcKimlikNo}, Atanmış={Assigned}, Varsayılan={Default}, Toplam={Total}",
+                    tcKimlikNo, assignedPermissions.Count, defaultPermissions.Count, result.Count);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetUserPermissionsWithDefaultsAsync hatası. TC: {TcKimlikNo}", tcKimlikNo);
+                return new Dictionary<string, int>();
+            }
+        }
     }
 }

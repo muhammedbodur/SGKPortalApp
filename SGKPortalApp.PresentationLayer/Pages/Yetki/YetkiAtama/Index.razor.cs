@@ -13,8 +13,14 @@ using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Yetki.YetkiAtama
 {
-    public partial class Index : ComponentBase
+    public partial class Index
     {
+        /// <summary>
+        /// Permission Key: YET.YETKIATAMA.INDEX
+        /// Route: /yetki-atama
+        /// Convention: {MODUL_KODU}.{URL_TIRESIZ}.{ACTION}
+        /// </summary>
+        protected override string PagePermissionKey => "YET.YETKIATAMA.INDEX";
         // amamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamam
         // DEPENDENCY INJECTION
         // amamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamam
@@ -256,15 +262,25 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.YetkiAtama
                 Aciklama = islem.Aciklama,
                 PermissionKey = islem.PermissionKey,
                 IslemTipi = islem.IslemTipi,
-                IsGroupNode = false
+                IsGroupNode = false,
+                MinYetkiSeviyesi = islem.MinYetkiSeviyesi // MinYetkiSeviyesi'ni sakla
             };
 
             // Mevcut yetkiyi kontrol et
             if (ExistingPermissions.TryGetValue(islem.ModulControllerIslemId, out var existingPerm))
             {
+                // Personele yetki atanmış
                 node.PersonelYetkiId = existingPerm.PersonelYetkiId;
                 node.SelectedLevel = existingPerm.YetkiSeviyesi;
                 node.OriginalLevel = existingPerm.YetkiSeviyesi;
+                node.IsAssigned = true;
+            }
+            else
+            {
+                // Personele yetki atanmamış - MinYetkiSeviyesi varsayılan olarak gösterilsin
+                node.SelectedLevel = islem.MinYetkiSeviyesi;
+                node.OriginalLevel = null; // Atanmamış olduğunu belirt
+                node.IsAssigned = false;
             }
 
             // Alt işlemleri ekle
@@ -286,7 +302,20 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.YetkiAtama
                 return;
 
             node.SelectedLevel = level;
-            node.HasChanges = node.SelectedLevel != node.OriginalLevel;
+            
+            // HasChanges kontrolü:
+            // - Atanmamış ve MinYetkiSeviyesi'nden farklı seçilmişse → değişiklik var
+            // - Atanmış ve OriginalLevel'dan farklı seçilmişse → değişiklik var
+            if (node.IsAssigned)
+            {
+                node.HasChanges = node.SelectedLevel != node.OriginalLevel;
+            }
+            else
+            {
+                // Atanmamış - MinYetkiSeviyesi'nden farklı bir şey seçilmişse değişiklik var
+                node.HasChanges = node.SelectedLevel != node.MinYetkiSeviyesi;
+            }
+            
             StateHasChanged();
         }
 

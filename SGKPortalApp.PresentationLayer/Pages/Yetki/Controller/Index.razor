@@ -1,82 +1,88 @@
-@page "/yetki/controller"
+@page "/yetki-controller"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common
-@using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces
-@inject IModulControllerApiService ControllerApiService
-@inject IModulApiService ModulApiService
-@inject IJSRuntime JS
-@inject IToastService ToastService
 
 <PageTitle>Controller Yönetimi - SGK Portal</PageTitle>
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold mb-1">
-                <i class="bx bx-folder-open me-2"></i>Controller Yönetimi
-            </h4>
-            <p class="text-muted mb-0">Modül controller'larını yönetin</p>
+    @if (!CanViewPage)
+    {
+        <div class="alert alert-danger" role="alert">
+            <i class="bx bx-lock-alt me-2"></i>
+            Bu sayfayı görüntüleme yetkiniz bulunmuyor.
         </div>
-        <button class="btn btn-primary" @onclick="ShowAddModal">
-            <i class="bx bx-plus me-1"></i>Yeni Controller
-        </button>
-    </div>
+    }
+    else
+    {
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">
+                    <i class="bx bx-folder-open me-2"></i>Controller Yönetimi
+                </h4>
+                <p class="text-muted mb-0">Modül controller'larını yönetin</p>
+            </div>
+            <button class="btn btn-primary" @onclick="ShowAddModal">
+                <i class="bx bx-plus me-1"></i>Yeni Controller
+            </button>
+        </div>
 
-    <div class="card">
-        <div class="card-body">
-            @if (IsLoading)
-            {
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary"></div>
-                    <p class="mt-2 text-muted">Yükleniyor...</p>
-                </div>
-            }
-            else if (!Controllers.Any())
-            {
-                <div class="text-center py-5">
-                    <i class="bx bx-folder-open" style="font-size: 3rem; color: #ccc;"></i>
-                    <p class="mt-2 text-muted">Henüz controller eklenmemiş</p>
-                </div>
-            }
-            else
-            {
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Controller Adı</th>
-                                <th>Modül</th>
-                                <th>İşlem Sayısı</th>
-                                <th>Oluşturulma</th>
-                                <th class="text-end">İşlemler</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var c in Controllers)
-                            {
+        <div class="card">
+            <div class="card-body">
+                @if (IsLoading)
+                {
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary"></div>
+                        <p class="mt-2 text-muted">Yükleniyor...</p>
+                    </div>
+                }
+                else if (!Controllers.Any())
+                {
+                    <div class="text-center py-5">
+                        <i class="bx bx-folder-open" style="font-size: 3rem; color: #ccc;"></i>
+                        <p class="mt-2 text-muted">Henüz controller eklenmemiş</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
                                 <tr>
-                                    <td>@c.ModulControllerId</td>
-                                    <td><strong>@c.ModulControllerAdi</strong></td>
-                                    <td><span class="badge bg-label-primary">@c.ModulAdi</span></td>
-                                    <td><span class="badge bg-label-info">@c.IslemCount İşlem</span></td>
-                                    <td><small class="text-muted">@c.EklenmeTarihi.ToString("dd.MM.yyyy")</small></td>
-                                    <td class="text-end">
-                                        <button class="btn btn-sm btn-icon btn-outline-primary me-1" @onclick="() => StartEdit(c)">
-                                            <i class="bx bx-edit"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-icon btn-outline-danger" @onclick="() => DeleteController(c)">
-                                            <i class="bx bx-trash"></i>
-                                        </button>
-                                    </td>
+                                    <th>#</th>
+                                    <th>Controller Adı</th>
+                                    <th>Modül</th>
+                                    <th>İşlem Sayısı</th>
+                                    <th>Oluşturulma</th>
+                                    <th class="text-end">İşlemler</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
+                            </thead>
+                            <tbody>
+                                @foreach (var c in Controllers)
+                                {
+                                    <tr>
+                                        <td>@c.ModulControllerId</td>
+                                        <td><strong>@c.ModulControllerAdi</strong></td>
+                                        <td><span class="badge bg-label-primary">@c.ModulAdi</span></td>
+                                        <td><span class="badge bg-label-info">@c.IslemCount İşlem</span></td>
+                                        <td><small class="text-muted">@c.EklenmeTarihi.ToString("dd.MM.yyyy")</small></td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-icon btn-outline-primary me-1" @onclick="() => StartEdit(c)">
+                                                <i class="bx bx-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-icon btn-outline-danger" @onclick="() => DeleteController(c)">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
         </div>
-    </div>
+    }
 </div>
 
 @if (ShowModal)
@@ -114,113 +120,4 @@
             </div>
         </div>
     </div>
-}
-
-@code {
-    private List<ModulControllerResponseDto> Controllers = new();
-    private List<DropdownItemDto> Moduller = new();
-    private bool IsLoading = true;
-    private bool IsSaving = false;
-    private bool ShowModal = false;
-    private int? EditingId = null;
-    private int SelectedModulId = 0;
-    private string ControllerAdi = string.Empty;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadModulDropdown();
-        await LoadData();
-    }
-
-    private async Task LoadModulDropdown()
-    {
-        var result = await ModulApiService.GetDropdownAsync();
-        if (result.Success && result.Data != null)
-            Moduller = result.Data;
-    }
-
-    private async Task LoadData()
-    {
-        IsLoading = true;
-        var result = await ControllerApiService.GetAllAsync();
-        if (result.Success && result.Data != null)
-            Controllers = result.Data;
-        IsLoading = false;
-    }
-
-    private void ShowAddModal()
-    {
-        EditingId = null;
-        SelectedModulId = 0;
-        ControllerAdi = string.Empty;
-        ShowModal = true;
-    }
-
-    private void StartEdit(ModulControllerResponseDto c)
-    {
-        EditingId = c.ModulControllerId;
-        SelectedModulId = c.ModulId;
-        ControllerAdi = c.ModulControllerAdi;
-        ShowModal = true;
-    }
-
-    private void CloseModal()
-    {
-        ShowModal = false;
-        EditingId = null;
-    }
-
-    private async Task SaveController()
-    {
-        if (SelectedModulId <= 0 || string.IsNullOrWhiteSpace(ControllerAdi))
-        {
-            await ToastService.ShowWarningAsync("Modül ve Controller adı zorunludur");
-            return;
-        }
-
-        IsSaving = true;
-        StateHasChanged();
-
-        if (EditingId.HasValue)
-        {
-            var request = new ModulControllerUpdateRequestDto { ModulId = SelectedModulId, ModulControllerAdi = ControllerAdi.Trim() };
-            var result = await ControllerApiService.UpdateAsync(EditingId.Value, request);
-            if (result.Success)
-                await ToastService.ShowSuccessAsync(result.Message ?? "Controller güncellendi");
-            else
-                await ToastService.ShowErrorAsync(result.Message ?? "Controller güncellenemedi");
-        }
-        else
-        {
-            var request = new ModulControllerCreateRequestDto { ModulId = SelectedModulId, ModulControllerAdi = ControllerAdi.Trim() };
-            var result = await ControllerApiService.CreateAsync(request);
-            if (result.Success)
-                await ToastService.ShowSuccessAsync(result.Message ?? "Controller eklendi");
-            else
-                await ToastService.ShowErrorAsync(result.Message ?? "Controller eklenemedi");
-        }
-
-        IsSaving = false;
-        CloseModal();
-        await LoadData();
-    }
-
-    private async Task DeleteController(ModulControllerResponseDto c)
-    {
-        if (c.IslemCount > 0)
-        {
-            await ToastService.ShowWarningAsync($"Bu controller'a bağlı {c.IslemCount} işlem var. Önce işlemleri silin.");
-            return;
-        }
-
-        var confirmed = await JS.InvokeAsync<bool>("confirm", $"'{c.ModulControllerAdi}' silinsin mi?");
-        if (!confirmed) return;
-
-        var result = await ControllerApiService.DeleteAsync(c.ModulControllerId);
-        if (result.Success)
-            await ToastService.ShowSuccessAsync(result.Message ?? "Controller silindi");
-        else
-            await ToastService.ShowErrorAsync(result.Message ?? "Controller silinemedi");
-        await LoadData();
-    }
 }

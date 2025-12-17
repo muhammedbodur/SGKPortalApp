@@ -1,13 +1,23 @@
-@page "/personel/departman/manage"
-@page "/personel/departman/manage/{id:int}"
+@page "/personel-departman/manage"
+@page "/personel-departman/manage/{id:int}"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
 
 <PageTitle>@(IsEditMode ? "Departman Düzenle" : "Yeni Departman") - SGK Portal</PageTitle>
 
-<!-- ═══════════════════════════════════════════════════════ -->
-<!-- BREADCRUMB -->
-<!-- ═══════════════════════════════════════════════════════ -->
 <div class="container-xxl flex-grow-1 container-p-y">
+    @if (!CanViewPage)
+    {
+        <div class="alert alert-danger" role="alert">
+            <i class="bx bx-lock-alt me-2"></i>
+            Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+        </div>
+    }
+    else
+    {
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- BREADCRUMB -->
+    <!-- ═══════════════════════════════════════════════════════ -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb breadcrumb-style1">
             <li class="breadcrumb-item">
@@ -223,6 +233,7 @@
                 }
             </div>
         </div>
+    }
     }
 </div>
 

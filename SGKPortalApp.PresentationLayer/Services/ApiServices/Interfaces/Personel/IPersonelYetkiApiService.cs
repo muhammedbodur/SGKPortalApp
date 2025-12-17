@@ -13,5 +13,8 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Persone
         Task<ServiceResult<PersonelYetkiResponseDto>> CreateAsync(PersonelYetkiCreateRequestDto request);
         Task<ServiceResult<PersonelYetkiResponseDto>> UpdateAsync(int id, PersonelYetkiUpdateRequestDto request);
         Task<ServiceResult<bool>> DeleteAsync(int id);
+
+        // Login ile aynı metodu kullanır (atanmış + MinYetkiSeviyesi > None olan varsayılanlar)
+        Task<ServiceResult<Dictionary<string, int>>> GetUserPermissionsWithDefaultsAsync(string tcKimlikNo);
     }
 }

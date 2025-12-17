@@ -12,6 +12,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
     /// <summary>
     /// SignalR callback'inde cookie yazılamadığı için bu endpoint kullanılır.
     /// JS tarafından çağrılarak permissions claim'i güncellenir.
+    /// Login ile aynı metodu kullanır (GetUserPermissionsWithDefaultsAsync)
     /// </summary>
     [Authorize]
     public class RefreshPermissionsModel : PageModel
@@ -38,18 +39,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                     return new JsonResult(new { success = false, error = "TcKimlikNo bulunamadı" });
                 }
 
-                // DB'den güncel yetkileri çek
-                var permsResult = await _personelYetkiApiService.GetByTcKimlikNoAsync(tcKimlikNo);
+                // DB'den güncel yetkileri çek (atanmış + MinYetkiSeviyesi > None olan varsayılanlar)
+                // Login ile aynı metodu kullanır - API üzerinden
+                var permsResult = await _personelYetkiApiService.GetUserPermissionsWithDefaultsAsync(tcKimlikNo);
                 if (!permsResult.Success || permsResult.Data == null)
                 {
                     _logger.LogWarning("Yetkiler alınamadı: {Error}", permsResult.Message);
                     return new JsonResult(new { success = false, error = permsResult.Message });
                 }
 
-                // Dictionary'e çevir
-                var permissions = permsResult.Data
-                    .Where(p => !string.IsNullOrEmpty(p.PermissionKey))
-                    .ToDictionary(p => p.PermissionKey, p => (int)p.YetkiSeviyesi);
+                var permissions = permsResult.Data;
 
                 // Mevcut claims'leri al (Permissions hariç)
                 var existingClaims = User.Claims

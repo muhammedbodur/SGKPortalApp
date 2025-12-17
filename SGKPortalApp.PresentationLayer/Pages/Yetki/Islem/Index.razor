@@ -1,27 +1,35 @@
-@page "/yetki/islem"
+@page "/yetki-islem"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Common
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
-@using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces
-@using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
 
 <PageTitle>İşlem Yönetimi - SGK Portal</PageTitle>
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold mb-1">
-                <i class="bx bx-list-ul me-2"></i>İşlem Yönetimi
-            </h4>
-            <p class="text-muted mb-0">Controller işlemlerini yönetin (Action'lar)</p>
+    @if (!CanViewPage)
+    {
+        <div class="alert alert-danger" role="alert">
+            <i class="bx bx-lock-alt me-2"></i>
+            Bu sayfayı görüntüleme yetkiniz bulunmuyor.
         </div>
-        <button class="btn btn-primary" @onclick="ShowAddModal">
-            <i class="bx bx-plus me-1"></i>Yeni İşlem
-        </button>
-    </div>
+    }
+    else
+    {
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">
+                    <i class="bx bx-list-ul me-2"></i>İşlem Yönetimi
+                </h4>
+                <p class="text-muted mb-0">Controller işlemlerini yönetin (Action'lar)</p>
+            </div>
+            <button class="btn btn-primary" @onclick="ShowAddModal">
+                <i class="bx bx-plus me-1"></i>Yeni İşlem
+            </button>
+        </div>
 
-    <div class="card">
+        <div class="card">
         <div class="card-body">
             @if (IsLoading)
             {
@@ -108,7 +116,8 @@
                 </div>
             }
         </div>
-    </div>
+        </div>
+    }
 </div>
 
 @if (ShowModal)

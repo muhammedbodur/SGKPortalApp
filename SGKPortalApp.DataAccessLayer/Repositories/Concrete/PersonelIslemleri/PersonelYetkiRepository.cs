@@ -78,5 +78,22 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
 
             return permission?.YetkiSeviyesi ?? YetkiSeviyesi.None;
         }
+
+        public async Task<Dictionary<string, int>> GetAssignedPermissionsAsync(string tcKimlikNo)
+        {
+            if (string.IsNullOrWhiteSpace(tcKimlikNo))
+                return new Dictionary<string, int>();
+
+            return await _dbSet
+                .Include(py => py.ModulControllerIslem)
+                .AsNoTracking()
+                .Where(py => py.TcKimlikNo == tcKimlikNo 
+                          && !py.SilindiMi 
+                          && py.ModulControllerIslem != null 
+                          && !string.IsNullOrEmpty(py.ModulControllerIslem.PermissionKey))
+                .ToDictionaryAsync(
+                    py => py.ModulControllerIslem!.PermissionKey,
+                    py => (int)py.YetkiSeviyesi);
+        }
     }
 }

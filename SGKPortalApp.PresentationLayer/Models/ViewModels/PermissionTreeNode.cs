@@ -17,7 +17,9 @@ namespace SGKPortalApp.PresentationLayer.Models.ViewModels
 
         public int PersonelYetkiId { get; set; } = 0;
         public YetkiSeviyesi SelectedLevel { get; set; } = YetkiSeviyesi.None;
-        public YetkiSeviyesi OriginalLevel { get; set; } = YetkiSeviyesi.None;
+        public YetkiSeviyesi? OriginalLevel { get; set; } = null; // null = atanmamış
+        public YetkiSeviyesi MinYetkiSeviyesi { get; set; } = YetkiSeviyesi.None; // Varsayılan seviye
+        public bool IsAssigned { get; set; } = false; // Personele yetki atanmış mı?
         public bool HasChanges { get; set; } = false;
 
         public List<PermissionTreeNode> Children { get; set; } = new();

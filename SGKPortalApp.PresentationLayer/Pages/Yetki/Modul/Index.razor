@@ -1,16 +1,21 @@
-@page "/yetki/modul"
+@page "/yetki-modul"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common
-@using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces
-@inject IModulApiService ModulApiService
-@inject IJSRuntime JS
-@inject IToastService ToastService
 
 <PageTitle>Modül Yönetimi - SGK Portal</PageTitle>
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    @if (!CanViewPage)
+    {
+        <div class="alert alert-danger" role="alert">
+            <i class="bx bx-lock-alt me-2"></i>
+            Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+        </div>
+    }
+    else
+    {
+        <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h4 class="fw-bold mb-1">
                 <i class="bx bx-folder me-2"></i>Modül Yönetimi
@@ -53,7 +58,8 @@
                         <thead>
                             <tr>
                                 <th style="width: 5%">#</th>
-                                <th style="width: 40%">Modül Adı</th>
+                                <th style="width: 30%">Modül Adı</th>
+                                <th style="width: 10%">Modül Kodu</th>
                                 <th style="width: 15%">Controller Sayısı</th>
                                 <th style="width: 20%">Oluşturulma</th>
                                 <th style="width: 20%" class="text-end">İşlemler</th>
@@ -75,6 +81,21 @@
                                         else
                                         {
                                             <strong>@modul.ModulAdi</strong>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (EditingId == modul.ModulId)
+                                        {
+                                            <input type="text"
+                                                   class="form-control form-control-sm"
+                                                   @bind="EditingModulKodu"
+                                                   placeholder="Modül kodu..."
+                                                   maxlength="10"
+                                                   style="text-transform: uppercase;" />
+                                        }
+                                        else
+                                        {
+                                            <code class="text-primary">@modul.ModulKodu</code>
                                         }
                                     </td>
                                     <td>
@@ -132,10 +153,10 @@
                 </div>
             }
         </div>
-    </div>
+        </div>
+    }
 </div>
 
-<!-- Add Modal -->
 @if (ShowModal)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
@@ -153,8 +174,19 @@
                         <input type="text"
                                class="form-control"
                                @bind="NewModulAdi"
-                               placeholder="Örn: personel, siramatik, pdks..."
+                               placeholder="Örn: Personel, Sıramatik, PDKS..."
                                disabled="@IsSaving" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Modül Kodu <span class="text-danger">*</span></label>
+                        <input type="text"
+                               class="form-control"
+                               @bind="NewModulKodu"
+                               placeholder="Örn: PER, SIR, PDKS..."
+                               maxlength="10"
+                               style="text-transform: uppercase;"
+                               disabled="@IsSaving" />
+                        <small class="text-muted">Sadece büyük harfler (A-Z), en fazla 10 karakter</small>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -178,162 +210,3 @@
     </div>
 }
 
-@code {
-    private List<ModulResponseDto> Moduller = new();
-    private bool IsLoading = true;
-    private bool IsSaving = false;
-    private bool ShowModal = false;
-
-    // Add Modal
-    private string NewModulAdi = string.Empty;
-
-    // Edit Mode
-    private int? EditingId = null;
-    private string EditingModulAdi = string.Empty;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadData();
-    }
-
-    private async Task LoadData()
-    {
-        IsLoading = true;
-        StateHasChanged();
-
-        var result = await ModulApiService.GetAllAsync();
-        if (result.Success && result.Data != null)
-        {
-            Moduller = result.Data;
-        }
-        else
-        {
-            await ToastService.ShowErrorAsync(result.Message ?? "Modüller yüklenemedi");
-        }
-
-        IsLoading = false;
-        StateHasChanged();
-    }
-
-    private void ShowAddModal()
-    {
-        NewModulAdi = string.Empty;
-        ShowModal = true;
-    }
-
-    private void CloseModal()
-    {
-        ShowModal = false;
-        NewModulAdi = string.Empty;
-    }
-
-    private async Task AddModul()
-    {
-        if (string.IsNullOrWhiteSpace(NewModulAdi))
-        {
-            await ToastService.ShowWarningAsync("Modül adı boş olamaz");
-            return;
-        }
-
-        IsSaving = true;
-        StateHasChanged();
-
-        var request = new ModulCreateRequestDto
-        {
-            ModulAdi = NewModulAdi.Trim()
-        };
-
-        var result = await ModulApiService.CreateAsync(request);
-
-        if (result.Success)
-        {
-            await ToastService.ShowSuccessAsync(result.Message ?? "Modül başarıyla eklendi");
-            CloseModal();
-            await LoadData();
-        }
-        else
-        {
-            await ToastService.ShowErrorAsync(result.Message ?? "Modül eklenemedi");
-        }
-
-        IsSaving = false;
-        StateHasChanged();
-    }
-
-    private void StartEdit(ModulResponseDto modul)
-    {
-        EditingId = modul.ModulId;
-        EditingModulAdi = modul.ModulAdi;
-    }
-
-    private void CancelEdit()
-    {
-        EditingId = null;
-        EditingModulAdi = string.Empty;
-    }
-
-    private async Task SaveEdit(int id)
-    {
-        if (string.IsNullOrWhiteSpace(EditingModulAdi))
-        {
-            await ToastService.ShowWarningAsync("Modül adı boş olamaz");
-            return;
-        }
-
-        IsSaving = true;
-        StateHasChanged();
-
-        var request = new ModulUpdateRequestDto
-        {
-            ModulAdi = EditingModulAdi.Trim()
-        };
-
-        var result = await ModulApiService.UpdateAsync(id, request);
-
-        if (result.Success)
-        {
-            await ToastService.ShowSuccessAsync(result.Message ?? "Modül başarıyla güncellendi");
-            CancelEdit();
-            await LoadData();
-        }
-        else
-        {
-            await ToastService.ShowErrorAsync(result.Message ?? "Modül güncellenemedi");
-        }
-
-        IsSaving = false;
-        StateHasChanged();
-    }
-
-    private async Task DeleteModul(ModulResponseDto modul)
-    {
-        if (modul.ControllerCount > 0)
-        {
-            await ToastService.ShowWarningAsync($"Bu modüle bağlı {modul.ControllerCount} controller bulunmaktadır. Önce onları silmelisiniz.");
-            return;
-        }
-
-        var confirmed = await JS.InvokeAsync<bool>("confirm",
-            $"'{modul.ModulAdi}' modülünü silmek istediğinizden emin misiniz?");
-
-        if (!confirmed) return;
-
-        IsSaving = true;
-        StateHasChanged();
-
-        var result = await ModulApiService.DeleteAsync(modul.ModulId);
-
-        if (result.Success)
-        {
-            await ToastService.ShowSuccessAsync(result.Message ?? "Modül başarıyla silindi");
-            await LoadData();
-        }
-        else
-        {
-            await ToastService.ShowErrorAsync(result.Message ?? "Modül silinemedi");
-        }
-
-        IsSaving = false;
-        StateHasChanged();
-    }
-}

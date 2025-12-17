@@ -108,5 +108,16 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
                 .Select(mci => new DropdownItemDto { Id = mci.ModulControllerIslemId, Ad = mci.ModulControllerIslemAdi })
                 .ToListAsync();
         }
+
+        public async Task<Dictionary<string, int>> GetDefaultPermissionsAsync()
+        {
+            return await _dbSet
+                .AsNoTracking()
+                .Where(mci => !string.IsNullOrEmpty(mci.PermissionKey) 
+                           && mci.MinYetkiSeviyesi > BusinessObjectLayer.Enums.Common.YetkiSeviyesi.None)
+                .ToDictionaryAsync(
+                    mci => mci.PermissionKey!,
+                    mci => (int)mci.MinYetkiSeviyesi);
+        }
     }
 }

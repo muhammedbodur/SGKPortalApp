@@ -13,5 +13,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri
         Task<ApiResponseDto<PersonelYetkiResponseDto>> CreateAsync(PersonelYetkiCreateRequestDto request);
         Task<ApiResponseDto<PersonelYetkiResponseDto>> UpdateAsync(int id, PersonelYetkiUpdateRequestDto request);
         Task<ApiResponseDto<bool>> DeleteAsync(int id);
+
+        /// <summary>
+        /// Kullanıcının tüm yetkilerini döner (atanmış + MinYetkiSeviyesi > None olan varsayılanlar)
+        /// Claims'e eklenecek dictionary formatında döner
+        /// </summary>
+        Task<Dictionary<string, int>> GetUserPermissionsWithDefaultsAsync(string tcKimlikNo);
     }
 }

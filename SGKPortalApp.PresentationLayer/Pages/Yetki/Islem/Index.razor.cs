@@ -4,13 +4,20 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.PresentationLayer.Components.Base;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
 {
-    public partial class Index : ComponentBase
+    public partial class Index
     {
+        /// <summary>
+        /// Permission Key: YET.YETKIISLEM.INDEX
+        /// Route: /yetki-islem
+        /// Convention: {MODUL_KODU}.{URL_TIRESIZ}.{ACTION}
+        /// </summary>
+        protected override string PagePermissionKey => "YET.YETKIISLEM.INDEX";
         [Inject] private IModulControllerIslemApiService IslemApiService { get; set; } = default!;
         [Inject] private IModulControllerApiService ControllerApiService { get; set; } = default!;
         [Inject] private IModulApiService ModulApiService { get; set; } = default!;
@@ -50,6 +57,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
 
         protected override async Task OnInitializedAsync()
         {
+            await base.OnInitializedAsync();
             await LoadModulDropdown();
             await LoadDtoTypes();
             await LoadData();

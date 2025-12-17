@@ -42,16 +42,26 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 var repo = _unitOfWork.GetRepository<IModulControllerIslemRepository>();
                 var islemler = await repo.GetAllAsync();
 
+                // FormField ve Field tipindeki işlemleri al
                 var fieldPermissions = islemler
-                    .Where(i => !string.IsNullOrEmpty(i.DtoTypeName) && !string.IsNullOrEmpty(i.DtoFieldName))
+                    .Where(i => !string.IsNullOrEmpty(i.PermissionKey) && 
+                           (i.IslemTipi == YetkiIslemTipi.FormField || i.IslemTipi == YetkiIslemTipi.Field))
                     .ToList();
 
                 _fieldPermissionCache.Clear();
 
                 foreach (var perm in fieldPermissions)
                 {
-                    var key = $"{perm.DtoTypeName}:{perm.DtoFieldName}";
-                    _fieldPermissionCache[key] = (perm.PermissionKey, perm.MinYetkiSeviyesi);
+                    // PermissionKey ile cache'le (case-insensitive arama için uppercase)
+                    var permissionKeyUpper = perm.PermissionKey.ToUpperInvariant();
+                    _fieldPermissionCache[permissionKeyUpper] = (perm.PermissionKey, perm.MinYetkiSeviyesi);
+                    
+                    // Eski format için de ekle (DtoTypeName:DtoFieldName)
+                    if (!string.IsNullOrEmpty(perm.DtoTypeName) && !string.IsNullOrEmpty(perm.DtoFieldName))
+                    {
+                        var legacyKey = $"{perm.DtoTypeName}:{perm.DtoFieldName}";
+                        _fieldPermissionCache[legacyKey] = (perm.PermissionKey, perm.MinYetkiSeviyesi);
+                    }
                 }
 
                 _logger.LogInformation("Loaded {Count} field permissions into cache", _fieldPermissionCache.Count);
@@ -64,6 +74,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 
         /// <summary>
         /// Validates if user has permission to modify a specific DTO field
+        /// 
+        /// Mantık:
+        /// - Field permission tanımlı değilse → izin ver (sayfa seviyesi kontrolü olmalı)
+        /// - Kullanıcıya yetki atanmışsa → atanan seviye Edit olmalı
+        /// - Kullanıcıya yetki atanmamışsa → MinYetkiSeviyesi Edit olmalı
         /// </summary>
         public bool CanEditField(string dtoTypeName, string fieldName, Dictionary<string, YetkiSeviyesi> userPermissions, out string? permissionKey)
         {
@@ -79,14 +94,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             permissionKey = fieldPerm.PermissionKey;
 
             // Check user's permission level for this field
-            if (!userPermissions.TryGetValue(fieldPerm.PermissionKey, out var userLevel))
+            if (userPermissions.TryGetValue(fieldPerm.PermissionKey, out var userLevel))
             {
-                // User has no permission for this field
-                return false;
+                // Kullanıcıya yetki atanmış → atanan seviye Edit olmalı
+                return userLevel >= YetkiSeviyesi.Edit;
             }
 
-            // User must have at least the minimum required level
-            return userLevel >= fieldPerm.MinYetkiSeviyesi;
+            // Kullanıcıya yetki atanmamış → MinYetkiSeviyesi Edit olmalı
+            // MinYetkiSeviyesi Edit ise düzenleme izni var, View veya None ise yok
+            return fieldPerm.MinYetkiSeviyesi >= YetkiSeviyesi.Edit;
         }
 
         /// <summary>
@@ -129,16 +145,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 // Convention-based permission key kontrolü (pagePermissionKey verilmişse)
                 if (!string.IsNullOrEmpty(pagePermissionKey))
                 {
-                    var fieldPermissionKey = $"{pagePermissionKey}.FIELD.{prop.Name.ToUpperInvariant()}";
+                    var fieldPermissionKey = $"{pagePermissionKey}.FORMFIELD.{prop.Name.ToUpperInvariant()}";
+                    var cacheKey = $"{dtoTypeName}:{prop.Name}";
                     
-                    // Case-insensitive arama
+                    // Case-insensitive arama - kullanıcıya yetki atanmış mı?
                     var matchingKey = userPermissions.Keys.FirstOrDefault(k => 
                         string.Equals(k, fieldPermissionKey, StringComparison.OrdinalIgnoreCase));
                     
-                    // Kullanıcının bu field için yetkisi var mı?
                     if (matchingKey != null && userPermissions.TryGetValue(matchingKey, out var userLevel))
                     {
-                        // Yetki var ama Edit değil (View veya None)
+                        // Kullanıcıya yetki atanmış → atanan seviye Edit olmalı
                         if (userLevel < YetkiSeviyesi.Edit)
                         {
                             _logger.LogWarning(
@@ -147,6 +163,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                             unauthorizedFields.Add(prop.Name);
                         }
                         continue; // Yetki kontrolü yapıldı, sonraki field'a geç
+                    }
+                    
+                    // Kullanıcıya yetki atanmamış - cache'den MinYetkiSeviyesi kontrol et
+                    // Cache key olarak PermissionKey kullan (uppercase)
+                    var permissionKeyUpper = fieldPermissionKey.ToUpperInvariant();
+                    if (_fieldPermissionCache.TryGetValue(permissionKeyUpper, out var fieldPerm))
+                    {
+                        // Field permission tanımlı - MinYetkiSeviyesi Edit olmalı
+                        if (fieldPerm.MinYetkiSeviyesi < YetkiSeviyesi.Edit)
+                        {
+                            _logger.LogWarning(
+                                "User attempted to edit field without permission (MinYetkiSeviyesi={MinLevel}). Field: {Field}, RequiredPermission: {Permission}",
+                                fieldPerm.MinYetkiSeviyesi, prop.Name, fieldPermissionKey);
+                            unauthorizedFields.Add(prop.Name);
+                        }
+                        continue;
                     }
                     // Field permission tanımlı değil -> izin ver (sayfa seviyesi kontrolü olmalı)
                 }

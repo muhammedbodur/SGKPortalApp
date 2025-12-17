@@ -348,6 +348,20 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
             }
         }
 
+        [JSInvokable]
+        public async Task OnPermissionDefinitionsChanged()
+        {
+            try
+            {
+                await PermissionStateService.RefreshDefinitionsAsync();
+                await InvokeAsync(StateHasChanged);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "OnPermissionDefinitionsChanged hatası");
+            }
+        }
+
         private async Task LoadBankoPanelSiralarAsync()
         {
             try

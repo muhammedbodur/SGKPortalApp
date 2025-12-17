@@ -8,8 +8,8 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
     /// Field-level ve Action-level permission destekli sayfa base class'ı.
     /// 
     /// Convention-based permission key üretimi:
-    /// - Field: {FieldPermissionKeyPrefix}.FIELD.{FIELDNAME}  (örn: PER.PERSONEL.MANAGE.FIELD.EMAIL)
-    /// - Action: {PagePermissionKey}.ACTION.{ACTIONNAME}      (örn: PER.PERSONEL.INDEX.ACTION.DETAIL)
+    /// - FormField: {FieldPermissionKeyPrefix}.FORMFIELD.{FIELDNAME}  (örn: PER.PERSONEL.MANAGE.FORMFIELD.EMAIL)
+    /// - Action: {PagePermissionKey}.ACTION.{ACTIONNAME}              (örn: PER.PERSONEL.INDEX.ACTION.DETAIL)
     /// 
     /// Kullanım (Manage/Create sayfaları):
     /// 1. Sayfanızda bu class'ı inherit edin
@@ -61,11 +61,11 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         #region Field-Level Permissions (Convention-based)
 
         /// <summary>
-        /// Convention-based field permission key üretir: {FieldPermissionKeyPrefix}.FIELD.{FIELDNAME}
-        /// Örnek: PER.PERSONEL.MANAGE.FIELD.EMAIL
+        /// Convention-based field permission key üretir: {FieldPermissionKeyPrefix}.FORMFIELD.{FIELDNAME}
+        /// Örnek: PER.PERSONEL.MANAGE.FORMFIELD.EMAIL
         /// </summary>
         protected string GetFieldPermissionKey(string fieldName)
-            => $"{FieldPermissionKeyPrefix}.FIELD.{fieldName.ToUpperInvariant()}";
+            => $"{FieldPermissionKeyPrefix}.FORMFIELD.{fieldName.ToUpperInvariant()}";
 
         /// <summary>
         /// Field-level edit yetkisi kontrolü

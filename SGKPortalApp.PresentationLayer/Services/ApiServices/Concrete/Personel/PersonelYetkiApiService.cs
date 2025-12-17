@@ -217,5 +217,39 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
                 return ServiceResult<bool>.Fail($"Hata: {ex.Message}");
             }
         }
+
+        public async Task<ServiceResult<Dictionary<string, int>>> GetUserPermissionsWithDefaultsAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"personelyetki/with-defaults/{tcKimlikNo}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetUserPermissionsWithDefaultsAsync failed: {Error}", errorContent);
+                    return ServiceResult<Dictionary<string, int>>.Fail("Yetkiler alınamadı.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<Dictionary<string, int>>>();
+
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return ServiceResult<Dictionary<string, int>>.Ok(
+                        apiResponse.Data,
+                        apiResponse.Message ?? "İşlem başarılı"
+                    );
+                }
+
+                return ServiceResult<Dictionary<string, int>>.Fail(
+                    apiResponse?.Message ?? "Yetkiler alınamadı"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetUserPermissionsWithDefaultsAsync Exception");
+                return ServiceResult<Dictionary<string, int>>.Fail($"Hata: {ex.Message}");
+            }
+        }
     }
 }

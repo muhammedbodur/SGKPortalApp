@@ -146,7 +146,7 @@ window.bankoMode = {
             window.location.href = '/auth/login';
         });
 
-        // Permissions changed
+        // Permissions changed (kullanıcıya özel yetki atandığında)
         connection.on("permissionsChanged", async (data) => {
             console.log('🔑 permissionsChanged:', data);
             
@@ -171,6 +171,37 @@ window.bankoMode = {
                 this.dotNetHelper.invokeMethodAsync('OnPermissionsChanged')
                     .catch(err => {
                         console.error('❌ OnPermissionsChanged çağrısı başarısız:', err);
+                    });
+            }
+        });
+
+        // Permission definitions changed (yeni yetki tanımı eklendiğinde/güncellendiğinde)
+        // Tüm kullanıcıların _definedPermissions cache'ini yenilemesi + claims güncellenmesi gerekir
+        // Çünkü yeni eklenen yetki tanımının MinYetkiSeviyesi > None ise claims'e eklenmeli
+        connection.on("permissionDefinitionsChanged", async (data) => {
+            console.log('📋 permissionDefinitionsChanged:', data);
+            
+            // 1. Önce HTTP endpoint ile cookie'yi güncelle (yeni varsayılan yetkiler için)
+            try {
+                const response = await fetch('/auth/refreshpermissions', {
+                    method: 'GET',
+                    credentials: 'same-origin'
+                });
+                const result = await response.json();
+                if (result.success) {
+                    console.log('✅ Permissions cookie güncellendi (definitions):', result.count, 'yetki');
+                } else {
+                    console.error('❌ Permissions cookie güncellenemedi:', result.error);
+                }
+            } catch (err) {
+                console.error('❌ RefreshPermissions endpoint hatası:', err);
+            }
+            
+            // 2. Blazor component'i bilgilendir (cache yenilemesi için)
+            if (this.dotNetHelper) {
+                this.dotNetHelper.invokeMethodAsync('OnPermissionDefinitionsChanged')
+                    .catch(err => {
+                        console.error('❌ OnPermissionDefinitionsChanged çağrısı başarısız:', err);
                     });
             }
         });

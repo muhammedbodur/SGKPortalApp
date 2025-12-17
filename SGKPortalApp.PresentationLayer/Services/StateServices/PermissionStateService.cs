@@ -21,8 +21,9 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
         // PermissionKey -> YetkiSeviyesi dictionary (kullanıcının yetkileri)
         private Dictionary<string, YetkiSeviyesi> _permissions = new();
         
-        // Sistemde tanımlı tüm permission key'ler (ModulControllerIslem tablosundan)
-        private HashSet<string> _definedPermissionKeys = new(StringComparer.OrdinalIgnoreCase);
+        // Sistemde tanımlı tüm permission key'ler ve MinYetkiSeviyesi değerleri (ModulControllerIslem tablosundan)
+        // Key: PermissionKey, Value: MinYetkiSeviyesi (yetki atanmamış personel için varsayılan seviye)
+        private Dictionary<string, YetkiSeviyesi> _definedPermissions = new(StringComparer.OrdinalIgnoreCase);
 
         public event Action? OnChange;
 
@@ -60,11 +61,8 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
                 if (IsLoaded && !force)
                     return;
 
-                // 0. Sistemde tanımlı tüm permission key'leri yükle (bir kez)
-                if (_definedPermissionKeys.Count == 0)
-                {
-                    await LoadDefinedPermissionKeysAsync();
-                }
+                // 0. Sistemde tanımlı tüm permission key'leri yükle (her login'de temiz yükle)
+                await LoadDefinedPermissionKeysAsync();
 
                 // 1. Önce claims'den okumayı dene (DB'ye gitmeden)
                 if (TryLoadFromClaims())
@@ -122,20 +120,42 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
         {
             try
             {
+                _logger.LogInformation("📋 LoadDefinedPermissionKeysAsync başlıyor...");
                 var result = await _modulControllerIslemApiService.GetAllAsync();
+                
+                _logger.LogInformation("📋 API sonucu: Success={Success}, DataCount={Count}", 
+                    result.Success, result.Data?.Count ?? 0);
+                
                 if (result.Success && result.Data != null)
                 {
-                    _definedPermissionKeys = result.Data
+                    var permissionsWithKey = result.Data
                         .Where(x => !string.IsNullOrEmpty(x.PermissionKey))
-                        .Select(x => x.PermissionKey!)
-                        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                        .ToList();
                     
-                    _logger.LogDebug("🔑 Sistemde tanımlı {Count} permission key yüklendi", _definedPermissionKeys.Count);
+                    _logger.LogInformation("📋 PermissionKey'li kayıt sayısı: {Count}", permissionsWithKey.Count);
+                    
+                    _definedPermissions = permissionsWithKey
+                        .ToDictionary(
+                            x => x.PermissionKey!,
+                            x => x.MinYetkiSeviyesi,
+                            StringComparer.OrdinalIgnoreCase);
+                    
+                    _logger.LogInformation("🔑 Sistemde tanımlı {Count} permission key yüklendi", _definedPermissions.Count);
+                    
+                    // İlk 10 key'i logla
+                    foreach (var kvp in _definedPermissions.Take(10))
+                    {
+                        _logger.LogDebug("  - {Key} = {Value}", kvp.Key, kvp.Value);
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("📋 API başarısız veya data null: {Message}", result.Message);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "LoadDefinedPermissionKeysAsync hata");
+                _logger.LogError(ex, "LoadDefinedPermissionKeysAsync hata");
             }
         }
 
@@ -166,6 +186,30 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
             {
                 _logger.LogWarning(ex, "Claims'den yetki okuma hatası");
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Yetki tanımlarını DB'den yeniden çeker (SignalR permissionDefinitionsChanged geldiğinde çağrılır)
+        /// Yeni yetki tanımı eklendiğinde veya MinYetkiSeviyesi değiştiğinde tüm kullanıcılar bu metodu çağırır
+        /// </summary>
+        public async Task RefreshDefinitionsAsync()
+        {
+            await _loadLock.WaitAsync();
+            try
+            {
+                _logger.LogInformation("📋 Yetki tanımları yenileniyor...");
+                await LoadDefinedPermissionKeysAsync();
+                _logger.LogInformation("📋 Yetki tanımları yenilendi. Toplam: {Count}", _definedPermissions.Count);
+                OnChange?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "RefreshDefinitionsAsync hatası");
+            }
+            finally
+            {
+                _loadLock.Release();
             }
         }
 
@@ -216,7 +260,7 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
         /// Mantık:
         /// - Key sistemde tanımlı DEĞİLSE → Edit (henüz permission uygulanmamış, tam yetki)
         /// - Key sistemde tanımlı VE kullanıcıya verilmişse → Verilen seviye
-        /// - Key sistemde tanımlı VE kullanıcıya verilmemişse → None (yetki yok)
+        /// - Key sistemde tanımlı VE kullanıcıya verilmemişse → MinYetkiSeviyesi (varsayılan davranış)
         /// </summary>
         public YetkiSeviyesi GetLevel(string permissionKey)
         {
@@ -234,11 +278,11 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
             }
 
             // 2. Kullanıcıya verilmemiş - sistemde tanımlı mı kontrol et
-            if (_definedPermissionKeys.Contains(permissionKey))
+            if (_definedPermissions.TryGetValue(permissionKey, out var minLevel))
             {
-                // Sistemde tanımlı ama kullanıcıya verilmemiş → None
-                _logger.LogDebug("GetLevel: Key={Key}, Level=None (sistemde tanımlı, kullanıcıya verilmemiş)", permissionKey);
-                return YetkiSeviyesi.None;
+                // Sistemde tanımlı ama kullanıcıya verilmemiş → MinYetkiSeviyesi (varsayılan davranış)
+                _logger.LogDebug("GetLevel: Key={Key}, Level={Level} (sistemde tanımlı, MinYetkiSeviyesi uygulandı)", permissionKey, minLevel);
+                return minLevel;
             }
 
             // 3. Sistemde tanımlı değil → Edit (henüz permission uygulanmamış)

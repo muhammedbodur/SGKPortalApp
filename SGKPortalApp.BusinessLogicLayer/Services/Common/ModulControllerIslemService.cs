@@ -3,6 +3,8 @@ using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Interfaces.SignalR;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 
@@ -12,13 +14,66 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ModulControllerIslemService> _logger;
+        private readonly ISignalRBroadcaster _broadcaster;
+        private readonly IHubConnectionRepository _hubConnectionRepository;
 
         public ModulControllerIslemService(
             IUnitOfWork unitOfWork,
-            ILogger<ModulControllerIslemService> logger)
+            ILogger<ModulControllerIslemService> logger,
+            ISignalRBroadcaster broadcaster,
+            IHubConnectionRepository hubConnectionRepository)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _broadcaster = broadcaster;
+            _hubConnectionRepository = hubConnectionRepository;
+        }
+
+        /// <summary>
+        /// Tüm aktif kullanıcılara yetki tanımlarının değiştiğini bildirir.
+        /// Her kullanıcıya permissionsChanged event'i gönderilir (claims güncellemesi için)
+        /// </summary>
+        private async Task BroadcastPermissionDefinitionsChangedAsync()
+        {
+            try
+            {
+                var connections = await _hubConnectionRepository.GetActiveConnectionsAsync();
+                
+                // Sadece online ve silinmemiş connection'ları al
+                // Her kullanıcı için ayrı ayrı permissionsChanged gönder
+                var userConnections = connections
+                    .Where(c => c.ConnectionStatus == ConnectionStatus.online && !c.SilindiMi)
+                    .GroupBy(c => c.TcKimlikNo)
+                    .ToList();
+
+                if (!userConnections.Any())
+                {
+                    _logger.LogDebug("BroadcastPermissionDefinitionsChangedAsync: Aktif connection bulunamadı");
+                    return;
+                }
+
+                // Her kullanıcıya permissionsChanged event'i gönder
+                // Bu event zaten JS tarafında /auth/refreshpermissions çağrısı yapıyor
+                foreach (var userGroup in userConnections)
+                {
+                    var connectionId = userGroup.First().ConnectionId;
+                    await _broadcaster.SendToConnectionsAsync(
+                        new List<string> { connectionId },
+                        "permissionsChanged",
+                        new
+                        {
+                            TcKimlikNo = userGroup.Key,
+                            Reason = "PermissionDefinitionChanged",
+                            Timestamp = DateTime.Now
+                        });
+                }
+
+                _logger.LogInformation("permissionsChanged broadcast edildi (definition change). Kullanıcı sayısı: {Count}", userConnections.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "permissionsChanged broadcast hatası (definition change)");
+            }
         }
 
         public async Task<ApiResponseDto<List<ModulControllerIslemResponseDto>>> GetAllAsync()
@@ -174,6 +229,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 await repo.AddAsync(entity);
                 await _unitOfWork.SaveChangesAsync();
 
+                // Tüm aktif kullanıcılara yetki tanımlarının değiştiğini bildir
+                await BroadcastPermissionDefinitionsChangedAsync();
+
                 var dto = new ModulControllerIslemResponseDto
                 {
                     ModulControllerIslemId = entity.ModulControllerIslemId,
@@ -235,6 +293,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 repo.Update(entity);
                 await _unitOfWork.SaveChangesAsync();
 
+                // Tüm aktif kullanıcılara yetki tanımlarının değiştiğini bildir
+                await BroadcastPermissionDefinitionsChangedAsync();
+
                 var dto = new ModulControllerIslemResponseDto
                 {
                     ModulControllerIslemId = entity.ModulControllerIslemId,
@@ -277,6 +338,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 
                 repo.Delete(entity);
                 await _unitOfWork.SaveChangesAsync();
+
+                // Tüm aktif kullanıcılara yetki tanımlarının değiştiğini bildir
+                await BroadcastPermissionDefinitionsChangedAsync();
 
                 return ApiResponseDto<bool>.SuccessResult(true, "İşlem başarıyla silindi");
             }

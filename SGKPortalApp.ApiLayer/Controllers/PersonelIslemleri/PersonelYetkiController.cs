@@ -66,5 +66,16 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
             var result = await _personelYetkiService.DeleteAsync(id);
             return result.Success ? Ok(result) : BadRequest(result);
         }
+
+        /// <summary>
+        /// Kullanıcının tüm yetkilerini döner (atanmış + MinYetkiSeviyesi > None olan varsayılanlar)
+        /// Login ile aynı metodu kullanır
+        /// </summary>
+        [HttpGet("with-defaults/{tcKimlikNo}")]
+        public async Task<IActionResult> GetUserPermissionsWithDefaults(string tcKimlikNo)
+        {
+            var permissions = await _personelYetkiService.GetUserPermissionsWithDefaultsAsync(tcKimlikNo);
+            return Ok(new { Success = true, Data = permissions, Message = $"{permissions.Count} yetki yüklendi" });
+        }
     }
 }

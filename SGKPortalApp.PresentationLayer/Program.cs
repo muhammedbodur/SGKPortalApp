@@ -244,6 +244,9 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 // Image Helper Service
 builder.Services.AddScoped<ImageHelper>();
 
+// Stale Connection Cleanup Background Service
+builder.Services.AddHostedService<SGKPortalApp.PresentationLayer.Services.BackgroundServices.StaleConnectionCleanupService>();
+
 // ═══════════════════════════════════════════════════════
 // 📝 LOGGING CONFIGURATION
 // ═══════════════════════════════════════════════════════

@@ -22,5 +22,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri
 
         // Personelin belirli permission key için yetki seviyesi
         Task<YetkiSeviyesi> GetPermissionLevelAsync(string tcKimlikNo, string permissionKey);
+
+        // Personele atanmış tüm yetkileri dictionary olarak döner (PermissionKey -> YetkiSeviyesi)
+        Task<Dictionary<string, int>> GetAssignedPermissionsAsync(string tcKimlikNo);
     }
 }

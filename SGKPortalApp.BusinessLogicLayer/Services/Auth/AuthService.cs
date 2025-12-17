@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
 using SGKPortalApp.DataAccessLayer.Context;
@@ -14,11 +15,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
     {
         private readonly SGKDbContext _context;
         private readonly ILogger<AuthService> _logger;
+        private readonly IPersonelYetkiService _personelYetkiService;
 
-        public AuthService(SGKDbContext context, ILogger<AuthService> logger)
+        public AuthService(
+            SGKDbContext context, 
+            ILogger<AuthService> logger,
+            IPersonelYetkiService personelYetkiService)
         {
             _context = context;
             _logger = logger;
+            _personelYetkiService = personelYetkiService;
         }
 
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)
@@ -149,16 +155,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                     _logger.LogInformation("Login başarılı - {TcKimlikNo} - {AdSoyad}",
                         user.TcKimlikNo, user.Personel.AdSoyad);
 
-                    // 🔑 Yetkileri çek
-                    var permissions = await _context.PersonelYetkileri
-                        .Where(py => py.TcKimlikNo == user.TcKimlikNo && !py.SilindiMi)
-                        .Include(py => py.ModulControllerIslem)
-                        .Where(py => py.ModulControllerIslem != null && !string.IsNullOrEmpty(py.ModulControllerIslem.PermissionKey))
-                        .ToDictionaryAsync(
-                            py => py.ModulControllerIslem!.PermissionKey,
-                            py => (int)py.YetkiSeviyesi);
+                    // 🔑 Yetkileri çek (atanmış + MinYetkiSeviyesi > None olan varsayılanlar)
+                    var permissions = await _personelYetkiService.GetUserPermissionsWithDefaultsAsync(user.TcKimlikNo);
 
-                    _logger.LogDebug("🔑 Login: {Count} yetki yüklendi - {TcKimlikNo}", permissions.Count, user.TcKimlikNo);
+                    _logger.LogDebug("🔑 Login: {Count} yetki yüklendi (atanmış + varsayılan) - {TcKimlikNo}", permissions.Count, user.TcKimlikNo);
 
                     return new LoginResponseDto
                     {
