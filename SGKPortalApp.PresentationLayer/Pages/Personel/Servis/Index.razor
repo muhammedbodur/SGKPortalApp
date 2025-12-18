@@ -1,4 +1,5 @@
 ﻿@page "/personel/Servis"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
 
@@ -240,26 +241,38 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-1">
-                                            <!-- Düzenle -->
-                                            <button class="btn btn-sm btn-icon btn-outline-primary"
-                                                    @onclick="() => NavigateToEdit(Servis.ServisId)"
-                                                    title="Düzenle">
-                                                <i class="bx bx-edit"></i>
-                                            </button>
+                                            @if (IsActionVisible("EDIT"))
+                                            {
+                                                <!-- Düzenle -->
+                                                <button class="btn btn-sm btn-icon btn-outline-primary"
+                                                        @onclick="() => NavigateToEdit(Servis.ServisId)"
+                                                        disabled="@(!CanEditAction("EDIT"))"
+                                                        title="@(CanEditAction("EDIT") ? "Düzenle" : "Düzenle (Yetki Yok)")">
+                                                    <i class="bx bx-edit"></i>
+                                                </button>
+                                            }
 
-                                            <!-- Aktif/Pasif Toggle -->
-                                            <button class="btn btn-sm btn-icon @(Servis.Aktiflik == Aktiflik.Aktif ? "btn-outline-warning" : "btn-outline-success")"
-                                                    @onclick="() => ShowToggleStatusConfirmation(Servis.ServisId, Servis.ServisAdi, Servis.Aktiflik)"
-                                                    title="@(Servis.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")">
-                                                <i class="bx @(Servis.Aktiflik == Aktiflik.Aktif ? "bx-toggle-right" : "bx-toggle-left")"></i>
-                                            </button>
+                                            @if (IsActionVisible("TOGGLE"))
+                                            {
+                                                <!-- Aktif/Pasif Toggle -->
+                                                <button class="btn btn-sm btn-icon @(Servis.Aktiflik == Aktiflik.Aktif ? "btn-outline-warning" : "btn-outline-success")"
+                                                        @onclick="() => ShowToggleStatusConfirmation(Servis.ServisId, Servis.ServisAdi, Servis.Aktiflik)"
+                                                        disabled="@(!CanEditAction("TOGGLE"))"
+                                                        title="@(CanEditAction("TOGGLE") ? (Servis.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap") : (Servis.Aktiflik == Aktiflik.Aktif ? "Pasif Yap (Yetki Yok)" : "Aktif Yap (Yetki Yok)"))">
+                                                    <i class="bx @(Servis.Aktiflik == Aktiflik.Aktif ? "bx-toggle-right" : "bx-toggle-left")"></i>
+                                                </button>
+                                            }
 
-                                            <!-- Sil -->
-                                            <button class="btn btn-sm btn-icon btn-outline-danger"
-                                                    @onclick="() => ShowDeleteConfirmation(Servis.ServisId, Servis.ServisAdi, Servis.PersonelSayisi)"
-                                                    title="Sil">
-                                                <i class="bx bx-trash"></i>
-                                            </button>
+                                            @if (IsActionVisible("DELETE"))
+                                            {
+                                                <!-- Sil -->
+                                                <button class="btn btn-sm btn-icon btn-outline-danger"
+                                                        @onclick="() => ShowDeleteConfirmation(Servis.ServisId, Servis.ServisAdi, Servis.PersonelSayisi)"
+                                                        disabled="@(!CanEditAction("DELETE"))"
+                                                        title="@(CanEditAction("DELETE") ? "Sil" : "Sil (Yetki Yok)")">
+                                                    <i class="bx bx-trash"></i>
+                                                </button>
+                                            }
                                         </div>
                                     </td>
                                 </tr>
