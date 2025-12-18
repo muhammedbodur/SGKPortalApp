@@ -71,16 +71,29 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
             // Varsayılan: Kullanıcının kendi Hizmet Binasını seç
             else
             {
-                var userHizmetBinasiId = GetCurrentUserHizmetBinasiId();
-                if (userHizmetBinasiId > 0 && hizmetBinalari.Any(b => b.HizmetBinasiId == userHizmetBinasiId))
+                try
                 {
-                    selectedHizmetBinasiId = userHizmetBinasiId;
-                    await LoadData();
+                    var userHizmetBinasiId = GetCurrentUserHizmetBinasiId();
+                    if (userHizmetBinasiId > 0 && hizmetBinalari.Any(b => b.HizmetBinasiId == userHizmetBinasiId))
+                    {
+                        selectedHizmetBinasiId = userHizmetBinasiId;
+                        await LoadData();
+                    }
+                    else if (hizmetBinalari.Any())
+                    {
+                        selectedHizmetBinasiId = hizmetBinalari.First().HizmetBinasiId;
+                        await LoadData();
+                    }
                 }
-                else if (hizmetBinalari.Any())
+                catch (Exception ex)
                 {
-                    selectedHizmetBinasiId = hizmetBinalari.First().HizmetBinasiId;
-                    await LoadData();
+                    _logger.LogError(ex, "KanalAltIslem OnInitializedAsync hatası");
+                    // Hata olursa ilk hizmet binasını seç
+                    if (hizmetBinalari.Any())
+                    {
+                        selectedHizmetBinasiId = hizmetBinalari.First().HizmetBinasiId;
+                        await LoadData();
+                    }
                 }
             }
         }
