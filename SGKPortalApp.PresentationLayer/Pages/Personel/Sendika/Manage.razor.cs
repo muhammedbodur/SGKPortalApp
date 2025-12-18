@@ -8,8 +8,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel.Sendika
 {
-    public partial class Manage : ComponentBase
+    public partial class Manage
     {
+        protected override string PagePermissionKey => "PER.SENDIKA.MANAGE";
+
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
         // ═══════════════════════════════════════════════════════

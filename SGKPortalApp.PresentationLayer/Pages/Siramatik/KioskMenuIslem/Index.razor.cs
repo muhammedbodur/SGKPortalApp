@@ -7,6 +7,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuIslem
 {
     public partial class Index
     {
+        protected override string PagePermissionKey => "SIRA.KIOSKMENUISLEM.INDEX";
+
         [Inject] private IKioskMenuApiService _kioskMenuService { get; set; } = default!;
         [Inject] private IKioskMenuIslemApiService _kioskMenuIslemService { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;

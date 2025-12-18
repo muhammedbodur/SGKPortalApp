@@ -10,6 +10,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskSimulator
 {
     public partial class Index
     {
+        protected override string PagePermissionKey => "SIRA.KIOSKSIMULATOR.INDEX";
+
         [Inject] private IKioskSimulatorApiService _kioskSimulatorService { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
         [Inject] private ILogger<Index> _logger { get; set; } = default!;

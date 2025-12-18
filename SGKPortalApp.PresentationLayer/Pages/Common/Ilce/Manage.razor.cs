@@ -8,8 +8,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Common.Ilce
 {
-    public partial class Manage : ComponentBase
+    public partial class Manage
     {
+        protected override string PagePermissionKey => "CMN.ILCE.MANAGE";
+
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
         // ═══════════════════════════════════════════════════════

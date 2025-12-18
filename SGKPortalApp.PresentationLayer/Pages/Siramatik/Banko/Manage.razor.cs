@@ -13,6 +13,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
 {
     public partial class Manage
     {
+        protected override string PagePermissionKey => "SIRA.BANKO.MANAGE";
+
         [Inject] private IBankoApiService _bankoService { get; set; } = default!;
         [Inject] private IHizmetBinasiApiService _hizmetBinasiService { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;

@@ -16,6 +16,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
 {
     public partial class Index
     {
+        protected override string PagePermissionKey => "SIRA.KANALISLEM.INDEX";
+
         [Inject] private IKanalIslemApiService _kanalService { get; set; } = default!;
         [Inject] private IHizmetBinasiApiService _hizmetBinasiService { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;

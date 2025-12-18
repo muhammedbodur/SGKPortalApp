@@ -1,147 +1,158 @@
 @page "/siramatik/kiosk-menu/manage"
 @page "/siramatik/kiosk-menu/manage/{KioskMenuId:int}"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
 @attribute [Authorize]
 
 <PageTitle>@(IsEditMode ? "Kiosk Menü Düzenle" : "Yeni Kiosk Menü") - SGK Portal</PageTitle>
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb breadcrumb-style1">
-            <li class="breadcrumb-item">
-                <a href="/">
-                    <i class="bx bx-home-alt me-1"></i>Ana Sayfa
-                </a>
-            </li>
-            <li class="breadcrumb-item">
-                <a href="/siramatik/kiosk-menu">
-                    Kiosk Menüleri
-                </a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">
-                @(IsEditMode ? "Düzenle" : "Yeni Menü")
-            </li>
-        </ol>
-    </nav>
-
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold mb-1">
-                <i class="bx @(IsEditMode ? "bx-edit" : "bx-plus-circle") me-2"></i>
-                @(IsEditMode ? "Kiosk Menü Düzenle" : "Yeni Kiosk Menü Ekle")
-            </h4>
-            <p class="text-muted mb-0">
-                @(IsEditMode ? "Menü bilgilerini güncelleyin" : "Kiosklar için yeni bir menü oluşturun")
-            </p>
-        </div>
-
-        <button class="btn btn-outline-secondary" @onclick="NavigateBack" disabled="@isSaving">
-            <i class="bx bx-arrow-back me-1"></i>Geri Dön
-        </button>
-    </div>
-
-    @if (isLoading)
+    @if (!CanViewPage)
     {
-        <div class="text-center py-5">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Yükleniyor...</span>
-            </div>
-            <p class="mt-3 text-muted">Veriler yükleniyor...</p>
+        <div class="alert alert-danger" role="alert">
+            <i class="bx bx-lock-alt me-2"></i>
+            Bu sayfayı görüntüleme yetkiniz bulunmuyor.
         </div>
     }
     else
     {
-        <div class="row">
-            <div class="col-lg-8 col-xl-6 mx-auto">
-                <div class="card">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <h5 class="mb-0">
-                            <i class="bx bx-info-circle me-2"></i>Menü Bilgileri
-                        </h5>
-                        @if (IsEditMode)
-                        {
-                            <span class="badge bg-label-info">ID: @KioskMenuId</span>
-                        }
-                    </div>
-                    <div class="card-body">
-                        <EditForm Model="@model" OnValidSubmit="HandleSubmit">
-                            <DataAnnotationsValidator />
-                            <ValidationSummary />
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-style1">
+                <li class="breadcrumb-item">
+                    <a href="/">
+                        <i class="bx bx-home-alt me-1"></i>Ana Sayfa
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/siramatik/kiosk-menu">
+                        Kiosk Menüleri
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    @(IsEditMode ? "Düzenle" : "Yeni Menü")
+                </li>
+            </ol>
+        </nav>
 
-                            <!-- Menü Adı -->
-                            <div class="mb-3">
-                                <label class="form-label required">
-                                    <i class="bx bx-list-ul me-1"></i>Menü Adı
-                                </label>
-                                <InputText @bind-Value="model.MenuAdi" class="form-control" maxlength="150" disabled="@isSaving" />
-                                <ValidationMessage For="@(() => model.MenuAdi)" class="text-danger small mt-1" />
-                                <div class="form-text">@model.MenuAdi.Length / 150 karakter</div>
-                            </div>
-
-                            <!-- Açıklama -->
-                            <div class="mb-3">
-                                <label class="form-label">
-                                    <i class="bx bx-note me-1"></i>Açıklama (Opsiyonel)
-                                </label>
-                                <InputTextArea @bind-Value="model.Aciklama"
-                                               class="form-control" rows="3" maxlength="500" disabled="@isSaving" />
-                                <ValidationMessage For="@(() => model.Aciklama)" class="text-danger small mt-1" />
-                                <div class="form-text">@((model.Aciklama?.Length ?? 0)) / 500 karakter</div>
-                            </div>
-
-                            <!-- Aktiflik -->
-                            <div class="mb-0">
-                                <label class="form-label fw-bold">Durum</label>
-                                <div class="form-check form-switch">
-                                    <InputCheckbox @bind-Value="isAktif" class="form-check-input" id="aktiflikSwitch" />
-                                    <label class="form-check-label" for="aktiflikSwitch">
-                                        @(isAktif ? "Aktif" : "Pasif")
-                                    </label>
-                                </div>
-                                <small class="text-muted">Pasif menüler yeni kiosk atanmasına kapalı olur.</small>
-                            </div>
-
-                            <div class="mt-4 d-flex justify-content-between">
-                                <button type="button" class="btn btn-secondary" @onclick="NavigateBack" disabled="@isSaving">
-                                    <i class="bx bx-x me-1"></i>İptal
-                                </button>
-                                <button type="submit" class="btn btn-primary" disabled="@isSaving">
-                                    @if (isSaving)
-                                    {
-                                        <span class="spinner-border spinner-border-sm me-1"></span>
-                                        <span>Kaydediliyor...</span>
-                                    }
-                                    else
-                                    {
-                                        <i class="bx bx-save me-1"></i>
-                                        <span>@(IsEditMode ? "Güncelle" : "Kaydet")</span>
-                                    }
-                                </button>
-                            </div>
-                        </EditForm>
-                    </div>
-                </div>
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">
+                    <i class="bx @(IsEditMode ? "bx-edit" : "bx-plus-circle") me-2"></i>
+                    @(IsEditMode ? "Kiosk Menü Düzenle" : "Yeni Kiosk Menü Ekle")
+                </h4>
+                <p class="text-muted mb-0">
+                    @(IsEditMode ? "Menü bilgilerini güncelleyin" : "Kiosklar için yeni bir menü oluşturun")
+                </p>
             </div>
 
-            <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h6 class="mb-0">
-                            <i class="bx bx-info-circle me-1"></i>Menü İpuçları
-                        </h6>
-                    </div>
-                    <div class="card-body text-muted small">
-                        <ul class="list-unstyled mb-0">
-                            <li class="mb-2"><i class="bx bx-chevron-right"></i> Menü adı kiosk ekranlarında görünecek başlıktır.</li>
-                            <li class="mb-2"><i class="bx bx-chevron-right"></i> Aynı menü birden fazla kioska atanabilir.</li>
-                            <li class="mb-2"><i class="bx bx-chevron-right"></i> Pasif menüler mevcut kioskları etkilemez ancak yeni atama yapılamaz.</li>
-                            <li><i class="bx bx-chevron-right"></i> Açıklama sadece yönetim ekranları içindir.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+            <button class="btn btn-outline-secondary" @onclick="NavigateBack" disabled="@isSaving">
+                <i class="bx bx-arrow-back me-1"></i>Geri Dön
+            </button>
         </div>
+
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <p class="mt-3 text-muted">Veriler yükleniyor...</p>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-lg-8 col-xl-6 mx-auto">
+                    <div class="card">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0">
+                                <i class="bx bx-info-circle me-2"></i>Menü Bilgileri
+                            </h5>
+                            @if (IsEditMode)
+                            {
+                                <span class="badge bg-label-info">ID: @KioskMenuId</span>
+                            }
+                        </div>
+                        <div class="card-body">
+                            <EditForm Model="@model" OnValidSubmit="HandleSubmit">
+                                <DataAnnotationsValidator />
+                                <ValidationSummary />
+
+                                <!-- Menü Adı -->
+                                <div class="mb-3">
+                                    <label class="form-label required">
+                                        <i class="bx bx-list-ul me-1"></i>Menü Adı
+                                    </label>
+                                    <InputText @bind-Value="model.MenuAdi" class="form-control" maxlength="150" disabled="@isSaving" />
+                                    <ValidationMessage For="@(() => model.MenuAdi)" class="text-danger small mt-1" />
+                                    <div class="form-text">@model.MenuAdi.Length / 150 karakter</div>
+                                </div>
+
+                                <!-- Açıklama -->
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bx bx-note me-1"></i>Açıklama (Opsiyonel)
+                                    </label>
+                                    <InputTextArea @bind-Value="model.Aciklama"
+                                                   class="form-control" rows="3" maxlength="500" disabled="@isSaving" />
+                                    <ValidationMessage For="@(() => model.Aciklama)" class="text-danger small mt-1" />
+                                    <div class="form-text">@((model.Aciklama?.Length ?? 0)) / 500 karakter</div>
+                                </div>
+
+                                <!-- Aktiflik -->
+                                <div class="mb-0">
+                                    <label class="form-label fw-bold">Durum</label>
+                                    <div class="form-check form-switch">
+                                        <InputCheckbox @bind-Value="isAktif" class="form-check-input" id="aktiflikSwitch" />
+                                        <label class="form-check-label" for="aktiflikSwitch">
+                                            @(isAktif ? "Aktif" : "Pasif")
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Pasif menüler yeni kiosk atanmasına kapalı olur.</small>
+                                </div>
+
+                                <div class="mt-4 d-flex justify-content-between">
+                                    <button type="button" class="btn btn-secondary" @onclick="NavigateBack" disabled="@isSaving">
+                                        <i class="bx bx-x me-1"></i>İptal
+                                    </button>
+                                    <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                                        @if (isSaving)
+                                        {
+                                            <span class="spinner-border spinner-border-sm me-1"></span>
+                                            <span>Kaydediliyor...</span>
+                                        }
+                                        else
+                                        {
+                                            <i class="bx bx-save me-1"></i>
+                                            <span>@(IsEditMode ? "Güncelle" : "Kaydet")</span>
+                                        }
+                                    </button>
+                                </div>
+                            </EditForm>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="bx bx-info-circle me-1"></i>Menü İpuçları
+                            </h6>
+                        </div>
+                        <div class="card-body text-muted small">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2"><i class="bx bx-chevron-right"></i> Menü adı kiosk ekranlarında görünecek başlıktır.</li>
+                                <li class="mb-2"><i class="bx bx-chevron-right"></i> Aynı menü birden fazla kioska atanabilir.</li>
+                                <li class="mb-2"><i class="bx bx-chevron-right"></i> Pasif menüler mevcut kioskları etkilemez ancak yeni atama yapılamaz.</li>
+                                <li><i class="bx bx-chevron-right"></i> Açıklama sadece yönetim ekranları içindir.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     }
 </div>

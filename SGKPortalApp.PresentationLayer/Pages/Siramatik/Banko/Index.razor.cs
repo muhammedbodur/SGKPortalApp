@@ -16,6 +16,7 @@ using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramatik;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
+using SGKPortalApp.PresentationLayer.Components.Base;
 
 
 namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
@@ -24,7 +25,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
     {
         protected override string PagePermissionKey => "SIRAMATIK.BANKO.INDEX";
 
-        [Inject] private IBankoApiService _bankoService { get; set; } = default!
+        [Inject] private IBankoApiService _bankoService { get; set; } = default!;
         [Inject] private IHizmetBinasiApiService _hizmetBinasiService { get; set; } = default!;
         [Inject] private IPersonelApiService _personelService { get; set; } = default!;
         [Inject] private IDepartmanApiService _departmanService { get; set; } = default!;

@@ -1,183 +1,191 @@
 @page "/common/il/manage"
 @page "/common/il/manage/{id:int}"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
 
 <PageTitle>@(IsEditMode ? "İl Düzenle" : "Yeni İl") - SGK Portal</PageTitle>
 
-<!-- ═══════════════════════════════════════════════════════ -->
-<!-- BREADCRUMB -->
-<!-- ═══════════════════════════════════════════════════════ -->
 <div class="container-xxl flex-grow-1 container-p-y">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb breadcrumb-style1">
-            <li class="breadcrumb-item">
-                <a href="javascript:void(0);" @onclick="NavigateToHome">
-                    <i class="bx bx-home-alt me-1"></i>Ana Sayfa
-                </a>
-            </li>
-            <li class="breadcrumb-item">
-                <a href="javascript:void(0);" @onclick="NavigateToIlList">
-                    İl Yönetimi
-                </a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">
-                @(IsEditMode ? "Düzenle" : "Yeni İl")
-            </li>
-        </ol>
-    </nav>
-
-    <!-- ═══════════════════════════════════════════════════════ -->
-    <!-- PAGE HEADER -->
-    <!-- ═══════════════════════════════════════════════════════ -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold mb-1">
-                <i class="bx @(IsEditMode ? "bx-edit" : "bx-plus-circle") me-2"></i>
-                @(IsEditMode ? "İl Düzenle" : "Yeni İl Ekle")
-            </h4>
-            <p class="text-muted mb-0">
-                @(IsEditMode ? "İl bilgilerini güncelleyin" : "Yeni bir il oluşturun")
-            </p>
-        </div>
-
-        <button class="btn btn-outline-secondary" @onclick="NavigateToIlList">
-            <i class="bx bx-arrow-back me-1"></i>Geri Dön
-        </button>
-    </div>
-
-    @if (IsLoading)
+    @if (!CanViewPage)
     {
-        <!-- Loading State -->
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <div class="spinner-border text-primary mb-3" role="status">
-                    <span class="visually-hidden">Yükleniyor...</span>
-                </div>
-                <p class="text-muted">@(IsEditMode ? "İl bilgileri yükleniyor..." : "Hazırlanıyor...")</p>
-            </div>
-        </div>
-    }
-    else if (NotFound)
-    {
-        <!-- Not Found State -->
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="bx bx-error-circle display-1 text-danger mb-3"></i>
-                <h5 class="mb-3">İl Bulunamadı</h5>
-                <p class="text-muted mb-4">
-                    Aradığınız il bulunamadı veya silinmiş olabilir.
-                </p>
-                <button class="btn btn-primary" @onclick="NavigateToIlList">
-                    <i class="bx bx-list-ul me-1"></i>İl Listesine Dön
-                </button>
-            </div>
+        <div class="alert alert-danger" role="alert">
+            <i class="bx bx-lock-alt me-2"></i>
+            Bu sayfayı görüntüleme yetkiniz bulunmuyor.
         </div>
     }
     else
     {
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-style1">
+                <li class="breadcrumb-item">
+                    <a href="javascript:void(0);" @onclick="NavigateToHome">
+                        <i class="bx bx-home-alt me-1"></i>Ana Sayfa
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="javascript:void(0);" @onclick="NavigateToIlList">
+                        İl Yönetimi
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    @(IsEditMode ? "Düzenle" : "Yeni İl")
+                </li>
+            </ol>
+        </nav>
+
         <!-- ═══════════════════════════════════════════════════════ -->
-        <!-- FORM CARD -->
+        <!-- PAGE HEADER -->
         <!-- ═══════════════════════════════════════════════════════ -->
-        <div class="row">
-            <div class="col-lg-8 col-xl-6 mx-auto">
-                <div class="card">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <h5 class="mb-0">
-                            <i class="bx bx-info-circle me-2"></i>İl Bilgileri
-                        </h5>
-                        @if (IsEditMode)
-                        {
-                            <span class="badge bg-label-info">ID: @Id</span>
-                        }
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">
+                    <i class="bx @(IsEditMode ? "bx-edit" : "bx-plus-circle") me-2"></i>
+                    @(IsEditMode ? "İl Düzenle" : "Yeni İl Ekle")
+                </h4>
+                <p class="text-muted mb-0">
+                    @(IsEditMode ? "İl bilgilerini güncelleyin" : "Yeni bir il oluşturun")
+                </p>
+            </div>
+
+            <button class="btn btn-outline-secondary" @onclick="NavigateToIlList">
+                <i class="bx bx-arrow-back me-1"></i>Geri Dön
+            </button>
+        </div>
+
+        @if (IsLoading)
+        {
+            <!-- Loading State -->
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
                     </div>
-
-                    <div class="card-body">
-                        <EditForm Model="@FormModel" OnValidSubmit="HandleSubmit">
-                            <DataAnnotationsValidator />
-
-                            <!-- İl Adı -->
-                            <div class="mb-3">
-                                <label class="form-label required">
-                                    <i class="bx bx-map me-1"></i>İl Adı
-                                </label>
-                                <InputText @bind-Value="FormModel.IlAdi"
-                                           class="form-control"
-                                           placeholder="Örn: İZMİR"
-                                           maxlength="50"
-                                           disabled="@IsSaving" />
-                                <ValidationMessage For="@(() => FormModel.IlAdi)" class="text-danger small mt-1" />
-
-                                <!-- Karakter Sayacı -->
-                                <div class="form-text">
-                                    @FormModel.IlAdi.Length / 50 karakter
-                                </div>
-                            </div>
-
-                            <!-- Info Box -->
+                    <p class="text-muted">@(IsEditMode ? "İl bilgileri yükleniyor..." : "Hazırlanıyor...")</p>
+                </div>
+            </div>
+        }
+        else if (NotFound)
+        {
+            <!-- Not Found State -->
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bx bx-error-circle display-1 text-danger mb-3"></i>
+                    <h5 class="mb-3">İl Bulunamadı</h5>
+                    <p class="text-muted mb-4">
+                        Aradığınız il bulunamadı veya silinmiş olabilir.
+                    </p>
+                    <button class="btn btn-primary" @onclick="NavigateToIlList">
+                        <i class="bx bx-list-ul me-1"></i>İl Listesine Dön
+                    </button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- FORM CARD -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="row">
+                <div class="col-lg-8 col-xl-6 mx-auto">
+                    <div class="card">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0">
+                                <i class="bx bx-info-circle me-2"></i>İl Bilgileri
+                            </h5>
                             @if (IsEditMode)
                             {
-                                <div class="alert alert-info d-flex align-items-center mb-4">
-                                    <i class="bx bx-info-circle fs-4 me-2"></i>
-                                    <div class="flex-grow-1">
-                                        <strong>Bilgi:</strong> Bu ile ait
-                                        <strong>@CurrentIlceSayisi ilçe</strong> bulunmaktadır.
+                                <span class="badge bg-label-info">ID: @Id</span>
+                            }
+                        </div>
+
+                        <div class="card-body">
+                            <EditForm Model="@FormModel" OnValidSubmit="HandleSubmit">
+                                <DataAnnotationsValidator />
+
+                                <!-- İl Adı -->
+                                <div class="mb-3">
+                                    <label class="form-label required">
+                                        <i class="bx bx-map me-1"></i>İl Adı
+                                    </label>
+                                    <InputText @bind-Value="FormModel.IlAdi"
+                                               class="form-control"
+                                               placeholder="Örn: İZMİR"
+                                               maxlength="50"
+                                               disabled="@IsSaving" />
+                                    <ValidationMessage For="@(() => FormModel.IlAdi)" class="text-danger small mt-1" />
+
+                                    <!-- Karakter Sayacı -->
+                                    <div class="form-text">
+                                        @FormModel.IlAdi.Length / 50 karakter
                                     </div>
                                 </div>
-                            }
 
-                            <!-- Validation Summary -->
-                            <ValidationSummary class="alert alert-danger" />
+                                <!-- Info Box -->
+                                @if (IsEditMode)
+                                {
+                                    <div class="alert alert-info d-flex align-items-center mb-4">
+                                        <i class="bx bx-info-circle fs-4 me-2"></i>
+                                        <div class="flex-grow-1">
+                                            <strong>Bilgi:</strong> Bu ile ait
+                                            <strong>@CurrentIlceSayisi ilçe</strong> bulunmaktadır.
+                                        </div>
+                                    </div>
+                                }
 
-                            <!-- Action Buttons -->
-                            <div class="d-flex gap-2 justify-content-end pt-3 border-top">
-                                <button type="button"
-                                        class="btn btn-outline-secondary"
-                                        @onclick="NavigateToIlList"
-                                        disabled="@IsSaving">
-                                    <i class="bx bx-x me-1"></i>İptal
-                                </button>
+                                <!-- Validation Summary -->
+                                <ValidationSummary class="alert alert-danger" />
 
-                                <button type="submit"
-                                        class="btn btn-primary"
-                                        disabled="@IsSaving">
-                                    @if (IsSaving)
-                                    {
-                                        <span class="spinner-border spinner-border-sm me-1"></span>
-                                        <span>Kaydediliyor...</span>
-                                    }
-                                    else
-                                    {
-                                        <i class="bx bx-check me-1"></i>
-                                        <span>@(IsEditMode ? "Güncelle" : "Kaydet")</span>
-                                    }
-                                </button>
-                            </div>
-                        </EditForm>
-                    </div>
-                </div>
+                                <!-- Action Buttons -->
+                                <div class="d-flex gap-2 justify-content-end pt-3 border-top">
+                                    <button type="button"
+                                            class="btn btn-outline-secondary"
+                                            @onclick="NavigateToIlList"
+                                            disabled="@IsSaving">
+                                        <i class="bx bx-x me-1"></i>İptal
+                                    </button>
 
-                <!-- Delete Button (Edit Mode Only) -->
-                @if (IsEditMode)
-                {
-                    <div class="card border-danger mt-4">
-                        <div class="card-body">
-                            <h6 class="text-danger mb-2">
-                                <i class="bx bx-error-circle me-1"></i>Tehlikeli Bölge
-                            </h6>
-                            <p class="text-muted mb-3 small">
-                                Bu ili silmek istiyorsanız, aşağıdaki butona tıklayın.
-                                Bu işlem geri alınamaz.
-                            </p>
-                            <button class="btn btn-outline-danger"
-                                    @onclick="ShowDeleteConfirmation"
-                                    disabled="@IsSaving">
-                                <i class="bx bx-trash me-1"></i>İli Sil
-                            </button>
+                                    <button type="submit"
+                                            class="btn btn-primary"
+                                            disabled="@IsSaving">
+                                        @if (IsSaving)
+                                        {
+                                            <span class="spinner-border spinner-border-sm me-1"></span>
+                                            <span>Kaydediliyor...</span>
+                                        }
+                                        else
+                                        {
+                                            <i class="bx bx-check me-1"></i>
+                                            <span>@(IsEditMode ? "Güncelle" : "Kaydet")</span>
+                                        }
+                                    </button>
+                                </div>
+                            </EditForm>
                         </div>
                     </div>
-                }
+
+                    <!-- Delete Button (Edit Mode Only) -->
+                    @if (IsEditMode)
+                    {
+                        <div class="card border-danger mt-4">
+                            <div class="card-body">
+                                <h6 class="text-danger mb-2">
+                                    <i class="bx bx-error-circle me-1"></i>Tehlikeli Bölge
+                                </h6>
+                                <p class="text-muted mb-3 small">
+                                    Bu ili silmek istiyorsanız, aşağıdaki butona tıklayın.
+                                    Bu işlem geri alınamaz.
+                                </p>
+                                <button class="btn btn-outline-danger"
+                                        @onclick="ShowDeleteConfirmation"
+                                        disabled="@IsSaving">
+                                    <i class="bx bx-trash me-1"></i>İli Sil
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
-        </div>
+        }
     }
 </div>
 

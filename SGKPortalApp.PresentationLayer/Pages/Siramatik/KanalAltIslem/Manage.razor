@@ -1,5 +1,6 @@
 @page "/siramatik/kanal-alt-islem/manage"
 @page "/siramatik/kanal-alt-islem/manage/{KanalAltIslemId:int}"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
 @using System.ComponentModel.DataAnnotations
@@ -8,6 +9,15 @@
 <PageTitle>@(IsEditMode ? "Alt İşlem Düzenle" : "Yeni Alt İşlem") - SGK Portal</PageTitle>
 
 <div class="container-xxl flex-grow-1 container-p-y">
+    @if (!CanViewPage)
+    {
+        <div class="alert alert-danger" role="alert">
+            <i class="bx bx-lock-alt me-2"></i>
+            Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+        </div>
+    }
+    else
+    {
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb breadcrumb-style1">

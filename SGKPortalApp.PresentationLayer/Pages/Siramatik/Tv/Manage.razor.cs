@@ -15,6 +15,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
 {
     public partial class Manage
     {
+        protected override string PagePermissionKey => "SIRA.TV.MANAGE";
+
         [Parameter]
         public int TvId { get; set; }
 

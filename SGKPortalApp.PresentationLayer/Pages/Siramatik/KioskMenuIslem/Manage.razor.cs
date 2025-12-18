@@ -10,6 +10,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuIslem
 {
     public partial class Manage
     {
+        protected override string PagePermissionKey => "SIRA.KIOSKMENUISLEM.MANAGE";
+
         [Parameter] public int? KioskMenuIslemId { get; set; }
         [Parameter] [SupplyParameterFromQuery] public int? kioskMenuId { get; set; }
 

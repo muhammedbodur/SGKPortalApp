@@ -3,13 +3,14 @@ using QuestPDF.Infrastructure;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
+using SGKPortalApp.PresentationLayer.Components.Base;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel.AtanmaNedeni
 {
     public partial class Index
     {
         protected override string PagePermissionKey => "PER.ATANMANEDENI.INDEX";
-        [Inject] private NavigationManager _navigationManager { get; set; } = default!
+        [Inject] private NavigationManager _navigationManager { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
         [Inject] private IAtanmaNedeniApiService _atanmaNedeniApiService { get; set; } = default!;
 

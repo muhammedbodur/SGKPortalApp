@@ -5,8 +5,10 @@ using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel.AtanmaNedeni
 {
-    public partial class Manage : ComponentBase
+    public partial class Manage
     {
+        protected override string PagePermissionKey => "PER.ATANMANEDENI.MANAGE";
+
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
         [Inject] private IAtanmaNedeniApiService _atanmaNedeniApiService { get; set; } = default!;

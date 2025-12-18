@@ -1,299 +1,310 @@
 @page "/siramatik/kiosk-simulator"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
 @attribute [Authorize]
 
 <PageTitle>Kiosk Simülatör - SGK Portal</PageTitle>
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold mb-1">
-                <i class="bx bx-terminal me-2 text-warning"></i>Kiosk Simülatör
-            </h4>
-            <p class="text-muted mb-0">
-                Masaüstü kiosk uygulamasını simüle eder - Test amaçlı
-            </p>
+    @if (!CanViewPage)
+    {
+        <div class="alert alert-danger" role="alert">
+            <i class="bx bx-lock-alt me-2"></i>
+            Bu sayfayı görüntüleme yetkiniz bulunmuyor.
         </div>
-        <div>
-            <span class="badge bg-warning text-dark">
-                <i class="bx bx-info-circle me-1"></i>
-                Geliştirme Modu
-            </span>
+    }
+    else
+    {
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">
+                    <i class="bx bx-terminal me-2 text-warning"></i>Kiosk Simülatör
+                </h4>
+                <p class="text-muted mb-0">
+                    Masaüstü kiosk uygulamasını simüle eder - Test amaçlı
+                </p>
+            </div>
+            <div>
+                <span class="badge bg-warning text-dark">
+                    <i class="bx bx-info-circle me-1"></i>
+                    Geliştirme Modu
+                </span>
+            </div>
         </div>
-    </div>
 
-    <!-- Kiosk Seçimi -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label fw-bold">
-                        <i class="bx bx-desktop me-1"></i>Kiosk Seçiniz
-                    </label>
-                    <select class="form-select form-select-lg" @onchange="OnKioskChanged" value="@selectedKioskId">
-                        <option value="0">-- Kiosk Seçiniz --</option>
-                        @foreach (var kiosk in kiosklar)
+        <!-- Kiosk Seçimi -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">
+                            <i class="bx bx-desktop me-1"></i>Kiosk Seçiniz
+                        </label>
+                        <select class="form-select form-select-lg" @onchange="OnKioskChanged" value="@selectedKioskId">
+                            <option value="0">-- Kiosk Seçiniz --</option>
+                            @foreach (var kiosk in kiosklar)
+                            {
+                                <option value="@kiosk.KioskId">@kiosk.KioskAdi (@kiosk.HizmetBinasiAdi)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-8">
+                        @if (selectedKioskId > 0)
                         {
-                            <option value="@kiosk.KioskId">@kiosk.KioskAdi (@kiosk.HizmetBinasiAdi)</option>
+                            <div class="alert alert-info mb-0">
+                                <i class="bx bx-info-circle me-1"></i>
+                                <strong>@GetSelectedKioskAdi()</strong> için kiosk simülasyonu aktif
+                            </div>
                         }
-                    </select>
-                </div>
-                <div class="col-md-8">
-                    @if (selectedKioskId > 0)
-                    {
-                        <div class="alert alert-info mb-0">
-                            <i class="bx bx-info-circle me-1"></i>
-                            <strong>@GetSelectedKioskAdi()</strong> için kiosk simülasyonu aktif
-                        </div>
-                    }
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    @if (selectedKioskId > 0)
-    {
-        <!-- Kiosk Ekranı Simülasyonu -->
-        <div class="row">
-            <!-- Sol Panel: Menü/İşlem Seçimi -->
-            <div class="col-lg-8">
-                <div class="card kiosk-screen">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="bx bx-touch me-2"></i>
-                            @if (currentStep == KioskStep.MenuSecimi)
+        @if (selectedKioskId > 0)
+        {
+            <!-- Kiosk Ekranı Simülasyonu -->
+            <div class="row">
+                <!-- Sol Panel: Menü/İşlem Seçimi -->
+                <div class="col-lg-8">
+                    <div class="card kiosk-screen">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="bx bx-touch me-2"></i>
+                                @if (currentStep == KioskStep.MenuSecimi)
+                                {
+                                    <span>İşlem Seçiniz</span>
+                                }
+                                else if (currentStep == KioskStep.AltIslemSecimi)
+                                {
+                                    <span>Alt İşlem Seçiniz</span>
+                                }
+                                else if (currentStep == KioskStep.SiraAlindi)
+                                {
+                                    <span>Sıra Bilgisi</span>
+                                }
+                            </h5>
+                            @if (currentStep != KioskStep.MenuSecimi)
                             {
-                                <span>İşlem Seçiniz</span>
+                                <button class="btn btn-light btn-sm" @onclick="GoBack">
+                                    <i class="bx bx-arrow-back me-1"></i>Geri
+                                </button>
                             }
-                            else if (currentStep == KioskStep.AltIslemSecimi)
+                        </div>
+                        <div class="card-body p-4">
+                            @if (isLoading)
                             {
-                                <span>Alt İşlem Seçiniz</span>
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+                                    <p class="mt-3 text-muted">Yükleniyor...</p>
+                                </div>
                             }
-                            else if (currentStep == KioskStep.SiraAlindi)
+                            else if (currentStep == KioskStep.MenuSecimi)
                             {
-                                <span>Sıra Bilgisi</span>
-                            }
-                        </h5>
-                        @if (currentStep != KioskStep.MenuSecimi)
-                        {
-                            <button class="btn btn-light btn-sm" @onclick="GoBack">
-                                <i class="bx bx-arrow-back me-1"></i>Geri
-                            </button>
-                        }
-                    </div>
-                    <div class="card-body p-4">
-                        @if (isLoading)
-                        {
-                            <div class="text-center py-5">
-                                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
-                                <p class="mt-3 text-muted">Yükleniyor...</p>
-                            </div>
-                        }
-                        else if (currentStep == KioskStep.MenuSecimi)
-                        {
-                            <!-- ADIM 1: Menü Seçimi -->
-                            @if (kioskMenuler.Any())
-                            {
-                                <div class="row g-3">
-                                    @foreach (var menu in kioskMenuler)
-                                    {
-                                        <div class="col-md-6 col-lg-4">
-                                            <div class="card h-100 kiosk-menu-card" @onclick="() => SelectMenu(menu)">
-                                                <div class="card-body text-center p-4">
-                                                    <div class="kiosk-icon mb-3">
-                                                        <i class="bx bx-folder-open bx-lg text-primary"></i>
-                                                    </div>
-                                                    <h5 class="card-title mb-2">@menu.MenuAdi</h5>
-                                                    @if (!string.IsNullOrEmpty(menu.Aciklama))
-                                                    {
-                                                        <p class="card-text text-muted small mb-2">@menu.Aciklama</p>
-                                                    }
-                                                    <div class="d-flex justify-content-center gap-2">
-                                                        <span class="badge bg-info">
-                                                            <i class="bx bx-list-ul me-1"></i>@menu.AktifAltIslemSayisi işlem
-                                                        </span>
-                                                        <span class="badge bg-warning text-dark">
-                                                            <i class="bx bx-time me-1"></i>@menu.ToplamBekleyenSiraSayisi bekleyen
-                                                        </span>
+                                <!-- ADIM 1: Menü Seçimi -->
+                                @if (kioskMenuler.Any())
+                                {
+                                    <div class="row g-3">
+                                        @foreach (var menu in kioskMenuler)
+                                        {
+                                            <div class="col-md-6 col-lg-4">
+                                                <div class="card h-100 kiosk-menu-card" @onclick="() => SelectMenu(menu)">
+                                                    <div class="card-body text-center p-4">
+                                                        <div class="kiosk-icon mb-3">
+                                                            <i class="bx bx-folder-open bx-lg text-primary"></i>
+                                                        </div>
+                                                        <h5 class="card-title mb-2">@menu.MenuAdi</h5>
+                                                        @if (!string.IsNullOrEmpty(menu.Aciklama))
+                                                        {
+                                                            <p class="card-text text-muted small mb-2">@menu.Aciklama</p>
+                                                        }
+                                                        <div class="d-flex justify-content-center gap-2">
+                                                            <span class="badge bg-info">
+                                                                <i class="bx bx-list-ul me-1"></i>@menu.AktifAltIslemSayisi işlem
+                                                            </span>
+                                                            <span class="badge bg-warning text-dark">
+                                                                <i class="bx bx-time me-1"></i>@menu.ToplamBekleyenSiraSayisi bekleyen
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    }
-                                </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-warning text-center">
+                                        <i class="bx bx-error-circle bx-lg mb-2"></i>
+                                        <h5>Şu anda hizmet verilemiyor</h5>
+                                        <p class="mb-0">Bu hizmet binasında aktif personel bulunan işlem bulunmamaktadır.</p>
+                                    </div>
+                                }
                             }
-                            else
+                            else if (currentStep == KioskStep.AltIslemSecimi)
                             {
-                                <div class="alert alert-warning text-center">
-                                    <i class="bx bx-error-circle bx-lg mb-2"></i>
-                                    <h5>Şu anda hizmet verilemiyor</h5>
-                                    <p class="mb-0">Bu hizmet binasında aktif personel bulunan işlem bulunmamaktadır.</p>
+                                <!-- ADIM 2: Alt İşlem Seçimi -->
+                                <div class="mb-3">
+                                    <span class="badge bg-primary fs-6">
+                                        <i class="bx bx-folder me-1"></i>@selectedMenu?.MenuAdi
+                                    </span>
                                 </div>
-                            }
-                        }
-                        else if (currentStep == KioskStep.AltIslemSecimi)
-                        {
-                            <!-- ADIM 2: Alt İşlem Seçimi -->
-                            <div class="mb-3">
-                                <span class="badge bg-primary fs-6">
-                                    <i class="bx bx-folder me-1"></i>@selectedMenu?.MenuAdi
-                                </span>
-                            </div>
                             
-                            @if (altIslemler.Any())
-                            {
-                                <div class="row g-3">
-                                    @foreach (var islem in altIslemler)
-                                    {
-                                        <div class="col-md-6">
-                                            <div class="card h-100 kiosk-islem-card" @onclick="() => SelectAltIslem(islem)">
-                                                <div class="card-body p-4">
-                                                    <div class="d-flex align-items-start">
-                                                        <div class="kiosk-icon me-3">
-                                                            <i class="bx bx-file bx-md text-success"></i>
-                                                        </div>
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="card-title mb-1">@islem.KanalAltAdi</h6>
-                                                            <p class="text-muted small mb-2">@islem.KanalAdi</p>
-                                                            <div class="d-flex gap-2">
-                                                                <span class="badge bg-warning text-dark">
-                                                                    <i class="bx bx-user me-1"></i>@islem.BekleyenSiraSayisi bekleyen
-                                                                </span>
-                                                                <span class="badge bg-info">
-                                                                    <i class="bx bx-time me-1"></i>~@islem.TahminiBeklemeSuresi dk
-                                                                </span>
+                                @if (altIslemler.Any())
+                                {
+                                    <div class="row g-3">
+                                        @foreach (var islem in altIslemler)
+                                        {
+                                            <div class="col-md-6">
+                                                <div class="card h-100 kiosk-islem-card" @onclick="() => SelectAltIslem(islem)">
+                                                    <div class="card-body p-4">
+                                                        <div class="d-flex align-items-start">
+                                                            <div class="kiosk-icon me-3">
+                                                                <i class="bx bx-file bx-md text-success"></i>
+                                                            </div>
+                                                            <div class="flex-grow-1">
+                                                                <h6 class="card-title mb-1">@islem.KanalAltAdi</h6>
+                                                                <p class="text-muted small mb-2">@islem.KanalAdi</p>
+                                                                <div class="d-flex gap-2">
+                                                                    <span class="badge bg-warning text-dark">
+                                                                        <i class="bx bx-user me-1"></i>@islem.BekleyenSiraSayisi bekleyen
+                                                                    </span>
+                                                                    <span class="badge bg-info">
+                                                                        <i class="bx bx-time me-1"></i>~@islem.TahminiBeklemeSuresi dk
+                                                                    </span>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    }
-                                </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-warning text-center">
+                                        <i class="bx bx-error-circle bx-lg mb-2"></i>
+                                        <h5>Şu anda hizmet verilemiyor</h5>
+                                        <p class="mb-0">Bu menüde aktif personel bulunan işlem bulunmamaktadır.</p>
+                                    </div>
+                                }
                             }
-                            else
+                            else if (currentStep == KioskStep.SiraAlindi)
                             {
-                                <div class="alert alert-warning text-center">
-                                    <i class="bx bx-error-circle bx-lg mb-2"></i>
-                                    <h5>Şu anda hizmet verilemiyor</h5>
-                                    <p class="mb-0">Bu menüde aktif personel bulunan işlem bulunmamaktadır.</p>
-                                </div>
-                            }
-                        }
-                        else if (currentStep == KioskStep.SiraAlindi)
-                        {
-                            <!-- ADIM 3: Sıra Alındı - Fiş Gösterimi -->
-                            @if (siraAlResponse != null)
-                            {
-                                <div class="text-center">
-                                    <div class="kiosk-ticket mx-auto">
-                                        <div class="ticket-header">
-                                            <i class="bx bx-check-circle bx-lg text-success mb-2"></i>
-                                            <h4 class="text-success mb-0">Sıranız Alındı!</h4>
-                                        </div>
-                                        <div class="ticket-body">
-                                            <div class="ticket-number">
-                                                @siraAlResponse.SiraNo
+                                <!-- ADIM 3: Sıra Alındı - Fiş Gösterimi -->
+                                @if (siraAlResponse != null)
+                                {
+                                    <div class="text-center">
+                                        <div class="kiosk-ticket mx-auto">
+                                            <div class="ticket-header">
+                                                <i class="bx bx-check-circle bx-lg text-success mb-2"></i>
+                                                <h4 class="text-success mb-0">Sıranız Alındı!</h4>
                                             </div>
-                                            <div class="ticket-info">
-                                                <p class="mb-1"><strong>@siraAlResponse.KanalAltAdi</strong></p>
-                                                <p class="mb-1 text-muted">@siraAlResponse.HizmetBinasiAdi</p>
-                                                <hr />
-                                                <p class="mb-1">
-                                                    <i class="bx bx-calendar me-1"></i>
-                                                    @siraAlResponse.SiraAlisZamani.ToString("dd.MM.yyyy HH:mm")
-                                                </p>
-                                                <p class="mb-1">
-                                                    <i class="bx bx-user me-1"></i>
-                                                    Önünüzde <strong>@siraAlResponse.BekleyenSiraSayisi</strong> kişi bekliyor
-                                                </p>
-                                                @if (siraAlResponse.TahminiBeklemeSuresi.HasValue)
-                                                {
-                                                    <p class="mb-0">
-                                                        <i class="bx bx-time me-1"></i>
-                                                        Tahmini bekleme: <strong>~@siraAlResponse.TahminiBeklemeSuresi dk</strong>
+                                            <div class="ticket-body">
+                                                <div class="ticket-number">
+                                                    @siraAlResponse.SiraNo
+                                                </div>
+                                                <div class="ticket-info">
+                                                    <p class="mb-1"><strong>@siraAlResponse.KanalAltAdi</strong></p>
+                                                    <p class="mb-1 text-muted">@siraAlResponse.HizmetBinasiAdi</p>
+                                                    <hr />
+                                                    <p class="mb-1">
+                                                        <i class="bx bx-calendar me-1"></i>
+                                                        @siraAlResponse.SiraAlisZamani.ToString("dd.MM.yyyy HH:mm")
                                                     </p>
-                                                }
+                                                    <p class="mb-1">
+                                                        <i class="bx bx-user me-1"></i>
+                                                        Önünüzde <strong>@siraAlResponse.BekleyenSiraSayisi</strong> kişi bekliyor
+                                                    </p>
+                                                    @if (siraAlResponse.TahminiBeklemeSuresi.HasValue)
+                                                    {
+                                                        <p class="mb-0">
+                                                            <i class="bx bx-time me-1"></i>
+                                                            Tahmini bekleme: <strong>~@siraAlResponse.TahminiBeklemeSuresi dk</strong>
+                                                        </p>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <div class="ticket-footer">
+                                                <small class="text-muted">Lütfen sıranızı bekleyiniz</small>
                                             </div>
                                         </div>
-                                        <div class="ticket-footer">
-                                            <small class="text-muted">Lütfen sıranızı bekleyiniz</small>
+                                    
+                                        <div class="mt-4">
+                                            <button class="btn btn-primary btn-lg" @onclick="ResetKiosk">
+                                                <i class="bx bx-home me-1"></i>Ana Menüye Dön
+                                            </button>
                                         </div>
                                     </div>
-                                    
-                                    <div class="mt-4">
-                                        <button class="btn btn-primary btn-lg" @onclick="ResetKiosk">
-                                            <i class="bx bx-home me-1"></i>Ana Menüye Dön
-                                        </button>
-                                    </div>
-                                </div>
+                                }
                             }
-                        }
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sağ Panel: Durum Bilgisi -->
-            <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h6 class="mb-0">
-                            <i class="bx bx-info-circle me-1"></i>Simülasyon Durumu
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item d-flex justify-content-between">
-                                <span>Kiosk:</span>
-                                <strong>@GetSelectedKioskAdi()</strong>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between">
-                                <span>Mevcut Adım:</span>
-                                <span class="badge bg-primary">@GetCurrentStepName()</span>
-                            </li>
-                            @if (selectedMenu != null)
-                            {
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Seçili Menü:</span>
-                                    <strong>@selectedMenu.MenuAdi</strong>
-                                </li>
-                            }
-                            @if (selectedAltIslem != null)
-                            {
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>Seçili İşlem:</span>
-                                    <strong>@selectedAltIslem.KanalAltAdi</strong>
-                                </li>
-                            }
-                        </ul>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Hızlı Bilgi -->
-                <div class="card mt-3">
-                    <div class="card-header bg-warning text-dark">
-                        <h6 class="mb-0">
-                            <i class="bx bx-bulb me-1"></i>Bilgi
-                        </h6>
+                <!-- Sağ Panel: Durum Bilgisi -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="bx bx-info-circle me-1"></i>Simülasyon Durumu
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Kiosk:</span>
+                                    <strong>@GetSelectedKioskAdi()</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>Mevcut Adım:</span>
+                                    <span class="badge bg-primary">@GetCurrentStepName()</span>
+                                </li>
+                                @if (selectedMenu != null)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Seçili Menü:</span>
+                                        <strong>@selectedMenu.MenuAdi</strong>
+                                    </li>
+                                }
+                                @if (selectedAltIslem != null)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>Seçili İşlem:</span>
+                                        <strong>@selectedAltIslem.KanalAltAdi</strong>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <p class="small mb-2">
-                            <i class="bx bx-check text-success me-1"></i>
-                            Sadece aktif personeli olan menüler gösterilir
-                        </p>
-                        <p class="small mb-2">
-                            <i class="bx bx-check text-success me-1"></i>
-                            Personel en az Yrd. Uzman yetkisinde olmalı
-                        </p>
-                        <p class="small mb-0">
-                            <i class="bx bx-check text-success me-1"></i>
-                            Personel banko modunda olmalı
-                        </p>
+
+                    <!-- Hızlı Bilgi -->
+                    <div class="card mt-3">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0">
+                                <i class="bx bx-bulb me-1"></i>Bilgi
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="small mb-2">
+                                <i class="bx bx-check text-success me-1"></i>
+                                Sadece aktif personeli olan menüler gösterilir
+                            </p>
+                            <p class="small mb-2">
+                                <i class="bx bx-check text-success me-1"></i>
+                                Personel en az Yrd. Uzman yetkisinde olmalı
+                            </p>
+                            <p class="small mb-0">
+                                <i class="bx bx-check text-success me-1"></i>
+                                Personel banko modunda olmalı
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        }
     }
 </div>
 

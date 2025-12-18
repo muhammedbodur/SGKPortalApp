@@ -1,177 +1,191 @@
 @page "/siramatik/banko/manage"
 @page "/siramatik/banko/manage/{BankoId:int}"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.Common.Extensions
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
 @using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri
+@attribute [Authorize]
+
+<PageTitle>@(IsEditMode ? "Banko Düzenle" : "Yeni Banko") - SGK Portal</PageTitle>
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb breadcrumb-style1">
-            <li class="breadcrumb-item">
-                <a href="/">
-                    <i class="bx bx-home-alt me-1"></i>Ana Sayfa
-                </a>
-            </li>
-            <li class="breadcrumb-item">
-                <a href="/siramatik/banko/list">
-                    Banko Yönetimi
-                </a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">
-                @(IsEditMode ? "Düzenle" : "Yeni Banko")
-            </li>
-        </ol>
-    </nav>
-
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold mb-1">
-                <i class="bx @(IsEditMode ? "bx-edit" : "bx-plus-circle") me-2"></i>
-                @(IsEditMode ? "Banko Düzenle" : "Yeni Banko Ekle")
-            </h4>
-            <p class="text-muted mb-0">
-                @(IsEditMode ? "Banko bilgilerini güncelleyin" : "Yeni bir banko oluşturun")
-            </p>
-        </div>
-
-        <button class="btn btn-outline-secondary" @onclick="NavigateBack">
-            <i class="bx bx-arrow-back me-1"></i>Geri Dön
-        </button>
-    </div>
-
-
-    @if (isLoading)
+    @if (!CanViewPage)
     {
-        <div class="text-center py-5">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Yükleniyor...</span>
-            </div>
-            <p class="mt-3 text-muted">Veriler yükleniyor...</p>
+        <div class="alert alert-danger" role="alert">
+            <i class="bx bx-lock-alt me-2"></i>
+            Bu sayfayı görüntüleme yetkiniz bulunmuyor.
         </div>
     }
     else
     {
-        <div class="row">
-            <div class="col-lg-8 col-xl-6 mx-auto">
-                <div class="card">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <h5 class="mb-0">
-                            <i class="bx bx-info-circle me-2"></i>Banko Bilgileri
-                        </h5>
-                        @if (IsEditMode)
-                        {
-                            <span class="badge bg-label-info">ID: @BankoId</span>
-                        }
-                    </div>
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-style1">
+                <li class="breadcrumb-item">
+                    <a href="/">
+                        <i class="bx bx-home-alt me-1"></i>Ana Sayfa
+                    </a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="/siramatik/banko/list">
+                        Banko Yönetimi
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    @(IsEditMode ? "Düzenle" : "Yeni Banko")
+                </li>
+            </ol>
+        </nav>
 
-                    <div class="card-body">
-                        <EditForm Model="@model" OnValidSubmit="HandleSubmit">
-                            <ValidationSummary />
-                            <DataAnnotationsValidator />
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">
+                    <i class="bx @(IsEditMode ? "bx-edit" : "bx-plus-circle") me-2"></i>
+                    @(IsEditMode ? "Banko Düzenle" : "Yeni Banko Ekle")
+                </h4>
+                <p class="text-muted mb-0">
+                    @(IsEditMode ? "Banko bilgilerini güncelleyin" : "Yeni bir banko oluşturun")
+                </p>
+            </div>
 
-                            <!-- Hizmet Binası Seçimi -->
-                            <div class="mb-3">
-                                <label class="form-label required">
-                                    <i class="bx bx-building me-1"></i>Hizmet Binası
-                                </label>
-                                @if (IsEditMode || (selectedHizmetBinasiId > 0 && HizmetBinasiId.HasValue))
-                                {
-                                    <!-- Düzenleme modunda veya URL'den parametre geldiyse readonly -->
-                                    <input type="text" class="form-control"
-                                           value="@(allHizmetBinalari.FirstOrDefault(b => b.HizmetBinasiId == selectedHizmetBinasiId)?.HizmetBinasiAdi ?? hizmetBinasiAdi)"
-                                           disabled readonly />
-                                    <small class="text-muted">@(IsEditMode ? "Düzenleme sırasında hizmet binası değiştirilemez" : "Index sayfasından seçilen hizmet binası")</small>
-                                }
-                                else
-                                {
-                                    <!-- Ekleme modunda dropdown (URL'den parametre yoksa) -->
-                                    <select class="form-select"
-                                            value="@selectedHizmetBinasiId"
-                                            @onchange="OnHizmetBinasiChanged"
-                                            disabled="@isSaving">
-                                        <option value="0">-- Hizmet Binası Seçiniz --</option>
-                                        @foreach (var bina in allHizmetBinalari)
-                                        {
-                                            <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
-                                        }
-                                    </select>
-                                    <ValidationMessage For="@(() => model.HizmetBinasiId)" />
-                                }
-                            </div>
+            <button class="btn btn-outline-secondary" @onclick="NavigateBack">
+                <i class="bx bx-arrow-back me-1"></i>Geri Dön
+            </button>
+        </div>
 
-                            <!-- Kat -->
-                            <div class="mb-3">
-                                <label class="form-label required">
-                                    <i class="bx bx-layer me-1"></i>Kat
-                                </label>
-                                <select class="form-select" @bind="model.KatTipi" disabled="@isSaving">
-                                    @foreach (var kat in Enum.GetValues<KatTipi>())
+
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <p class="mt-3 text-muted">Veriler yükleniyor...</p>
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-lg-8 col-xl-6 mx-auto">
+                    <div class="card">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0">
+                                <i class="bx bx-info-circle me-2"></i>Banko Bilgileri
+                            </h5>
+                            @if (IsEditMode)
+                            {
+                                <span class="badge bg-label-info">ID: @BankoId</span>
+                            }
+                        </div>
+
+                        <div class="card-body">
+                            <EditForm Model="@model" OnValidSubmit="HandleSubmit">
+                                <ValidationSummary />
+                                <DataAnnotationsValidator />
+
+                                <!-- Hizmet Binası Seçimi -->
+                                <div class="mb-3">
+                                    <label class="form-label required">
+                                        <i class="bx bx-building me-1"></i>Hizmet Binası
+                                    </label>
+                                    @if (IsEditMode || (selectedHizmetBinasiId > 0 && HizmetBinasiId.HasValue))
                                     {
-                                        <option value="@kat">@kat.GetDisplayName()</option>
-                                    }
-                                </select>
-                                <ValidationMessage For="@(() => model.KatTipi)" />
-                            </div>
-
-                            <!-- Banko No -->
-                            <div class="mb-3">
-                                <label class="form-label required">
-                                    <i class="bx bx-hash me-1"></i>Banko No
-                                </label>
-                                <input type="number" class="form-control" @bind="model.BankoNo" min="1" disabled="@isSaving" placeholder="Kat içindeki banko numarası" />
-                                <small class="text-muted">Her katta 1'den başlayabilirsiniz. Örn: Zemin Kat 1,2,3 - 1. Kat 1,2,3</small>
-                                <ValidationMessage For="@(() => model.BankoNo)" />
-                            </div>
-
-                            <!-- Banko Tipi -->
-                            <div class="mb-3">
-                                <label class="form-label required">
-                                    <i class="bx bx-category me-1"></i>Banko Tipi
-                                </label>
-                                <select class="form-select" @bind="model.BankoTipi" disabled="@isSaving">
-                                    @foreach (var tip in Enum.GetValues<BankoTipi>())
-                                    {
-                                        <option value="@tip">@tip.GetDisplayName()</option>
-                                    }
-                                </select>
-                                <ValidationMessage For="@(() => model.BankoTipi)" />
-                            </div>
-
-                            <!-- Açıklama -->
-                            <div class="mb-3">
-                                <label class="form-label">
-                                    <i class="bx bx-note me-1"></i>Açıklama
-                                </label>
-                                <textarea class="form-control" @bind="model.BankoAciklama" rows="3" disabled="@isSaving" placeholder="Banko hakkında ek bilgi..."></textarea>
-                                <ValidationMessage For="@(() => model.BankoAciklama)" />
-                            </div>
-
-                            <!-- Buttons -->
-                            <div class="d-flex justify-content-end gap-2 mt-4">
-                                <button type="button" class="btn btn-outline-secondary" @onclick="NavigateBack" disabled="@isSaving">
-                                    <i class="bx bx-x me-1"></i>İptal
-                                </button>
-                                <button type="submit" class="btn btn-primary" disabled="@isSaving">
-                                    @if (isSaving)
-                                    {
-                                        <span class="spinner-border spinner-border-sm me-1"></span>
+                                        <!-- Düzenleme modunda veya URL'den parametre geldiyse readonly -->
+                                        <input type="text" class="form-control"
+                                               value="@(allHizmetBinalari.FirstOrDefault(b => b.HizmetBinasiId == selectedHizmetBinasiId)?.HizmetBinasiAdi ?? hizmetBinasiAdi)"
+                                               disabled readonly />
+                                        <small class="text-muted">@(IsEditMode ? "Düzenleme sırasında hizmet binası değiştirilemez" : "Index sayfasından seçilen hizmet binası")</small>
                                     }
                                     else
                                     {
-                                        <i class="bx bx-save me-1"></i>
+                                        <!-- Ekleme modunda dropdown (URL'den parametre yoksa) -->
+                                        <select class="form-select"
+                                                value="@selectedHizmetBinasiId"
+                                                @onchange="OnHizmetBinasiChanged"
+                                                disabled="@isSaving">
+                                            <option value="0">-- Hizmet Binası Seçiniz --</option>
+                                            @foreach (var bina in allHizmetBinalari)
+                                            {
+                                                <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                                            }
+                                        </select>
+                                        <ValidationMessage For="@(() => model.HizmetBinasiId)" />
                                     }
-                                    @(IsEditMode ? "Güncelle" : "Kaydet")
-                                </button>
-                            </div>
-                        </EditForm>
+                                </div>
+
+                                <!-- Kat -->
+                                <div class="mb-3">
+                                    <label class="form-label required">
+                                        <i class="bx bx-layer me-1"></i>Kat
+                                    </label>
+                                    <select class="form-select" @bind="model.KatTipi" disabled="@isSaving">
+                                        @foreach (var kat in Enum.GetValues<KatTipi>())
+                                        {
+                                            <option value="@kat">@kat.GetDisplayName()</option>
+                                        }
+                                    </select>
+                                    <ValidationMessage For="@(() => model.KatTipi)" />
+                                </div>
+
+                                <!-- Banko No -->
+                                <div class="mb-3">
+                                    <label class="form-label required">
+                                        <i class="bx bx-hash me-1"></i>Banko No
+                                    </label>
+                                    <input type="number" class="form-control" @bind="model.BankoNo" min="1" disabled="@isSaving" placeholder="Kat içindeki banko numarası" />
+                                    <small class="text-muted">Her katta 1'den başlayabilirsiniz. Örn: Zemin Kat 1,2,3 - 1. Kat 1,2,3</small>
+                                    <ValidationMessage For="@(() => model.BankoNo)" />
+                                </div>
+
+                                <!-- Banko Tipi -->
+                                <div class="mb-3">
+                                    <label class="form-label required">
+                                        <i class="bx bx-category me-1"></i>Banko Tipi
+                                    </label>
+                                    <select class="form-select" @bind="model.BankoTipi" disabled="@isSaving">
+                                        @foreach (var tip in Enum.GetValues<BankoTipi>())
+                                        {
+                                            <option value="@tip">@tip.GetDisplayName()</option>
+                                        }
+                                    </select>
+                                    <ValidationMessage For="@(() => model.BankoTipi)" />
+                                </div>
+
+                                <!-- Açıklama -->
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bx bx-note me-1"></i>Açıklama
+                                    </label>
+                                    <textarea class="form-control" @bind="model.BankoAciklama" rows="3" disabled="@isSaving" placeholder="Banko hakkında ek bilgi..."></textarea>
+                                    <ValidationMessage For="@(() => model.BankoAciklama)" />
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <button type="button" class="btn btn-outline-secondary" @onclick="NavigateBack" disabled="@isSaving">
+                                        <i class="bx bx-x me-1"></i>İptal
+                                    </button>
+                                    <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                                        @if (isSaving)
+                                        {
+                                            <span class="spinner-border spinner-border-sm me-1"></span>
+                                        }
+                                        else
+                                        {
+                                            <i class="bx bx-save me-1"></i>
+                                        }
+                                        @(IsEditMode ? "Güncelle" : "Kaydet")
+                                    </button>
+                                </div>
+                            </EditForm>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        }
     }
 </div>
 

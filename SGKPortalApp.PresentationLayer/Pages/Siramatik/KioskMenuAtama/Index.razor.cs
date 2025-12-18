@@ -11,6 +11,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
 {
     public partial class Index
     {
+        protected override string PagePermissionKey => "SIRA.KIOSKMENUATAMA.INDEX";
+
         [Inject] private IKioskMenuAtamaApiService _kioskMenuAtamaService { get; set; } = default!;
         [Inject] private IHizmetBinasiApiService _hizmetBinasiService { get; set; } = default!;
         [Inject] private IKioskApiService _kioskService { get; set; } = default!;

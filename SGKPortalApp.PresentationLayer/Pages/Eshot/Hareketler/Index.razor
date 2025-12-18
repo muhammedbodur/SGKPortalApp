@@ -1,8 +1,19 @@
 @page "/eshot/hareketler"
 @inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 
+@if (!CanViewPage)
+{
+<div class="alert alert-danger" role="alert">
+<i class="bx bx-lock-alt me-2"></i>
+Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+</div>
+}
+else
+{
+
 <h3>Eshot Hareketler</h3>
 
 @code {
 
+}
 }

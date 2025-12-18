@@ -10,6 +10,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenu
 {
     public partial class Index
     {
+        protected override string PagePermissionKey => "SIRA.KIOSKMENU.INDEX";
+
         [Inject] private IKioskMenuApiService _kioskMenuService { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
         [Inject] private ILogger<Index> _logger { get; set; } = default!;

@@ -16,6 +16,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
 {
     public partial class Index
     {
+        protected override string PagePermissionKey => "SIRA.TV.INDEX";
+
         [Inject]
         private ITvApiService _tvService { get; set; } = default!;
 

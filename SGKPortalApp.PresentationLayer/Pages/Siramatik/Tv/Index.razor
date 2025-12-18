@@ -1,4 +1,5 @@
 @page "/siramatik/tv"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
 @using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri
@@ -7,195 +8,205 @@
 <PageTitle>TV Yönetimi - SGK Portal</PageTitle>
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold mb-1">
-                <i class="bx bx-tv me-2"></i>TV Yönetimi
-            </h4>
-            <p class="text-muted mb-0">Sıramatik TV ekranlarını yönetin</p>
-        </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary" @onclick="RefreshAsync" disabled="@isLoading">
-                <i class="bx bx-refresh"></i>
-            </button>
-            <a href="/siramatik/tv/manage" class="btn btn-primary">
-                <i class="bx bx-plus me-1"></i>Yeni TV
-            </a>
-        </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label">Hizmet Binası</label>
-                    <select class="form-select" @onchange="OnHizmetBinasiChanged">
-                        <option value="">Tümü</option>
-                        @foreach (var bina in hizmetBinalari)
-                        {
-                            <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Kat Tipi</label>
-                    <select class="form-select" @onchange="OnKatTipiChanged">
-                        <option value="">Tümü</option>
-                        @foreach (KatTipi katTipi in Enum.GetValues(typeof(KatTipi)))
-                        {
-                            <option value="@((int)katTipi)">@katTipi</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Durum</label>
-                    <select class="form-select" @onchange="OnAktiflikChanged">
-                        <option value="">Tümü</option>
-                        <option value="@((int)Aktiflik.Aktif)">Aktif</option>
-                        <option value="@((int)Aktiflik.Pasif)">Pasif</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Bağlantı</label>
-                    <select class="form-select" @onchange="OnConnectionChanged">
-                        <option value="">Tümü</option>
-                        <option value="true">Bağlı</option>
-                        <option value="false">Bağlı Değil</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="row mt-3">
-                <div class="col">
-                    <div class="d-flex gap-4 text-muted small flex-wrap">
-                        <span><i class="bx bx-tv text-primary"></i> Toplam: <strong>@allTvler.Count</strong></span>
-                        <span><i class="bx bx-check-circle text-success"></i> Aktif: <strong>@allTvler.Count(t => t.Aktiflik == Aktiflik.Aktif)</strong></span>
-                        <span><i class="bx bx-x-circle text-danger"></i> Pasif: <strong>@allTvler.Count(t => t.Aktiflik == Aktiflik.Pasif)</strong></span>
-                        <span><i class="bx bx-wifi text-info"></i> Bağlı: <strong>@allTvler.Count(t => t.IsConnected)</strong></span>
-                        <span><i class="bx bx-filter-alt text-warning"></i> Filtrelenen: <strong>@filteredTvler.Count</strong></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @if (isLoading)
+    @if (!CanViewPage)
     {
-        <div class="text-center py-5">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Yükleniyor...</span>
-            </div>
-            <p class="mt-3 text-muted">TV'ler yükleniyor...</p>
-        </div>
-    }
-    else if (!filteredTvler.Any())
-    {
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="bx bx-tv" style="font-size: 4rem; color: #ddd;"></i>
-                <h5 class="mt-3 text-muted">Kayıt bulunamadı</h5>
-                <p class="text-muted">@(selectedHizmetBinasiId.HasValue || selectedKatTipi.HasValue || selectedAktiflik.HasValue ? "Arama kriterlerine uygun TV bulunamadı." : "Henüz TV tanımlanmamış.")</p>
-                <a href="/siramatik/tv/manage" class="btn btn-primary">
-                    <i class="bx bx-plus me-1"></i>İlk TV'yi Ekle
-                </a>
-            </div>
+        <div class="alert alert-danger" role="alert">
+            <i class="bx bx-lock-alt me-2"></i>
+            Bu sayfayı görüntüleme yetkiniz bulunmuyor.
         </div>
     }
     else
     {
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-            @foreach (var tv in filteredTvler)
-            {
-                <div class="col">
-                    <div class="card h-100 @(tv.Aktiflik == Aktiflik.Pasif ? "border-warning" : "")">
-                        <div class="card-body d-flex flex-column">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div class="flex-grow-1">
-                                    <h5 class="card-title mb-1">
-                                        <i class="bx bx-tv me-1"></i>@tv.TvAdi
-                                    </h5>
-                                    <small class="text-muted">@tv.HizmetBinasiAdi</small>
-                                </div>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-icon btn-text-secondary rounded-pill dropdown-toggle hide-arrow"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bx bx-dots-vertical-rounded"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <a class="dropdown-item" href="/siramatik/tv/display/@tv.TvId" target="_blank">
-                                                <i class="bx bx-show me-2"></i>TV Görünümü
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="/siramatik/tv/manage/@tv.TvId">
-                                                <i class="bx bx-edit me-2"></i>Düzenle
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <button class="dropdown-item" @onclick="() => ToggleAktiflik(tv)">
-                                                <i class="bx @(tv.Aktiflik == Aktiflik.Aktif ? "bx-x-circle" : "bx-check-circle") me-2"></i>
-                                                @(tv.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")
-                                            </button>
-                                        </li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <button class="dropdown-item text-danger" @onclick="() => ShowDeleteConfirm(tv)">
-                                                <i class="bx bx-trash me-2"></i>Sil
-                                            </button>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">
+                    <i class="bx bx-tv me-2"></i>TV Yönetimi
+                </h4>
+                <p class="text-muted mb-0">Sıramatik TV ekranlarını yönetin</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary" @onclick="RefreshAsync" disabled="@isLoading">
+                    <i class="bx bx-refresh"></i>
+                </button>
+                <a href="/siramatik/tv/manage" class="btn btn-primary">
+                    <i class="bx bx-plus me-1"></i>Yeni TV
+                </a>
+            </div>
+        </div>
 
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span class="badge bg-label-@(tv.Aktiflik == Aktiflik.Aktif ? "success" : "danger")">
-                                        @tv.Aktiflik
-                                    </span>
-                                    <span class="badge bg-label-@(tv.IsConnected ? "info" : "secondary")">
-                                        <i class="bx bx-wifi me-1"></i>@(tv.IsConnected ? "Bağlı" : "Bağlı Değil")
-                                    </span>
-                                </div>
-                                <div class="mb-2">
-                                    <small class="text-muted">Kat:</small>
-                                    <span class="badge bg-label-primary ms-1">@tv.KatTipi</span>
-                                </div>
-                                <div class="mb-2">
-                                    <small class="text-muted">Banko Sayısı:</small>
-                                    <span class="fw-semibold ms-1">@tv.BankoSayisi</span>
-                                </div>
-                                @if (!string.IsNullOrEmpty(tv.TvAciklama))
-                                {
-                                    <div class="mt-2">
-                                        <small class="text-muted d-block">Açıklama:</small>
-                                        <small>@tv.TvAciklama</small>
-                                    </div>
-                                }
-                            </div>
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Hizmet Binası</label>
+                        <select class="form-select" @onchange="OnHizmetBinasiChanged">
+                            <option value="">Tümü</option>
+                            @foreach (var bina in hizmetBinalari)
+                            {
+                                <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Kat Tipi</label>
+                        <select class="form-select" @onchange="OnKatTipiChanged">
+                            <option value="">Tümü</option>
+                            @foreach (KatTipi katTipi in Enum.GetValues(typeof(KatTipi)))
+                            {
+                                <option value="@((int)katTipi)">@katTipi</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Durum</label>
+                        <select class="form-select" @onchange="OnAktiflikChanged">
+                            <option value="">Tümü</option>
+                            <option value="@((int)Aktiflik.Aktif)">Aktif</option>
+                            <option value="@((int)Aktiflik.Pasif)">Pasif</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Bağlantı</label>
+                        <select class="form-select" @onchange="OnConnectionChanged">
+                            <option value="">Tümü</option>
+                            <option value="true">Bağlı</option>
+                            <option value="false">Bağlı Değil</option>
+                        </select>
+                    </div>
+                </div>
 
-                            <div class="mt-auto">
-                                <div class="d-flex gap-2">
-                                    <a href="/siramatik/tv/display/@tv.TvId" target="_blank" class="btn btn-sm btn-outline-primary flex-fill">
-                                        <i class="bx bx-show"></i> Görüntüle
-                                    </a>
-                                    <a href="/siramatik/tv/banko-eslestirme?tvId=@tv.TvId" class="btn btn-sm btn-outline-secondary flex-fill">
-                                        <i class="bx bx-link"></i> Banko Eşleştir
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer">
-                            <small class="text-muted">
-                                <i class="bx bx-calendar"></i> @tv.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm")
-                            </small>
+                <div class="row mt-3">
+                    <div class="col">
+                        <div class="d-flex gap-4 text-muted small flex-wrap">
+                            <span><i class="bx bx-tv text-primary"></i> Toplam: <strong>@allTvler.Count</strong></span>
+                            <span><i class="bx bx-check-circle text-success"></i> Aktif: <strong>@allTvler.Count(t => t.Aktiflik == Aktiflik.Aktif)</strong></span>
+                            <span><i class="bx bx-x-circle text-danger"></i> Pasif: <strong>@allTvler.Count(t => t.Aktiflik == Aktiflik.Pasif)</strong></span>
+                            <span><i class="bx bx-wifi text-info"></i> Bağlı: <strong>@allTvler.Count(t => t.IsConnected)</strong></span>
+                            <span><i class="bx bx-filter-alt text-warning"></i> Filtrelenen: <strong>@filteredTvler.Count</strong></span>
                         </div>
                     </div>
                 </div>
-            }
+            </div>
         </div>
+
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <p class="mt-3 text-muted">TV'ler yükleniyor...</p>
+            </div>
+        }
+        else if (!filteredTvler.Any())
+        {
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bx bx-tv" style="font-size: 4rem; color: #ddd;"></i>
+                    <h5 class="mt-3 text-muted">Kayıt bulunamadı</h5>
+                    <p class="text-muted">@(selectedHizmetBinasiId.HasValue || selectedKatTipi.HasValue || selectedAktiflik.HasValue ? "Arama kriterlerine uygun TV bulunamadı." : "Henüz TV tanımlanmamış.")</p>
+                    <a href="/siramatik/tv/manage" class="btn btn-primary">
+                        <i class="bx bx-plus me-1"></i>İlk TV'yi Ekle
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                @foreach (var tv in filteredTvler)
+                {
+                    <div class="col">
+                        <div class="card h-100 @(tv.Aktiflik == Aktiflik.Pasif ? "border-warning" : "")">
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="flex-grow-1">
+                                        <h5 class="card-title mb-1">
+                                            <i class="bx bx-tv me-1"></i>@tv.TvAdi
+                                        </h5>
+                                        <small class="text-muted">@tv.HizmetBinasiAdi</small>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-icon btn-text-secondary rounded-pill dropdown-toggle hide-arrow"
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="/siramatik/tv/display/@tv.TvId" target="_blank">
+                                                    <i class="bx bx-show me-2"></i>TV Görünümü
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="/siramatik/tv/manage/@tv.TvId">
+                                                    <i class="bx bx-edit me-2"></i>Düzenle
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item" @onclick="() => ToggleAktiflik(tv)">
+                                                    <i class="bx @(tv.Aktiflik == Aktiflik.Aktif ? "bx-x-circle" : "bx-check-circle") me-2"></i>
+                                                    @(tv.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")
+                                                </button>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <button class="dropdown-item text-danger" @onclick="() => ShowDeleteConfirm(tv)">
+                                                    <i class="bx bx-trash me-2"></i>Sil
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="badge bg-label-@(tv.Aktiflik == Aktiflik.Aktif ? "success" : "danger")">
+                                            @tv.Aktiflik
+                                        </span>
+                                        <span class="badge bg-label-@(tv.IsConnected ? "info" : "secondary")">
+                                            <i class="bx bx-wifi me-1"></i>@(tv.IsConnected ? "Bağlı" : "Bağlı Değil")
+                                        </span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Kat:</small>
+                                        <span class="badge bg-label-primary ms-1">@tv.KatTipi</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Banko Sayısı:</small>
+                                        <span class="fw-semibold ms-1">@tv.BankoSayisi</span>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(tv.TvAciklama))
+                                    {
+                                        <div class="mt-2">
+                                            <small class="text-muted d-block">Açıklama:</small>
+                                            <small>@tv.TvAciklama</small>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="mt-auto">
+                                    <div class="d-flex gap-2">
+                                        <a href="/siramatik/tv/display/@tv.TvId" target="_blank" class="btn btn-sm btn-outline-primary flex-fill">
+                                            <i class="bx bx-show"></i> Görüntüle
+                                        </a>
+                                        <a href="/siramatik/tv/banko-eslestirme?tvId=@tv.TvId" class="btn btn-sm btn-outline-secondary flex-fill">
+                                            <i class="bx bx-link"></i> Banko Eşleştir
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <small class="text-muted">
+                                    <i class="bx bx-calendar"></i> @tv.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm")
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
     }
 </div>
 
