@@ -22,14 +22,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
 {
     /// <summary>
     /// PersonelAtama - Kanal/Alt Kanal'a Personel Uzmanlık Atama Sayfası
-    /// 
+    ///
     /// AMAÇ:
     /// - Excel benzeri matrix grid'de personel-kanal işlem atamalarını yönetir
     /// - Her hücre toggle düğmesi gibi çalışır: 0 → 1 → 2 → 0 döngüsü
     /// - Renkli gösterim: 1=Yeşil, 2=Mavi, 0=Gri
     /// </summary>
-    public partial class Index : ComponentBase
+    public partial class Index
     {
+        protected override string PagePermissionKey => "SIRA.PERSONELATAMA.INDEX";
+
 
         // URL Parameters
         [SupplyParameterFromQuery(Name = "kanalAltIslemId")]
