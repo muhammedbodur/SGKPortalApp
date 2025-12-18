@@ -3,6 +3,7 @@
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
 @using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
+@using SGKPortalApp.PresentationLayer.Components.Permission
 
 <PageTitle>Personel Yönetimi - SGK Portal</PageTitle>
 
@@ -305,36 +306,20 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-1">
-                                            @if (IsActionVisible(ActionType.DETAIL))
-                                            {
-                                                <button class="btn btn-sm btn-icon btn-outline-primary"
-                                                        @onclick:stopPropagation="true"
-                                                        @onclick="() => NavigateToDetail(personel.TcKimlikNo)"
-                                                        disabled="@(!CanAction(ActionType.DETAIL))"
-                                                        title="@(CanAction(ActionType.DETAIL) ? "Detay" : "Detay (Yetki Yok)")">
-                                                    <i class="bx bx-show"></i>
-                                                </button>
-                                            }
-                                            @if (IsActionVisible(ActionType.EDIT))
-                                            {
-                                                <button class="btn btn-sm btn-icon btn-outline-info"
-                                                        @onclick:stopPropagation="true"
-                                                        @onclick="() => NavigateToEdit(personel.TcKimlikNo)"
-                                                        disabled="@(!CanEditAction(ActionType.EDIT))"
-                                                        title="@(CanEditAction(ActionType.EDIT) ? "Düzenle" : "Düzenle (Yetki Yok)")">
-                                                    <i class="bx bx-edit"></i>
-                                                </button>
-                                            }
-                                            @if (IsActionVisible(ActionType.DELETE))
-                                            {
-                                                <button class="btn btn-sm btn-icon btn-outline-danger"
-                                                        @onclick:stopPropagation="true"
-                                                        @onclick="() => OpenDeleteModal(personel)"
-                                                        disabled="@(!CanEditAction(ActionType.DELETE))"
-                                                        title="@(CanEditAction(ActionType.DELETE) ? "Sil" : "Sil (Yetki Yok)")">
-                                                    <i class="bx bx-trash"></i>
-                                                </button>
-                                            }
+                                            <ActionButton ActionType="ActionType.DETAIL"
+                                                          IsVisible="@IsActionVisible(ActionType.DETAIL)"
+                                                          IsEnabled="@CanAction(ActionType.DETAIL)"
+                                                          OnClick="() => NavigateToDetail(personel.TcKimlikNo)" />
+
+                                            <ActionButton ActionType="ActionType.EDIT"
+                                                          IsVisible="@IsActionVisible(ActionType.EDIT)"
+                                                          IsEnabled="@CanEditAction(ActionType.EDIT)"
+                                                          OnClick="() => NavigateToEdit(personel.TcKimlikNo)" />
+
+                                            <ActionButton ActionType="ActionType.DELETE"
+                                                          IsVisible="@IsActionVisible(ActionType.DELETE)"
+                                                          IsEnabled="@CanEditAction(ActionType.DELETE)"
+                                                          OnClick="() => OpenDeleteModal(personel)" />
                                         </div>
                                     </td>
                                 </tr>
