@@ -4,6 +4,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 
 namespace SGKPortalApp.ApiLayer.Controllers.Common
 {
@@ -102,7 +103,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.Common
                     .OrderBy(x => x.Id)
                     .ToList();
 
-                return Ok(new ApiResponse<List<DropdownDto>>
+                return Ok(new ApiResponseDto<List<DropdownDto>>
                 {
                     Success = true,
                     Message = "ActionType listesi başarıyla getirildi",
@@ -112,7 +113,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.Common
             catch (Exception ex)
             {
                 _logger.LogError(ex, "ActionType listesi getirilirken hata oluştu");
-                return BadRequest(new ApiResponse<List<DropdownDto>>
+                return BadRequest(new ApiResponseDto<List<DropdownDto>>
                 {
                     Success = false,
                     Message = $"Hata: {ex.Message}"
