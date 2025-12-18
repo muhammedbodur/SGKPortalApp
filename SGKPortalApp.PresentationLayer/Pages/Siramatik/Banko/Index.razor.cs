@@ -22,7 +22,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
 {
     public partial class Index
     {
-        [Inject] private IBankoApiService _bankoService { get; set; } = default!;
+        protected override string PagePermissionKey => "SIRAMATIK.BANKO.INDEX";
+
+        [Inject] private IBankoApiService _bankoService { get; set; } = default!
         [Inject] private IHizmetBinasiApiService _hizmetBinasiService { get; set; } = default!;
         [Inject] private IPersonelApiService _personelService { get; set; } = default!;
         [Inject] private IDepartmanApiService _departmanService { get; set; } = default!;

@@ -11,8 +11,9 @@ using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Common.Ilce
 {
-    public partial class Index : ComponentBase
+    public partial class Index
     {
+        protected override string PagePermissionKey => "PORTAL.ILCE.INDEX";
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
         // ═══════════════════════════════════════════════════════

@@ -6,9 +6,10 @@ using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel.AtanmaNedeni
 {
-    public partial class Index : ComponentBase
+    public partial class Index
     {
-        [Inject] private NavigationManager _navigationManager { get; set; } = default!;
+        protected override string PagePermissionKey => "PER.ATANMANEDENI.INDEX";
+        [Inject] private NavigationManager _navigationManager { get; set; } = default!
         [Inject] private IToastService _toastService { get; set; } = default!;
         [Inject] private IAtanmaNedeniApiService _atanmaNedeniApiService { get; set; } = default!;
 

@@ -1,4 +1,5 @@
 @page "/personel/atanma-nedeni"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
 
 <PageTitle>Atanma Nedenleri - SGK Portal</PageTitle>
@@ -189,19 +190,27 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-1">
-                                            <!-- Düzenle -->
-                                            <button class="btn btn-sm btn-icon btn-outline-primary"
-                                                    @onclick="() => NavigateToEdit(item.AtanmaNedeniId)"
-                                                    title="Düzenle">
-                                                <i class="bx bx-edit"></i>
-                                            </button>
+                                            @if (IsActionVisible("EDIT"))
+                                            {
+                                                <!-- Düzenle -->
+                                                <button class="btn btn-sm btn-icon btn-outline-primary"
+                                                        @onclick="() => NavigateToEdit(item.AtanmaNedeniId)"
+                                                        disabled="@(!CanEditAction("EDIT"))"
+                                                        title="@(CanEditAction("EDIT") ? "Düzenle" : "Düzenle (Yetki Yok)")">
+                                                    <i class="bx bx-edit"></i>
+                                                </button>
+                                            }
 
-                                            <!-- Sil -->
-                                            <button class="btn btn-sm btn-icon btn-outline-danger"
-                                                    @onclick="() => ShowDeleteModal(item)"
-                                                    title="Sil">
-                                                <i class="bx bx-trash"></i>
-                                            </button>
+                                            @if (IsActionVisible("DELETE"))
+                                            {
+                                                <!-- Sil -->
+                                                <button class="btn btn-sm btn-icon btn-outline-danger"
+                                                        @onclick="() => ShowDeleteModal(item)"
+                                                        disabled="@(!CanEditAction("DELETE"))"
+                                                        title="@(CanEditAction("DELETE") ? "Sil" : "Sil (Yetki Yok)")">
+                                                    <i class="bx bx-trash"></i>
+                                                </button>
+                                            }
                                         </div>
                                     </td>
                                 </tr>

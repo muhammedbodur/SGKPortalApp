@@ -1,4 +1,5 @@
 @page "/personel/sendika"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
 
@@ -284,26 +285,38 @@
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-1">
-                                        <!-- Düzenle -->
-                                        <button class="btn btn-sm btn-icon btn-outline-primary"
-                                                @onclick="() => NavigateToEdit(sendika.SendikaId)"
-                                                title="Düzenle">
-                                            <i class="bx bx-edit"></i>
-                                        </button>
+                                        @if (IsActionVisible("EDIT"))
+                                        {
+                                            <!-- Düzenle -->
+                                            <button class="btn btn-sm btn-icon btn-outline-primary"
+                                                    @onclick="() => NavigateToEdit(sendika.SendikaId)"
+                                                    disabled="@(!CanEditAction("EDIT"))"
+                                                    title="@(CanEditAction("EDIT") ? "Düzenle" : "Düzenle (Yetki Yok)")">
+                                                <i class="bx bx-edit"></i>
+                                            </button>
+                                        }
 
-                                        <!-- Aktif/Pasif Toggle -->
-                                        <button class="btn btn-sm btn-icon @(sendika.Aktiflik == Aktiflik.Aktif ? "btn-outline-warning" : "btn-outline-success")"
-                                                @onclick="() => ShowToggleStatusConfirmation(sendika.SendikaId, sendika.SendikaAdi, sendika.Aktiflik)"
-                                                title="@(sendika.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")">
-                                            <i class="bx @(sendika.Aktiflik == Aktiflik.Aktif ? "bx-toggle-right" : "bx-toggle-left")"></i>
-                                        </button>
+                                        @if (IsActionVisible("TOGGLE"))
+                                        {
+                                            <!-- Aktif/Pasif Toggle -->
+                                            <button class="btn btn-sm btn-icon @(sendika.Aktiflik == Aktiflik.Aktif ? "btn-outline-warning" : "btn-outline-success")"
+                                                    @onclick="() => ShowToggleStatusConfirmation(sendika.SendikaId, sendika.SendikaAdi, sendika.Aktiflik)"
+                                                    disabled="@(!CanEditAction("TOGGLE"))"
+                                                    title="@(CanEditAction("TOGGLE") ? (sendika.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap") : (sendika.Aktiflik == Aktiflik.Aktif ? "Pasif Yap (Yetki Yok)" : "Aktif Yap (Yetki Yok)"))">
+                                                <i class="bx @(sendika.Aktiflik == Aktiflik.Aktif ? "bx-toggle-right" : "bx-toggle-left")"></i>
+                                            </button>
+                                        }
 
-                                        <!-- Sil -->
-                                        <button class="btn btn-sm btn-icon btn-outline-danger"
-                                                @onclick="() => ConfirmDelete(sendika)"
-                                                title="Sil">
-                                            <i class="bx bx-trash"></i>
-                                        </button>
+                                        @if (IsActionVisible("DELETE"))
+                                        {
+                                            <!-- Sil -->
+                                            <button class="btn btn-sm btn-icon btn-outline-danger"
+                                                    @onclick="() => ConfirmDelete(sendika)"
+                                                    disabled="@(!CanEditAction("DELETE"))"
+                                                    title="@(CanEditAction("DELETE") ? "Sil" : "Sil (Yetki Yok)")">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
+                                        }
                                     </div>
                                 </td>
                             </tr>
