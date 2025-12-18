@@ -13,6 +13,7 @@ using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using System.ComponentModel.DataAnnotations;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Components.Base;
+using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel
 {
