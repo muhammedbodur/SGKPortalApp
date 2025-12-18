@@ -184,6 +184,43 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
 
         #endregion
 
+        #region User Context Helpers
+
+        /// <summary>
+        /// Giriş yapmış kullanıcının Hizmet Binası ID'sini döndürür
+        /// Claim'de yoksa 0 döner
+        /// </summary>
+        protected int GetCurrentUserHizmetBinasiId()
+        {
+            var authState = AuthStateProvider.GetAuthenticationStateAsync().Result;
+            var claim = authState.User.FindFirst("HizmetBinasiId");
+            return claim != null && int.TryParse(claim.Value, out var id) ? id : 0;
+        }
+
+        /// <summary>
+        /// Giriş yapmış kullanıcının Hizmet Binası Adını döndürür
+        /// </summary>
+        protected string GetCurrentUserHizmetBinasiAdi()
+        {
+            var authState = AuthStateProvider.GetAuthenticationStateAsync().Result;
+            return authState.User.FindFirst("HizmetBinasiAdi")?.Value ?? string.Empty;
+        }
+
+        /// <summary>
+        /// Kullanıcının belirtilen Hizmet Binasını görüntüleme yetkisi var mı?
+        /// Güvenlik kontrolü: Kullanıcı sadece kendi Hizmet Binasındaki verileri görebilir
+        /// </summary>
+        protected bool CanAccessHizmetBinasi(int hizmetBinasiId)
+        {
+            // Admin kullanıcılar tüm hizmet binalarına erişebilir (isteğe bağlı)
+            // TODO: Admin kontrolü eklenebilir
+
+            var userHizmetBinasiId = GetCurrentUserHizmetBinasiId();
+            return userHizmetBinasiId == hizmetBinasiId;
+        }
+
+        #endregion
+
         #region Lifecycle
 
         protected override async Task OnInitializedAsync()
