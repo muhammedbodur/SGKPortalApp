@@ -80,7 +80,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
         private bool IsLoading { get; set; } = true;
         private bool IsExporting { get; set; } = false;
-        private string ExportType { get; set; } = string.Empty;
+        private string CurrentExportType { get; set; } = string.Empty;
 
         // ═══════════════════════════════════════════════════════
         // QUICK ADD MODAL PROPERTIES
@@ -398,7 +398,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private async Task ExportToExcel()
         {
             IsExporting = true;
-            ExportType = "excel";
+            CurrentExportType = "excel";
             try
             {
                 using var workbook = new XLWorkbook();
@@ -443,14 +443,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             finally
             {
                 IsExporting = false;
-                ExportType = string.Empty;
+                CurrentExportType = string.Empty;
             }
         }
 
         private async Task ExportToPdf()
         {
             IsExporting = true;
-            ExportType = "pdf";
+            CurrentExportType = "pdf";
 
             try
             {
@@ -553,7 +553,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             finally
             {
                 IsExporting = false;
-                ExportType = string.Empty;
+                CurrentExportType = string.Empty;
             }
         }
 
