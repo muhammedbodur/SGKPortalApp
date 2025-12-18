@@ -175,6 +175,13 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         protected bool CanEditAction(ActionType actionType)
             => CanEditAction(actionType.ToString());
 
+        /// <summary>
+        /// Tıklanabilir satır için CSS style döner (ActionType enum ile)
+        /// Yetki varsa "cursor: pointer;", yoksa boş string
+        /// </summary>
+        protected string GetClickableRowStyle(ActionType actionType)
+            => CanAction(actionType) ? "cursor: pointer;" : "";
+
         #endregion
 
         #region Lifecycle
