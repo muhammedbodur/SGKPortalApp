@@ -1,0 +1,23 @@
+@*
+    ExportButton Component - Export işlemleri için standart buton
+
+    Kullanım:
+    <ExportButton ExportType="ExportType.Excel"
+                  OnClick="ExportToExcel"
+                  IsExporting="@IsExporting"
+                  CurrentExportType="@ExportType" />
+*@
+
+<button class="btn @CssClass"
+        @onclick="OnClick"
+        disabled="@IsExporting">
+    @if (IsCurrentlyExporting)
+    {
+        <span class="spinner-border spinner-border-sm me-1"></span>
+    }
+    else
+    {
+        <i class="bx @Icon me-1"></i>
+    }
+    @Label
+</button>
