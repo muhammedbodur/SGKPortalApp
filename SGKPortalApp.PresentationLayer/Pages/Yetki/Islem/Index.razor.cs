@@ -27,12 +27,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
 
         private List<ModulControllerIslemResponseDto> Islemler = new();
         private List<ModulControllerIslemResponseDto> FilteredIslemler = new();
-        private List<ModulResponseDto> Moduller = new(); // ← ModulKodu için ModulResponseDto kullan
+        private List<ModulControllerIslemResponseDto> FilteredIslemlerDisplay = new();
+        private List<ModulResponseDto> Moduller = new();
         private List<DropdownItemDto> FilteredControllers = new();
+        private List<DropdownItemDto> AllControllers = new();
         private bool IsLoading = true;
         private bool IsSaving = false;
         private bool ShowModal = false;
         private int? EditingId = null;
+
+        private string SearchTerm = string.Empty;
+        private int FilterModulId = 0;
+        private int FilterControllerId = 0;
+        private int FilterIslemTipi = -1;
         private int SelectedModulId = 0;
         private int SelectedControllerId = 0;
         private string IslemAdi = string.Empty;
@@ -59,6 +66,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
         {
             await base.OnInitializedAsync();
             await LoadModulDropdown();
+            await LoadAllControllers();
             await LoadDtoTypes();
             await LoadData();
         }
@@ -256,6 +264,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
             };
         }
 
+        private async Task LoadAllControllers()
+        {
+            var result = await ControllerApiService.GetDropdownAsync();
+            if (result.Success && result.Data != null)
+                AllControllers = result.Data;
+        }
+
         private async Task LoadData()
         {
             IsLoading = true;
@@ -263,6 +278,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
             if (result.Success && result.Data != null)
             {
                 Islemler = BuildHierarchicalList(result.Data);
+                ApplyFilter();
             }
             IsLoading = false;
         }
@@ -525,6 +541,40 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
             else
                 await ToastService.ShowErrorAsync(result.Message ?? "İşlem silinemedi");
             await LoadData();
+        }
+
+        private void ApplyFilter()
+        {
+            var query = Islemler.AsEnumerable();
+
+            // Search
+            if (!string.IsNullOrWhiteSpace(SearchTerm))
+            {
+                var searchLower = SearchTerm.ToLower();
+                query = query.Where(i =>
+                    (i.ModulControllerIslemAdi?.ToLower().Contains(searchLower) ?? false));
+            }
+
+            // Filter by Modul
+            if (FilterModulId > 0)
+            {
+                query = query.Where(i => i.ModulId == FilterModulId);
+            }
+
+            // Filter by Controller
+            if (FilterControllerId > 0)
+            {
+                query = query.Where(i => i.ModulControllerId == FilterControllerId);
+            }
+
+            // Filter by IslemTipi
+            if (FilterIslemTipi >= 0)
+            {
+                query = query.Where(i => (int)i.IslemTipi == FilterIslemTipi);
+            }
+
+            FilteredIslemlerDisplay = query.ToList();
+            StateHasChanged();
         }
     }
 }

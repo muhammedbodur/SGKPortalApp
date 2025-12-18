@@ -27,6 +27,53 @@
             </button>
         </div>
 
+        <!-- Search Card -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Arama</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bx bx-search"></i>
+                            </span>
+                            <input type="text"
+                                   class="form-control"
+                                   placeholder="Controller adı ile ara..."
+                                   @bind="SearchTerm"
+                                   @bind:event="oninput"
+                                   @onkeyup="ApplyFilter" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Modül Filtresi</label>
+                        <select class="form-select" @bind="FilterModulId" @bind:after="ApplyFilter">
+                            <option value="0">Tümü</option>
+                            @foreach (var m in Moduller)
+                            {
+                                <option value="@m.Id">@m.Ad</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Sırala</label>
+                        <select class="form-select" @bind="SortBy" @bind:after="ApplyFilter">
+                            <option value="ControllerAdi">Controller Adı</option>
+                            <option value="ModulAdi">Modül</option>
+                            <option value="EklenmeTarihi">Oluşturulma Tarihi</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Sıralama Yönü</label>
+                        <select class="form-select" @bind="SortDirection" @bind:after="ApplyFilter">
+                            <option value="asc">Artan</option>
+                            <option value="desc">Azalan</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-body">
                 @if (IsLoading)
@@ -49,16 +96,16 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Controller Adı</th>
-                                    <th>Modül</th>
-                                    <th>İşlem Sayısı</th>
-                                    <th>Oluşturulma</th>
-                                    <th class="text-end">İşlemler</th>
+                                    <th style="width: 60px;">#</th>
+                                    <th style="width: 30%;">Controller Adı</th>
+                                    <th style="width: 20%;">Modül</th>
+                                    <th style="width: 15%;">İşlem Sayısı</th>
+                                    <th style="width: 15%;">Oluşturulma</th>
+                                    <th class="text-end" style="width: 120px;">İşlemler</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var c in Controllers)
+                                @foreach (var c in FilteredControllers)
                                 {
                                     <tr>
                                         <td>@c.ModulControllerId</td>
@@ -78,6 +125,19 @@
                                 }
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="mt-3 text-muted small">
+                        <i class="bx bx-folder-open text-primary"></i>
+                        @if (FilteredControllers.Count != Controllers.Count)
+                        {
+                            <text>Gösterilen: <strong>@FilteredControllers.Count</strong> / Toplam: <strong>@Controllers.Count</strong> controller</text>
+                        }
+                        else
+                        {
+                            <text>Toplam: <strong>@Controllers.Count</strong> controller</text>
+                        }
                     </div>
                 }
             </div>

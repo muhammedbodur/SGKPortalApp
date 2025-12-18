@@ -22,9 +22,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Modul
         protected override string PagePermissionKey => "YET.YETKIMODUL.INDEX";
 
         private List<ModulResponseDto> Moduller = new();
+        private List<ModulResponseDto> FilteredModuller = new();
         private bool IsLoading = true;
         private bool IsSaving = false;
         private bool ShowModal = false;
+
+        private string SearchTerm = string.Empty;
+        private string SortBy = "ModulAdi";
+        private string SortDirection = "asc";
 
         // Add Modal
         private string NewModulAdi = string.Empty;
@@ -50,6 +55,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Modul
             if (result.Success && result.Data != null)
             {
                 Moduller = result.Data;
+                ApplyFilter();
             }
             else
             {
@@ -197,6 +203,37 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Modul
             }
 
             IsSaving = false;
+            StateHasChanged();
+        }
+
+        private void ApplyFilter()
+        {
+            var query = Moduller.AsEnumerable();
+
+            // Search
+            if (!string.IsNullOrWhiteSpace(SearchTerm))
+            {
+                var searchLower = SearchTerm.ToLower();
+                query = query.Where(m =>
+                    (m.ModulAdi?.ToLower().Contains(searchLower) ?? false) ||
+                    (m.ModulKodu?.ToLower().Contains(searchLower) ?? false));
+            }
+
+            // Sort
+            query = SortBy switch
+            {
+                "ModulKodu" => SortDirection == "asc" 
+                    ? query.OrderBy(m => m.ModulKodu) 
+                    : query.OrderByDescending(m => m.ModulKodu),
+                "EklenmeTarihi" => SortDirection == "asc" 
+                    ? query.OrderBy(m => m.EklenmeTarihi) 
+                    : query.OrderByDescending(m => m.EklenmeTarihi),
+                _ => SortDirection == "asc" 
+                    ? query.OrderBy(m => m.ModulAdi) 
+                    : query.OrderByDescending(m => m.ModulAdi)
+            };
+
+            FilteredModuller = query.ToList();
             StateHasChanged();
         }
     }

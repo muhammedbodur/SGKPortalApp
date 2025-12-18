@@ -34,6 +34,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Controller
         // ═══════════════════════════════════════════════════════════
 
         private List<ModulControllerResponseDto> Controllers = new();
+        private List<ModulControllerResponseDto> FilteredControllers = new();
         private List<DropdownItemDto> Moduller = new();
         private bool IsLoading = true;
         private bool IsSaving = false;
@@ -41,6 +42,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Controller
         private int? EditingId = null;
         private int SelectedModulId = 0;
         private string ControllerAdi = string.Empty;
+
+        private string SearchTerm = string.Empty;
+        private int FilterModulId = 0;
+        private string SortBy = "ControllerAdi";
+        private string SortDirection = "asc";
 
         protected override async Task OnInitializedAsync()
         {
@@ -61,7 +67,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Controller
             IsLoading = true;
             var result = await ControllerApiService.GetAllAsync();
             if (result.Success && result.Data != null)
+            {
                 Controllers = result.Data;
+                ApplyFilter();
+            }
             IsLoading = false;
         }
 
@@ -139,6 +148,42 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Controller
             else
                 await ToastService.ShowErrorAsync(result.Message ?? "Controller silinemedi");
             await LoadData();
+        }
+
+        private void ApplyFilter()
+        {
+            var query = Controllers.AsEnumerable();
+
+            // Search
+            if (!string.IsNullOrWhiteSpace(SearchTerm))
+            {
+                var searchLower = SearchTerm.ToLower();
+                query = query.Where(c =>
+                    (c.ModulControllerAdi?.ToLower().Contains(searchLower) ?? false));
+            }
+
+            // Filter by Modul
+            if (FilterModulId > 0)
+            {
+                query = query.Where(c => c.ModulId == FilterModulId);
+            }
+
+            // Sort
+            query = SortBy switch
+            {
+                "ModulAdi" => SortDirection == "asc" 
+                    ? query.OrderBy(c => c.ModulAdi) 
+                    : query.OrderByDescending(c => c.ModulAdi),
+                "EklenmeTarihi" => SortDirection == "asc" 
+                    ? query.OrderBy(c => c.EklenmeTarihi) 
+                    : query.OrderByDescending(c => c.EklenmeTarihi),
+                _ => SortDirection == "asc" 
+                    ? query.OrderBy(c => c.ModulControllerAdi) 
+                    : query.OrderByDescending(c => c.ModulControllerAdi)
+            };
+
+            FilteredControllers = query.ToList();
+            StateHasChanged();
         }
     }
 }

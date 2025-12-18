@@ -29,6 +29,59 @@
             </button>
         </div>
 
+        <!-- Search Card -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Arama</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bx bx-search"></i>
+                            </span>
+                            <input type="text"
+                                   class="form-control"
+                                   placeholder="İşlem adı ile ara..."
+                                   @bind="SearchTerm"
+                                   @bind:event="oninput"
+                                   @onkeyup="ApplyFilter" />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Modül Filtresi</label>
+                        <select class="form-select" @bind="FilterModulId" @bind:after="ApplyFilter">
+                            <option value="0">Tümü</option>
+                            @foreach (var m in Moduller)
+                            {
+                                <option value="@m.ModulId">@m.ModulAdi</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Controller Filtresi</label>
+                        <select class="form-select" @bind="FilterControllerId" @bind:after="ApplyFilter">
+                            <option value="0">Tümü</option>
+                            @foreach (var c in AllControllers)
+                            {
+                                <option value="@c.Id">@c.Ad</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">İşlem Tipi</label>
+                        <select class="form-select" @bind="FilterIslemTipi" @bind:after="ApplyFilter">
+                            <option value="-1">Tümü</option>
+                            <option value="@((int)YetkiIslemTipi.Page)">Sayfa</option>
+                            <option value="@((int)YetkiIslemTipi.Tab)">Tab</option>
+                            <option value="@((int)YetkiIslemTipi.Buton)">Buton</option>
+                            <option value="@((int)YetkiIslemTipi.Field)">Field</option>
+                            <option value="@((int)YetkiIslemTipi.FormField)">FormField</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card">
         <div class="card-body">
             @if (IsLoading)
@@ -51,24 +104,27 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th style="width: 50px;">#</th>
-                                <th>İşlem Adı</th>
-                                <th style="width: 120px;">İşlem Tipi</th>
-                                <th>Route</th>
-                                <th>Permission Key</th>
-                                <th style="width: 120px;">Sayfa Tipi</th>
-                                <th style="width: 100px;">Min. Yetki</th>
-                                <th>Controller / Modül</th>
-                                <th class="text-end" style="width: 120px;">İşlemler</th>
+                                <th style="width: 12%;">Controller / Modül</th>
+                                <th style="width: 15%;">İşlem Adı</th>
+                                <th style="width: 10%;">İşlem Tipi</th>
+                                <th style="width: 12%;">Route</th>
+                                <th style="width: 15%;">Permission Key</th>
+                                <th style="width: 10%;">Sayfa Tipi</th>
+                                <th style="width: 8%;">Min. Yetki</th>
+                                <th class="text-end" style="width: 100px;">İşlemler</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var i in Islemler)
+                            @foreach (var i in FilteredIslemlerDisplay)
                             {
                                 var isChild = i.UstIslemId.HasValue;
                                 var indent = isChild ? "ps-4" : "";
                                 <tr>
-                                    <td>@i.ModulControllerIslemId</td>
+                                    @* <td>@i.ModulControllerIslemId</td> *@
+                                    <td>
+                                        <span class="badge bg-label-info">@i.ModulControllerAdi</span>
+                                        <span class="badge bg-label-primary">@i.ModulAdi</span>
+                                    </td>
                                     <td class="@indent">
                                         @if (isChild)
                                         {
@@ -100,8 +156,8 @@
                                                 break;
                                         }
                                     </td>
-                                    <td><code class="text-primary">@(i.Route ?? "-")</code></td>
-                                    <td><code class="text-secondary small">@(i.PermissionKey ?? "-")</code></td>
+                                    <td><small><code class="text-primary">@(i.Route ?? "-")</code></small></td>
+                                    <td><small><code class="text-secondary">@(i.PermissionKey ?? "-")</code></small></td>
                                     <td>
                                         @switch (i.SayfaTipi)
                                         {
@@ -130,10 +186,6 @@
                                                 break;
                                         }
                                     </td>
-                                    <td>
-                                        <span class="badge bg-label-info">@i.ModulControllerAdi</span>
-                                        <span class="badge bg-label-primary">@i.ModulAdi</span>
-                                    </td>
                                     <td class="text-end">
                                         <button class="btn btn-sm btn-icon btn-outline-primary me-1" @onclick="() => StartEdit(i)">
                                             <i class="bx bx-edit"></i>
@@ -146,6 +198,19 @@
                             }
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Stats -->
+                <div class="mt-3 text-muted small">
+                    <i class="bx bx-list-ul text-primary"></i>
+                    @if (FilteredIslemlerDisplay.Count != Islemler.Count)
+                    {
+                        <text>Gösterilen: <strong>@FilteredIslemlerDisplay.Count</strong> / Toplam: <strong>@Islemler.Count</strong> işlem</text>
+                    }
+                    else
+                    {
+                        <text>Toplam: <strong>@Islemler.Count</strong> işlem</text>
+                    }
                 </div>
             }
         </div>
