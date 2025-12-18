@@ -16,6 +16,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
 
         [Parameter] public int? KioskMenuAtamaId { get; set; }
 
+        [Parameter]
+        [SupplyParameterFromQuery]
+        public int? HizmetBinasiId { get; set; }
+
         [Inject] private IKioskMenuAtamaApiService _kioskMenuAtamaService { get; set; } = default!;
         [Inject] private IHizmetBinasiApiService _hizmetBinasiService { get; set; } = default!;
         [Inject] private IKioskApiService _kioskService { get; set; } = default!;
@@ -38,6 +42,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
 
         protected override async Task OnInitializedAsync()
         {
+            await base.OnInitializedAsync();
             await LoadDropdownsAsync();
 
             if (KioskMenuAtamaId.HasValue)
@@ -46,11 +51,29 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
             }
             else
             {
-                // Yeni kayıt için ilk hizmet binasını otomatik seç
-                if (hizmetBinalari.Any())
+                // ✅ Güvenlik: URL'den HizmetBinasiId parametresi geldiyse yetki kontrolü
+                if (HizmetBinasiId.HasValue && HizmetBinasiId.Value > 0)
                 {
-                    selectedHizmetBinasiId = hizmetBinalari.First().HizmetBinasiId;
+                    if (!CanAccessHizmetBinasi(HizmetBinasiId.Value))
+                    {
+                        await _toastService.ShowWarningAsync("Bu Hizmet Binasına erişim yetkiniz yok!");
+                        _logger.LogWarning("Yetkisiz Hizmet Binası erişim denemesi (URL): {BinaId}", HizmetBinasiId.Value);
+                        _navigationManager.NavigateTo("/siramatik/kiosk-menu-atama");
+                        return;
+                    }
+
+                    selectedHizmetBinasiId = HizmetBinasiId.Value;
                     await OnHizmetBinasiChanged(new ChangeEventArgs { Value = selectedHizmetBinasiId.ToString() });
+                }
+                else
+                {
+                    // ✅ URL'den parametre gelmediyse kullanıcının kendi HizmetBinası'nı seç
+                    var userHizmetBinasiId = GetCurrentUserHizmetBinasiId();
+                    if (userHizmetBinasiId > 0)
+                    {
+                        selectedHizmetBinasiId = userHizmetBinasiId;
+                        await OnHizmetBinasiChanged(new ChangeEventArgs { Value = selectedHizmetBinasiId.ToString() });
+                    }
                 }
             }
         }
@@ -97,6 +120,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
         {
             if (int.TryParse(e.Value?.ToString(), out int binaId))
             {
+                // ✅ Güvenlik kontrolü
+                if (binaId > 0 && !CanAccessHizmetBinasi(binaId))
+                {
+                    await _toastService.ShowWarningAsync("Bu Hizmet Binasını seçme yetkiniz yok!");
+                    _logger.LogWarning("Yetkisiz Hizmet Binası seçim denemesi: {BinaId}", binaId);
+                    return;
+                }
+
                 selectedHizmetBinasiId = binaId;
 
                 if (binaId > 0)
@@ -232,6 +263,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
             try
             {
                 isSaving = true;
+
+                // ✅ Güvenlik: Form submit öncesi son kontrol (form manipulation önlemi)
+                // Seçilen Kiosk'un HizmetBinası'nı kontrol et
+                var selectedKiosk = kiosklar.FirstOrDefault(k => k.KioskId == model.KioskId);
+                if (selectedKiosk != null && !CanAccessHizmetBinasi(selectedKiosk.HizmetBinasiId))
+                {
+                    await _toastService.ShowErrorAsync("Bu Hizmet Binasında kayıt oluşturma yetkiniz yok!");
+                    _logger.LogWarning("Yetkisiz kayıt oluşturma denemesi: HizmetBinasiId={BinaId}, KioskId={KioskId}",
+                        selectedKiosk.HizmetBinasiId, model.KioskId);
+                    return;
+                }
 
                 var request = new KioskMenuAtamaCreateRequestDto
                 {

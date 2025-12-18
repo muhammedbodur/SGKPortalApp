@@ -59,6 +59,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
 
         protected override async Task OnInitializedAsync()
         {
+            await base.OnInitializedAsync();
             await LoadDropdownData();
 
             if (IsEditMode)
@@ -77,15 +78,34 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                     Aktiflik = Aktiflik.Aktif
                 };
 
-                // URL'den hizmet binası parametresi geldiyse otomatik seç
+                // ✅ Güvenlik: URL'den HizmetBinasiId parametresi geldiyse yetki kontrolü
                 if (HizmetBinasiId.HasValue && HizmetBinasiId.Value > 0)
                 {
+                    if (!CanAccessHizmetBinasi(HizmetBinasiId.Value))
+                    {
+                        await _toastService.ShowWarningAsync("Bu Hizmet Binasına erişim yetkiniz yok!");
+                        _logger.LogWarning("Yetkisiz Hizmet Binası erişim denemesi (URL): {BinaId}", HizmetBinasiId.Value);
+                        _navigationManager.NavigateTo("/siramatik/kanal-islem");
+                        return;
+                    }
+
                     model.HizmetBinasiId = HizmetBinasiId.Value;
                     isHizmetBinasiFromUrl = true;
                     var bina = hizmetBinalari.FirstOrDefault(b => b.HizmetBinasiId == HizmetBinasiId.Value);
                     hizmetBinasiAdi = bina?.HizmetBinasiAdi ?? "Bilinmeyen";
                     await LoadMevcutKanalIslemler(HizmetBinasiId.Value);
                     SuggestNextValues();
+                }
+                else
+                {
+                    // ✅ URL'den parametre gelmediyse kullanıcının kendi HizmetBinası'nı seç
+                    var userHizmetBinasiId = GetCurrentUserHizmetBinasiId();
+                    if (userHizmetBinasiId > 0)
+                    {
+                        model.HizmetBinasiId = userHizmetBinasiId;
+                        await LoadMevcutKanalIslemler(userHizmetBinasiId);
+                        SuggestNextValues();
+                    }
                 }
 
                 isAktif = true;
@@ -230,6 +250,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
         {
             if (int.TryParse(e.Value?.ToString(), out int binaId) && binaId > 0)
             {
+                // ✅ Güvenlik kontrolü
+                if (!CanAccessHizmetBinasi(binaId))
+                {
+                    await _toastService.ShowWarningAsync("Bu Hizmet Binasını seçme yetkiniz yok!");
+                    _logger.LogWarning("Yetkisiz Hizmet Binası seçim denemesi: {BinaId}", binaId);
+                    return;
+                }
+
                 model.HizmetBinasiId = binaId;
                 await LoadMevcutKanalIslemler(binaId);
                 SuggestNextValues();
@@ -392,7 +420,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
         private async Task CreateKanalIslem()
         {
             _logger.LogInformation("🔄 CreateKanalIslem başladı");
-            
+
+            // ✅ Güvenlik: Form submit öncesi son kontrol (form manipulation önlemi)
+            if (!CanAccessHizmetBinasi(model.HizmetBinasiId))
+            {
+                await _toastService.ShowErrorAsync("Bu Hizmet Binasında kayıt oluşturma yetkiniz yok!");
+                _logger.LogWarning("Yetkisiz kayıt oluşturma denemesi: HizmetBinasiId={BinaId}", model.HizmetBinasiId);
+                return;
+            }
+
             var createDto = new KanalIslemCreateRequestDto
             {
                 KanalId = model.KanalId,

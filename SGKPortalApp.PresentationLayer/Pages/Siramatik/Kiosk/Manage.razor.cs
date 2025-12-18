@@ -22,6 +22,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
 
         [Parameter] public int? KioskId { get; set; }
 
+        [Parameter]
+        [SupplyParameterFromQuery]
+        public int? HizmetBinasiId { get; set; }
+
         // State
         private bool isLoading;
         private bool isSaving;
@@ -33,9 +37,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
 
         // Lookups
         private List<HizmetBinasiResponseDto> hizmetBinalari = new();
+        private int selectedHizmetBinasiId = 0;
 
         protected override async Task OnInitializedAsync()
         {
+            await base.OnInitializedAsync();
             await LoadDropdownsAsync();
 
             if (IsEditMode)
@@ -51,6 +57,32 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
                     KioskIp = string.Empty,
                     Aktiflik = Aktiflik.Aktif
                 };
+
+                // ✅ Güvenlik: URL'den HizmetBinasiId parametresi geldiyse yetki kontrolü
+                if (HizmetBinasiId.HasValue && HizmetBinasiId.Value > 0)
+                {
+                    if (!CanAccessHizmetBinasi(HizmetBinasiId.Value))
+                    {
+                        await _toastService.ShowWarningAsync("Bu Hizmet Binasına erişim yetkiniz yok!");
+                        _logger.LogWarning("Yetkisiz Hizmet Binası erişim denemesi (URL): {BinaId}", HizmetBinasiId.Value);
+                        _navigationManager.NavigateTo("/siramatik/kiosk/list");
+                        return;
+                    }
+
+                    selectedHizmetBinasiId = HizmetBinasiId.Value;
+                    model.HizmetBinasiId = HizmetBinasiId.Value;
+                }
+                else
+                {
+                    // ✅ URL'den parametre gelmediyse kullanıcının kendi HizmetBinası'nı seç
+                    var userHizmetBinasiId = GetCurrentUserHizmetBinasiId();
+                    if (userHizmetBinasiId > 0)
+                    {
+                        selectedHizmetBinasiId = userHizmetBinasiId;
+                        model.HizmetBinasiId = userHizmetBinasiId;
+                    }
+                }
+
                 isAktif = true;
             }
         }
@@ -127,6 +159,23 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
             }
         }
 
+        private async void OnHizmetBinasiChanged(ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out int hizmetBinasiId))
+            {
+                // ✅ Güvenlik kontrolü
+                if (hizmetBinasiId > 0 && !CanAccessHizmetBinasi(hizmetBinasiId))
+                {
+                    await _toastService.ShowWarningAsync("Bu Hizmet Binasını seçme yetkiniz yok!");
+                    _logger.LogWarning("Yetkisiz Hizmet Binası seçim denemesi: {BinaId}", hizmetBinasiId);
+                    return;
+                }
+
+                selectedHizmetBinasiId = hizmetBinasiId;
+                model.HizmetBinasiId = hizmetBinasiId;
+            }
+        }
+
         private async Task HandleSubmit()
         {
             try
@@ -156,6 +205,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
 
         private async Task CreateKioskAsync()
         {
+            // ✅ Güvenlik: Form submit öncesi son kontrol (form manipulation önlemi)
+            if (!CanAccessHizmetBinasi(model.HizmetBinasiId))
+            {
+                await _toastService.ShowErrorAsync("Bu Hizmet Binasında kayıt oluşturma yetkiniz yok!");
+                _logger.LogWarning("Yetkisiz kayıt oluşturma denemesi: HizmetBinasiId={BinaId}", model.HizmetBinasiId);
+                return;
+            }
+
             var createDto = new KioskCreateRequestDto
             {
                 KioskAdi = model.KioskAdi,

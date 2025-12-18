@@ -42,6 +42,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
 
         protected override async Task OnInitializedAsync()
         {
+            await base.OnInitializedAsync();
             await LoadDropdownData();
 
             if (IsEditMode)
@@ -59,12 +60,30 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
                     BankoTipi = BankoTipi.Normal
                 };
 
-                // URL'den hizmet binası parametresi geldiyse otomatik seç
+                // ✅ Güvenlik: URL'den HizmetBinasiId parametresi geldiyse yetki kontrolü
                 if (HizmetBinasiId.HasValue && HizmetBinasiId.Value > 0)
                 {
+                    if (!CanAccessHizmetBinasi(HizmetBinasiId.Value))
+                    {
+                        await _toastService.ShowWarningAsync("Bu Hizmet Binasına erişim yetkiniz yok!");
+                        _logger.LogWarning("Yetkisiz Hizmet Binası erişim denemesi (URL): {BinaId}", HizmetBinasiId.Value);
+                        _navigationManager.NavigateTo("/siramatik/banko/list");
+                        return;
+                    }
+
                     selectedHizmetBinasiId = HizmetBinasiId.Value;
                     model.HizmetBinasiId = HizmetBinasiId.Value;
                     _logger.LogInformation($"🔗 URL'den HizmetBinasiId alındı: {HizmetBinasiId.Value}");
+                }
+                else
+                {
+                    // ✅ URL'den parametre gelmediyse kullanıcının kendi HizmetBinası'nı seç
+                    var userHizmetBinasiId = GetCurrentUserHizmetBinasiId();
+                    if (userHizmetBinasiId > 0)
+                    {
+                        selectedHizmetBinasiId = userHizmetBinasiId;
+                        model.HizmetBinasiId = userHizmetBinasiId;
+                    }
                 }
             }
         }
@@ -132,10 +151,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
             }
         }
 
-        private void OnHizmetBinasiChanged(ChangeEventArgs e)
+        private async void OnHizmetBinasiChanged(ChangeEventArgs e)
         {
             if (int.TryParse(e.Value?.ToString(), out int hizmetBinasiId))
             {
+                // ✅ Güvenlik kontrolü
+                if (hizmetBinasiId > 0 && !CanAccessHizmetBinasi(hizmetBinasiId))
+                {
+                    await _toastService.ShowWarningAsync("Bu Hizmet Binasını seçme yetkiniz yok!");
+                    _logger.LogWarning("Yetkisiz Hizmet Binası seçim denemesi: {BinaId}", hizmetBinasiId);
+                    return;
+                }
+
                 selectedHizmetBinasiId = hizmetBinasiId;
                 model.HizmetBinasiId = hizmetBinasiId;
             }
@@ -170,6 +197,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
                 }
                 else
                 {
+                    // ✅ Güvenlik: Form submit öncesi son kontrol (form manipulation önlemi)
+                    if (!CanAccessHizmetBinasi(model.HizmetBinasiId))
+                    {
+                        await _toastService.ShowErrorAsync("Bu Hizmet Binasında kayıt oluşturma yetkiniz yok!");
+                        _logger.LogWarning("Yetkisiz kayıt oluşturma denemesi: HizmetBinasiId={BinaId}", model.HizmetBinasiId);
+                        return;
+                    }
+
                     // Create
                     var createDto = new BankoCreateRequestDto
                     {
