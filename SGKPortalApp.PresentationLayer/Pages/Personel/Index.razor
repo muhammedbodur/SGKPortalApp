@@ -26,12 +26,12 @@
             <ExportButton ExportType="ExportType.Excel"
                           OnClick="ExportToExcel"
                           IsExporting="@IsExporting"
-                          CurrentExportType="@ExportType" />
+                          CurrentExportType="@CurrentExportType" />
 
             <ExportButton ExportType="ExportType.PDF"
                           OnClick="ExportToPdf"
                           IsExporting="@IsExporting"
-                          CurrentExportType="@ExportType" />
+                          CurrentExportType="@CurrentExportType" />
 
             <button class="btn btn-primary" @onclick="GoToManagePage">
                 <i class="bx bx-user-plus me-1"></i> Yeni Personel Ekle
