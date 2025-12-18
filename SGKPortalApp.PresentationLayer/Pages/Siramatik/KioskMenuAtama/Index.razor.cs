@@ -35,6 +35,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
 
         protected override async Task OnInitializedAsync()
         {
+            await base.OnInitializedAsync();
             await LoadDataAsync();
         }
 
@@ -53,8 +54,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
                         .OrderBy(x => x.HizmetBinasiAdi)
                         .ToList();
 
-                    // İlk hizmet binasını otomatik seç (alfabetik sırayla)
-                    if (hizmetBinalari.Any())
+                    // Kullanıcının kendi Hizmet Binasını default olarak seç
+                    var userHizmetBinasiId = GetCurrentUserHizmetBinasiId();
+                    if (userHizmetBinasiId > 0 && hizmetBinalari.Any(b => b.HizmetBinasiId == userHizmetBinasiId))
+                    {
+                        selectedHizmetBinasiId = userHizmetBinasiId;
+                        await OnHizmetBinasiChangedAsync();
+                        // OnHizmetBinasiChangedAsync içinde LoadAtamalarAsync çağrılıyor
+                    }
+                    else if (hizmetBinalari.Any())
                     {
                         selectedHizmetBinasiId = hizmetBinalari.First().HizmetBinasiId;
                         await OnHizmetBinasiChangedAsync();
@@ -144,6 +152,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
         {
             if (int.TryParse(e.Value?.ToString(), out int binaId))
             {
+                // ✅ Güvenlik kontrolü: Kullanıcı başka Hizmet Binasını seçmeye çalışıyor mu?
+                if (binaId > 0 && !CanAccessHizmetBinasi(binaId))
+                {
+                    await _toastService.ShowWarningAsync("Bu Hizmet Binasını görüntüleme yetkiniz yok!");
+                    _logger.LogWarning("Yetkisiz Hizmet Binası erişim denemesi: {BinaId}", binaId);
+                    return; // İşlemi durdur
+                }
+
                 selectedHizmetBinasiId = binaId;
                 await OnHizmetBinasiChangedAsync();
             }

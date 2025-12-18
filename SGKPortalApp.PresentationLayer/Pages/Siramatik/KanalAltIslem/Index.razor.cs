@@ -54,6 +54,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
         protected override async Task OnInitializedAsync()
         {
             QuestPDF.Settings.License = LicenseType.Community;
+            await base.OnInitializedAsync();
             await LoadDropdownData();
 
             // URL'den kanalIslemId parametresi geldiyse
@@ -67,11 +68,33 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                 selectedHizmetBinasiId = HizmetBinasiIdParam.Value;
                 await LoadData();
             }
-            // Varsayılan: İlk hizmet binasını seç
-            else if (hizmetBinalari.Any())
+            // Varsayılan: Kullanıcının kendi Hizmet Binasını seç
+            else
             {
-                selectedHizmetBinasiId = hizmetBinalari.First().HizmetBinasiId;
-                await LoadData();
+                try
+                {
+                    var userHizmetBinasiId = GetCurrentUserHizmetBinasiId();
+                    if (userHizmetBinasiId > 0 && hizmetBinalari.Any(b => b.HizmetBinasiId == userHizmetBinasiId))
+                    {
+                        selectedHizmetBinasiId = userHizmetBinasiId;
+                        await LoadData();
+                    }
+                    else if (hizmetBinalari.Any())
+                    {
+                        selectedHizmetBinasiId = hizmetBinalari.First().HizmetBinasiId;
+                        await LoadData();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "KanalAltIslem OnInitializedAsync hatası");
+                    // Hata olursa ilk hizmet binasını seç
+                    if (hizmetBinalari.Any())
+                    {
+                        selectedHizmetBinasiId = hizmetBinalari.First().HizmetBinasiId;
+                        await LoadData();
+                    }
+                }
             }
         }
         
@@ -207,6 +230,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
         {
             if (int.TryParse(e.Value?.ToString(), out int binaId))
             {
+                // ✅ Güvenlik kontrolü: Kullanıcı başka Hizmet Binasını seçmeye çalışıyor mu?
+                if (binaId > 0 && !CanAccessHizmetBinasi(binaId))
+                {
+                    await _toastService.ShowWarningAsync("Bu Hizmet Binasını görüntüleme yetkiniz yok!");
+                    _logger.LogWarning("Yetkisiz Hizmet Binası erişim denemesi: {BinaId}", binaId);
+                    return; // İşlemi durdur
+                }
+
                 selectedHizmetBinasiId = binaId;
                 selectedKanalIslemId = 0; // Kanal işlem filtresini sıfırla
                 await LoadData();

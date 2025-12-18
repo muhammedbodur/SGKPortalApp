@@ -58,6 +58,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
 
         protected override async Task OnInitializedAsync()
         {
+            await base.OnInitializedAsync();
             await LoadDropdownData();
 
             if (IsEditMode)
@@ -75,14 +76,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                     Aktiflik = Aktiflik.Aktif
                 };
 
-                // URL'den hizmet binası parametresi geldiyse otomatik seç
+                // ✅ Güvenlik: URL'den HizmetBinasiId parametresi geldiyse yetki kontrolü
                 if (HizmetBinasiId.HasValue && HizmetBinasiId.Value > 0)
                 {
+                    if (!CanAccessHizmetBinasi(HizmetBinasiId.Value))
+                    {
+                        await _toastService.ShowWarningAsync("Bu Hizmet Binasına erişim yetkiniz yok!");
+                        _logger.LogWarning("Yetkisiz Hizmet Binası erişim denemesi (URL): {BinaId}", HizmetBinasiId.Value);
+                        _navigationManager.NavigateTo("/siramatik/kanal-alt-islem");
+                        return;
+                    }
+
                     selectedHizmetBinasiId = HizmetBinasiId.Value;
                     model.HizmetBinasiId = HizmetBinasiId.Value;
                     await LoadKanalIslemler();
                     _logger.LogInformation($"🔗 URL'den HizmetBinasiId alındı: {HizmetBinasiId.Value}");
-                    
+
                     // URL'den kanal işlem parametresi geldiyse otomatik seç
                     if (KanalIslemId.HasValue && KanalIslemId.Value > 0)
                     {
@@ -95,14 +104,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                         _logger.LogInformation($"🔗 URL'den KanalIslemId alındı: {KanalIslemId.Value}");
                     }
                 }
-                // URL'den parametre gelmediyse ilk hizmet binasını otomatik seç
-                else if (hizmetBinalari.Any())
+                else
                 {
-                    var ilkBina = hizmetBinalari.First();
-                    selectedHizmetBinasiId = ilkBina.HizmetBinasiId;
-                    model.HizmetBinasiId = ilkBina.HizmetBinasiId;
-                    await LoadKanalIslemler();
-                    _logger.LogInformation($"🏢 İlk hizmet binası otomatik seçildi: {ilkBina.HizmetBinasiAdi} (ID: {ilkBina.HizmetBinasiId})");
+                    // ✅ URL'den parametre gelmediyse kullanıcının kendi HizmetBinası'nı seç
+                    var userHizmetBinasiId = GetCurrentUserHizmetBinasiId();
+                    if (userHizmetBinasiId > 0)
+                    {
+                        selectedHizmetBinasiId = userHizmetBinasiId;
+                        model.HizmetBinasiId = userHizmetBinasiId;
+                        await LoadKanalIslemler();
+                    }
                 }
 
                 isAktif = true;
@@ -164,6 +175,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
         {
             if (int.TryParse(e.Value?.ToString(), out int binaId))
             {
+                // ✅ Güvenlik kontrolü
+                if (binaId > 0 && !CanAccessHizmetBinasi(binaId))
+                {
+                    await _toastService.ShowWarningAsync("Bu Hizmet Binasını seçme yetkiniz yok!");
+                    _logger.LogWarning("Yetkisiz Hizmet Binası seçim denemesi: {BinaId}", binaId);
+                    return;
+                }
+
                 selectedHizmetBinasiId = binaId;
                 model.HizmetBinasiId = binaId; // Model'i de güncelle
                 model.KanalIslemId = 0; // Kanal işlem seçimini sıfırla
@@ -385,6 +404,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
 
         private async Task CreateKanalAltIslem()
         {
+            // ✅ Güvenlik: Form submit öncesi son kontrol (form manipulation önlemi)
+            if (!CanAccessHizmetBinasi(model.HizmetBinasiId))
+            {
+                await _toastService.ShowErrorAsync("Bu Hizmet Binasında kayıt oluşturma yetkiniz yok!");
+                _logger.LogWarning("Yetkisiz kayıt oluşturma denemesi: HizmetBinasiId={BinaId}", model.HizmetBinasiId);
+                return;
+            }
+
             var createDto = new KanalAltIslemCreateRequestDto
             {
                 KanalAltId = model.KanalAltId,

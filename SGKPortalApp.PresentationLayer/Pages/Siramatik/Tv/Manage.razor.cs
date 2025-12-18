@@ -20,6 +20,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
         [Parameter]
         public int TvId { get; set; }
 
+        [Parameter]
+        [SupplyParameterFromQuery]
+        public int? HizmetBinasiId { get; set; }
+
         [Inject]
         private ITvApiService _tvService { get; set; } = default!;
 
@@ -32,6 +36,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
         [Inject]
         private NavigationManager _navigationManager { get; set; } = default!;
 
+        [Inject]
+        private ILogger<Manage> _logger { get; set; } = default!;
+
         private TvFormModel model = new();
         private List<HizmetBinasiResponseDto> hizmetBinalari = new();
 
@@ -43,9 +50,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
         private DateTime? duzenlenmeTarihi = null;
 
         private bool IsEditMode => TvId > 0;
+        private int selectedHizmetBinasiId = 0;
 
         protected override async Task OnInitializedAsync()
         {
+            await base.OnInitializedAsync();
             await LoadDataAsync();
         }
 
@@ -89,6 +98,33 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
                         NavigateBack();
                     }
                 }
+                else
+                {
+                    // ✅ Güvenlik: URL'den HizmetBinasiId parametresi geldiyse yetki kontrolü
+                    if (HizmetBinasiId.HasValue && HizmetBinasiId.Value > 0)
+                    {
+                        if (!CanAccessHizmetBinasi(HizmetBinasiId.Value))
+                        {
+                            await _toastService.ShowWarningAsync("Bu Hizmet Binasına erişim yetkiniz yok!");
+                            _logger.LogWarning("Yetkisiz Hizmet Binası erişim denemesi (URL): {BinaId}", HizmetBinasiId.Value);
+                            _navigationManager.NavigateTo("/siramatik/tv");
+                            return;
+                        }
+
+                        selectedHizmetBinasiId = HizmetBinasiId.Value;
+                        model.HizmetBinasiId = HizmetBinasiId.Value;
+                    }
+                    else
+                    {
+                        // ✅ URL'den parametre gelmediyse kullanıcının kendi HizmetBinası'nı seç
+                        var userHizmetBinasiId = GetCurrentUserHizmetBinasiId();
+                        if (userHizmetBinasiId > 0)
+                        {
+                            selectedHizmetBinasiId = userHizmetBinasiId;
+                            model.HizmetBinasiId = userHizmetBinasiId;
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -97,6 +133,23 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
             finally
             {
                 isLoading = false;
+            }
+        }
+
+        private async void OnHizmetBinasiChanged(ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out int hizmetBinasiId))
+            {
+                // ✅ Güvenlik kontrolü
+                if (hizmetBinasiId > 0 && !CanAccessHizmetBinasi(hizmetBinasiId))
+                {
+                    await _toastService.ShowWarningAsync("Bu Hizmet Binasını seçme yetkiniz yok!");
+                    _logger.LogWarning("Yetkisiz Hizmet Binası seçim denemesi: {BinaId}", hizmetBinasiId);
+                    return;
+                }
+
+                selectedHizmetBinasiId = hizmetBinasiId;
+                model.HizmetBinasiId = hizmetBinasiId;
             }
         }
 
@@ -137,6 +190,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
                 }
                 else
                 {
+                    // ✅ Güvenlik: Form submit öncesi son kontrol (form manipulation önlemi)
+                    if (!CanAccessHizmetBinasi(model.HizmetBinasiId))
+                    {
+                        await _toastService.ShowErrorAsync("Bu Hizmet Binasında kayıt oluşturma yetkiniz yok!");
+                        _logger.LogWarning("Yetkisiz kayıt oluşturma denemesi: HizmetBinasiId={BinaId}", model.HizmetBinasiId);
+                        return;
+                    }
+
                     var createDto = new TvCreateRequestDto
                     {
                         TvAdi = model.TvAdi,

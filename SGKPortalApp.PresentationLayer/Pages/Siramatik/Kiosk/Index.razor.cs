@@ -36,9 +36,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
 
         protected override async Task OnInitializedAsync()
         {
+            await base.OnInitializedAsync();
             await LoadDropdownDataAsync();
 
-            if (hizmetBinalari.Any())
+            // Kullanıcının kendi Hizmet Binasını default olarak seç
+            var userHizmetBinasiId = GetCurrentUserHizmetBinasiId();
+            if (userHizmetBinasiId > 0 && hizmetBinalari.Any(b => b.HizmetBinasiId == userHizmetBinasiId))
+            {
+                selectedHizmetBinasiId = userHizmetBinasiId;
+                await LoadKiosksAsync();
+            }
+            else if (hizmetBinalari.Any())
             {
                 selectedHizmetBinasiId = hizmetBinalari.First().HizmetBinasiId;
                 await LoadKiosksAsync();
@@ -130,6 +138,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
         {
             if (int.TryParse(e.Value?.ToString(), out var binaId))
             {
+                // ✅ Güvenlik kontrolü: Kullanıcı başka Hizmet Binasını seçmeye çalışıyor mu?
+                if (binaId > 0 && !CanAccessHizmetBinasi(binaId))
+                {
+                    await _toastService.ShowWarningAsync("Bu Hizmet Binasını görüntüleme yetkiniz yok!");
+                    _logger.LogWarning("Yetkisiz Hizmet Binası erişim denemesi: {BinaId}", binaId);
+                    return; // İşlemi durdur
+                }
+
                 selectedHizmetBinasiId = binaId;
                 selectedAktiflik = null;
                 searchText = string.Empty;

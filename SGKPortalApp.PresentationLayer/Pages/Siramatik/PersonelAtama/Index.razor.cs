@@ -116,12 +116,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
         protected override async Task OnInitializedAsync()
         {
             QuestPDF.Settings.License = LicenseType.Community;
-            
+            await base.OnInitializedAsync();
+
             IsLoading = true;
             try
             {
                 await LoadHizmetBinalari();
-                
+
                 // URL'den kanalAltIslemId parametresi geldiyse
                 if (KanalAltIslemIdParam.HasValue && KanalAltIslemIdParam.Value > 0)
                 {
@@ -207,9 +208,20 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
 
                     if (HizmetBinalari.Any() && SelectedHizmetBinasiId == 0)
                     {
-                        SelectedHizmetBinasiId = HizmetBinalari.First().HizmetBinasiId;
-                        await LoadServisler();
-                        await LoadMatrixData();
+                        // Kullanıcının kendi Hizmet Binasını default olarak seç
+                        var userHizmetBinasiId = GetCurrentUserHizmetBinasiId();
+                        if (userHizmetBinasiId > 0 && HizmetBinalari.Any(b => b.HizmetBinasiId == userHizmetBinasiId))
+                        {
+                            SelectedHizmetBinasiId = userHizmetBinasiId;
+                            await LoadServisler();
+                            await LoadMatrixData();
+                        }
+                        else if (HizmetBinalari.Any())
+                        {
+                            SelectedHizmetBinasiId = HizmetBinalari.First().HizmetBinasiId;
+                            await LoadServisler();
+                            await LoadMatrixData();
+                        }
                     }
                 }
                 else
@@ -231,6 +243,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
         {
             if (e.Value != null && int.TryParse(e.Value.ToString(), out int selectedId))
             {
+                // ✅ Güvenlik kontrolü: Kullanıcı başka Hizmet Binasını seçmeye çalışıyor mu?
+                if (selectedId > 0 && !CanAccessHizmetBinasi(selectedId))
+                {
+                    await _toastService.ShowWarningAsync("Bu Hizmet Binasını görüntüleme yetkiniz yok!");
+                    _logger.LogWarning("Yetkisiz Hizmet Binası erişim denemesi: {BinaId}", selectedId);
+                    return; // İşlemi durdur
+                }
+
                 SelectedHizmetBinasiId = selectedId;
             }
 
