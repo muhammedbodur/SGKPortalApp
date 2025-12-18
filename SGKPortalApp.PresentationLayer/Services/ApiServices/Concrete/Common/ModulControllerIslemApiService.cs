@@ -187,5 +187,27 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
                 return ServiceResult<List<DropdownItemDto>>.Fail($"Hata: {ex.Message}");
             }
         }
+
+        public async Task<ServiceResult<List<DropdownDto>>> GetActionTypesAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("modulcontrollerislem/action-types");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<List<DropdownDto>>.Fail("ActionType listesi alınamadı");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<DropdownDto>>>();
+                return apiResponse?.Success == true && apiResponse.Data != null
+                    ? ServiceResult<List<DropdownDto>>.Ok(apiResponse.Data, apiResponse.Message ?? "Başarılı")
+                    : ServiceResult<List<DropdownDto>>.Fail(apiResponse?.Message ?? "ActionType listesi alınamadı");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetActionTypesAsync Exception");
+                return ServiceResult<List<DropdownDto>>.Fail($"Hata: {ex.Message}");
+            }
+        }
     }
 }

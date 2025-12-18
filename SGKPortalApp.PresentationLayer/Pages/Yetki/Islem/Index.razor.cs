@@ -58,9 +58,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
         private bool IsLoadingDtoTypes = false;
         private bool IsLoadingDtoFields = false;
 
+        // ActionType states (Buton için)
+        private List<DropdownDto> ActionTypes = new();
+        private bool IsLoadingActionTypes = false;
+        private string? SelectedActionType = null;
+
         // Computed properties for conditional rendering
         private bool IsFieldType => SelectedIslemTipi == YetkiIslemTipi.Field || SelectedIslemTipi == YetkiIslemTipi.FormField;
         private bool ShowRouteField => SelectedIslemTipi == YetkiIslemTipi.Page;
+        private bool IsButonType => SelectedIslemTipi == YetkiIslemTipi.Buton;
 
         protected override async Task OnInitializedAsync()
         {
@@ -68,6 +74,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
             await LoadModulDropdown();
             await LoadAllControllers();
             await LoadDtoTypes();
+            await LoadActionTypes();
             await LoadData();
         }
 
@@ -185,6 +192,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
                 _ => YetkiSeviyesi.View
             };
 
+            // Buton tipi değiştiğinde ActionType temizle
+            if (!IsButonType)
+            {
+                SelectedActionType = null;
+            }
+
+            GeneratePermissionKey();
+        }
+
+        private void OnActionTypeChanged()
+        {
+            // ActionType seçildiğinde İşlem Adı'nı otomatik doldur
+            if (!string.IsNullOrWhiteSpace(SelectedActionType))
+            {
+                IslemAdi = SelectedActionType.ToUpperInvariant();
+            }
             GeneratePermissionKey();
         }
 
@@ -361,6 +384,31 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
             finally
             {
                 IsLoadingDtoTypes = false;
+            }
+        }
+
+        private async Task LoadActionTypes()
+        {
+            IsLoadingActionTypes = true;
+            try
+            {
+                var result = await IslemApiService.GetActionTypesAsync();
+                if (result.Success && result.Data != null)
+                {
+                    ActionTypes = result.Data;
+                }
+                else
+                {
+                    await ToastService.ShowErrorAsync(result.Message ?? "ActionType listesi yüklenemedi");
+                }
+            }
+            catch (Exception ex)
+            {
+                await ToastService.ShowErrorAsync($"ActionType yükleme hatası: {ex.Message}");
+            }
+            finally
+            {
+                IsLoadingActionTypes = false;
             }
         }
 

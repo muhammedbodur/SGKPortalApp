@@ -148,6 +148,35 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
 
         #endregion
 
+        #region Action-Level Permissions (ActionType Enum Overloads)
+
+        /// <summary>
+        /// Convention-based action permission key üretir (ActionType enum ile)
+        /// Örnek: PER.PERSONEL.INDEX.ACTION.DETAIL
+        /// </summary>
+        protected string GetActionPermissionKey(ActionType actionType)
+            => GetActionPermissionKey(actionType.ToString());
+
+        /// <summary>
+        /// Aksiyon yetkisi var mı? (ActionType enum ile)
+        /// </summary>
+        protected bool CanAction(ActionType actionType)
+            => CanAction(actionType.ToString());
+
+        /// <summary>
+        /// Aksiyon görünür mü? (ActionType enum ile)
+        /// </summary>
+        protected bool IsActionVisible(ActionType actionType)
+            => IsActionVisible(actionType.ToString());
+
+        /// <summary>
+        /// Aksiyon düzenleme yetkisi var mı? (ActionType enum ile)
+        /// </summary>
+        protected bool CanEditAction(ActionType actionType)
+            => CanEditAction(actionType.ToString());
+
+        #endregion
+
         #region Lifecycle
 
         protected override async Task OnInitializedAsync()

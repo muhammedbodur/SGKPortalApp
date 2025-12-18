@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
+using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.Common.Extensions;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
 
 namespace SGKPortalApp.ApiLayer.Controllers.Common
 {
@@ -79,6 +82,42 @@ namespace SGKPortalApp.ApiLayer.Controllers.Common
         {
             var result = await _modulControllerIslemService.GetDropdownByControllerIdAsync(controllerId);
             return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// ActionType enum listesini döndürür (Buton İşlem Adı için)
+        /// </summary>
+        [HttpGet("action-types")]
+        public IActionResult GetActionTypes()
+        {
+            try
+            {
+                var actionTypes = Enum.GetValues<ActionType>()
+                    .Select(e => new DropdownDto
+                    {
+                        Id = (int)e,
+                        Ad = e.ToString(),
+                        Aciklama = e.GetDisplayName()
+                    })
+                    .OrderBy(x => x.Id)
+                    .ToList();
+
+                return Ok(new ApiResponse<List<DropdownDto>>
+                {
+                    Success = true,
+                    Message = "ActionType listesi başarıyla getirildi",
+                    Data = actionTypes
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ActionType listesi getirilirken hata oluştu");
+                return BadRequest(new ApiResponse<List<DropdownDto>>
+                {
+                    Success = false,
+                    Message = $"Hata: {ex.Message}"
+                });
+            }
         }
     }
 }

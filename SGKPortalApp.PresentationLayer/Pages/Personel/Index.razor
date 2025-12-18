@@ -249,7 +249,7 @@
 
                             @foreach (var (personel, index) in pagedData.Select((p, i) => (p, i)))
                             {
-                                <tr style="@(CanAction("DETAIL") ? "cursor: pointer;" : "")" @onclick="() => TryNavigateToDetail(personel.TcKimlikNo)">
+                                <tr style="@(CanAction(ActionType.DETAIL) ? "cursor: pointer;" : "")" @onclick="() => TryNavigateToDetail(personel.TcKimlikNo)">
                                     <td>@((CurrentPage - 1) * PageSize + index + 1)</td>
                                     <td>
                                         <span class="fw-medium">@personel.TcKimlikNo</span>
@@ -305,33 +305,33 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-1">
-                                            @if (IsActionVisible("DETAIL"))
+                                            @if (IsActionVisible(ActionType.DETAIL))
                                             {
                                                 <button class="btn btn-sm btn-icon btn-outline-primary"
                                                         @onclick:stopPropagation="true"
                                                         @onclick="() => NavigateToDetail(personel.TcKimlikNo)"
-                                                        disabled="@(!CanAction("DETAIL"))"
-                                                        title="@(CanAction("DETAIL") ? "Detay" : "Detay (Yetki Yok)")">
+                                                        disabled="@(!CanAction(ActionType.DETAIL))"
+                                                        title="@(CanAction(ActionType.DETAIL) ? "Detay" : "Detay (Yetki Yok)")">
                                                     <i class="bx bx-show"></i>
                                                 </button>
                                             }
-                                            @if (IsActionVisible("EDIT"))
+                                            @if (IsActionVisible(ActionType.EDIT))
                                             {
                                                 <button class="btn btn-sm btn-icon btn-outline-info"
                                                         @onclick:stopPropagation="true"
                                                         @onclick="() => NavigateToEdit(personel.TcKimlikNo)"
-                                                        disabled="@(!CanEditAction("EDIT"))"
-                                                        title="@(CanEditAction("EDIT") ? "Düzenle" : "Düzenle (Yetki Yok)")">
+                                                        disabled="@(!CanEditAction(ActionType.EDIT))"
+                                                        title="@(CanEditAction(ActionType.EDIT) ? "Düzenle" : "Düzenle (Yetki Yok)")">
                                                     <i class="bx bx-edit"></i>
                                                 </button>
                                             }
-                                            @if (IsActionVisible("DELETE"))
+                                            @if (IsActionVisible(ActionType.DELETE))
                                             {
                                                 <button class="btn btn-sm btn-icon btn-outline-danger"
                                                         @onclick:stopPropagation="true"
                                                         @onclick="() => OpenDeleteModal(personel)"
-                                                        disabled="@(!CanEditAction("DELETE"))"
-                                                        title="@(CanEditAction("DELETE") ? "Sil" : "Sil (Yetki Yok)")">
+                                                        disabled="@(!CanEditAction(ActionType.DELETE))"
+                                                        title="@(CanEditAction(ActionType.DELETE) ? "Sil" : "Sil (Yetki Yok)")">
                                                     <i class="bx bx-trash"></i>
                                                 </button>
                                             }
