@@ -235,7 +235,7 @@
 
                             @foreach (var (personel, index) in pagedData.Select((p, i) => (p, i)))
                             {
-                                <tr style="@(CanAction(ActionType.DETAIL) ? "cursor: pointer;" : "")" @onclick="() => TryNavigateToDetail(personel.TcKimlikNo)">
+                                <tr style="@GetClickableRowStyle(ActionType.DETAIL)" @onclick="() => TryNavigateToDetail(personel.TcKimlikNo)">
                                     <td>@((CurrentPage - 1) * PageSize + index + 1)</td>
                                     <td>
                                         <span class="fw-medium">@personel.TcKimlikNo</span>
