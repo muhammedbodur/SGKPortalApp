@@ -14,5 +14,6 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
         Task<ServiceResult<bool>> DeleteAsync(int id);
         Task<ServiceResult<List<DropdownItemDto>>> GetDropdownAsync();
         Task<ServiceResult<List<DropdownItemDto>>> GetDropdownByControllerIdAsync(int controllerId);
+        Task<ServiceResult<List<DropdownDto>>> GetActionTypesAsync();
     }
 }

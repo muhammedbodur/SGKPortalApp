@@ -252,11 +252,6 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">İşlem Adı <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" @bind="IslemAdi" @bind:after="OnIslemAdiChanged" placeholder="Örn: LIST, CREATE, DELETE..." />
-                            <small class="text-muted">Field tipi seçiliyse DTO Field Name'den otomatik doldurulur</small>
-                        </div>
-                        <div class="col-md-6 mb-3">
                             <label class="form-label">İşlem Tipi</label>
                             <select class="form-select" @bind="SelectedIslemTipi" @bind:after="OnIslemTipiChanged">
                                 <option value="@YetkiIslemTipi.Page">📄 Sayfa</option>
@@ -265,6 +260,46 @@
                                 <option value="@YetkiIslemTipi.Field">📝 Field (Görüntüleme)</option>
                                 <option value="@YetkiIslemTipi.FormField">✏️ Input (Form Alanı)</option>
                             </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            @if (IsButonType)
+                            {
+                                <label class="form-label">İşlem Adı (ActionType) <span class="text-danger">*</span></label>
+                                <select class="form-select" @bind="SelectedActionType" @bind:after="OnActionTypeChanged" disabled="@IsLoadingActionTypes">
+                                    <option value="">-- Action Seçiniz --</option>
+                                    @if (IsLoadingActionTypes)
+                                    {
+                                        <option value="">⏳ Yükleniyor...</option>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var action in ActionTypes)
+                                        {
+                                            <option value="@action.Ad">@action.Aciklama (@action.Ad)</option>
+                                        }
+                                    }
+                                </select>
+                                <small class="text-muted">
+                                    @if (IsLoadingActionTypes)
+                                    {
+                                        <i class="bx bx-loader-alt bx-spin"></i> <text>ActionType listesi yükleniyor...</text>
+                                    }
+                                    else if (!string.IsNullOrEmpty(SelectedActionType))
+                                    {
+                                        <i class="bx bx-check-circle text-success"></i> <text>Seçilen: @SelectedActionType</text>
+                                    }
+                                    else
+                                    {
+                                        <i class="bx bx-info-circle"></i> <text>Standart action tipi seçiniz</text>
+                                    }
+                                </small>
+                            }
+                            else
+                            {
+                                <label class="form-label">İşlem Adı <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" @bind="IslemAdi" @bind:after="OnIslemAdiChanged" placeholder="Örn: LIST, CREATE, DELETE..." />
+                                <small class="text-muted">Field tipi seçiliyse DTO Field Name'den otomatik doldurulur</small>
+                            }
                         </div>
                     </div>
                     <div class="mb-3">

@@ -286,7 +286,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         /// </summary>
         private void TryNavigateToDetail(string tcKimlikNo)
         {
-            if (CanAction("DETAIL"))
+            if (CanAction(ActionType.DETAIL))
                 NavigateToDetail(tcKimlikNo);
         }
 
