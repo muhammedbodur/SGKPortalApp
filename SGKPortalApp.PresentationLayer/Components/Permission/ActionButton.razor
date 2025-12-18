@@ -1,0 +1,23 @@
+@*
+    ActionButton Component - ActionType enum ile çalışır
+
+    Kullanım:
+    <ActionButton ActionType="ActionType.DETAIL"
+                  OnClick="() => NavigateToDetail(id)" />
+
+    <ActionButton ActionType="ActionType.EDIT"
+                  OnClick="() => NavigateToEdit(id)"
+                  Icon="bx-pencil" />
+*@
+
+@if (IsVisible)
+{
+    <button type="button"
+            class="btn btn-sm btn-icon @CssClass"
+            disabled="@(!IsEnabled)"
+            title="@Title"
+            @onclick="HandleClick"
+            @onclick:stopPropagation="@StopPropagation">
+        <i class="bx @Icon"></i>
+    </button>
+}
