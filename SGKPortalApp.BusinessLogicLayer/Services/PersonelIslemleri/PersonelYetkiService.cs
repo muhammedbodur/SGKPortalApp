@@ -277,7 +277,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
         }
 
         /// <summary>
-        /// Kullanıcının tüm yetkilerini döner (atanmış + MinYetkiSeviyesi > None olan varsayılanlar)
+        /// Kullanıcının tüm yetkilerini döner (atanmış + MinYetkiSeviyesi >= None olan varsayılanlar)
         /// Claims'e eklenecek dictionary formatında döner
         /// </summary>
         public async Task<Dictionary<string, int>> GetUserPermissionsWithDefaultsAsync(string tcKimlikNo)

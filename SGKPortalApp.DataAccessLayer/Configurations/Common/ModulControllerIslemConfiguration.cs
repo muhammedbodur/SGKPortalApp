@@ -36,6 +36,18 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.Common
                 .HasDatabaseName("IX_PER_ModulControllerIslemleri_Controller_Islem")
                 .HasFilter("[SilindiMi] = 0");
 
+            // PermissionKey unique constraint (soft delete aware)
+            builder.HasIndex(mci => mci.PermissionKey)
+                .IsUnique()
+                .HasDatabaseName("IX_PER_ModulControllerIslemleri_PermissionKey")
+                .HasFilter("[SilindiMi] = 0");
+
+            // Route unique constraint (soft delete aware, NULL allowed)
+            builder.HasIndex(mci => mci.Route)
+                .IsUnique()
+                .HasDatabaseName("IX_PER_ModulControllerIslemleri_Route")
+                .HasFilter("[SilindiMi] = 0 AND [Route] IS NOT NULL");
+
             builder.HasQueryFilter(mci => !mci.SilindiMi);
         }
     }

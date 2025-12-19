@@ -30,7 +30,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common
         Task<IEnumerable<DropdownItemDto>> GetDropdownAsync();
         Task<IEnumerable<DropdownItemDto>> GetByControllerDropdownAsync(int modulControllerId);
 
-        // MinYetkiSeviyesi > None olan tüm yetki tanımlarını döner (PermissionKey -> MinYetkiSeviyesi)
+        // MinYetkiSeviyesi >= None olan tüm yetki tanımlarını döner (PermissionKey -> MinYetkiSeviyesi)
         Task<Dictionary<string, int>> GetDefaultPermissionsAsync();
     }
 }
