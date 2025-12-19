@@ -66,7 +66,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
                     {
                         await _toastService.ShowWarningAsync("Bu Hizmet Binasına erişim yetkiniz yok!");
                         _logger.LogWarning("Yetkisiz Hizmet Binası erişim denemesi (URL): {BinaId}", HizmetBinasiId.Value);
-                        _navigationManager.NavigateTo("/siramatik/banko/list");
+                        _navigationManager.NavigateTo("/siramatik/banko");
                         return;
                     }
 
@@ -241,11 +241,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
         {
             if (HizmetBinasiId.HasValue && HizmetBinasiId.Value > 0)
             {
-                _navigationManager.NavigateTo($"/siramatik/banko/list?hizmetBinasiId={HizmetBinasiId.Value}");
+                _navigationManager.NavigateTo($"/siramatik/banko?hizmetBinasiId={HizmetBinasiId.Value}");
             }
             else
             {
-                _navigationManager.NavigateTo("/siramatik/banko/list");
+                _navigationManager.NavigateTo("/siramatik/banko");
             }
         }
     }

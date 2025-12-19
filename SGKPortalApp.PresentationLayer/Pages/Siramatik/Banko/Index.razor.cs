@@ -24,7 +24,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
     public partial class Index
     {
         // PagePermissionKey otomatik route'tan çözümlenir
-        // Database'de Route: /siramatik/banko/list → PermissionKey: SIRAMATIK.BANKO.LIST
         // Manuel override gerekmez, otomatik database mapping kullanılır
 
         [Inject] private IBankoApiService _bankoService { get; set; } = default!;

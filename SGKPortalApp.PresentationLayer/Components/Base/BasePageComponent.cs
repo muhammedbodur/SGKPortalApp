@@ -153,10 +153,10 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
 
         /// <summary>
         /// Ad Soyad'dan nickname oluşturur.
-        /// Örnek: "Muhammed Ali Bodur" → "M.A.BODUR"
+        /// Örnek: "Muhammed Bodur" → "M.BODUR"
         /// </summary>
         /// <param name="adSoyad">Ad Soyad</param>
-        /// <returns>Nickname (M.A.BODUR formatında)</returns>
+        /// <returns>Nickname (M.BODUR formatında)</returns>
         protected string GenerateNickName(string adSoyad)
         {
             if (string.IsNullOrWhiteSpace(adSoyad))

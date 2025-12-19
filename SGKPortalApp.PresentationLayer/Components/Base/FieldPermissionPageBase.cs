@@ -312,7 +312,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         /// Index sayfalarındaki field/filter'lar için edit yetkisi kontrolü
         /// IsEditMode kontrolü YAPMAZ (Index sayfaları için)
         /// Permission Key: {PagePermissionKey}.FORMFIELD.{FIELDNAME}
-        /// Örnek: SIRAMATIK.BANKO.LIST.FORMFIELD.HIZMET_BINASI
+        /// Örnek: SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI
         /// </summary>
         protected bool CanEditFieldInList(string fieldName)
         {
