@@ -166,13 +166,13 @@ warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
 warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
       The 'Aktiflik' property 'Aktiflik' on entity type 'Tv' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
 info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (38ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      Executed DbCommand (44ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
       SELECT 1
 info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (31ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      Executed DbCommand (29ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
       SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
 info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (5ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      Executed DbCommand (7ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
       SELECT [MigrationId], [ProductVersion]
       FROM [__EFMigrationsHistory]
       ORDER BY [MigrationId];
@@ -191,7 +191,7 @@ info: Microsoft.EntityFrameworkCore.Database.Command[20101]
 info: SGKPortalApp.PresentationLayer.Services.BackgroundServices.StaleConnectionCleanupService[0]
       StaleConnectionCleanupService başlatıldı. Aralık: 00:05:00, Threshold: 00:10:00
 info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (81ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      Executed DbCommand (85ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
       SELECT [c].[HubConnectionId], [c].[ConnectedAt], [c].[ConnectionId], [c].[ConnectionStatus], [c].[ConnectionType], [c].[DuzenlenmeTarihi], [c].[DuzenleyenKullanici], [c].[EklenmeTarihi], [c].[EkleyenKullanici], [c].[IslemZamani], [c].[LastActivityAt], [c].[SilenKullanici], [c].[SilindiMi], [c].[SilinmeTarihi], [c].[TcKimlikNo], [c1].[TcKimlikNo], [c1].[AktifBankoId], [c1].[AktifMi], [c1].[BankoModuAktif], [c1].[BankoModuBaslangic], [c1].[BasarisizGirisSayisi], [c1].[DuzenlenmeTarihi], [c1].[DuzenleyenKullanici], [c1].[EklenmeTarihi], [c1].[EkleyenKullanici], [c1].[HesapKilitTarihi], [c1].[HubConnectionId], [c1].[PassWord], [c1].[PermissionStamp], [c1].[SessionID], [c1].[SilenKullanici], [c1].[SilindiMi], [c1].[SilinmeTarihi], [c1].[SonGirisTarihi], [c1].[UserType], [p0].[TcKimlikNo], [p0].[AdSoyad], [p0].[Adres], [p0].[AtanmaNedeniId], [p0].[BitirdigiBolum], [p0].[BitirdigiOkul], [p0].[Bransi], [p0].[CepTelefonu], [p0].[CepTelefonu2], [p0].[CezaBilgileri], [p0].[Cinsiyet], [p0].[Dahili], [p0].[DepartmanId], [p0].[DogumTarihi], [p0].[DuzenlenmeTarihi], [p0].[DuzenleyenKullanici], [p0].[EgitimBilgisi], [p0].[EklenmeTarihi], [p0].[EkleyenKullanici], [p0].[Email], [p0].[EmekliSicilNo], [p0].[EngelBilgileri], [p0].[EsininAdi], [p0].[EsininIsAdresi], [p0].[EsininIsDurumu], [p0].[EsininIsIlId], [p0].[EsininIsIlceId], [p0].[EsininIsSemt], [p0].[EsininUnvani], [p0].[EvDurumu], [p0].[EvTelefonu], [p0].[Gorev], [p0].[HizmetBilgisi], [p0].[HizmetBinasiId], [p0].[IlId], [p0].[IlceId], [p0].[ImzaYetkileri], [p0].[KanGrubu], [p0].[KartGonderimIslemBasari], [p0].[KartNo], [p0].[KartNoAktiflikTarihi], [p0].[KartNoDuzenlenmeTarihi], [p0].[KartNoGonderimTarihi], [p0].[MedeniDurumu], [p0].[NickName], [p0].[OgrenimDurumu], [p0].[OgrenimSuresi], [p0].[PersonelAktiflikDurum], [p0].[PersonelKayitNo], [p0].[PersonelTipi], [p0].[Resim], [p0].[SehitYakinligi], [p0].[Semt], [p0].[SendikaId], [p0].[ServisId], [p0].[SicilNo], [p0].[SilenKullanici], [p0].[SilindiMi], [p0].[SilinmeTarihi], [p0].[Tabldot], [p0].[UlasimServis1], [p0].[UlasimServis2], [p0].[UnvanId], [p0].[Uzmanlik]
       FROM [dbo].[CMN_HubConnections] AS [c]
       INNER JOIN (
@@ -233,918 +233,6 @@ fail: SGKPortalApp.PresentationLayer.Services.BackgroundServices.StaleConnection
          at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.Attach(TEntity entity)
          at SGKPortalApp.DataAccessLayer.Repositories.Generic.GenericRepository`1.Update(T entity) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Generic\GenericRepository.cs:line 103
          at SGKPortalApp.PresentationLayer.Services.BackgroundServices.StaleConnectionCleanupService.CleanupAllOnStartupAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer\Services\BackgroundServices\StaleConnectionCleanupService.cs:line 90
-warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
-      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
-      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-info: SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth.AuthApiService[0]
-      POST: https://localhost:9080/api/auth/login
-info: System.Net.Http.HttpClient.IAuthApiService.LogicalHandler[100]
-      Start processing HTTP request POST https://localhost:9080/api/auth/login
-info: System.Net.Http.HttpClient.IAuthApiService.ClientHandler[100]
-      Sending HTTP request POST https://localhost:9080/api/auth/login
-info: System.Net.Http.HttpClient.IAuthApiService.ClientHandler[101]
-      Received HTTP response headers after 3802.9811ms - 200
-info: System.Net.Http.HttpClient.IAuthApiService.LogicalHandler[101]
-      End processing HTTP request after 3825.6092ms - 200
-info: SGKPortalApp.PresentationLayer.Pages.Auth.LoginHandlerModel[0]
-      ?? 9 yetki claims'e eklendi
-info: SGKPortalApp.PresentationLayer.Pages.Auth.LoginHandlerModel[0]
-      ? Kullanıcı giriş yaptı: Muhammed Bodur (28165202398) - Personel
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 401.4673ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 401.8504ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 30.8793ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 31.2282ms - 200
-warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
-      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
-      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 19.6148ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 19.9261ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 10.0792ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 10.2519ms - 200
-info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/banko/personel/28165202398/banko
-info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/banko/personel/28165202398/banko
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? LoadDefinedPermissionKeysAsync başlıyor...
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
-info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
-      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
-      Received HTTP response headers after 201.2214ms - 200
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
-      End processing HTTP request after 201.3947ms - 200
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? API sonucu: Success=True, DataCount=9
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? PermissionKey'li kayıt sayısı: 9
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? Sistemde tanımlı 9 permission key yüklendi
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??? 3 route-to-permission mapping yüklendi
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ? Claims'den 9 yetki yüklendi
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE.FORMFIELD.SICILNO = View
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE.FORMFIELD.DEPARTMANID = View
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.DETAIL = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.EDIT = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.ADD = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.DELETE = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - YETKI.INDEX = Edit
-info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
-      ? MainLayout başarıyla initialize edildi
-info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[101]
-      Received HTTP response headers after 356.8024ms - 200
-info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[101]
-      End processing HTTP request after 356.9738ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 30.0499ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 30.2212ms - 200
-info: SGKPortalApp.PresentationLayer.Components.Siramatik.BankoModeWidget[0]
-      ?? BankoModeWidget LoadData: 28165202398 - DB Banko Modu: False, State Banko Modu: False
-info: System.Net.Http.HttpClient.IModulApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/modul
-info: System.Net.Http.HttpClient.IModulApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/modul
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-info: System.Net.Http.HttpClient.IModulApiService.ClientHandler[101]
-      Received HTTP response headers after 111.0394ms - 200
-info: System.Net.Http.HttpClient.IModulApiService.LogicalHandler[101]
-      End processing HTTP request after 111.2376ms - 200
-info: System.Net.Http.HttpClient.IModulControllerApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/modulcontroller/dropdown
-info: System.Net.Http.HttpClient.IModulControllerApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/modulcontroller/dropdown
-info: System.Net.Http.HttpClient.IModulControllerApiService.ClientHandler[101]
-      Received HTTP response headers after 83.6877ms - 200
-info: System.Net.Http.HttpClient.IModulControllerApiService.LogicalHandler[101]
-      End processing HTTP request after 83.8432ms - 200
-info: SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common.DtoDiscoveryApiService[0]
-      GetAllDtoTypesAsync: BaseAddress=https://localhost:9080/api/
-info: System.Net.Http.HttpClient.IDtoDiscoveryApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/dtodiscovery/dto-types
-info: System.Net.Http.HttpClient.IDtoDiscoveryApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/dtodiscovery/dto-types
-info: System.Net.Http.HttpClient.IDtoDiscoveryApiService.ClientHandler[101]
-      Received HTTP response headers after 36.9806ms - 200
-info: System.Net.Http.HttpClient.IDtoDiscoveryApiService.LogicalHandler[101]
-      End processing HTTP request after 37.1036ms - 200
-info: SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common.DtoDiscoveryApiService[0]
-      GetAllDtoTypesAsync: StatusCode=OK
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem/action-types
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem/action-types
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
-      Received HTTP response headers after 18.6289ms - 200
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
-      End processing HTTP request after 18.7654ms - 200
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
-      Received HTTP response headers after 19.7095ms - 200
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
-      End processing HTTP request after 19.8885ms - 200
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-info: System.Net.Http.HttpClient.IModulControllerApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/modulcontroller/dropdown/by-modul/3
-info: System.Net.Http.HttpClient.IModulControllerApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/modulcontroller/dropdown/by-modul/3
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-info: System.Net.Http.HttpClient.IModulControllerApiService.ClientHandler[101]
-      Received HTTP response headers after 83.4477ms - 200
-info: System.Net.Http.HttpClient.IModulControllerApiService.LogicalHandler[101]
-      End processing HTTP request after 83.6105ms - 200
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 45.329ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 45.5172ms - 200
-warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
-      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
-      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 15.6053ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 15.8066ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/banko/personel/28165202398/banko
-info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/banko/personel/28165202398/banko
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 14.6447ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 14.8488ms - 200
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? LoadDefinedPermissionKeysAsync başlıyor...
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
-      Received HTTP response headers after 59.9227ms - 200
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
-      End processing HTTP request after 60.0463ms - 200
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? API sonucu: Success=True, DataCount=9
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? PermissionKey'li kayıt sayısı: 9
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? Sistemde tanımlı 9 permission key yüklendi
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??? 3 route-to-permission mapping yüklendi
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ? Claims'den 9 yetki yüklendi
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE.FORMFIELD.SICILNO = View
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE.FORMFIELD.DEPARTMANID = View
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.DETAIL = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.EDIT = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.ADD = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.DELETE = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - YETKI.INDEX = Edit
-info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
-      ? MainLayout başarıyla initialize edildi
-info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[101]
-      Received HTTP response headers after 128.5726ms - 200
-info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[101]
-      End processing HTTP request after 128.724ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 25.939ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 26.1146ms - 200
-info: SGKPortalApp.PresentationLayer.Components.Siramatik.BankoModeWidget[0]
-      ?? BankoModeWidget LoadData: 28165202398 - DB Banko Modu: False, State Banko Modu: False
-info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
-      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
-info: System.Net.Http.HttpClient.IHizmetBinasiApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/hizmetbinasi/active
-info: System.Net.Http.HttpClient.IHizmetBinasiApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/hizmetbinasi/active
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
-info: System.Net.Http.HttpClient.IHizmetBinasiApiService.ClientHandler[101]
-      Received HTTP response headers after 463.7427ms - 200
-info: System.Net.Http.HttpClient.IHizmetBinasiApiService.LogicalHandler[101]
-      End processing HTTP request after 464.0696ms - 200
-info: System.Net.Http.HttpClient.IDepartmanApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/departman/active
-info: System.Net.Http.HttpClient.IDepartmanApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/departman/active
-info: System.Net.Http.HttpClient.IDepartmanApiService.ClientHandler[101]
-      Received HTTP response headers after 179.7504ms - 200
-info: System.Net.Http.HttpClient.IDepartmanApiService.LogicalHandler[101]
-      End processing HTTP request after 179.8761ms - 200
-info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/banko/bina/6
-info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/banko/bina/6
-info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[101]
-      Received HTTP response headers after 247.8795ms - 200
-info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[101]
-      End processing HTTP request after 247.9995ms - 200
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
-      Start processing HTTP request POST https://localhost:9080/api/modulcontrollerislem
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
-      Sending HTTP request POST https://localhost:9080/api/modulcontrollerislem
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 8.0527ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 8.2089ms - 200
-info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/personelyetki/with-defaults/28165202398
-info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/personelyetki/with-defaults/28165202398
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
-      Received HTTP response headers after 2146.6661ms - 201
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
-      End processing HTTP request after 2146.7987ms - 201
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
-      Received HTTP response headers after 9.3982ms - 200
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
-      End processing HTTP request after 9.6042ms - 200
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[101]
-      Received HTTP response headers after 41.5509ms - 200
-info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[101]
-      End processing HTTP request after 41.6584ms - 200
-info: SGKPortalApp.PresentationLayer.Pages.Auth.RefreshPermissionsModel[0]
-      ?? Permissions claim güncellendi: 9 yetki - 28165202398
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 11.0914ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 11.2175ms - 200
-info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/personelyetki/with-defaults/28165202398
-info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/personelyetki/with-defaults/28165202398
-info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[101]
-      Received HTTP response headers after 16.3419ms - 200
-info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[101]
-      End processing HTTP request after 16.5302ms - 200
-info: SGKPortalApp.PresentationLayer.Pages.Auth.RefreshPermissionsModel[0]
-      ?? Permissions claim güncellendi: 9 yetki - 28165202398
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? Yetkiler SignalR ile yenileniyor. TcKimlikNo: 28165202398
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? Yetkiler SignalR ile yenileniyor. TcKimlikNo: 28165202398
-info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
-info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
-info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
-info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/personelyetki/by-tc/28165202398
-info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[101]
-      Received HTTP response headers after 83.9927ms - 200
-info: System.Net.Http.HttpClient.IPersonelYetkiApiService.ClientHandler[101]
-      Received HTTP response headers after 83.9951ms - 200
-info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[101]
-      End processing HTTP request after 84.1023ms - 200
-info: System.Net.Http.HttpClient.IPersonelYetkiApiService.LogicalHandler[101]
-      End processing HTTP request after 84.1251ms - 200
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? Kullanıcı yetkileri yüklendi. Toplam: 9
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? Kullanıcı yetkileri yüklendi. Toplam: 9
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE.FORMFIELD.SICILNO = View
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE.FORMFIELD.SICILNO = View
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.DELETE = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.DETAIL = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - YETKI.INDEX = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.ADD = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.DELETE = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.EDIT = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE.FORMFIELD.DEPARTMANID = View
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.DETAIL = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - YETKI.INDEX = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.ADD = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.EDIT = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE.FORMFIELD.DEPARTMANID = View
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? Yetkiler yenilendi. Toplam: 9
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? Yetkiler yenilendi. Toplam: 9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 12.1864ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 12.3162ms - 200
-warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
-      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
-      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 9.0331ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 9.1262ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? LoadDefinedPermissionKeysAsync başlıyor...
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=0
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=0
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=0
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=0
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=0
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=0
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=0
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=0
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=0
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=0
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=0
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=0
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=0
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 12.6051ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 12.7345ms - 200
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
-      Received HTTP response headers after 13.2573ms - 200
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
-      End processing HTTP request after 13.4133ms - 200
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? API sonucu: Success=True, DataCount=10
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? PermissionKey'li kayıt sayısı: 10
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? Sistemde tanımlı 10 permission key yüklendi
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??? 4 route-to-permission mapping yüklendi
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ? Claims'den 9 yetki yüklendi
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE.FORMFIELD.SICILNO = View
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE.FORMFIELD.DEPARTMANID = View
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.DETAIL = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.EDIT = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.ADD = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.DELETE = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - YETKI.INDEX = Edit
-info: System.Net.Http.HttpClient.IHizmetBinasiApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/hizmetbinasi/active
-info: System.Net.Http.HttpClient.IHizmetBinasiApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/hizmetbinasi/active
-info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
-      ? MainLayout başarıyla initialize edildi
-info: System.Net.Http.HttpClient.IHizmetBinasiApiService.ClientHandler[101]
-      Received HTTP response headers after 14.7549ms - 200
-info: System.Net.Http.HttpClient.IHizmetBinasiApiService.LogicalHandler[101]
-      End processing HTTP request after 14.8479ms - 200
-info: System.Net.Http.HttpClient.IDepartmanApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/departman/active
-info: System.Net.Http.HttpClient.IDepartmanApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/departman/active
-info: System.Net.Http.HttpClient.IDepartmanApiService.ClientHandler[101]
-      Received HTTP response headers after 10.6869ms - 200
-info: System.Net.Http.HttpClient.IDepartmanApiService.LogicalHandler[101]
-      End processing HTTP request after 10.7917ms - 200
-info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/banko/bina/6
-info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/banko/bina/6
-info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[101]
-      Received HTTP response headers after 10.1388ms - 200
-info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[101]
-      End processing HTTP request after 10.238ms - 200
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
-info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
-      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 122.4873ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 122.5251ms - 200
-warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
-      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
-      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 5.793ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 5.8363ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? LoadDefinedPermissionKeysAsync başlıyor...
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=0
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 7.4351ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 7.498ms - 200
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
-      Received HTTP response headers after 18.0636ms - 200
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
-      End processing HTTP request after 18.1193ms - 200
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? API sonucu: Success=True, DataCount=10
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? PermissionKey'li kayıt sayısı: 10
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? Sistemde tanımlı 10 permission key yüklendi
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??? 4 route-to-permission mapping yüklendi
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ? Claims'den 9 yetki yüklendi
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE.FORMFIELD.SICILNO = View
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE.FORMFIELD.DEPARTMANID = View
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.DETAIL = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.EDIT = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.ADD = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.DELETE = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - YETKI.INDEX = Edit
-info: System.Net.Http.HttpClient.IModulApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/modul
-info: System.Net.Http.HttpClient.IModulApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/modul
-info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
-      ? MainLayout başarıyla initialize edildi
-info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
-      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
-info: System.Net.Http.HttpClient.IModulApiService.ClientHandler[101]
-      Received HTTP response headers after 19.3694ms - 200
-info: System.Net.Http.HttpClient.IModulApiService.LogicalHandler[101]
-      End processing HTTP request after 19.4128ms - 200
-info: System.Net.Http.HttpClient.IModulControllerApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/modulcontroller/dropdown
-info: System.Net.Http.HttpClient.IModulControllerApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/modulcontroller/dropdown
-info: System.Net.Http.HttpClient.IModulControllerApiService.ClientHandler[101]
-      Received HTTP response headers after 11.2132ms - 200
-info: System.Net.Http.HttpClient.IModulControllerApiService.LogicalHandler[101]
-      End processing HTTP request after 11.253ms - 200
-info: SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common.DtoDiscoveryApiService[0]
-      GetAllDtoTypesAsync: BaseAddress=https://localhost:9080/api/
-info: System.Net.Http.HttpClient.IDtoDiscoveryApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/dtodiscovery/dto-types
-info: System.Net.Http.HttpClient.IDtoDiscoveryApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/dtodiscovery/dto-types
-info: System.Net.Http.HttpClient.IDtoDiscoveryApiService.ClientHandler[101]
-      Received HTTP response headers after 5.8183ms - 200
-info: System.Net.Http.HttpClient.IDtoDiscoveryApiService.LogicalHandler[101]
-      End processing HTTP request after 5.8991ms - 200
-info: SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common.DtoDiscoveryApiService[0]
-      GetAllDtoTypesAsync: StatusCode=OK
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem/action-types
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem/action-types
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
-      Received HTTP response headers after 4.3878ms - 200
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
-      End processing HTTP request after 4.4238ms - 200
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
-      Received HTTP response headers after 3.8236ms - 200
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
-      End processing HTTP request after 3.8612ms - 200
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (19ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
-      SELECT [c].[HubConnectionId], [c].[ConnectedAt], [c].[ConnectionId], [c].[ConnectionStatus], [c].[ConnectionType], [c].[DuzenlenmeTarihi], [c].[DuzenleyenKullanici], [c].[EklenmeTarihi], [c].[EkleyenKullanici], [c].[IslemZamani], [c].[LastActivityAt], [c].[SilenKullanici], [c].[SilindiMi], [c].[SilinmeTarihi], [c].[TcKimlikNo], [c1].[TcKimlikNo], [c1].[AktifBankoId], [c1].[AktifMi], [c1].[BankoModuAktif], [c1].[BankoModuBaslangic], [c1].[BasarisizGirisSayisi], [c1].[DuzenlenmeTarihi], [c1].[DuzenleyenKullanici], [c1].[EklenmeTarihi], [c1].[EkleyenKullanici], [c1].[HesapKilitTarihi], [c1].[HubConnectionId], [c1].[PassWord], [c1].[PermissionStamp], [c1].[SessionID], [c1].[SilenKullanici], [c1].[SilindiMi], [c1].[SilinmeTarihi], [c1].[SonGirisTarihi], [c1].[UserType], [p0].[TcKimlikNo], [p0].[AdSoyad], [p0].[Adres], [p0].[AtanmaNedeniId], [p0].[BitirdigiBolum], [p0].[BitirdigiOkul], [p0].[Bransi], [p0].[CepTelefonu], [p0].[CepTelefonu2], [p0].[CezaBilgileri], [p0].[Cinsiyet], [p0].[Dahili], [p0].[DepartmanId], [p0].[DogumTarihi], [p0].[DuzenlenmeTarihi], [p0].[DuzenleyenKullanici], [p0].[EgitimBilgisi], [p0].[EklenmeTarihi], [p0].[EkleyenKullanici], [p0].[Email], [p0].[EmekliSicilNo], [p0].[EngelBilgileri], [p0].[EsininAdi], [p0].[EsininIsAdresi], [p0].[EsininIsDurumu], [p0].[EsininIsIlId], [p0].[EsininIsIlceId], [p0].[EsininIsSemt], [p0].[EsininUnvani], [p0].[EvDurumu], [p0].[EvTelefonu], [p0].[Gorev], [p0].[HizmetBilgisi], [p0].[HizmetBinasiId], [p0].[IlId], [p0].[IlceId], [p0].[ImzaYetkileri], [p0].[KanGrubu], [p0].[KartGonderimIslemBasari], [p0].[KartNo], [p0].[KartNoAktiflikTarihi], [p0].[KartNoDuzenlenmeTarihi], [p0].[KartNoGonderimTarihi], [p0].[MedeniDurumu], [p0].[NickName], [p0].[OgrenimDurumu], [p0].[OgrenimSuresi], [p0].[PersonelAktiflikDurum], [p0].[PersonelKayitNo], [p0].[PersonelTipi], [p0].[Resim], [p0].[SehitYakinligi], [p0].[Semt], [p0].[SendikaId], [p0].[ServisId], [p0].[SicilNo], [p0].[SilenKullanici], [p0].[SilindiMi], [p0].[SilinmeTarihi], [p0].[Tabldot], [p0].[UlasimServis1], [p0].[UlasimServis2], [p0].[UnvanId], [p0].[Uzmanlik]
-      FROM [dbo].[CMN_HubConnections] AS [c]
-      INNER JOIN (
-          SELECT [c0].[TcKimlikNo], [c0].[AktifBankoId], [c0].[AktifMi], [c0].[BankoModuAktif], [c0].[BankoModuBaslangic], [c0].[BasarisizGirisSayisi], [c0].[DuzenlenmeTarihi], [c0].[DuzenleyenKullanici], [c0].[EklenmeTarihi], [c0].[EkleyenKullanici], [c0].[HesapKilitTarihi], [c0].[HubConnectionId], [c0].[PassWord], [c0].[PermissionStamp], [c0].[SessionID], [c0].[SilenKullanici], [c0].[SilindiMi], [c0].[SilinmeTarihi], [c0].[SonGirisTarihi], [c0].[UserType]
-          FROM [dbo].[CMN_Users] AS [c0]
-          WHERE [c0].[SilindiMi] = CAST(0 AS bit)
-      ) AS [c1] ON [c].[TcKimlikNo] = [c1].[TcKimlikNo]
-      LEFT JOIN (
-          SELECT [p].[TcKimlikNo], [p].[AdSoyad], [p].[Adres], [p].[AtanmaNedeniId], [p].[BitirdigiBolum], [p].[BitirdigiOkul], [p].[Bransi], [p].[CepTelefonu], [p].[CepTelefonu2], [p].[CezaBilgileri], [p].[Cinsiyet], [p].[Dahili], [p].[DepartmanId], [p].[DogumTarihi], [p].[DuzenlenmeTarihi], [p].[DuzenleyenKullanici], [p].[EgitimBilgisi], [p].[EklenmeTarihi], [p].[EkleyenKullanici], [p].[Email], [p].[EmekliSicilNo], [p].[EngelBilgileri], [p].[EsininAdi], [p].[EsininIsAdresi], [p].[EsininIsDurumu], [p].[EsininIsIlId], [p].[EsininIsIlceId], [p].[EsininIsSemt], [p].[EsininUnvani], [p].[EvDurumu], [p].[EvTelefonu], [p].[Gorev], [p].[HizmetBilgisi], [p].[HizmetBinasiId], [p].[IlId], [p].[IlceId], [p].[ImzaYetkileri], [p].[KanGrubu], [p].[KartGonderimIslemBasari], [p].[KartNo], [p].[KartNoAktiflikTarihi], [p].[KartNoDuzenlenmeTarihi], [p].[KartNoGonderimTarihi], [p].[MedeniDurumu], [p].[NickName], [p].[OgrenimDurumu], [p].[OgrenimSuresi], [p].[PersonelAktiflikDurum], [p].[PersonelKayitNo], [p].[PersonelTipi], [p].[Resim], [p].[SehitYakinligi], [p].[Semt], [p].[SendikaId], [p].[ServisId], [p].[SicilNo], [p].[SilenKullanici], [p].[SilindiMi], [p].[SilinmeTarihi], [p].[Tabldot], [p].[UlasimServis1], [p].[UlasimServis2], [p].[UnvanId], [p].[Uzmanlik]
-          FROM [dbo].[PER_Personeller] AS [p]
-          WHERE [p].[SilindiMi] = CAST(0 AS bit)
-      ) AS [p0] ON [c1].[TcKimlikNo] = [p0].[TcKimlikNo]
-      WHERE [c].[SilindiMi] = CAST(0 AS bit) AND [c].[ConnectionStatus] = N'online'
-fail: SGKPortalApp.PresentationLayer.Services.BackgroundServices.StaleConnectionCleanupService[0]
-      Stale connection temizliği hatası
-      System.InvalidOperationException: The instance of entity type 'User' cannot be tracked because another instance with the key value '{TcKimlikNo: TV0000001}' is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached.
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1.ThrowIdentityConflict(InternalEntityEntry entry)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1.Add(TKey key, InternalEntityEntry entry, Boolean updateDuplicate)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1.Add(TKey key, InternalEntityEntry entry)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.NullableKeyIdentityMap`1.Add(InternalEntityEntry entry)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.StartTracking(InternalEntityEntry entry)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.InternalEntityEntry.SetEntityState(EntityState oldState, EntityState newState, Boolean acceptChanges, Boolean modifyProperties)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.InternalEntityEntry.SetEntityState(EntityState entityState, Boolean acceptChanges, Boolean modifyProperties, Nullable`1 forceStateWhenUnknownKey, Nullable`1 fallbackState)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityGraphAttacher.PaintAction(EntityEntryGraphNode`1 node)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityEntryGraphIterator.TraverseGraph[TState](EntityEntryGraphNode`1 node, Func`2 handleNode)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityEntryGraphIterator.TraverseGraph[TState](EntityEntryGraphNode`1 node, Func`2 handleNode)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityGraphAttacher.AttachGraph(InternalEntityEntry rootEntry, EntityState targetState, EntityState storeGeneratedWithKeySetTargetState, Boolean forceStateWhenUnknownKey)
-         at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.SetEntityState(InternalEntityEntry entry, EntityState entityState)
-         at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.Attach(TEntity entity)
-         at SGKPortalApp.DataAccessLayer.Repositories.Generic.GenericRepository`1.Update(T entity) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Generic\GenericRepository.cs:line 103
-         at SGKPortalApp.PresentationLayer.Services.BackgroundServices.StaleConnectionCleanupService.CleanupStaleConnectionsAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer\Services\BackgroundServices\StaleConnectionCleanupService.cs:line 132
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 50.0068ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 50.0664ms - 200
-warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
-      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
-      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 5.5617ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 5.6124ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 6.3036ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 6.3579ms - 200
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? LoadDefinedPermissionKeysAsync başlıyor...
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
-      Received HTTP response headers after 17.6806ms - 200
-info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
-      End processing HTTP request after 17.7223ms - 200
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? API sonucu: Success=True, DataCount=10
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? PermissionKey'li kayıt sayısı: 10
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? Sistemde tanımlı 10 permission key yüklendi
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??? 4 route-to-permission mapping yüklendi
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ? Claims'den 9 yetki yüklendi
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE.FORMFIELD.SICILNO = View
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE.FORMFIELD.DEPARTMANID = View
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.DETAIL = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.EDIT = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.ADD = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.DELETE = Edit
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - YETKI.INDEX = Edit
-info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
-      ? MainLayout başarıyla initialize edildi
-info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
-      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
-info: Microsoft.EntityFrameworkCore.Database.Command[20101]
-      Executed DbCommand (18ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
-      SELECT [c].[HubConnectionId], [c].[ConnectedAt], [c].[ConnectionId], [c].[ConnectionStatus], [c].[ConnectionType], [c].[DuzenlenmeTarihi], [c].[DuzenleyenKullanici], [c].[EklenmeTarihi], [c].[EkleyenKullanici], [c].[IslemZamani], [c].[LastActivityAt], [c].[SilenKullanici], [c].[SilindiMi], [c].[SilinmeTarihi], [c].[TcKimlikNo], [c1].[TcKimlikNo], [c1].[AktifBankoId], [c1].[AktifMi], [c1].[BankoModuAktif], [c1].[BankoModuBaslangic], [c1].[BasarisizGirisSayisi], [c1].[DuzenlenmeTarihi], [c1].[DuzenleyenKullanici], [c1].[EklenmeTarihi], [c1].[EkleyenKullanici], [c1].[HesapKilitTarihi], [c1].[HubConnectionId], [c1].[PassWord], [c1].[PermissionStamp], [c1].[SessionID], [c1].[SilenKullanici], [c1].[SilindiMi], [c1].[SilinmeTarihi], [c1].[SonGirisTarihi], [c1].[UserType], [p0].[TcKimlikNo], [p0].[AdSoyad], [p0].[Adres], [p0].[AtanmaNedeniId], [p0].[BitirdigiBolum], [p0].[BitirdigiOkul], [p0].[Bransi], [p0].[CepTelefonu], [p0].[CepTelefonu2], [p0].[CezaBilgileri], [p0].[Cinsiyet], [p0].[Dahili], [p0].[DepartmanId], [p0].[DogumTarihi], [p0].[DuzenlenmeTarihi], [p0].[DuzenleyenKullanici], [p0].[EgitimBilgisi], [p0].[EklenmeTarihi], [p0].[EkleyenKullanici], [p0].[Email], [p0].[EmekliSicilNo], [p0].[EngelBilgileri], [p0].[EsininAdi], [p0].[EsininIsAdresi], [p0].[EsininIsDurumu], [p0].[EsininIsIlId], [p0].[EsininIsIlceId], [p0].[EsininIsSemt], [p0].[EsininUnvani], [p0].[EvDurumu], [p0].[EvTelefonu], [p0].[Gorev], [p0].[HizmetBilgisi], [p0].[HizmetBinasiId], [p0].[IlId], [p0].[IlceId], [p0].[ImzaYetkileri], [p0].[KanGrubu], [p0].[KartGonderimIslemBasari], [p0].[KartNo], [p0].[KartNoAktiflikTarihi], [p0].[KartNoDuzenlenmeTarihi], [p0].[KartNoGonderimTarihi], [p0].[MedeniDurumu], [p0].[NickName], [p0].[OgrenimDurumu], [p0].[OgrenimSuresi], [p0].[PersonelAktiflikDurum], [p0].[PersonelKayitNo], [p0].[PersonelTipi], [p0].[Resim], [p0].[SehitYakinligi], [p0].[Semt], [p0].[SendikaId], [p0].[ServisId], [p0].[SicilNo], [p0].[SilenKullanici], [p0].[SilindiMi], [p0].[SilinmeTarihi], [p0].[Tabldot], [p0].[UlasimServis1], [p0].[UlasimServis2], [p0].[UnvanId], [p0].[Uzmanlik]
-      FROM [dbo].[CMN_HubConnections] AS [c]
-      INNER JOIN (
-          SELECT [c0].[TcKimlikNo], [c0].[AktifBankoId], [c0].[AktifMi], [c0].[BankoModuAktif], [c0].[BankoModuBaslangic], [c0].[BasarisizGirisSayisi], [c0].[DuzenlenmeTarihi], [c0].[DuzenleyenKullanici], [c0].[EklenmeTarihi], [c0].[EkleyenKullanici], [c0].[HesapKilitTarihi], [c0].[HubConnectionId], [c0].[PassWord], [c0].[PermissionStamp], [c0].[SessionID], [c0].[SilenKullanici], [c0].[SilindiMi], [c0].[SilinmeTarihi], [c0].[SonGirisTarihi], [c0].[UserType]
-          FROM [dbo].[CMN_Users] AS [c0]
-          WHERE [c0].[SilindiMi] = CAST(0 AS bit)
-      ) AS [c1] ON [c].[TcKimlikNo] = [c1].[TcKimlikNo]
-      LEFT JOIN (
-          SELECT [p].[TcKimlikNo], [p].[AdSoyad], [p].[Adres], [p].[AtanmaNedeniId], [p].[BitirdigiBolum], [p].[BitirdigiOkul], [p].[Bransi], [p].[CepTelefonu], [p].[CepTelefonu2], [p].[CezaBilgileri], [p].[Cinsiyet], [p].[Dahili], [p].[DepartmanId], [p].[DogumTarihi], [p].[DuzenlenmeTarihi], [p].[DuzenleyenKullanici], [p].[EgitimBilgisi], [p].[EklenmeTarihi], [p].[EkleyenKullanici], [p].[Email], [p].[EmekliSicilNo], [p].[EngelBilgileri], [p].[EsininAdi], [p].[EsininIsAdresi], [p].[EsininIsDurumu], [p].[EsininIsIlId], [p].[EsininIsIlceId], [p].[EsininIsSemt], [p].[EsininUnvani], [p].[EvDurumu], [p].[EvTelefonu], [p].[Gorev], [p].[HizmetBilgisi], [p].[HizmetBinasiId], [p].[IlId], [p].[IlceId], [p].[ImzaYetkileri], [p].[KanGrubu], [p].[KartGonderimIslemBasari], [p].[KartNo], [p].[KartNoAktiflikTarihi], [p].[KartNoDuzenlenmeTarihi], [p].[KartNoGonderimTarihi], [p].[MedeniDurumu], [p].[NickName], [p].[OgrenimDurumu], [p].[OgrenimSuresi], [p].[PersonelAktiflikDurum], [p].[PersonelKayitNo], [p].[PersonelTipi], [p].[Resim], [p].[SehitYakinligi], [p].[Semt], [p].[SendikaId], [p].[ServisId], [p].[SicilNo], [p].[SilenKullanici], [p].[SilindiMi], [p].[SilinmeTarihi], [p].[Tabldot], [p].[UlasimServis1], [p].[UlasimServis2], [p].[UnvanId], [p].[Uzmanlik]
-          FROM [dbo].[PER_Personeller] AS [p]
-          WHERE [p].[SilindiMi] = CAST(0 AS bit)
-      ) AS [p0] ON [c1].[TcKimlikNo] = [p0].[TcKimlikNo]
-      WHERE [c].[SilindiMi] = CAST(0 AS bit) AND [c].[ConnectionStatus] = N'online'
-fail: SGKPortalApp.PresentationLayer.Services.BackgroundServices.StaleConnectionCleanupService[0]
-      Stale connection temizliği hatası
-      System.InvalidOperationException: The instance of entity type 'User' cannot be tracked because another instance with the key value '{TcKimlikNo: TV0000001}' is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached.
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1.ThrowIdentityConflict(InternalEntityEntry entry)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1.Add(TKey key, InternalEntityEntry entry, Boolean updateDuplicate)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.IdentityMap`1.Add(TKey key, InternalEntityEntry entry)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.NullableKeyIdentityMap`1.Add(InternalEntityEntry entry)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.StartTracking(InternalEntityEntry entry)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.InternalEntityEntry.SetEntityState(EntityState oldState, EntityState newState, Boolean acceptChanges, Boolean modifyProperties)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.InternalEntityEntry.SetEntityState(EntityState entityState, Boolean acceptChanges, Boolean modifyProperties, Nullable`1 forceStateWhenUnknownKey, Nullable`1 fallbackState)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityGraphAttacher.PaintAction(EntityEntryGraphNode`1 node)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityEntryGraphIterator.TraverseGraph[TState](EntityEntryGraphNode`1 node, Func`2 handleNode)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityEntryGraphIterator.TraverseGraph[TState](EntityEntryGraphNode`1 node, Func`2 handleNode)
-         at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.EntityGraphAttacher.AttachGraph(InternalEntityEntry rootEntry, EntityState targetState, EntityState storeGeneratedWithKeySetTargetState, Boolean forceStateWhenUnknownKey)
-         at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.SetEntityState(InternalEntityEntry entry, EntityState entityState)
-         at Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1.Attach(TEntity entity)
-         at SGKPortalApp.DataAccessLayer.Repositories.Generic.GenericRepository`1.Update(T entity) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Generic\GenericRepository.cs:line 103
-         at SGKPortalApp.PresentationLayer.Services.BackgroundServices.StaleConnectionCleanupService.CleanupStaleConnectionsAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer\Services\BackgroundServices\StaleConnectionCleanupService.cs:line 132
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=YET.YETKIISLEM.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
-      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
-      Sending HTTP request GET https://localhost:9080/api/user/28165202398
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 75.1519ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 75.265ms - 200
 info: SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel[0]
       ?? Logout: Muhammed Bodur çıkış yapıyor...
 info: System.Net.Http.HttpClient.Default.LogicalHandler[100]
@@ -1152,9 +240,9 @@ info: System.Net.Http.HttpClient.Default.LogicalHandler[100]
 info: System.Net.Http.HttpClient.Default.ClientHandler[100]
       Sending HTTP request POST https://localhost:9080/api/auth/logout
 info: System.Net.Http.HttpClient.Default.ClientHandler[101]
-      Received HTTP response headers after 125.0278ms - 200
+      Received HTTP response headers after 367.4532ms - 200
 info: System.Net.Http.HttpClient.Default.LogicalHandler[101]
-      End processing HTTP request after 125.1008ms - 200
+      End processing HTTP request after 388.4429ms - 200
 info: SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel[0]
       ? API Logout başarılı - 28165202398
 warn: SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel[0]
@@ -1175,11 +263,11 @@ info: System.Net.Http.HttpClient.IAuthApiService.LogicalHandler[100]
 info: System.Net.Http.HttpClient.IAuthApiService.ClientHandler[100]
       Sending HTTP request POST https://localhost:9080/api/auth/login
 info: System.Net.Http.HttpClient.IAuthApiService.ClientHandler[101]
-      Received HTTP response headers after 115.4296ms - 200
+      Received HTTP response headers after 1310.119ms - 200
 info: System.Net.Http.HttpClient.IAuthApiService.LogicalHandler[101]
-      End processing HTTP request after 115.5011ms - 200
+      End processing HTTP request after 1311.2128ms - 200
 info: SGKPortalApp.PresentationLayer.Pages.Auth.LoginHandlerModel[0]
-      ?? 9 yetki claims'e eklendi
+      ?? 10 yetki claims'e eklendi
 info: SGKPortalApp.PresentationLayer.Pages.Auth.LoginHandlerModel[0]
       ? Kullanıcı giriş yaptı: Muhammed Bodur (28165202398) - Personel
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
@@ -1187,17 +275,17 @@ info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
       Sending HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 31.639ms - 200
+      Received HTTP response headers after 214.8067ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 31.7104ms - 200
+      End processing HTTP request after 215.0969ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
       Start processing HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
       Sending HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 7.8809ms - 200
+      Received HTTP response headers after 19.0937ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 8.0366ms - 200
+      End processing HTTP request after 19.2391ms - 200
 warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
       Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
 warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
@@ -1207,23 +295,21 @@ info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
       Sending HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 15.6501ms - 200
+      Received HTTP response headers after 14.6459ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 15.7404ms - 200
+      End processing HTTP request after 14.9149ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
       Start processing HTTP request GET https://localhost:9080/api/user/28165202398
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
       Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 8.7715ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 8.9494ms - 200
 info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[100]
       Start processing HTTP request GET https://localhost:9080/api/banko/personel/28165202398/banko
 info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[100]
       Sending HTTP request GET https://localhost:9080/api/banko/personel/28165202398/banko
-info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 17.2117ms - 200
-info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 17.3677ms - 200
-info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? LoadDefinedPermissionKeysAsync başlıyor...
 info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
       Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
 info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
@@ -1231,9 +317,21 @@ info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[1
 info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
       ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
 info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
-      Received HTTP response headers after 80.5809ms - 200
+      Received HTTP response headers after 160.2051ms - 200
 info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
-      End processing HTTP request after 80.7358ms - 200
+      End processing HTTP request after 160.3667ms - 200
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PagePermissionService[0]
+      PagePermissionService: 10 sayfa yetkisi yüklendi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? LoadDefinedPermissionKeysAsync başlıyor...
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
+      Received HTTP response headers after 11.4339ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
+      End processing HTTP request after 11.5768ms - 200
 info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
       ?? API sonucu: Success=True, DataCount=10
 info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
@@ -1243,114 +341,560 @@ info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateServi
 info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
       ??? 4 route-to-permission mapping yüklendi
 info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ? Claims'den 9 yetki yüklendi
+      ? Claims'den 10 yetki yüklendi
 info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE = Edit
+      ??   - PERSONEL.MANAGE = None
 info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE.FORMFIELD.SICILNO = View
+      ??   - YETKI.INDEX = None
 info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.MANAGE.FORMFIELD.DEPARTMANID = View
+      ??   - PERSONEL.MANAGE.FORMFIELD.SICILNO = None
 info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX = Edit
+      ??   - PERSONEL.MANAGE.FORMFIELD.DEPARTMANID = None
 info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.DETAIL = Edit
+      ??   - PERSONEL.INDEX = None
 info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.EDIT = Edit
+      ??   - PERSONEL.INDEX.ACTION.DETAIL = None
 info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.ADD = Edit
+      ??   - PERSONEL.INDEX.ACTION.DELETE = None
 info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - PERSONEL.INDEX.ACTION.DELETE = Edit
+      ??   - PERSONEL.INDEX.ACTION.EDIT = None
 info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ??   - YETKI.INDEX = Edit
+      ??   - PERSONEL.INDEX.ACTION.ADD = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - SIRAMATIK.BANKO.LIST = None
+info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[101]
+      Received HTTP response headers after 276.9323ms - 200
+info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[101]
+      End processing HTTP request after 277.1128ms - 200
 info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
       ? MainLayout başarıyla initialize edildi
-info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[101]
-      Received HTTP response headers after 159.5972ms - 200
-info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[101]
-      End processing HTTP request after 159.7429ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
       Start processing HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
       Sending HTTP request GET https://localhost:9080/api/user/28165202398/banko-mode/is-active
 info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
-      Received HTTP response headers after 12.8407ms - 200
+      Received HTTP response headers after 16.3498ms - 200
 info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
-      End processing HTTP request after 13.0185ms - 200
+      End processing HTTP request after 16.5055ms - 200
 info: SGKPortalApp.PresentationLayer.Components.Siramatik.BankoModeWidget[0]
       ?? BankoModeWidget LoadData: 28165202398 - DB Banko Modu: False, State Banko Modu: False
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 12.9358ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 13.0837ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 10.2465ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 10.4988ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 9.7664ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 9.9044ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
+      Received HTTP response headers after 18.7551ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
+      End processing HTTP request after 18.9155ms - 200
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PagePermissionService[0]
+      PagePermissionService: 10 sayfa yetkisi yüklendi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? LoadDefinedPermissionKeysAsync başlıyor...
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
+      Received HTTP response headers after 14.1846ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
+      End processing HTTP request after 14.3308ms - 200
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? API sonucu: Success=True, DataCount=10
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? PermissionKey'li kayıt sayısı: 10
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? Sistemde tanımlı 10 permission key yüklendi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??? 4 route-to-permission mapping yüklendi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? Claims'den 10 yetki yüklendi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.MANAGE = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - YETKI.INDEX = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.MANAGE.FORMFIELD.SICILNO = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.MANAGE.FORMFIELD.DEPARTMANID = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX.ACTION.DETAIL = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX.ACTION.DELETE = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX.ACTION.EDIT = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX.ACTION.ADD = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - SIRAMATIK.BANKO.LIST = None
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 14.3693ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 14.5018ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 34.4824ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 34.6221ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 12.6142ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 12.8074ms - 200
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? LoadDefinedPermissionKeysAsync başlıyor...
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
+      Received HTTP response headers after 15.7705ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
+      End processing HTTP request after 15.8987ms - 200
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? Route bulunamadı: /siramatik/banko/list
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? GetLevel: Key=UNKNOWN kullanıcı permission'larında bulunamadı. _permissions.Count=0
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? GetLevel: Key=UNKNOWN.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=0
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? GetLevel: Key=UNKNOWN.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=0
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? GetLevel: Key=UNKNOWN.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=0
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? GetLevel: Key=UNKNOWN.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=0
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? GetLevel: Key=UNKNOWN.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=0
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? GetLevel: Key=UNKNOWN.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=0
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? GetLevel: Key=UNKNOWN.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=0
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? GetLevel: Key=UNKNOWN.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=0
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? GetLevel: Key=UNKNOWN.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=0
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? GetLevel: Key=UNKNOWN.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=0
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? GetLevel: Key=UNKNOWN.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=0
+warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? GetLevel: Key=UNKNOWN.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=0
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? API sonucu: Success=True, DataCount=10
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? PermissionKey'li kayıt sayısı: 10
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? Sistemde tanımlı 10 permission key yüklendi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??? 4 route-to-permission mapping yüklendi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? Claims'den 10 yetki yüklendi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.MANAGE = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - YETKI.INDEX = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.MANAGE.FORMFIELD.SICILNO = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.MANAGE.FORMFIELD.DEPARTMANID = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX.ACTION.DETAIL = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX.ACTION.DELETE = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX.ACTION.EDIT = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX.ACTION.ADD = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - SIRAMATIK.BANKO.LIST = None
 info: System.Net.Http.HttpClient.IHizmetBinasiApiService.LogicalHandler[100]
       Start processing HTTP request GET https://localhost:9080/api/hizmetbinasi/active
 info: System.Net.Http.HttpClient.IHizmetBinasiApiService.ClientHandler[100]
       Sending HTTP request GET https://localhost:9080/api/hizmetbinasi/active
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
-warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
+      Received HTTP response headers after 13.9307ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
+      End processing HTTP request after 14.0926ms - 200
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PagePermissionService[0]
+      PagePermissionService: 10 sayfa yetkisi yüklendi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=SIRAMATIK.BANKO.LIST, Level=None (kullanıcıya verilmiş)
+warn: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ?? Yetkisiz erişim denemesi: /siramatik/banko/list - Sayfa kendi yetki UI'ını gösterecek
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
 info: System.Net.Http.HttpClient.IHizmetBinasiApiService.ClientHandler[101]
-      Received HTTP response headers after 163.8474ms - 200
+      Received HTTP response headers after 379.222ms - 200
 info: System.Net.Http.HttpClient.IHizmetBinasiApiService.LogicalHandler[101]
-      End processing HTTP request after 164.0348ms - 200
+      End processing HTTP request after 379.3427ms - 200
 info: System.Net.Http.HttpClient.IDepartmanApiService.LogicalHandler[100]
       Start processing HTTP request GET https://localhost:9080/api/departman/active
 info: System.Net.Http.HttpClient.IDepartmanApiService.ClientHandler[100]
       Sending HTTP request GET https://localhost:9080/api/departman/active
 info: System.Net.Http.HttpClient.IDepartmanApiService.ClientHandler[101]
-      Received HTTP response headers after 51.0233ms - 200
+      Received HTTP response headers after 199.2375ms - 200
 info: System.Net.Http.HttpClient.IDepartmanApiService.LogicalHandler[101]
-      End processing HTTP request after 51.1067ms - 200
+      End processing HTTP request after 199.365ms - 200
 info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[100]
       Start processing HTTP request GET https://localhost:9080/api/banko/bina/6
 info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[100]
       Sending HTTP request GET https://localhost:9080/api/banko/bina/6
 info: System.Net.Http.HttpClient.IBankoApiService.ClientHandler[101]
-      Received HTTP response headers after 65.8147ms - 200
+      Received HTTP response headers after 221.7175ms - 200
 info: System.Net.Http.HttpClient.IBankoApiService.LogicalHandler[101]
-      End processing HTTP request after 65.9368ms - 200
+      End processing HTTP request after 221.8158ms - 200
 warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX kullanıcı permission'larında bulunamadı. _permissions.Count=9
+      ?? GetLevel: Key=UNKNOWN kullanıcı permission'larında bulunamadı. _permissions.Count=10
 warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
+      ?? GetLevel: Key=UNKNOWN.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=10
 warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
+      ?? GetLevel: Key=UNKNOWN.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=10
 warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
+      ?? GetLevel: Key=UNKNOWN.ACTION.EXCEL_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=10
 warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
+      ?? GetLevel: Key=UNKNOWN.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=10
 warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
+      ?? GetLevel: Key=UNKNOWN.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=10
 warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=9
+      ?? GetLevel: Key=UNKNOWN.ACTION.PDF_EXPORT kullanıcı permission'larında bulunamadı. _permissions.Count=10
 warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
+      ?? GetLevel: Key=UNKNOWN.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=10
 warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
+      ?? GetLevel: Key=UNKNOWN.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=10
 warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=9
+      ?? GetLevel: Key=UNKNOWN.ACTION.ADD kullanıcı permission'larında bulunamadı. _permissions.Count=10
 warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
+      ?? GetLevel: Key=UNKNOWN.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=10
 warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
+      ?? GetLevel: Key=UNKNOWN.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=10
 warn: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
-      ?? GetLevel: Key=SIRAMATIK.BANKO.INDEX.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=9
+      ?? GetLevel: Key=UNKNOWN.FORMFIELD.HIZMET_BINASI kullanıcı permission'larında bulunamadı. _permissions.Count=10
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 41.4612ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 41.5994ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 10.9436ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 11.1005ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 14.3143ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 14.5379ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
+      Received HTTP response headers after 34.6658ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
+      End processing HTTP request after 34.8121ms - 200
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PagePermissionService[0]
+      PagePermissionService: 10 sayfa yetkisi yüklendi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? LoadDefinedPermissionKeysAsync başlıyor...
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
+      Received HTTP response headers after 14.511ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
+      End processing HTTP request after 14.6763ms - 200
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? API sonucu: Success=True, DataCount=10
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? PermissionKey'li kayıt sayısı: 10
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? Sistemde tanımlı 10 permission key yüklendi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??? 4 route-to-permission mapping yüklendi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? Claims'den 10 yetki yüklendi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.MANAGE = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - YETKI.INDEX = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.MANAGE.FORMFIELD.SICILNO = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.MANAGE.FORMFIELD.DEPARTMANID = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX.ACTION.DETAIL = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX.ACTION.DELETE = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX.ACTION.EDIT = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX.ACTION.ADD = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - SIRAMATIK.BANKO.LIST = None
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 13.368ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 13.5123ms - 200
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 17.6702ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 18.0057ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[101]
+      Received HTTP response headers after 11.3901ms - 200
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[101]
+      End processing HTTP request after 11.5197ms - 200
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? LoadDefinedPermissionKeysAsync başlıyor...
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
+      Received HTTP response headers after 14.1604ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
+      End processing HTTP request after 14.2904ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/modulcontrollerislem
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? API sonucu: Success=True, DataCount=10
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? PermissionKey'li kayıt sayısı: 10
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ?? Sistemde tanımlı 10 permission key yüklendi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??? 4 route-to-permission mapping yüklendi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? Claims'den 10 yetki yüklendi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.MANAGE = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - YETKI.INDEX = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.MANAGE.FORMFIELD.SICILNO = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.MANAGE.FORMFIELD.DEPARTMANID = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX.ACTION.DETAIL = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX.ACTION.DELETE = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX.ACTION.EDIT = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - PERSONEL.INDEX.ACTION.ADD = None
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ??   - SIRAMATIK.BANKO.LIST = None
+info: System.Net.Http.HttpClient.IPersonelApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/personel
+info: System.Net.Http.HttpClient.IPersonelApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/personel
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.ClientHandler[101]
+      Received HTTP response headers after 12.7949ms - 200
+info: System.Net.Http.HttpClient.IModulControllerIslemApiService.LogicalHandler[101]
+      End processing HTTP request after 12.9355ms - 200
+info: System.Net.Http.HttpClient.IDepartmanApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/departman
+info: System.Net.Http.HttpClient.IDepartmanApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/departman
+info: System.Net.Http.HttpClient.IServisApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/servis
+info: System.Net.Http.HttpClient.IServisApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/servis
+info: System.Net.Http.HttpClient.IUnvanApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/unvan
+info: System.Net.Http.HttpClient.IUnvanApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/unvan
+info: System.Net.Http.HttpClient.IHizmetBinasiApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/hizmetbinasi
+info: System.Net.Http.HttpClient.IHizmetBinasiApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/hizmetbinasi
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PagePermissionService[0]
+      PagePermissionService: 10 sayfa yetkisi yüklendi
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout başarıyla initialize edildi
+info: System.Net.Http.HttpClient.IDepartmanApiService.ClientHandler[101]
+      Received HTTP response headers after 150.0687ms - 200
+info: System.Net.Http.HttpClient.IDepartmanApiService.LogicalHandler[101]
+      End processing HTTP request after 150.216ms - 200
+info: SGKPortalApp.PresentationLayer.Shared.Layout.MainLayout[0]
+      ? MainLayout JS initialization tamamlandı (OnAfterRenderAsync)
+info: System.Net.Http.HttpClient.IServisApiService.ClientHandler[101]
+      Received HTTP response headers after 283.9318ms - 200
+info: System.Net.Http.HttpClient.IServisApiService.LogicalHandler[101]
+      End processing HTTP request after 284.0673ms - 200
+info: System.Net.Http.HttpClient.IHizmetBinasiApiService.ClientHandler[101]
+      Received HTTP response headers after 279.6796ms - 200
+info: System.Net.Http.HttpClient.IHizmetBinasiApiService.LogicalHandler[101]
+      End processing HTTP request after 279.8215ms - 200
+info: System.Net.Http.HttpClient.IUnvanApiService.ClientHandler[101]
+      Received HTTP response headers after 341.3615ms - 200
+info: System.Net.Http.HttpClient.IUnvanApiService.LogicalHandler[101]
+      End processing HTTP request after 341.4952ms - 200
+info: System.Net.Http.HttpClient.IPersonelApiService.ClientHandler[101]
+      Received HTTP response headers after 565.6005ms - 200
+info: System.Net.Http.HttpClient.IPersonelApiService.LogicalHandler[101]
+      End processing HTTP request after 565.7314ms - 200
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DETAIL, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DETAIL, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DETAIL, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.EDIT, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.EDIT, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DELETE, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DELETE, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DETAIL, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DETAIL, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DETAIL, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.EDIT, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.EDIT, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DELETE, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DELETE, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DETAIL, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DETAIL, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DETAIL, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.EDIT, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.EDIT, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DELETE, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DELETE, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DETAIL, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DETAIL, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DETAIL, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.EDIT, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.EDIT, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DELETE, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DELETE, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DETAIL, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DETAIL, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DETAIL, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.EDIT, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.EDIT, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DELETE, Level=None (kullanıcıya verilmiş)
+info: SGKPortalApp.PresentationLayer.Services.StateServices.PermissionStateService[0]
+      ? GetLevel: Key=PERSONEL.INDEX.ACTION.DELETE, Level=None (kullanıcıya verilmiş)
