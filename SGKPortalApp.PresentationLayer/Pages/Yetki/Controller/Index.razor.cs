@@ -36,11 +36,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Controller
         private List<ModulControllerResponseDto> Controllers = new();
         private List<ModulControllerResponseDto> FilteredControllers = new();
         private List<DropdownItemDto> Moduller = new();
+        private List<DropdownItemDto> ParentControllers = new(); // Üst controller seçimi için
         private bool IsLoading = true;
         private bool IsSaving = false;
         private bool ShowModal = false;
         private int? EditingId = null;
         private int SelectedModulId = 0;
+        private int? SelectedUstModulControllerId = null; // Hiyerarşik yapı için
         private string ControllerAdi = string.Empty;
 
         private string SearchTerm = string.Empty;
@@ -78,22 +80,51 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Controller
         {
             EditingId = null;
             SelectedModulId = 0;
+            SelectedUstModulControllerId = null;
             ControllerAdi = string.Empty;
+            ParentControllers = new();
             ShowModal = true;
         }
 
-        private void StartEdit(ModulControllerResponseDto c)
+        private async void StartEdit(ModulControllerResponseDto c)
         {
             EditingId = c.ModulControllerId;
             SelectedModulId = c.ModulId;
+            SelectedUstModulControllerId = c.UstModulControllerId;
             ControllerAdi = c.ModulControllerAdi;
+            await LoadParentControllers();
             ShowModal = true;
+            StateHasChanged();
         }
 
         private void CloseModal()
         {
             ShowModal = false;
             EditingId = null;
+        }
+
+        private async Task OnModulChangedInModal()
+        {
+            SelectedUstModulControllerId = null;
+            await LoadParentControllers();
+        }
+
+        private async Task LoadParentControllers()
+        {
+            if (SelectedModulId <= 0)
+            {
+                ParentControllers = new();
+                return;
+            }
+
+            var result = await ControllerApiService.GetDropdownByModulIdAsync(SelectedModulId);
+            if (result.Success && result.Data != null)
+            {
+                // Editing yapıyorsak, kendisini listeden çıkar (self-parent olamaz)
+                ParentControllers = result.Data
+                    .Where(c => !EditingId.HasValue || c.Id != EditingId.Value)
+                    .ToList();
+            }
         }
 
         private async Task SaveController()
@@ -109,7 +140,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Controller
 
             if (EditingId.HasValue)
             {
-                var request = new ModulControllerUpdateRequestDto { ModulId = SelectedModulId, ModulControllerAdi = ControllerAdi.Trim() };
+                var request = new ModulControllerUpdateRequestDto
+                {
+                    ModulId = SelectedModulId,
+                    ModulControllerAdi = ControllerAdi.Trim(),
+                    UstModulControllerId = SelectedUstModulControllerId > 0 ? SelectedUstModulControllerId : null
+                };
                 var result = await ControllerApiService.UpdateAsync(EditingId.Value, request);
                 if (result.Success)
                     await ToastService.ShowSuccessAsync(result.Message ?? "Controller güncellendi");
@@ -118,7 +154,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Controller
             }
             else
             {
-                var request = new ModulControllerCreateRequestDto { ModulId = SelectedModulId, ModulControllerAdi = ControllerAdi.Trim() };
+                var request = new ModulControllerCreateRequestDto
+                {
+                    ModulId = SelectedModulId,
+                    ModulControllerAdi = ControllerAdi.Trim(),
+                    UstModulControllerId = SelectedUstModulControllerId > 0 ? SelectedUstModulControllerId : null
+                };
                 var result = await ControllerApiService.CreateAsync(request);
                 if (result.Success)
                     await ToastService.ShowSuccessAsync(result.Message ?? "Controller eklendi");
