@@ -114,7 +114,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
             return await _dbSet
                 .AsNoTracking()
                 .Where(mci => !string.IsNullOrEmpty(mci.PermissionKey)
-                           && mci.MinYetkiSeviyesi >= BusinessObjectLayer.Enums.Common.YetkiSeviyesi.None)
+                           && mci.MinYetkiSeviyesi >= BusinessObjectLayer.Enums.Common.YetkiSeviyesi.None
+                           && !mci.SilindiMi)
                 .ToDictionaryAsync(
                     mci => mci.PermissionKey!,
                     mci => (int)mci.MinYetkiSeviyesi);
