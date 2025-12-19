@@ -8,6 +8,15 @@
 
 <PageTitle>Personel Yönetimi - SGK Portal</PageTitle>
 
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
 <!-- ═══════════════════════════════════════════════════════ -->
 <!-- PAGE HEADER -->
 <!-- ═══════════════════════════════════════════════════════ -->
@@ -392,4 +401,6 @@
             </div>
         </div>
     </div>
+}
+
 }

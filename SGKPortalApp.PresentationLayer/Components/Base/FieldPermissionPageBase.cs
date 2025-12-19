@@ -54,17 +54,22 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
                 if (!string.IsNullOrEmpty(PagePermissionKey))
                 {
                     _resolvedPermissionKey = PagePermissionKey;
+                    Logger?.LogInformation("🔑 ResolvedPermissionKey: Manuel override kullanıldı: {Key}", _resolvedPermissionKey);
                     return _resolvedPermissionKey;
                 }
 
                 // 2. Route'tan otomatik çözümle
                 var currentPath = GetCurrentRoutePath();
+                Logger?.LogInformation("🔍 ResolvedPermissionKey: Route={Route}", currentPath);
+
                 _resolvedPermissionKey = PermissionStateService.GetPermissionKeyByRoute(currentPath);
-                
+                Logger?.LogInformation("🔍 ResolvedPermissionKey: GetPermissionKeyByRoute döndü: {Key}", _resolvedPermissionKey ?? "NULL");
+
                 if (string.IsNullOrEmpty(_resolvedPermissionKey))
                 {
                     // Route bulunamadı, varsayılan değer kullan
                     _resolvedPermissionKey = "UNKNOWN";
+                    Logger?.LogWarning("⚠️ ResolvedPermissionKey: Route mapping bulunamadı, UNKNOWN kullanılıyor");
                 }
 
                 return _resolvedPermissionKey;
@@ -112,7 +117,19 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         /// <summary>
         /// Sayfa görüntüleme yetkisi var mı?
         /// </summary>
-        protected bool CanViewPage => PermissionStateService.CanView(ResolvedPermissionKey);
+        protected bool CanViewPage
+        {
+            get
+            {
+                var key = ResolvedPermissionKey;
+                var level = PermissionStateService.GetLevel(key);
+                var canView = level >= YetkiSeviyesi.View;
+
+                Logger?.LogInformation("🔍 CanViewPage: Key={Key}, Level={Level}, CanView={CanView}", key, level, canView);
+
+                return canView;
+            }
+        }
 
         /// <summary>
         /// Sayfa düzenleme yetkisi var mı?
