@@ -696,96 +696,46 @@ info: Microsoft.Hosting.Lifetime[0]
 info: Microsoft.Hosting.Lifetime[0]
       Content root path: D:\AspNetExamples\SGKPortalApp\SGKPortalApp.ApiLayer
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: PYicpdJzMUewewb5I1vp-A - Kullanıcı: Muhammed Bodur (TC: 28165202398)
+      ?? [SiramatikHub] Yeni bağlantı: xURoQgtNzhoL8ff_3J7Tdw - Kullanıcı: Muhammed Bodur (TC: 28165202398)
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=0ef34f10-7de2-491c-aee1-18a46224f911
+      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=960d0ce9-4be1-4200-afab-bcdee11e5d81
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: PYicpdJzMUewewb5I1vp-A | TC: 28165202398 | Type: MainLayout | IP: ::1
+      ?? [SiramatikHub] Yeni bağlantı: w-aEEKsZUPV1y1bbJuw2Ug - Kullanıcı: Muhammed Bodur (TC: 28165202398)
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=960d0ce9-4be1-4200-afab-bcdee11e5d81
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: xURoQgtNzhoL8ff_3J7Tdw | TC: 28165202398 | Type: MainLayout | IP: ::1
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: w-aEEKsZUPV1y1bbJuw2Ug | TC: 28165202398 | Type: MainLayout | IP: ::1
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? Banko modu kontrolü: isBankoMode=False
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: IjEYeU8oycM339Ciy6vLZQ - Kullanıcı: Muhammed Bodur (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=0ef34f10-7de2-491c-aee1-18a46224f911
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: IjEYeU8oycM339Ciy6vLZQ | TC: 28165202398 | Type: MainLayout | IP: ::1
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? Banko modu kontrolü: isBankoMode=False
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? Personel bağlantısı koptu: 28165202398
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: PYicpdJzMUewewb5I1vp-A - Kullanıcı: Muhammed Bodur
-info: SGKPortalApp.ApiLayer.Controllers.Auth.AuthController[0]
-      ?? Logout: 28165202398 çıkış yapıyor...
-info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
-      ?? Banko modundan çıkılıyor: 28165202398
-info: SGKPortalApp.BusinessLogicLayer.Services.Common.UserService[0]
-      Banko modu deaktif edildi. TC: 28165202398
-info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
-      ? Banko modundan çıkıldı: 28165202398
-info: SGKPortalApp.ApiLayer.Controllers.Auth.AuthController[0]
-      ? Logout: Banko modu temizlendi - 28165202398
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Personel bağlantısı koptu: 28165202398
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: IjEYeU8oycM339Ciy6vLZQ - Kullanıcı: Muhammed Bodur
-warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
-      ?? Kullanıcı farklı bir cihazdan/tarayıcıdan giriş yaptı - TcKimlikNo: 28165202398, Eski SessionID: d2c06b4a-68b8-43e3-82fc-44b0f2f34d51, Yeni SessionID: cb42091b-32bd-4985-90f5-946011bf8261
-info: SGKPortalApp.BusinessLogicLayer.Services.Auth.AuthService[0]
-      Login başarılı - 28165202398 - Muhammed Bodur
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: 297LtyniylP0H_z3VFk8yw - Kullanıcı: Muhammed Bodur (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=0d9c1345-a288-4b1e-a2dd-5be9b3bb1994
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: 297LtyniylP0H_z3VFk8yw | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
-warn: Microsoft.EntityFrameworkCore.Query[10108]
-      Collection navigations are only considered null if their parent entity is null. Use 'Any' to check whether collection navigation 'Banko.BankoKullanicilari' is empty.
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: CQv9w3rgQqvmYGtUvUvy4A - Kullanıcı: Muhammed Bodur (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=True, isTvDisplay=False, tabSessionId=7bfc2d53-12e5-4843-bc4d-6816c9bb0748
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: CQv9w3rgQqvmYGtUvUvy4A | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: hhDkFFmx8NzG_PFqW75lXA - Kullanıcı: Muhammed Bodur (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=True, isTvDisplay=False, tabSessionId=7bb7b2b2-c5f6-41ce-a9d5-e1e66114ff59
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: hhDkFFmx8NzG_PFqW75lXA | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
+      ?? [SiramatikHub] Bağlantı koptu: xURoQgtNzhoL8ff_3J7Tdw - Kullanıcı: Muhammed Bodur
 info: SGKPortalApp.ApiLayer.Controllers.Common.HizmetBinasiController[0]
       GetActive endpoint çağrıldı
 warn: Microsoft.EntityFrameworkCore.Query[20504]
       Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+info: SGKPortalApp.BusinessLogicLayer.Services.Common.ModulControllerIslemService[0]
+      permissionsChanged broadcast edildi (definition change). Kullanıcı sayısı: 3
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Personel bağlantısı koptu: 28165202398
+      ?? [SiramatikHub] Yeni bağlantı: SeqFMn-dSX_05m0_AUODdw - Kullanıcı: Muhammed Bodur (TC: 28165202398)
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: CQv9w3rgQqvmYGtUvUvy4A - Kullanıcı: Muhammed Bodur
+      ?? Page Lifecycle: isRefresh=False, isNewTab=True, isTvDisplay=False, tabSessionId=f95aec81-a744-42b2-8371-db95bd0f5731
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: r5UNf_VkXjD5OJwZ11OwxA - Kullanıcı: Muhammed Bodur (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=7bfc2d53-12e5-4843-bc4d-6816c9bb0748
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: r5UNf_VkXjD5OJwZ11OwxA | TC: 28165202398 | Type: MainLayout | IP: ::1
+      ? Yeni bağlantı oluşturuldu: SeqFMn-dSX_05m0_AUODdw | TC: 28165202398 | Type: MainLayout | IP: ::1
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? Banko modu kontrolü: isBankoMode=False
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: iPU2QDR0xAlBUL_wsIQGpg - Kullanıcı: Muhammed Bodur (TC: 28165202398)
+      ?? [SiramatikHub] Yeni bağlantı: _G4W_L5Y_ptR-6TRxawMpQ - Kullanıcı: Muhammed Bodur (TC: 28165202398)
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=True, isTvDisplay=False, tabSessionId=c7495328-10a5-497f-85cc-c9b229b9135a
+      ?? Page Lifecycle: isRefresh=False, isNewTab=True, isTvDisplay=False, tabSessionId=b7928656-119b-4491-8616-e3bc63c41823
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: iPU2QDR0xAlBUL_wsIQGpg | TC: 28165202398 | Type: MainLayout | IP: ::1
+      ? Yeni bağlantı oluşturuldu: _G4W_L5Y_ptR-6TRxawMpQ | TC: 28165202398 | Type: MainLayout | IP: ::1
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? Banko modu kontrolü: isBankoMode=False
 info: SGKPortalApp.ApiLayer.Controllers.Common.HizmetBinasiController[0]
-      GetAll endpoint çağrıldı
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Personel bağlantısı koptu: 28165202398
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: iPU2QDR0xAlBUL_wsIQGpg - Kullanıcı: Muhammed Bodur
+      GetActive endpoint çağrıldı
