@@ -155,7 +155,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                     _logger.LogInformation("Login başarılı - {TcKimlikNo} - {AdSoyad}",
                         user.TcKimlikNo, user.Personel.AdSoyad);
 
-                    // 🔑 Yetkileri çek (atanmış + MinYetkiSeviyesi > None olan varsayılanlar)
+                    // 🔑 Yetkileri çek (atanmış + MinYetkiSeviyesi >= None olan varsayılanlar)
                     var permissions = await _personelYetkiService.GetUserPermissionsWithDefaultsAsync(user.TcKimlikNo);
 
                     _logger.LogDebug("🔑 Login: {Count} yetki yüklendi (atanmış + varsayılan) - {TcKimlikNo}", permissions.Count, user.TcKimlikNo);
