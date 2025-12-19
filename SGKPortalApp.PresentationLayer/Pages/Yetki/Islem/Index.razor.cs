@@ -17,7 +17,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
         /// Route: /yetki-islem
         /// Convention: {MODUL_KODU}.{URL_TIRESIZ}.{ACTION}
         /// </summary>
-        protected override string PagePermissionKey => "YET.YETKIISLEM.INDEX";
+        protected override string PagePermissionKey => "YETKI.YETKI-ISLEM.INDEX";
         [Inject] private IModulControllerIslemApiService IslemApiService { get; set; } = default!;
         [Inject] private IModulControllerApiService ControllerApiService { get; set; } = default!;
         [Inject] private IModulApiService ModulApiService { get; set; } = default!;
@@ -111,7 +111,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
                 .OrderBy(i => i.ModulControllerIslemAdi)
                 .ToList();
 
+            // Sayfa tipi için Route ve İşlem Adı otomatik doldur
+            AutoPopulateRouteAndIslemAdi();
+
             GeneratePermissionKey();
+        }
+
+        /// <summary>
+        /// Controller seçildiğinde Route alanını temizle (kullanıcı manuel dolduracak)
+        /// </summary>
+        private void AutoPopulateRouteAndIslemAdi()
+        {
+            // Route alanını boş bırak, kullanıcı manuel dolduracak
+            // İşlem Adı da boş kalacak, Route'tan otomatik çıkarılacak
         }
 
         private async Task OnDtoTypeChanged()
@@ -145,6 +157,95 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
 
         private void OnIslemAdiChanged()
         {
+            GeneratePermissionKey();
+        }
+
+        /// <summary>
+        /// Route değiştiğinde çağrılır
+        /// 1) Controller hiyerarşisi ile Route'u karşılaştırır
+        /// 2) Route'tan sayfa adını çıkarıp İşlem Adı'na yazar
+        /// </summary>
+        private async Task OnRouteChanged()
+        {
+            if (string.IsNullOrWhiteSpace(Route) || SelectedControllerId <= 0)
+            {
+                GeneratePermissionKey();
+                return;
+            }
+
+            var controller = FilteredControllers.FirstOrDefault(c => c.Id == SelectedControllerId);
+            var modul = Moduller.FirstOrDefault(m => m.ModulId == SelectedModulId);
+            
+            if (controller == null || modul == null)
+            {
+                GeneratePermissionKey();
+                return;
+            }
+
+            // Route'u temizle - localhost:8080 gibi URL kısımlarını kaldır
+            var cleanedRoute = Route.Trim();
+            
+            // URL formatında girildiyse sadece path kısmını al
+            if (cleanedRoute.Contains("://"))
+            {
+                try
+                {
+                    var uri = new Uri(cleanedRoute);
+                    cleanedRoute = uri.PathAndQuery;
+                    Route = cleanedRoute; // Temizlenmiş halini geri yaz
+                }
+                catch
+                {
+                    // URI parse edilemezse olduğu gibi devam et
+                }
+            }
+
+            // Route'u normalize et
+            var routeNormalized = cleanedRoute.Trim().TrimStart('/').ToLowerInvariant();
+            
+            // FullPath'i al (Metadata'dan)
+            string fullPathNormalized = "";
+            if (!string.IsNullOrWhiteSpace(controller.Metadata))
+            {
+                fullPathNormalized = controller.Metadata.Trim().TrimStart('/').ToLowerInvariant();
+            }
+
+            // Route'tan İşlem Adı'nı otomatik çıkar
+            // FullPath ile karşılaştırarak controller kısmını ayır
+            // Örnek: FullPath="/Auth/Login", Route="/auth/login" → İşlem Adı: INDEX (route tam eşleşiyor)
+            // Örnek: FullPath="/Siramatik/Banko", Route="/siramatik/banko/personel-atama" → İşlem Adı: PERSONEL-ATAMA
+            
+            if (!string.IsNullOrWhiteSpace(fullPathNormalized) && routeNormalized.StartsWith(fullPathNormalized))
+            {
+                // Route, FullPath ile başlıyorsa, kalan kısmı sayfa adı olarak al
+                var remainingPath = routeNormalized.Substring(fullPathNormalized.Length).TrimStart('/');
+                
+                if (string.IsNullOrWhiteSpace(remainingPath))
+                {
+                    // Route tam olarak FullPath'e eşitse, varsayılan INDEX
+                    IslemAdi = "INDEX";
+                }
+                else
+                {
+                    // Kalan kısım sayfa adı
+                    var pageName = remainingPath.Split('/')[0].ToUpperInvariant();
+                    IslemAdi = pageName;
+                }
+            }
+            else
+            {
+                // FullPath yoksa veya eşleşmiyorsa, route'un son kısmını al
+                var routeParts = routeNormalized.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                if (routeParts.Length > 0)
+                {
+                    IslemAdi = routeParts[^1].ToUpperInvariant();
+                }
+                else
+                {
+                    IslemAdi = "INDEX";
+                }
+            }
+
             GeneratePermissionKey();
         }
 
@@ -229,16 +330,26 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
                 return;
             }
 
-            // ModulKodu (örn: PER) - Artık doğrudan ModulKodu'dan alınıyor
-            var modulKodu = modul.ModulKodu?.ToUpperInvariant() ?? "UNKNOWN";
-
-            // Controller adı - Hiyerarşik controller desteği
-            // Dropdown'dan gelen Ad alanı: "Banko > PersonelAtama" veya "Banko" formatında olabilir
-            var controllerPath = controller.Ad?.ToUpperInvariant() ?? "UNKNOWN";
-            var controllerParts = controllerPath.Split(new[] { " > " }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(p => p.Trim())
-                .ToArray();
-            var controllerKeyPath = string.Join(".", controllerParts);
+            // Controller adı - TÜM hiyerarşiyi dahil et (FullPath'ten al)
+            // Metadata'dan FullPath: "/Siramatik/Banko" → "SIRAMATIK.BANKO"
+            string controllerKeyPath;
+            
+            if (!string.IsNullOrWhiteSpace(controller.Metadata))
+            {
+                // FullPath varsa onu kullan (recursive query'den geliyor)
+                var fullPath = controller.Metadata.Trim().TrimStart('/').ToUpperInvariant();
+                var controllerParts = fullPath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                controllerKeyPath = string.Join(".", controllerParts);
+            }
+            else
+            {
+                // FullPath yoksa Ad alanından çıkar (fallback)
+                var controllerPath = controller.Ad?.ToUpperInvariant() ?? "UNKNOWN";
+                var controllerParts = controllerPath.Split(new[] { " > " }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(p => p.Trim())
+                    .ToArray();
+                controllerKeyPath = string.Join(".", controllerParts);
+            }
 
             // İşlem adı (zaten uppercase)
             var islemAdi = IslemAdi.Trim().ToUpperInvariant();
@@ -265,18 +376,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
 
                     // Tip prefix varsa ekle
                     if (!string.IsNullOrEmpty(tipPrefix))
-                        PermissionKey = $"{modulKodu}.{controllerKeyPath}.{ustIslemAdi}.{tipPrefix}.{islemAdi}";
+                        PermissionKey = $"{controllerKeyPath}.{ustIslemAdi}.{tipPrefix}.{islemAdi}";
                     else
-                        PermissionKey = $"{modulKodu}.{controllerKeyPath}.{ustIslemAdi}.{islemAdi}";
+                        PermissionKey = $"{controllerKeyPath}.{ustIslemAdi}.{islemAdi}";
                     return;
                 }
             }
 
             // Üst işlem yoksa direkt oluştur
             if (!string.IsNullOrEmpty(tipPrefix))
-                PermissionKey = $"{modulKodu}.{controllerKeyPath}.{tipPrefix}.{islemAdi}";
+                PermissionKey = $"{controllerKeyPath}.{tipPrefix}.{islemAdi}";
             else
-                PermissionKey = $"{modulKodu}.{controllerKeyPath}.{islemAdi}";
+                PermissionKey = $"{controllerKeyPath}.{islemAdi}";
         }
 
         private string GetIslemPrefix(ModulControllerIslemResponseDto islem)

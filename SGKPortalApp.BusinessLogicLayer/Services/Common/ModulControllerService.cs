@@ -5,6 +5,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 {
@@ -12,13 +13,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ModulControllerService> _logger;
+        private readonly IYetkiQueryRepository _yetkiQueryRepository;
 
         public ModulControllerService(
             IUnitOfWork unitOfWork,
-            ILogger<ModulControllerService> logger)
+            ILogger<ModulControllerService> logger,
+            IYetkiQueryRepository yetkiQueryRepository)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _yetkiQueryRepository = yetkiQueryRepository;
         }
 
         public async Task<ApiResponseDto<List<ModulControllerResponseDto>>> GetAllAsync()
@@ -260,6 +264,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 var repo = _unitOfWork.GetRepository<IModulControllerRepository>();
                 var controllers = await repo.GetByModulAsync(modulId);
 
+                // Recursive query ile tüm controller'ların FullPath bilgisini al
+                var hierarchyData = await _yetkiQueryRepository.GetModulControllersWithHierarchyAsync(modulId);
+                var fullPathDict = hierarchyData.ToDictionary(h => h.ModulControllerId, h => h.FullPath);
+
                 var dropdown = controllers.Select(c => new DropdownItemDto
                 {
                     Id = c.ModulControllerId,
@@ -267,8 +275,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     Ad = c.UstModulController != null
                         ? $"{c.UstModulController.ModulControllerAdi} > {c.ModulControllerAdi}"
                         : c.ModulControllerAdi,
-                    // Metadata olarak parent bilgisini de tut (permission key oluşturmak için)
-                    Metadata = c.UstModulControllerId?.ToString()
+                    // Metadata olarak FullPath bilgisini tut (route önerisi için)
+                    // Örnek: "/Siramatik/Banko"
+                    Metadata = fullPathDict.ContainsKey(c.ModulControllerId) 
+                        ? fullPathDict[c.ModulControllerId] 
+                        : null
                 }).ToList();
 
                 return ApiResponseDto<List<DropdownItemDto>>.SuccessResult(dropdown, "Dropdown listesi başarıyla getirildi");

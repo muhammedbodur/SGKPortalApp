@@ -245,9 +245,19 @@
                                 <option value="0">-- Controller Seçiniz --</option>
                                 @foreach (var c in FilteredControllers)
                                 {
-                                    <option value="@c.Id">@c.Ad</option>
+                                    <option value="@c.Id" title="@c.Metadata">@c.Ad</option>
                                 }
                             </select>
+                            @if (SelectedControllerId > 0)
+                            {
+                                var selectedController = FilteredControllers.FirstOrDefault(c => c.Id == SelectedControllerId);
+                                if (selectedController?.Metadata != null)
+                                {
+                                    <small class="text-muted">
+                                        <i class="bx bx-folder-tree"></i> Hiyerarşik yol: <strong>@selectedController.Metadata</strong>
+                                    </small>
+                                }
+                            }
                         </div>
                     </div>
                     <div class="row">
@@ -423,8 +433,11 @@
                         <h6 class="mb-3"><i class="bx bx-map me-1"></i>Sayfa Bilgileri</h6>
                         <div class="mb-3">
                             <label class="form-label">Route (Sayfa Yolu)</label>
-                            <input type="text" class="form-control" @bind="Route" placeholder="Örn: /personel/manage, /siramatik/banko/list" />
-                            <small class="text-muted">Bu sayfanın URL yolu</small>
+                            <input type="text" class="form-control" @bind="Route" @bind:after="OnRouteChanged" placeholder="Örn: /siramatik/banko/list" />
+                            <small class="text-muted">
+                                Controller hiyerarşisine uygun route girin. Sayfa adı otomatik İşlem Adı'na yazılacak.<br/>
+                                <strong>Beklenen format:</strong> /@(FilteredControllers.FirstOrDefault(c => c.Id == SelectedControllerId)?.Ad?.Replace(" > ", "/").ToLower() ?? "controller")/[sayfa-adi]
+                            </small>
                         </div>
                     }
 

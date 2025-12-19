@@ -35,6 +35,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Controller
 
         private List<ModulControllerResponseDto> Controllers = new();
         private List<ModulControllerResponseDto> FilteredControllers = new();
+        private List<ModulControllerResponseDto> HierarchicalControllers = new(); // Hiyerarşik sıralı liste
         private List<DropdownItemDto> Moduller = new();
         private List<DropdownItemDto> ParentControllers = new(); // Üst controller seçimi için
         private bool IsLoading = true;
@@ -224,7 +225,70 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Controller
             };
 
             FilteredControllers = query.ToList();
+            
+            // Hiyerarşik yapıyı oluştur
+            BuildHierarchy();
+            
             StateHasChanged();
+        }
+
+        /// <summary>
+        /// Parent-child hiyerarşisini oluşturur
+        /// Root controller'lar önce, altlarındaki child'lar hemen ardından gösterilir
+        /// </summary>
+        private void BuildHierarchy()
+        {
+            HierarchicalControllers = new();
+            
+            // 1. Root controller'ları bul (UstModulControllerId == null)
+            var rootControllers = FilteredControllers
+                .Where(c => !c.UstModulControllerId.HasValue)
+                .ToList();
+            
+            // 2. Her root controller için, önce kendisini ekle, sonra child'larını ekle
+            foreach (var root in rootControllers)
+            {
+                HierarchicalControllers.Add(root);
+                
+                // Bu root'un child'larını bul ve ekle
+                AddChildControllers(root.ModulControllerId, 1);
+            }
+        }
+
+        /// <summary>
+        /// Belirtilen parent'ın child controller'larını recursive olarak ekler
+        /// </summary>
+        private void AddChildControllers(int parentId, int level)
+        {
+            var children = FilteredControllers
+                .Where(c => c.UstModulControllerId == parentId)
+                .ToList();
+            
+            foreach (var child in children)
+            {
+                HierarchicalControllers.Add(child);
+                
+                // Bu child'ın da child'ları varsa onları da ekle (recursive)
+                AddChildControllers(child.ModulControllerId, level + 1);
+            }
+        }
+
+        /// <summary>
+        /// Controller'ın hiyerarşi seviyesini döndürür (0=root, 1=child, 2=grandchild...)
+        /// </summary>
+        private int GetHierarchyLevel(ModulControllerResponseDto controller)
+        {
+            int level = 0;
+            var current = controller;
+            
+            while (current.UstModulControllerId.HasValue)
+            {
+                level++;
+                current = Controllers.FirstOrDefault(c => c.ModulControllerId == current.UstModulControllerId.Value);
+                if (current == null) break;
+            }
+            
+            return level;
         }
     }
 }

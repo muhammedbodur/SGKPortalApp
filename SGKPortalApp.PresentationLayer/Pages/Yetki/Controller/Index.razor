@@ -106,16 +106,25 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var c in FilteredControllers)
+                                @foreach (var c in HierarchicalControllers)
                                 {
+                                    var level = GetHierarchyLevel(c);
+                                    var indent = level * 30; // Her seviye için 30px girinti
+                                    
                                     <tr>
                                         <td>@c.ModulControllerId</td>
                                         <td>
-                                            <strong>@c.ModulControllerAdi</strong>
-                                            @if (c.UstModulControllerId.HasValue)
-                                            {
-                                                <br/><small class="text-muted">└ Alt Controller</small>
-                                            }
+                                            <div style="padding-left: @(indent)px;">
+                                                @if (c.UstModulControllerId.HasValue)
+                                                {
+                                                    <i class="bx bx-subdirectory-right text-muted me-1"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bx bx-folder text-primary me-1"></i>
+                                                }
+                                                <strong>@c.ModulControllerAdi</strong>
+                                            </div>
                                         </td>
                                         <td>
                                             @if (!string.IsNullOrEmpty(c.UstModulControllerAdi))

@@ -138,6 +138,11 @@ namespace SGKPortalApp.Common.Extensions
                               SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex.SiramatikQueryRepository>();
             Console.WriteLine("  ✅ ISiramatikQueryRepository -> SiramatikQueryRepository");
 
+            // Yetki Query Repository
+            services.AddScoped<SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex.IYetkiQueryRepository,
+                              SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex.YetkiQueryRepository>();
+            Console.WriteLine("  ✅ IYetkiQueryRepository -> YetkiQueryRepository");
+
             Console.WriteLine("✅ Complex Query Repositories kayıt edildi\n");
             return services;
         }
