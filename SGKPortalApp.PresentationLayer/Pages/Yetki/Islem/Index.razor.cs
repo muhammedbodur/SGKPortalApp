@@ -232,8 +232,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
             // ModulKodu (örn: PER) - Artık doğrudan ModulKodu'dan alınıyor
             var modulKodu = modul.ModulKodu?.ToUpperInvariant() ?? "UNKNOWN";
 
-            // Controller adı (örn: PERSONEL)
-            var controllerAdi = controller.Ad?.ToUpperInvariant() ?? "UNKNOWN";
+            // Controller adı - Hiyerarşik controller desteği
+            // Dropdown'dan gelen Ad alanı: "Banko > PersonelAtama" veya "Banko" formatında olabilir
+            var controllerPath = controller.Ad?.ToUpperInvariant() ?? "UNKNOWN";
+            var controllerParts = controllerPath.Split(new[] { " > " }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(p => p.Trim())
+                .ToArray();
+            var controllerKeyPath = string.Join(".", controllerParts);
 
             // İşlem adı (zaten uppercase)
             var islemAdi = IslemAdi.Trim().ToUpperInvariant();
@@ -260,18 +265,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
 
                     // Tip prefix varsa ekle
                     if (!string.IsNullOrEmpty(tipPrefix))
-                        PermissionKey = $"{modulKodu}.{controllerAdi}.{ustIslemAdi}.{tipPrefix}.{islemAdi}";
+                        PermissionKey = $"{modulKodu}.{controllerKeyPath}.{ustIslemAdi}.{tipPrefix}.{islemAdi}";
                     else
-                        PermissionKey = $"{modulKodu}.{controllerAdi}.{ustIslemAdi}.{islemAdi}";
+                        PermissionKey = $"{modulKodu}.{controllerKeyPath}.{ustIslemAdi}.{islemAdi}";
                     return;
                 }
             }
 
             // Üst işlem yoksa direkt oluştur
             if (!string.IsNullOrEmpty(tipPrefix))
-                PermissionKey = $"{modulKodu}.{controllerAdi}.{tipPrefix}.{islemAdi}";
+                PermissionKey = $"{modulKodu}.{controllerKeyPath}.{tipPrefix}.{islemAdi}";
             else
-                PermissionKey = $"{modulKodu}.{controllerAdi}.{islemAdi}";
+                PermissionKey = $"{modulKodu}.{controllerKeyPath}.{islemAdi}";
         }
 
         private string GetIslemPrefix(ModulControllerIslemResponseDto islem)

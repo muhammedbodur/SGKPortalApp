@@ -111,8 +111,25 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
             filteredTvler = filteredTvler.ToList();
         }
 
-        private void OnHizmetBinasiChanged(ChangeEventArgs e)
+        private async Task OnHizmetBinasiChanged(ChangeEventArgs e)
         {
+            // ✅ 1. YETKİ KONTROLÜ: Kullanıcı bu filtreyi değiştirebilir mi?
+            if (!CanEditFieldInList("HIZMET_BINASI"))
+            {
+                await _toastService.ShowWarningAsync("Bu filtreyi değiştirme yetkiniz yok!");
+                return; // ❌ İşlemi durdur
+            }
+
+            if (!string.IsNullOrEmpty(e.Value?.ToString()) && int.TryParse(e.Value.ToString(), out int binaId))
+            {
+                // ✅ 2. DATA VALİDATİON: Kullanıcı başka Hizmet Binasını seçmeye çalışıyor mu?
+                if (binaId > 0 && !CanAccessHizmetBinasi(binaId))
+                {
+                    await _toastService.ShowWarningAsync("Bu Hizmet Binasını görüntüleme yetkiniz yok!");
+                    return; // ❌ İşlemi durdur
+                }
+            }
+
             selectedHizmetBinasiId = string.IsNullOrEmpty(e.Value?.ToString()) ? null : int.Parse(e.Value.ToString()!);
             ApplyFilters();
         }

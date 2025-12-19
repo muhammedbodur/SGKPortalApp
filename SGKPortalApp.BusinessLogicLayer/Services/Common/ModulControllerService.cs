@@ -34,6 +34,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     ModulControllerAdi = c.ModulControllerAdi,
                     ModulId = c.ModulId,
                     ModulAdi = c.Modul?.ModulAdi ?? string.Empty,
+                    UstModulControllerId = c.UstModulControllerId,
+                    UstModulControllerAdi = c.UstModulController?.ModulControllerAdi,
                     EklenmeTarihi = c.EklenmeTarihi,
                     DuzenlenmeTarihi = c.DuzenlenmeTarihi,
                     IslemCount = c.ModulControllerIslemler?.Count ?? 0
@@ -64,6 +66,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     ModulControllerAdi = c.ModulControllerAdi,
                     ModulId = c.ModulId,
                     ModulAdi = modul?.ModulAdi ?? string.Empty,
+                    UstModulControllerId = c.UstModulControllerId,
+                    UstModulControllerAdi = c.UstModulController?.ModulControllerAdi,
                     EklenmeTarihi = c.EklenmeTarihi,
                     DuzenlenmeTarihi = c.DuzenlenmeTarihi,
                     IslemCount = c.ModulControllerIslemler?.Count ?? 0
@@ -94,6 +98,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     ModulControllerAdi = controller.ModulControllerAdi,
                     ModulId = controller.ModulId,
                     ModulAdi = controller.Modul?.ModulAdi ?? string.Empty,
+                    UstModulControllerId = controller.UstModulControllerId,
+                    UstModulControllerAdi = controller.UstModulController?.ModulControllerAdi,
                     EklenmeTarihi = controller.EklenmeTarihi,
                     DuzenlenmeTarihi = controller.DuzenlenmeTarihi,
                     IslemCount = controller.ModulControllerIslemler?.Count ?? 0
@@ -127,7 +133,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 {
                     ModulControllerAdi = request.ModulControllerAdi,
                     ModulId = request.ModulId,
-                    Modul = modul
+                    Modul = modul,
+                    UstModulControllerId = request.UstModulControllerId
                 };
 
                 await repo.AddAsync(entity);
@@ -139,6 +146,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     ModulControllerAdi = entity.ModulControllerAdi,
                     ModulId = entity.ModulId,
                     ModulAdi = modul.ModulAdi,
+                    UstModulControllerId = entity.UstModulControllerId,
+                    UstModulControllerAdi = entity.UstModulController?.ModulControllerAdi,
                     EklenmeTarihi = entity.EklenmeTarihi,
                     DuzenlenmeTarihi = entity.DuzenlenmeTarihi,
                     IslemCount = 0
@@ -170,6 +179,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 
                 entity.ModulControllerAdi = request.ModulControllerAdi;
                 entity.ModulId = request.ModulId;
+                entity.UstModulControllerId = request.UstModulControllerId;
                 entity.DuzenlenmeTarihi = DateTime.Now;
 
                 repo.Update(entity);
@@ -181,6 +191,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     ModulControllerAdi = entity.ModulControllerAdi,
                     ModulId = entity.ModulId,
                     ModulAdi = modul.ModulAdi,
+                    UstModulControllerId = entity.UstModulControllerId,
+                    UstModulControllerAdi = entity.UstModulController?.ModulControllerAdi,
                     EklenmeTarihi = entity.EklenmeTarihi,
                     DuzenlenmeTarihi = entity.DuzenlenmeTarihi
                 };
@@ -251,7 +263,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 var dropdown = controllers.Select(c => new DropdownItemDto
                 {
                     Id = c.ModulControllerId,
-                    Ad = c.ModulControllerAdi
+                    // Hiyerarşik görünüm: "Parent > Child" formatında
+                    Ad = c.UstModulController != null
+                        ? $"{c.UstModulController.ModulControllerAdi} > {c.ModulControllerAdi}"
+                        : c.ModulControllerAdi,
+                    // Metadata olarak parent bilgisini de tut (permission key oluşturmak için)
+                    Metadata = c.UstModulControllerId?.ToString()
                 }).ToList();
 
                 return ApiResponseDto<List<DropdownItemDto>>.SuccessResult(dropdown, "Dropdown listesi başarıyla getirildi");

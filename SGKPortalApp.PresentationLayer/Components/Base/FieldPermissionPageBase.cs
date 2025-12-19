@@ -287,6 +287,48 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
 
         #endregion
 
+        #region Field-Level Permissions for Index Pages (Filters için)
+
+        /// <summary>
+        /// Index sayfalarındaki field/filter'lar için edit yetkisi kontrolü
+        /// IsEditMode kontrolü YAPMAZ (Index sayfaları için)
+        /// Permission Key: {PagePermissionKey}.FORMFIELD.{FIELDNAME}
+        /// Örnek: SIRA.BANKO.INDEX.FORMFIELD.HIZMET_BINASI
+        /// </summary>
+        protected bool CanEditFieldInList(string fieldName)
+        {
+            return PermissionStateService.CanEdit(GetFieldPermissionKey(fieldName));
+        }
+
+        /// <summary>
+        /// Index sayfalarındaki field/filter'lar için view yetkisi kontrolü
+        /// </summary>
+        protected bool CanViewFieldInList(string fieldName)
+        {
+            return PermissionStateService.CanView(GetFieldPermissionKey(fieldName));
+        }
+
+        /// <summary>
+        /// Index sayfalarındaki field/filter görünür mü?
+        /// None seviyesi = görünmez
+        /// </summary>
+        protected bool IsFieldVisibleInList(string fieldName)
+        {
+            var level = PermissionStateService.GetLevel(GetFieldPermissionKey(fieldName));
+            return level != YetkiSeviyesi.None;
+        }
+
+        /// <summary>
+        /// Index sayfalarındaki field/filter disabled olmalı mı?
+        /// View seviyesi = disabled, Edit seviyesi = aktif
+        /// </summary>
+        protected bool IsFieldDisabledInList(string fieldName)
+        {
+            return !CanEditFieldInList(fieldName);
+        }
+
+        #endregion
+
         #region Lifecycle
 
         protected override async Task OnInitializedAsync()

@@ -243,14 +243,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
 
         private async Task OnHizmetBinasiChanged(ChangeEventArgs e)
         {
+            // ✅ 1. YETKİ KONTROLÜ: Kullanıcı bu filtreyi değiştirebilir mi?
+            if (!CanEditFieldInList("HIZMET_BINASI"))
+            {
+                await _toastService.ShowWarningAsync("Bu filtreyi değiştirme yetkiniz yok!");
+                _logger.LogWarning("Yetkisiz filtre değiştirme denemesi: HIZMET_BINASI");
+                return; // ❌ İşlemi durdur
+            }
+
             if (e.Value != null && int.TryParse(e.Value.ToString(), out int selectedId))
             {
-                // ✅ Güvenlik kontrolü: Kullanıcı başka Hizmet Binasını seçmeye çalışıyor mu?
+                // ✅ 2. DATA VALİDATİON: Kullanıcı başka Hizmet Binasını seçmeye çalışıyor mu?
                 if (selectedId > 0 && !CanAccessHizmetBinasi(selectedId))
                 {
                     await _toastService.ShowWarningAsync("Bu Hizmet Binasını görüntüleme yetkiniz yok!");
                     _logger.LogWarning("Yetkisiz Hizmet Binası erişim denemesi: {BinaId}", selectedId);
-                    return; // İşlemi durdur
+                    return; // ❌ İşlemi durdur
                 }
 
                 SelectedHizmetBinasiId = selectedId;
