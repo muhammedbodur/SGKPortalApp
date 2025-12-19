@@ -409,11 +409,23 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
 
             // Route'u normalize et (trailing slash kaldır)
             var normalizedRoute = route.TrimEnd('/');
-            
+
+            _logger.LogInformation("🗺️ GetPermissionKeyByRoute çağrıldı: {Route}, Dictionary count: {Count}", normalizedRoute, _routeToPermissionKey.Count);
+
+            // DEBUG: İlk 10 route mapping'i logla
+            if (_routeToPermissionKey.Count > 0)
+            {
+                _logger.LogInformation("🗺️ İlk 10 route mapping:");
+                foreach (var kvp in _routeToPermissionKey.Take(10))
+                {
+                    _logger.LogInformation("  - {Route} → {Key}", kvp.Key, kvp.Value);
+                }
+            }
+
             // 1. Önce tam eşleşme dene
             if (_routeToPermissionKey.TryGetValue(normalizedRoute, out var permissionKey))
             {
-                _logger.LogDebug("🗺️ Route resolved: {Route} → {PermissionKey}", normalizedRoute, permissionKey);
+                _logger.LogInformation("✅ Route resolved (exact match): {Route} → {PermissionKey}", normalizedRoute, permissionKey);
                 return permissionKey;
             }
 
@@ -424,7 +436,7 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
                 var routeWithIndex = $"{normalizedRoute}/index";
                 if (_routeToPermissionKey.TryGetValue(routeWithIndex, out permissionKey))
                 {
-                    _logger.LogDebug("🗺️ Route resolved (with /index): {Route} → {PermissionKey}", routeWithIndex, permissionKey);
+                    _logger.LogInformation("✅ Route resolved (with /index): {RouteOriginal} + /index → {PermissionKey}", normalizedRoute, permissionKey);
                     return permissionKey;
                 }
             }
@@ -436,12 +448,12 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
                 var routeWithoutIndex = normalizedRoute.Substring(0, normalizedRoute.Length - 6); // "/index" = 6 karakter
                 if (_routeToPermissionKey.TryGetValue(routeWithoutIndex, out permissionKey))
                 {
-                    _logger.LogDebug("🗺️ Route resolved (without /index): {Route} → {PermissionKey}", routeWithoutIndex, permissionKey);
+                    _logger.LogInformation("✅ Route resolved (without /index): {RouteOriginal} - /index → {PermissionKey}", normalizedRoute, permissionKey);
                     return permissionKey;
                 }
             }
 
-            _logger.LogWarning("⚠️ Route bulunamadı: {Route}", normalizedRoute);
+            _logger.LogWarning("❌ Route bulunamadı: {Route} (dictionary'de {Count} kayıt var)", normalizedRoute, _routeToPermissionKey.Count);
             return null;
         }
     }
