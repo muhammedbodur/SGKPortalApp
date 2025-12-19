@@ -16,7 +16,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
 {
     public partial class Index
     {
-        protected override string PagePermissionKey => "SIRA.KANALALTISLEM.INDEX";
+        // ⚡ PagePermissionKey artık otomatik çözümleniyor!
+        // Route: /siramatik/kanal-alt-islem → PermissionKey: SIRA.KANALALTISLEM.INDEX
+        // Manuel override gerekmez, FieldPermissionPageBase otomatik halleder
 
         [Inject] private IKanalAltIslemApiService _kanalAltIslemService { get; set; } = default!;
         [Inject] private IKanalIslemApiService _kanalIslemService { get; set; } = default!;

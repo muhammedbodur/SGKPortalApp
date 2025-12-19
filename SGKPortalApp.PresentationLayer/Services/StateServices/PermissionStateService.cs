@@ -24,6 +24,10 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
         // Sistemde tanımlı tüm permission key'ler ve MinYetkiSeviyesi değerleri (ModulControllerIslem tablosundan)
         // Key: PermissionKey, Value: MinYetkiSeviyesi (yetki atanmamış personel için varsayılan seviye)
         private Dictionary<string, YetkiSeviyesi> _definedPermissions = new(StringComparer.OrdinalIgnoreCase);
+        
+        // Route → PermissionKey mapping (ModulControllerIslem tablosundan)
+        // Key: Route (örn: /personel/departman), Value: PermissionKey (örn: PER.DEPARTMAN.INDEX)
+        private Dictionary<string, string> _routeToPermissionKey = new(StringComparer.OrdinalIgnoreCase);
 
         public event Action? OnChange;
 
@@ -142,6 +146,19 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
                     
                     _logger.LogInformation("🔑 Sistemde tanımlı {Count} permission key yüklendi", _definedPermissions.Count);
                     
+                    // Route → PermissionKey mapping'i oluştur
+                    var routeMappings = result.Data
+                        .Where(x => !string.IsNullOrEmpty(x.Route) && !string.IsNullOrEmpty(x.PermissionKey))
+                        .ToList();
+                    
+                    _routeToPermissionKey = routeMappings
+                        .ToDictionary(
+                            x => x.Route!.TrimEnd('/'),
+                            x => x.PermissionKey!,
+                            StringComparer.OrdinalIgnoreCase);
+                    
+                    _logger.LogInformation("🗺️ {Count} route-to-permission mapping yüklendi", _routeToPermissionKey.Count);
+                    
                     // İlk 10 key'i logla
                     foreach (var kvp in _definedPermissions.Take(10))
                     {
@@ -170,15 +187,29 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
                 var permissionsClaim = httpContext?.User?.FindFirst("Permissions")?.Value;
 
                 if (string.IsNullOrEmpty(permissionsClaim))
+                {
+                    _logger.LogWarning("⚠️ Claims'de Permissions bulunamadı");
                     return false;
+                }
 
                 var permissionsDict = JsonSerializer.Deserialize<Dictionary<string, int>>(permissionsClaim);
                 if (permissionsDict == null)
+                {
+                    _logger.LogWarning("⚠️ Permissions claim deserialize edilemedi");
                     return false;
+                }
 
                 _permissions = permissionsDict.ToDictionary(
                     kvp => kvp.Key,
                     kvp => (YetkiSeviyesi)kvp.Value);
+
+                _logger.LogInformation("✅ Claims'den {Count} yetki yüklendi", _permissions.Count);
+                
+                // İlk 20 yetkiyi logla
+                foreach (var perm in _permissions.Take(20))
+                {
+                    _logger.LogInformation("🔑   - {Key} = {Level}", perm.Key, perm.Value);
+                }
 
                 return true;
             }
@@ -237,6 +268,14 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
                     _permissions = permsResult.Data
                         .Where(p => !string.IsNullOrEmpty(p.PermissionKey))
                         .ToDictionary(p => p.PermissionKey, p => p.YetkiSeviyesi);
+                    
+                    _logger.LogInformation("🔑 Kullanıcı yetkileri yüklendi. Toplam: {Count}", _permissions.Count);
+                    
+                    // Debug: İlk 20 yetkiyi logla
+                    foreach (var perm in _permissions.Take(20))
+                    {
+                        _logger.LogInformation("🔑   - {Key} = {Level}", perm.Key, perm.Value);
+                    }
                 }
 
                 IsLoaded = true;
@@ -267,25 +306,33 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
             if (string.IsNullOrWhiteSpace(permissionKey))
                 return YetkiSeviyesi.None;
 
-            // 1. Kullanıcının bu key için yetkisi var mı?
+            // 1. Sistemde tanımlı mı kontrol et (önce bu kontrolü yapalım)
+            var isDefinedInSystem = _definedPermissions.ContainsKey(permissionKey);
+
+            // 2. Kullanıcının bu key için yetkisi var mı?
             var matchingKey = _permissions.Keys.FirstOrDefault(k => 
                 string.Equals(k, permissionKey, StringComparison.OrdinalIgnoreCase));
 
             if (matchingKey != null && _permissions.TryGetValue(matchingKey, out var level))
             {
-                _logger.LogDebug("GetLevel: Key={Key}, Level={Level} (kullanıcıya verilmiş)", permissionKey, level);
+                _logger.LogInformation("✅ GetLevel: Key={Key}, Level={Level} (kullanıcıya verilmiş)", permissionKey, level);
                 return level;
             }
+            else
+            {
+                _logger.LogWarning("⚠️ GetLevel: Key={Key} kullanıcı permission'larında bulunamadı. _permissions.Count={Count}", permissionKey, _permissions.Count);
+            }
 
-            // 2. Kullanıcıya verilmemiş - sistemde tanımlı mı kontrol et
-            if (_definedPermissions.TryGetValue(permissionKey, out var minLevel))
+            // 3. Kullanıcıya verilmemiş - sistemde tanımlı mı?
+            if (isDefinedInSystem && _definedPermissions.TryGetValue(permissionKey, out var minLevel))
             {
                 // Sistemde tanımlı ama kullanıcıya verilmemiş → MinYetkiSeviyesi (varsayılan davranış)
                 _logger.LogDebug("GetLevel: Key={Key}, Level={Level} (sistemde tanımlı, MinYetkiSeviyesi uygulandı)", permissionKey, minLevel);
                 return minLevel;
             }
 
-            // 3. Sistemde tanımlı değil → Edit (henüz permission uygulanmamış)
+            // 4. Sistemde tanımlı değil → Edit (henüz permission uygulanmamış)
+            // ⚠️ UYARI: Bu durumda tam yetki veriliyor çünkü permission sistemi henüz uygulanmamış
             _logger.LogDebug("GetLevel: Key={Key}, Level=Edit (sistemde tanımlı değil, tam yetki)", permissionKey);
             return YetkiSeviyesi.Edit;
         }
@@ -336,6 +383,56 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
         {
             await EnsureLoadedAsync();
             return CanEdit(permissionKey);
+        }
+
+        /// <summary>
+        /// Route'tan PermissionKey'i çözümler
+        /// Örnek: "/personel/departman" → "PER.DEPARTMAN.INDEX"
+        /// 
+        /// ASP.NET Core Routing: /personel ve /personel/index aynı sayfaya gider
+        /// Bu yüzden her iki route'u da kontrol ediyoruz
+        /// </summary>
+        public string? GetPermissionKeyByRoute(string route)
+        {
+            if (string.IsNullOrWhiteSpace(route))
+                return null;
+
+            // Route'u normalize et (trailing slash kaldır)
+            var normalizedRoute = route.TrimEnd('/');
+            
+            // 1. Önce tam eşleşme dene
+            if (_routeToPermissionKey.TryGetValue(normalizedRoute, out var permissionKey))
+            {
+                _logger.LogDebug("🗺️ Route resolved: {Route} → {PermissionKey}", normalizedRoute, permissionKey);
+                return permissionKey;
+            }
+
+            // 2. Eğer route /index ile bitmiyorsa, /index ekleyip tekrar dene
+            // Örnek: /personel → /personel/index
+            if (!normalizedRoute.EndsWith("/index", StringComparison.OrdinalIgnoreCase))
+            {
+                var routeWithIndex = $"{normalizedRoute}/index";
+                if (_routeToPermissionKey.TryGetValue(routeWithIndex, out permissionKey))
+                {
+                    _logger.LogDebug("🗺️ Route resolved (with /index): {Route} → {PermissionKey}", routeWithIndex, permissionKey);
+                    return permissionKey;
+                }
+            }
+
+            // 3. Eğer route /index ile bitiyorsa, /index'i kaldırıp tekrar dene
+            // Örnek: /personel/index → /personel
+            if (normalizedRoute.EndsWith("/index", StringComparison.OrdinalIgnoreCase))
+            {
+                var routeWithoutIndex = normalizedRoute.Substring(0, normalizedRoute.Length - 6); // "/index" = 6 karakter
+                if (_routeToPermissionKey.TryGetValue(routeWithoutIndex, out permissionKey))
+                {
+                    _logger.LogDebug("🗺️ Route resolved (without /index): {Route} → {PermissionKey}", routeWithoutIndex, permissionKey);
+                    return permissionKey;
+                }
+            }
+
+            _logger.LogWarning("⚠️ Route bulunamadı: {Route}", normalizedRoute);
+            return null;
         }
     }
 }

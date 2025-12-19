@@ -28,15 +28,78 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         /// <summary>
         /// Sayfa için permission key (örn: "PER.PERSONEL.MANAGE")
         /// Create/Edit ayrımı olan sayfalarda dinamik olabilir
+        /// 
+        /// ⚠️ UYARI: Bu property artık OPTIONAL!
+        /// - Eğer override edilirse: Manuel değer kullanılır (geriye uyumluluk)
+        /// - Eğer override edilmezse: Route'tan otomatik çözümlenir
         /// </summary>
-        protected abstract string PagePermissionKey { get; }
+        protected virtual string? PagePermissionKey => null;
+
+        /// <summary>
+        /// Çözümlenmiş permission key (cache)
+        /// </summary>
+        private string? _resolvedPermissionKey;
+
+        /// <summary>
+        /// Gerçek permission key'i döndürür (manuel veya otomatik)
+        /// </summary>
+        protected string ResolvedPermissionKey
+        {
+            get
+            {
+                if (_resolvedPermissionKey != null)
+                    return _resolvedPermissionKey;
+
+                // 1. Manuel override varsa onu kullan (geriye uyumluluk)
+                if (!string.IsNullOrEmpty(PagePermissionKey))
+                {
+                    _resolvedPermissionKey = PagePermissionKey;
+                    return _resolvedPermissionKey;
+                }
+
+                // 2. Route'tan otomatik çözümle
+                var currentPath = GetCurrentRoutePath();
+                _resolvedPermissionKey = PermissionStateService.GetPermissionKeyByRoute(currentPath);
+                
+                if (string.IsNullOrEmpty(_resolvedPermissionKey))
+                {
+                    // Route bulunamadı, varsayılan değer kullan
+                    _resolvedPermissionKey = "UNKNOWN";
+                }
+
+                return _resolvedPermissionKey;
+            }
+        }
+
+        /// <summary>
+        /// Mevcut route path'ini alır
+        /// Örnek: https://localhost:8080/personel/departman → /personel/departman
+        /// </summary>
+        private string GetCurrentRoutePath()
+        {
+            try
+            {
+                var uri = new Uri(NavigationManager.Uri);
+                var path = uri.AbsolutePath.TrimEnd('/');
+                
+                // Query string ve fragment'ı kaldır
+                if (path.Contains('?'))
+                    path = path.Substring(0, path.IndexOf('?'));
+                
+                return path;
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
 
         /// <summary>
         /// Field-level permission key prefix'i (örn: "PER.PERSONEL.MANAGE")
         /// Field permission key'leri bu prefix + ".FIELD." + fieldName şeklinde üretilir
-        /// Varsayılan olarak PagePermissionKey kullanılır, gerekirse override edilebilir
+        /// Varsayılan olarak ResolvedPermissionKey kullanılır, gerekirse override edilebilir
         /// </summary>
-        protected virtual string FieldPermissionKeyPrefix => PagePermissionKey;
+        protected virtual string FieldPermissionKeyPrefix => ResolvedPermissionKey;
 
         /// <summary>
         /// Sayfa Edit modunda mı? (Create modunda field-level permission uygulanmaz)
@@ -49,12 +112,12 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         /// <summary>
         /// Sayfa görüntüleme yetkisi var mı?
         /// </summary>
-        protected bool CanViewPage => PermissionStateService.CanView(PagePermissionKey);
+        protected bool CanViewPage => PermissionStateService.CanView(ResolvedPermissionKey);
 
         /// <summary>
         /// Sayfa düzenleme yetkisi var mı?
         /// </summary>
-        protected bool CanEditPage => PermissionStateService.CanEdit(PagePermissionKey);
+        protected bool CanEditPage => PermissionStateService.CanEdit(ResolvedPermissionKey);
 
         #endregion
 
@@ -113,11 +176,11 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         #region Action-Level Permissions (List sayfaları için)
 
         /// <summary>
-        /// Convention-based action permission key üretir: {PagePermissionKey}.ACTION.{ACTIONNAME}
+        /// Convention-based action permission key üretir: {ResolvedPermissionKey}.ACTION.{ACTIONNAME}
         /// Örnek: PER.PERSONEL.INDEX.ACTION.DETAIL
         /// </summary>
         protected string GetActionPermissionKey(string actionName)
-            => $"{PagePermissionKey}.ACTION.{actionName.ToUpperInvariant()}";
+            => $"{ResolvedPermissionKey}.ACTION.{actionName.ToUpperInvariant()}";
 
         /// <summary>
         /// Aksiyon yetkisi var mı? (View veya Edit seviyesi yeterli)
@@ -134,8 +197,11 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         /// </summary>
         protected bool IsActionVisible(string actionName)
         {
-            var level = PermissionStateService.GetLevel(GetActionPermissionKey(actionName));
-            return level != YetkiSeviyesi.None;
+            var actionKey = GetActionPermissionKey(actionName);
+            var level = PermissionStateService.GetLevel(actionKey);
+            var isVisible = level != YetkiSeviyesi.None;
+            
+            return isVisible;
         }
 
         /// <summary>
@@ -227,16 +293,9 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         {
             await base.OnInitializedAsync();
 
-            // Permission state'i yükle
-            try
-            {
-                await PermissionStateService.EnsureLoadedAsync();
-                PermissionStateService.OnChange += HandlePermissionStateChanged;
-            }
-            catch (Exception)
-            {
-                // Sessizce devam et
-            }
+            // Permission state'i yükle - ÖNCE permission'lar yüklensin, sonra render olsun
+            await PermissionStateService.EnsureLoadedAsync();
+            PermissionStateService.OnChange += HandlePermissionStateChanged;
         }
 
         /// <summary>

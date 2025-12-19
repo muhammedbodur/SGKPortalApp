@@ -23,11 +23,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         // PERMISSION CONFIGURATION (FieldPermissionPageBase)
         // ═══════════════════════════════════════════════════════════
 
-        /// <summary>
-        /// Sayfa permission key: PER.PERSONEL.INDEX
-        /// Action permission'lar: PER.PERSONEL.INDEX.ACTION.DETAIL, PER.PERSONEL.INDEX.ACTION.EDIT, vb.
-        /// </summary>
-        protected override string PagePermissionKey => "PER.PERSONEL.INDEX";
+        // ⚡ PagePermissionKey artık otomatik çözümleniyor!
+        // Route: /personel/index (veya /personel) → PermissionKey: PER.PERSONEL.INDEX
+        // Action permission'lar: PER.PERSONEL.INDEX.ACTION.DETAIL, PER.PERSONEL.INDEX.ACTION.EDIT, vb.
+        // Manuel override gerekmez, FieldPermissionPageBase otomatik halleder
+
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
         // ═══════════════════════════════════════════════════════

@@ -54,9 +54,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         // FIELD PERMISSION CONFIGURATION (FieldPermissionPageBase)
         // ═══════════════════════════════════════════════════════════
 
-        // Permission Keys - Create ve Edit için ayrı
-        private const string PermissionKeyCreate = "PER.PERSONEL.CREATE";
-        private const string PermissionKeyManage = "PER.PERSONEL.MANAGE";
+        // ⚡ PagePermissionKey artık otomatik çözümleniyor!
+        // Route: /personel/manage → PermissionKey: PER.PERSONEL.MANAGE
+        // Route: /personel/manage/{tcKimlikNo} → PermissionKey: PER.PERSONEL.MANAGE
+        // Manuel override gerekmez, FieldPermissionPageBase otomatik halleder
 
         /// <summary>
         /// Edit modu: TcKimlikNo parametresi varsa true
@@ -64,14 +65,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         protected override bool IsEditMode => !string.IsNullOrEmpty(TcKimlikNo);
 
         /// <summary>
-        /// Sayfa yetkisi: Create modunda PER.PERSONEL.CREATE, Edit modunda PER.PERSONEL.MANAGE
-        /// </summary>
-        protected override string PagePermissionKey => IsEditMode ? PermissionKeyManage : PermissionKeyCreate;
-
-        /// <summary>
         /// Field permission prefix'i: Her zaman PER.PERSONEL.MANAGE (field permission sadece Edit'te aktif)
+        /// Not: Create modunda field-level permission uygulanmaz, sadece Edit modunda aktif
         /// </summary>
-        protected override string FieldPermissionKeyPrefix => PermissionKeyManage;
+        protected override string FieldPermissionKeyPrefix => "PER.PERSONEL.MANAGE";
 
         // Lookup Lists
         private List<DepartmanResponseDto> Departmanlar { get; set; } = new();
