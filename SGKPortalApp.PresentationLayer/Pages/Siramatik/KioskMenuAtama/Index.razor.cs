@@ -150,14 +150,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
 
         private async Task OnHizmetBinasiChanged(ChangeEventArgs e)
         {
+            // ✅ 1. YETKİ KONTROLÜ: Kullanıcı bu filtreyi değiştirebilir mi?
+            if (!CanEditFieldInList("HIZMET_BINASI"))
+            {
+                await _toastService.ShowWarningAsync("Bu filtreyi değiştirme yetkiniz yok!");
+                _logger.LogWarning("Yetkisiz filtre değiştirme denemesi: HIZMET_BINASI");
+                return; // ❌ İşlemi durdur
+            }
+
             if (int.TryParse(e.Value?.ToString(), out int binaId))
             {
-                // ✅ Güvenlik kontrolü: Kullanıcı başka Hizmet Binasını seçmeye çalışıyor mu?
+                // ✅ 2. DATA VALİDATİON: Kullanıcı başka Hizmet Binasını seçmeye çalışıyor mu?
                 if (binaId > 0 && !CanAccessHizmetBinasi(binaId))
                 {
                     await _toastService.ShowWarningAsync("Bu Hizmet Binasını görüntüleme yetkiniz yok!");
                     _logger.LogWarning("Yetkisiz Hizmet Binası erişim denemesi: {BinaId}", binaId);
-                    return; // İşlemi durdur
+                    return; // ❌ İşlemi durdur
                 }
 
                 selectedHizmetBinasiId = binaId;

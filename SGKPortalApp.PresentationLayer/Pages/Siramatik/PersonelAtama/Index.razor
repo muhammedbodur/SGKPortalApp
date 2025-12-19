@@ -74,48 +74,57 @@ else
             <div class="card-body">
                 <div class="row g-3">
                     <!-- Hizmet Binası Seçimi -->
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">
-                            <i class="bx bx-building me-2"></i>Hizmet Binası
-                            @if (isFiltersLocked)
+                    @if (IsFieldVisibleInList("HIZMET_BINASI"))
+                    {
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">
+                                <i class="bx bx-building me-2"></i>Hizmet Binası
+                                @if (!CanEditFieldInList("HIZMET_BINASI"))
+                                {
+                                    <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
+                                        <i class="bx bx-lock-alt"></i>
+                                    </span>
+                                }
+                                @if (isFiltersLocked)
+                                {
+                                    <span class="badge bg-label-secondary ms-1"><i class="bx bx-lock-alt"></i></span>
+                                }
+                            </label>
+                            <select class="form-select"
+                                    value="@SelectedHizmetBinasiId"
+                                    @onchange="OnHizmetBinasiChanged"
+                                    disabled="@(IsLoadingDropdowns || isFiltersLocked || IsFieldDisabledInList("HIZMET_BINASI"))">
+                                <option value="0">-- Hizmet Binası Seçiniz --</option>
+                                @foreach (var hb in HizmetBinalari)
+                                {
+                                    <option value="@hb.HizmetBinasiId">
+                                        @hb.HizmetBinasiAdi (@hb.PersonelSayisi personel)
+                                    </option>
+                                }
+                            </select>
+                            @if (IsLoadingDropdowns)
                             {
-                                <span class="badge bg-label-secondary ms-1"><i class="bx bx-lock-alt"></i></span>
+                                <small class="text-muted d-block mt-1">
+                                    <i class="bx bx-loader-alt bx-spin me-1"></i>
+                                    Yükleniyor...
+                                </small>
                             }
-                        </label>
-                        <select class="form-select"
-                                value="@SelectedHizmetBinasiId"
-                                @onchange="OnHizmetBinasiChanged"
-                                disabled="@(IsLoadingDropdowns || isFiltersLocked)">
-                            <option value="0">-- Hizmet Binası Seçiniz --</option>
-                            @foreach (var hb in HizmetBinalari)
+                            else if (HizmetBinalari.Any())
                             {
-                                <option value="@hb.HizmetBinasiId">
-                                    @hb.HizmetBinasiAdi (@hb.PersonelSayisi personel)
-                                </option>
+                                <small class="text-success d-block mt-1">
+                                    <i class="bx bx-check-circle me-1"></i>
+                                    @HizmetBinalari.Count Hizmet binası mevcut
+                                </small>
                             }
-                        </select>
-                        @if (IsLoadingDropdowns)
-                        {
-                            <small class="text-muted d-block mt-1">
-                                <i class="bx bx-loader-alt bx-spin me-1"></i>
-                                Yükleniyor...
-                            </small>
-                        }
-                        else if (HizmetBinalari.Any())
-                        {
-                            <small class="text-success d-block mt-1">
-                                <i class="bx bx-check-circle me-1"></i>
-                                @HizmetBinalari.Count Hizmet binası mevcut
-                            </small>
-                        }
-                        else if (!HizmetBinalari.Any())
-                        {
-                            <small class="text-warning d-block mt-1">
-                                <i class="bx bx-info-circle me-1"></i>
-                                Hizmet binası bulunamadı
-                            </small>
-                        }
-                    </div>
+                            else if (!HizmetBinalari.Any())
+                            {
+                                <small class="text-warning d-block mt-1">
+                                    <i class="bx bx-info-circle me-1"></i>
+                                    Hizmet binası bulunamadı
+                                </small>
+                            }
+                        </div>
+                    }
 
                     <div class="col-md-6">
                         <label class="form-label fw-bold">

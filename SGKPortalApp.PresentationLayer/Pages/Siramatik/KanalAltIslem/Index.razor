@@ -60,22 +60,31 @@
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-body py-3">
                 <div class="row g-3 align-items-center">
-                    <div class="col-lg-3">
-                        <label class="form-label fw-semibold mb-1">
-                            <i class="bx bx-building me-1 text-primary"></i>Hizmet Binası
-                            @if (isKanalIslemLocked)
-                            {
-                                <span class="badge bg-label-secondary ms-1"><i class="bx bx-lock-alt"></i></span>
-                            }
-                        </label>
-                        <select class="form-select" @onchange="OnHizmetBinasiChanged" value="@selectedHizmetBinasiId" disabled="@isKanalIslemLocked">
-                            <option value="0">-- Hizmet Binası Seçiniz --</option>
-                            @foreach (var bina in hizmetBinalari)
-                            {
-                                <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
-                            }
-                        </select>
-                    </div>
+                    @if (IsFieldVisibleInList("HIZMET_BINASI"))
+                    {
+                        <div class="col-lg-3">
+                            <label class="form-label fw-semibold mb-1">
+                                <i class="bx bx-building me-1 text-primary"></i>Hizmet Binası
+                                @if (!CanEditFieldInList("HIZMET_BINASI"))
+                                {
+                                    <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
+                                        <i class="bx bx-lock-alt"></i>
+                                    </span>
+                                }
+                                @if (isKanalIslemLocked)
+                                {
+                                    <span class="badge bg-label-secondary ms-1"><i class="bx bx-lock-alt"></i></span>
+                                }
+                            </label>
+                            <select class="form-select" @onchange="OnHizmetBinasiChanged" value="@selectedHizmetBinasiId" disabled="@(isKanalIslemLocked || IsFieldDisabledInList("HIZMET_BINASI"))">
+                                <option value="0">-- Hizmet Binası Seçiniz --</option>
+                                @foreach (var bina in hizmetBinalari)
+                                {
+                                    <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                                }
+                            </select>
+                        </div>
+                    }
                     <div class="col-lg-3">
                         <label class="form-label fw-semibold mb-1">
                             <i class="bx bx-cog me-1 text-info"></i>Kanal İşlem
