@@ -79,18 +79,30 @@ else
         <div class="card-body">
             <div class="row g-3">
                 <!-- Hizmet Binası Seçimi -->
-                <div class="col-md-3">
-                    <label class="form-label">
-                        <i class="bx bx-building me-1"></i>Hizmet Binası
-                    </label>
-                    <select class="form-select" @onchange="OnHizmetBinasiChanged" value="@selectedHizmetBinasiId">
-                        <option value="0">-- Hizmet Binası Seçiniz --</option>
-                        @foreach (var bina in hizmetBinalari)
-                        {
-                            <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
-                        }
-                    </select>
-                </div>
+                @if (IsFieldVisibleInList("HIZMET_BINASI"))
+                {
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            <i class="bx bx-building me-1"></i>Hizmet Binası
+                            @if (!CanEditFieldInList("HIZMET_BINASI"))
+                            {
+                                <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
+                                    <i class="bx bx-lock-alt"></i>
+                                </span>
+                            }
+                        </label>
+                        <select class="form-select"
+                                @onchange="OnHizmetBinasiChanged"
+                                value="@selectedHizmetBinasiId"
+                                disabled="@IsFieldDisabledInList("HIZMET_BINASI")">
+                            <option value="0">-- Hizmet Binası Seçiniz --</option>
+                            @foreach (var bina in hizmetBinalari)
+                            {
+                                <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                            }
+                        </select>
+                    </div>
+                }
 
                 <!-- Kat Filtresi -->
                 <div class="col-md-2">
