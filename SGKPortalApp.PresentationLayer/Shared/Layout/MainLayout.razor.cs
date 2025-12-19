@@ -24,6 +24,7 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         [Inject] private IUserApiService UserApiService { get; set; } = default!;
         [Inject] private ISiraCagirmaApiService SiraCagirmaApiService { get; set; } = default!;
         [Inject] private PermissionStateService PermissionStateService { get; set; } = default!;
+        [Inject] private PagePermissionService PagePermissionService { get; set; } = default!;
 
         [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
         [Inject] private ILogger<MainLayout> Logger { get; set; } = default!;
@@ -73,6 +74,9 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
 
                 // 2. İlk session kontrolü
                 await CheckSessionValidityThrottledAsync();
+
+                // 2.5 Route-based permission kontrolü
+                await CheckPagePermissionAsync();
 
                 // 3. Panel verisini yalnızca banko modundaysa yükle
                 await LoadBankoPanelSiralarAsync();
@@ -207,7 +211,10 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                     // 2. Session kontrolü (throttled - her 30 saniyede bir)
                     await CheckSessionValidityThrottledAsync();
 
-                    // 3. Banko modu kontrolü
+                    // 3. Route-based permission kontrolü
+                    await CheckPagePermissionAsync();
+
+                    // 4. Banko modu kontrolü
                     CheckBankoModeAccess();
 
                     // 4. UI güncelle
@@ -299,6 +306,35 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                 Logger.LogError(ex, "❌ Session kontrolü hatası");
                 // Hata durumunda güvenli tarafta kal - login'e yönlendir
                 NavigationManager.NavigateTo("/auth/login?error=true", forceLoad: true);
+            }
+        }
+
+        /// <summary>
+        /// Route-based permission kontrolü
+        /// </summary>
+        private async Task CheckPagePermissionAsync()
+        {
+            try
+            {
+                var currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+                var relativeUrl = string.IsNullOrEmpty(currentUrl) ? "/" : $"/{currentUrl}";
+
+                // Public sayfalar için yetki kontrolü yapma
+                var publicPages = new[] { "/auth/login", "/auth/forgot-password", "/auth/reset-password" };
+                if (publicPages.Any(p => relativeUrl.StartsWith(p, StringComparison.OrdinalIgnoreCase)))
+                    return;
+
+                // Route-based permission kontrolü
+                var canAccess = await PagePermissionService.CanAccessPageAsync(relativeUrl);
+                if (!canAccess)
+                {
+                    Logger.LogWarning("⚠️ Yetkisiz erişim denemesi: {Url} - ana sayfaya yönlendiriliyor", relativeUrl);
+                    NavigationManager.NavigateTo("/", forceLoad: true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "❌ CheckPagePermissionAsync hatası");
             }
         }
 
