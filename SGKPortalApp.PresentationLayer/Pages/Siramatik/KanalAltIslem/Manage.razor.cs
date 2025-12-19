@@ -12,7 +12,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
 {
     public partial class Manage
     {
-        protected override string PagePermissionKey => "SIRA.KANALALTISLEM.MANAGE";
 
         [Inject] private IKanalAltIslemApiService _kanalAltIslemService { get; set; } = default!;
         [Inject] private IKanalIslemApiService _kanalIslemService { get; set; } = default!;

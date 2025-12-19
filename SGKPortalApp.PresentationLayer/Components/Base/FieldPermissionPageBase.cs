@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.StateServices;
 
@@ -6,29 +7,30 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
 {
     /// <summary>
     /// Field-level ve Action-level permission destekli sayfa base class'ı.
-    /// 
+    ///
     /// Convention-based permission key üretimi:
-    /// - FormField: {FieldPermissionKeyPrefix}.FORMFIELD.{FIELDNAME}  (örn: PER.PERSONEL.MANAGE.FORMFIELD.EMAIL)
-    /// - Action: {PagePermissionKey}.ACTION.{ACTIONNAME}              (örn: PER.PERSONEL.INDEX.ACTION.DETAIL)
-    /// 
+    /// - FormField: {FieldPermissionKeyPrefix}.FORMFIELD.{FIELDNAME}  (örn: PERSONEL.MANAGE.FORMFIELD.EMAIL)
+    /// - Action: {PagePermissionKey}.ACTION.{ACTIONNAME}              (örn: PERSONEL.INDEX.ACTION.DETAIL)
+    ///
     /// Kullanım (Manage/Create sayfaları):
     /// 1. Sayfanızda bu class'ı inherit edin
-    /// 2. PagePermissionKey property'sini override edin (sayfa yetkisi için)
+    /// 2. PagePermissionKey artık otomatik route'tan çözümlenir (manuel override GEREKMEZ)
     /// 3. IsEditMode property'sini override edin (Create/Edit ayrımı için)
     /// 4. Razor'da: @if (IsFieldVisible(nameof(Model.Email))) ve disabled="@(!CanEditField(nameof(Model.Email)))"
-    /// 
+    ///
     /// Kullanım (List/Index sayfaları):
-    /// 1. PagePermissionKey = "PER.PERSONEL.INDEX"
+    /// 1. PagePermissionKey otomatik çözümlenir (route: /personel → key: PERSONEL.INDEX)
     /// 2. Razor'da: @if (CanAction("DETAIL")) { <button @onclick="NavigateToDetail">Detay</button> }
     /// </summary>
     public abstract class FieldPermissionPageBase : BasePageComponent, IDisposable
     {
         [Inject] protected PermissionStateService PermissionStateService { get; set; } = default!;
+        [Inject] protected ILogger<FieldPermissionPageBase> Logger { get; set; } = default!;
 
         /// <summary>
-        /// Sayfa için permission key (örn: "PER.PERSONEL.MANAGE")
+        /// Sayfa için permission key (örn: "PERSONEL.MANAGE")
         /// Create/Edit ayrımı olan sayfalarda dinamik olabilir
-        /// 
+        ///
         /// ⚠️ UYARI: Bu property artık OPTIONAL!
         /// - Eğer override edilirse: Manuel değer kullanılır (geriye uyumluluk)
         /// - Eğer override edilmezse: Route'tan otomatik çözümlenir
@@ -100,8 +102,8 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         }
 
         /// <summary>
-        /// Field-level permission key prefix'i (örn: "PER.PERSONEL.MANAGE")
-        /// Field permission key'leri bu prefix + ".FIELD." + fieldName şeklinde üretilir
+        /// Field-level permission key prefix'i (örn: "PERSONEL.MANAGE")
+        /// Field permission key'leri bu prefix + ".FORMFIELD." + fieldName şeklinde üretilir
         /// Varsayılan olarak ResolvedPermissionKey kullanılır, gerekirse override edilebilir
         /// </summary>
         protected virtual string FieldPermissionKeyPrefix => ResolvedPermissionKey;
@@ -142,7 +144,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
 
         /// <summary>
         /// Convention-based field permission key üretir: {FieldPermissionKeyPrefix}.FORMFIELD.{FIELDNAME}
-        /// Örnek: PER.PERSONEL.MANAGE.FORMFIELD.EMAIL
+        /// Örnek: PERSONEL.MANAGE.FORMFIELD.EMAIL
         /// </summary>
         protected string GetFieldPermissionKey(string fieldName)
             => $"{FieldPermissionKeyPrefix}.FORMFIELD.{fieldName.ToUpperInvariant()}";
@@ -194,7 +196,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
 
         /// <summary>
         /// Convention-based action permission key üretir: {ResolvedPermissionKey}.ACTION.{ACTIONNAME}
-        /// Örnek: PER.PERSONEL.INDEX.ACTION.DETAIL
+        /// Örnek: PERSONEL.INDEX.ACTION.DETAIL
         /// </summary>
         protected string GetActionPermissionKey(string actionName)
             => $"{ResolvedPermissionKey}.ACTION.{actionName.ToUpperInvariant()}";
@@ -235,7 +237,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
 
         /// <summary>
         /// Convention-based action permission key üretir (ActionType enum ile)
-        /// Örnek: PER.PERSONEL.INDEX.ACTION.DETAIL
+        /// Örnek: PERSONEL.INDEX.ACTION.DETAIL
         /// </summary>
         protected string GetActionPermissionKey(ActionType actionType)
             => GetActionPermissionKey(actionType.ToString());
@@ -310,7 +312,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         /// Index sayfalarındaki field/filter'lar için edit yetkisi kontrolü
         /// IsEditMode kontrolü YAPMAZ (Index sayfaları için)
         /// Permission Key: {PagePermissionKey}.FORMFIELD.{FIELDNAME}
-        /// Örnek: SIRA.BANKO.INDEX.FORMFIELD.HIZMET_BINASI
+        /// Örnek: SIRAMATIK.BANKO.LIST.FORMFIELD.HIZMET_BINASI
         /// </summary>
         protected bool CanEditFieldInList(string fieldName)
         {

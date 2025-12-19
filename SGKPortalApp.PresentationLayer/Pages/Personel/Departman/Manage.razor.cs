@@ -18,7 +18,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
         /// Route: /personel-departman/manage/{id}
         /// Convention: {MODUL_KODU}.{URL_TIRESIZ}.{ACTION}
         /// </summary>
-        protected override string PagePermissionKey => "PER.PERSONELDEPARTMAN.MANAGE";
 
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION

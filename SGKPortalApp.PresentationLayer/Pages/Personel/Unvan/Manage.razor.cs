@@ -11,7 +11,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Unvan
 {
     public partial class Manage
     {
-        protected override string PagePermissionKey => "PER.UNVAN.MANAGE";
 
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION

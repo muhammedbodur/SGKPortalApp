@@ -9,7 +9,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.SignalRLogs
 {
     public partial class Index : IDisposable
     {
-        protected override string PagePermissionKey => "SIRA.SIGNALRLOGS.INDEX";
 
         [Inject] private ISignalREventLogApiService _eventLogService { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;

@@ -9,7 +9,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.Il
 {
     public partial class Manage
     {
-        protected override string PagePermissionKey => "CMN.IL.MANAGE";
 
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION

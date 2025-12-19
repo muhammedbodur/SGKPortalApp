@@ -20,7 +20,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.YetkiAtama
         /// Route: /yetki-atama
         /// Convention: {MODUL_KODU}.{URL_TIRESIZ}.{ACTION}
         /// </summary>
-        protected override string PagePermissionKey => "YET.YETKIATAMA.INDEX";
         // amamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamam
         // DEPENDENCY INJECTION
         // amamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamam

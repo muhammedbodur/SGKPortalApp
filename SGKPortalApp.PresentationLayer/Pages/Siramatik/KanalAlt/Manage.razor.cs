@@ -10,7 +10,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAlt
 {
     public partial class Manage
     {
-        protected override string PagePermissionKey => "SIRA.KANALALT.MANAGE";
 
         [Inject] private IKanalAltApiService _kanalAltService { get; set; } = default!;
         [Inject] private IKanalApiService _kanalService { get; set; } = default!;

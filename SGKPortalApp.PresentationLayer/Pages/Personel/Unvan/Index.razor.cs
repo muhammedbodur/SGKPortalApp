@@ -15,7 +15,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Unvan
 {
     public partial class Index
     {
-        protected override string PagePermissionKey => "PER.UNVAN.INDEX";
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
         // ═══════════════════════════════════════════════════════

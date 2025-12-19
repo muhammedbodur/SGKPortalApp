@@ -27,7 +27,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Controller
         /// Route: /yetki-controller
         /// Convention: {MODUL_KODU}.{URL_TIRESIZ}.{ACTION}
         /// </summary>
-        protected override string PagePermissionKey => "YET.YETKICONTROLLER.INDEX";
 
         // ═══════════════════════════════════════════════════════════
         // STATE

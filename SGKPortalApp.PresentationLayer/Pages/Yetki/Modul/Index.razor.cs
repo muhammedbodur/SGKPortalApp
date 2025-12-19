@@ -19,7 +19,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Modul
         /// Route: /yetki-modul
         /// Convention: {MODUL_KODU}.{URL_TIRESIZ}.{ACTION}
         /// </summary>
-        protected override string PagePermissionKey => "YET.YETKIMODUL.INDEX";
 
         private List<ModulResponseDto> Moduller = new();
         private List<ModulResponseDto> FilteredModuller = new();

@@ -12,7 +12,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KioskMenuAtama
 {
     public partial class Manage
     {
-        protected override string PagePermissionKey => "SIRA.KIOSKMENUATAMA.MANAGE";
 
         [Parameter] public int? KioskMenuAtamaId { get; set; }
 

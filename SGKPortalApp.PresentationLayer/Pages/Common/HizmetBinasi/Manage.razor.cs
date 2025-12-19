@@ -12,7 +12,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
 {
     public partial class Manage
     {
-        protected override string PagePermissionKey => "CMN.HIZMETBINASI.MANAGE";
 
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
