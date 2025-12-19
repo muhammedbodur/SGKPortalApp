@@ -11,5 +11,11 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common
         [Required(ErrorMessage = "Modül seçimi zorunludur")]
         [Range(1, int.MaxValue, ErrorMessage = "Geçerli bir modül seçiniz")]
         public int ModulId { get; set; }
+
+        /// <summary>
+        /// Üst controller (parent) - Hiyerarşik yapı için
+        /// NULL ise root controller'dır
+        /// </summary>
+        public int? UstModulControllerId { get; set; }
     }
 }

@@ -19,6 +19,21 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
         [InverseProperty("ModulControllers")]
         public required Modul Modul { get; set; }
 
+        /// <summary>
+        /// Üst controller (parent) - Hiyerarşik yapı için
+        /// NULL ise root controller'dır
+        /// </summary>
+        public int? UstModulControllerId { get; set; }
+        [ForeignKey("UstModulControllerId")]
+        [InverseProperty("AltModulControllers")]
+        public ModulController? UstModulController { get; set; }
+
+        /// <summary>
+        /// Alt controller'lar (children) - Hiyerarşik yapı için
+        /// </summary>
+        [InverseProperty("UstModulController")]
+        public ICollection<ModulController> AltModulControllers { get; set; } = new List<ModulController>();
+
         public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
 
         [InverseProperty("ModulController")]

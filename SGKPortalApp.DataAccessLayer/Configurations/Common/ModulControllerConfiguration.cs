@@ -31,12 +31,23 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.Common
                 .IsRequired()
                 .HasDefaultValue(false);
 
+            // Hiyerarşik yapı için UstModulControllerId
+            builder.Property(mc => mc.UstModulControllerId)
+                .IsRequired(false);
+
             builder.HasIndex(mc => new { mc.ModulId, mc.ModulControllerAdi })
                 .IsUnique()
                 .HasDatabaseName("IX_PER_ModulControllers_Modul_Controller")
                 .HasFilter("[SilindiMi] = 0");
 
             builder.HasQueryFilter(mc => !mc.SilindiMi);
+
+            // Self-referencing relationship (Parent-Child)
+            builder.HasOne(mc => mc.UstModulController)
+                .WithMany(mc => mc.AltModulControllers)
+                .HasForeignKey(mc => mc.UstModulControllerId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_PER_ModulControllers_UstController");
 
             builder.HasMany(mc => mc.ModulControllerIslemler)
                 .WithOne(mci => mci.ModulController)
