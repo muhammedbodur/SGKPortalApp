@@ -378,6 +378,7 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
             try
             {
                 await PermissionStateService.RefreshAsync();
+                await PagePermissionService.RefreshAsync(); // ✅ Route-permission mapping'i de yenile
                 await InvokeAsync(StateHasChanged);
             }
             catch (Exception ex)
@@ -392,6 +393,7 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
             try
             {
                 await PermissionStateService.RefreshDefinitionsAsync();
+                await PagePermissionService.RefreshAsync(); // ✅ Route-permission mapping'i de yenile
                 await InvokeAsync(StateHasChanged);
             }
             catch (Exception ex)
