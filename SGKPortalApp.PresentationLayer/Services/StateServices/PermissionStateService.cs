@@ -293,13 +293,13 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
         }
 
         /// <summary>
-        /// Permission key bazlı yetki seviyesi döner (örn: "PER.PERSONEL.LIST")
+        /// Permission key bazlı yetki seviyesi döner
         /// Senkron versiyon - EnsureLoadedAsync önceden çağrılmış olmalı
-        /// 
+        ///
         /// Mantık:
-        /// - Key sistemde tanımlı DEĞİLSE → Edit (henüz permission uygulanmamış, tam yetki)
-        /// - Key sistemde tanımlı VE kullanıcıya verilmişse → Verilen seviye
-        /// - Key sistemde tanımlı VE kullanıcıya verilmemişse → MinYetkiSeviyesi (varsayılan davranış)
+        /// - Key sistemde tanımlı DEĞİLSE → Edit (henüz permission uygulanmamış, geçici tam yetki)
+        /// - Key sistemde tanımlı VE kullanıcıya verilmişse → Kullanıcıya verilen seviye
+        /// - Key sistemde tanımlı VE kullanıcıya verilmemişse → None (default deny - güvenlik)
         /// </summary>
         public YetkiSeviyesi GetLevel(string permissionKey)
         {
@@ -309,11 +309,11 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
                 return YetkiSeviyesi.None;
             }
 
-            // ⚠️ ÖZEL DURUM: Route çözümlenememiş sayfalar için default deny
+            // ⚠️ ÖZEL DURUM: Route mapping bulunamayan sayfalar (geliştirme aşamasında)
             if (permissionKey == "UNKNOWN")
             {
-                _logger.LogWarning("🔒 GetLevel: Key=UNKNOWN (route çözümlenemedi), erişim reddedildi (default deny)");
-                return YetkiSeviyesi.None;
+                _logger.LogWarning("🔓 GetLevel: Key=UNKNOWN (route mapping yok), geçici erişim veriliyor (Edit)");
+                return YetkiSeviyesi.Edit;
             }
 
             // 1. Sistemde tanımlı mı kontrol et (önce bu kontrolü yapalım)
@@ -334,16 +334,18 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
             }
 
             // 3. Kullanıcıya verilmemiş - sistemde tanımlı mı?
-            if (isDefinedInSystem && _definedPermissions.TryGetValue(permissionKey, out var minLevel))
+            if (isDefinedInSystem)
             {
-                // Sistemde tanımlı ama kullanıcıya verilmemiş → MinYetkiSeviyesi (varsayılan davranış)
-                _logger.LogInformation("📋 GetLevel: Key={Key}, Level={Level} (sistemde tanımlı, MinYetkiSeviyesi)", permissionKey, minLevel);
-                return minLevel;
+                // Sistemde tanımlı ama kullanıcıya verilmemiş → None (default deny)
+                // MinYetkiSeviyesi kullanılmıyor çünkü o sadece metadata (gerekli minimum seviye)
+                _logger.LogWarning("🔒 GetLevel: Key={Key}, Level=None (sistemde tanımlı ama kullanıcıya atanmamış, erişim reddedildi)", permissionKey);
+                return YetkiSeviyesi.None;
             }
 
             // 4. Sistemde tanımlı değil → Edit (henüz permission uygulanmamış)
-            // ⚠️ UYARI: Bu durumda tam yetki veriliyor çünkü permission sistemi henüz uygulanmamış
-            _logger.LogWarning("🔓 GetLevel: Key={Key}, Level=Edit (sistemde tanımlı değil, tam yetki veriliyor!)", permissionKey);
+            // ⚠️ UYARI: Bu durumda geçici olarak tam yetki veriliyor
+            // Yeni sayfa eklendiğinde permission tanımlanana kadar erişim sağlanır
+            _logger.LogWarning("🔓 GetLevel: Key={Key}, Level=Edit (sistemde tanımlı değil, geçici tam yetki veriliyor!)", permissionKey);
             return YetkiSeviyesi.Edit;
         }
 
