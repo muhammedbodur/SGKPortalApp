@@ -310,7 +310,8 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         }
 
         /// <summary>
-        /// Route-based permission kontrolü
+        /// Route-based permission kontrolü (Logging only)
+        /// Sayfalar kendi yetki kontrolünü yapmalı (FieldPermissionPageBase.CanViewPage)
         /// </summary>
         private async Task CheckPagePermissionAsync()
         {
@@ -324,12 +325,13 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                 if (publicPages.Any(p => relativeUrl.StartsWith(p, StringComparison.OrdinalIgnoreCase)))
                     return;
 
-                // Route-based permission kontrolü
+                // Route-based permission kontrolü (sadece loglama)
                 var canAccess = await PagePermissionService.CanAccessPageAsync(relativeUrl);
                 if (!canAccess)
                 {
-                    Logger.LogWarning("⚠️ Yetkisiz erişim denemesi: {Url} - ana sayfaya yönlendiriliyor", relativeUrl);
-                    NavigationManager.NavigateTo("/", forceLoad: true);
+                    Logger.LogWarning("⚠️ Yetkisiz erişim denemesi: {Url} - Sayfa kendi yetki UI'ını gösterecek", relativeUrl);
+                    // NOT: Redirect yapılmıyor, sayfa kendi yetki kontrolünü yapıyor
+                    // Bu sayede sayfadaki "Bu sayfayı görüntüleme yetkiniz bulunmuyor." mesajı görülebiliyor
                 }
             }
             catch (Exception ex)
