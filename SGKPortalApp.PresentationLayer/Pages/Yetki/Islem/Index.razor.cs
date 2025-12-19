@@ -17,7 +17,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
         /// Route: /yetki-islem
         /// Convention: {MODUL_KODU}.{URL_TIRESIZ}.{ACTION}
         /// </summary>
-        protected override string PagePermissionKey => "YETKI.YETKI-ISLEM.INDEX";
         [Inject] private IModulControllerIslemApiService IslemApiService { get; set; } = default!;
         [Inject] private IModulControllerApiService ControllerApiService { get; set; } = default!;
         [Inject] private IModulApiService ModulApiService { get; set; } = default!;

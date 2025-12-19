@@ -14,7 +14,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Sendika
 {
     public partial class Index
     {
-        protected override string PagePermissionKey => "PER.SENDIKA.INDEX";
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
         // ═══════════════════════════════════════════════════════

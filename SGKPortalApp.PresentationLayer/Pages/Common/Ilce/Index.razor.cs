@@ -13,7 +13,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.Ilce
 {
     public partial class Index
     {
-        protected override string PagePermissionKey => "PORTAL.ILCE.INDEX";
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
         // ═══════════════════════════════════════════════════════

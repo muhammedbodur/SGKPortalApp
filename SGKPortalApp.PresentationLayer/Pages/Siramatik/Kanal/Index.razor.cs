@@ -15,7 +15,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kanal
 {
     public partial class Index
     {
-        protected override string PagePermissionKey => "SIRA.KANAL.INDEX";
 
         [Inject] private IKanalApiService _kanalService { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;

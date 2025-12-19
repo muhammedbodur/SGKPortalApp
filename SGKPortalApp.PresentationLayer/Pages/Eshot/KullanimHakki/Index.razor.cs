@@ -4,6 +4,5 @@ namespace SGKPortalApp.PresentationLayer.Pages.Eshot.KullanimHakki
 {
     public partial class Index
     {
-        protected override string PagePermissionKey => "ESHOT.KULLANIMHAKKI.INDEX";
     }
 }

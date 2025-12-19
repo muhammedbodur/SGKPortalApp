@@ -14,7 +14,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
 {
     public partial class Index
     {
-        protected override string PagePermissionKey => "PORTAL.HIZMETBINASI.INDEX";
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
         // ═══════════════════════════════════════════════════════

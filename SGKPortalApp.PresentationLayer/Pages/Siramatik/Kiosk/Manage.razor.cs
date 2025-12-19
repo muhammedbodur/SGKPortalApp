@@ -12,7 +12,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
 {
     public partial class Manage
     {
-        protected override string PagePermissionKey => "SIRA.KIOSK.MANAGE";
 
         [Inject] private IKioskApiService _kioskService { get; set; } = default!;
         [Inject] private IHizmetBinasiApiService _hizmetBinasiService { get; set; } = default!;

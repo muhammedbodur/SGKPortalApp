@@ -14,7 +14,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
 {
     public partial class Index
     {
-        protected override string PagePermissionKey => "PER.DEPARTMAN.INDEX";
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
         // ═══════════════════════════════════════════════════════

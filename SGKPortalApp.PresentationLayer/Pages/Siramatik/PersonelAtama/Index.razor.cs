@@ -30,7 +30,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
     /// </summary>
     public partial class Index
     {
-        protected override string PagePermissionKey => "SIRA.PERSONELATAMA.INDEX";
 
 
         // URL Parameters
