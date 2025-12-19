@@ -18,11 +18,11 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         [Inject] protected AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
 
         /// <summary>
-        /// Component'i yeniden render et
+        /// Component'i yeniden render et (async context için)
         /// </summary>
-        protected new void StateHasChanged()
+        protected void RefreshUI()
         {
-            base.StateHasChanged();
+            InvokeAsync(StateHasChanged);
         }
 
         /// <summary>
