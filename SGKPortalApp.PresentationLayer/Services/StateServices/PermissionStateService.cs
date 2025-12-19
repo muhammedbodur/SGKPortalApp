@@ -309,11 +309,11 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
                 return YetkiSeviyesi.None;
             }
 
-            // ⚠️ ÖZEL DURUM: Route çözümlenememiş sayfalar için default deny
+            // ⚠️ ÖZEL DURUM: Route mapping bulunamayan sayfalar (geliştirme aşamasında)
             if (permissionKey == "UNKNOWN")
             {
-                _logger.LogWarning("🔒 GetLevel: Key=UNKNOWN (route çözümlenemedi), erişim reddedildi (default deny)");
-                return YetkiSeviyesi.None;
+                _logger.LogWarning("🔓 GetLevel: Key=UNKNOWN (route mapping yok), geçici erişim veriliyor (Edit)");
+                return YetkiSeviyesi.Edit;
             }
 
             // 1. Sistemde tanımlı mı kontrol et (önce bu kontrolü yapalım)
