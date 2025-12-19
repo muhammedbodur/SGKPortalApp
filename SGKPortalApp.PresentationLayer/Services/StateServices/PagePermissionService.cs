@@ -147,7 +147,15 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
                 return true; // PermissionKey tanımlı değilse erişime izin ver
 
             var userLevel = await _permissionStateService.GetPermissionLevelAsync(permissionKey);
-            return userLevel >= minLevel;
+
+            // None seviyesi "yetkisiz" demektir, erişim yok
+            if (userLevel == YetkiSeviyesi.None)
+                return false;
+
+            // MinYetkiSeviyesi de None ise, bu sayfa için en az View seviyesi gerekli
+            var requiredLevel = minLevel > YetkiSeviyesi.None ? minLevel : YetkiSeviyesi.View;
+
+            return userLevel >= requiredLevel;
         }
 
         /// <summary>
