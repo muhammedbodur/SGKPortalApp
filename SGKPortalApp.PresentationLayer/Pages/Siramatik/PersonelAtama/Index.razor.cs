@@ -243,12 +243,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
         private async Task OnHizmetBinasiChanged(ChangeEventArgs e)
         {
             // ✅ 1. YETKİ KONTROLÜ: Kullanıcı bu filtreyi değiştirebilir mi?
-            if (!CanEditFieldInList("HIZMET_BINASI"))
+            if (!CanEditFieldInList("HIZMETBINASIID"))
             {
                 await _toastService.ShowWarningAsync("Bu filtreyi değiştirme yetkiniz yok!");
                 _logger.LogWarning("Yetkisiz filtre değiştirme denemesi: HIZMET_BINASI");
                 return; // ❌ İşlemi durdur
             }
+
 
             if (e.Value != null && int.TryParse(e.Value.ToString(), out int selectedId))
             {
@@ -259,6 +260,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
                     _logger.LogWarning("Yetkisiz Hizmet Binası erişim denemesi: {BinaId}", selectedId);
                     return; // ❌ İşlemi durdur
                 }
+
 
                 SelectedHizmetBinasiId = selectedId;
             }

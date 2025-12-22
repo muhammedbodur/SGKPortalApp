@@ -17,17 +17,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
     public partial class Index
     {
 
-        [Inject]
-        private ITvApiService _tvService { get; set; } = default!;
-
-        [Inject]
-        private IHizmetBinasiApiService _hizmetBinasiService { get; set; } = default!;
-
-        [Inject]
-        private IToastService _toastService { get; set; } = default!;
-
-        [Inject]
-        private NavigationManager _navigationManager { get; set; } = default!;
+        [Inject] private ITvApiService _tvService { get; set; } = default!;
+        [Inject] private IHizmetBinasiApiService _hizmetBinasiService { get; set; } = default!;
+        [Inject] private IToastService _toastService { get; set; } = default!;
+        [Inject] private NavigationManager _navigationManager { get; set; } = default!;
+        [Inject] private ILogger<Index> _logger { get; set; } = default!;
 
         private List<TvResponseDto> allTvler = new();
         private List<TvResponseDto> filteredTvler = new();
@@ -112,16 +106,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
 
         private async Task OnHizmetBinasiChanged(ChangeEventArgs e)
         {
-            // ✅ 1. YETKİ KONTROLÜ: Kullanıcı bu filtreyi değiştirebilir mi?
-            if (!CanEditFieldInList("HIZMET_BINASI"))
+            // 1. YETKİ KONTROLÜ: Kullanıcı bu filtreyi değiştirebilir mi?
+            if (!CanEditFieldInList("HIZMETBINASIID"))
             {
                 await _toastService.ShowWarningAsync("Bu filtreyi değiştirme yetkiniz yok!");
-                return; // ❌ İşlemi durdur
+                _logger.LogWarning("Yetkisiz filtre değiştirme denemesi: HIZMET_BINASI");
+                return; // İşlemi durdur
             }
 
             if (!string.IsNullOrEmpty(e.Value?.ToString()) && int.TryParse(e.Value.ToString(), out int binaId))
             {
-                // ✅ 2. DATA VALİDATİON: Kullanıcı başka Hizmet Binasını seçmeye çalışıyor mu?
+                // 2. DATA VALİDATİON: Kullanıcı başka Hizmet Binasını seçmeye çalışıyor mu?
                 if (binaId > 0 && !CanAccessHizmetBinasi(binaId))
                 {
                     await _toastService.ShowWarningAsync("Bu Hizmet Binasını görüntüleme yetkiniz yok!");

@@ -6,163 +6,165 @@
 
 <PageTitle>@(KioskMenuIslemId.HasValue ? "İşlem Düzenle" : "Yeni İşlem Ekle") - SGK Portal</PageTitle>
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    @if (!CanViewPage)
-    {
-        <div class="alert alert-danger" role="alert">
-            <i class="bx bx-lock-alt me-2"></i>
-            Bu sayfayı görüntüleme yetkiniz bulunmuyor.
-        </div>
-    }
-    else
-    {
-        <!-- Header -->
-        <div class="mb-4">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item">
-                        <a href="/siramatik/kiosk-menu-islem">Menü Alt Kanal İşlemleri</a>
-                    </li>
-                    <li class="breadcrumb-item active">@(KioskMenuIslemId.HasValue ? "Düzenle" : "Yeni Ekle")</li>
-                </ol>
-            </nav>
-            <h4 class="fw-bold">
-                <i class="bx @(KioskMenuIslemId.HasValue ? "bx-edit" : "bx-plus") me-2"></i>
-                @(KioskMenuIslemId.HasValue ? "İşlem Düzenle" : "Yeni İşlem Ekle")
-            </h4>
-        </div>
-
-        @if (isLoading)
-        {
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Yükleniyor...</span>
-                </div>
-                <p class="text-muted mt-2">Yükleniyor...</p>
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <!-- Header -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="/siramatik/kiosk-menu-islem">Menü Alt Kanal İşlemleri</a>
+                        </li>
+                        <li class="breadcrumb-item active">@(KioskMenuIslemId.HasValue ? "Düzenle" : "Yeni Ekle")</li>
+                    </ol>
+                </nav>
+                <h4 class="fw-bold">
+                    <i class="bx @(KioskMenuIslemId.HasValue ? "bx-edit" : "bx-plus") me-2"></i>
+                    @(KioskMenuIslemId.HasValue ? "İşlem Düzenle" : "Yeni İşlem Ekle")
+                </h4>
             </div>
-        }
-        else
-        {
-            <div class="row">
-                <div class="col-xl-8">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">İşlem Bilgileri</h5>
-                        </div>
-                        <div class="card-body">
-                            <EditForm Model="@model" OnValidSubmit="HandleSubmit">
-                                <DataAnnotationsValidator />
 
-                                <!-- Kiosk Menüsü -->
-                                <div class="mb-3">
-                                    <label class="form-label">
-                                        Kiosk Menüsü <span class="text-danger">*</span>
-                                    </label>
-                                    <select class="form-select"
-                                            @bind="model.KioskMenuId"
-                                            disabled="@isSaving">
-                                        <option value="0">-- Menü Seçiniz --</option>
-                                        @foreach (var menu in kioskMenuleri)
-                                        {
-                                            <option value="@menu.KioskMenuId">@menu.MenuAdi</option>
-                                        }
-                                    </select>
-                                    <ValidationMessage For="@(() => model.KioskMenuId)" />
-                                </div>
+            @if (isLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="text-muted mt-2">Yükleniyor...</p>
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    <div class="col-xl-8">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">İşlem Bilgileri</h5>
+                            </div>
+                            <div class="card-body">
+                                <EditForm Model="@model" OnValidSubmit="HandleSubmit">
+                                    <DataAnnotationsValidator />
 
-                                <!-- Kanal Alt -->
-                                <div class="mb-3">
-                                    <label class="form-label">
-                                        Alt Kanal <span class="text-danger">*</span>
-                                    </label>
-                                    <select class="form-select"
-                                            @bind="model.KanalAltId"
-                                            disabled="@isSaving">
-                                        <option value="0">-- Kanal Alt Seçiniz --</option>
-                                        @foreach (var kanalAlt in kanalAltlar)
-                                        {
-                                            <option value="@kanalAlt.KanalAltId">
-                                                @kanalAlt.KanalAltAdi
-                                            </option>
-                                        }
-                                    </select>
-                                    <ValidationMessage For="@(() => model.KanalAltId)" />
-                                    <div class="form-text">
-                                        Bu işlem hangi menü altına yönlendirilecek (örn: 4/A, 4/B)
-                                    </div>
-                                </div>
-
-                                <!-- Menü Sırası -->
-                                <div class="mb-3">
-                                    <label class="form-label">
-                                        Menü Sırası <span class="text-danger">*</span>
-                                    </label>
-                                    <InputNumber class="form-control"
-                                                 @bind-Value="model.MenuSira"
-                                                 min="1"
-                                                 max="999"
-                                                 disabled="@isSaving" />
-                                    <ValidationMessage For="@(() => model.MenuSira)" />
-                                    <div class="form-text">
-                                        Kiosk ekranında gösterilme sırası (1-999)
-                                    </div>
-                                </div>
-
-                                <!-- Aktiflik -->
-                                <div class="mb-4">
-                                    <label class="form-label">Durum</label>
-                                    <div class="form-check form-switch">
-                                        <InputCheckbox class="form-check-input"
-                                                       @bind-Value="isAktif"
-                                                       disabled="@isSaving" />
-                                        <label class="form-check-label">
-                                            @(isAktif ? "Aktif" : "Pasif")
+                                    <!-- Kiosk Menüsü -->
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            Kiosk Menüsü <span class="text-danger">*</span>
                                         </label>
+                                        <select class="form-select"
+                                                @bind="model.KioskMenuId"
+                                                disabled="@isSaving">
+                                            <option value="0">-- Menü Seçiniz --</option>
+                                            @foreach (var menu in kioskMenuleri)
+                                            {
+                                                <option value="@menu.KioskMenuId">@menu.MenuAdi</option>
+                                            }
+                                        </select>
+                                        <ValidationMessage For="@(() => model.KioskMenuId)" />
                                     </div>
-                                    <div class="form-text">
-                                        Pasif işlemler kiosk ekranında görünmez
-                                    </div>
-                                </div>
 
-                                <!-- Buttons -->
-                                <div class="d-flex gap-2">
-                                    <button type="submit" class="btn btn-primary" disabled="@isSaving">
-                                        @if (isSaving)
-                                        {
-                                            <span class="spinner-border spinner-border-sm me-1"></span>
-                                        }
-                                        else
-                                        {
-                                            <i class="bx bx-save me-1"></i>
-                                        }
-                                        @(KioskMenuIslemId.HasValue ? "Güncelle" : "Kaydet")
-                                    </button>
-                                    <a href="/siramatik/kiosk-menu-islem" class="btn btn-secondary" disabled="@isSaving">
-                                        <i class="bx bx-x me-1"></i>İptal
-                                    </a>
-                                </div>
-                            </EditForm>
+                                    <!-- Kanal Alt -->
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            Alt Kanal <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select"
+                                                @bind="model.KanalAltId"
+                                                disabled="@isSaving">
+                                            <option value="0">-- Kanal Alt Seçiniz --</option>
+                                            @foreach (var kanalAlt in kanalAltlar)
+                                            {
+                                                <option value="@kanalAlt.KanalAltId">
+                                                    @kanalAlt.KanalAltAdi
+                                                </option>
+                                            }
+                                        </select>
+                                        <ValidationMessage For="@(() => model.KanalAltId)" />
+                                        <div class="form-text">
+                                            Bu işlem hangi menü altına yönlendirilecek (örn: 4/A, 4/B)
+                                        </div>
+                                    </div>
+
+                                    <!-- Menü Sırası -->
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            Menü Sırası <span class="text-danger">*</span>
+                                        </label>
+                                        <InputNumber class="form-control"
+                                                        @bind-Value="model.MenuSira"
+                                                        min="1"
+                                                        max="999"
+                                                        disabled="@isSaving" />
+                                        <ValidationMessage For="@(() => model.MenuSira)" />
+                                        <div class="form-text">
+                                            Kiosk ekranında gösterilme sırası (1-999)
+                                        </div>
+                                    </div>
+
+                                    <!-- Aktiflik -->
+                                    <div class="mb-4">
+                                        <label class="form-label">Durum</label>
+                                        <div class="form-check form-switch">
+                                            <InputCheckbox class="form-check-input"
+                                                            @bind-Value="isAktif"
+                                                            disabled="@isSaving" />
+                                            <label class="form-check-label">
+                                                @(isAktif ? "Aktif" : "Pasif")
+                                            </label>
+                                        </div>
+                                        <div class="form-text">
+                                            Pasif işlemler kiosk ekranında görünmez
+                                        </div>
+                                    </div>
+
+                                    <!-- Buttons -->
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                                            @if (isSaving)
+                                            {
+                                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                            }
+                                            else
+                                            {
+                                                <i class="bx bx-save me-1"></i>
+                                            }
+                                            @(KioskMenuIslemId.HasValue ? "Güncelle" : "Kaydet")
+                                        </button>
+                                        <a href="/siramatik/kiosk-menu-islem" class="btn btn-secondary" disabled="@isSaving">
+                                            <i class="bx bx-x me-1"></i>İptal
+                                        </a>
+                                    </div>
+                                </EditForm>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Info Card -->
-                <div class="col-xl-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h6 class="card-title">
-                                <i class="bx bx-info-circle me-2"></i>Bilgilendirme
-                            </h6>
-                            <div class="text-muted small">
-                                <p class="mb-0">
-                                    <i class="bx bx-check text-success me-1"></i>
-                                    Alt kanal backend işlemini belirler
-                                </p>
+                    <!-- Info Card -->
+                    <div class="col-xl-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="bx bx-info-circle me-2"></i>Bilgilendirme
+                                </h6>
+                                <div class="text-muted small">
+                                    <p class="mb-0">
+                                        <i class="bx bx-check text-success me-1"></i>
+                                        Alt kanal backend işlemini belirler
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        }
-    }
-</div>
+            }
+        </div>
+    </FieldPermissionScope>
+}

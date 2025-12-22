@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
@@ -15,19 +16,27 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
         private readonly IUserInfoService _userInfoService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<PermissionStateService> _logger;
+        private readonly IMemoryCache _memoryCache;
 
         private readonly SemaphoreSlim _loadLock = new(1, 1);
 
         // PermissionKey -> YetkiSeviyesi dictionary (kullanıcının yetkileri)
         private Dictionary<string, YetkiSeviyesi> _permissions = new();
-        
+
         // Sistemde tanımlı tüm permission key'ler ve MinYetkiSeviyesi değerleri (ModulControllerIslem tablosundan)
         // Key: PermissionKey, Value: MinYetkiSeviyesi (yetki atanmamış personel için varsayılan seviye)
         private Dictionary<string, YetkiSeviyesi> _definedPermissions = new(StringComparer.OrdinalIgnoreCase);
-        
+
         // Route → PermissionKey mapping (ModulControllerIslem tablosundan)
         // Key: Route (örn: /personel/departman), Value: PermissionKey (örn: PER.DEPARTMAN.INDEX)
         private Dictionary<string, string> _routeToPermissionKey = new(StringComparer.OrdinalIgnoreCase);
+
+        private const string DefinedPermissionsCacheKey = "PermissionStateService.DefinedPermissions";
+        private const string RoutePermissionMapCacheKey = "PermissionStateService.RoutePermissionMap";
+        private static readonly MemoryCacheEntryOptions CacheOptions = new()
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+        };
 
         public event Action? OnChange;
 
@@ -38,13 +47,15 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
             IModulControllerIslemApiService modulControllerIslemApiService,
             IUserInfoService userInfoService,
             IHttpContextAccessor httpContextAccessor,
-            ILogger<PermissionStateService> logger)
+            ILogger<PermissionStateService> logger,
+            IMemoryCache memoryCache)
         {
             _personelYetkiApiService = personelYetkiApiService;
             _modulControllerIslemApiService = modulControllerIslemApiService;
             _userInfoService = userInfoService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
+            _memoryCache = memoryCache;
         }
 
         public Task EnsureLoadedAsync(bool force = false)
@@ -124,42 +135,48 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
         {
             try
             {
+                if (TryLoadDefinitionsFromCache())
+                {
+                    _logger.LogInformation("📋 Permission tanımları memory cache'den yüklendi. Count={Count}", _definedPermissions.Count);
+                    return;
+                }
+
                 _logger.LogInformation("📋 LoadDefinedPermissionKeysAsync başlıyor...");
                 var result = await _modulControllerIslemApiService.GetAllAsync();
-                
-                _logger.LogInformation("📋 API sonucu: Success={Success}, DataCount={Count}", 
+
+                _logger.LogInformation("📋 API sonucu: Success={Success}, DataCount={Count}",
                     result.Success, result.Data?.Count ?? 0);
-                
+
                 if (result.Success && result.Data != null)
                 {
                     var permissionsWithKey = result.Data
                         .Where(x => !string.IsNullOrEmpty(x.PermissionKey))
                         .ToList();
-                    
+
                     _logger.LogInformation("📋 PermissionKey'li kayıt sayısı: {Count}", permissionsWithKey.Count);
-                    
+
                     _definedPermissions = permissionsWithKey
                         .ToDictionary(
                             x => x.PermissionKey!,
                             x => x.MinYetkiSeviyesi,
                             StringComparer.OrdinalIgnoreCase);
-                    
-                    _logger.LogInformation("🔑 Sistemde tanımlı {Count} permission key yüklendi", _definedPermissions.Count);
-                    
-                    // Route → PermissionKey mapping'i oluştur
+
                     var routeMappings = result.Data
                         .Where(x => !string.IsNullOrEmpty(x.Route) && !string.IsNullOrEmpty(x.PermissionKey))
                         .ToList();
-                    
+
                     _routeToPermissionKey = routeMappings
                         .ToDictionary(
                             x => x.Route!.TrimEnd('/'),
                             x => x.PermissionKey!,
                             StringComparer.OrdinalIgnoreCase);
-                    
+
+                    _memoryCache.Set(DefinedPermissionsCacheKey, _definedPermissions, CacheOptions);
+                    _memoryCache.Set(RoutePermissionMapCacheKey, _routeToPermissionKey, CacheOptions);
+
+                    _logger.LogInformation("🔑 Sistemde tanımlı {Count} permission key yüklendi", _definedPermissions.Count);
                     _logger.LogInformation("🗺️ {Count} route-to-permission mapping yüklendi", _routeToPermissionKey.Count);
-                    
-                    // İlk 10 key'i logla
+
                     foreach (var kvp in _definedPermissions.Take(10))
                     {
                         _logger.LogDebug("  - {Key} = {Value}", kvp.Key, kvp.Value);
@@ -230,6 +247,10 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
             try
             {
                 _logger.LogInformation("📋 Yetki tanımları yenileniyor...");
+
+                _memoryCache.Remove(DefinedPermissionsCacheKey);
+                _memoryCache.Remove(RoutePermissionMapCacheKey);
+
                 await LoadDefinedPermissionKeysAsync();
                 _logger.LogInformation("📋 Yetki tanımları yenilendi. Toplam: {Count}", _definedPermissions.Count);
                 OnChange?.Invoke();
@@ -242,6 +263,28 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
             {
                 _loadLock.Release();
             }
+        }
+
+        private bool TryLoadDefinitionsFromCache()
+        {
+            var hasDefinitions = _memoryCache.TryGetValue(DefinedPermissionsCacheKey, out Dictionary<string, YetkiSeviyesi>? cachedDefinitions);
+            var hasRoutes = _memoryCache.TryGetValue(RoutePermissionMapCacheKey, out Dictionary<string, string>? cachedRoutes);
+
+            if (hasDefinitions && hasRoutes && cachedDefinitions != null && cachedRoutes != null)
+            {
+                _definedPermissions = cachedDefinitions;
+                _routeToPermissionKey = cachedRoutes;
+                return true;
+            }
+
+            return false;
+        }
+
+        public (IReadOnlyDictionary<string, YetkiSeviyesi>? DefinedPermissions, IReadOnlyDictionary<string, string>? RouteMap) GetCacheSnapshot()
+        {
+            _memoryCache.TryGetValue(DefinedPermissionsCacheKey, out Dictionary<string, YetkiSeviyesi>? defined);
+            _memoryCache.TryGetValue(RoutePermissionMapCacheKey, out Dictionary<string, string>? routes);
+            return (defined, routes);
         }
 
         /// <summary>

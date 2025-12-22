@@ -13,7 +13,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
     public partial class Index
     {
         /// <summary>
-        /// Permission Key: YET.YETKIISLEM.INDEX
         /// Route: /yetki-islem
         /// Convention: {MODUL_KODU}.{URL_TIRESIZ}.{ACTION}
         /// </summary>

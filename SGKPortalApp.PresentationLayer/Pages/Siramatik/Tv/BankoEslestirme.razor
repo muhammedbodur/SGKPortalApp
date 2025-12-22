@@ -1,251 +1,264 @@
 @page "/siramatik/tv/banko-eslestirme"
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @attribute [Authorize]
 @inject IJSRuntime JS
 
 <PageTitle>TV - Banko Eşleştirme - SGK Portal</PageTitle>
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb breadcrumb-style1">
-            <li class="breadcrumb-item">
-                <a href="/">
-                    <i class="bx bx-home-alt me-1"></i>Ana Sayfa
-                </a>
-            </li>
-            <li class="breadcrumb-item">
-                <a href="/siramatik/tv">
-                    TV Yönetimi
-                </a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">
-                Banko Eşleştirme
-            </li>
-        </ol>
-    </nav>
-
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold mb-1">
-                <i class="bx bx-link me-2"></i>TV - Banko Eşleştirme
-            </h4>
-            <p class="text-muted mb-0">TV ekranlarına banko atayın</p>
-        </div>
-        <button class="btn btn-outline-secondary" @onclick="NavigateBack">
-            <i class="bx bx-arrow-back me-1"></i>Geri Dön
-        </button>
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
     </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb breadcrumb-style1">
+                    <li class="breadcrumb-item">
+                        <a href="/">
+                            <i class="bx bx-home-alt me-1"></i>Ana Sayfa
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="/siramatik/tv">
+                            TV Yönetimi
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Banko Eşleştirme
+                    </li>
+                </ol>
+            </nav>
 
-    @if (isLoading)
-    {
-        <div class="text-center py-5">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Yükleniyor...</span>
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        <i class="bx bx-link me-2"></i>TV - Banko Eşleştirme
+                    </h4>
+                    <p class="text-muted mb-0">TV ekranlarına banko atayın</p>
+                </div>
+                <button class="btn btn-outline-secondary" @onclick="NavigateBack">
+                    <i class="bx bx-arrow-back me-1"></i>Geri Dön
+                </button>
             </div>
-            <p class="mt-3 text-muted">Veriler yükleniyor...</p>
-        </div>
-    }
-    else
-    {
-        <div class="row">
-            <!-- Sol Panel - TV Seçimi -->
-            <div class="col-lg-4 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="bx bx-tv me-2"></i>TV Seçimi
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <!-- Hizmet Binası -->
-                        <div class="mb-3">
-                            <label class="form-label">Hizmet Binası</label>
-                            <select class="form-select" value="@selectedHizmetBinasiId" @onchange="OnHizmetBinasiChanged">
-                                <option value="0">-- Hizmet Binası Seçiniz --</option>
-                                @foreach (var bina in hizmetBinalari)
-                                {
-                                    <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
-                                }
-                            </select>
-                        </div>
 
-                        <!-- TV Listesi -->
-                        @if (selectedHizmetBinasiId > 0)
-                        {
-                            <div class="mb-3">
-                                <label class="form-label">TV</label>
-                                @if (!tvler.Any())
-                                {
-                                    <div class="alert alert-info">
-                                        <i class="bx bx-info-circle me-1"></i>
-                                        Bu hizmet binasında TV bulunmuyor
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="list-group">
-                                        @foreach (var tv in tvler)
+            @if (isLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Veriler yükleniyor...</p>
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    <!-- Sol Panel - TV Seçimi -->
+                    <div class="col-lg-4 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="bx bx-tv me-2"></i>TV Seçimi
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Hizmet Binası -->
+                                <div class="mb-3">
+                                    <label class="form-label">Hizmet Binası</label>
+                                    <select class="form-select" value="@selectedHizmetBinasiId" @onchange="OnHizmetBinasiChanged">
+                                        <option value="0">-- Hizmet Binası Seçiniz --</option>
+                                        @foreach (var bina in hizmetBinalari)
                                         {
-                                            <button type="button"
-                                                    class="list-group-item list-group-item-action @(selectedTvId == tv.TvId ? "active" : "")"
-                                                    @onclick="() => SelectTv(tv.TvId)">
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <div>
-                                                        <i class="bx bx-tv me-1"></i>
-                                                        <strong>@tv.TvAdi</strong>
-                                                        <br />
-                                                        <small>@tv.KatTipi</small>
-                                                    </div>
-                                                    <span class="badge bg-label-primary">
-                                                        @tv.BankoSayisi Banko
-                                                    </span>
-                                                </div>
-                                            </button>
+                                            <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                                        }
+                                    </select>
+                                </div>
+
+                                <!-- TV Listesi -->
+                                @if (selectedHizmetBinasiId > 0)
+                                {
+                                    <div class="mb-3">
+                                        <label class="form-label">TV</label>
+                                        @if (!tvler.Any())
+                                        {
+                                            <div class="alert alert-info">
+                                                <i class="bx bx-info-circle me-1"></i>
+                                                Bu hizmet binasında TV bulunmuyor
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="list-group">
+                                                @foreach (var tv in tvler)
+                                                {
+                                                    <button type="button"
+                                                            class="list-group-item list-group-item-action @(selectedTvId == tv.TvId ? "active" : "")"
+                                                            @onclick="() => SelectTv(tv.TvId)">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <i class="bx bx-tv me-1"></i>
+                                                                <strong>@tv.TvAdi</strong>
+                                                                <br />
+                                                                <small>@tv.KatTipi</small>
+                                                            </div>
+                                                            <span class="badge bg-label-primary">
+                                                                @tv.BankoSayisi Banko
+                                                            </span>
+                                                        </div>
+                                                    </button>
+                                                }
+                                            </div>
                                         }
                                     </div>
                                 }
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Sağ Panel - Banko Eşleştirme -->
+                    <div class="col-lg-8">
+                        @if (selectedTvId == 0)
+                        {
+                            <div class="card">
+                                <div class="card-body text-center py-5">
+                                    <i class="bx bx-tv" style="font-size: 4rem; color: #ddd;"></i>
+                                    <h5 class="mt-3 text-muted">TV Seçiniz</h5>
+                                    <p class="text-muted">Banko eşleştirmek için önce bir TV seçin</p>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row">
+                                <!-- Eşleştirilmiş Bankolar -->
+                                <div class="col-md-6 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-success text-white">
+                                            <h6 class="mb-0">
+                                                <i class="bx bx-check-circle me-1"></i>
+                                                Eşleştirilmiş Bankolar (@assignedBankolar.Count)
+                                            </h6>
+                                        </div>
+                                        <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                                            @if (isLoadingBankolar)
+                                            {
+                                                <div class="text-center py-4">
+                                                    <div class="spinner-border spinner-border-sm text-primary"></div>
+                                                    <p class="mt-2 text-muted small">Yükleniyor...</p>
+                                                </div>
+                                            }
+                                            else if (!assignedBankolar.Any())
+                                            {
+                                                <div class="text-center py-4">
+                                                    <i class="bx bx-info-circle" style="font-size: 2rem; color: #ddd;"></i>
+                                                    <p class="mt-2 text-muted small">Henüz banko eşleştirilmemiş</p>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="list-group" id="assignedList">
+                                                    @foreach (var banko in assignedBankolar)
+                                                    {
+                                                        <div class="list-group-item d-flex justify-content-between align-items-center"
+                                                             draggable="true"
+                                                             @ondragstart="() => OnDragStart(banko.BankoId)"
+                                                             @ondragover:preventDefault
+                                                             @ondrop="() => OnDropToUnassigned(banko.BankoId)"
+                                                             style="cursor: move;">
+                                                            <div class="flex-grow-1">
+                                                                <i class="bx bx-grid-vertical me-2 text-muted"></i>
+                                                                <strong>Banko @banko.BankoNo</strong>
+                                                                <span class="badge bg-label-primary ms-2">@banko.KatTipiAdi</span>
+                                                                <br />
+                                                                <small class="text-muted">@banko.BankoTipiAdi</small>
+                                                            </div>
+                                                            <button class="btn btn-sm btn-outline-danger"
+                                                                    @onclick="() => RemoveBanko(banko.BankoId)"
+                                                                    disabled="@isSaving">
+                                                                <i class="bx bx-x"></i>
+                                                            </button>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Eşleştirilmemiş Bankolar -->
+                                <div class="col-md-6 mb-4">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-secondary text-white">
+                                            <h6 class="mb-0">
+                                                <i class="bx bx-x-circle me-1"></i>
+                                                Eşleştirilmemiş Bankolar (@unassignedBankolar.Count)
+                                            </h6>
+                                        </div>
+                                        <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                                            @if (isLoadingBankolar)
+                                            {
+                                                <div class="text-center py-4">
+                                                    <div class="spinner-border spinner-border-sm text-primary"></div>
+                                                    <p class="mt-2 text-muted small">Yükleniyor...</p>
+                                                </div>
+                                            }
+                                            else if (!unassignedBankolar.Any())
+                                            {
+                                                <div class="text-center py-4">
+                                                    <i class="bx bx-check-circle" style="font-size: 2rem; color: #28c76f;"></i>
+                                                    <p class="mt-2 text-muted small">Tüm bankolar eşleştirilmiş</p>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="list-group" id="unassignedList">
+                                                    @foreach (var banko in unassignedBankolar)
+                                                    {
+                                                        <div class="list-group-item d-flex justify-content-between align-items-center"
+                                                             draggable="true"
+                                                             @ondragstart="() => OnDragStart(banko.BankoId)"
+                                                             @ondragover:preventDefault
+                                                             @ondrop="() => OnDropToAssigned(banko.BankoId)"
+                                                             style="cursor: move;">
+                                                            <div class="flex-grow-1">
+                                                                <i class="bx bx-grid-vertical me-2 text-muted"></i>
+                                                                <strong>Banko @banko.BankoNo</strong>
+                                                                <span class="badge bg-label-primary ms-2">@banko.KatTipiAdi</span>
+                                                                <br />
+                                                                <small class="text-muted">@banko.BankoTipiAdi</small>
+                                                            </div>
+                                                            <button class="btn btn-sm btn-outline-success"
+                                                                    @onclick="() => AddBanko(banko.BankoId)"
+                                                                    disabled="@isSaving">
+                                                                <i class="bx bx-plus"></i>
+                                                            </button>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bilgi Kutusu -->
+                            <div class="alert alert-info">
+                                <i class="bx bx-info-circle me-1"></i>
+                                <strong>İpucu:</strong> Bankoları sürükleyip bırakarak veya <i class="bx bx-plus"></i>/<i class="bx bx-x"></i> butonlarını kullanarak eşleştirebilirsiniz.
+                            </div>
                         }
                     </div>
                 </div>
-            </div>
-
-            <!-- Sağ Panel - Banko Eşleştirme -->
-            <div class="col-lg-8">
-                @if (selectedTvId == 0)
-                {
-                    <div class="card">
-                        <div class="card-body text-center py-5">
-                            <i class="bx bx-tv" style="font-size: 4rem; color: #ddd;"></i>
-                            <h5 class="mt-3 text-muted">TV Seçiniz</h5>
-                            <p class="text-muted">Banko eşleştirmek için önce bir TV seçin</p>
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    <div class="row">
-                        <!-- Eşleştirilmiş Bankolar -->
-                        <div class="col-md-6 mb-4">
-                            <div class="card h-100">
-                                <div class="card-header bg-success text-white">
-                                    <h6 class="mb-0">
-                                        <i class="bx bx-check-circle me-1"></i>
-                                        Eşleştirilmiş Bankolar (@assignedBankolar.Count)
-                                    </h6>
-                                </div>
-                                <div class="card-body" style="max-height: 600px; overflow-y: auto;">
-                                    @if (isLoadingBankolar)
-                                    {
-                                        <div class="text-center py-4">
-                                            <div class="spinner-border spinner-border-sm text-primary"></div>
-                                            <p class="mt-2 text-muted small">Yükleniyor...</p>
-                                        </div>
-                                    }
-                                    else if (!assignedBankolar.Any())
-                                    {
-                                        <div class="text-center py-4">
-                                            <i class="bx bx-info-circle" style="font-size: 2rem; color: #ddd;"></i>
-                                            <p class="mt-2 text-muted small">Henüz banko eşleştirilmemiş</p>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <div class="list-group" id="assignedList">
-                                            @foreach (var banko in assignedBankolar)
-                                            {
-                                                <div class="list-group-item d-flex justify-content-between align-items-center"
-                                                     draggable="true"
-                                                     @ondragstart="() => OnDragStart(banko.BankoId)"
-                                                     @ondragover:preventDefault
-                                                     @ondrop="() => OnDropToUnassigned(banko.BankoId)"
-                                                     style="cursor: move;">
-                                                    <div class="flex-grow-1">
-                                                        <i class="bx bx-grid-vertical me-2 text-muted"></i>
-                                                        <strong>Banko @banko.BankoNo</strong>
-                                                        <span class="badge bg-label-primary ms-2">@banko.KatTipiAdi</span>
-                                                        <br />
-                                                        <small class="text-muted">@banko.BankoTipiAdi</small>
-                                                    </div>
-                                                    <button class="btn btn-sm btn-outline-danger"
-                                                            @onclick="() => RemoveBanko(banko.BankoId)"
-                                                            disabled="@isSaving">
-                                                        <i class="bx bx-x"></i>
-                                                    </button>
-                                                </div>
-                                            }
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Eşleştirilmemiş Bankolar -->
-                        <div class="col-md-6 mb-4">
-                            <div class="card h-100">
-                                <div class="card-header bg-secondary text-white">
-                                    <h6 class="mb-0">
-                                        <i class="bx bx-x-circle me-1"></i>
-                                        Eşleştirilmemiş Bankolar (@unassignedBankolar.Count)
-                                    </h6>
-                                </div>
-                                <div class="card-body" style="max-height: 600px; overflow-y: auto;">
-                                    @if (isLoadingBankolar)
-                                    {
-                                        <div class="text-center py-4">
-                                            <div class="spinner-border spinner-border-sm text-primary"></div>
-                                            <p class="mt-2 text-muted small">Yükleniyor...</p>
-                                        </div>
-                                    }
-                                    else if (!unassignedBankolar.Any())
-                                    {
-                                        <div class="text-center py-4">
-                                            <i class="bx bx-check-circle" style="font-size: 2rem; color: #28c76f;"></i>
-                                            <p class="mt-2 text-muted small">Tüm bankolar eşleştirilmiş</p>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <div class="list-group" id="unassignedList">
-                                            @foreach (var banko in unassignedBankolar)
-                                            {
-                                                <div class="list-group-item d-flex justify-content-between align-items-center"
-                                                     draggable="true"
-                                                     @ondragstart="() => OnDragStart(banko.BankoId)"
-                                                     @ondragover:preventDefault
-                                                     @ondrop="() => OnDropToAssigned(banko.BankoId)"
-                                                     style="cursor: move;">
-                                                    <div class="flex-grow-1">
-                                                        <i class="bx bx-grid-vertical me-2 text-muted"></i>
-                                                        <strong>Banko @banko.BankoNo</strong>
-                                                        <span class="badge bg-label-primary ms-2">@banko.KatTipiAdi</span>
-                                                        <br />
-                                                        <small class="text-muted">@banko.BankoTipiAdi</small>
-                                                    </div>
-                                                    <button class="btn btn-sm btn-outline-success"
-                                                            @onclick="() => AddBanko(banko.BankoId)"
-                                                            disabled="@isSaving">
-                                                        <i class="bx bx-plus"></i>
-                                                    </button>
-                                                </div>
-                                            }
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Bilgi Kutusu -->
-                    <div class="alert alert-info">
-                        <i class="bx bx-info-circle me-1"></i>
-                        <strong>İpucu:</strong> Bankoları sürükleyip bırakarak veya <i class="bx bx-plus"></i>/<i class="bx bx-x"></i> butonlarını kullanarak eşleştirebilirsiniz.
-                    </div>
-                }
-            </div>
+            }
         </div>
-    }
-</div>
+    </FieldPermissionScope>
+}

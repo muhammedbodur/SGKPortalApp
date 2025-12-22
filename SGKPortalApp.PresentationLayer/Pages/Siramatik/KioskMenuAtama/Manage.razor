@@ -6,156 +6,160 @@
 
 <PageTitle>@(KioskMenuAtamaId.HasValue ? "Atama Düzenle" : "Yeni Atama") - SGK Portal</PageTitle>
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    @if (!CanViewPage)
-    {
-        <div class="alert alert-danger" role="alert">
-            <i class="bx bx-lock-alt me-2"></i>
-            Bu sayfayı görüntüleme yetkiniz bulunmuyor.
-        </div>
-    }
-    else
-    {
-        <div class="mb-4">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item">
-                        <a href="/siramatik/kiosk-menu-atama">Kiosk Menü Ataması</a>
-                    </li>
-                    <li class="breadcrumb-item active">@(KioskMenuAtamaId.HasValue ? "Düzenle" : "Yeni Atama")</li>
-                </ol>
-            </nav>
-            <h4 class="fw-bold">
-                <i class="bx @(KioskMenuAtamaId.HasValue ? "bx-edit" : "bx-plus") me-2"></i>
-                @(KioskMenuAtamaId.HasValue ? "Atama Düzenle" : "Yeni Menü Ataması")
-            </h4>
-        </div>
 
-        @if (isLoading)
-        {
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary"></div>
-                <p class="text-muted mt-2">Yükleniyor...</p>
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="/siramatik/kiosk-menu-atama">Kiosk Menü Ataması</a>
+                        </li>
+                        <li class="breadcrumb-item active">@(KioskMenuAtamaId.HasValue ? "Düzenle" : "Yeni Atama")</li>
+                    </ol>
+                </nav>
+                <h4 class="fw-bold">
+                    <i class="bx @(KioskMenuAtamaId.HasValue ? "bx-edit" : "bx-plus") me-2"></i>
+                    @(KioskMenuAtamaId.HasValue ? "Atama Düzenle" : "Yeni Menü Ataması")
+                </h4>
             </div>
-        }
-        else
-        {
-            <div class="row">
-                <div class="col-xl-8">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">Atama Bilgileri</h5>
-                        </div>
-                        <div class="card-body">
-                            <EditForm Model="@model" OnValidSubmit="HandleSubmit">
-                                <DataAnnotationsValidator />
 
-                                <div class="mb-3">
-                                    <label class="form-label">
-                                        Hizmet Binası <span class="text-danger">*</span>
-                                    </label>
-                                    <select class="form-select" @onchange="OnHizmetBinasiChanged" disabled="@isSaving">
-                                        <option value="0">-- Hizmet Binası Seçiniz --</option>
-                                        @foreach (var bina in hizmetBinalari)
-                                        {
-                                            <option value="@bina.HizmetBinasiId" selected="@(selectedHizmetBinasiId == bina.HizmetBinasiId)">
-                                                @bina.HizmetBinasiAdi
-                                            </option>
-                                        }
-                                    </select>
-                                </div>
+            @if (isLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary"></div>
+                    <p class="text-muted mt-2">Yükleniyor...</p>
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    <div class="col-xl-8">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Atama Bilgileri</h5>
+                            </div>
+                            <div class="card-body">
+                                <EditForm Model="@model" OnValidSubmit="HandleSubmit">
+                                    <DataAnnotationsValidator />
 
-                                <div class="mb-3">
-                                    <label class="form-label">
-                                        Kiosk <span class="text-danger">*</span>
-                                    </label>
-                                    <select class="form-select" value="@model.KioskId" @onchange="OnKioskChanged" disabled="@isSaving">
-                                        <option value="0">-- Kiosk Seçiniz --</option>
-                                        @foreach (var kiosk in kiosklar)
-                                        {
-                                            <option value="@kiosk.KioskId">@kiosk.KioskAdi</option>
-                                        }
-                                    </select>
-                                    <ValidationMessage For="@(() => model.KioskId)" />
-                                </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            Hizmet Binası <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select" @onchange="OnHizmetBinasiChanged" disabled="@isSaving">
+                                            <option value="0">-- Hizmet Binası Seçiniz --</option>
+                                            @foreach (var bina in hizmetBinalari)
+                                            {
+                                                <option value="@bina.HizmetBinasiId" selected="@(selectedHizmetBinasiId == bina.HizmetBinasiId)">
+                                                    @bina.HizmetBinasiAdi
+                                                </option>
+                                            }
+                                        </select>
+                                    </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label">
-                                        Kiosk Menüsü <span class="text-danger">*</span>
-                                    </label>
-                                    <select class="form-select" @bind="model.KioskMenuId" disabled="@isSaving">
-                                        <option value="0">-- Menü Seçiniz --</option>
-                                        @foreach (var menu in availableMenuleri)
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            Kiosk <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select" value="@model.KioskId" @onchange="OnKioskChanged" disabled="@isSaving">
+                                            <option value="0">-- Kiosk Seçiniz --</option>
+                                            @foreach (var kiosk in kiosklar)
+                                            {
+                                                <option value="@kiosk.KioskId">@kiosk.KioskAdi</option>
+                                            }
+                                        </select>
+                                        <ValidationMessage For="@(() => model.KioskId)" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            Kiosk Menüsü <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select" @bind="model.KioskMenuId" disabled="@isSaving">
+                                            <option value="0">-- Menü Seçiniz --</option>
+                                            @foreach (var menu in availableMenuleri)
+                                            {
+                                                <option value="@menu.KioskMenuId">@menu.MenuAdi</option>
+                                            }
+                                        </select>
+                                        @if (model.KioskId > 0 && !availableMenuleri.Any())
                                         {
-                                            <option value="@menu.KioskMenuId">@menu.MenuAdi</option>
+                                            <div class="form-text text-warning">
+                                                <i class="bx bx-info-circle me-1"></i>
+                                                Bu kiosk için tüm menüler zaten atanmış. Yeni menü atamak için mevcut atamayı pasifleştirin.
+                                            </div>
                                         }
-                                    </select>
-                                    @if (model.KioskId > 0 && !availableMenuleri.Any())
-                                    {
-                                        <div class="form-text text-warning">
-                                            <i class="bx bx-info-circle me-1"></i>
-                                            Bu kiosk için tüm menüler zaten atanmış. Yeni menü atamak için mevcut atamayı pasifleştirin.
+                                        <ValidationMessage For="@(() => model.KioskMenuId)" />
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label">Durum</label>
+                                        <div class="form-check form-switch">
+                                            <InputCheckbox class="form-check-input" @bind-Value="isAktif" disabled="@isSaving" />
+                                            <label class="form-check-label">@(isAktif ? "Aktif" : "Pasif")</label>
                                         </div>
-                                    }
-                                    <ValidationMessage For="@(() => model.KioskMenuId)" />
-                                </div>
-
-                                <div class="mb-4">
-                                    <label class="form-label">Durum</label>
-                                    <div class="form-check form-switch">
-                                        <InputCheckbox class="form-check-input" @bind-Value="isAktif" disabled="@isSaving" />
-                                        <label class="form-check-label">@(isAktif ? "Aktif" : "Pasif")</label>
+                                        <div class="form-text">
+                                            Bir kiosk'a birden fazla menü atanabilir, ancak aynı menü tekrar atanamaz
+                                        </div>
                                     </div>
-                                    <div class="form-text">
-                                        Bir kiosk'a birden fazla menü atanabilir, ancak aynı menü tekrar atanamaz
-                                    </div>
-                                </div>
 
-                                <div class="d-flex gap-2">
-                                    <button type="submit" class="btn btn-primary" disabled="@isSaving">
-                                        @if (isSaving)
-                                        {
-                                            <span class="spinner-border spinner-border-sm me-1"></span>
-                                        }
-                                        else
-                                        {
-                                            <i class="bx bx-save me-1"></i>
-                                        }
-                                        @(KioskMenuAtamaId.HasValue ? "Güncelle" : "Kaydet")
-                                    </button>
-                                    <a href="/siramatik/kiosk-menu-atama" class="btn btn-secondary">
-                                        <i class="bx bx-x me-1"></i>İptal
-                                    </a>
-                                </div>
-                            </EditForm>
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                                            @if (isSaving)
+                                            {
+                                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                            }
+                                            else
+                                            {
+                                                <i class="bx bx-save me-1"></i>
+                                            }
+                                            @(KioskMenuAtamaId.HasValue ? "Güncelle" : "Kaydet")
+                                        </button>
+                                        <a href="/siramatik/kiosk-menu-atama" class="btn btn-secondary">
+                                            <i class="bx bx-x me-1"></i>İptal
+                                        </a>
+                                    </div>
+                                </EditForm>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="col-xl-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h6 class="card-title">
-                                <i class="bx bx-info-circle me-2"></i>Bilgilendirme
-                            </h6>
-                            <div class="text-muted small">
-                                <p class="mb-2">
-                                    <i class="bx bx-check text-success me-1"></i>
-                                    Her kiosk'a bir menü atanmalıdır
-                                </p>
-                                <p class="mb-2">
-                                    <i class="bx bx-check text-success me-1"></i>
-                                    Aynı anda sadece bir aktif atama olabilir
-                                </p>
-                                <p class="mb-0">
-                                    <i class="bx bx-check text-success me-1"></i>
-                                    Menü değişikliği anında yansır
-                                </p>
+                    <div class="col-xl-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="bx bx-info-circle me-2"></i>Bilgilendirme
+                                </h6>
+                                <div class="text-muted small">
+                                    <p class="mb-2">
+                                        <i class="bx bx-check text-success me-1"></i>
+                                        Her kiosk'a bir menü atanmalıdır
+                                    </p>
+                                    <p class="mb-2">
+                                        <i class="bx bx-check text-success me-1"></i>
+                                        Aynı anda sadece bir aktif atama olabilir
+                                    </p>
+                                    <p class="mb-0">
+                                        <i class="bx bx-check text-success me-1"></i>
+                                        Menü değişikliği anında yansır
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        }
-    }
-</div>
+            }
+        </div>
+    </FieldPermissionScope>
+}
+

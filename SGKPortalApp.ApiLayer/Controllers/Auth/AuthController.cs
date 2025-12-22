@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using SGKPortalApp.ApiLayer.Services.Hubs;
+using SGKPortalApp.ApiLayer.Services.Hubs.Constants;
 using SGKPortalApp.ApiLayer.Services.Hubs.Interfaces;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
@@ -12,15 +15,21 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
     {
         private readonly IAuthService _authService;
         private readonly IBankoModeService _bankoModeService;
+        private readonly IHubConnectionService _hubConnectionService;
+        private readonly IHubContext<SiramatikHub> _hubContext;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(
             IAuthService authService,
             IBankoModeService bankoModeService,
+            IHubConnectionService hubConnectionService,
+            IHubContext<SiramatikHub> hubContext,
             ILogger<AuthController> logger)
         {
             _authService = authService;
             _bankoModeService = bankoModeService;
+            _hubConnectionService = hubConnectionService;
+            _hubContext = hubContext;
             _logger = logger;
         }
 
@@ -125,6 +134,8 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
                     {
                         _logger.LogWarning(ex, "⚠️ Logout: Banko modu temizlenirken hata - {TcKimlikNo}", tcKimlikNo);
                     }
+
+                    await ForceLogoutActiveSessionsAsync(tcKimlikNo);
                 }
 
                 return Ok(new { message = "Çıkış başarılı" });
@@ -133,6 +144,33 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
             {
                 _logger.LogError(ex, "❌ Logout sırasında hata oluştu");
                 return Ok(new { message = "Çıkış tamamlandı (bazı hatalarla)" });
+            }
+        }
+
+        private async Task ForceLogoutActiveSessionsAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var connections = await _hubConnectionService.GetActiveConnectionsByTcKimlikNoAsync(tcKimlikNo);
+                if (connections == null || connections.Count == 0)
+                    return;
+
+                foreach (var connection in connections)
+                {
+                    _logger.LogInformation("📡 Logout: ForceLogout gönderiliyor - ConnectionId={ConnectionId}", connection.ConnectionId);
+
+                    await _hubContext.Clients.Client(connection.ConnectionId)
+                        .SendAsync(SignalREvents.ForceLogout, "Oturumunuz sonlandırıldı. Lütfen tekrar giriş yapın.");
+
+                    await _hubContext.Clients.Client(connection.ConnectionId)
+                        .SendAsync(SignalREvents.BankoModeDeactivated, new { reason = "logout" });
+
+                    await _hubConnectionService.DisconnectAsync(connection.ConnectionId);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "⚠️ Logout: force logout yayınlanırken hata - {TcKimlikNo}", tcKimlikNo);
             }
         }
     }

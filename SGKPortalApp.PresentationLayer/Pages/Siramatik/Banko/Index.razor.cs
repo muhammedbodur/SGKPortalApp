@@ -208,17 +208,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
         private async Task OnHizmetBinasiChanged(ChangeEventArgs e)
         {
             // ✅ 1. YETKİ KONTROLÜ: Kullanıcı bu filtreyi değiştirebilir mi?
-            if (!CanEditFieldInList("HIZMET_BINASI"))
+            if (!CanEditFieldInList("HIZMETBINASIID"))
             {
                 await _toastService.ShowWarningAsync("Bu filtreyi değiştirme yetkiniz yok!");
-                _logger.LogWarning("Yetkisiz filtre değiştirme denemesi: HIZMET_BINASI");
+                _logger.LogWarning("Yetkisiz filtre değiştirme denemesi: HIZMETBINASIID");
                 return; // ❌ İşlemi durdur
             }
 
             if (int.TryParse(e.Value?.ToString(), out int binaId))
             {
-                // ✅ 2. DATA VALİDATİON: Kullanıcı başka Hizmet Binasını seçmeye çalışıyor mu?
-                if (binaId > 0 && !CanAccessHizmetBinasi(binaId))
+                // ✅ 2. DATA VALİDATİON: Edit yetkisi yoksa sadece kendi Hizmet Binasını seçebilir
+                // Edit yetkisi varsa tüm Hizmet Binalarını seçebilir
+                var hasEditPermission = CanEditFieldInList("HIZMETBINASIID");
+                if (binaId > 0 && !hasEditPermission && !CanAccessHizmetBinasi(binaId))
                 {
                     await _toastService.ShowWarningAsync("Bu Hizmet Binasını görüntüleme yetkiniz yok!");
                     _logger.LogWarning("Yetkisiz Hizmet Binası erişim denemesi: {BinaId}", binaId);

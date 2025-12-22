@@ -6,335 +6,341 @@
 
 <PageTitle>Alt Kanal İşlem Yönetimi - SGK Portal</PageTitle>
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    @if (!CanViewPage)
-    {
-        <div class="alert alert-danger" role="alert">
-            <i class="bx bx-lock-alt me-2"></i>
-            Bu sayfayı görüntüleme yetkiniz bulunmuyor.
-        </div>
-    }
-    else
-    {
-        <!-- Header -->
-        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
-            <div>
-                <h4 class="fw-bold mb-1">
-                    <i class="bx bx-subdirectory-right me-2"></i>Alt Kanal İşlem Yönetimi
-                </h4>
-                <p class="text-muted mb-0">
-                    Alt kanalların hizmet binalarındaki işlemlerini tanımlayın ve personel atamalarını yönetin.
-                </p>
-            </div>
 
-            <div class="d-flex flex-wrap gap-2">
-                <div class="btn-group">
-                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" disabled="@isLoading">
-                        @if (isLoading)
-                        {
-                            <span class="spinner-border spinner-border-sm me-2"></span>
-                        }
-                        <i class="bx bx-download me-1"></i> Dışa Aktar
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li>
-                            <button class="dropdown-item" @onclick="ExportToExcel">
-                                <i class="bx bx-spreadsheet me-2 text-success"></i>Excel
-                            </button>
-                        </li>
-                        <li>
-                            <button class="dropdown-item" @onclick="ExportToPdf">
-                                <i class="bx bxs-file-pdf me-2 text-danger"></i>PDF
-                            </button>
-                        </li>
-                    </ul>
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="@IsEditMode">
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <!-- Header -->
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        <i class="bx bx-subdirectory-right me-2"></i>Alt Kanal İşlem Yönetimi
+                    </h4>
+                    <p class="text-muted mb-0">
+                        Alt kanalların hizmet binalarındaki işlemlerini tanımlayın ve personel atamalarını yönetin.
+                    </p>
                 </div>
 
-                <a href="@GetManageUrl()" class="btn btn-primary">
-                    <i class="bx bx-plus me-1"></i>Yeni Alt İşlem
-                </a>
-            </div>
-        </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" disabled="@isLoading">
+                            @if (isLoading)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                            }
+                            <i class="bx bx-download me-1"></i> Dışa Aktar
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <button class="dropdown-item" @onclick="ExportToExcel">
+                                    <i class="bx bx-spreadsheet me-2 text-success"></i>Excel
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" @onclick="ExportToPdf">
+                                    <i class="bx bxs-file-pdf me-2 text-danger"></i>PDF
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
 
-        <!-- Hizmet Binası ve Kanal İşlem Seçimi -->
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body py-3">
-                <div class="row g-3 align-items-center">
-                    @if (IsFieldVisibleInList("HIZMET_BINASI"))
-                    {
+                    <a href="@GetManageUrl()" class="btn btn-primary">
+                        <i class="bx bx-plus me-1"></i>Yeni Alt İşlem
+                    </a>
+                </div>
+            </div>
+
+            <!-- Hizmet Binası ve Kanal İşlem Seçimi -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body py-3">
+                    <div class="row g-3 align-items-center">
+                        <PermissionField FieldName="HIZMETBINASIID" Context="perm">
+                            <div class="col-lg-3">
+                                <label class="form-label fw-semibold mb-1">
+                                    <i class="bx bx-building me-1 text-primary"></i>Hizmet Binası
+                                    @if (!perm.CanEdit)
+                                    {
+                                        <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
+                                            <i class="bx bx-lock-alt"></i>
+                                        </span>
+                                    }
+                                    @if (isKanalIslemLocked)
+                                    {
+                                        <span class="badge bg-label-secondary ms-1"><i class="bx bx-lock-alt"></i></span>
+                                    }
+                                </label>
+                                <select class="form-select"
+                                        @onchange="OnHizmetBinasiChanged"
+                                        value="@selectedHizmetBinasiId"
+                                        disabled="@(isKanalIslemLocked || perm.IsDisabled)">
+                                    <option value="0">-- Hizmet Binası Seçiniz --</option>
+                                    @foreach (var bina in hizmetBinalari)
+                                    {
+                                        <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                                    }
+                                </select>
+                            </div>
+                        </PermissionField>
                         <div class="col-lg-3">
                             <label class="form-label fw-semibold mb-1">
-                                <i class="bx bx-building me-1 text-primary"></i>Hizmet Binası
-                                @if (!CanEditFieldInList("HIZMET_BINASI"))
-                                {
-                                    <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
-                                        <i class="bx bx-lock-alt"></i>
-                                    </span>
-                                }
+                                <i class="bx bx-cog me-1 text-info"></i>Kanal İşlem
                                 @if (isKanalIslemLocked)
                                 {
                                     <span class="badge bg-label-secondary ms-1"><i class="bx bx-lock-alt"></i></span>
                                 }
                             </label>
-                            <select class="form-select" @onchange="OnHizmetBinasiChanged" value="@selectedHizmetBinasiId" disabled="@(isKanalIslemLocked || IsFieldDisabledInList("HIZMET_BINASI"))">
-                                <option value="0">-- Hizmet Binası Seçiniz --</option>
-                                @foreach (var bina in hizmetBinalari)
+                            <select class="form-select" @onchange="OnKanalIslemChanged" value="@selectedKanalIslemId" disabled="@(selectedHizmetBinasiId == 0 || isKanalIslemLocked)">
+                                <option value="0">Tüm Kanal İşlemler</option>
+                                @foreach (var kanal in kanalIslemler)
                                 {
-                                    <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                                    <option value="@kanal.KanalIslemId">@kanal.KanalAdi</option>
                                 }
                             </select>
-                        </div>
-                    }
-                    <div class="col-lg-3">
-                        <label class="form-label fw-semibold mb-1">
-                            <i class="bx bx-cog me-1 text-info"></i>Kanal İşlem
                             @if (isKanalIslemLocked)
                             {
-                                <span class="badge bg-label-secondary ms-1"><i class="bx bx-lock-alt"></i></span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary mt-1" @onclick="UnlockFilters">
+                                    <i class="bx bx-lock-open-alt me-1"></i>Kilidi Aç
+                                </button>
                             }
-                        </label>
-                        <select class="form-select" @onchange="OnKanalIslemChanged" value="@selectedKanalIslemId" disabled="@(selectedHizmetBinasiId == 0 || isKanalIslemLocked)">
-                            <option value="0">Tüm Kanal İşlemler</option>
-                            @foreach (var kanal in kanalIslemler)
-                            {
-                                <option value="@kanal.KanalIslemId">@kanal.KanalAdi</option>
-                            }
-                        </select>
-                        @if (isKanalIslemLocked)
+                        </div>
+                        @if (selectedHizmetBinasiId > 0)
                         {
-                            <button type="button" class="btn btn-sm btn-outline-secondary mt-1" @onclick="UnlockFilters">
-                                <i class="bx bx-lock-open-alt me-1"></i>Kilidi Aç
-                            </button>
+                            <div class="col-lg-6">
+                                <div class="row g-2">
+                                    <div class="col-4 col-lg-3">
+                                        <div class="bg-label-primary rounded p-2 text-center">
+                                            <h6 class="mb-0">@allAltIslemler.Count</h6>
+                                            <small class="text-muted" style="font-size: 0.7rem;">Alt İşlem</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-lg-3">
+                                        <div class="bg-label-success rounded p-2 text-center">
+                                            <h6 class="mb-0 text-success">@allAltIslemler.Count(k => k.Aktiflik == Aktiflik.Aktif)</h6>
+                                            <small class="text-muted" style="font-size: 0.7rem;">Aktif</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-lg-3">
+                                        <div class="bg-label-warning rounded p-2 text-center" title="Personel atanmış alt işlem sayısı">
+                                            <h6 class="mb-0 text-warning">@allAltIslemler.Count(k => k.PersonelSayisi > 0)</h6>
+                                            <small class="text-muted" style="font-size: 0.7rem;">Atanmış</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4 col-lg-3">
+                                        <div class="bg-label-secondary rounded p-2 text-center">
+                                            <h6 class="mb-0">@filteredAltIslemler.Count</h6>
+                                            <small class="text-muted" style="font-size: 0.7rem;">Filtre</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         }
                     </div>
-                    @if (selectedHizmetBinasiId > 0)
-                    {
-                        <div class="col-lg-6">
-                            <div class="row g-2">
-                                <div class="col-4 col-lg-3">
-                                    <div class="bg-label-primary rounded p-2 text-center">
-                                        <h6 class="mb-0">@allAltIslemler.Count</h6>
-                                        <small class="text-muted" style="font-size: 0.7rem;">Alt İşlem</small>
-                                    </div>
-                                </div>
-                                <div class="col-4 col-lg-3">
-                                    <div class="bg-label-success rounded p-2 text-center">
-                                        <h6 class="mb-0 text-success">@allAltIslemler.Count(k => k.Aktiflik == Aktiflik.Aktif)</h6>
-                                        <small class="text-muted" style="font-size: 0.7rem;">Aktif</small>
-                                    </div>
-                                </div>
-                                <div class="col-4 col-lg-3">
-                                    <div class="bg-label-warning rounded p-2 text-center" title="Personel atanmış alt işlem sayısı">
-                                        <h6 class="mb-0 text-warning">@allAltIslemler.Count(k => k.PersonelSayisi > 0)</h6>
-                                        <small class="text-muted" style="font-size: 0.7rem;">Atanmış</small>
-                                    </div>
-                                </div>
-                                <div class="col-4 col-lg-3">
-                                    <div class="bg-label-secondary rounded p-2 text-center">
-                                        <h6 class="mb-0">@filteredAltIslemler.Count</h6>
-                                        <small class="text-muted" style="font-size: 0.7rem;">Filtre</small>
-                                    </div>
+                </div>
+            </div>
+
+            @if (selectedHizmetBinasiId > 0)
+            {
+                <!-- Filtreleme Çubuğu -->
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body py-3">
+                        <div class="row g-3 align-items-center">
+                            <!-- Arama -->
+                            <div class="col-lg-3">
+                                <div class="input-group input-group-merge">
+                                    <span class="input-group-text"><i class="bx bx-search"></i></span>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           placeholder="Alt kanal adı ara..." 
+                                           @bind="searchText" 
+                                           @bind:event="oninput" 
+                                           @onkeyup="OnSearchChanged" />
+                                    @if (!string.IsNullOrEmpty(searchText))
+                                    {
+                                        <span class="input-group-text cursor-pointer" @onclick="() => { searchText = string.Empty; OnSearchChanged(); }">
+                                            <i class="bx bx-x"></i>
+                                        </span>
+                                    }
                                 </div>
                             </div>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
 
-        @if (selectedHizmetBinasiId > 0)
-        {
-            <!-- Filtreleme Çubuğu -->
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-body py-3">
-                    <div class="row g-3 align-items-center">
-                        <!-- Arama -->
-                        <div class="col-lg-3">
-                            <div class="input-group input-group-merge">
-                                <span class="input-group-text"><i class="bx bx-search"></i></span>
-                                <input type="text" 
-                                       class="form-control" 
-                                       placeholder="Alt kanal adı ara..." 
-                                       @bind="searchText" 
-                                       @bind:event="oninput" 
-                                       @onkeyup="OnSearchChanged" />
-                                @if (!string.IsNullOrEmpty(searchText))
-                                {
-                                    <span class="input-group-text cursor-pointer" @onclick="() => { searchText = string.Empty; OnSearchChanged(); }">
-                                        <i class="bx bx-x"></i>
-                                    </span>
-                                }
-                            </div>
-                        </div>
-
-                        <!-- Aktiflik Filtresi - Button Group -->
-                        <div class="col-lg-auto">
-                            <div class="btn-group" role="group">
-                                <button type="button"
-                                        class="btn btn-sm @(selectedAktiflik == null ? "btn-secondary" : "btn-outline-secondary")"
-                                        @onclick="() => SetAktiflikFilter(null)">
-                                    Tümü
-                                </button>
-                                <button type="button"
-                                        class="btn btn-sm @(selectedAktiflik == Aktiflik.Aktif ? "btn-label-success" : "btn-outline-secondary")"
-                                        @onclick="() => SetAktiflikFilter(Aktiflik.Aktif)">
-                                    Aktif
-                                </button>
-                                <button type="button"
-                                        class="btn btn-sm @(selectedAktiflik == Aktiflik.Pasif ? "btn-label-secondary" : "btn-outline-secondary")"
-                                        @onclick="() => SetAktiflikFilter(Aktiflik.Pasif)">
-                                    Pasif
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Sonuç Bilgisi -->
-                        <div class="col-lg-auto ms-lg-auto">
-                            <span class="badge bg-label-secondary">
-                                <i class="bx bx-filter me-1"></i>@filteredAltIslemler.Count / @allAltIslemler.Count kayıt
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        }
-
-        @if (isLoading)
-        {
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Yükleniyor...</span>
-                </div>
-                <p class="mt-3 text-muted">Veriler yükleniyor...</p>
-            </div>
-        }
-        else if (selectedHizmetBinasiId == 0)
-        {
-            <div class="card">
-                <div class="card-body text-center py-5">
-                    <i class="bx bx-building" style="font-size: 4rem; color: #ddd;"></i>
-                    <h5 class="mt-3 text-muted">Hizmet Binası Seçiniz</h5>
-                    <p class="text-muted">Lütfen yukarıdan bir hizmet binası seçerek başlayın.</p>
-                </div>
-            </div>
-        }
-        else if (filteredAltIslemler.Any())
-        {
-            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-                @foreach (var altIslem in filteredAltIslemler)
-                {
-                    <div class="col">
-                        <div class="card h-100 shadow-sm border-0 card-hover @(altIslem.Aktiflik == Aktiflik.Pasif ? "opacity-75" : "")">
-                            <div class="card-header border-0 pb-0 d-flex justify-content-between align-items-center">
-                                <span class="badge @(altIslem.Aktiflik == Aktiflik.Aktif ? "bg-label-success" : "bg-label-secondary")">
-                                    @(altIslem.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif")
-                                </span>
-                                <div class="dropdown">
-                                    <button class="btn btn-text-secondary btn-icon btn-sm rounded-pill" type="button" data-bs-toggle="dropdown">
-                                        <i class="bx bx-dots-vertical-rounded"></i>
+                            <!-- Aktiflik Filtresi - Button Group -->
+                            <div class="col-lg-auto">
+                                <div class="btn-group" role="group">
+                                    <button type="button"
+                                            class="btn btn-sm @(selectedAktiflik == null ? "btn-secondary" : "btn-outline-secondary")"
+                                            @onclick="() => SetAktiflikFilter(null)">
+                                        Tümü
                                     </button>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <a class="dropdown-item" href="/siramatik/kanal-alt-islem/manage/@altIslem.KanalAltIslemId">
-                                                <i class="bx bx-edit-alt me-2 text-primary"></i>Düzenle
-                                            </a>
-                                        </li>
-                                        <li><hr class="dropdown-divider my-1" /></li>
-                                        <li>
-                                            <a class="dropdown-item" href="/siramatik/personel-atama?kanalAltIslemId=@altIslem.KanalAltIslemId">
-                                                <i class="bx bx-user-plus me-2 text-warning"></i>Personel Ata
-                                            </a>
-                                        </li>
-                                        <li><hr class="dropdown-divider my-1" /></li>
-                                        <li>
-                                            <button class="dropdown-item" @onclick="() => ToggleAktiflik(altIslem)">
-                                                <i class="bx @(altIslem.Aktiflik == Aktiflik.Aktif ? "bx-pause" : "bx-play") me-2"></i>
-                                                @(altIslem.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button class="dropdown-item text-danger" @onclick="() => ShowDeleteConfirm(altIslem)">
-                                                <i class="bx bx-trash me-2"></i>Sil
-                                            </button>
-                                        </li>
-                                    </ul>
+                                    <button type="button"
+                                            class="btn btn-sm @(selectedAktiflik == Aktiflik.Aktif ? "btn-label-success" : "btn-outline-secondary")"
+                                            @onclick="() => SetAktiflikFilter(Aktiflik.Aktif)">
+                                        Aktif
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-sm @(selectedAktiflik == Aktiflik.Pasif ? "btn-label-secondary" : "btn-outline-secondary")"
+                                            @onclick="() => SetAktiflikFilter(Aktiflik.Pasif)">
+                                        Pasif
+                                    </button>
                                 </div>
                             </div>
-                        
-                            <div class="card-body pt-3">
-                                <h5 class="card-title fw-semibold mb-1">@altIslem.KanalAltAdi</h5>
-                                <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
-                                    <span class="badge bg-label-info">
-                                        <i class="bx bx-cog me-1"></i>@altIslem.KanalAdi
-                                    </span>
-                                    <small class="text-muted">
-                                        <i class="bx bx-calendar me-1"></i>@altIslem.EklenmeTarihi.ToString("dd MMM yyyy")
-                                    </small>
-                                </div>
-                            
-                                <!-- Personel Uzmanlık Dağılımı -->
-                                <div class="d-flex gap-2 justify-content-center">
-                                    @if (altIslem.SefSayisi > 0)
-                                    {
-                                        <div class="bg-label-danger rounded px-2 py-1 text-center" title="Şef">
-                                            <small class="fw-bold text-danger">@altIslem.SefSayisi</small>
-                                            <small class="text-muted d-block" style="font-size: 0.65rem;">Şef</small>
-                                        </div>
-                                    }
-                                    @if (altIslem.UzmanSayisi > 0)
-                                    {
-                                        <div class="bg-label-success rounded px-2 py-1 text-center" title="Uzman">
-                                            <small class="fw-bold text-success">@altIslem.UzmanSayisi</small>
-                                            <small class="text-muted d-block" style="font-size: 0.65rem;">Uzman</small>
-                                        </div>
-                                    }
-                                    @if (altIslem.YrdUzmanSayisi > 0)
-                                    {
-                                        <div class="bg-label-info rounded px-2 py-1 text-center" title="Yrd. Uzman">
-                                            <small class="fw-bold text-info">@altIslem.YrdUzmanSayisi</small>
-                                            <small class="text-muted d-block" style="font-size: 0.65rem;">Yrd.Uzm</small>
-                                        </div>
-                                    }
-                                    @if (altIslem.PersonelSayisi == 0)
-                                    {
-                                        <div class="bg-label-secondary rounded px-3 py-1 text-center">
-                                            <small class="text-muted">Personel Yok</small>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        
-                            <!-- Hızlı Aksiyon -->
-                            <div class="card-footer border-0 pt-0">
-                                <a href="/siramatik/personel-atama?kanalAltIslemId=@altIslem.KanalAltIslemId" 
-                                   class="btn btn-sm btn-outline-warning w-100">
-                                    <i class="bx bx-user-plus me-1"></i>Personel Yönet
-                                </a>
+
+                            <!-- Sonuç Bilgisi -->
+                            <div class="col-lg-auto ms-lg-auto">
+                                <span class="badge bg-label-secondary">
+                                    <i class="bx bx-filter me-1"></i>@filteredAltIslemler.Count / @allAltIslemler.Count kayıt
+                                </span>
                             </div>
                         </div>
                     </div>
-                }
-            </div>
-        }
-        else
-        {
-            <div class="card">
-                <div class="card-body text-center py-5">
-                    <i class="bx bx-search" style="font-size: 4rem; color: #ddd;"></i>
-                    <h5 class="mt-3 text-muted">Alt işlem bulunamadı</h5>
-                    <p class="text-muted">@(string.IsNullOrEmpty(searchText) ? "Henüz alt işlem eklenmemiş." : "Arama kriterlerine uygun sonuç bulunamadı.")</p>
-                    @if (string.IsNullOrEmpty(searchText))
+                </div>
+            }
+
+            @if (isLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Veriler yükleniyor...</p>
+                </div>
+            }
+            else if (selectedHizmetBinasiId == 0)
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="bx bx-building" style="font-size: 4rem; color: #ddd;"></i>
+                        <h5 class="mt-3 text-muted">Hizmet Binası Seçiniz</h5>
+                        <p class="text-muted">Lütfen yukarıdan bir hizmet binası seçerek başlayın.</p>
+                    </div>
+                </div>
+            }
+            else if (filteredAltIslemler.Any())
+            {
+                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                    @foreach (var altIslem in filteredAltIslemler)
                     {
-                        <a href="/siramatik/kanal-alt-islem/manage" class="btn btn-primary mt-3">
-                            <i class="bx bx-plus me-1"></i>
-                            İlk Kanal Alt İşlemi Ekle
-                        </a>
+                        <div class="col">
+                            <div class="card h-100 shadow-sm border-0 card-hover @(altIslem.Aktiflik == Aktiflik.Pasif ? "opacity-75" : "")">
+                                <div class="card-header border-0 pb-0 d-flex justify-content-between align-items-center">
+                                    <span class="badge @(altIslem.Aktiflik == Aktiflik.Aktif ? "bg-label-success" : "bg-label-secondary")">
+                                        @(altIslem.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif")
+                                    </span>
+                                    <div class="dropdown">
+                                        <button class="btn btn-text-secondary btn-icon btn-sm rounded-pill" type="button" data-bs-toggle="dropdown">
+                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="/siramatik/kanal-alt-islem/manage/@altIslem.KanalAltIslemId">
+                                                    <i class="bx bx-edit-alt me-2 text-primary"></i>Düzenle
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider my-1" /></li>
+                                            <li>
+                                                <a class="dropdown-item" href="/siramatik/personel-atama?kanalAltIslemId=@altIslem.KanalAltIslemId">
+                                                    <i class="bx bx-user-plus me-2 text-warning"></i>Personel Ata
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider my-1" /></li>
+                                            <li>
+                                                <button class="dropdown-item" @onclick="() => ToggleAktiflik(altIslem)">
+                                                    <i class="bx @(altIslem.Aktiflik == Aktiflik.Aktif ? "bx-pause" : "bx-play") me-2"></i>
+                                                    @(altIslem.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap")
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item text-danger" @onclick="() => ShowDeleteConfirm(altIslem)">
+                                                    <i class="bx bx-trash me-2"></i>Sil
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                        
+                                <div class="card-body pt-3">
+                                    <h5 class="card-title fw-semibold mb-1">@altIslem.KanalAltAdi</h5>
+                                    <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+                                        <span class="badge bg-label-info">
+                                            <i class="bx bx-cog me-1"></i>@altIslem.KanalAdi
+                                        </span>
+                                        <small class="text-muted">
+                                            <i class="bx bx-calendar me-1"></i>@altIslem.EklenmeTarihi.ToString("dd MMM yyyy")
+                                        </small>
+                                    </div>
+                            
+                                    <!-- Personel Uzmanlık Dağılımı -->
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        @if (altIslem.SefSayisi > 0)
+                                        {
+                                            <div class="bg-label-danger rounded px-2 py-1 text-center" title="Şef">
+                                                <small class="fw-bold text-danger">@altIslem.SefSayisi</small>
+                                                <small class="text-muted d-block" style="font-size: 0.65rem;">Şef</small>
+                                            </div>
+                                        }
+                                        @if (altIslem.UzmanSayisi > 0)
+                                        {
+                                            <div class="bg-label-success rounded px-2 py-1 text-center" title="Uzman">
+                                                <small class="fw-bold text-success">@altIslem.UzmanSayisi</small>
+                                                <small class="text-muted d-block" style="font-size: 0.65rem;">Uzman</small>
+                                            </div>
+                                        }
+                                        @if (altIslem.YrdUzmanSayisi > 0)
+                                        {
+                                            <div class="bg-label-info rounded px-2 py-1 text-center" title="Yrd. Uzman">
+                                                <small class="fw-bold text-info">@altIslem.YrdUzmanSayisi</small>
+                                                <small class="text-muted d-block" style="font-size: 0.65rem;">Yrd.Uzm</small>
+                                            </div>
+                                        }
+                                        @if (altIslem.PersonelSayisi == 0)
+                                        {
+                                            <div class="bg-label-secondary rounded px-3 py-1 text-center">
+                                                <small class="text-muted">Personel Yok</small>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                        
+                                <!-- Hızlı Aksiyon -->
+                                <div class="card-footer border-0 pt-0">
+                                    <a href="/siramatik/personel-atama?kanalAltIslemId=@altIslem.KanalAltIslemId" 
+                                       class="btn btn-sm btn-outline-warning w-100">
+                                        <i class="bx bx-user-plus me-1"></i>Personel Yönet
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     }
                 </div>
-            </div>
-        }
-    }
-</div>
+            }
+            else
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="bx bx-search" style="font-size: 4rem; color: #ddd;"></i>
+                        <h5 class="mt-3 text-muted">Alt işlem bulunamadı</h5>
+                        <p class="text-muted">@(string.IsNullOrEmpty(searchText) ? "Henüz alt işlem eklenmemiş." : "Arama kriterlerine uygun sonuç bulunamadı.")</p>
+                        @if (string.IsNullOrEmpty(searchText))
+                        {
+                            <a href="/siramatik/kanal-alt-islem/manage" class="btn btn-primary mt-3">
+                                <i class="bx bx-plus me-1"></i>
+                                İlk Kanal Alt İşlemi Ekle
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </FieldPermissionScope>
+}
+
 
 <!-- Delete Confirmation Modal -->
 @if (showDeleteModal)

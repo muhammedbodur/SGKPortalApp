@@ -23,425 +23,426 @@ else if (IsLoading)
 }
 else
 {
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-xxl flex-grow-1 container-p-y">
 
-        @* ═══════════════════════════════════════════════════════════════════════════════ *@
-        @* PAGE HEADER - DEPARTMAN PATTERN *@
-        @* ═══════════════════════════════════════════════════════════════════════════════ *@
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h4 class="fw-bold mb-1">
-                    <i class="bx bx-user-check me-2"></i>Personel Atama
-                </h4>
-                <p class="text-muted mb-0">
-                    Kanal alt işlemlerine personel uzmanlık düzeylerini atayın
-                </p>
-            </div>
+            @* ═══════════════════════════════════════════════════════════════════════════════ *@
+            @* PAGE HEADER - DEPARTMAN PATTERN *@
+            @* ═══════════════════════════════════════════════════════════════════════════════ *@
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        <i class="bx bx-user-check me-2"></i>Personel Atama
+                    </h4>
+                    <p class="text-muted mb-0">
+                        Kanal alt işlemlerine personel uzmanlık düzeylerini atayın
+                    </p>
+                </div>
 
-            <div class="d-flex gap-2">
-                <!-- Excel Export -->
-                <button class="btn btn-success" @onclick="ExportToExcel" disabled="@IsExporting">
-                    @if (IsExporting && ExportType == "excel")
-                    {
-                        <span class="spinner-border spinner-border-sm me-1"></span>
-                    }
-                    else
-                    {
-                        <i class="bx bx-download me-1"></i>
-                    }
-                    Excel
-                </button>
-
-                <!-- PDF Export -->
-                <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@IsExporting">
-                    @if (IsExporting && ExportType == "pdf")
-                    {
-                        <span class="spinner-border spinner-border-sm me-1"></span>
-                    }
-                    else
-                    {
-                        <i class="bx bxs-file-pdf me-1"></i>
-                    }
-                    PDF
-                </button>
-
-                <!-- Filtreleri Temizle -->
-                <button class="btn btn-outline-secondary" @onclick="ClearAllFilters">
-                    <i class="bx bx-refresh me-1"></i>
-                    Temizle
-                </button>
-            </div>
-        </div>
-
-        @* ═══════════════════════════════════════════════════════════════════════════════ *@
-        @* HIZMET BİNASI + RENK AÇIKLAMASI - DEPARTMAN PATTERN *@
-        @* ═══════════════════════════════════════════════════════════════════════════════ *@
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="row g-3">
-                    <!-- Hizmet Binası Seçimi -->
-                    @if (IsFieldVisibleInList("HIZMET_BINASI"))
-                    {
-                        <div class="col-md-6">
-                            <label class="form-label fw-bold">
-                                <i class="bx bx-building me-2"></i>Hizmet Binası
-                                @if (!CanEditFieldInList("HIZMET_BINASI"))
-                                {
-                                    <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
-                                        <i class="bx bx-lock-alt"></i>
-                                    </span>
-                                }
-                                @if (isFiltersLocked)
-                                {
-                                    <span class="badge bg-label-secondary ms-1"><i class="bx bx-lock-alt"></i></span>
-                                }
-                            </label>
-                            <select class="form-select"
-                                    value="@SelectedHizmetBinasiId"
-                                    @onchange="OnHizmetBinasiChanged"
-                                    disabled="@(IsLoadingDropdowns || isFiltersLocked || IsFieldDisabledInList("HIZMET_BINASI"))">
-                                <option value="0">-- Hizmet Binası Seçiniz --</option>
-                                @foreach (var hb in HizmetBinalari)
-                                {
-                                    <option value="@hb.HizmetBinasiId">
-                                        @hb.HizmetBinasiAdi (@hb.PersonelSayisi personel)
-                                    </option>
-                                }
-                            </select>
-                            @if (IsLoadingDropdowns)
-                            {
-                                <small class="text-muted d-block mt-1">
-                                    <i class="bx bx-loader-alt bx-spin me-1"></i>
-                                    Yükleniyor...
-                                </small>
-                            }
-                            else if (HizmetBinalari.Any())
-                            {
-                                <small class="text-success d-block mt-1">
-                                    <i class="bx bx-check-circle me-1"></i>
-                                    @HizmetBinalari.Count Hizmet binası mevcut
-                                </small>
-                            }
-                            else if (!HizmetBinalari.Any())
-                            {
-                                <small class="text-warning d-block mt-1">
-                                    <i class="bx bx-info-circle me-1"></i>
-                                    Hizmet binası bulunamadı
-                                </small>
-                            }
-                        </div>
-                    }
-
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">
-                            <i class="bx bx-filter me-2"></i>Servis Filtrele
-                        </label>
-                        <select class="form-select"
-                                value="@SelectedServisId"
-                                @onchange="OnServisChanged"
-                                disabled="@(IsLoadingMatrix || SelectedHizmetBinasiId == 0)">
-                            <option value="0">-- Tüm Servisler --</option>
-                            @foreach (var servis in Servisler)
-                            {
-                                <option value="@servis.ServisId">
-                                    @servis.ServisAdi (@servis.PersonelSayisi personel)
-                                </option>
-                            }
-                        </select>
-                        @if (SelectedHizmetBinasiId > 0 && Servisler.Any())
+                <div class="d-flex gap-2">
+                    <!-- Excel Export -->
+                    <button class="btn btn-success" @onclick="ExportToExcel" disabled="@IsExporting">
+                        @if (IsExporting && ExportType == "excel")
                         {
-                            <small class="text-success d-block mt-1">
-                                <i class="bx bx-check-circle me-1"></i>
-                                @Servisler.Count servis mevcut
-                            </small>
-                        }
-                        else if (SelectedHizmetBinasiId > 0 && !Servisler.Any())
-                        {
-                            <small class="text-warning d-block mt-1">
-                                <i class="bx bx-info-circle me-1"></i>
-                                Bu binada personellere ait servis bulunamadı
-                            </small>
+                            <span class="spinner-border spinner-border-sm me-1"></span>
                         }
                         else
                         {
-                            <small class="text-muted d-block mt-1">
-                                Önce hizmet binası seçiniz
-                            </small>
+                            <i class="bx bx-download me-1"></i>
                         }
-                    </div>
+                        Excel
+                    </button>
 
-                    <!-- Renk Açıklaması -->
-                    <div class="col-md-8">
-                        <label class="form-label fw-bold">
-                            <i class="bx bx-info-circle me-2"></i>Uzmanlık Seviyeleri
-                        </label>
-                        <div class="d-flex flex-wrap gap-2 align-items-center">
-                            <span class="badge bg-danger p-2">Şef</span>
-                            <span class="badge bg-success p-2">Konusunda Uzman</span>
-                            <span class="badge bg-info p-2">Konusunda Yrd. Uzman</span>
-                            <span class="badge bg-secondary p-2">Bilgisi Yok</span>
-                        </div>
-                    </div>
+                    <!-- PDF Export -->
+                    <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@IsExporting">
+                        @if (IsExporting && ExportType == "pdf")
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        else
+                        {
+                            <i class="bx bxs-file-pdf me-1"></i>
+                        }
+                        PDF
+                    </button>
+
+                    <!-- Filtreleri Temizle -->
+                    <button class="btn btn-outline-secondary" @onclick="ClearAllFilters">
+                        <i class="bx bx-refresh me-1"></i>
+                        Temizle
+                    </button>
                 </div>
-
-                @* İstatistikler *@
-                @if (SelectedHizmetBinasiId > 0 && !IsLoadingMatrix)
-                {
-                    <div class="row mt-3">
-                        <div class="col">
-                            <div class="d-flex gap-4 text-muted small">
-                                <span>
-                                    <i class="bx bx-user text-primary"></i>
-                                    Personel: <strong>@PersonelMatrix.Count</strong>
-                                </span>
-                                <span>
-                                    <i class="bx bx-list-ul text-info"></i>
-                                    Kanal Alt İşlem: <strong>@KanalAltIslemler.Count</strong>
-                                </span>
-                                <span>
-                                    <i class="bx bx-check-circle text-success"></i>
-                                    Atama: <strong>@AtamalarDict.Count</strong>
-                                </span>
-                                <span>
-                                    <i class="bx bx-filter-alt text-warning"></i>
-                                    Filtrelenen: <strong>@FilteredPersoneller.Count × @FilteredKanalAltIslemler.Count</strong>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                }
             </div>
-        </div>
 
-        @* ═══════════════════════════════════════════════════════════════════════════════ *@
-        @* ARAMA FİLTRELERİ - DEPARTMAN PATTERN *@
-        @* ═══════════════════════════════════════════════════════════════════════════════ *@
-        @if (SelectedHizmetBinasiId > 0)
-        {
+            @* ═══════════════════════════════════════════════════════════════════════════════ *@
+            @* HIZMET BİNASI + RENK AÇIKLAMASI - DEPARTMAN PATTERN *@
+            @* ═══════════════════════════════════════════════════════════════════════════════ *@
             <div class="card mb-4">
                 <div class="card-body">
                     <div class="row g-3">
-                        <!-- Personel Arama -->
-                        <div class="col-md-6">
-                            <label class="form-label">Personel Ara</label>
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="bx bx-search"></i>
-                                </span>
-                                <input type="text"
-                                       class="form-control"
-                                       placeholder="Ad, Soyad veya TC Kimlik No..."
-                                       @bind="PersonelSearchTerm"
-                                       @bind:event="oninput" />
-                            </div>
-                            <small class="text-muted d-block mt-1">
-                                @FilteredPersoneller.Count / @PersonelMatrix.Count personel gösteriliyor
-                            </small>
-                        </div>
-
-                        <!-- Kanal Alt İşlem Filtrele -->
-                        <div class="col-md-6">
-                            <label class="form-label">
-                                Kanal Alt İşlem Filtrele
-                                @if (isFiltersLocked)
+                        <!-- Hizmet Binası Seçimi -->
+                        <PermissionField FieldName="HIZMETBINASIID" Context="perm">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">
+                                    <i class="bx bx-building me-2"></i>Hizmet Binası
+                                    @if (!perm.CanEdit)
+                                    {
+                                        <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
+                                            <i class="bx bx-lock-alt"></i>
+                                        </span>
+                                    }
+                                    @if (isFiltersLocked)
+                                    {
+                                        <span class="badge bg-label-secondary ms-1"><i class="bx bx-lock-alt"></i></span>
+                                    }
+                                </label>
+                                <select class="form-select"
+                                        value="@SelectedHizmetBinasiId"
+                                        @onchange="OnHizmetBinasiChanged"
+                                        disabled="@(IsLoadingDropdowns || isFiltersLocked || perm.IsDisabled)">
+                                    <option value="0">-- Hizmet Binası Seçiniz --</option>
+                                    @foreach (var hb in HizmetBinalari)
+                                    {
+                                        <option value="@hb.HizmetBinasiId">
+                                            @hb.HizmetBinasiAdi (@hb.PersonelSayisi personel)
+                                        </option>
+                                    }
+                                </select>
+                                @if (IsLoadingDropdowns)
                                 {
-                                    <span class="badge bg-label-secondary ms-1"><i class="bx bx-lock-alt"></i></span>
+                                    <small class="text-muted d-block mt-1">
+                                        <i class="bx bx-loader-alt bx-spin me-1"></i>
+                                        Yükleniyor...
+                                    </small>
                                 }
+                                else if (HizmetBinalari.Any())
+                                {
+                                    <small class="text-success d-block mt-1">
+                                        <i class="bx bx-check-circle me-1"></i>
+                                        @HizmetBinalari.Count Hizmet binası mevcut
+                                    </small>
+                                }
+                                else if (!HizmetBinalari.Any())
+                                {
+                                    <small class="text-warning d-block mt-1">
+                                        <i class="bx bx-info-circle me-1"></i>
+                                        Hizmet binası bulunamadı
+                                    </small>
+                                }
+                            </div>
+                        </PermissionField>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">
+                                <i class="bx bx-filter me-2"></i>Servis Filtrele
                             </label>
                             <select class="form-select"
-                                    @bind="KanalAltIslemSearchTerm"
-                                    disabled="@isFiltersLocked">
-                                <option value="">-- Tüm İşlemler --</option>
-                                @foreach (var kai in KanalAltIslemler)
+                                    value="@SelectedServisId"
+                                    @onchange="OnServisChanged"
+                                    disabled="@(IsLoadingMatrix || SelectedHizmetBinasiId == 0)">
+                                <option value="0">-- Tüm Servisler --</option>
+                                @foreach (var servis in Servisler)
                                 {
-                                    <option value="@kai.KanalAltIslemId">
-                                        @kai.KanalAdi - @kai.KanalAltAdi @(kai.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Pasif ? "(PASİF)" : "")
+                                    <option value="@servis.ServisId">
+                                        @servis.ServisAdi (@servis.PersonelSayisi personel)
                                     </option>
                                 }
                             </select>
-                            @if (isFiltersLocked)
+                            @if (SelectedHizmetBinasiId > 0 && Servisler.Any())
                             {
-                                <button type="button" class="btn btn-sm btn-outline-secondary mt-1" @onclick="UnlockFilters">
-                                    <i class="bx bx-lock-open-alt me-1"></i>Kilidi Aç
-                                </button>
+                                <small class="text-success d-block mt-1">
+                                    <i class="bx bx-check-circle me-1"></i>
+                                    @Servisler.Count servis mevcut
+                                </small>
+                            }
+                            else if (SelectedHizmetBinasiId > 0 && !Servisler.Any())
+                            {
+                                <small class="text-warning d-block mt-1">
+                                    <i class="bx bx-info-circle me-1"></i>
+                                    Bu binada personellere ait servis bulunamadı
+                                </small>
                             }
                             else
                             {
                                 <small class="text-muted d-block mt-1">
-                                    @FilteredKanalAltIslemler.Count / @KanalAltIslemler.Count işlem gösteriliyor
+                                    Önce hizmet binası seçiniz
                                 </small>
                             }
                         </div>
+
+                        <!-- Renk Açıklaması -->
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">
+                                <i class="bx bx-info-circle me-2"></i>Uzmanlık Seviyeleri
+                            </label>
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <span class="badge bg-danger p-2">Şef</span>
+                                <span class="badge bg-success p-2">Konusunda Uzman</span>
+                                <span class="badge bg-info p-2">Konusunda Yrd. Uzman</span>
+                                <span class="badge bg-secondary p-2">Bilgisi Yok</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        }
 
-        @* ═══════════════════════════════════════════════════════════════════════════════ *@
-        @* MATRIX GRID - ANA İÇERİK *@
-        @* ═══════════════════════════════════════════════════════════════════════════════ *@
-
-        @if (SelectedHizmetBinasiId > 0 && !IsLoadingMatrix)
-        {
-            <div class="card">
-                <div class="card-body">
-                    @if (FilteredPersoneller.Count == 0 || FilteredKanalAltIslemler.Count == 0)
+                    @* İstatistikler *@
+                    @if (SelectedHizmetBinasiId > 0 && !IsLoadingMatrix)
                     {
-                        <div class="alert alert-info text-center mb-0">
-                            <i class="bx bx-info-circle me-2"></i>
-                            @if (FilteredPersoneller.Count == 0)
-                            {
-                                <span>Bu hizmet binasında personel bulunmamaktadır.</span>
-                            }
-                            else if (FilteredKanalAltIslemler.Count == 0)
-                            {
-                                <span>Bu hizmet binasında kanal alt işlem bulunmamaktadır.</span>
-                            }
+                        <div class="row mt-3">
+                            <div class="col">
+                                <div class="d-flex gap-4 text-muted small">
+                                    <span>
+                                        <i class="bx bx-user text-primary"></i>
+                                        Personel: <strong>@PersonelMatrix.Count</strong>
+                                    </span>
+                                    <span>
+                                        <i class="bx bx-list-ul text-info"></i>
+                                        Kanal Alt İşlem: <strong>@KanalAltIslemler.Count</strong>
+                                    </span>
+                                    <span>
+                                        <i class="bx bx-check-circle text-success"></i>
+                                        Atama: <strong>@AtamalarDict.Count</strong>
+                                    </span>
+                                    <span>
+                                        <i class="bx bx-filter-alt text-warning"></i>
+                                        Filtrelenen: <strong>@FilteredPersoneller.Count × @FilteredKanalAltIslemler.Count</strong>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     }
-                    else
-                    {
-                        @* MATRIX TABLE - EXCEL STYLE *@
-                        <div class="table-responsive">
-                            <table class="table table-hover table-bordered mb-0">
+                </div>
+            </div>
 
-                                @* HEADER ROW - KANAL ALT İŞLEMLERİ *@
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="bg-primary text-white" style="min-width: 200px; position: sticky; left: 0; z-index: 10;">
-                                            <strong>Personel Adı</strong>
-                                            <br />
-                                            <small>TC No</small>
-                                        </th>
-                                        @foreach (var kai in FilteredKanalAltIslemler)
-                                        {
-                                            var isPasif = kai.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Pasif;
-                                            <th class="text-center @(isPasif ? "bg-warning-subtle" : "bg-light")" 
-                                                style="position: sticky; left: 0; z-index: 5; min-width: 140px; max-width: 140px; @(isPasif ? "opacity: 0.7;" : "")">
-                                                <strong>@kai.KanalAltAdi</strong>
-                                                @if (isPasif)
-                                                {
-                                                    <br />
-                                                    <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">PASİF</span>
-                                                }
-                                            </th>
-                                        }
-                                    </tr>
-                                </thead>
+            @* ═══════════════════════════════════════════════════════════════════════════════ *@
+            @* ARAMA FİLTRELERİ - DEPARTMAN PATTERN *@
+            @* ═══════════════════════════════════════════════════════════════════════════════ *@
+            @if (SelectedHizmetBinasiId > 0)
+            {
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <!-- Personel Arama -->
+                            <div class="col-md-6">
+                                <label class="form-label">Personel Ara</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bx bx-search"></i>
+                                    </span>
+                                    <input type="text"
+                                           class="form-control"
+                                           placeholder="Ad, Soyad veya TC Kimlik No..."
+                                           @bind="PersonelSearchTerm"
+                                           @bind:event="oninput" />
+                                </div>
+                                <small class="text-muted d-block mt-1">
+                                    @FilteredPersoneller.Count / @PersonelMatrix.Count personel gösteriliyor
+                                </small>
+                            </div>
 
-                                @* DATA ROWS - PERSONELLER *@
-                                <tbody>
-                                    @foreach (var personel in FilteredPersoneller)
+                            <!-- Kanal Alt İşlem Filtrele -->
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    Kanal Alt İşlem Filtrele
+                                    @if (isFiltersLocked)
                                     {
-                                        <tr>
-                                            @* PERSONEL CELL (STICKY) *@
-                                            <td style="position: sticky; left: 0; z-index: 5; background-color: white;">
-                                                <div class="d-flex align-items-center">
-                                                    @if (!string.IsNullOrEmpty(personel.Resim))
-                                                    {
-                                                        <img src="@personel.Resim"
-                                                             alt="@personel.PersonelAdSoyad"
-                                                             class="avatar avatar-sm me-2" />
-                                                    }
-                                                    else
-                                                    {
-                                                        <div class="avatar avatar-sm me-2 bg-secondary text-white">
-                                                            <span class="avatar-initial rounded-circle">
-                                                                @personel.PersonelAdSoyad[0]
-                                                            </span>
-                                                        </div>
-                                                    }
-                                                    <div>
-                                                        <strong>@personel.PersonelAdSoyad</strong>
-                                                        <br />
-                                                        <small class="text-muted">@personel.TcKimlikNo</small>
-                                                    </div>
-                                                </div>
-                                            </td>
+                                        <span class="badge bg-label-secondary ms-1"><i class="bx bx-lock-alt"></i></span>
+                                    }
+                                </label>
+                                <select class="form-select"
+                                        @bind="KanalAltIslemSearchTerm"
+                                        disabled="@isFiltersLocked">
+                                    <option value="">-- Tüm İşlemler --</option>
+                                    @foreach (var kai in KanalAltIslemler)
+                                    {
+                                        <option value="@kai.KanalAltIslemId">
+                                            @kai.KanalAdi - @kai.KanalAltAdi @(kai.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Pasif ? "(PASİF)" : "")
+                                        </option>
+                                    }
+                                </select>
+                                @if (isFiltersLocked)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-secondary mt-1" @onclick="UnlockFilters">
+                                        <i class="bx bx-lock-open-alt me-1"></i>Kilidi Aç
+                                    </button>
+                                }
+                                else
+                                {
+                                    <small class="text-muted d-block mt-1">
+                                        @FilteredKanalAltIslemler.Count / @KanalAltIslemler.Count işlem gösteriliyor
+                                    </small>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
 
-                                            @* HÜCRE - TOGGLE BUTONLAR *@
+            @* ═══════════════════════════════════════════════════════════════════════════════ *@
+            @* MATRIX GRID - ANA İÇERİK *@
+            @* ═══════════════════════════════════════════════════════════════════════════════ *@
+
+            @if (SelectedHizmetBinasiId > 0 && !IsLoadingMatrix)
+            {
+                <div class="card">
+                    <div class="card-body">
+                        @if (FilteredPersoneller.Count == 0 || FilteredKanalAltIslemler.Count == 0)
+                        {
+                            <div class="alert alert-info text-center mb-0">
+                                <i class="bx bx-info-circle me-2"></i>
+                                @if (FilteredPersoneller.Count == 0)
+                                {
+                                    <span>Bu hizmet binasında personel bulunmamaktadır.</span>
+                                }
+                                else if (FilteredKanalAltIslemler.Count == 0)
+                                {
+                                    <span>Bu hizmet binasında kanal alt işlem bulunmamaktadır.</span>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            @* MATRIX TABLE - EXCEL STYLE *@
+                            <div class="table-responsive">
+                                <table class="table table-hover table-bordered mb-0">
+
+                                    @* HEADER ROW - KANAL ALT İŞLEMLERİ *@
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="bg-primary text-white" style="min-width: 200px; position: sticky; left: 0; z-index: 10;">
+                                                <strong>Personel Adı</strong>
+                                                <br />
+                                                <small>TC No</small>
+                                            </th>
                                             @foreach (var kai in FilteredKanalAltIslemler)
                                             {
-                                                var mevcutValue = GetHucreValue(personel.TcKimlikNo, kai.KanalAltIslemId);
-                                                var isLoading = IsHucreLoading(personel.TcKimlikNo, kai.KanalAltIslemId);
-                                                var buttonClass = GetHucreButtonClass(mevcutValue);
-                                                var displayName = GetUzmanlikDisplayName(mevcutValue);
-                                                var hucreId = GetHucreId(personel.TcKimlikNo, kai.KanalAltIslemId);
                                                 var isPasif = kai.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Pasif;
+                                                <th class="text-center @(isPasif ? "bg-warning-subtle" : "bg-light")" 
+                                                    style="position: sticky; left: 0; z-index: 5; min-width: 140px; max-width: 140px; @(isPasif ? "opacity: 0.7;" : "")">
+                                                    <strong>@kai.KanalAltAdi</strong>
+                                                    @if (isPasif)
+                                                    {
+                                                        <br />
+                                                        <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">PASİF</span>
+                                                    }
+                                                </th>
+                                            }
+                                        </tr>
+                                    </thead>
 
-                                                <td class="text-center align-middle p-2 @(isPasif ? "bg-warning-subtle" : "")" style="@(isPasif ? "opacity: 0.6;" : "")">
-                                                    <button class="@buttonClass btn-block w-100 h-auto py-2 px-1"
-                                                            style="min-height: 60px; font-size: 0.85rem;"
-                                                            @onclick="() => OnHucreClicked(personel.TcKimlikNo, kai.KanalAltIslemId, isPasif)"
-                                                            disabled="@isLoading"
-                                                            id="@hucreId"
-                                                            title="@(isPasif ? "Bu işlem pasif durumda - işlem yapılamaz" : "Tıkla: Bilgisi Yok → Şef → Uzman → Yrd. Uzman → Bilgisi Yok")">
-
-                                                        @if (isLoading)
+                                    @* DATA ROWS - PERSONELLER *@
+                                    <tbody>
+                                        @foreach (var personel in FilteredPersoneller)
+                                        {
+                                            <tr>
+                                                @* PERSONEL CELL (STICKY) *@
+                                                <td style="position: sticky; left: 0; z-index: 5; background-color: white;">
+                                                    <div class="d-flex align-items-center">
+                                                        @if (!string.IsNullOrEmpty(personel.Resim))
                                                         {
-                                                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                                                            <span>Güncelleniyor...</span>
+                                                            <img src="@personel.Resim"
+                                                                 alt="@personel.PersonelAdSoyad"
+                                                                 class="avatar avatar-sm me-2" />
                                                         }
                                                         else
                                                         {
-                                                            <div>
-                                                                <strong>@displayName</strong>
-                                                                <br />
-                                                                <small>(@((int)mevcutValue))</small>
+                                                            <div class="avatar avatar-sm me-2 bg-secondary text-white">
+                                                                <span class="avatar-initial rounded-circle">
+                                                                    @personel.PersonelAdSoyad[0]
+                                                                </span>
                                                             </div>
                                                         }
-                                                    </button>
+                                                        <div>
+                                                            <strong>@personel.PersonelAdSoyad</strong>
+                                                            <br />
+                                                            <small class="text-muted">@personel.TcKimlikNo</small>
+                                                        </div>
+                                                    </div>
                                                 </td>
-                                            }
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+
+                                                @* HÜCRE - TOGGLE BUTONLAR *@
+                                                @foreach (var kai in FilteredKanalAltIslemler)
+                                                {
+                                                    var mevcutValue = GetHucreValue(personel.TcKimlikNo, kai.KanalAltIslemId);
+                                                    var isLoading = IsHucreLoading(personel.TcKimlikNo, kai.KanalAltIslemId);
+                                                    var buttonClass = GetHucreButtonClass(mevcutValue);
+                                                    var displayName = GetUzmanlikDisplayName(mevcutValue);
+                                                    var hucreId = GetHucreId(personel.TcKimlikNo, kai.KanalAltIslemId);
+                                                    var isPasif = kai.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Pasif;
+
+                                                    <td class="text-center align-middle p-2 @(isPasif ? "bg-warning-subtle" : "")" style="@(isPasif ? "opacity: 0.6;" : "")">
+                                                        <button class="@buttonClass btn-block w-100 h-auto py-2 px-1"
+                                                                style="min-height: 60px; font-size: 0.85rem;"
+                                                                @onclick="() => OnHucreClicked(personel.TcKimlikNo, kai.KanalAltIslemId, isPasif)"
+                                                                disabled="@isLoading"
+                                                                id="@hucreId"
+                                                                title="@(isPasif ? "Bu işlem pasif durumda - işlem yapılamaz" : "Tıkla: Bilgisi Yok → Şef → Uzman → Yrd. Uzman → Bilgisi Yok")">
+
+                                                            @if (isLoading)
+                                                            {
+                                                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                                                                <span>Güncelleniyor...</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div>
+                                                                    <strong>@displayName</strong>
+                                                                    <br />
+                                                                    <small>(@((int)mevcutValue))</small>
+                                                                </div>
+                                                            }
+                                                        </button>
+                                                    </td>
+                                                }
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else if (SelectedHizmetBinasiId > 0 && IsLoadingMatrix)
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Yükleniyor...</span>
                         </div>
-                    }
-                </div>
-            </div>
-        }
-        else if (SelectedHizmetBinasiId > 0 && IsLoadingMatrix)
-        {
-            <div class="card">
-                <div class="card-body text-center py-5">
-                    <div class="spinner-border text-primary mb-3" role="status">
-                        <span class="visually-hidden">Yükleniyor...</span>
-                    </div>
-                    <p class="text-muted">Matrix verisi yükleniyor...</p>
-                </div>
-            </div>
-        }
-        else if (SelectedHizmetBinasiId == 0 && HizmetBinalari.Any())
-        {
-            <div class="card">
-                <div class="card-body text-center py-5">
-                    <i class="bx bx-info-circle text-warning" style="font-size: 3rem;"></i>
-                    <p class="text-muted mt-3">Lütfen yukarıdan bir hizmet binası seçiniz</p>
-                </div>
-            </div>
-        }
-
-        @* ═══════════════════════════════════════════════════════════════════════════════ *@
-        @* FOOTER INFO *@
-        @* ═══════════════════════════════════════════════════════════════════════════════ *@
-
-        @if (SelectedHizmetBinasiId > 0 && !IsLoadingMatrix && PersonelMatrix.Any() && KanalAltIslemler.Any())
-        {
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="alert alert-light border mb-0">
-                        <small class="text-muted">
-                            <i class="bx bx-lightbulb me-1"></i>
-                            <strong>İpucu:</strong> Hücrelere tıklayarak personel uzmanlık seviyelerini değiştirebilirsiniz.
-                            Her tıklamada döngü devam eder: Bilgisi Yok → Konusunda Uzman → Konusunda Yrd. Uzman → Bilgisi Yok
-                        </small>
+                        <p class="text-muted">Matrix verisi yükleniyor...</p>
                     </div>
                 </div>
-            </div>
-        }
-    </div>
+            }
+            else if (SelectedHizmetBinasiId == 0 && HizmetBinalari.Any())
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="bx bx-info-circle text-warning" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-3">Lütfen yukarıdan bir hizmet binası seçiniz</p>
+                    </div>
+                </div>
+            }
+
+            @* ═══════════════════════════════════════════════════════════════════════════════ *@
+            @* FOOTER INFO *@
+            @* ═══════════════════════════════════════════════════════════════════════════════ *@
+
+            @if (SelectedHizmetBinasiId > 0 && !IsLoadingMatrix && PersonelMatrix.Any() && KanalAltIslemler.Any())
+            {
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="alert alert-light border mb-0">
+                            <small class="text-muted">
+                                <i class="bx bx-lightbulb me-1"></i>
+                                <strong>İpucu:</strong> Hücrelere tıklayarak personel uzmanlık seviyelerini değiştirebilirsiniz.
+                                Her tıklamada döngü devam eder: Bilgisi Yok → Konusunda Uzman → Konusunda Yrd. Uzman → Bilgisi Yok
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </FieldPermissionScope>
 }
 
 @* ═══════════════════════════════════════════════════════════════════════════════ *@

@@ -17,20 +17,20 @@ Bu sayfayı görüntüleme yetkiniz bulunmuyor.
 }
 else
 {
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        <i class="bx bx-desktop me-2"></i>Banko Yönetimi
+                    </h4>
+                    <p class="text-muted mb-0">
+                        Tüm bankoları görüntüleyin ve yönetin
+                    </p>
+                </div>
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold mb-1">
-                <i class="bx bx-desktop me-2"></i>Banko Yönetimi
-            </h4>
-            <p class="text-muted mb-0">
-                Tüm bankoları görüntüleyin ve yönetin
-            </p>
-        </div>
-
-        <div class="d-flex gap-2">
+                <div class="d-flex gap-2">
             @if (IsActionVisible("EXCEL_EXPORT"))
             {
                 <!-- Excel Export -->
@@ -70,20 +70,20 @@ else
                     <i class="bx bx-plus me-1"></i>Yeni Banko
                 </a>
             }
-        </div>
-    </div>
+                </div>
+            </div>
 
-    <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3">
+            <!-- Filters -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
                 <!-- Hizmet Binası Seçimi -->
-                @if (IsFieldVisibleInList("HIZMET_BINASI"))
+                @if (IsFieldVisibleInList("HIZMETBINASIID"))
                 {
                     <div class="col-md-3">
                         <label class="form-label">
                             <i class="bx bx-building me-1"></i>Hizmet Binası
-                            @if (!CanEditFieldInList("HIZMET_BINASI"))
+                            @if (!CanEditFieldInList("HIZMETBINASIID"))
                             {
                                 <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
                                     <i class="bx bx-lock-alt"></i>
@@ -93,7 +93,7 @@ else
                         <select class="form-select"
                                 @onchange="OnHizmetBinasiChanged"
                                 value="@selectedHizmetBinasiId"
-                                disabled="@IsFieldDisabledInList("HIZMET_BINASI")">
+                                disabled="@IsFieldDisabledInList("HIZMETBINASIID")">
                             <option value="0">-- Hizmet Binası Seçiniz --</option>
                             @foreach (var bina in hizmetBinalari)
                             {
@@ -103,8 +103,8 @@ else
                     </div>
                 }
 
-                <!-- Kat Filtresi -->
-                <div class="col-md-2">
+                        <!-- Kat Filtresi -->
+                        <div class="col-md-2">
                     <label class="form-label">
                         <i class="bx bx-layer me-1"></i>Kat
                     </label>
@@ -115,10 +115,10 @@ else
                             <option value="@((int)kat)">@kat.GetDisplayName()</option>
                         }
                     </select>
-                </div>
+                        </div>
 
-                <!-- Banko Tipi Filtresi -->
-                <div class="col-md-2">
+                        <!-- Banko Tipi Filtresi -->
+                        <div class="col-md-2">
                     <label class="form-label">
                         <i class="bx bx-category me-1"></i>Banko Tipi
                     </label>
@@ -129,38 +129,38 @@ else
                             <option value="@((int)tip)">@tip.GetDisplayName()</option>
                         }
                     </select>
-                </div>
+                        </div>
 
-                <!-- Arama -->
-                <div class="col-md-2">
+                        <!-- Arama -->
+                        <div class="col-md-2">
                     <label class="form-label">Ara</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="bx bx-search"></i></span>
                         <input type="text" class="form-control" placeholder="Banko no ile ara..."
                                @bind="searchText" @bind:event="oninput" @onkeyup="OnSearchChanged" />
                     </div>
-                </div>
+                        </div>
 
-                <!-- Durum Filtresi -->
-                <div class="col-md-2">
+                        <!-- Durum Filtresi -->
+                        <div class="col-md-2">
                     <label class="form-label">Durum</label>
                     <select class="form-select" @onchange="OnAktiflikChanged">
                         <option value="">Tümü</option>
                         <option value="@((int)Aktiflik.Aktif)">Aktif</option>
                         <option value="@((int)Aktiflik.Pasif)">Pasif</option>
                     </select>
-                </div>
+                        </div>
 
-                <!-- Temizle -->
-                <div class="col-md-1 d-flex align-items-end">
+                        <!-- Temizle -->
+                        <div class="col-md-1 d-flex align-items-end">
                     <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters" title="Filtreleri Temizle">
                         <i class="bx bx-reset"></i>
                     </button>
-                </div>
-            </div>
+                        </div>
+                    </div>
 
-            <!-- İstatistikler -->
-            <div class="row mt-3">
+                    <!-- İstatistikler -->
+                    <div class="row mt-3">
                 <div class="col">
                     <div class="d-flex gap-4 text-muted small">
                         <span><i class="bx bx-list-ul text-primary"></i> Toplam: <strong>@allBankolar.Count</strong></span>
@@ -169,31 +169,31 @@ else
                         <span><i class="bx bx-user-check text-info"></i> Atanmış: <strong>@allBankolar.Count(b => !b.BankoMusaitMi)</strong></span>
                         <span><i class="bx bx-filter-alt text-warning"></i> Filtrelenen: <strong>@filteredBankolar.Count</strong></span>
                     </div>
+                    </div>
+                </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    @if (isLoading)
+            @if (isLoading)
     {
         <div class="text-center py-5">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Yükleniyor...</span>
             </div>
             <p class="mt-3 text-muted">Veriler yükleniyor...</p>
-        </div>
-    }
-    else if (selectedHizmetBinasiId == 0)
+                </div>
+            }
+            else if (selectedHizmetBinasiId == 0)
     {
         <div class="card">
             <div class="card-body text-center py-5">
                 <i class="bx bx-building" style="font-size: 4rem; color: #ddd;"></i>
                 <h5 class="mt-3 text-muted">Hizmet Binası Seçiniz</h5>
                 <p class="text-muted">Lütfen yukarıdan bir hizmet binası seçerek başlayın.</p>
-            </div>
-        </div>
-    }
-    else if (groupedBankolar.Any())
+                </div>
+                </div>
+            }
+            else if (groupedBankolar.Any())
     {
         <!-- Kat Bazlı Accordion -->
         <div class="accordion" id="bankoAccordion">
@@ -313,9 +313,9 @@ else
                     </div>
                 </div>
             }
-        </div>
-    }
-    else
+                </div>
+            }
+            else
     {
         <div class="card">
             <div class="card-body text-center py-5">
@@ -329,10 +329,11 @@ else
                         İlk Bankoyu Ekle
                     </button>
                 }
-            </div>
+                </div>
+                </div>
+            }
         </div>
-    }
-</div>
+    </FieldPermissionScope>
 }
 <!-- Add/Edit Modal -->
 @if (showManageModal)

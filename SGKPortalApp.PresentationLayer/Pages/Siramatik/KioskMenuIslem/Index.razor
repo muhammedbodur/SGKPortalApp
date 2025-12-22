@@ -6,159 +6,162 @@
 
 <PageTitle>Menü Alt Kanal İşlemleri - SGK Portal</PageTitle>
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    @if (!CanViewPage)
-    {
-        <div class="alert alert-danger" role="alert">
-            <i class="bx bx-lock-alt me-2"></i>
-            Bu sayfayı görüntüleme yetkiniz bulunmuyor.
-        </div>
-    }
-    else
-    {
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h4 class="fw-bold mb-1">
-                    <i class="bx bx-list-ul me-2"></i>Menü Alt Kanal İşlemleri
-                </h4>
-                <p class="text-muted mb-0">
-                    Kiosk menülerine alt kanal işlemleri ekleyin ve yönetin
-                </p>
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-xxl flex-grow-1 container-p-y">
+    
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        <i class="bx bx-list-ul me-2"></i>Menü Alt Kanal İşlemleri
+                    </h4>
+                    <p class="text-muted mb-0">
+                        Kiosk menülerine alt kanal işlemleri ekleyin ve yönetin
+                    </p>
+                </div>
             </div>
-        </div>
 
-        <!-- Header Actions -->
-        <div class="d-flex justify-content-end mb-3">
-            <a href="/siramatik/menu-islem-eslestirme" class="btn btn-success">
-                <i class="bx bx-link me-1"></i>İşlem Eşleştirme
-            </a>
-        </div>
+            <!-- Header Actions -->
+            <div class="d-flex justify-content-end mb-3">
+                <a href="/siramatik/menu-islem-eslestirme" class="btn btn-success">
+                    <i class="bx bx-link me-1"></i>İşlem Eşleştirme
+                </a>
+            </div>
 
-        <!-- Menü Seçimi -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <label class="form-label">Kiosk Menüsü Seçin</label>
-                        <select class="form-select @(selectedKioskMenuId == 0 ? "border-primary" : "")" 
-                                value="@selectedKioskMenuId"
-                                @onchange="OnKioskMenuChanged" 
-                                disabled="@isLoading">
-                            <option value="0">-- Menü Seçiniz --</option>
-                            @foreach (var menu in kioskMenuleri)
-                            {
-                                <option value="@menu.KioskMenuId">@menu.MenuAdi</option>
-                            }
-                        </select>
-                    </div>
-                    @if (selectedKioskMenuId > 0)
-                    {
-                        <div class="col-md-6 d-flex align-items-end">
-                            <a href="/siramatik/kiosk-menu-islem/manage?kioskMenuId=@selectedKioskMenuId" 
-                               class="btn btn-primary">
-                                <i class="bx bx-plus me-1"></i>Yeni İşlem Ekle
-                            </a>
+            <!-- Menü Seçimi -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Kiosk Menüsü Seçin</label>
+                            <select class="form-select @(selectedKioskMenuId == 0 ? "border-primary" : "")" 
+                                    value="@selectedKioskMenuId"
+                                    @onchange="OnKioskMenuChanged" 
+                                    disabled="@isLoading">
+                                <option value="0">-- Menü Seçiniz --</option>
+                                @foreach (var menu in kioskMenuleri)
+                                {
+                                    <option value="@menu.KioskMenuId">@menu.MenuAdi</option>
+                                }
+                            </select>
                         </div>
-                    }
+                        @if (selectedKioskMenuId > 0)
+                        {
+                            <div class="col-md-6 d-flex align-items-end">
+                                <a href="/siramatik/kiosk-menu-islem/manage?kioskMenuId=@selectedKioskMenuId" 
+                                   class="btn btn-primary">
+                                    <i class="bx bx-plus me-1"></i>Yeni İşlem Ekle
+                                </a>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
-        </div>
 
-        @if (isLoading)
-        {
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Yükleniyor...</span>
+            @if (isLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="text-muted mt-2">İşlemler yükleniyor...</p>
                 </div>
-                <p class="text-muted mt-2">İşlemler yükleniyor...</p>
-            </div>
-        }
-        else if (selectedKioskMenuId == 0)
-        {
-            <div class="card">
-                <div class="card-body text-center py-5">
-                    <i class="bx bx-info-circle display-1 text-muted mb-3"></i>
-                    <h5 class="text-muted">Lütfen bir menü seçiniz</h5>
-                    <p class="text-muted">Menü işlemlerini görüntülemek için yukarıdan bir kiosk menüsü seçin</p>
+            }
+            else if (selectedKioskMenuId == 0)
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="bx bx-info-circle display-1 text-muted mb-3"></i>
+                        <h5 class="text-muted">Lütfen bir menü seçiniz</h5>
+                        <p class="text-muted">Menü işlemlerini görüntülemek için yukarıdan bir kiosk menüsü seçin</p>
+                    </div>
                 </div>
-            </div>
-        }
-        else if (!filteredIslemler.Any())
-        {
-            <div class="card">
-                <div class="card-body text-center py-5">
-                    <i class="bx bx-folder-open display-1 text-muted mb-3"></i>
-                    <h5 class="text-muted">Bu menüde henüz işlem yok</h5>
-                    <p class="text-muted mb-3">Yeni işlem eklemek için yukarıdaki butonu kullanın</p>
-                    <a href="/siramatik/kiosk-menu-islem/manage?kioskMenuId=@selectedKioskMenuId" 
-                       class="btn btn-primary">
-                        <i class="bx bx-plus me-1"></i>İlk İşlemi Ekle
-                    </a>
+            }
+            else if (!filteredIslemler.Any())
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="bx bx-folder-open display-1 text-muted mb-3"></i>
+                        <h5 class="text-muted">Bu menüde henüz işlem yok</h5>
+                        <p class="text-muted mb-3">Yeni işlem eklemek için yukarıdaki butonu kullanın</p>
+                        <a href="/siramatik/kiosk-menu-islem/manage?kioskMenuId=@selectedKioskMenuId" 
+                           class="btn btn-primary">
+                            <i class="bx bx-plus me-1"></i>İlk İşlemi Ekle
+                        </a>
+                    </div>
                 </div>
-            </div>
-        }
-        else
-        {
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="bx bx-list-ul me-2"></i>
-                        @selectedMenuAdi - İşlemler (@filteredIslemler.Count)
-                    </h5>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th width="60">Sıra</th>
-                                <th>İşlem Adı</th>
-                                <th>Alt Kanal</th>
-                                <th width="100">Durum</th>
-                                <th width="150" class="text-end">İşlemler</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var islem in filteredIslemler.OrderBy(i => i.MenuSira))
-                            {
-                                <tr class="@(islem.Aktiflik == Aktiflik.Pasif ? "table-warning" : string.Empty)">
-                                    <td>
-                                        <span class="badge bg-label-secondary">@islem.MenuSira</span>
-                                    </td>
-                                    <td>
-                                        <div class="fw-semibold">@islem.KioskMenuAdi</div>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-label-info">@islem.KanalAltAdi</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge @(islem.Aktiflik == Aktiflik.Aktif ? "bg-label-success" : "bg-label-danger")">
-                                            @(islem.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif")
-                                        </span>
-                                    </td>
-                                    <td class="text-end">
-                                        <div class="btn-group">
-                                            <a class="btn btn-sm btn-icon btn-outline-primary" 
-                                               href="@($"/siramatik/kiosk-menu-islem/manage/{islem.KioskMenuIslemId}")" 
-                                               title="Düzenle">
-                                                <i class="bx bx-edit"></i>
-                                            </a>
-                                            <button class="btn btn-sm btn-icon btn-outline-danger" 
-                                                    @onclick="() => ShowDeleteConfirm(islem)" 
-                                                    title="Sil">
-                                                <i class="bx bx-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
+            }
+            else
+            {
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bx bx-list-ul me-2"></i>
+                            @selectedMenuAdi - İşlemler (@filteredIslemler.Count)
+                        </h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th width="60">Sıra</th>
+                                    <th>İşlem Adı</th>
+                                    <th>Alt Kanal</th>
+                                    <th width="100">Durum</th>
+                                    <th width="150" class="text-end">İşlemler</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var islem in filteredIslemler.OrderBy(i => i.MenuSira))
+                                {
+                                    <tr class="@(islem.Aktiflik == Aktiflik.Pasif ? "table-warning" : string.Empty)">
+                                        <td>
+                                            <span class="badge bg-label-secondary">@islem.MenuSira</span>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold">@islem.KioskMenuAdi</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-label-info">@islem.KanalAltAdi</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge @(islem.Aktiflik == Aktiflik.Aktif ? "bg-label-success" : "bg-label-danger")">
+                                                @(islem.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif")
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="btn-group">
+                                                <a class="btn btn-sm btn-icon btn-outline-primary" 
+                                                   href="@($"/siramatik/kiosk-menu-islem/manage/{islem.KioskMenuIslemId}")" 
+                                                   title="Düzenle">
+                                                    <i class="bx bx-edit"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-icon btn-outline-danger" 
+                                                        @onclick="() => ShowDeleteConfirm(islem)" 
+                                                        title="Sil">
+                                                    <i class="bx bx-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-        }
-    }
-</div>
+            }
+        </div>
+     </FieldPermissionScope>
+}
 
 <!-- Delete Confirmation Modal -->
 @if (showDeleteModal && selectedIslem != null)

@@ -314,7 +314,11 @@ function initializeSignalR(hubUrl = '/hubs/tv') {
     if (window.signalRManager) {
         console.warn('⚠️ Eski SignalR Manager bulundu, yenisi oluşturuluyor');
         try {
-            window.signalRManager.stop();
+            if (typeof window.signalRManager.stop === 'function') {
+                window.signalRManager.stop();
+            } else {
+                console.warn('Eski manager stop metodu yok, direkt değiştiriliyor');
+            }
         } catch (e) {
             console.warn('Eski manager durdurulurken hata:', e);
         }

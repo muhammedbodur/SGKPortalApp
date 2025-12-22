@@ -96,7 +96,6 @@
         }
         else
         {
-            <CascadingValue Name="FieldPermissionPageKey" Value="@FieldPermissionKeyPrefix">
                 <CascadingValue Name="FieldPermissionIsEditMode" Value="@IsEditMode">
                     <EditForm Model="@FormModel" OnValidSubmit="HandleFinalSubmit">
                         <DataAnnotationsValidator />
@@ -1199,7 +1198,6 @@
                         </div>
                     </EditForm>
                 </CascadingValue>
-            </CascadingValue>
         }
     }
 </div>

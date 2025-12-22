@@ -154,12 +154,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
         {
             if (int.TryParse(e.Value?.ToString(), out int hizmetBinasiId))
             {
-                // ✅ Güvenlik kontrolü
-                if (hizmetBinasiId > 0 && !CanAccessHizmetBinasi(hizmetBinasiId))
+                // 1. YETKİ KONTROLÜ: Kullanıcı bu filtreyi değiştirebilir mi?
+                if (!CanEditFieldInList("HIZMETBINASIID"))
                 {
-                    await _toastService.ShowWarningAsync("Bu Hizmet Binasını seçme yetkiniz yok!");
-                    _logger.LogWarning("Yetkisiz Hizmet Binası seçim denemesi: {BinaId}", hizmetBinasiId);
-                    return;
+                    await _toastService.ShowWarningAsync("Bu filtreyi değiştirme yetkiniz yok!");
+                    _logger.LogWarning("Yetkisiz filtre değiştirme denemesi: HIZMET_BINASI");
+                    return; // İşlemi durdur
                 }
 
                 selectedHizmetBinasiId = hizmetBinasiId;

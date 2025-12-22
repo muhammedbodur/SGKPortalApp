@@ -68,7 +68,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         /// Field permission prefix'i: Her zaman PER.PERSONEL.MANAGE (field permission sadece Edit'te aktif)
         /// Not: Create modunda field-level permission uygulanmaz, sadece Edit modunda aktif
         /// </summary>
-        protected override string FieldPermissionKeyPrefix => "PER.PERSONEL.MANAGE";
 
         // Lookup Lists
         private List<DepartmanResponseDto> Departmanlar { get; set; } = new();

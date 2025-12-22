@@ -28,6 +28,11 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         [Inject] protected ILogger<FieldPermissionPageBase> Logger { get; set; } = default!;
 
         /// <summary>
+        /// Permissions yüklendi mi?
+        /// </summary>
+        protected bool IsPermissionsLoaded { get; private set; }
+
+        /// <summary>
         /// Sayfa için permission key (örn: "PERSONEL.MANAGE")
         /// Create/Edit ayrımı olan sayfalarda dinamik olabilir
         ///
@@ -62,16 +67,16 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
 
                 // 2. Route'tan otomatik çözümle
                 var currentPath = GetCurrentRoutePath();
-                //Logger?.LogInformation("🔍 ResolvedPermissionKey: Route={Route}", currentPath);
+                Logger?.LogInformation("🔍 ResolvedPermissionKey: Route={Route}", currentPath);
 
                 _resolvedPermissionKey = PermissionStateService.GetPermissionKeyByRoute(currentPath);
-                //Logger?.LogInformation("🔍 ResolvedPermissionKey: GetPermissionKeyByRoute döndü: {Key}", _resolvedPermissionKey ?? "NULL");
+                Logger?.LogInformation("🔍 ResolvedPermissionKey: GetPermissionKeyByRoute döndü: {Key}", _resolvedPermissionKey ?? "NULL");
 
                 if (string.IsNullOrEmpty(_resolvedPermissionKey))
                 {
                     // Route bulunamadı, varsayılan değer kullan
                     _resolvedPermissionKey = "UNKNOWN";
-                    //Logger?.LogWarning("⚠️ ResolvedPermissionKey: Route mapping bulunamadı, UNKNOWN kullanılıyor");
+                    Logger?.LogWarning("⚠️ ResolvedPermissionKey: Route mapping bulunamadı, UNKNOWN kullanılıyor");
                 }
 
                 return _resolvedPermissionKey;
@@ -127,7 +132,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
                 var level = PermissionStateService.GetLevel(key);
                 var canView = level >= YetkiSeviyesi.View;
 
-                //Logger?.LogInformation("🔍 CanViewPage: Key={Key}, Level={Level}, CanView={CanView}", key, level, canView);
+                Logger?.LogInformation("🔍 CanViewPage: Key={Key}, Level={Level}, CanView={CanView}", key, level, canView);
 
                 return canView;
             }
@@ -354,9 +359,19 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         {
             await base.OnInitializedAsync();
 
+            // Permission cache'i temizle - permissions yüklendikten sonra yeniden hesaplanacak
+            _resolvedPermissionKey = null;
+
             // Permission state'i yükle - ÖNCE permission'lar yüklensin, sonra render olsun
             await PermissionStateService.EnsureLoadedAsync();
+            
+            // Permissions yüklendi, şimdi permission key'i çözümle
+            IsPermissionsLoaded = true;
+            
             PermissionStateService.OnChange += HandlePermissionStateChanged;
+            
+            // UI'ı güncelle - permissions yüklendi
+            StateHasChanged();
         }
 
         /// <summary>
@@ -364,6 +379,8 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         /// </summary>
         protected virtual void HandlePermissionStateChanged()
         {
+            // Permission setleri değiştiğinde route mapping yeniden yapılabilsin diye cache'i temizle
+            _resolvedPermissionKey = null;
             InvokeAsync(StateHasChanged);
         }
 

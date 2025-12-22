@@ -1,6 +1,8 @@
 @page "/auth/claims"
 @using System.Security.Claims
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
 @inject AuthenticationStateProvider AuthStateProvider
+@inject PermissionStateService PermissionStateService
 
 <PageTitle>Claims Görüntüle</PageTitle>
 
@@ -57,24 +59,129 @@
                 </div>
 
                 <hr />
-                <h6>Permissions Özet</h6>
+                <h6>Permissions</h6>
                 @if (_permissionsDict != null && _permissionsDict.Any())
                 {
                     <span class="badge bg-success me-2">@_permissionsDict.Count yetki tanımlı</span>
-                    <ul class="mt-2">
-                        @foreach (var perm in _permissionsDict.Take(20))
-                        {
-                            <li><code>@perm.Key</code> = <span class="badge bg-primary">@GetLevelName(perm.Value)</span></li>
-                        }
-                        @if (_permissionsDict.Count > 20)
-                        {
-                            <li>... ve @(_permissionsDict.Count - 20) daha</li>
-                        }
-                    </ul>
+                    <div class="table-responsive mt-2" style="max-height:400px;overflow:auto;">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Permission Key</th>
+                                    <th>Level</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var perm in _permissionsDict.OrderBy(p => p.Key))
+                                {
+                                    <tr>
+                                        <td><code>@perm.Key</code></td>
+                                        <td><span class="badge bg-primary">@GetLevelName(perm.Value)</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 }
                 else
                 {
                     <span class="badge bg-warning">Permissions claim bulunamadı</span>
+                }
+
+                <hr />
+                <h6>Permission Cache Snapshot</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title mb-2">Defined Permissions</h6>
+                                @if (_definedPermissions != null)
+                                {
+                                    <p class="mb-2"><span class="badge bg-info">@_definedPermissions.Count kayıt</span></p>
+                                    <ul class="small list-unstyled mb-0">
+                                        @foreach (var kvp in _definedPermissions.Take(15))
+                                        {
+                                            <li><code>@kvp.Key</code> = <strong>@kvp.Value</strong></li>
+                                        }
+                                        @if (_definedPermissions.Count > 15)
+                                        {
+                                            <li>... ve @(_definedPermissions.Count - 15) daha</li>
+                                        }
+                                    </ul>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Cache boş</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title mb-2">Route → Permission Map</h6>
+                                @if (_routeMap != null)
+                                {
+                                    <p class="mb-2"><span class="badge bg-info">@_routeMap.Count kayıt</span></p>
+                                    <ul class="small list-unstyled mb-0">
+                                        @foreach (var kvp in _routeMap.Take(15))
+                                        {
+                                            <li><code>@kvp.Key</code> → <strong>@kvp.Value</strong></li>
+                                        }
+                                        @if (_routeMap.Count > 15)
+                                        {
+                                            <li>... ve @(_routeMap.Count - 15) daha</li>
+                                        }
+                                    </ul>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Cache boş</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+                <h6>Defined vs User Permissions</h6>
+                @if (_permissionMatrix?.Any() == true)
+                {
+                    <div class="table-responsive mt-2" style="max-height:500px;overflow:auto;">
+                        <table class="table table-sm table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width:35%">Permission Key</th>
+                                    <th style="width:25%">Route (örn.)</th>
+                                    <th style="width:20%">Tanım (Min)</th>
+                                    <th style="width:20%">Kullanıcı Seviyesi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in _permissionMatrix)
+                                {
+                                    <tr>
+                                        <td><code>@item.Key</code></td>
+                                        <td>@(string.IsNullOrEmpty(item.Route) ? "-" : item.Route)</td>
+                                        <td>
+                                            <span class="badge bg-label-secondary">
+                                                @FormatLevel(item.DefinedLevel)
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge @(item.UserLevel.HasValue ? "bg-primary" : "bg-label-danger")">
+                                                @(item.UserLevel.HasValue ? FormatLevel(item.UserLevel) : "None")
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <span class="badge bg-warning">Henüz permission matrisi oluşturulamadı</span>
                 }
             }
         </div>
@@ -84,6 +191,9 @@
 @code {
     private IEnumerable<Claim>? _claims;
     private Dictionary<string, int>? _permissionsDict;
+    private IReadOnlyDictionary<string, YetkiSeviyesi>? _definedPermissions;
+    private IReadOnlyDictionary<string, string>? _routeMap;
+    private List<PermissionMatrixRow>? _permissionMatrix;
 
     protected override async Task OnInitializedAsync()
     {
@@ -100,6 +210,12 @@
             }
             catch { }
         }
+
+        var snapshot = PermissionStateService.GetCacheSnapshot();
+        _definedPermissions = snapshot.DefinedPermissions;
+        _routeMap = snapshot.RouteMap;
+
+        BuildPermissionMatrix();
     }
 
     private string FormatJson(string json)
@@ -122,4 +238,52 @@
         2 => "Edit",
         _ => level.ToString()
     };
+
+    private string FormatLevel(YetkiSeviyesi? level)
+        => level.HasValue ? GetLevelName((int)level.Value) : "-";
+
+    private void BuildPermissionMatrix()
+    {
+        var comparer = StringComparer.OrdinalIgnoreCase;
+        var allKeys = new HashSet<string>(comparer);
+
+        if (_definedPermissions != null)
+            foreach (var key in _definedPermissions.Keys)
+                allKeys.Add(key);
+
+        if (_permissionsDict != null)
+            foreach (var key in _permissionsDict.Keys)
+                allKeys.Add(key);
+
+        var routeLookup = new Dictionary<string, string>(comparer);
+        if (_routeMap != null)
+        {
+            foreach (var kvp in _routeMap)
+            {
+                if (!routeLookup.ContainsKey(kvp.Value))
+                {
+                    routeLookup[kvp.Value] = kvp.Key;
+                }
+            }
+        }
+
+        _permissionMatrix = allKeys
+            .OrderBy(k => k, comparer)
+            .Select(key => new PermissionMatrixRow
+            {
+                Key = key,
+                Route = routeLookup.TryGetValue(key, out var route) ? route : null,
+                DefinedLevel = _definedPermissions != null && _definedPermissions.TryGetValue(key, out var defined) ? defined : (YetkiSeviyesi?)null,
+                UserLevel = _permissionsDict != null && _permissionsDict.TryGetValue(key, out var userLevelInt) ? (YetkiSeviyesi)userLevelInt : (YetkiSeviyesi?)null
+            })
+            .ToList();
+    }
+
+    private class PermissionMatrixRow
+    {
+        public string Key { get; set; } = string.Empty;
+        public string? Route { get; set; }
+        public YetkiSeviyesi? DefinedLevel { get; set; }
+        public YetkiSeviyesi? UserLevel { get; set; }
+    }
 }

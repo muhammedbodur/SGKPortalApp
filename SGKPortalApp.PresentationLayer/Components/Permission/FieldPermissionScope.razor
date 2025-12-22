@@ -1,0 +1,19 @@
+@namespace SGKPortalApp.PresentationLayer.Components.Permission
+@inherits LayoutComponentBase
+
+<CascadingValue Name="FieldPermissionPageKey" Value="@PageKey">
+    <CascadingValue Name="FieldPermissionIsEditMode" Value="@IsEditMode">
+        @ChildContent
+    </CascadingValue>
+</CascadingValue>
+
+@code {
+    [Parameter]
+    public string PageKey { get; set; } = string.Empty;
+
+    [Parameter]
+    public bool IsEditMode { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}
