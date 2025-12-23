@@ -7,520 +7,522 @@
 
 @if (!CanViewPage)
 {
-<div class="alert alert-danger" role="alert">
-<i class="bx bx-lock-alt me-2"></i>
-Bu sayfayı görüntüleme yetkiniz bulunmuyor.
-</div>
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
 }
 else
 {
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
 
-<!-- ═══════════════════════════════════════════════════════ -->
-<!-- PAGE HEADER -->
-<!-- ═══════════════════════════════════════════════════════ -->
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold mb-1">
-                <i class="bx bx-group me-2"></i>Sendika Yönetimi
-            </h4>
-            <p class="text-muted mb-0">
-                Tüm sendikaları görüntüleyin ve yönetin
-            </p>
-        </div>
-
-        <div class="d-flex gap-2">
-            <!-- Excel Export -->
-            <button class="btn btn-success" @onclick="ExportToExcel" disabled="@IsExporting">
-                @if (IsExporting && ExportType == "excel")
-                {
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                }
-                else
-                {
-                    <i class="bx bx-download me-1"></i>
-                }
-                Excel
-            </button>
-
-            <!-- PDF Export -->
-            <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@IsExporting">
-                @if (IsExporting && ExportType == "pdf")
-                {
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                }
-                else
-                {
-                    <i class="bx bxs-file-pdf me-1"></i>
-                }
-                PDF
-            </button>
-
-            <!-- Yeni Sendika -->
-            <button class="btn btn-primary" @onclick="NavigateToCreate">
-                <i class="bx bx-plus me-1"></i>Yeni Sendika
-            </button>
-        </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════════ -->
-    <!-- FILTER CARD -->
-    <!-- ═══════════════════════════════════════════════════════ -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3">
-                <!-- Arama -->
-                <div class="col-md-4">
-                    <label class="form-label">Sendika Ara</label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bx bx-search"></i>
-                        </span>
-                        <input type="text"
-                               class="form-control"
-                               placeholder="Sendika adı..."
-                               @bind="searchTerm"
-                               @bind:event="oninput"
-                               @onkeyup="OnSearchChanged" />
-                    </div>
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- PAGE HEADER -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        <i class="bx bx-group me-2"></i>Sendika Yönetimi
+                    </h4>
+                    <p class="text-muted mb-0">
+                        Tüm sendikaları görüntüleyin ve yönetin
+                    </p>
                 </div>
 
-                <!-- Durum Filtresi -->
-                <div class="col-md-3">
-                    <label class="form-label">Durum</label>
-                    <select class="form-select" value="@filterStatus" @onchange="OnFilterStatusChanged">
-                        <option value="all">Tümü</option>
-                        <option value="active">Aktif</option>
-                        <option value="passive">Pasif</option>
-                    </select>
-                </div>
-
-                <!-- Sıralama -->
-                <div class="col-md-3">
-                    <label class="form-label">Sıralama</label>
-                    <select class="form-select" value="@sortBy" @onchange="OnSortByChanged">
-                        <option value="name-asc">İsim (A-Z)</option>
-                        <option value="name-desc">İsim (Z-A)</option>
-                        <option value="date-newest">En Yeni</option>
-                        <option value="date-oldest">En Eski</option>
-                        <option value="personel-most">En Çok Personel</option>
-                        <option value="personel-least">En Az Personel</option>
-                    </select>
-                </div>
-
-                <!-- Temizle -->
-                <div class="col-md-2 d-flex align-items-end">
-                    <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
-                        <i class="bx bx-x me-1"></i>Temizle
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════════ -->
-    <!-- STATISTICS CARDS -->
-    <!-- ═══════════════════════════════════════════════════════ -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Toplam Sendika</h6>
-                            <h3 class="mb-0">@TotalCount</h3>
-                        </div>
-                        <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-primary">
-                                <i class="bx bx-group bx-sm"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Aktif</h6>
-                            <h3 class="mb-0 text-success">@ActiveCount</h3>
-                        </div>
-                        <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-success">
-                                <i class="bx bx-check-circle bx-sm"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Pasif</h6>
-                            <h3 class="mb-0 text-danger">@PassiveCount</h3>
-                        </div>
-                        <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-danger">
-                                <i class="bx bx-x-circle bx-sm"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1">Gösterilen</h6>
-                            <h3 class="mb-0">@FilteredSendikalar.Count</h3>
-                        </div>
-                        <div class="avatar">
-                            <span class="avatar-initial rounded bg-label-info">
-                                <i class="bx bx-filter bx-sm"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════════ -->
-    <!-- DATA TABLE -->
-    <!-- ═══════════════════════════════════════════════════════ -->
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Sendika Listesi</h5>
-            <span class="badge bg-primary">@FilteredSendikalar.Count kayıt</span>
-        </div>
-
-        @if (IsLoading)
-        {
-            <div class="card-body text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Yükleniyor...</span>
-                </div>
-                <p class="mt-2 text-muted">Sendikalar yükleniyor...</p>
-            </div>
-        }
-        else if (!FilteredSendikalar.Any())
-        {
-            <div class="card-body text-center py-5">
-                <i class="bx bx-search bx-lg text-muted mb-3"></i>
-                <h5 class="text-muted">Sendika Bulunamadı</h5>
-                <p class="text-muted">
-                    @if (!string.IsNullOrEmpty(searchTerm))
-                    {
-                        <span>Arama kriterlerinize uygun sendika bulunamadı.</span>
-                    }
-                    else
-                    {
-                        <span>Henüz sendika eklenmemiş.</span>
-                    }
-                </p>
-                <button class="btn btn-primary mt-2" @onclick="NavigateToCreate">
-                    <i class="bx bx-plus me-1"></i>İlk Sendikayı Ekle
-                </button>
-            </div>
-        }
-        else
-        {
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th style="width: 5%">#</th>
-                            <th style="width: 30%">Sendika Adı</th>
-                            <th style="width: 10%">Personel Sayısı</th>
-                            <th style="width: 10%">Durum</th>
-                            <th style="width: 17%">Eklenme Tarihi</th>
-                            <th style="width: 17%">Güncelleme Tarihi</th>
-                            <th style="width: 5%" class="text-end">İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var (sendika, index) in FilteredSendikalar.Select((s, i) => (s, i + 1)))
-                        {
-                            <tr>
-                                <td>@index</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar avatar-sm me-2">
-                                            <span class="avatar-initial rounded-circle bg-label-primary">
-                                                @sendika.SendikaAdi.Substring(0, 1).ToUpper()
-                                            </span>
-                                        </div>
-                                        <strong>@sendika.SendikaAdi</strong>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <i class="bx bx-user me-2 text-primary"></i>
-                                        <strong>@sendika.PersonelSayisi</strong>
-                                    </div>
-                                </td>
-                                <td>
-                                    @if (sendika.Aktiflik == Aktiflik.Aktif)
-                                    {
-                                        <span class="badge bg-success">
-                                            <i class="bx bx-check-circle me-1"></i>Aktif
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger">
-                                            <i class="bx bx-x-circle me-1"></i>Pasif
-                                        </span>
-                                    }
-                                </td>
-                                <td>
-                                    <small class="text-muted">
-                                        @sendika.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm")
-                                    </small>
-                                </td>
-                                <td>
-                                    <small class="text-muted">
-                                        @sendika.DuzenlenmeTarihi.ToString("dd.MM.yyyy HH:mm")
-                                    </small>
-                                </td>
-                                <td class="text-center">
-                                    <div class="d-flex justify-content-center gap-1">
-                                        @if (IsActionVisible("EDIT"))
-                                        {
-                                            <!-- Düzenle -->
-                                            <button class="btn btn-sm btn-icon btn-outline-primary"
-                                                    @onclick="() => NavigateToEdit(sendika.SendikaId)"
-                                                    disabled="@(!CanEditAction("EDIT"))"
-                                                    title="@(CanEditAction("EDIT") ? "Düzenle" : "Düzenle (Yetki Yok)")">
-                                                <i class="bx bx-edit"></i>
-                                            </button>
-                                        }
-
-                                        @if (IsActionVisible("TOGGLE"))
-                                        {
-                                            <!-- Aktif/Pasif Toggle -->
-                                            <button class="btn btn-sm btn-icon @(sendika.Aktiflik == Aktiflik.Aktif ? "btn-outline-warning" : "btn-outline-success")"
-                                                    @onclick="() => ShowToggleStatusConfirmation(sendika.SendikaId, sendika.SendikaAdi, sendika.Aktiflik)"
-                                                    disabled="@(!CanEditAction("TOGGLE"))"
-                                                    title="@(CanEditAction("TOGGLE") ? (sendika.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap") : (sendika.Aktiflik == Aktiflik.Aktif ? "Pasif Yap (Yetki Yok)" : "Aktif Yap (Yetki Yok)"))">
-                                                <i class="bx @(sendika.Aktiflik == Aktiflik.Aktif ? "bx-toggle-right" : "bx-toggle-left")"></i>
-                                            </button>
-                                        }
-
-                                        @if (IsActionVisible("DELETE"))
-                                        {
-                                            <!-- Sil -->
-                                            <button class="btn btn-sm btn-icon btn-outline-danger"
-                                                    @onclick="() => ConfirmDelete(sendika)"
-                                                    disabled="@(!CanEditAction("DELETE"))"
-                                                    title="@(CanEditAction("DELETE") ? "Sil" : "Sil (Yetki Yok)")">
-                                                <i class="bx bx-trash"></i>
-                                            </button>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-    </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════════════ -->
-<!-- TOGGLE STATUS CONFIRMATION MODAL -->
-<!-- ═══════════════════════════════════════════════════════ -->
-@if (ShowToggleModal)
-{
-    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        @if (ToggleSendikaCurrentStatus == Aktiflik.Aktif)
-                        {
-                            <i class="bx bx-x-circle text-warning me-2"></i>
-                            <span>Sendikayı Pasif Yap</span>
-                        }
-                        else
-                        {
-                            <i class="bx bx-check-circle text-success me-2"></i>
-                            <span>Sendikayı Aktif Yap</span>
-                        }
-                    </h5>
-                    <button type="button" class="btn-close" @onclick="CloseToggleModal" disabled="@IsToggling"></button>
-                </div>
-                <div class="modal-body">
-                    @if (ToggleSendikaCurrentStatus == Aktiflik.Aktif)
-                    {
-                        <div class="alert alert-warning mb-3">
-                            <div class="d-flex align-items-start">
-                                <i class="bx bx-error-circle me-2 fs-5"></i>
-                                <div>
-                                    <strong>⚠️ Dikkat!</strong> Sendikayı pasif hale getirmek üzeresiniz.
-                                    <p class="mb-0 mt-2">
-                                        <strong>@ToggleSendikaAdi</strong> Sendikasını pasif yapmak istediğinizden emin misiniz?
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        @if (ToggleSendikaPersonelSayisi > 0)
-                        {
-                            <div class="alert alert-info mb-3">
-                                <i class="bx bx-info-circle me-2"></i>
-                                Bu sendikada <strong>@ToggleSendikaPersonelSayisi aktif personel</strong> bulunmaktadır.
-                            </div>
-                        }
-
-                        <p class="mb-2"><strong>Pasif yapıldığında:</strong></p>
-                        <ul class="text-muted mb-0">
-                            <li>Sendika listede görünmeye devam edecektir</li>
-                            <li>Mevcut personeller sendikalarını koruyacaktır</li>
-                            <li>Yeni personel ataması yapılamayacaktır</li>
-                            <li>Sendika seçim listelerinde görünmeyecektir</li>
-                        </ul>
-                    }
-                    else
-                    {
-                        <div class="alert alert-success mb-3">
-                            <div class="d-flex align-items-start">
-                                <i class="bx bx-check-circle me-2 fs-5"></i>
-                                <div>
-                                    <strong>Bilgi:</strong> Sendikayı aktif hale getirmek üzeresiniz.
-                                    <p class="mb-0 mt-2">
-                                        <strong>@ToggleSendikaAdi</strong> Sendikasını aktif yapmak istediğinizden emin misiniz?
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <p class="mb-2"><strong>Aktif yapıldığında:</strong></p>
-                        <ul class="text-muted mb-0">
-                            <li>Sendika tüm listelerde görünecektir</li>
-                            <li>Yeni personel ataması yapılabilecektir</li>
-                            <li>Tüm özellikler kullanılabilir olacaktır</li>
-                        </ul>
-                    }
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseToggleModal" disabled="@IsToggling">
-                        İptal
-                    </button>
-                    <button type="button"
-                            class="btn @(ToggleSendikaCurrentStatus == Aktiflik.Aktif ? "btn-warning" : "btn-success")"
-                            @onclick="ConfirmToggleStatus"
-                            disabled="@IsToggling">
-                        @if (IsToggling)
+                <div class="d-flex gap-2">
+                    <!-- Excel Export -->
+                    <button class="btn btn-success" @onclick="ExportToExcel" disabled="@IsExporting">
+                        @if (IsExporting && ExportType == "excel")
                         {
                             <span class="spinner-border spinner-border-sm me-1"></span>
-                            <span>İşleniyor...</span>
                         }
                         else
                         {
-                            @if (ToggleSendikaCurrentStatus == Aktiflik.Aktif)
+                            <i class="bx bx-download me-1"></i>
+                        }
+                        Excel
+                    </button>
+
+                    <!-- PDF Export -->
+                    <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@IsExporting">
+                        @if (IsExporting && ExportType == "pdf")
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        else
+                        {
+                            <i class="bx bxs-file-pdf me-1"></i>
+                        }
+                        PDF
+                    </button>
+
+                    <!-- Yeni Sendika -->
+                    <button class="btn btn-primary" @onclick="NavigateToCreate">
+                        <i class="bx bx-plus me-1"></i>Yeni Sendika
+                    </button>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- FILTER CARD -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Arama -->
+                        <div class="col-md-4">
+                            <label class="form-label">Sendika Ara</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bx bx-search"></i>
+                                </span>
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="Sendika adı..."
+                                       @bind="searchTerm"
+                                       @bind:event="oninput"
+                                       @onkeyup="OnSearchChanged" />
+                            </div>
+                        </div>
+
+                        <!-- Durum Filtresi -->
+                        <div class="col-md-3">
+                            <label class="form-label">Durum</label>
+                            <select class="form-select" value="@filterStatus" @onchange="OnFilterStatusChanged">
+                                <option value="all">Tümü</option>
+                                <option value="active">Aktif</option>
+                                <option value="passive">Pasif</option>
+                            </select>
+                        </div>
+
+                        <!-- Sıralama -->
+                        <div class="col-md-3">
+                            <label class="form-label">Sıralama</label>
+                            <select class="form-select" value="@sortBy" @onchange="OnSortByChanged">
+                                <option value="name-asc">İsim (A-Z)</option>
+                                <option value="name-desc">İsim (Z-A)</option>
+                                <option value="date-newest">En Yeni</option>
+                                <option value="date-oldest">En Eski</option>
+                                <option value="personel-most">En Çok Personel</option>
+                                <option value="personel-least">En Az Personel</option>
+                            </select>
+                        </div>
+
+                        <!-- Temizle -->
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
+                                <i class="bx bx-x me-1"></i>Temizle
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- STATISTICS CARDS -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-1">Toplam Sendika</h6>
+                                    <h3 class="mb-0">@TotalCount</h3>
+                                </div>
+                                <div class="avatar">
+                                    <span class="avatar-initial rounded bg-label-primary">
+                                        <i class="bx bx-group bx-sm"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-1">Aktif</h6>
+                                    <h3 class="mb-0 text-success">@ActiveCount</h3>
+                                </div>
+                                <div class="avatar">
+                                    <span class="avatar-initial rounded bg-label-success">
+                                        <i class="bx bx-check-circle bx-sm"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-1">Pasif</h6>
+                                    <h3 class="mb-0 text-danger">@PassiveCount</h3>
+                                </div>
+                                <div class="avatar">
+                                    <span class="avatar-initial rounded bg-label-danger">
+                                        <i class="bx bx-x-circle bx-sm"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="text-muted mb-1">Gösterilen</h6>
+                                    <h3 class="mb-0">@FilteredSendikalar.Count</h3>
+                                </div>
+                                <div class="avatar">
+                                    <span class="avatar-initial rounded bg-label-info">
+                                        <i class="bx bx-filter bx-sm"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- DATA TABLE -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Sendika Listesi</h5>
+                    <span class="badge bg-primary">@FilteredSendikalar.Count kayıt</span>
+                </div>
+
+                @if (IsLoading)
+                {
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Yükleniyor...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Sendikalar yükleniyor...</p>
+                    </div>
+                }
+                else if (!FilteredSendikalar.Any())
+                {
+                    <div class="card-body text-center py-5">
+                        <i class="bx bx-search bx-lg text-muted mb-3"></i>
+                        <h5 class="text-muted">Sendika Bulunamadı</h5>
+                        <p class="text-muted">
+                            @if (!string.IsNullOrEmpty(searchTerm))
                             {
-                                <i class="bx bx-x-circle me-1"></i>
-                                <span>Pasif Yap</span>
+                                <span>Arama kriterlerinize uygun sendika bulunamadı.</span>
                             }
                             else
                             {
-                                <i class="bx bx-check-circle me-1"></i>
-                                <span>Aktif Yap</span>
+                                <span>Henüz sendika eklenmemiş.</span>
                             }
-                        }
-                    </button>
-                </div>
+                        </p>
+                        <button class="btn btn-primary mt-2" @onclick="NavigateToCreate">
+                            <i class="bx bx-plus me-1"></i>İlk Sendikayı Ekle
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%">#</th>
+                                    <th style="width: 30%">Sendika Adı</th>
+                                    <th style="width: 10%">Personel Sayısı</th>
+                                    <th style="width: 10%">Durum</th>
+                                    <th style="width: 17%">Eklenme Tarihi</th>
+                                    <th style="width: 17%">Güncelleme Tarihi</th>
+                                    <th style="width: 5%" class="text-end">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var (sendika, index) in FilteredSendikalar.Select((s, i) => (s, i + 1)))
+                                {
+                                    <tr>
+                                        <td>@index</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm me-2">
+                                                    <span class="avatar-initial rounded-circle bg-label-primary">
+                                                        @sendika.SendikaAdi.Substring(0, 1).ToUpper()
+                                                    </span>
+                                                </div>
+                                                <strong>@sendika.SendikaAdi</strong>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bx bx-user me-2 text-primary"></i>
+                                                <strong>@sendika.PersonelSayisi</strong>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if (sendika.Aktiflik == Aktiflik.Aktif)
+                                            {
+                                                <span class="badge bg-success">
+                                                    <i class="bx bx-check-circle me-1"></i>Aktif
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">
+                                                    <i class="bx bx-x-circle me-1"></i>Pasif
+                                                </span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                @sendika.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm")
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                @sendika.DuzenlenmeTarihi.ToString("dd.MM.yyyy HH:mm")
+                                            </small>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center gap-1">
+                                                @if (IsActionVisible("EDIT"))
+                                                {
+                                                    <!-- Düzenle -->
+                                                    <button class="btn btn-sm btn-icon btn-outline-primary"
+                                                            @onclick="() => NavigateToEdit(sendika.SendikaId)"
+                                                            disabled="@(!CanEditAction("EDIT"))"
+                                                            title="@(CanEditAction("EDIT") ? "Düzenle" : "Düzenle (Yetki Yok)")">
+                                                        <i class="bx bx-edit"></i>
+                                                    </button>
+                                                }
+
+                                                @if (IsActionVisible("TOGGLE"))
+                                                {
+                                                    <!-- Aktif/Pasif Toggle -->
+                                                    <button class="btn btn-sm btn-icon @(sendika.Aktiflik == Aktiflik.Aktif ? "btn-outline-warning" : "btn-outline-success")"
+                                                            @onclick="() => ShowToggleStatusConfirmation(sendika.SendikaId, sendika.SendikaAdi, sendika.Aktiflik)"
+                                                            disabled="@(!CanEditAction("TOGGLE"))"
+                                                            title="@(CanEditAction("TOGGLE") ? (sendika.Aktiflik == Aktiflik.Aktif ? "Pasif Yap" : "Aktif Yap") : (sendika.Aktiflik == Aktiflik.Aktif ? "Pasif Yap (Yetki Yok)" : "Aktif Yap (Yetki Yok)"))">
+                                                        <i class="bx @(sendika.Aktiflik == Aktiflik.Aktif ? "bx-toggle-right" : "bx-toggle-left")"></i>
+                                                    </button>
+                                                }
+
+                                                @if (IsActionVisible("DELETE"))
+                                                {
+                                                    <!-- Sil -->
+                                                    <button class="btn btn-sm btn-icon btn-outline-danger"
+                                                            @onclick="() => ConfirmDelete(sendika)"
+                                                            disabled="@(!CanEditAction("DELETE"))"
+                                                            title="@(CanEditAction("DELETE") ? "Sil" : "Sil (Yetki Yok)")">
+                                                        <i class="bx bx-trash"></i>
+                                                    </button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
             </div>
         </div>
-    </div>
-}
 
-<!-- ═══════════════════════════════════════════════════════ -->
-<!-- DELETE CONFIRMATION MODAL -->
-<!-- ═══════════════════════════════════════════════════════ -->
-@if (SendikaToDelete != null)
-{
-    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bx bx-trash text-danger me-2"></i>Sendika Sil
-                    </h5>
-                    <button type="button" class="btn-close" @onclick="CancelDelete"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-danger mb-3">
-                        <div class="d-flex align-items-start">
-                            <i class="bx bx-error-circle me-2 fs-5"></i>
-                            <div>
-                                <strong>🗑️ Dikkat!</strong> Kalıcı silme işlemi yapıyorsunuz.
-                                <p class="mb-0 mt-2">
-                                    <strong>@SendikaToDelete.SendikaAdi</strong> Sendikasını silmek istediğinizden emin misiniz?
-                                </p>
-                            </div>
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- TOGGLE STATUS CONFIRMATION MODAL -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        @if (ShowToggleModal)
+        {
+            <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                @if (ToggleSendikaCurrentStatus == Aktiflik.Aktif)
+                                {
+                                    <i class="bx bx-x-circle text-warning me-2"></i>
+                                    <span>Sendikayı Pasif Yap</span>
+                                }
+                                else
+                                {
+                                    <i class="bx bx-check-circle text-success me-2"></i>
+                                    <span>Sendikayı Aktif Yap</span>
+                                }
+                            </h5>
+                            <button type="button" class="btn-close" @onclick="CloseToggleModal" disabled="@IsToggling"></button>
+                        </div>
+                        <div class="modal-body">
+                            @if (ToggleSendikaCurrentStatus == Aktiflik.Aktif)
+                            {
+                                <div class="alert alert-warning mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bx bx-error-circle me-2 fs-5"></i>
+                                        <div>
+                                            <strong>⚠️ Dikkat!</strong> Sendikayı pasif hale getirmek üzeresiniz.
+                                            <p class="mb-0 mt-2">
+                                                <strong>@ToggleSendikaAdi</strong> Sendikasını pasif yapmak istediğinizden emin misiniz?
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if (ToggleSendikaPersonelSayisi > 0)
+                                {
+                                    <div class="alert alert-info mb-3">
+                                        <i class="bx bx-info-circle me-2"></i>
+                                        Bu sendikada <strong>@ToggleSendikaPersonelSayisi aktif personel</strong> bulunmaktadır.
+                                    </div>
+                                }
+
+                                <p class="mb-2"><strong>Pasif yapıldığında:</strong></p>
+                                <ul class="text-muted mb-0">
+                                    <li>Sendika listede görünmeye devam edecektir</li>
+                                    <li>Mevcut personeller sendikalarını koruyacaktır</li>
+                                    <li>Yeni personel ataması yapılamayacaktır</li>
+                                    <li>Sendika seçim listelerinde görünmeyecektir</li>
+                                </ul>
+                            }
+                            else
+                            {
+                                <div class="alert alert-success mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bx bx-check-circle me-2 fs-5"></i>
+                                        <div>
+                                            <strong>Bilgi:</strong> Sendikayı aktif hale getirmek üzeresiniz.
+                                            <p class="mb-0 mt-2">
+                                                <strong>@ToggleSendikaAdi</strong> Sendikasını aktif yapmak istediğinizden emin misiniz?
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <p class="mb-2"><strong>Aktif yapıldığında:</strong></p>
+                                <ul class="text-muted mb-0">
+                                    <li>Sendika tüm listelerde görünecektir</li>
+                                    <li>Yeni personel ataması yapılabilecektir</li>
+                                    <li>Tüm özellikler kullanılabilir olacaktır</li>
+                                </ul>
+                            }
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CloseToggleModal" disabled="@IsToggling">
+                                İptal
+                            </button>
+                            <button type="button"
+                                    class="btn @(ToggleSendikaCurrentStatus == Aktiflik.Aktif ? "btn-warning" : "btn-success")"
+                                    @onclick="ConfirmToggleStatus"
+                                    disabled="@IsToggling">
+                                @if (IsToggling)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                    <span>İşleniyor...</span>
+                                }
+                                else
+                                {
+                                    @if (ToggleSendikaCurrentStatus == Aktiflik.Aktif)
+                                    {
+                                        <i class="bx bx-x-circle me-1"></i>
+                                        <span>Pasif Yap</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bx bx-check-circle me-1"></i>
+                                        <span>Aktif Yap</span>
+                                    }
+                                }
+                            </button>
                         </div>
                     </div>
-
-                    @if (SendikaToDelete.PersonelSayisi > 0)
-                    {
-                        <div class="alert alert-warning mb-3">
-                            <i class="bx bx-error-circle me-2"></i>
-                            <strong>Uyarı:</strong> Bu sendikada <strong>@SendikaToDelete.PersonelSayisi aktif personel</strong> bulunmaktadır!
-                        </div>
-                    }
-
-                    <p class="mb-2"><strong>Silme işlemi sonrasında:</strong></p>
-                    <ul class="text-muted mb-3">
-                        <li><strong>Sendika kaydı kalıcı olarak silinecektir</strong></li>
-                        @if (SendikaToDelete.PersonelSayisi > 0)
-                        {
-                            <li class="text-danger"><strong>Bu işlem personel sayısı nedeniyle başarısız olacaktır</strong></li>
-                            <li>Önce tüm personelleri başka bir sendikaya aktarmalısınız</li>
-                        }
-                        else
-                        {
-                            <li>Bu işlem geri alınamaz</li>
-                        }
-                    </ul>
-
-                    @if (SendikaToDelete.PersonelSayisi > 0)
-                    {
-                        <p class="text-danger mb-0">
-                            <small><strong>Not:</strong> Silme işlemine devam etmek için önce tüm personelleri başka bir sendikaya aktarmanız gerekmektedir.</small>
-                        </p>
-                    }
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CancelDelete">
-                        <i class="bx bx-x me-1"></i>İptal
-                    </button>
-                    <button type="button" class="btn btn-danger" @onclick="DeleteSendika" disabled="@IsDeleting">
-                        @if (IsDeleting)
-                        {
-                            <span class="spinner-border spinner-border-sm me-1"></span>
-                        }
-                        else
-                        {
-                            <i class="bx bx-trash me-1"></i>
-                        }
-                        Sil
-                    </button>
                 </div>
             </div>
-        </div>
-    </div>
-}
+        }
+
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- DELETE CONFIRMATION MODAL -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        @if (SendikaToDelete != null)
+        {
+            <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="bx bx-trash text-danger me-2"></i>Sendika Sil
+                            </h5>
+                            <button type="button" class="btn-close" @onclick="CancelDelete"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-danger mb-3">
+                                <div class="d-flex align-items-start">
+                                    <i class="bx bx-error-circle me-2 fs-5"></i>
+                                    <div>
+                                        <strong>🗑️ Dikkat!</strong> Kalıcı silme işlemi yapıyorsunuz.
+                                        <p class="mb-0 mt-2">
+                                            <strong>@SendikaToDelete.SendikaAdi</strong> Sendikasını silmek istediğinizden emin misiniz?
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (SendikaToDelete.PersonelSayisi > 0)
+                            {
+                                <div class="alert alert-warning mb-3">
+                                    <i class="bx bx-error-circle me-2"></i>
+                                    <strong>Uyarı:</strong> Bu sendikada <strong>@SendikaToDelete.PersonelSayisi aktif personel</strong> bulunmaktadır!
+                                </div>
+                            }
+
+                            <p class="mb-2"><strong>Silme işlemi sonrasında:</strong></p>
+                            <ul class="text-muted mb-3">
+                                <li><strong>Sendika kaydı kalıcı olarak silinecektir</strong></li>
+                                @if (SendikaToDelete.PersonelSayisi > 0)
+                                {
+                                    <li class="text-danger"><strong>Bu işlem personel sayısı nedeniyle başarısız olacaktır</strong></li>
+                                    <li>Önce tüm personelleri başka bir sendikaya aktarmalısınız</li>
+                                }
+                                else
+                                {
+                                    <li>Bu işlem geri alınamaz</li>
+                                }
+                            </ul>
+
+                            @if (SendikaToDelete.PersonelSayisi > 0)
+                            {
+                                <p class="text-danger mb-0">
+                                    <small><strong>Not:</strong> Silme işlemine devam etmek için önce tüm personelleri başka bir sendikaya aktarmanız gerekmektedir.</small>
+                                </p>
+                            }
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CancelDelete">
+                                <i class="bx bx-x me-1"></i>İptal
+                            </button>
+                            <button type="button" class="btn btn-danger" @onclick="DeleteSendika" disabled="@IsDeleting">
+                                @if (IsDeleting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                }
+                                else
+                                {
+                                    <i class="bx bx-trash me-1"></i>
+                                }
+                                Sil
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </FieldPermissionScope>
 }

@@ -5,7 +5,7 @@ using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
 {
-    public partial class Detail : ComponentBase
+    public partial class Detail
     {
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
