@@ -18,17 +18,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
         private readonly IMapper _mapper;
         private readonly ILogger<SendikaService> _logger;
         private readonly IFieldPermissionValidationService _fieldPermissionService;
+        private readonly IPermissionKeyResolverService _permissionKeyResolver;
 
         public SendikaService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<SendikaService> logger,
-            IFieldPermissionValidationService fieldPermissionService)
+            IFieldPermissionValidationService fieldPermissionService,
+            IPermissionKeyResolverService permissionKeyResolver)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _fieldPermissionService = fieldPermissionService;
+            _permissionKeyResolver = permissionKeyResolver;
         }
 
         public async Task<ApiResponseDto<List<SendikaResponseDto>>> GetAllAsync()
@@ -142,7 +145,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 }
 
                 // ⭐ Field-level permission enforcement
-                // Permission key: PER.SENDIKA.MANAGE
+                // Permission key otomatik çözümleme (route → permission key)
+                var permissionKey = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
                 var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
                 var originalDto = _mapper.Map<SendikaUpdateRequestDto>(sendika);
 
@@ -150,7 +154,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     request,
                     userPermissions,
                     originalDto,
-                    "PER.SENDIKA.MANAGE",
+                    permissionKey,
                     null);
 
                 if (unauthorizedFields.Any())

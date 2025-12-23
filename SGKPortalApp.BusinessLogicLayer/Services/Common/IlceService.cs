@@ -15,17 +15,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly IMapper _mapper;
         private readonly ILogger<IlceService> _logger;
         private readonly IFieldPermissionValidationService _fieldPermissionService;
+        private readonly IPermissionKeyResolverService _permissionKeyResolver;
 
         public IlceService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<IlceService> logger,
-            IFieldPermissionValidationService fieldPermissionService)
+            IFieldPermissionValidationService fieldPermissionService,
+            IPermissionKeyResolverService permissionKeyResolver)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _fieldPermissionService = fieldPermissionService;
+            _permissionKeyResolver = permissionKeyResolver;
         }
 
         public async Task<ApiResponseDto<List<IlceResponseDto>>> GetAllAsync()
@@ -140,7 +143,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                         .ErrorResult("Bu isimde başka bir ilçe zaten mevcut");
 
                 // ⭐ Field-level permission enforcement
-                // Permission key: COM.ILCE.MANAGE
+                // Permission key otomatik çözümleme (route → permission key)
+                var permissionKey = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
                 var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
                 var originalDto = _mapper.Map<IlceUpdateRequestDto>(ilce);
 
@@ -148,7 +152,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     request,
                     userPermissions,
                     originalDto,
-                    "COM.ILCE.MANAGE",
+                    permissionKey,
                     null);
 
                 if (unauthorizedFields.Any())

@@ -13,6 +13,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.Common
     public interface IPermissionKeyResolverService
     {
         /// <summary>
+        /// Mevcut HTTP request'in route'undan permission key'i çözümler (SYNC - cache lookup).
+        /// Backend service'lerde kullanım için - HttpContext'ten route'u otomatik alır.
+        ///
+        /// Örnek (Backend):
+        /// - HttpContext.Request.Path: /api/personel/unvan → Permission Key: "PERSONEL.UNVAN.INDEX"
+        /// </summary>
+        /// <returns>Permission key veya null</returns>
+        string? ResolveFromCurrentRequest();
+
+        /// <summary>
         /// Belirtilen route'tan permission key'i çözümler (SYNC - cache lookup).
         /// Frontend'deki PermissionStateService.GetPermissionKeyByRoute() ile aynı mantık.
         ///

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
@@ -12,17 +13,44 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
     /// </summary>
     public class PermissionKeyResolverService : IPermissionKeyResolverService
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMemoryCache _memoryCache;
         private readonly ILogger<PermissionKeyResolverService> _logger;
 
         private const string RoutePermissionMapCacheKey = "PermissionKeyResolverService.RoutePermissionMap";
 
         public PermissionKeyResolverService(
+            IHttpContextAccessor httpContextAccessor,
             IMemoryCache memoryCache,
             ILogger<PermissionKeyResolverService> logger)
         {
+            _httpContextAccessor = httpContextAccessor;
             _memoryCache = memoryCache;
             _logger = logger;
+        }
+
+        /// <summary>
+        /// Mevcut HTTP request'in route'undan permission key'i çözümler (SYNC - cache lookup).
+        /// Backend service'lerde kullanım için.
+        /// </summary>
+        public string? ResolveFromCurrentRequest()
+        {
+            try
+            {
+                var path = _httpContextAccessor.HttpContext?.Request.Path.Value;
+                if (string.IsNullOrWhiteSpace(path))
+                {
+                    _logger.LogDebug("⚠️ HttpContext veya Request.Path boş");
+                    return null;
+                }
+
+                return ResolveFromRoute(path);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ ResolveFromCurrentRequest hatası");
+                return null;
+            }
         }
 
         /// <summary>

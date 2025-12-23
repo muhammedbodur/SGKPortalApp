@@ -20,19 +20,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         private readonly ILogger<KanalIslemService> _logger;
         private readonly ICascadeHelper _cascadeHelper;
         private readonly IFieldPermissionValidationService _fieldPermissionService;
+        private readonly IPermissionKeyResolverService _permissionKeyResolver;
 
         public KanalIslemService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<KanalIslemService> logger,
             ICascadeHelper cascadeHelper,
-            IFieldPermissionValidationService fieldPermissionService)
+            IFieldPermissionValidationService fieldPermissionService,
+            IPermissionKeyResolverService permissionKeyResolver)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _cascadeHelper = cascadeHelper;
             _fieldPermissionService = fieldPermissionService;
+            _permissionKeyResolver = permissionKeyResolver;
         }
 
         public async Task<ApiResponseDto<List<KanalIslemResponseDto>>> GetAllAsync()
@@ -221,6 +224,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 }
 
                 // ⭐ Field-level permission enforcement
+                // Permission key otomatik çözümleme (route → permission key)
+                var permissionKey = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
                 var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
                 var originalDto = _mapper.Map<KanalIslemUpdateRequestDto>(kanalIslem);
 
@@ -228,7 +233,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     request,
                     userPermissions,
                     originalDto,
-                    "SIR.KANALISLEM.MANAGE",
+                    permissionKey,
                     null);
 
                 if (unauthorizedFields.Any())

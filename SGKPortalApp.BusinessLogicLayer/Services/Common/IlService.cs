@@ -15,17 +15,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly IMapper _mapper;
         private readonly ILogger<IlService> _logger;
         private readonly IFieldPermissionValidationService _fieldPermissionService;
+        private readonly IPermissionKeyResolverService _permissionKeyResolver;
 
         public IlService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<IlService> logger,
-            IFieldPermissionValidationService fieldPermissionService)
+            IFieldPermissionValidationService fieldPermissionService,
+            IPermissionKeyResolverService permissionKeyResolver)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _fieldPermissionService = fieldPermissionService;
+            _permissionKeyResolver = permissionKeyResolver;
         }
 
         public async Task<ApiResponseDto<List<IlResponseDto>>> GetAllAsync()
@@ -135,7 +138,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                         .ErrorResult("Bu isimde başka bir il zaten mevcut");
 
                 // ⭐ Field-level permission enforcement
-                // Permission key: COM.IL.MANAGE
+                // Permission key otomatik çözümleme (route → permission key)
+                var permissionKey = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
                 var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
                 var originalDto = _mapper.Map<IlUpdateRequestDto>(il);
 
@@ -143,7 +147,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     request,
                     userPermissions,
                     originalDto,
-                    "COM.IL.MANAGE",
+                    permissionKey,
                     null);
 
                 if (unauthorizedFields.Any())

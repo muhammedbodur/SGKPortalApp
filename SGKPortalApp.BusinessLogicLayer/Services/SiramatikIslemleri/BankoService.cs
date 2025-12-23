@@ -23,19 +23,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         private readonly ILogger<BankoService> _logger;
         private readonly ICascadeHelper _cascadeHelper;
         private readonly IFieldPermissionValidationService _fieldPermissionService;
+        private readonly IPermissionKeyResolverService _permissionKeyResolver;
 
         public BankoService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<BankoService> logger,
             ICascadeHelper cascadeHelper,
-            IFieldPermissionValidationService fieldPermissionService)
+            IFieldPermissionValidationService fieldPermissionService,
+            IPermissionKeyResolverService permissionKeyResolver)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _cascadeHelper = cascadeHelper;
             _fieldPermissionService = fieldPermissionService;
+            _permissionKeyResolver = permissionKeyResolver;
         }
 
         // ═══════════════════════════════════════════════════════
@@ -172,6 +175,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     }
 
                     // ⭐ Field-level permission enforcement
+                    // Permission key otomatik çözümleme (route → permission key)
+                    var permissionKey = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
                     var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
                     var originalDto = _mapper.Map<BankoUpdateRequestDto>(banko);
 
@@ -179,7 +184,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         request,
                         userPermissions,
                         originalDto,
-                        "SIR.BANKO.MANAGE",
+                        permissionKey,
                         null);
 
                     if (unauthorizedFields.Any())

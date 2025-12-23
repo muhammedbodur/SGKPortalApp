@@ -15,17 +15,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly ILogger<ModulControllerService> _logger;
         private readonly IYetkiQueryRepository _yetkiQueryRepository;
         private readonly IFieldPermissionValidationService _fieldPermissionService;
+        private readonly IPermissionKeyResolverService _permissionKeyResolver;
 
         public ModulControllerService(
             IUnitOfWork unitOfWork,
             ILogger<ModulControllerService> logger,
             IYetkiQueryRepository yetkiQueryRepository,
-            IFieldPermissionValidationService fieldPermissionService)
+            IFieldPermissionValidationService fieldPermissionService,
+            IPermissionKeyResolverService permissionKeyResolver)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _yetkiQueryRepository = yetkiQueryRepository;
             _fieldPermissionService = fieldPermissionService;
+            _permissionKeyResolver = permissionKeyResolver;
         }
 
         public async Task<ApiResponseDto<List<ModulControllerResponseDto>>> GetAllAsync()
@@ -185,15 +188,21 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     return ApiResponseDto<ModulControllerResponseDto>.ErrorResult("Seçilen modül bulunamadı");
 
                 // ⭐ Field-level permission enforcement
-                // Permission key: COM.MODULCONTROLLER.MANAGE
+                // Permission key otomatik çözümleme (route → permission key)
+                var permissionKey = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
                 var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
-                var originalDto = _mapper.Map<ModulControllerUpdateRequestDto>(entity);
+                var originalDto = new ModulControllerUpdateRequestDto
+                {
+                    ModulControllerId = entity.ModulControllerId,
+                    ModulControllerAdi = entity.ModulControllerAdi,
+                    ModulId = entity.ModulId
+                };
 
                 var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
                     request,
                     userPermissions,
                     originalDto,
-                    "COM.MODULCONTROLLER.MANAGE",
+                    permissionKey,
                     null);
 
                 if (unauthorizedFields.Any())
