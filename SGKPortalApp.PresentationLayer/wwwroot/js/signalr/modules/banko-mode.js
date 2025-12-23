@@ -4,6 +4,10 @@ window.bankoMode = {
     dotNetHelper: null,
     eventHandlersSetup: false,
 
+    // Retry configuration
+    maxRetries: 4,
+    retryDelays: [2000, 4000, 8000, 16000], // 2s, 4s, 8s, 16s
+
     // SignalR bağlantısını al (MainLayout'tan)
     getConnection: function () {
         if (!this.connection) {
@@ -11,6 +15,57 @@ window.bankoMode = {
             return null;
         }
         return this.connection;
+    },
+
+    // Permission refresh with retry logic
+    refreshPermissionsWithRetry: async function (eventType = 'unknown') {
+        for (let attempt = 0; attempt < this.maxRetries; attempt++) {
+            try {
+                console.log(`🔄 [${eventType}] Permissions refresh deneme ${attempt + 1}/${this.maxRetries}...`);
+
+                const response = await fetch('/auth/refreshpermissions', {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log(`✅ [${eventType}] Permissions cookie güncellendi:`, result.count, 'yetki');
+                    return { success: true, count: result.count };
+                } else {
+                    throw new Error(result.error || 'Bilinmeyen hata');
+                }
+
+            } catch (err) {
+                console.error(`❌ [${eventType}] Deneme ${attempt + 1} başarısız:`, err.message);
+
+                // Son deneme değilse bekle
+                if (attempt < this.maxRetries - 1) {
+                    const delay = this.retryDelays[attempt];
+                    console.log(`⏳ [${eventType}] ${delay}ms sonra tekrar denenecek...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                } else {
+                    // Tüm denemeler başarısız
+                    console.error(`🔴 [${eventType}] ${this.maxRetries} deneme sonucu başarısız oldu!`);
+
+                    // Kullanıcıya kritik uyarı göster
+                    const userMessage = `UYARI: Yetki güncellemesi alınamadı!\n\nYetkilerinizde değişiklik yapıldı ancak sistem güncelleyemedi.\nLütfen sayfayı yenileyerek oturumunuzu güncelleyin.\n\nHata: ${err.message}`;
+                    alert(userMessage);
+
+                    return { success: false, error: err.message, attempts: this.maxRetries };
+                }
+            }
+        }
+
+        return { success: false, error: 'Max retry aşıldı', attempts: this.maxRetries };
     },
 
     // Bağlantıyı set et (signalr-app-initializer'dan çağrılır)
@@ -149,26 +204,21 @@ window.bankoMode = {
         // Permissions changed (kullanıcıya özel yetki atandığında)
         connection.on("permissionsChanged", async (data) => {
             console.log('🔑 permissionsChanged:', data);
-            
-            // 1. Önce HTTP endpoint ile cookie'yi güncelle
-            try {
-                const response = await fetch('/auth/refreshpermissions', {
-                    method: 'GET',
-                    credentials: 'same-origin'
-                });
-                const result = await response.json();
-                if (result.success) {
-                    console.log('✅ Permissions cookie güncellendi:', result.count, 'yetki');
-                } else {
-                    console.error('❌ Permissions cookie güncellenemedi:', result.error);
-                }
-            } catch (err) {
-                console.error('❌ RefreshPermissions endpoint hatası:', err);
-            }
-            
-            // 2. Sonra Blazor component'i bilgilendir (UI güncellemesi için)
+
+            // 1. Retry ile HTTP endpoint çağrısı (cookie güncelleme)
+            const refreshResult = await window.bankoMode.refreshPermissionsWithRetry('permissionsChanged');
+
+            // 2. Başarılı olsa da olmasada Blazor component'i bilgilendir
+            // (UI en azından cache'i temizleyebilir)
             if (this.dotNetHelper) {
-                this.dotNetHelper.invokeMethodAsync('OnPermissionsChanged')
+                this.dotNetHelper.invokeMethodAsync('OnPermissionsChanged', refreshResult)
+                    .then(() => {
+                        if (refreshResult.success) {
+                            console.log('✅ Permission değişikliği tamamlandı, UI güncellenecek');
+                        } else {
+                            console.warn('⚠️ Permission refresh başarısız oldu ama UI bilgilendirildi');
+                        }
+                    })
                     .catch(err => {
                         console.error('❌ OnPermissionsChanged çağrısı başarısız:', err);
                     });
@@ -180,26 +230,20 @@ window.bankoMode = {
         // Çünkü yeni eklenen yetki tanımının MinYetkiSeviyesi > None ise claims'e eklenmeli
         connection.on("permissionDefinitionsChanged", async (data) => {
             console.log('📋 permissionDefinitionsChanged:', data);
-            
-            // 1. Önce HTTP endpoint ile cookie'yi güncelle (yeni varsayılan yetkiler için)
-            try {
-                const response = await fetch('/auth/refreshpermissions', {
-                    method: 'GET',
-                    credentials: 'same-origin'
-                });
-                const result = await response.json();
-                if (result.success) {
-                    console.log('✅ Permissions cookie güncellendi (definitions):', result.count, 'yetki');
-                } else {
-                    console.error('❌ Permissions cookie güncellenemedi:', result.error);
-                }
-            } catch (err) {
-                console.error('❌ RefreshPermissions endpoint hatası:', err);
-            }
-            
-            // 2. Blazor component'i bilgilendir (cache yenilemesi için)
+
+            // 1. Retry ile HTTP endpoint çağrısı (cookie ve definition cache güncelleme)
+            const refreshResult = await window.bankoMode.refreshPermissionsWithRetry('permissionDefinitionsChanged');
+
+            // 2. Başarılı olsa da olmasasa Blazor component'i bilgilendir
             if (this.dotNetHelper) {
-                this.dotNetHelper.invokeMethodAsync('OnPermissionDefinitionsChanged')
+                this.dotNetHelper.invokeMethodAsync('OnPermissionDefinitionsChanged', refreshResult)
+                    .then(() => {
+                        if (refreshResult.success) {
+                            console.log('✅ Permission definitions güncellemesi tamamlandı');
+                        } else {
+                            console.warn('⚠️ Permission definitions refresh başarısız oldu ama UI bilgilendirildi');
+                        }
+                    })
                     .catch(err => {
                         console.error('❌ OnPermissionDefinitionsChanged çağrısı başarısız:', err);
                     });

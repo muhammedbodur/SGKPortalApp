@@ -108,7 +108,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         /// <summary>
         /// Validates multiple fields in a DTO
         /// Returns list of fields that user cannot edit
-        /// 
+        ///
         /// Yeni mantık: Convention-based permission key kullanır
         /// Örnek: pagePermissionKey = "PER.PERSONEL.MANAGE" ve fieldName = "SicilNo"
         ///        -> Permission key: "PER.PERSONEL.MANAGE.FIELD.SICILNO"
@@ -117,7 +117,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             TDto dto,
             Dictionary<string, YetkiSeviyesi> userPermissions,
             TDto? originalDto = null,
-            string? pagePermissionKey = null) where TDto : class
+            string? pagePermissionKey = null,
+            string? userTcKimlikNo = null) where TDto : class
         {
             var unauthorizedFields = new List<string>();
             var dtoTypeName = typeof(TDto).Name;
@@ -132,14 +133,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     continue;
 
                 // Check if field has changed (dirty checking)
+                object? currentValue = null;
+                object? originalValue = null;
+                bool hasChanged = false;
+
                 if (originalDto != null)
                 {
-                    var currentValue = prop.GetValue(dto);
-                    var originalValue = prop.GetValue(originalDto);
+                    currentValue = prop.GetValue(dto);
+                    originalValue = prop.GetValue(originalDto);
 
                     // Skip unchanged fields
                     if (Equals(currentValue, originalValue))
                         continue;
+
+                    hasChanged = true;
                 }
 
                 // Convention-based permission key kontrolü (pagePermissionKey verilmişse)
@@ -147,24 +154,34 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 {
                     var fieldPermissionKey = $"{pagePermissionKey}.FORMFIELD.{prop.Name.ToUpperInvariant()}";
                     var cacheKey = $"{dtoTypeName}:{prop.Name}";
-                    
+
                     // Case-insensitive arama - kullanıcıya yetki atanmış mı?
-                    var matchingKey = userPermissions.Keys.FirstOrDefault(k => 
+                    var matchingKey = userPermissions.Keys.FirstOrDefault(k =>
                         string.Equals(k, fieldPermissionKey, StringComparison.OrdinalIgnoreCase));
-                    
+
                     if (matchingKey != null && userPermissions.TryGetValue(matchingKey, out var userLevel))
                     {
                         // Kullanıcıya yetki atanmış → atanan seviye Edit olmalı
                         if (userLevel < YetkiSeviyesi.Edit)
                         {
+                            // 🔴 AUDIT LOG: Yetkisiz field değiştirme girişimi
                             _logger.LogWarning(
-                                "User attempted to edit field without Edit permission. Field: {Field}, UserLevel: {Level}, RequiredPermission: {Permission}",
-                                prop.Name, userLevel, fieldPermissionKey);
+                                "🔴 AUDIT: Unauthorized field edit attempt | User: {User} | DTO: {DtoType} | Field: {Field} | " +
+                                "UserLevel: {UserLevel} | RequiredLevel: Edit | Permission: {Permission} | " +
+                                "OldValue: {OldValue} | NewValue: {NewValue} | Timestamp: {Timestamp}",
+                                userTcKimlikNo ?? "Unknown",
+                                dtoTypeName,
+                                prop.Name,
+                                userLevel,
+                                fieldPermissionKey,
+                                originalValue?.ToString() ?? "null",
+                                currentValue?.ToString() ?? "null",
+                                DateTime.UtcNow);
                             unauthorizedFields.Add(prop.Name);
                         }
                         continue; // Yetki kontrolü yapıldı, sonraki field'a geç
                     }
-                    
+
                     // Kullanıcıya yetki atanmamış - cache'den MinYetkiSeviyesi kontrol et
                     // Cache key olarak PermissionKey kullan (uppercase)
                     var permissionKeyUpper = fieldPermissionKey.ToUpperInvariant();
@@ -173,9 +190,19 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                         // Field permission tanımlı - MinYetkiSeviyesi Edit olmalı
                         if (fieldPerm.MinYetkiSeviyesi < YetkiSeviyesi.Edit)
                         {
+                            // 🔴 AUDIT LOG: Yetkisiz field değiştirme girişimi (MinYetkiSeviyesi)
                             _logger.LogWarning(
-                                "User attempted to edit field without permission (MinYetkiSeviyesi={MinLevel}). Field: {Field}, RequiredPermission: {Permission}",
-                                fieldPerm.MinYetkiSeviyesi, prop.Name, fieldPermissionKey);
+                                "🔴 AUDIT: Unauthorized field edit attempt (MinYetki) | User: {User} | DTO: {DtoType} | Field: {Field} | " +
+                                "MinYetkiSeviyesi: {MinLevel} | RequiredLevel: Edit | Permission: {Permission} | " +
+                                "OldValue: {OldValue} | NewValue: {NewValue} | Timestamp: {Timestamp}",
+                                userTcKimlikNo ?? "Unknown",
+                                dtoTypeName,
+                                prop.Name,
+                                fieldPerm.MinYetkiSeviyesi,
+                                fieldPermissionKey,
+                                originalValue?.ToString() ?? "null",
+                                currentValue?.ToString() ?? "null",
+                                DateTime.UtcNow);
                             unauthorizedFields.Add(prop.Name);
                         }
                         continue;
@@ -186,9 +213,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 // Eski yöntem: Cache-based kontrol (DtoTypeName:DtoFieldName)
                 if (!CanEditField(dtoTypeName, prop.Name, userPermissions, out var permissionKey))
                 {
+                    // 🔴 AUDIT LOG: Yetkisiz field değiştirme girişimi (Legacy)
                     _logger.LogWarning(
-                        "User attempted to edit field without permission. DTO: {DtoType}, Field: {Field}, RequiredPermission: {Permission}",
-                        dtoTypeName, prop.Name, permissionKey ?? "Unknown");
+                        "🔴 AUDIT: Unauthorized field edit attempt (Legacy) | User: {User} | DTO: {DtoType} | Field: {Field} | " +
+                        "Permission: {Permission} | OldValue: {OldValue} | NewValue: {NewValue} | Timestamp: {Timestamp}",
+                        userTcKimlikNo ?? "Unknown",
+                        dtoTypeName,
+                        prop.Name,
+                        permissionKey ?? "Unknown",
+                        originalValue?.ToString() ?? "null",
+                        currentValue?.ToString() ?? "null",
+                        DateTime.UtcNow);
 
                     unauthorizedFields.Add(prop.Name);
                 }
