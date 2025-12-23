@@ -380,10 +380,41 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         }
 
         [JSInvokable]
-        public async Task OnPermissionsChanged()
+        public async Task OnPermissionsChanged(object? refreshResult)
         {
             try
             {
+                // JavaScript'ten gelen retry sonucunu kontrol et
+                bool refreshSuccessful = true;
+                if (refreshResult != null)
+                {
+                    var resultDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(
+                        System.Text.Json.JsonSerializer.Serialize(refreshResult));
+
+                    if (resultDict != null && resultDict.ContainsKey("success"))
+                    {
+                        refreshSuccessful = resultDict["success"].ToString()?.ToLower() == "true";
+
+                        if (!refreshSuccessful)
+                        {
+                            var error = resultDict.ContainsKey("error") ? resultDict["error"].ToString() : "Unknown error";
+                            var attempts = resultDict.ContainsKey("attempts") ? resultDict["attempts"].ToString() : "0";
+
+                            Logger.LogError("🔴 Permission refresh başarısız oldu! Hata: {Error}, Deneme: {Attempts}", error, attempts);
+
+                            // Kullanıcıya UI'da da göster (JavaScript alert'e ek olarak)
+                            // StateHasChanged yapılacak, gerekirse sayfa seviyesinde hata mesajı gösterilebilir
+                        }
+                        else
+                        {
+                            var count = resultDict.ContainsKey("count") ? resultDict["count"].ToString() : "0";
+                            Logger.LogInformation("✅ Permission refresh başarılı: {Count} yetki güncellendi", count);
+                        }
+                    }
+                }
+
+                // Başarılı ya da başarısız olsa da cache'i yenilemeyi dene
+                // (Cookie güncellenememiş olsa bile en azından mevcut veriyle senkronize olalım)
                 await PermissionStateService.RefreshAsync();
                 await PagePermissionService.RefreshAsync(); // ✅ Route-permission mapping'i de yenile
                 UpdatePermissionContextReady();
@@ -391,15 +422,42 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
             }
             catch (Exception ex)
             {
-                Logger.LogWarning(ex, "OnPermissionsChanged hatası");
+                Logger.LogError(ex, "❌ OnPermissionsChanged hatası");
             }
         }
 
         [JSInvokable]
-        public async Task OnPermissionDefinitionsChanged()
+        public async Task OnPermissionDefinitionsChanged(object? refreshResult)
         {
             try
             {
+                // JavaScript'ten gelen retry sonucunu kontrol et
+                bool refreshSuccessful = true;
+                if (refreshResult != null)
+                {
+                    var resultDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(
+                        System.Text.Json.JsonSerializer.Serialize(refreshResult));
+
+                    if (resultDict != null && resultDict.ContainsKey("success"))
+                    {
+                        refreshSuccessful = resultDict["success"].ToString()?.ToLower() == "true";
+
+                        if (!refreshSuccessful)
+                        {
+                            var error = resultDict.ContainsKey("error") ? resultDict["error"].ToString() : "Unknown error";
+                            var attempts = resultDict.ContainsKey("attempts") ? resultDict["attempts"].ToString() : "0";
+
+                            Logger.LogError("🔴 Permission definitions refresh başarısız oldu! Hata: {Error}, Deneme: {Attempts}", error, attempts);
+                        }
+                        else
+                        {
+                            var count = resultDict.ContainsKey("count") ? resultDict["count"].ToString() : "0";
+                            Logger.LogInformation("✅ Permission definitions refresh başarılı: {Count} yetki güncellendi", count);
+                        }
+                    }
+                }
+
+                // Başarılı ya da başarısız olsa da cache'i yenilemeyi dene
                 await PermissionStateService.RefreshDefinitionsAsync();
                 await PagePermissionService.RefreshAsync(); // ✅ Route-permission mapping'i de yenile
                 UpdatePermissionContextReady();
@@ -407,7 +465,7 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
             }
             catch (Exception ex)
             {
-                Logger.LogWarning(ex, "OnPermissionDefinitionsChanged hatası");
+                Logger.LogError(ex, "❌ OnPermissionDefinitionsChanged hatası");
             }
         }
 

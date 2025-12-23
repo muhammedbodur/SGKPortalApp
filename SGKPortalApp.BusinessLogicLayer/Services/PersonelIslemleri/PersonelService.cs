@@ -142,19 +142,32 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 if (level < YetkiSeviyesi.Edit)
                     return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
 
-                var canDelete = level >= YetkiSeviyesi.Edit;
-
                 var personel = await _unitOfWork.Repository<Personel>().GetByIdAsync(tcKimlikNo);
                 if (personel == null)
                     return ApiResponseDto<PersonelResponseDto>.ErrorResult("Personel bulunamadı");
 
-                if (!canDelete)
-                {
-                    if (!string.Equals(request.Email, personel.Email, StringComparison.OrdinalIgnoreCase))
-                        return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
+                // ⭐ Field-level permission enforcement
+                // Kullanıcının tüm field permission'larını yükle
+                var userPermissions = await GetUserFieldPermissionsAsync(request.RequestorTcKimlikNo!);
 
-                    if (!string.IsNullOrWhiteSpace(personel.Resim) && string.IsNullOrWhiteSpace(request.Resim))
-                        return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
+                // Orijinal DTO'yu oluştur (mevcut entity'den)
+                var originalDto = _mapper.Map<PersonelUpdateRequestDto>(personel);
+
+                // Yetkisiz field değişikliklerini tespit et (convention-based: PER.PERSONEL.MANAGE.FIELD.{FIELDNAME})
+                var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    request,
+                    userPermissions,
+                    originalDto,
+                    "PER.PERSONEL.MANAGE", // pagePermissionKey
+                    request.RequestorTcKimlikNo); // userTcKimlikNo for audit logging
+
+                // Yetkisiz alanları orijinal değerlere geri al (sessiz revert)
+                if (unauthorizedFields.Any())
+                {
+                    _fieldPermissionService.RevertUnauthorizedFields(request, originalDto, unauthorizedFields);
+                    _logger.LogWarning(
+                        "UpdateAsync - Field-level permission enforcement: {Count} alan revert edildi. TC: {TcKimlikNo}, Alanlar: {Fields}",
+                        unauthorizedFields.Count, tcKimlikNo, string.Join(", ", unauthorizedFields));
                 }
 
                 _mapper.Map(request, personel);
@@ -557,10 +570,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     
                     // Yetkisiz field değişikliklerini tespit et (convention-based: PER.PERSONEL.MANAGE.FIELD.{FIELDNAME})
                     var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
-                        request.Personel, 
-                        userPermissions, 
+                        request.Personel,
+                        userPermissions,
                         originalDto,
-                        "PER.PERSONEL.MANAGE"); // pagePermissionKey
+                        "PER.PERSONEL.MANAGE", // pagePermissionKey
+                        request.RequestorTcKimlikNo); // userTcKimlikNo for audit logging
                     
                     // Yetkisiz alanları orijinal değerlere geri al (sessiz revert)
                     if (unauthorizedFields.Any())
