@@ -15,15 +15,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<UserService> _logger;
+        private readonly IFieldPermissionValidationService _fieldPermissionService;
 
         public UserService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<UserService> logger)
+            ILogger<UserService> logger,
+            IFieldPermissionValidationService fieldPermissionService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _fieldPermissionService = fieldPermissionService;
         }
 
         public async Task<ApiResponseDto<UserResponseDto>> GetByTcKimlikNoAsync(string tcKimlikNo)
@@ -114,7 +117,26 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 if (user == null)
                     return ApiResponseDto<UserResponseDto>.ErrorResult("Kullanıcı bulunamadı");
 
-                // UserUpdateRequestDto sadece AktifMi içeriyor
+                // ⭐ Field-level permission enforcement
+                // Permission key: COM.USER.MANAGE
+                var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
+                var originalDto = _mapper.Map<UserUpdateRequestDto>(user);
+
+                var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    request,
+                    userPermissions,
+                    originalDto,
+                    "COM.USER.MANAGE",
+                    request.RequestorTcKimlikNo);
+
+                if (unauthorizedFields.Any())
+                {
+                    _fieldPermissionService.RevertUnauthorizedFields(request, originalDto, unauthorizedFields);
+                    _logger.LogWarning(
+                        "UserService.UpdateAsync - Field-level permission enforcement: {Count} alan revert edildi. TC: {TcKimlikNo}",
+                        unauthorizedFields.Count, tcKimlikNo);
+                }
+
                 _mapper.Map(request, user);
                 userRepo.Update(user);
                 await _unitOfWork.SaveChangesAsync();
