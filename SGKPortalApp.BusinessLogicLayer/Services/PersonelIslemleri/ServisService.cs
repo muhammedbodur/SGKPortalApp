@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
@@ -17,15 +18,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<ServisService> _logger;
+        private readonly IFieldPermissionValidationService _fieldPermissionService;
 
         public ServisService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<ServisService> logger)
+            ILogger<ServisService> logger,
+            IFieldPermissionValidationService fieldPermissionService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _fieldPermissionService = fieldPermissionService;
         }
 
         public async Task<ApiResponseDto<List<ServisResponseDto>>> GetAllAsync()
@@ -141,6 +145,25 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 else
                 {
                     _logger.LogInformation("Aktiflik kontrolü atlandı - Koşul sağlanmadı");
+                }
+
+                // ⭐ Field-level permission enforcement
+                var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
+                var originalDto = _mapper.Map<ServisUpdateRequestDto>(servis);
+
+                var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    request,
+                    userPermissions,
+                    originalDto,
+                    "PER.SERVIS.MANAGE",
+                    null);
+
+                if (unauthorizedFields.Any())
+                {
+                    _fieldPermissionService.RevertUnauthorizedFields(request, originalDto, unauthorizedFields);
+                    _logger.LogWarning(
+                        "ServisService.UpdateAsync - Field-level permission enforcement: {Count} alan revert edildi.",
+                        unauthorizedFields.Count);
                 }
 
                 _mapper.Map(request, servis);

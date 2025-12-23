@@ -17,17 +17,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly ILogger<ModulControllerIslemService> _logger;
         private readonly ISignalRBroadcaster _broadcaster;
         private readonly IHubConnectionRepository _hubConnectionRepository;
+        private readonly IFieldPermissionValidationService _fieldPermissionService;
 
         public ModulControllerIslemService(
             IUnitOfWork unitOfWork,
             ILogger<ModulControllerIslemService> logger,
             ISignalRBroadcaster broadcaster,
-            IHubConnectionRepository hubConnectionRepository)
+            IHubConnectionRepository hubConnectionRepository,
+            IFieldPermissionValidationService fieldPermissionService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _broadcaster = broadcaster;
             _hubConnectionRepository = hubConnectionRepository;
+            _fieldPermissionService = fieldPermissionService;
         }
 
         /// <summary>
@@ -388,6 +391,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                         return ApiResponseDto<ModulControllerIslemResponseDto>.ErrorResult("Üst işlem sadece Page tipinde olabilir");
                     }
                 }
+
+                // Field permission validation
+                var validationResult = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    entity,
+                    request,
+                    "COM.MODULCONTROLLERISLEM.MANAGE");
+
+                if (!validationResult.Success)
+                    return ApiResponseDto<ModulControllerIslemResponseDto>.ErrorResult(validationResult.Message);
 
                 entity.ModulControllerIslemAdi = request.ModulControllerIslemAdi;
                 entity.ModulControllerId = request.ModulControllerId;

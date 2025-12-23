@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
@@ -16,15 +17,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<SendikaService> _logger;
+        private readonly IFieldPermissionValidationService _fieldPermissionService;
 
         public SendikaService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<SendikaService> logger)
+            ILogger<SendikaService> logger,
+            IFieldPermissionValidationService fieldPermissionService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _fieldPermissionService = fieldPermissionService;
         }
 
         public async Task<ApiResponseDto<List<SendikaResponseDto>>> GetAllAsync()
@@ -136,6 +140,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         return ApiResponseDto<SendikaResponseDto>
                             .ErrorResult($"Bu sendikaya bağlı {personelCount} personel bulunmaktadır. Önce personelleri düzenleyiniz");
                 }
+
+                // Field permission validation
+                var validationResult = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    sendika,
+                    request,
+                    "PER.SENDIKA.MANAGE");
+
+                if (!validationResult.Success)
+                    return ApiResponseDto<SendikaResponseDto>.ErrorResult(validationResult.Message);
 
                 _mapper.Map(request, sendika);
                 sendikaRepo.Update(sendika);

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
@@ -17,15 +18,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<UnvanService> _logger;
+        private readonly IFieldPermissionValidationService _fieldPermissionService;
 
         public UnvanService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<UnvanService> logger)
+            ILogger<UnvanService> logger,
+            IFieldPermissionValidationService fieldPermissionService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _fieldPermissionService = fieldPermissionService;
         }
 
         public async Task<ApiResponseDto<List<UnvanResponseDto>>> GetAllAsync()
@@ -142,6 +146,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 {
                     _logger.LogInformation("Aktiflik kontrolü atlandı - Koşul sağlanmadı");
                 }
+
+                // Field permission validation
+                var validationResult = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    unvan,
+                    request,
+                    "PER.UNVAN.MANAGE");
+
+                if (!validationResult.Success)
+                    return ApiResponseDto<UnvanResponseDto>.ErrorResult(validationResult.Message);
 
                 _mapper.Map(request, unvan);
                 unvanRepo.Update(unvan);

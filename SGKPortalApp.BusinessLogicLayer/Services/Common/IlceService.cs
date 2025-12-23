@@ -14,15 +14,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<IlceService> _logger;
+        private readonly IFieldPermissionValidationService _fieldPermissionService;
 
         public IlceService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<IlceService> logger)
+            ILogger<IlceService> logger,
+            IFieldPermissionValidationService fieldPermissionService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _fieldPermissionService = fieldPermissionService;
         }
 
         public async Task<ApiResponseDto<List<IlceResponseDto>>> GetAllAsync()
@@ -135,6 +138,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 if (existingIlce != null && existingIlce.IlceId != id)
                     return ApiResponseDto<IlceResponseDto>
                         .ErrorResult("Bu isimde başka bir ilçe zaten mevcut");
+
+                // Field permission validation
+                var validationResult = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    ilce,
+                    request,
+                    "COM.ILCE.MANAGE");
+
+                if (!validationResult.Success)
+                    return ApiResponseDto<IlceResponseDto>.ErrorResult(validationResult.Message);
 
                 ilce.IlId = request.IlId;
                 ilce.IlceAdi = request.IlceAdi;

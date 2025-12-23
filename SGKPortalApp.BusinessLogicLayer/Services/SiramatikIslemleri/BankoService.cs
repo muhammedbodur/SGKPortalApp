@@ -22,17 +22,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         private readonly IMapper _mapper;
         private readonly ILogger<BankoService> _logger;
         private readonly ICascadeHelper _cascadeHelper;
+        private readonly IFieldPermissionValidationService _fieldPermissionService;
 
         public BankoService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<BankoService> logger,
-            ICascadeHelper cascadeHelper)
+            ICascadeHelper cascadeHelper,
+            IFieldPermissionValidationService fieldPermissionService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _cascadeHelper = cascadeHelper;
+            _fieldPermissionService = fieldPermissionService;
         }
 
         // ═══════════════════════════════════════════════════════
@@ -166,6 +169,25 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                             return ApiResponseDto<BankoResponseDto>
                                 .ErrorResult($"Bu hizmet binasında {request.KatTipi.GetDisplayName()} katında {request.BankoNo} numaralı banko zaten mevcut");
                         }
+                    }
+
+                    // ⭐ Field-level permission enforcement
+                    var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
+                    var originalDto = _mapper.Map<BankoUpdateRequestDto>(banko);
+
+                    var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                        request,
+                        userPermissions,
+                        originalDto,
+                        "SIR.BANKO.MANAGE",
+                        null);
+
+                    if (unauthorizedFields.Any())
+                    {
+                        _fieldPermissionService.RevertUnauthorizedFields(request, originalDto, unauthorizedFields);
+                        _logger.LogWarning(
+                            "BankoService.UpdateAsync - Field-level permission enforcement: {Count} alan revert edildi.",
+                            unauthorizedFields.Count);
                     }
 
                     banko.BankoNo = request.BankoNo;
