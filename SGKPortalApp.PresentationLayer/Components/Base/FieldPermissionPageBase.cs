@@ -25,6 +25,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
     public abstract class FieldPermissionPageBase : BasePageComponent, IDisposable
     {
         [Inject] protected PermissionStateService PermissionStateService { get; set; } = default!;
+        [Inject] protected BusinessLogicLayer.Interfaces.Common.IPermissionKeyResolverService PermissionKeyResolver { get; set; } = default!;
         [Inject] protected ILogger<FieldPermissionPageBase> Logger { get; set; } = default!;
 
         /// <summary>
@@ -72,27 +73,22 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
                     return _resolvedPermissionKey;
                 }
 
-                // 2. Route'tan otomatik çözümle
+                // 2. Route'tan otomatik çözümle (⚡ PermissionKeyResolver kullanılıyor - TEK MEKANIZMA)
                 var currentPath = GetCurrentRoutePath();
                 Logger?.LogInformation("🔍 ResolvedPermissionKey: Route={Route}", currentPath);
 
-                var resolvedKey = PermissionStateService.GetPermissionKeyByRoute(currentPath);
+                // Sync metod kullan (cache'den oku)
+                var resolvedKey = PermissionKeyResolver.ResolveFromRouteSync(currentPath);
 
-                if (resolvedKey == PermissionStateService.RouteLoadingPlaceholderKey)
+                if (resolvedKey == null)
                 {
-                    Logger?.LogInformation("⌛ ResolvedPermissionKey: Route mapping yükleniyor, placeholder döndü");
-                    return resolvedKey;
+                    Logger?.LogWarning("⚠️ ResolvedPermissionKey: Route mapping bulunamadı, UNKNOWN kullanılıyor. Route: {Route}", currentPath);
+                    _resolvedPermissionKey = "UNKNOWN";
+                    return _resolvedPermissionKey;
                 }
 
                 _resolvedPermissionKey = resolvedKey;
-                Logger?.LogInformation("🔍 ResolvedPermissionKey: GetPermissionKeyByRoute döndü: {Key}", _resolvedPermissionKey ?? "NULL");
-
-                if (string.IsNullOrEmpty(_resolvedPermissionKey))
-                {
-                    // Route bulunamadı, varsayılan değer kullan
-                    _resolvedPermissionKey = "UNKNOWN";
-                    Logger?.LogWarning("⚠️ ResolvedPermissionKey: Route mapping bulunamadı, UNKNOWN kullanılıyor");
-                }
+                Logger?.LogInformation("✅ ResolvedPermissionKey: PermissionKeyResolver döndü: {Key}", _resolvedPermissionKey);
 
                 return _resolvedPermissionKey;
             }
@@ -450,6 +446,21 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
             try
             {
                 await PermissionStateService.EnsureLoadedAsync();
+
+                // ⚡ Route → Permission Key mapping'i cache'e yükle (PermissionKeyResolver için)
+                var currentPath = GetCurrentRoutePath();
+                if (!string.IsNullOrWhiteSpace(currentPath))
+                {
+                    try
+                    {
+                        // Async metod cache'i yükler, sync metod kullanabilir
+                        await PermissionKeyResolver.ResolveFromRouteAsync(currentPath);
+                    }
+                    catch (Exception cacheEx)
+                    {
+                        Logger?.LogWarning(cacheEx, "FieldPermissionPageBase: PermissionKeyResolver cache yüklenemedi");
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -461,7 +472,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
 
             if (!IsPermissionsLoaded || !PermissionStateService.RouteMappingsLoaded)
             {
-                Logger?.LogWarning("FieldPermissionPageBase: Permission context henüz hazır değil. IsLoaded={IsLoaded}, RouteMappingsLoaded={RouteLoaded}",
+                Logger?.LogWarning("FieldPermissionPageBase: Permission context henüz hazır değil. IsLoaded={IsLoaded}, RouteLoaded={RouteLoaded}",
                     IsPermissionsLoaded, PermissionStateService.RouteMappingsLoaded);
             }
 

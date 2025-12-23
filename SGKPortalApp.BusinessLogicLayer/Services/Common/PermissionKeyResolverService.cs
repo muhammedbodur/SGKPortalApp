@@ -65,7 +65,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         }
 
         /// <summary>
-        /// Belirtilen route'tan permission key'i çözümler.
+        /// Belirtilen route'tan permission key'i çözümler (ASYNC).
         /// Frontend'deki GetPermissionKeyByRoute() ile aynı mantık.
         /// </summary>
         public async Task<string?> ResolveFromRouteAsync(string route)
@@ -86,56 +86,96 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     return null;
                 }
 
-                // 1. Direkt eşleşme dene
-                if (routeMap.TryGetValue(normalizedRoute, out var permissionKey))
-                {
-                    _logger.LogDebug("✅ Route çözümlendi: {Route} → {PermissionKey}", normalizedRoute, permissionKey);
-                    return permissionKey;
-                }
-
-                // 2. /index ekleyerek dene (örn: /personel/unvan → /personel/unvan/index)
-                if (!normalizedRoute.EndsWith("/index"))
-                {
-                    var indexRoute = $"{normalizedRoute}/index";
-                    if (routeMap.TryGetValue(indexRoute, out permissionKey))
-                    {
-                        _logger.LogDebug("✅ Route çözümlendi (index): {Route} → {PermissionKey}", indexRoute, permissionKey);
-                        return permissionKey;
-                    }
-                }
-
-                // 3. /index kaldırarak dene (örn: /personel/unvan/index → /personel/unvan)
-                if (normalizedRoute.EndsWith("/index"))
-                {
-                    var baseRoute = normalizedRoute.Substring(0, normalizedRoute.Length - 6); // "/index" = 6 karakter
-                    if (routeMap.TryGetValue(baseRoute, out permissionKey))
-                    {
-                        _logger.LogDebug("✅ Route çözümlendi (base): {Route} → {PermissionKey}", baseRoute, permissionKey);
-                        return permissionKey;
-                    }
-                }
-
-                // 4. Dynamic route parametrelerini dene (örn: /personel/manage/12345678901 → /personel/manage/{tcKimlikNo})
-                // Geriye doğru "/" kaldırarak parent route'ları dene
-                var segments = normalizedRoute.Split('/', StringSplitOptions.RemoveEmptyEntries);
-                for (int i = segments.Length - 1; i > 0; i--)
-                {
-                    var parentRoute = "/" + string.Join("/", segments.Take(i));
-                    if (routeMap.TryGetValue(parentRoute, out permissionKey))
-                    {
-                        _logger.LogDebug("✅ Route çözümlendi (parent): {ParentRoute} → {PermissionKey}", parentRoute, permissionKey);
-                        return permissionKey;
-                    }
-                }
-
-                _logger.LogWarning("⚠️ Route için permission key bulunamadı: {Route}", normalizedRoute);
-                return null;
+                return ResolveFromRouteSyncInternal(normalizedRoute, routeMap);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "❌ ResolveFromRouteAsync hatası: {Route}", route);
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Belirtilen route'tan permission key'i çözümler (SYNC - sadece cache).
+        /// Frontend'de property içinden çağrılabilir.
+        /// </summary>
+        public string? ResolveFromRouteSync(string route)
+        {
+            if (string.IsNullOrWhiteSpace(route))
+                return null;
+
+            try
+            {
+                // Route'u normalize et
+                var normalizedRoute = route.TrimEnd('/').ToLowerInvariant();
+
+                // Sadece cache'den oku (async yok)
+                if (!_memoryCache.TryGetValue(RoutePermissionMapCacheKey, out Dictionary<string, string>? routeMap)
+                    || routeMap == null || routeMap.Count == 0)
+                {
+                    _logger.LogDebug("⚠️ Route mapping cache'de yok (sync çağrı): {Route}", normalizedRoute);
+                    return null;
+                }
+
+                return ResolveFromRouteSyncInternal(normalizedRoute, routeMap);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ ResolveFromRouteSync hatası: {Route}", route);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Route çözümleme mantığı (internal helper).
+        /// Hem async hem sync metod tarafından kullanılır.
+        /// </summary>
+        private string? ResolveFromRouteSyncInternal(string normalizedRoute, Dictionary<string, string> routeMap)
+        {
+            // 1. Direkt eşleşme dene
+            if (routeMap.TryGetValue(normalizedRoute, out var permissionKey))
+            {
+                _logger.LogDebug("✅ Route çözümlendi: {Route} → {PermissionKey}", normalizedRoute, permissionKey);
+                return permissionKey;
+            }
+
+            // 2. /index ekleyerek dene (örn: /personel/unvan → /personel/unvan/index)
+            if (!normalizedRoute.EndsWith("/index"))
+            {
+                var indexRoute = $"{normalizedRoute}/index";
+                if (routeMap.TryGetValue(indexRoute, out permissionKey))
+                {
+                    _logger.LogDebug("✅ Route çözümlendi (index): {Route} → {PermissionKey}", indexRoute, permissionKey);
+                    return permissionKey;
+                }
+            }
+
+            // 3. /index kaldırarak dene (örn: /personel/unvan/index → /personel/unvan)
+            if (normalizedRoute.EndsWith("/index"))
+            {
+                var baseRoute = normalizedRoute.Substring(0, normalizedRoute.Length - 6); // "/index" = 6 karakter
+                if (routeMap.TryGetValue(baseRoute, out permissionKey))
+                {
+                    _logger.LogDebug("✅ Route çözümlendi (base): {Route} → {PermissionKey}", baseRoute, permissionKey);
+                    return permissionKey;
+                }
+            }
+
+            // 4. Dynamic route parametrelerini dene (örn: /personel/manage/12345678901 → /personel/manage/{tcKimlikNo})
+            // Geriye doğru "/" kaldırarak parent route'ları dene
+            var segments = normalizedRoute.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            for (int i = segments.Length - 1; i > 0; i--)
+            {
+                var parentRoute = "/" + string.Join("/", segments.Take(i));
+                if (routeMap.TryGetValue(parentRoute, out permissionKey))
+                {
+                    _logger.LogDebug("✅ Route çözümlendi (parent): {ParentRoute} → {PermissionKey}", parentRoute, permissionKey);
+                    return permissionKey;
+                }
+            }
+
+            _logger.LogWarning("⚠️ Route için permission key bulunamadı: {Route}", normalizedRoute);
+            return null;
         }
 
         /// <summary>
