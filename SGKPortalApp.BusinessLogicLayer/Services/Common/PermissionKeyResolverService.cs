@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
@@ -8,67 +7,29 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
     /// <summary>
     /// HTTP isteğinin route bilgisinden permission key'i otomatik çözümleyen servis.
     /// Frontend'deki PermissionStateService.GetPermissionKeyByRoute() ile aynı mantık.
+    ///
+    /// Cache PermissionStateService tarafından yüklenir. Bu servis sadece lookup yapar.
     /// </summary>
     public class PermissionKeyResolverService : IPermissionKeyResolverService
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IModulControllerIslemService _modulControllerIslemService;
         private readonly IMemoryCache _memoryCache;
         private readonly ILogger<PermissionKeyResolverService> _logger;
 
         private const string RoutePermissionMapCacheKey = "PermissionKeyResolverService.RoutePermissionMap";
-        private static readonly MemoryCacheEntryOptions CacheOptions = new()
-        {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
-        };
 
         public PermissionKeyResolverService(
-            IHttpContextAccessor httpContextAccessor,
-            IModulControllerIslemService modulControllerIslemService,
             IMemoryCache memoryCache,
             ILogger<PermissionKeyResolverService> logger)
         {
-            _httpContextAccessor = httpContextAccessor;
-            _modulControllerIslemService = modulControllerIslemService;
             _memoryCache = memoryCache;
             _logger = logger;
         }
 
         /// <summary>
-        /// Mevcut HTTP request'in route'undan permission key'i çözümler.
+        /// Belirtilen route'tan permission key'i çözümler (SYNC - cache lookup).
+        /// Frontend'deki PermissionStateService.GetPermissionKeyByRoute() ile aynı mantık.
         /// </summary>
-        public async Task<string?> ResolveFromCurrentRequestAsync()
-        {
-            try
-            {
-                var httpContext = _httpContextAccessor.HttpContext;
-                if (httpContext == null)
-                {
-                    _logger.LogWarning("⚠️ HttpContext bulunamadı, permission key çözümlenemedi");
-                    return null;
-                }
-
-                var path = httpContext.Request.Path.Value;
-                if (string.IsNullOrWhiteSpace(path))
-                {
-                    _logger.LogWarning("⚠️ Request path boş, permission key çözümlenemedi");
-                    return null;
-                }
-
-                return await ResolveFromRouteAsync(path);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "❌ ResolveFromCurrentRequestAsync hatası");
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Belirtilen route'tan permission key'i çözümler (ASYNC).
-        /// Frontend'deki GetPermissionKeyByRoute() ile aynı mantık.
-        /// </summary>
-        public async Task<string?> ResolveFromRouteAsync(string route)
+        public string? ResolveFromRoute(string route)
         {
             if (string.IsNullOrWhiteSpace(route))
                 return null;
@@ -78,42 +39,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 // Route'u normalize et (trailing slash kaldır, lowercase)
                 var normalizedRoute = route.TrimEnd('/').ToLowerInvariant();
 
-                // Cache'den route → permission key mapping'i al
-                var routeMap = await GetRoutePermissionMapAsync();
-                if (routeMap == null || routeMap.Count == 0)
-                {
-                    _logger.LogWarning("⚠️ Route → Permission Key mapping yüklenemedi");
-                    return null;
-                }
-
-                return ResolveFromRouteSyncInternal(normalizedRoute, routeMap);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "❌ ResolveFromRouteAsync hatası: {Route}", route);
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Belirtilen route'tan permission key'i çözümler (SYNC - sadece cache).
-        /// Frontend'de property içinden çağrılabilir.
-        /// </summary>
-        public string? ResolveFromRouteSync(string route)
-        {
-            if (string.IsNullOrWhiteSpace(route))
-                return null;
-
-            try
-            {
-                // Route'u normalize et
-                var normalizedRoute = route.TrimEnd('/').ToLowerInvariant();
-
-                // Sadece cache'den oku (async yok)
+                // Sadece cache'den oku (PermissionStateService cache'i yükler)
                 if (!_memoryCache.TryGetValue(RoutePermissionMapCacheKey, out Dictionary<string, string>? routeMap)
                     || routeMap == null || routeMap.Count == 0)
                 {
-                    _logger.LogDebug("⚠️ Route mapping cache'de yok (sync çağrı): {Route}", normalizedRoute);
+                    _logger.LogDebug("⚠️ Route mapping cache'de yok: {Route}", normalizedRoute);
                     return null;
                 }
 
@@ -121,14 +51,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ ResolveFromRouteSync hatası: {Route}", route);
+                _logger.LogError(ex, "❌ ResolveFromRoute hatası: {Route}", route);
                 return null;
             }
         }
 
         /// <summary>
         /// Route çözümleme mantığı (internal helper).
-        /// Hem async hem sync metod tarafından kullanılır.
+        /// Frontend'deki GetPermissionKeyByRoute() ile aynı algoritma.
         /// </summary>
         private string? ResolveFromRouteSyncInternal(string normalizedRoute, Dictionary<string, string> routeMap)
         {
@@ -176,52 +106,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 
             _logger.LogWarning("⚠️ Route için permission key bulunamadı: {Route}", normalizedRoute);
             return null;
-        }
-
-        /// <summary>
-        /// Route → PermissionKey mapping'ini cache'den veya DB'den yükler.
-        /// Frontend'deki _routeToPermissionKey ile aynı mantık.
-        /// </summary>
-        private async Task<Dictionary<string, string>?> GetRoutePermissionMapAsync()
-        {
-            // Cache'den oku
-            if (_memoryCache.TryGetValue(RoutePermissionMapCacheKey, out Dictionary<string, string>? cachedMap))
-            {
-                return cachedMap;
-            }
-
-            // DB'den yükle
-            try
-            {
-                _logger.LogInformation("📋 Route → Permission Key mapping yükleniyor...");
-
-                var result = await _modulControllerIslemService.GetAllAsync();
-                if (!result.Success || result.Data == null)
-                {
-                    _logger.LogWarning("⚠️ ModulControllerIslem verileri yüklenemedi");
-                    return null;
-                }
-
-                // Route → PermissionKey dictionary oluştur
-                var routeMap = result.Data
-                    .Where(x => !string.IsNullOrWhiteSpace(x.Route) && !string.IsNullOrWhiteSpace(x.PermissionKey))
-                    .GroupBy(x => x.Route.TrimEnd('/').ToLowerInvariant())
-                    .ToDictionary(
-                        g => g.Key,
-                        g => g.First().PermissionKey,
-                        StringComparer.OrdinalIgnoreCase);
-
-                // Cache'e kaydet
-                _memoryCache.Set(RoutePermissionMapCacheKey, routeMap, CacheOptions);
-
-                _logger.LogInformation("✅ Route mapping yüklendi: {Count} adet", routeMap.Count);
-                return routeMap;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "❌ Route mapping yüklenirken hata oluştu");
-                return null;
-            }
         }
     }
 }

@@ -77,8 +77,8 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
                 var currentPath = GetCurrentRoutePath();
                 Logger?.LogInformation("🔍 ResolvedPermissionKey: Route={Route}", currentPath);
 
-                // Sync metod kullan (cache'den oku)
-                var resolvedKey = PermissionKeyResolver.ResolveFromRouteSync(currentPath);
+                // Sync metod kullan (PermissionStateService cache'i yüklemiş olmalı)
+                var resolvedKey = PermissionKeyResolver.ResolveFromRoute(currentPath);
 
                 if (resolvedKey == null)
                 {
@@ -445,22 +445,8 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
 
             try
             {
+                // PermissionStateService hem permissions hem de route mapping'i yükler
                 await PermissionStateService.EnsureLoadedAsync();
-
-                // ⚡ Route → Permission Key mapping'i cache'e yükle (PermissionKeyResolver için)
-                var currentPath = GetCurrentRoutePath();
-                if (!string.IsNullOrWhiteSpace(currentPath))
-                {
-                    try
-                    {
-                        // Async metod cache'i yükler, sync metod kullanabilir
-                        await PermissionKeyResolver.ResolveFromRouteAsync(currentPath);
-                    }
-                    catch (Exception cacheEx)
-                    {
-                        Logger?.LogWarning(cacheEx, "FieldPermissionPageBase: PermissionKeyResolver cache yüklenemedi");
-                    }
-                }
             }
             catch (Exception ex)
             {
