@@ -19,17 +19,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
         private readonly IMapper _mapper;
         private readonly ILogger<ServisService> _logger;
         private readonly IFieldPermissionValidationService _fieldPermissionService;
+        private readonly IPermissionKeyResolverService _permissionKeyResolver;
 
         public ServisService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<ServisService> logger,
-            IFieldPermissionValidationService fieldPermissionService)
+            IFieldPermissionValidationService fieldPermissionService,
+            IPermissionKeyResolverService permissionKeyResolver)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _fieldPermissionService = fieldPermissionService;
+            _permissionKeyResolver = permissionKeyResolver;
         }
 
         public async Task<ApiResponseDto<List<ServisResponseDto>>> GetAllAsync()
@@ -148,6 +151,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 }
 
                 // ⭐ Field-level permission enforcement
+                // Permission key otomatik çözümleme (route → permission key)
+                var permissionKey = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
                 var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
                 var originalDto = _mapper.Map<ServisUpdateRequestDto>(servis);
 
@@ -155,7 +160,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     request,
                     userPermissions,
                     originalDto,
-                    "PER.SERVIS.MANAGE",
+                    permissionKey,
                     null);
 
                 if (unauthorizedFields.Any())

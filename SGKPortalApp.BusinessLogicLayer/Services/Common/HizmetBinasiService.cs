@@ -21,6 +21,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly ILogger<HizmetBinasiService> _logger;
         private readonly ICascadeHelper _cascadeHelper;
         private readonly IFieldPermissionValidationService _fieldPermissionService;
+        private readonly IPermissionKeyResolverService _permissionKeyResolver;
 
         public HizmetBinasiService(
             IUnitOfWork unitOfWork,
@@ -28,7 +29,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             IMapper mapper,
             ILogger<HizmetBinasiService> logger,
             ICascadeHelper cascadeHelper,
-            IFieldPermissionValidationService fieldPermissionService)
+            IFieldPermissionValidationService fieldPermissionService,
+            IPermissionKeyResolverService permissionKeyResolver)
         {
             _unitOfWork = unitOfWork;
             _commonQueryRepository = commonQueryRepository;
@@ -36,6 +38,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             _logger = logger;
             _cascadeHelper = cascadeHelper;
             _fieldPermissionService = fieldPermissionService;
+            _permissionKeyResolver = permissionKeyResolver;
         }
 
         public async Task<ApiResponseDto<List<HizmetBinasiResponseDto>>> GetAllAsync()
@@ -199,14 +202,26 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                             .ErrorResult($"Bu hizmet binasında {personelCount} personel bulunmaktadır. Önce personelleri başka hizmet binasına taşıyınız");
                 }
 
-                // Field permission validation
-                var validationResult = await _fieldPermissionService.ValidateFieldPermissionsAsync(
-                    entity,
-                    request,
-                    "COM.HIZMETBINASI.MANAGE");
+                // ⭐ Field-level permission enforcement
+                // Permission key otomatik çözümleme (route → permission key)
+                var permissionKey = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
+                var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
+                var originalDto = _mapper.Map<HizmetBinasiUpdateRequestDto>(entity);
 
-                if (!validationResult.Success)
-                    return ApiResponseDto<HizmetBinasiResponseDto>.ErrorResult(validationResult.Message);
+                var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    request,
+                    userPermissions,
+                    originalDto,
+                    permissionKey,
+                    null);
+
+                if (unauthorizedFields.Any())
+                {
+                    _fieldPermissionService.RevertUnauthorizedFields(request, originalDto, unauthorizedFields);
+                    _logger.LogWarning(
+                        "HizmetBinasiService.UpdateAsync - Field-level permission enforcement: {Count} alan revert edildi.",
+                        unauthorizedFields.Count);
+                }
 
                 _mapper.Map(request, entity);
                 hizmetBinasiRepo.Update(entity);

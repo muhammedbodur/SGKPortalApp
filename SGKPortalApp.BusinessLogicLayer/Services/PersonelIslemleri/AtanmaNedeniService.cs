@@ -18,17 +18,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
         private readonly IMapper _mapper;
         private readonly ILogger<AtanmaNedeniService> _logger;
         private readonly IFieldPermissionValidationService _fieldPermissionService;
+        private readonly IPermissionKeyResolverService _permissionKeyResolver;
 
         public AtanmaNedeniService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<AtanmaNedeniService> logger,
-            IFieldPermissionValidationService fieldPermissionService)
+            IFieldPermissionValidationService fieldPermissionService,
+            IPermissionKeyResolverService permissionKeyResolver)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _fieldPermissionService = fieldPermissionService;
+            _permissionKeyResolver = permissionKeyResolver;
         }
 
         public async Task<ApiResponseDto<List<AtanmaNedeniResponseDto>>> GetAllAsync()
@@ -105,14 +108,26 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 if (atanmaNedeni == null)
                     return ApiResponseDto<AtanmaNedeniResponseDto>.ErrorResult("Atanma nedeni bulunamadı");
 
-                // Field permission validation
-                var validationResult = await _fieldPermissionService.ValidateFieldPermissionsAsync(
-                    atanmaNedeni,
-                    request,
-                    "PER.ATANMANEDENI.MANAGE");
+                // ⭐ Field-level permission enforcement
+                // Permission key otomatik çözümleme (route → permission key)
+                var permissionKey = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
+                var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
+                var originalDto = _mapper.Map<AtanmaNedeniUpdateRequestDto>(atanmaNedeni);
 
-                if (!validationResult.Success)
-                    return ApiResponseDto<AtanmaNedeniResponseDto>.ErrorResult(validationResult.Message);
+                var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    request,
+                    userPermissions,
+                    originalDto,
+                    permissionKey,
+                    null);
+
+                if (unauthorizedFields.Any())
+                {
+                    _fieldPermissionService.RevertUnauthorizedFields(request, originalDto, unauthorizedFields);
+                    _logger.LogWarning(
+                        "AtanmaNedeniService.UpdateAsync - Field-level permission enforcement: {Count} alan revert edildi.",
+                        unauthorizedFields.Count);
+                }
 
                 _mapper.Map(request, atanmaNedeni);
                 _unitOfWork.Repository<AtanmaNedenleri>().Update(atanmaNedeni);

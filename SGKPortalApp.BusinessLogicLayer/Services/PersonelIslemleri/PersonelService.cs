@@ -26,17 +26,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
         private readonly IMapper _mapper;
         private readonly ILogger<PersonelService> _logger;
         private readonly IFieldPermissionValidationService _fieldPermissionService;
+        private readonly IPermissionKeyResolverService _permissionKeyResolver;
 
         public PersonelService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<PersonelService> logger,
-            IFieldPermissionValidationService fieldPermissionService)
+            IFieldPermissionValidationService fieldPermissionService,
+            IPermissionKeyResolverService permissionKeyResolver)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _fieldPermissionService = fieldPermissionService;
+            _permissionKeyResolver = permissionKeyResolver;
         }
 
         private async Task<(bool Ok, string? ErrorMessage)> ValidateRequestorAsync(string? requestorTcKimlikNo, string? requestorSessionId)
@@ -138,7 +141,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 if (!validation.Ok)
                     return ApiResponseDto<PersonelResponseDto>.ErrorResult(validation.ErrorMessage ?? "Yetkisiz işlem");
 
-                var level = await GetPermissionLevelAsync(request.RequestorTcKimlikNo!, "PER.PERSONEL.MANAGE");
+                var permissionKey = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
+                var level = await GetPermissionLevelAsync(request.RequestorTcKimlikNo!, permissionKey);
                 if (level < YetkiSeviyesi.Edit)
                     return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
 
@@ -147,18 +151,21 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     return ApiResponseDto<PersonelResponseDto>.ErrorResult("Personel bulunamadı");
 
                 // ⭐ Field-level permission enforcement
+                // Permission key otomatik çözümleme (route → permission key)
+                var permissionKey2 = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
+
                 // Kullanıcının tüm field permission'larını yükle
                 var userPermissions = await GetUserFieldPermissionsAsync(request.RequestorTcKimlikNo!);
 
                 // Orijinal DTO'yu oluştur (mevcut entity'den)
                 var originalDto = _mapper.Map<PersonelUpdateRequestDto>(personel);
 
-                // Yetkisiz field değişikliklerini tespit et (convention-based: PER.PERSONEL.MANAGE.FIELD.{FIELDNAME})
+                // Yetkisiz field değişikliklerini tespit et (convention-based: {PERMISSION_KEY}.FIELD.{FIELDNAME})
                 var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
                     request,
                     userPermissions,
                     originalDto,
-                    "PER.PERSONEL.MANAGE", // pagePermissionKey
+                    permissionKey2, // pagePermissionKey
                     request.RequestorTcKimlikNo); // userTcKimlikNo for audit logging
 
                 // Yetkisiz alanları orijinal değerlere geri al (sessiz revert)
@@ -425,7 +432,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     if (!validation.Ok)
                         return ApiResponseDto<PersonelResponseDto>.ErrorResult(validation.ErrorMessage ?? "Yetkisiz işlem");
 
-                    var level = await GetPermissionLevelAsync(request.RequestorTcKimlikNo!, "PER.PERSONEL.MANAGE");
+                    var permissionKey = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
+                    var level = await GetPermissionLevelAsync(request.RequestorTcKimlikNo!, permissionKey);
                     if (level < YetkiSeviyesi.Edit)
                         return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
 
@@ -552,7 +560,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     if (!validation.Ok)
                         return ApiResponseDto<PersonelResponseDto>.ErrorResult(validation.ErrorMessage ?? "Yetkisiz işlem");
 
-                    var level = await GetPermissionLevelAsync(request.RequestorTcKimlikNo!, "PER.PERSONEL.MANAGE");
+                    var permissionKey = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
+                    var level = await GetPermissionLevelAsync(request.RequestorTcKimlikNo!, permissionKey);
                     if (level < YetkiSeviyesi.Edit)
                         return ApiResponseDto<PersonelResponseDto>.ErrorResult("Bu işlem için yetkiniz bulunmuyor");
 
@@ -562,18 +571,21 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         return ApiResponseDto<PersonelResponseDto>.ErrorResult("Personel bulunamadı");
 
                     // ⭐ Field-level permission enforcement (B seçeneği: yetkisiz alanları sessizce revert et)
+                    // Permission key otomatik çözümleme (route → permission key)
+                    var permissionKey2 = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
+
                     // Kullanıcının tüm field permission'larını yükle
                     var userPermissions = await GetUserFieldPermissionsAsync(request.RequestorTcKimlikNo!);
-                    
+
                     // Orijinal DTO'yu oluştur (mevcut entity'den)
                     var originalDto = _mapper.Map<PersonelCreateRequestDto>(personel);
-                    
-                    // Yetkisiz field değişikliklerini tespit et (convention-based: PER.PERSONEL.MANAGE.FIELD.{FIELDNAME})
+
+                    // Yetkisiz field değişikliklerini tespit et (convention-based: {PERMISSION_KEY}.FIELD.{FIELDNAME})
                     var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
                         request.Personel,
                         userPermissions,
                         originalDto,
-                        "PER.PERSONEL.MANAGE", // pagePermissionKey
+                        permissionKey2, // pagePermissionKey
                         request.RequestorTcKimlikNo); // userTcKimlikNo for audit logging
                     
                     // Yetkisiz alanları orijinal değerlere geri al (sessiz revert)

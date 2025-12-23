@@ -16,17 +16,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly IMapper _mapper;
         private readonly ILogger<UserService> _logger;
         private readonly IFieldPermissionValidationService _fieldPermissionService;
+        private readonly IPermissionKeyResolverService _permissionKeyResolver;
 
         public UserService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<UserService> logger,
-            IFieldPermissionValidationService fieldPermissionService)
+            IFieldPermissionValidationService fieldPermissionService,
+            IPermissionKeyResolverService permissionKeyResolver)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _fieldPermissionService = fieldPermissionService;
+            _permissionKeyResolver = permissionKeyResolver;
         }
 
         public async Task<ApiResponseDto<UserResponseDto>> GetByTcKimlikNoAsync(string tcKimlikNo)
@@ -118,7 +121,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     return ApiResponseDto<UserResponseDto>.ErrorResult("Kullanıcı bulunamadı");
 
                 // ⭐ Field-level permission enforcement
-                // Permission key: COM.USER.MANAGE
+                // Permission key otomatik çözümleme (route → permission key)
+                var permissionKey = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
                 var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
                 var originalDto = _mapper.Map<UserUpdateRequestDto>(user);
 
@@ -126,8 +130,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     request,
                     userPermissions,
                     originalDto,
-                    "COM.USER.MANAGE",
-                    request.RequestorTcKimlikNo);
+                    permissionKey,
+                    null);
 
                 if (unauthorizedFields.Any())
                 {

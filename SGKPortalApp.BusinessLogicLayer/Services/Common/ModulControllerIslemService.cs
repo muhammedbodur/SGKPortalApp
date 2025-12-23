@@ -18,19 +18,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly ISignalRBroadcaster _broadcaster;
         private readonly IHubConnectionRepository _hubConnectionRepository;
         private readonly IFieldPermissionValidationService _fieldPermissionService;
+        private readonly IPermissionKeyResolverService _permissionKeyResolver;
 
         public ModulControllerIslemService(
             IUnitOfWork unitOfWork,
             ILogger<ModulControllerIslemService> logger,
             ISignalRBroadcaster broadcaster,
             IHubConnectionRepository hubConnectionRepository,
-            IFieldPermissionValidationService fieldPermissionService)
+            IFieldPermissionValidationService fieldPermissionService,
+            IPermissionKeyResolverService permissionKeyResolver)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _broadcaster = broadcaster;
             _hubConnectionRepository = hubConnectionRepository;
             _fieldPermissionService = fieldPermissionService;
+            _permissionKeyResolver = permissionKeyResolver;
         }
 
         /// <summary>
@@ -392,14 +395,39 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     }
                 }
 
-                // Field permission validation
-                var validationResult = await _fieldPermissionService.ValidateFieldPermissionsAsync(
-                    entity,
-                    request,
-                    "COM.MODULCONTROLLERISLEM.MANAGE");
+                // ⭐ Field-level permission enforcement
+                // Permission key otomatik çözümleme (route → permission key)
+                var permissionKey = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
+                var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
+                var originalDto = new ModulControllerIslemUpdateRequestDto
+                {
+                    ModulControllerIslemAdi = entity.ModulControllerIslemAdi,
+                    ModulControllerId = entity.ModulControllerId,
+                    IslemTipi = entity.IslemTipi,
+                    Route = entity.Route,
+                    PermissionKey = entity.PermissionKey,
+                    MinYetkiSeviyesi = entity.MinYetkiSeviyesi,
+                    SayfaTipi = entity.SayfaTipi,
+                    UstIslemId = entity.UstIslemId,
+                    Aciklama = entity.Aciklama,
+                    DtoTypeName = entity.DtoTypeName,
+                    DtoFieldName = entity.DtoFieldName
+                };
 
-                if (!validationResult.Success)
-                    return ApiResponseDto<ModulControllerIslemResponseDto>.ErrorResult(validationResult.Message);
+                var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    request,
+                    userPermissions,
+                    originalDto,
+                    permissionKey,
+                    null);
+
+                if (unauthorizedFields.Any())
+                {
+                    _fieldPermissionService.RevertUnauthorizedFields(request, originalDto, unauthorizedFields);
+                    _logger.LogWarning(
+                        "ModulControllerIslemService.UpdateAsync - Field-level permission enforcement: {Count} alan revert edildi.",
+                        unauthorizedFields.Count);
+                }
 
                 entity.ModulControllerIslemAdi = request.ModulControllerIslemAdi;
                 entity.ModulControllerId = request.ModulControllerId;

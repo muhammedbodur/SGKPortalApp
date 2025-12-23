@@ -15,17 +15,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly IMapper _mapper;
         private readonly ILogger<IlceService> _logger;
         private readonly IFieldPermissionValidationService _fieldPermissionService;
+        private readonly IPermissionKeyResolverService _permissionKeyResolver;
 
         public IlceService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<IlceService> logger,
-            IFieldPermissionValidationService fieldPermissionService)
+            IFieldPermissionValidationService fieldPermissionService,
+            IPermissionKeyResolverService permissionKeyResolver)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _fieldPermissionService = fieldPermissionService;
+            _permissionKeyResolver = permissionKeyResolver;
         }
 
         public async Task<ApiResponseDto<List<IlceResponseDto>>> GetAllAsync()
@@ -139,14 +142,26 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     return ApiResponseDto<IlceResponseDto>
                         .ErrorResult("Bu isimde başka bir ilçe zaten mevcut");
 
-                // Field permission validation
-                var validationResult = await _fieldPermissionService.ValidateFieldPermissionsAsync(
-                    ilce,
-                    request,
-                    "COM.ILCE.MANAGE");
+                // ⭐ Field-level permission enforcement
+                // Permission key otomatik çözümleme (route → permission key)
+                var permissionKey = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
+                var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
+                var originalDto = _mapper.Map<IlceUpdateRequestDto>(ilce);
 
-                if (!validationResult.Success)
-                    return ApiResponseDto<IlceResponseDto>.ErrorResult(validationResult.Message);
+                var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    request,
+                    userPermissions,
+                    originalDto,
+                    permissionKey,
+                    null);
+
+                if (unauthorizedFields.Any())
+                {
+                    _fieldPermissionService.RevertUnauthorizedFields(request, originalDto, unauthorizedFields);
+                    _logger.LogWarning(
+                        "IlceService.UpdateAsync - Field-level permission enforcement: {Count} alan revert edildi.",
+                        unauthorizedFields.Count);
+                }
 
                 ilce.IlId = request.IlId;
                 ilce.IlceAdi = request.IlceAdi;

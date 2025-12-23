@@ -7,6 +7,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
 
@@ -18,17 +19,23 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         private readonly IMapper _mapper;
         private readonly ILogger<KanalIslemService> _logger;
         private readonly ICascadeHelper _cascadeHelper;
+        private readonly IFieldPermissionValidationService _fieldPermissionService;
+        private readonly IPermissionKeyResolverService _permissionKeyResolver;
 
         public KanalIslemService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<KanalIslemService> logger,
-            ICascadeHelper cascadeHelper)
+            ICascadeHelper cascadeHelper,
+            IFieldPermissionValidationService fieldPermissionService,
+            IPermissionKeyResolverService permissionKeyResolver)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _cascadeHelper = cascadeHelper;
+            _fieldPermissionService = fieldPermissionService;
+            _permissionKeyResolver = permissionKeyResolver;
         }
 
         public async Task<ApiResponseDto<List<KanalIslemResponseDto>>> GetAllAsync()
@@ -203,17 +210,38 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 // Üst kaydın (Kanal) silinmiş veya pasif olup olmadığını kontrol et
                 var kanalRepo = _unitOfWork.GetRepository<IKanalRepository>();
                 var kanal = await kanalRepo.GetByIdAsync(request.KanalId);
-                
+
                 if (kanal == null || kanal.SilindiMi)
                 {
                     return ApiResponseDto<KanalIslemResponseDto>
                         .ErrorResult("Bağlı olduğu Kanal silinmiş olduğu için bu kanal işlem güncellenemez.");
                 }
-                
+
                 if (request.Aktiflik == Aktiflik.Aktif && kanal.Aktiflik != Aktiflik.Aktif)
                 {
                     return ApiResponseDto<KanalIslemResponseDto>
                         .ErrorResult("Bağlı olduğu Kanal pasif durumda olduğu için bu kanal işlem aktif edilemez. Önce Kanal'ı aktif ediniz.");
+                }
+
+                // ⭐ Field-level permission enforcement
+                // Permission key otomatik çözümleme (route → permission key)
+                var permissionKey = _permissionKeyResolver.ResolveFromCurrentRequest() ?? "UNKNOWN";
+                var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
+                var originalDto = _mapper.Map<KanalIslemUpdateRequestDto>(kanalIslem);
+
+                var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    request,
+                    userPermissions,
+                    originalDto,
+                    permissionKey,
+                    null);
+
+                if (unauthorizedFields.Any())
+                {
+                    _fieldPermissionService.RevertUnauthorizedFields(request, originalDto, unauthorizedFields);
+                    _logger.LogWarning(
+                        "KanalIslemService.UpdateAsync - Field-level permission enforcement: {Count} alan revert edildi.",
+                        unauthorizedFields.Count);
                 }
 
                 // Update
