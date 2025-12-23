@@ -184,14 +184,25 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 if (modul == null)
                     return ApiResponseDto<ModulControllerResponseDto>.ErrorResult("Seçilen modül bulunamadı");
 
-                // Field permission validation
-                var validationResult = await _fieldPermissionService.ValidateFieldPermissionsAsync(
-                    entity,
-                    request,
-                    "COM.MODULCONTROLLER.MANAGE");
+                // ⭐ Field-level permission enforcement
+                // Permission key: COM.MODULCONTROLLER.MANAGE
+                var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
+                var originalDto = _mapper.Map<ModulControllerUpdateRequestDto>(entity);
 
-                if (!validationResult.Success)
-                    return ApiResponseDto<ModulControllerResponseDto>.ErrorResult(validationResult.Message);
+                var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    request,
+                    userPermissions,
+                    originalDto,
+                    "COM.MODULCONTROLLER.MANAGE",
+                    null);
+
+                if (unauthorizedFields.Any())
+                {
+                    _fieldPermissionService.RevertUnauthorizedFields(request, originalDto, unauthorizedFields);
+                    _logger.LogWarning(
+                        "ModulControllerService.UpdateAsync - Field-level permission enforcement: {Count} alan revert edildi.",
+                        unauthorizedFields.Count);
+                }
 
                 entity.ModulControllerAdi = request.ModulControllerAdi;
                 entity.ModulId = request.ModulId;

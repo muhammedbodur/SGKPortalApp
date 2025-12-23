@@ -199,14 +199,25 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                             .ErrorResult($"Bu hizmet binasında {personelCount} personel bulunmaktadır. Önce personelleri başka hizmet binasına taşıyınız");
                 }
 
-                // Field permission validation
-                var validationResult = await _fieldPermissionService.ValidateFieldPermissionsAsync(
-                    entity,
-                    request,
-                    "COM.HIZMETBINASI.MANAGE");
+                // ⭐ Field-level permission enforcement
+                // Permission key: COM.HIZMETBINASI.MANAGE
+                var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
+                var originalDto = _mapper.Map<HizmetBinasiUpdateRequestDto>(entity);
 
-                if (!validationResult.Success)
-                    return ApiResponseDto<HizmetBinasiResponseDto>.ErrorResult(validationResult.Message);
+                var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    request,
+                    userPermissions,
+                    originalDto,
+                    "COM.HIZMETBINASI.MANAGE",
+                    null);
+
+                if (unauthorizedFields.Any())
+                {
+                    _fieldPermissionService.RevertUnauthorizedFields(request, originalDto, unauthorizedFields);
+                    _logger.LogWarning(
+                        "HizmetBinasiService.UpdateAsync - Field-level permission enforcement: {Count} alan revert edildi.",
+                        unauthorizedFields.Count);
+                }
 
                 _mapper.Map(request, entity);
                 hizmetBinasiRepo.Update(entity);

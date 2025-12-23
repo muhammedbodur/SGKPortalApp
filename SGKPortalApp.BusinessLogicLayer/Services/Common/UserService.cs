@@ -127,7 +127,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     userPermissions,
                     originalDto,
                     "COM.USER.MANAGE",
-                    request.RequestorTcKimlikNo);
+                    null);
 
                 if (unauthorizedFields.Any())
                 {

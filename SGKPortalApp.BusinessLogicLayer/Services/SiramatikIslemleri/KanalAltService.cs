@@ -7,6 +7,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
 
@@ -18,13 +19,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         private readonly IMapper _mapper;
         private readonly ILogger<KanalAltService> _logger;
         private readonly ICascadeHelper _cascadeHelper;
+        private readonly IFieldPermissionValidationService _fieldPermissionService;
 
-        public KanalAltService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<KanalAltService> logger, ICascadeHelper cascadeHelper)
+        public KanalAltService(
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            ILogger<KanalAltService> logger,
+            ICascadeHelper cascadeHelper,
+            IFieldPermissionValidationService fieldPermissionService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _cascadeHelper = cascadeHelper;
+            _fieldPermissionService = fieldPermissionService;
         }
 
         public async Task<ApiResponseDto<List<KanalAltResponseDto>>> GetAllAsync()
@@ -119,12 +127,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 // Üst kaydın (Kanal) silinmiş veya pasif olup olmadığını kontrol et
                 var kanalRepo = _unitOfWork.GetRepository<IKanalRepository>();
                 var kanal = await kanalRepo.GetByIdAsync(request.KanalId);
-                
+
                 if (kanal == null || kanal.SilindiMi)
                 {
                     return ApiResponseDto<KanalAltResponseDto>.ErrorResult("Bağlı olduğu Kanal silinmiş olduğu için bu alt kanal güncellenemez.");
                 }
-                
+
                 if (request.Aktiflik == Aktiflik.Aktif && kanal.Aktiflik != Aktiflik.Aktif)
                 {
                     return ApiResponseDto<KanalAltResponseDto>.ErrorResult("Bağlı olduğu Kanal pasif durumda olduğu için bu alt kanal aktif edilemez. Önce Kanal'ı aktif ediniz.");
@@ -136,6 +144,25 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 if (existingKanalAlt.Any())
                 {
                     return ApiResponseDto<KanalAltResponseDto>.ErrorResult("Bu kanalda aynı isimde bir alt kanal zaten mevcut");
+                }
+
+                // ⭐ Field-level permission enforcement
+                var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
+                var originalDto = _mapper.Map<KanalAltKanalUpdateRequestDto>(kanalAlt);
+
+                var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    request,
+                    userPermissions,
+                    originalDto,
+                    "SIR.KANALALT.MANAGE",
+                    null);
+
+                if (unauthorizedFields.Any())
+                {
+                    _fieldPermissionService.RevertUnauthorizedFields(request, originalDto, unauthorizedFields);
+                    _logger.LogWarning(
+                        "KanalAltService.UpdateAsync - Field-level permission enforcement: {Count} alan revert edildi.",
+                        unauthorizedFields.Count);
                 }
 
                 _mapper.Map(request, kanalAlt);

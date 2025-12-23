@@ -105,14 +105,25 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 if (atanmaNedeni == null)
                     return ApiResponseDto<AtanmaNedeniResponseDto>.ErrorResult("Atanma nedeni bulunamadı");
 
-                // Field permission validation
-                var validationResult = await _fieldPermissionService.ValidateFieldPermissionsAsync(
-                    atanmaNedeni,
-                    request,
-                    "PER.ATANMANEDENI.MANAGE");
+                // ⭐ Field-level permission enforcement
+                // Permission key: PER.ATANMANEDENI.MANAGE
+                var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
+                var originalDto = _mapper.Map<AtanmaNedeniUpdateRequestDto>(atanmaNedeni);
 
-                if (!validationResult.Success)
-                    return ApiResponseDto<AtanmaNedeniResponseDto>.ErrorResult(validationResult.Message);
+                var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    request,
+                    userPermissions,
+                    originalDto,
+                    "PER.ATANMANEDENI.MANAGE",
+                    null);
+
+                if (unauthorizedFields.Any())
+                {
+                    _fieldPermissionService.RevertUnauthorizedFields(request, originalDto, unauthorizedFields);
+                    _logger.LogWarning(
+                        "AtanmaNedeniService.UpdateAsync - Field-level permission enforcement: {Count} alan revert edildi.",
+                        unauthorizedFields.Count);
+                }
 
                 _mapper.Map(request, atanmaNedeni);
                 _unitOfWork.Repository<AtanmaNedenleri>().Update(atanmaNedeni);
