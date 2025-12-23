@@ -14,15 +14,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ModulControllerService> _logger;
         private readonly IYetkiQueryRepository _yetkiQueryRepository;
+        private readonly IFieldPermissionValidationService _fieldPermissionService;
 
         public ModulControllerService(
             IUnitOfWork unitOfWork,
             ILogger<ModulControllerService> logger,
-            IYetkiQueryRepository yetkiQueryRepository)
+            IYetkiQueryRepository yetkiQueryRepository,
+            IFieldPermissionValidationService fieldPermissionService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _yetkiQueryRepository = yetkiQueryRepository;
+            _fieldPermissionService = fieldPermissionService;
         }
 
         public async Task<ApiResponseDto<List<ModulControllerResponseDto>>> GetAllAsync()
@@ -180,6 +183,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 var modul = await modulRepo.GetByIdAsync(request.ModulId);
                 if (modul == null)
                     return ApiResponseDto<ModulControllerResponseDto>.ErrorResult("Seçilen modül bulunamadı");
+
+                // Field permission validation
+                var validationResult = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    entity,
+                    request,
+                    "COM.MODULCONTROLLER.MANAGE");
+
+                if (!validationResult.Success)
+                    return ApiResponseDto<ModulControllerResponseDto>.ErrorResult(validationResult.Message);
 
                 entity.ModulControllerAdi = request.ModulControllerAdi;
                 entity.ModulId = request.ModulId;

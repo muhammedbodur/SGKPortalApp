@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
@@ -16,15 +17,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<AtanmaNedeniService> _logger;
+        private readonly IFieldPermissionValidationService _fieldPermissionService;
 
         public AtanmaNedeniService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<AtanmaNedeniService> logger)
+            ILogger<AtanmaNedeniService> logger,
+            IFieldPermissionValidationService fieldPermissionService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _fieldPermissionService = fieldPermissionService;
         }
 
         public async Task<ApiResponseDto<List<AtanmaNedeniResponseDto>>> GetAllAsync()
@@ -97,9 +101,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             try
             {
                 var atanmaNedeni = await _unitOfWork.Repository<AtanmaNedenleri>().GetByIdAsync(id);
-                
+
                 if (atanmaNedeni == null)
                     return ApiResponseDto<AtanmaNedeniResponseDto>.ErrorResult("Atanma nedeni bulunamadı");
+
+                // Field permission validation
+                var validationResult = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    atanmaNedeni,
+                    request,
+                    "PER.ATANMANEDENI.MANAGE");
+
+                if (!validationResult.Success)
+                    return ApiResponseDto<AtanmaNedeniResponseDto>.ErrorResult(validationResult.Message);
 
                 _mapper.Map(request, atanmaNedeni);
                 _unitOfWork.Repository<AtanmaNedenleri>().Update(atanmaNedeni);
