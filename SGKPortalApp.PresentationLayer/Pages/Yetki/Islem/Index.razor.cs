@@ -600,6 +600,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
         {
             ShowModal = false;
             EditingId = null;
+            StateHasChanged();
         }
 
         private async Task SaveIslem()

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
@@ -87,6 +88,7 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
                 {
                     conn.ConnectionStatus = ConnectionStatus.offline;
                     conn.DuzenlenmeTarihi = DateTime.Now;
+                    ClearNavigationReferences(conn);
                     hubConnectionRepo.Update(conn);
                 }
 
@@ -129,6 +131,7 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
                 {
                     conn.ConnectionStatus = ConnectionStatus.offline;
                     conn.DuzenlenmeTarihi = DateTime.Now;
+                    ClearNavigationReferences(conn);
                     hubConnectionRepo.Update(conn);
                 }
 
@@ -140,6 +143,13 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
             {
                 _logger.LogError(ex, "Stale connection temizliği hatası");
             }
+        }
+
+        private static void ClearNavigationReferences(HubConnection connection)
+        {
+            connection.User = null;
+            connection.HubBankoConnection = null;
+            connection.HubTvConnection = null;
         }
     }
 }

@@ -15,7 +15,7 @@
             _ => "bx-circle"
         };
     var tipBadge = Node.IsGroupNode
-        ? (Depth == 0 ? ("bg-label-warning", "Modül") : ("bg-label-warning", "Controller"))
+        ? (Depth == 0 ? ("bg-label-warning", "Controller") : ("bg-label-warning", "Controller"))
         : Node.IslemTipi switch
         {
             YetkiIslemTipi.Page => ("bg-label-primary", "Sayfa"),

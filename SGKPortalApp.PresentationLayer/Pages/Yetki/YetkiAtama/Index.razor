@@ -173,24 +173,55 @@
                         }
                         else
                         {
-                            <div class="table-responsive">
-                                <table class="table table-sm table-hover mb-0 permission-tree-table">
-                                    <thead class="table-light sticky-top">
-                                        <tr>
-                                            <th style="width: 50%;">Yetki Adı</th>
-                                            <th class="text-center" style="width: 15%;">Tip</th>
-                                            <th class="text-center" style="width: 11.66%;">None</th>
-                                            <th class="text-center" style="width: 11.66%;">View</th>
-                                            <th class="text-center" style="width: 11.66%;">Edit</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var node in PermissionTree)
-                                        {
-                                            <PermissionTreeRow Node="node" Depth="0" OnLevelChanged="HandleLevelChanged" />
-                                        }
-                                    </tbody>
-                                </table>
+                            <div class="accordion accordion-flush" id="moduleAccordion">
+                                @{
+                                    var modulIndex = 0;
+                                }
+                                @foreach (var modulNode in PermissionTree)
+                                {
+                                    var collapseId = $"modulCollapse_{modulIndex}";
+                                    var headingId = $"modulHeading_{modulIndex}";
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="@headingId">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="false" aria-controls="@collapseId">
+                                                <i class="bx bx-grid-alt me-2 text-primary"></i>
+                                                <strong>@modulNode.IslemAdi</strong>
+                                                <span class="badge bg-label-primary ms-2">@modulNode.Children.Count</span>
+                                            </button>
+                                        </h2>
+                                        <div id="@collapseId" class="accordion-collapse collapse" aria-labelledby="@headingId" data-bs-parent="#moduleAccordion">
+                                            <div class="accordion-body p-0">
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm table-hover mb-0 permission-tree-table">
+                                                        <thead class="table-light sticky-top">
+                                                            <tr>
+                                                                <th style="width: 50%;">Yetki Adı</th>
+                                                                <th class="text-center" style="width: 15%;">Tip</th>
+                                                                <th class="text-center" style="width: 11.66%;">None</th>
+                                                                <th class="text-center" style="width: 11.66%;">View</th>
+                                                                <th class="text-center" style="width: 11.66%;">Edit</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var controllerNode in modulNode.Children)
+                                                            {
+                                                                <tr class="table-secondary">
+                                                                    <td colspan="5">
+                                                                        <i class="bx bx-folder me-2 text-muted"></i>
+                                                                        <strong>@controllerNode.IslemAdi</strong>
+                                                                        <span class="badge bg-label-secondary ms-2">@controllerNode.Children.Count</span>
+                                                                    </td>
+                                                                </tr>
+                                                                <PermissionTreeRow Node="controllerNode" Depth="0" OnLevelChanged="HandleLevelChanged" />
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    modulIndex++;
+                                }
                             </div>
                         }
                     </div>

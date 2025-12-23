@@ -217,8 +217,8 @@ else
             else
             {
                 <!-- Table -->
-                <div class="table-responsive">
-                    <table class="table table-hover">
+                <div class="table-container">
+                    <table class="table table-hover table-wide">
                         <thead>
                             <tr>
                                 <th style="width: 50px;">#</th>
@@ -246,10 +246,10 @@ else
                             {
                                 <tr style="@GetClickableRowStyle(ActionType.DETAIL)" @onclick="() => TryNavigateToDetail(personel.TcKimlikNo)">
                                     <td>@((CurrentPage - 1) * PageSize + index + 1)</td>
-                                    <td>
+                                    <td class="text-break">
                                         <span class="fw-medium">@personel.TcKimlikNo</span>
                                     </td>
-                                    <td>@personel.SicilNo</td>
+                                    <td class="text-break">@personel.SicilNo</td>
                                     <td>
                                         <div class="d-flex align-items-center avatar-offline">
                                             @if (!string.IsNullOrEmpty(personel.Resim))
@@ -273,11 +273,11 @@ else
                                             </div>
                                         </div>
                                     </td>
-                                    <td>@personel.DepartmanAdi</td>
-                                    <td>@personel.ServisAdi</td>
-                                    <td>@personel.HizmetBinasiAdi</td>
-                                    <td>@personel.UnvanAdi</td>
-                                    <td>@personel.Dahili</td>
+                                    <td class="text-break">@personel.DepartmanAdi</td>
+                                    <td class="text-break">@personel.ServisAdi</td>
+                                    <td class="text-break">@personel.HizmetBinasiAdi</td>
+                                    <td class="text-break">@personel.UnvanAdi</td>
+                                    <td class="text-break">@personel.Dahili</td>
                                     <td class="text-center">
                                         @switch (personel.PersonelAktiflikDurum)
                                         {

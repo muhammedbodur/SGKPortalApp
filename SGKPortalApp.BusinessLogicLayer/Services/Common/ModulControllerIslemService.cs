@@ -102,20 +102,25 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             try
             {
                 var connections = await _hubConnectionRepository.GetActiveConnectionsAsync();
-
-                // Sadece online ve silinmemiş connection'ları al
-                var userConnections = connections
+                var onlineConnections = connections
                     .Where(c => c.ConnectionStatus == ConnectionStatus.online && !c.SilindiMi)
-                    .GroupBy(c => c.TcKimlikNo)
-                    .Select(g => g.Key)
-                    .Distinct()
                     .ToList();
 
-                if (!userConnections.Any())
+                if (!onlineConnections.Any())
                 {
                     _logger.LogDebug("BroadcastPermissionDefinitionsChangedAsync: Aktif connection bulunamadı");
                     return;
                 }
+
+                var userConnections = onlineConnections
+                    .Select(c => c.TcKimlikNo)
+                    .Distinct()
+                    .ToList();
+
+                var connectionIds = onlineConnections
+                    .Select(c => c.ConnectionId)
+                    .Distinct()
+                    .ToList();
 
                 // Her kullanıcı için stamp güncelle ve broadcast yap
                 // PersonelYetkiService ile aynı pattern kullanılıyor
@@ -124,6 +129,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     var stamp = await TouchPermissionStampAsync(tcKimlikNo);
                     await BroadcastPermissionsChangedAsync(tcKimlikNo, stamp);
                 }
+
+                // Tanım değişikliğini tüm aktif bağlantılara bildir (cache yenilemesi için)
+                await _broadcaster.SendToConnectionsAsync(
+                    connectionIds,
+                    "permissionDefinitionsChanged",
+                    new
+                    {
+                        Timestamp = DateTime.Now,
+                        Message = "Permission definitions updated"
+                    });
 
                 _logger.LogInformation("permissionsChanged broadcast edildi (definition change). Kullanıcı sayısı: {Count}", userConnections.Count);
             }

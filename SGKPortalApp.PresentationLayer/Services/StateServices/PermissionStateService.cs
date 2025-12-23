@@ -18,6 +18,8 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
         private readonly ILogger<PermissionStateService> _logger;
         private readonly IMemoryCache _memoryCache;
 
+        public const string RouteLoadingPlaceholderKey = "__ROUTE_LOADING__";
+
         private readonly SemaphoreSlim _loadLock = new(1, 1);
 
         // PermissionKey -> YetkiSeviyesi dictionary (kullanıcının yetkileri)
@@ -30,6 +32,7 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
         // Route → PermissionKey mapping (ModulControllerIslem tablosundan)
         // Key: Route (örn: /personel/departman), Value: PermissionKey (örn: PER.DEPARTMAN.INDEX)
         private Dictionary<string, string> _routeToPermissionKey = new(StringComparer.OrdinalIgnoreCase);
+        private bool _routeMappingsInitialized;
 
         private const string DefinedPermissionsCacheKey = "PermissionStateService.DefinedPermissions";
         private const string RoutePermissionMapCacheKey = "PermissionStateService.RoutePermissionMap";
@@ -41,6 +44,7 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
         public event Action? OnChange;
 
         public bool IsLoaded { get; private set; }
+        public bool RouteMappingsLoaded => _routeMappingsInitialized;
 
         public PermissionStateService(
             IPersonelYetkiApiService personelYetkiApiService,
@@ -191,6 +195,10 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
             {
                 _logger.LogError(ex, "LoadDefinedPermissionKeysAsync hata");
             }
+            finally
+            {
+                _routeMappingsInitialized = true;
+            }
         }
 
         /// <summary>
@@ -250,6 +258,7 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
 
                 _memoryCache.Remove(DefinedPermissionsCacheKey);
                 _memoryCache.Remove(RoutePermissionMapCacheKey);
+                _routeMappingsInitialized = false;
 
                 await LoadDefinedPermissionKeysAsync();
                 _logger.LogInformation("📋 Yetki tanımları yenilendi. Toplam: {Count}", _definedPermissions.Count);
@@ -274,6 +283,7 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
             {
                 _definedPermissions = cachedDefinitions;
                 _routeToPermissionKey = cachedRoutes;
+                _routeMappingsInitialized = true;
                 return true;
             }
 
@@ -350,6 +360,12 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
             {
                 _logger.LogWarning("⚠️ GetLevel: PermissionKey boş!");
                 return YetkiSeviyesi.None;
+            }
+
+            if (permissionKey == RouteLoadingPlaceholderKey)
+            {
+                _logger.LogWarning("🕒 GetLevel: Route mapping henüz yüklenmedi. Geçici tam yetki veriliyor (Edit).");
+                return YetkiSeviyesi.Edit;
             }
 
             // ⚠️ ÖZEL DURUM: Route mapping bulunamayan sayfalar (geliştirme aşamasında)
@@ -455,6 +471,12 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
             // Route'u normalize et (trailing slash kaldır)
             var normalizedRoute = route.TrimEnd('/');
 
+            if (_routeToPermissionKey.Count == 0)
+            {
+                _logger.LogInformation("🕒 GetPermissionKeyByRoute: Route mapping henüz yüklenmedi. Route={Route}", normalizedRoute);
+                return RouteLoadingPlaceholderKey;
+            }
+
             _logger.LogInformation("🗺️ GetPermissionKeyByRoute çağrıldı: {Route}, Dictionary count: {Count}", normalizedRoute, _routeToPermissionKey.Count);
 
             // DEBUG: İlk 10 route mapping'i logla
@@ -467,23 +489,25 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
                 }
             }
 
-            // 1. Önce tam eşleşme dene
-            if (_routeToPermissionKey.TryGetValue(normalizedRoute, out var permissionKey))
-            {
-                _logger.LogInformation("✅ Route resolved (exact match): {Route} → {PermissionKey}", normalizedRoute, permissionKey);
-                return permissionKey;
-            }
+            string? permissionKey = null;
 
-            // 2. Eğer route /index ile bitmiyorsa, /index ekleyip tekrar dene
-            // Örnek: /personel → /personel/index
+            // 1. Önce /index ekleyerek dene (fiziksel dosya yolları /controller/action/index.razor şeklinde)
+            // Örnek: /siramatik/tv → /siramatik/tv/index
             if (!normalizedRoute.EndsWith("/index", StringComparison.OrdinalIgnoreCase))
             {
                 var routeWithIndex = $"{normalizedRoute}/index";
                 if (_routeToPermissionKey.TryGetValue(routeWithIndex, out permissionKey))
                 {
-                    _logger.LogInformation("✅ Route resolved (with /index): {RouteOriginal} + /index → {PermissionKey}", normalizedRoute, permissionKey);
+                    _logger.LogInformation("✅ Route resolved (with /index): {Route} + /index → {PermissionKey}", normalizedRoute, permissionKey);
                     return permissionKey;
                 }
+            }
+
+            // 2. Tam eşleşme dene
+            if (_routeToPermissionKey.TryGetValue(normalizedRoute, out permissionKey))
+            {
+                _logger.LogInformation("✅ Route resolved (exact match): {Route} → {PermissionKey}", normalizedRoute, permissionKey);
+                return permissionKey;
             }
 
             // 3. Eğer route /index ile bitiyorsa, /index'i kaldırıp tekrar dene
@@ -493,7 +517,7 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
                 var routeWithoutIndex = normalizedRoute.Substring(0, normalizedRoute.Length - 6); // "/index" = 6 karakter
                 if (_routeToPermissionKey.TryGetValue(routeWithoutIndex, out permissionKey))
                 {
-                    _logger.LogInformation("✅ Route resolved (without /index): {RouteOriginal} - /index → {PermissionKey}", normalizedRoute, permissionKey);
+                    _logger.LogInformation("✅ Route resolved (without /index): {Route} - /index → {PermissionKey}", normalizedRoute, permissionKey);
                     return permissionKey;
                 }
             }

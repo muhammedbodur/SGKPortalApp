@@ -40,6 +40,8 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         // ⭐ Kullanıcı TC ve Banko modu kontrolü (AsyncLocal'a bağımlı olmayan)
         private string? _tcKimlikNo;
         private bool IsInBankoMode => !string.IsNullOrEmpty(_tcKimlikNo) && BankoModeState.IsPersonelInBankoMode(_tcKimlikNo);
+        private bool PermissionContextReady => _permissionContextReady;
+        private bool _permissionContextReady;
 
         // ✅ Session check için cache
         private DateTime _lastSessionCheck = DateTime.MinValue;
@@ -89,6 +91,11 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                 catch (Exception ex)
                 {
                     Logger.LogWarning(ex, "PermissionStateService initial load hatası");
+                }
+                finally
+                {
+                    UpdatePermissionContextReady();
+                    PermissionStateService.OnChange += OnPermissionContextChanged;
                 }
 
                 // 4. Event listener'ları kaydet
@@ -379,6 +386,7 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
             {
                 await PermissionStateService.RefreshAsync();
                 await PagePermissionService.RefreshAsync(); // ✅ Route-permission mapping'i de yenile
+                UpdatePermissionContextReady();
                 await InvokeAsync(StateHasChanged);
             }
             catch (Exception ex)
@@ -394,12 +402,24 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
             {
                 await PermissionStateService.RefreshDefinitionsAsync();
                 await PagePermissionService.RefreshAsync(); // ✅ Route-permission mapping'i de yenile
+                UpdatePermissionContextReady();
                 await InvokeAsync(StateHasChanged);
             }
             catch (Exception ex)
             {
                 Logger.LogWarning(ex, "OnPermissionDefinitionsChanged hatası");
             }
+        }
+
+        private void UpdatePermissionContextReady()
+        {
+            _permissionContextReady = PermissionStateService.IsLoaded && PermissionStateService.RouteMappingsLoaded;
+        }
+
+        private void OnPermissionContextChanged()
+        {
+            UpdatePermissionContextReady();
+            InvokeAsync(StateHasChanged);
         }
 
         private async Task LoadBankoPanelSiralarAsync()

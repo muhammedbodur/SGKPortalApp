@@ -30,7 +30,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         /// <summary>
         /// Permissions yüklendi mi?
         /// </summary>
-        protected bool IsPermissionsLoaded { get; private set; }
+        protected bool IsPermissionsLoaded => PermissionStateService.IsLoaded;
 
         /// <summary>
         /// Sayfa için permission key (örn: "PERSONEL.MANAGE")
@@ -54,8 +54,15 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         {
             get
             {
-                if (_resolvedPermissionKey != null)
+                if (_resolvedPermissionKey != null &&
+                    _resolvedPermissionKey != PermissionStateService.RouteLoadingPlaceholderKey)
                     return _resolvedPermissionKey;
+
+                if (!IsPermissionsLoaded || !PermissionStateService.RouteMappingsLoaded)
+                {
+                    Logger?.LogInformation("⌛ ResolvedPermissionKey: Permissions veya route mapping henüz yüklenmedi");
+                    return PermissionStateService.RouteLoadingPlaceholderKey;
+                }
 
                 // 1. Manuel override varsa onu kullan (geriye uyumluluk)
                 if (!string.IsNullOrEmpty(PagePermissionKey))
@@ -69,7 +76,15 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
                 var currentPath = GetCurrentRoutePath();
                 Logger?.LogInformation("🔍 ResolvedPermissionKey: Route={Route}", currentPath);
 
-                _resolvedPermissionKey = PermissionStateService.GetPermissionKeyByRoute(currentPath);
+                var resolvedKey = PermissionStateService.GetPermissionKeyByRoute(currentPath);
+
+                if (resolvedKey == PermissionStateService.RouteLoadingPlaceholderKey)
+                {
+                    Logger?.LogInformation("⌛ ResolvedPermissionKey: Route mapping yükleniyor, placeholder döndü");
+                    return resolvedKey;
+                }
+
+                _resolvedPermissionKey = resolvedKey;
                 Logger?.LogInformation("🔍 ResolvedPermissionKey: GetPermissionKeyByRoute döndü: {Key}", _resolvedPermissionKey ?? "NULL");
 
                 if (string.IsNullOrEmpty(_resolvedPermissionKey))
@@ -82,6 +97,47 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
                 return _resolvedPermissionKey;
             }
         }
+
+        /// <summary>
+        /// Permission context yüklenene kadar sayfa render'ını bekletmek için kullanılabilir.
+        /// </summary>
+        protected bool ShouldShowPermissionLoading =>
+            !IsPermissionsLoaded ||
+            !PermissionStateService.RouteMappingsLoaded ||
+            ResolvedPermissionKey == PermissionStateService.RouteLoadingPlaceholderKey;
+
+        /// <summary>
+        /// Permission yüklenme sürecinde gösterilecek varsayılan içerik.
+        /// İsterseniz override ederek sayfa özelinde özelleştirebilirsiniz.
+        /// </summary>
+        protected virtual RenderFragment PermissionLoadingFragment => builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddAttribute(1, "class", "d-flex align-items-center justify-content-center");
+            builder.AddAttribute(2, "style", "min-height: 40vh;");
+
+            builder.OpenElement(3, "div");
+            builder.AddAttribute(4, "class", "text-center");
+
+            builder.OpenElement(5, "div");
+            builder.AddAttribute(6, "class", "spinner-border text-primary mb-3");
+            builder.AddAttribute(7, "role", "status");
+
+            builder.OpenElement(8, "span");
+            builder.AddAttribute(9, "class", "visually-hidden");
+            builder.AddContent(10, "Yükleniyor...");
+            builder.CloseElement(); // span
+
+            builder.CloseElement(); // spinner div
+
+            builder.OpenElement(11, "p");
+            builder.AddAttribute(12, "class", "text-muted mb-0");
+            builder.AddContent(13, "Yetki bilgileri yükleniyor, lütfen bekleyin…");
+            builder.CloseElement(); // p
+
+            builder.CloseElement(); // text-center div
+            builder.CloseElement(); // wrapper div
+        };
 
         /// <summary>
         /// Mevcut route path'ini alır
@@ -152,7 +208,13 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         /// Örnek: PERSONEL.MANAGE.FORMFIELD.EMAIL
         /// </summary>
         protected string GetFieldPermissionKey(string fieldName)
-            => $"{FieldPermissionKeyPrefix}.FORMFIELD.{fieldName.ToUpperInvariant()}";
+        {
+            var prefix = FieldPermissionKeyPrefix;
+            if (prefix == PermissionStateService.RouteLoadingPlaceholderKey)
+                return PermissionStateService.RouteLoadingPlaceholderKey;
+
+            return $"{prefix}.FORMFIELD.{fieldName.ToUpperInvariant()}";
+        }
 
         /// <summary>
         /// Field-level edit yetkisi kontrolü
@@ -204,7 +266,13 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         /// Örnek: PERSONEL.INDEX.ACTION.DETAIL
         /// </summary>
         protected string GetActionPermissionKey(string actionName)
-            => $"{ResolvedPermissionKey}.ACTION.{actionName.ToUpperInvariant()}";
+        {
+            var key = ResolvedPermissionKey;
+            if (key == PermissionStateService.RouteLoadingPlaceholderKey)
+                return PermissionStateService.RouteLoadingPlaceholderKey;
+
+            return $"{key}.ACTION.{actionName.ToUpperInvariant()}";
+        }
 
         /// <summary>
         /// Aksiyon yetkisi var mı? (View veya Edit seviyesi yeterli)
@@ -355,22 +423,48 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
 
         #region Lifecycle
 
+        private bool _permissionLifecycleInitialized;
+
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
+            await EnsurePermissionLifecycleInitializedAsync();
+        }
 
-            // Permission cache'i temizle - permissions yüklendikten sonra yeniden hesaplanacak
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            await base.OnAfterRenderAsync(firstRender);
+            if (!_permissionLifecycleInitialized)
+            {
+                await EnsurePermissionLifecycleInitializedAsync();
+            }
+        }
+
+        private async Task EnsurePermissionLifecycleInitializedAsync()
+        {
+            if (_permissionLifecycleInitialized)
+                return;
+
+            _permissionLifecycleInitialized = true;
+
+            try
+            {
+                await PermissionStateService.EnsureLoadedAsync();
+            }
+            catch (Exception ex)
+            {
+                Logger?.LogWarning(ex, "FieldPermissionPageBase: PermissionStateService.EnsureLoadedAsync hata verdi");
+            }
+
             _resolvedPermissionKey = null;
-
-            // Permission state'i yükle - ÖNCE permission'lar yüklensin, sonra render olsun
-            await PermissionStateService.EnsureLoadedAsync();
-            
-            // Permissions yüklendi, şimdi permission key'i çözümle
-            IsPermissionsLoaded = true;
-            
             PermissionStateService.OnChange += HandlePermissionStateChanged;
-            
-            // UI'ı güncelle - permissions yüklendi
+
+            if (!IsPermissionsLoaded || !PermissionStateService.RouteMappingsLoaded)
+            {
+                Logger?.LogWarning("FieldPermissionPageBase: Permission context henüz hazır değil. IsLoaded={IsLoaded}, RouteMappingsLoaded={RouteLoaded}",
+                    IsPermissionsLoaded, PermissionStateService.RouteMappingsLoaded);
+            }
+
             StateHasChanged();
         }
 
@@ -386,7 +480,10 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
 
         public virtual void Dispose()
         {
-            PermissionStateService.OnChange -= HandlePermissionStateChanged;
+            if (_permissionLifecycleInitialized)
+            {
+                PermissionStateService.OnChange -= HandlePermissionStateChanged;
+            }
         }
 
         #endregion
