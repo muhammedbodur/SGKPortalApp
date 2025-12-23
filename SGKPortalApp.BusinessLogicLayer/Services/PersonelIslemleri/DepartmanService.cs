@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
@@ -16,15 +17,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<DepartmanService> _logger;
+        private readonly IFieldPermissionValidationService _fieldPermissionService;
 
         public DepartmanService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<DepartmanService> logger)
+            ILogger<DepartmanService> logger,
+            IFieldPermissionValidationService fieldPermissionService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _fieldPermissionService = fieldPermissionService;
         }
 
         public async Task<ApiResponseDto<List<DepartmanResponseDto>>> GetAllAsync()
@@ -125,6 +129,25 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     if (personelCount > 0)
                         return ApiResponseDto<DepartmanResponseDto>
                             .ErrorResult($"Bu departmanda {personelCount} personel bulunmaktadır. Önce personelleri başka departmana taşıyınız");
+                }
+
+                // ⭐ Field-level permission enforcement
+                var userPermissions = new Dictionary<string, BusinessObjectLayer.Enums.Common.YetkiSeviyesi>();
+                var originalDto = _mapper.Map<DepartmanUpdateRequestDto>(departman);
+
+                var unauthorizedFields = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    request,
+                    userPermissions,
+                    originalDto,
+                    "PER.DEPARTMAN.MANAGE",
+                    null);
+
+                if (unauthorizedFields.Any())
+                {
+                    _fieldPermissionService.RevertUnauthorizedFields(request, originalDto, unauthorizedFields);
+                    _logger.LogWarning(
+                        "DepartmanService.UpdateAsync - Field-level permission enforcement: {Count} alan revert edildi.",
+                        unauthorizedFields.Count);
                 }
 
                 _mapper.Map(request, departman);
