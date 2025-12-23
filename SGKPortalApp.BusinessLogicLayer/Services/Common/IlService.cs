@@ -14,15 +14,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<IlService> _logger;
+        private readonly IFieldPermissionValidationService _fieldPermissionService;
 
         public IlService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            ILogger<IlService> logger)
+            ILogger<IlService> logger,
+            IFieldPermissionValidationService fieldPermissionService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _fieldPermissionService = fieldPermissionService;
         }
 
         public async Task<ApiResponseDto<List<IlResponseDto>>> GetAllAsync()
@@ -130,6 +133,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 if (existingIl != null && existingIl.IlId != id)
                     return ApiResponseDto<IlResponseDto>
                         .ErrorResult("Bu isimde başka bir il zaten mevcut");
+
+                // Field permission validation
+                var validationResult = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    il,
+                    request,
+                    "COM.IL.MANAGE");
+
+                if (!validationResult.Success)
+                    return ApiResponseDto<IlResponseDto>.ErrorResult(validationResult.Message);
 
                 il.IlAdi = request.IlAdi;
                 il.DuzenlenmeTarihi = DateTime.Now;

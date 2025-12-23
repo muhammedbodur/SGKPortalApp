@@ -20,19 +20,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly IMapper _mapper;
         private readonly ILogger<HizmetBinasiService> _logger;
         private readonly ICascadeHelper _cascadeHelper;
+        private readonly IFieldPermissionValidationService _fieldPermissionService;
 
         public HizmetBinasiService(
             IUnitOfWork unitOfWork,
             ICommonQueryRepository commonQueryRepository,
             IMapper mapper,
             ILogger<HizmetBinasiService> logger,
-            ICascadeHelper cascadeHelper)
+            ICascadeHelper cascadeHelper,
+            IFieldPermissionValidationService fieldPermissionService)
         {
             _unitOfWork = unitOfWork;
             _commonQueryRepository = commonQueryRepository;
             _mapper = mapper;
             _logger = logger;
             _cascadeHelper = cascadeHelper;
+            _fieldPermissionService = fieldPermissionService;
         }
 
         public async Task<ApiResponseDto<List<HizmetBinasiResponseDto>>> GetAllAsync()
@@ -195,6 +198,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                         return ApiResponseDto<HizmetBinasiResponseDto>
                             .ErrorResult($"Bu hizmet binasında {personelCount} personel bulunmaktadır. Önce personelleri başka hizmet binasına taşıyınız");
                 }
+
+                // Field permission validation
+                var validationResult = await _fieldPermissionService.ValidateFieldPermissionsAsync(
+                    entity,
+                    request,
+                    "COM.HIZMETBINASI.MANAGE");
+
+                if (!validationResult.Success)
+                    return ApiResponseDto<HizmetBinasiResponseDto>.ErrorResult(validationResult.Message);
 
                 _mapper.Map(request, entity);
                 hizmetBinasiRepo.Update(entity);
