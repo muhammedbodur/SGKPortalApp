@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.StateServices;
 
@@ -25,7 +26,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
     public abstract class FieldPermissionPageBase : BasePageComponent, IDisposable
     {
         [Inject] protected PermissionStateService PermissionStateService { get; set; } = default!;
-        [Inject] protected BusinessLogicLayer.Interfaces.Common.IPermissionKeyResolverService PermissionKeyResolver { get; set; } = default!;
+        [Inject] protected IPermissionKeyResolverService PermissionKeyResolver { get; set; } = default!;
         [Inject] protected ILogger<FieldPermissionPageBase> Logger { get; set; } = default!;
 
         /// <summary>
