@@ -1,0 +1,73 @@
+using Microsoft.Extensions.DependencyInjection;
+using SGKPortalApp.DataAccessLayer.Repositories;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
+using System.Reflection;
+
+namespace SGKPortalApp.DataAccessLayer.Extensions
+{
+    /// <summary>
+    /// DataAccessLayer servis kayıtları
+    /// Repository Pattern ve UnitOfWork
+    /// </summary>
+    public static class ServiceCollectionExtensions
+    {
+        /// <summary>
+        /// DataAccessLayer servislerini DI container'a kaydet
+        /// </summary>
+        public static IServiceCollection AddDataAccessLayer(this IServiceCollection services)
+        {
+            Console.WriteLine("📦 DataAccessLayer servisleri kaydediliyor...");
+
+            // UnitOfWork Pattern
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            Console.WriteLine("  ✅ IUnitOfWork → UnitOfWork");
+
+            // Tüm repository interface ve implementation'larını otomatik kaydet
+            RegisterRepositories(services);
+
+            Console.WriteLine("  🎉 DataAccessLayer hazır!\n");
+            return services;
+        }
+
+        /// <summary>
+        /// Assembly içindeki tüm repository interface ve implementation'larını otomatik kaydet
+        /// Convention: IEntityRepository (interface) → EntityRepository (concrete)
+        /// </summary>
+        private static void RegisterRepositories(IServiceCollection services)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+
+            // Tüm repository interface'lerini bul
+            var repositoryInterfaces = assembly.GetTypes()
+                .Where(t => t.IsInterface &&
+                           t.Name.EndsWith("Repository") &&
+                           t.Namespace != null &&
+                           t.Namespace.Contains("Repositories.Interfaces") &&
+                           t != typeof(IUnitOfWork) &&
+                           !t.Name.Contains("IGenericRepository"))
+                .ToList();
+
+            int registeredCount = 0;
+
+            foreach (var interfaceType in repositoryInterfaces)
+            {
+                // Implementation'ı bul (convention: IEntityRepository → EntityRepository)
+                var expectedImplementationName = interfaceType.Name.Substring(1); // "I" karakterini kaldır
+
+                var implementationType = assembly.GetTypes()
+                    .FirstOrDefault(t => !t.IsInterface &&
+                                       !t.IsAbstract &&
+                                       t.Name == expectedImplementationName &&
+                                       interfaceType.IsAssignableFrom(t));
+
+                if (implementationType != null)
+                {
+                    services.AddScoped(interfaceType, implementationType);
+                    registeredCount++;
+                }
+            }
+
+            Console.WriteLine($"  ✅ {registeredCount} Repository kaydedildi (auto-discovery)");
+        }
+    }
+}
