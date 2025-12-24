@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
+using SGKPortalApp.Common.Interfaces.Permission;
 using SGKPortalApp.PresentationLayer.Services.StateServices;
 
 namespace SGKPortalApp.PresentationLayer.Services.Permission
