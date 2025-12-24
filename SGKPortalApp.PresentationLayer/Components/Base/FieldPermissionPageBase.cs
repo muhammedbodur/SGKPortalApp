@@ -272,13 +272,17 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         }
 
         /// <summary>
-        /// Aksiyon yetkisi var mı? (View veya Edit seviyesi yeterli)
-        /// Tanımsız permission key = izin ver (sayfa seviyesi kontrolü olmalı)
+        /// Aksiyon yetkisi var mı? (Edit seviyesi gerekli - View sadece görüntüleme için!)
+        ///
+        /// ÖNEMLI: View seviyesi aksiyonları çalıştıramaz!
+        /// - View: Buton görünür ama disabled (sadece görüntüleme)
+        /// - Edit: Buton görünür ve enabled (aksiyon çalıştırılabilir)
+        /// - None: Buton gizli
         /// </summary>
         protected bool CanAction(string actionName)
         {
             var level = PermissionStateService.GetLevel(GetActionPermissionKey(actionName));
-            return level >= YetkiSeviyesi.View;
+            return level >= YetkiSeviyesi.Edit;  // Action'lar Edit seviyesi gerektirir!
         }
 
         /// <summary>
