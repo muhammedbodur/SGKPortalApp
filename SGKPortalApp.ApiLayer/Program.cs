@@ -72,11 +72,6 @@ namespace SGKPortalApp.ApiLayer
                     options.JsonSerializerOptions.WriteIndented = true;
                 });
 
-            // ═══════════════════════════════════════════════════════
-            // 🎯 SGK PORTAL SERVİSLERİ
-            // ═══════════════════════════════════════════════════════
-            builder.Services.AddSGKPortalServices(builder.Configuration);
-
             builder.Services.AddHttpContextAccessor();
 
             var sharedKeysPath = Path.Combine(

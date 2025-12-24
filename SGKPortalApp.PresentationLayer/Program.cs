@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
+using SGKPortalApp.BusinessLogicLayer.Extensions;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.PresentationLayer.Extensions;
@@ -98,11 +99,11 @@ Console.WriteLine($"✅ HttpClient configured - BaseAddress: {apiUrl}");
 // ═══════════════════════════════════════════════════════
 // ⭐ KATMAN SERVİSLERİ ⭐
 // ═══════════════════════════════════════════════════════
-// 1. Data Access Layer + core servisler (Shared connection string kullanıyor)
-builder.Services.AddSGKPortalServices(builder.Configuration);
-
-// 2. Common Layer (Shared services - hem Presentation hem BusinessLogic kullanır)
+// 1. Common Layer (Shared services)
 builder.Services.AddCommonServices();
+
+// 2. Business Logic Layer
+builder.Services.AddBusinessLogicLayer();
 
 // 3. Presentation Layer (UI Services)
 builder.Services.AddPresentationServices(builder.Configuration);
