@@ -17,6 +17,10 @@ namespace SGKPortalApp.Common.Extensions
         {
             Console.WriteLine("📦 Common Layer servisleri kaydediliyor...");
 
+            // Memory Cache (PermissionKeyResolverService için gerekli)
+            services.AddMemoryCache();
+            Console.WriteLine("  ✅ IMemoryCache → MemoryCache");
+
             // Permission Services
             services.AddScoped<IPermissionKeyResolverService, PermissionKeyResolverService>();
             Console.WriteLine("  ✅ IPermissionKeyResolverService → PermissionKeyResolverService");
