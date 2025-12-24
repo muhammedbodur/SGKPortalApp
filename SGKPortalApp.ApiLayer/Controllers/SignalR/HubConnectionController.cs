@@ -364,6 +364,51 @@ namespace SGKPortalApp.ApiLayer.Controllers.SignalR
             var isInUse = await _hubConnectionService.IsTvInUseByOtherTvUserAsync(tvId, currentTcKimlikNo);
             return Ok(isInUse);
         }
+
+        // ═══════════════════════════════════════════════════════
+        // CLEANUP ENDPOINTS (Background Service için)
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Uygulama başlangıcında tüm online connection'ları offline yapar
+        /// Frontend BackgroundService tarafından çağrılır
+        /// </summary>
+        [HttpPost("cleanup/startup")]
+        public async Task<IActionResult> CleanupAllOnStartup()
+        {
+            try
+            {
+                var count = await _hubConnectionService.CleanupAllOnStartupAsync();
+                _logger.LogInformation("Cleanup startup: {Count} connection temizlendi", count);
+                return Ok(new { cleanedCount = count, message = $"{count} connection offline yapıldı" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Cleanup startup hatası");
+                return StatusCode(500, new { message = "Cleanup startup hatası", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Stale connection'ları temizle
+        /// Frontend BackgroundService tarafından periyodik olarak çağrılır
+        /// </summary>
+        /// <param name="staleThresholdMinutes">Stale kabul edilme süresi (dakika). Default: 10</param>
+        [HttpPost("cleanup/stale")]
+        public async Task<IActionResult> CleanupStaleConnections([FromQuery] int staleThresholdMinutes = 10)
+        {
+            try
+            {
+                var count = await _hubConnectionService.CleanupStaleConnectionsAsync(staleThresholdMinutes);
+                _logger.LogDebug("Cleanup stale: {Count} connection temizlendi", count);
+                return Ok(new { cleanedCount = count, message = $"{count} stale connection offline yapıldı" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Cleanup stale hatası");
+                return StatusCode(500, new { message = "Cleanup stale hatası", error = ex.Message });
+            }
+        }
     }
 
     // Request DTOs

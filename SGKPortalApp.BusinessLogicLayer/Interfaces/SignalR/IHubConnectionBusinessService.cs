@@ -40,6 +40,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR
         Task<bool> IsTvInUseByTvUserAsync(int tvId);
         Task<bool> IsTvInUseByOtherTvUserAsync(int tvId, string currentTcKimlikNo);
         Task<List<HubConnection>> GetNonTvConnectionsByTcKimlikNoAsync(string tcKimlikNo);
+
+        // Cleanup Methods (Background Service için API endpoint'ler)
+        /// <summary>
+        /// Uygulama başlangıcında tüm online connection'ları offline yapar (restart cleanup)
+        /// </summary>
+        Task<int> CleanupAllOnStartupAsync();
+
+        /// <summary>
+        /// Stale (eski) connection'ları temizler (belirli süre aktivite olmayanlar)
+        /// </summary>
+        /// <param name="staleThresholdMinutes">Stale kabul edilme süresi (dakika)</param>
+        Task<int> CleanupStaleConnectionsAsync(int staleThresholdMinutes);
     }
 }
 
