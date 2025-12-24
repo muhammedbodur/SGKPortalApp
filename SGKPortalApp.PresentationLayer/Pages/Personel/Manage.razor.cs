@@ -779,6 +779,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             StateHasChanged();
         }
 
+        // ═══════════════════════════════════════════════════════
+        // TAB HELPER METHODS (Blazor Server Compatible)
+        // ═══════════════════════════════════════════════════════
+
+        private void SetPersonelTab() => SetActiveTab("personel");
+        private void SetIletisimTab() => SetActiveTab("iletisim");
+        private void SetKisiselTab() => SetActiveTab("kisisel");
+        private void SetOzlukTab() => SetActiveTab("ozluk");
+        private void SetEsCocukTab() => SetActiveTab("es-cocuk");
+        private void SetHizmetTab() => SetActiveTab("hizmet");
+        private void SetEgitimTab() => SetActiveTab("egitim");
+        private void SetYetkiTab() => SetActiveTab("yetki");
+        private void SetCezaTab() => SetActiveTab("ceza");
+        private void SetEngelTab() => SetActiveTab("engel");
+        private void SetFotografTab() => SetActiveTab("fotograf");
+
         private void FilterIlceler()
         {
             if (FormModel.IlId > 0)
