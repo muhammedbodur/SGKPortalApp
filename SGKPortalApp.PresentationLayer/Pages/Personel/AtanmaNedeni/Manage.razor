@@ -5,158 +5,162 @@
 
 <PageTitle>@(IsEditMode ? "Atanma Nedeni Düzenle" : "Yeni Atanma Nedeni") - SGK Portal</PageTitle>
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    @if (!CanViewPage)
-    {
-        <div class="alert alert-danger" role="alert">
-            <i class="bx bx-lock-alt me-2"></i>
-            Bu sayfayı görüntüleme yetkiniz bulunmuyor.
-        </div>
-    }
-    else
-    {
-        <!-- BREADCRUMB -->
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb breadcrumb-style1">
-                <li class="breadcrumb-item">
-                    <a href="javascript:void(0);" @onclick="NavigateToHome">
-                        <i class="bx bx-home-alt me-1"></i>Ana Sayfa
-                    </a>
-                </li>
-                <li class="breadcrumb-item">
-                    <a href="javascript:void(0);" @onclick="NavigateToList">
-                        Atanma Nedenleri
-                    </a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">
-                    @(IsEditMode ? "Düzenle" : "Yeni Atanma Nedeni")
-                </li>
-            </ol>
-        </nav>
 
-        <!-- PAGE HEADER -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h4 class="fw-bold mb-1">
-                    <i class="bx @(IsEditMode ? "bx-edit" : "bx-plus-circle") me-2"></i>
-                    @(IsEditMode ? "Atanma Nedeni Düzenle" : "Yeni Atanma Nedeni Ekle")
-                </h4>
-                <p class="text-muted mb-0">
-                    @(IsEditMode ? "Atanma nedeni bilgilerini güncelleyin" : "Yeni bir atanma nedeni oluşturun")
-                </p>
-            </div>
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <!-- BREADCRUMB -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb breadcrumb-style1">
+                    <li class="breadcrumb-item">
+                        <a href="javascript:void(0);" @onclick="NavigateToHome">
+                            <i class="bx bx-home-alt me-1"></i>Ana Sayfa
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="javascript:void(0);" @onclick="NavigateToList">
+                            Atanma Nedenleri
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        @(IsEditMode ? "Düzenle" : "Yeni Atanma Nedeni")
+                    </li>
+                </ol>
+            </nav>
 
-            <button class="btn btn-outline-secondary" @onclick="NavigateToList">
-                <i class="bx bx-arrow-back me-1"></i>Geri Dön
-            </button>
-        </div>
-
-        @if (IsLoading)
-        {
-            <!-- Loading State -->
-            <div class="card">
-                <div class="card-body text-center py-5">
-                    <div class="spinner-border text-primary mb-3" role="status">
-                        <span class="visually-hidden">Yükleniyor...</span>
-                    </div>
-                    <p class="text-muted">@(IsEditMode ? "Atanma nedeni bilgileri yükleniyor..." : "Hazırlanıyor...")</p>
+            <!-- PAGE HEADER -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        <i class="bx @(IsEditMode ? "bx-edit" : "bx-plus-circle") me-2"></i>
+                        @(IsEditMode ? "Atanma Nedeni Düzenle" : "Yeni Atanma Nedeni Ekle")
+                    </h4>
+                    <p class="text-muted mb-0">
+                        @(IsEditMode ? "Atanma nedeni bilgilerini güncelleyin" : "Yeni bir atanma nedeni oluşturun")
+                    </p>
                 </div>
+
+                <button class="btn btn-outline-secondary" @onclick="NavigateToList">
+                    <i class="bx bx-arrow-back me-1"></i>Geri Dön
+                </button>
             </div>
-        }
-        else
-        {
-            <!-- FORM CARD -->
-            <div class="row">
-                <div class="col-lg-8 col-xl-6 mx-auto">
-                    <div class="card">
-                        <div class="card-header d-flex align-items-center justify-content-between">
-                            <h5 class="mb-0">
-                                <i class="bx bx-info-circle me-2"></i>Atanma Nedeni Bilgileri
-                            </h5>
-                            @if (IsEditMode)
-                            {
-                                <span class="badge bg-label-info">ID: @Id</span>
-                            }
+
+            @if (IsLoading)
+            {
+                <!-- Loading State -->
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Yükleniyor...</span>
                         </div>
-
-                        <div class="card-body">
-                            <EditForm Model="@FormModel" OnValidSubmit="HandleSubmit">
-                                <DataAnnotationsValidator />
-
-                                <!-- Atanma Nedeni -->
-                                <div class="mb-3">
-                                    <label class="form-label required">
-                                        <i class="bx bx-file me-1"></i>Atanma Nedeni
-                                    </label>
-                                    <InputText @bind-Value="FormModel.AtanmaNedeni"
-                                               class="form-control"
-                                               placeholder="Örn: Naklen Atama"
-                                               maxlength="200"
-                                               disabled="@IsSaving" />
-                                    <ValidationMessage For="@(() => FormModel.AtanmaNedeni)" class="text-danger small mt-1" />
-
-                                    <!-- Karakter Sayacı -->
-                                    <div class="form-text">
-                                        @FormModel.AtanmaNedeni.Length / 200 karakter
-                                    </div>
-                                </div>
-
-                                <!-- Validation Summary -->
-                                <ValidationSummary class="alert alert-danger" />
-
-                                <!-- Action Buttons -->
-                                <div class="d-flex gap-2 justify-content-end pt-3 border-top">
-                                    <button type="button"
-                                            class="btn btn-outline-secondary"
-                                            @onclick="NavigateToList"
-                                            disabled="@IsSaving">
-                                        <i class="bx bx-x me-1"></i>İptal
-                                    </button>
-
-                                    <button type="submit"
-                                            class="btn btn-primary"
-                                            disabled="@IsSaving">
-                                        @if (IsSaving)
-                                        {
-                                            <span class="spinner-border spinner-border-sm me-1"></span>
-                                            <span>Kaydediliyor...</span>
-                                        }
-                                        else
-                                        {
-                                            <i class="bx bx-check me-1"></i>
-                                            <span>@(IsEditMode ? "Güncelle" : "Kaydet")</span>
-                                        }
-                                    </button>
-                                </div>
-                            </EditForm>
-                        </div>
+                        <p class="text-muted">@(IsEditMode ? "Atanma nedeni bilgileri yükleniyor..." : "Hazırlanıyor...")</p>
                     </div>
+                </div>
+            }
+            else
+            {
+                <!-- FORM CARD -->
+                <div class="row">
+                    <div class="col-lg-8 col-xl-6 mx-auto">
+                        <div class="card">
+                            <div class="card-header d-flex align-items-center justify-content-between">
+                                <h5 class="mb-0">
+                                    <i class="bx bx-info-circle me-2"></i>Atanma Nedeni Bilgileri
+                                </h5>
+                                @if (IsEditMode)
+                                {
+                                    <span class="badge bg-label-info">ID: @Id</span>
+                                }
+                            </div>
 
-                    <!-- Delete Button (Edit Mode Only) -->
-                    @if (IsEditMode)
-                    {
-                        <div class="card border-danger mt-4">
                             <div class="card-body">
-                                <h6 class="text-danger mb-2">
-                                    <i class="bx bx-error-circle me-1"></i>Tehlikeli Bölge
-                                </h6>
-                                <p class="text-muted mb-3 small">
-                                    Bu atanma nedenini silmek istiyorsanız, aşağıdaki butona tıklayın.
-                                    Bu işlem geri alınamaz.
-                                </p>
-                                <button class="btn btn-outline-danger"
-                                        @onclick="ShowDeleteConfirmation"
-                                        disabled="@IsSaving">
-                                    <i class="bx bx-trash me-1"></i>Atanma Nedenini Sil
-                                </button>
+                                <EditForm Model="@FormModel" OnValidSubmit="HandleSubmit">
+                                    <DataAnnotationsValidator />
+
+                                    <!-- Atanma Nedeni -->
+                                    <div class="mb-3">
+                                        <label class="form-label required">
+                                            <i class="bx bx-file me-1"></i>Atanma Nedeni
+                                        </label>
+                                        <InputText @bind-Value="FormModel.AtanmaNedeni"
+                                                   class="form-control"
+                                                   placeholder="Örn: Naklen Atama"
+                                                   maxlength="200"
+                                                   disabled="@IsSaving" />
+                                        <ValidationMessage For="@(() => FormModel.AtanmaNedeni)" class="text-danger small mt-1" />
+
+                                        <!-- Karakter Sayacı -->
+                                        <div class="form-text">
+                                            @FormModel.AtanmaNedeni.Length / 200 karakter
+                                        </div>
+                                    </div>
+
+                                    <!-- Validation Summary -->
+                                    <ValidationSummary class="alert alert-danger" />
+
+                                    <!-- Action Buttons -->
+                                    <div class="d-flex gap-2 justify-content-end pt-3 border-top">
+                                        <button type="button"
+                                                class="btn btn-outline-secondary"
+                                                @onclick="NavigateToList"
+                                                disabled="@IsSaving">
+                                            <i class="bx bx-x me-1"></i>İptal
+                                        </button>
+
+                                        <button type="submit"
+                                                class="btn btn-primary"
+                                                disabled="@IsSaving">
+                                            @if (IsSaving)
+                                            {
+                                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                                <span>Kaydediliyor...</span>
+                                            }
+                                            else
+                                            {
+                                                <i class="bx bx-check me-1"></i>
+                                                <span>@(IsEditMode ? "Güncelle" : "Kaydet")</span>
+                                            }
+                                        </button>
+                                    </div>
+                                </EditForm>
                             </div>
                         </div>
-                    }
+
+                        <!-- Delete Button (Edit Mode Only) -->
+                        @if (IsEditMode)
+                        {
+                            <div class="card border-danger mt-4">
+                                <div class="card-body">
+                                    <h6 class="text-danger mb-2">
+                                        <i class="bx bx-error-circle me-1"></i>Tehlikeli Bölge
+                                    </h6>
+                                    <p class="text-muted mb-3 small">
+                                        Bu atanma nedenini silmek istiyorsanız, aşağıdaki butona tıklayın.
+                                        Bu işlem geri alınamaz.
+                                    </p>
+                                    <button class="btn btn-outline-danger"
+                                            @onclick="ShowDeleteConfirmation"
+                                            disabled="@IsSaving">
+                                        <i class="bx bx-trash me-1"></i>Atanma Nedenini Sil
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
                 </div>
-            </div>
-        }
-    }
-</div>
+            }
+        </div>
+    </FieldPermissionScope>
+}
+
 
 <!-- DELETE CONFIRMATION MODAL -->
 @if (ShowDeleteModal)

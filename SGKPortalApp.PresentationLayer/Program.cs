@@ -7,6 +7,7 @@ using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.PresentationLayer.Extensions;
 using SGKPortalApp.PresentationLayer.Helpers;
 using SGKPortalApp.PresentationLayer.Middleware;
+using SGKPortalApp.PresentationLayer.Services.Permission;
 using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -97,7 +98,7 @@ Console.WriteLine($"✅ HttpClient configured - BaseAddress: {apiUrl}");
 // ═══════════════════════════════════════════════════════
 // ⭐ KATMAN SERVİSLERİ ⭐
 // ═══════════════════════════════════════════════════════
-// 1. Data Access Layer + Business Logic Layer (Shared connection string kullanıyor)
+// 1. Data Access Layer + core servisler (Shared connection string kullanıyor)
 builder.Services.AddSGKPortalServices(builder.Configuration);
 
 // 2. Presentation Layer (UI Services)

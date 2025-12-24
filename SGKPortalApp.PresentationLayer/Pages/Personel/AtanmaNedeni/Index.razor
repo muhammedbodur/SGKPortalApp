@@ -6,265 +6,268 @@
 
 @if (!CanViewPage)
 {
-<div class="alert alert-danger" role="alert">
-<i class="bx bx-lock-alt me-2"></i>
-Bu sayfayı görüntüleme yetkiniz bulunmuyor.
-</div>
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
 }
 else
 {
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold mb-1">
-                <i class="bx bx-file me-2"></i>Atanma Nedenleri
-            </h4>
-            <p class="text-muted mb-0">Tüm atanma nedenlerini görüntüleyin ve yönetin</p>
-        </div>
-
-        <div class="d-flex gap-2">
-            <!-- Excel Export -->
-            <button class="btn btn-success" @onclick="ExportToExcel" disabled="@IsExporting">
-                @if (IsExporting && ExportType == "excel")
-                {
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                }
-                else
-                {
-                    <i class="bx bx-download me-1"></i>
-                }
-                Excel
-            </button>
-
-            <!-- PDF Export -->
-            <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@IsExporting">
-                @if (IsExporting && ExportType == "pdf")
-                {
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                }
-                else
-                {
-                    <i class="bx bxs-file-pdf me-1"></i>
-                }
-                PDF
-            </button>
-
-            <!-- Yeni Atanma Nedeni -->
-            <button class="btn btn-primary" @onclick="NavigateToCreate">
-                <i class="bx bx-plus me-1"></i>Yeni Atanma Nedeni
-            </button>
-        </div>
-    </div>
-
-    <!-- FILTER CARD -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3">
-                <!-- Arama -->
-                <div class="col-md-6">
-                    <label class="form-label">Atanma Nedeni Ara</label>
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bx bx-search"></i>
-                        </span>
-                        <input type="text"
-                               class="form-control"
-                               placeholder="Atanma nedeni ara..."
-                               @bind="searchTerm"
-                               @bind:event="oninput"
-                               @onkeyup="OnSearchChanged" />
-                    </div>
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        <i class="bx bx-file me-2"></i>Atanma Nedenleri
+                    </h4>
+                    <p class="text-muted mb-0">Tüm atanma nedenlerini görüntüleyin ve yönetin</p>
                 </div>
 
-                <!-- Sıralama -->
-                <div class="col-md-4">
-                    <label class="form-label">Sıralama</label>
-                    <select class="form-select" value="@sortBy" @onchange="OnSortByChanged">
-                        <option value="name-asc">İsim (A-Z)</option>
-                        <option value="name-desc">İsim (Z-A)</option>
-                        <option value="date-newest">En Yeni</option>
-                        <option value="date-oldest">En Eski</option>
-                    </select>
-                </div>
+                <div class="d-flex gap-2">
+                    <!-- Excel Export -->
+                    <button class="btn btn-success" @onclick="ExportToExcel" disabled="@IsExporting">
+                        @if (IsExporting && ExportType == "excel")
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        else
+                        {
+                            <i class="bx bx-download me-1"></i>
+                        }
+                        Excel
+                    </button>
 
-                <!-- Temizle -->
-                <div class="col-md-2 d-flex align-items-end">
-                    <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
-                        <i class="bx bx-reset me-1"></i>Temizle
+                    <!-- PDF Export -->
+                    <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@IsExporting">
+                        @if (IsExporting && ExportType == "pdf")
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        else
+                        {
+                            <i class="bx bxs-file-pdf me-1"></i>
+                        }
+                        PDF
+                    </button>
+
+                    <!-- Yeni Atanma Nedeni -->
+                    <button class="btn btn-primary" @onclick="NavigateToCreate">
+                        <i class="bx bx-plus me-1"></i>Yeni Atanma Nedeni
                     </button>
                 </div>
             </div>
 
-            <!-- İstatistikler -->
-            <div class="row mt-3">
-                <div class="col">
-                    <div class="d-flex gap-4 text-muted small">
-                        <span>
-                            <i class="bx bx-file text-primary"></i>
-                            Toplam: <strong>@AtanmaNedenleri.Count</strong>
-                        </span>
-                        <span>
-                            <i class="bx bx-filter-alt text-info"></i>
-                            Filtrelenen: <strong>@FilteredAtanmaNedenleri.Count</strong>
-                        </span>
+            <!-- FILTER CARD -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Arama -->
+                        <div class="col-md-6">
+                            <label class="form-label">Atanma Nedeni Ara</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bx bx-search"></i>
+                                </span>
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="Atanma nedeni ara..."
+                                       @bind="searchTerm"
+                                       @bind:event="oninput"
+                                       @onkeyup="OnSearchChanged" />
+                            </div>
+                        </div>
+
+                        <!-- Sıralama -->
+                        <div class="col-md-4">
+                            <label class="form-label">Sıralama</label>
+                            <select class="form-select" value="@sortBy" @onchange="OnSortByChanged">
+                                <option value="name-asc">İsim (A-Z)</option>
+                                <option value="name-desc">İsim (Z-A)</option>
+                                <option value="date-newest">En Yeni</option>
+                                <option value="date-oldest">En Eski</option>
+                            </select>
+                        </div>
+
+                        <!-- Temizle -->
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
+                                <i class="bx bx-reset me-1"></i>Temizle
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- İstatistikler -->
+                    <div class="row mt-3">
+                        <div class="col">
+                            <div class="d-flex gap-4 text-muted small">
+                                <span>
+                                    <i class="bx bx-file text-primary"></i>
+                                    Toplam: <strong>@AtanmaNedenleri.Count</strong>
+                                </span>
+                                <span>
+                                    <i class="bx bx-filter-alt text-info"></i>
+                                    Filtrelenen: <strong>@FilteredAtanmaNedenleri.Count</strong>
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- TABLE CARD -->
-    <div class="card">
-        <div class="card-body">
-            @if (IsLoading)
-            {
-                <!-- Loading Spinner -->
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Yükleniyor...</span>
-                    </div>
-                    <p class="mt-2 text-muted">Atanma nedenleri yükleniyor...</p>
-                </div>
-            }
-            else if (!FilteredAtanmaNedenleri.Any())
-            {
-                <!-- Empty State -->
-                <div class="text-center py-5">
-                    <i class="bx bx-search-alt display-1 text-muted"></i>
-                    <h5 class="mt-3">Atanma Nedeni Bulunamadı</h5>
-                    <p class="text-muted">
-                        @if (string.IsNullOrEmpty(searchTerm))
-                        {
-                            <span>Henüz atanma nedeni eklenmemiş.</span>
-                        }
-                        else
-                        {
-                            <span>Arama kriterlerinize uygun atanma nedeni bulunamadı.</span>
-                        }
-                    </p>
-                    @if (string.IsNullOrEmpty(searchTerm))
+            <!-- TABLE CARD -->
+            <div class="card">
+                <div class="card-body">
+                    @if (IsLoading)
                     {
-                        <button class="btn btn-primary mt-2" @onclick="NavigateToCreate">
-                            <i class="bx bx-plus me-1"></i>İlk Atanma Nedenini Ekle
-                        </button>
+                        <!-- Loading Spinner -->
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Yükleniyor...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Atanma nedenleri yükleniyor...</p>
+                        </div>
+                    }
+                    else if (!FilteredAtanmaNedenleri.Any())
+                    {
+                        <!-- Empty State -->
+                        <div class="text-center py-5">
+                            <i class="bx bx-search-alt display-1 text-muted"></i>
+                            <h5 class="mt-3">Atanma Nedeni Bulunamadı</h5>
+                            <p class="text-muted">
+                                @if (string.IsNullOrEmpty(searchTerm))
+                                {
+                                    <span>Henüz atanma nedeni eklenmemiş.</span>
+                                }
+                                else
+                                {
+                                    <span>Arama kriterlerinize uygun atanma nedeni bulunamadı.</span>
+                                }
+                            </p>
+                            @if (string.IsNullOrEmpty(searchTerm))
+                            {
+                                <button class="btn btn-primary mt-2" @onclick="NavigateToCreate">
+                                    <i class="bx bx-plus me-1"></i>İlk Atanma Nedenini Ekle
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-outline-secondary mt-2" @onclick="ClearFilters">
+                                    <i class="bx bx-reset me-1"></i>Filtreleri Temizle
+                                </button>
+                            }
+                        </div>
                     }
                     else
                     {
-                        <button class="btn btn-outline-secondary mt-2" @onclick="ClearFilters">
-                            <i class="bx bx-reset me-1"></i>Filtreleri Temizle
-                        </button>
+                        <!-- Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">#</th>
+                                        <th>Atanma Nedeni</th>
+                                        <th class="text-center" style="width: 150px;">Eklenme Tarihi</th>
+                                        <th class="text-center" style="width: 150px;">Son Güncelleme</th>
+                                        <th class="text-center" style="width: 180px;">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var pagedData = FilteredAtanmaNedenleri
+                                        .Skip((CurrentPage - 1) * PageSize)
+                                        .Take(PageSize)
+                                        .ToList();
+                                    }
+                                    @foreach (var (item, index) in pagedData.Select((d, i) => (d, (CurrentPage - 1) * PageSize + i + 1)))
+                                    {
+                                        <tr>
+                                            <td>@index</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar avatar-sm me-2">
+                                                        <span class="avatar-initial rounded-circle bg-label-primary">
+                                                            @item.AtanmaNedeni.Substring(0, 1).ToUpper()
+                                                        </span>
+                                                    </div>
+                                                    <strong>@item.AtanmaNedeni</strong>
+                                                </div>
+                                            </td>
+                                            <td class="text-center text-muted small">
+                                                @DateTime.Now.ToString("dd.MM.yyyy HH:mm")
+                                            </td>
+                                            <td class="text-center text-muted small">
+                                                @DateTime.Now.ToString("dd.MM.yyyy HH:mm")
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-flex justify-content-center gap-1">
+                                                    @if (IsActionVisible("EDIT"))
+                                                    {
+                                                        <!-- Düzenle -->
+                                                        <button class="btn btn-sm btn-icon btn-outline-primary"
+                                                                @onclick="() => NavigateToEdit(item.AtanmaNedeniId)"
+                                                                disabled="@(!CanEditAction("EDIT"))"
+                                                                title="@(CanEditAction("EDIT") ? "Düzenle" : "Düzenle (Yetki Yok)")">
+                                                            <i class="bx bx-edit"></i>
+                                                        </button>
+                                                    }
+
+                                                    @if (IsActionVisible("DELETE"))
+                                                    {
+                                                        <!-- Sil -->
+                                                        <button class="btn btn-sm btn-icon btn-outline-danger"
+                                                                @onclick="() => ShowDeleteModal(item)"
+                                                                disabled="@(!CanEditAction("DELETE"))"
+                                                                title="@(CanEditAction("DELETE") ? "Sil" : "Sil (Yetki Yok)")">
+                                                            <i class="bx bx-trash"></i>
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        @if (TotalPages > 1)
+                        {
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="text-muted small">
+                                    Sayfa @CurrentPage / @TotalPages (Toplam @FilteredAtanmaNedenleri.Count kayıt)
+                                </div>
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0">
+                                        <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                                            <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">
+                                                <i class="bx bx-chevron-left"></i>
+                                            </button>
+                                        </li>
+                                        @for (int i = 1; i <= TotalPages; i++)
+                                        {
+                                            var pageNum = i;
+                                            <li class="page-item @(CurrentPage == pageNum ? "active" : "")">
+                                                <button class="page-link" @onclick="() => ChangePage(pageNum)">
+                                                    @pageNum
+                                                </button>
+                                            </li>
+                                        }
+                                        <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                                            <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">
+                                                <i class="bx bx-chevron-right"></i>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        }
                     }
                 </div>
-            }
-            else
-            {
-                <!-- Table -->
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th style="width: 50px;">#</th>
-                                <th>Atanma Nedeni</th>
-                                <th class="text-center" style="width: 150px;">Eklenme Tarihi</th>
-                                <th class="text-center" style="width: 150px;">Son Güncelleme</th>
-                                <th class="text-center" style="width: 180px;">İşlemler</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @{
-                                var pagedData = FilteredAtanmaNedenleri
-                                .Skip((CurrentPage - 1) * PageSize)
-                                .Take(PageSize)
-                                .ToList();
-                            }
-                            @foreach (var (item, index) in pagedData.Select((d, i) => (d, (CurrentPage - 1) * PageSize + i + 1)))
-                            {
-                                <tr>
-                                    <td>@index</td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar avatar-sm me-2">
-                                                <span class="avatar-initial rounded-circle bg-label-primary">
-                                                    @item.AtanmaNedeni.Substring(0, 1).ToUpper()
-                                                </span>
-                                            </div>
-                                            <strong>@item.AtanmaNedeni</strong>
-                                        </div>
-                                    </td>
-                                    <td class="text-center text-muted small">
-                                        @DateTime.Now.ToString("dd.MM.yyyy HH:mm")
-                                    </td>
-                                    <td class="text-center text-muted small">
-                                        @DateTime.Now.ToString("dd.MM.yyyy HH:mm")
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="d-flex justify-content-center gap-1">
-                                            @if (IsActionVisible("EDIT"))
-                                            {
-                                                <!-- Düzenle -->
-                                                <button class="btn btn-sm btn-icon btn-outline-primary"
-                                                        @onclick="() => NavigateToEdit(item.AtanmaNedeniId)"
-                                                        disabled="@(!CanEditAction("EDIT"))"
-                                                        title="@(CanEditAction("EDIT") ? "Düzenle" : "Düzenle (Yetki Yok)")">
-                                                    <i class="bx bx-edit"></i>
-                                                </button>
-                                            }
-
-                                            @if (IsActionVisible("DELETE"))
-                                            {
-                                                <!-- Sil -->
-                                                <button class="btn btn-sm btn-icon btn-outline-danger"
-                                                        @onclick="() => ShowDeleteModal(item)"
-                                                        disabled="@(!CanEditAction("DELETE"))"
-                                                        title="@(CanEditAction("DELETE") ? "Sil" : "Sil (Yetki Yok)")">
-                                                    <i class="bx bx-trash"></i>
-                                                </button>
-                                            }
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                @if (TotalPages > 1)
-                {
-                    <div class="d-flex justify-content-between align-items-center mt-3">
-                        <div class="text-muted small">
-                            Sayfa @CurrentPage / @TotalPages (Toplam @FilteredAtanmaNedenleri.Count kayıt)
-                        </div>
-                        <nav>
-                            <ul class="pagination pagination-sm mb-0">
-                                <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
-                                    <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">
-                                        <i class="bx bx-chevron-left"></i>
-                                    </button>
-                                </li>
-                                @for (int i = 1; i <= TotalPages; i++)
-                                {
-                                    var pageNum = i;
-                                    <li class="page-item @(CurrentPage == pageNum ? "active" : "")">
-                                        <button class="page-link" @onclick="() => ChangePage(pageNum)">
-                                            @pageNum
-                                        </button>
-                                    </li>
-                                }
-                                <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
-                                    <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">
-                                        <i class="bx bx-chevron-right"></i>
-                                    </button>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
-                }
-            }
+            </div>
         </div>
-    </div>
-</div>
+    </FieldPermissionScope>
+}
 
 <!-- Delete Modal -->
 @if (ShowDeleteConfirmation)
