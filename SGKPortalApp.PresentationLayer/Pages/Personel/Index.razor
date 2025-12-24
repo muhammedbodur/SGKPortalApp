@@ -222,11 +222,26 @@ else
                                 <thead>
                                     <tr>
                                         <th style="width: 50px;">#</th>
-                                        <th>TC Kimlik No</th>
-                                        <th>Sicil No</th>
-                                        <th>Ad Soyad</th>
-                                        <th>Departman</th>
-                                        <th>Servis</th>
+                                        <th class="sortable" @onclick="() => SortByColumn(\"TcKimlikNo\")" style="cursor: pointer;">
+                                            TC Kimlik No
+                                            <i class="bx @GetSortIcon(\"TcKimlikNo\") ms-1"></i>
+                                        </th>
+                                        <th class="sortable" @onclick="() => SortByColumn(\"SicilNo\")" style="cursor: pointer;">
+                                            Sicil No
+                                            <i class="bx @GetSortIcon(\"SicilNo\") ms-1"></i>
+                                        </th>
+                                        <th class="sortable" @onclick="() => SortByColumn(\"AdSoyad\")" style="cursor: pointer;">
+                                            Ad Soyad
+                                            <i class="bx @GetSortIcon(\"AdSoyad\") ms-1"></i>
+                                        </th>
+                                        <th class="sortable" @onclick="() => SortByColumn(\"DepartmanAdi\")" style="cursor: pointer;">
+                                            Departman
+                                            <i class="bx @GetSortIcon(\"DepartmanAdi\") ms-1"></i>
+                                        </th>
+                                        <th class="sortable" @onclick="() => SortByColumn(\"ServisAdi\")" style="cursor: pointer;">
+                                            Servis
+                                            <i class="bx @GetSortIcon(\"ServisAdi\") ms-1"></i>
+                                        </th>
                                         <th>Hizmet Binası</th>
                                         <th>Ünvan</th>
                                         <th>Dahili</th>

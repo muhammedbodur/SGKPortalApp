@@ -66,6 +66,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private int filterAktiflik = -1; // -1: Tümü, 0: Aktif, 1: Pasif, 2: Emekli
         private string sortBy = "name-asc";
 
+        // Column Header Sorting
+        private string currentSortColumn = "AdSoyad"; // Varsayılan sıralama kolonu
+        private bool currentSortAscending = true; // Varsayılan artan sıralama
+
         // ═══════════════════════════════════════════════════════
         // PAGINATION PROPERTIES
         // ═══════════════════════════════════════════════════════
@@ -191,15 +195,21 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 return true;
             }).ToList();
 
-            // Sıralama
-            FilteredPersoneller = sortBy switch
+            // Sıralama - Dinamik sütun sıralaması
+            FilteredPersoneller = (currentSortColumn, currentSortAscending) switch
             {
-                "name-asc" => FilteredPersoneller.OrderBy(p => p.AdSoyad).ToList(),
-                "name-desc" => FilteredPersoneller.OrderByDescending(p => p.AdSoyad).ToList(),
-                "sicil-asc" => FilteredPersoneller.OrderBy(p => p.SicilNo).ToList(),
-                "sicil-desc" => FilteredPersoneller.OrderByDescending(p => p.SicilNo).ToList(),
-                "date-newest" => FilteredPersoneller.OrderByDescending(p => p.EklenmeTarihi).ToList(),
-                "date-oldest" => FilteredPersoneller.OrderBy(p => p.EklenmeTarihi).ToList(),
+                ("TcKimlikNo", true) => FilteredPersoneller.OrderBy(p => p.TcKimlikNo).ToList(),
+                ("TcKimlikNo", false) => FilteredPersoneller.OrderByDescending(p => p.TcKimlikNo).ToList(),
+                ("SicilNo", true) => FilteredPersoneller.OrderBy(p => p.SicilNo).ToList(),
+                ("SicilNo", false) => FilteredPersoneller.OrderByDescending(p => p.SicilNo).ToList(),
+                ("AdSoyad", true) => FilteredPersoneller.OrderBy(p => p.AdSoyad).ToList(),
+                ("AdSoyad", false) => FilteredPersoneller.OrderByDescending(p => p.AdSoyad).ToList(),
+                ("DepartmanAdi", true) => FilteredPersoneller.OrderBy(p => p.DepartmanAdi).ToList(),
+                ("DepartmanAdi", false) => FilteredPersoneller.OrderByDescending(p => p.DepartmanAdi).ToList(),
+                ("ServisAdi", true) => FilteredPersoneller.OrderBy(p => p.ServisAdi).ToList(),
+                ("ServisAdi", false) => FilteredPersoneller.OrderByDescending(p => p.ServisAdi).ToList(),
+                ("EklenmeTarihi", true) => FilteredPersoneller.OrderBy(p => p.EklenmeTarihi).ToList(),
+                ("EklenmeTarihi", false) => FilteredPersoneller.OrderByDescending(p => p.EklenmeTarihi).ToList(),
                 _ => FilteredPersoneller.OrderBy(p => p.AdSoyad).ToList()
             };
 
@@ -245,7 +255,70 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private void OnSortByChanged(ChangeEventArgs e)
         {
             sortBy = e.Value?.ToString() ?? "name-asc";
+
+            // Dropdown değiştiğinde column sorting'i de senkronize et
+            (currentSortColumn, currentSortAscending) = sortBy switch
+            {
+                "name-asc" => ("AdSoyad", true),
+                "name-desc" => ("AdSoyad", false),
+                "sicil-asc" => ("SicilNo", true),
+                "sicil-desc" => ("SicilNo", false),
+                "date-newest" => ("EklenmeTarihi", false),
+                "date-oldest" => ("EklenmeTarihi", true),
+                _ => ("AdSoyad", true)
+            };
+
             ApplyFiltersAndSort();
+        }
+
+        /// <summary>
+        /// Tablo başlığına tıklandığında sıralama yapır
+        /// </summary>
+        private void SortByColumn(string columnName)
+        {
+            // Aynı kolona tıklanırsa direction'ı değiştir, farklı kolona tıklanırsa ascending yap
+            if (currentSortColumn == columnName)
+            {
+                currentSortAscending = !currentSortAscending;
+            }
+            else
+            {
+                currentSortColumn = columnName;
+                currentSortAscending = true;
+            }
+
+            // Dropdown'ı da senkronize et
+            sortBy = (currentSortColumn, currentSortAscending) switch
+            {
+                ("AdSoyad", true) => "name-asc",
+                ("AdSoyad", false) => "name-desc",
+                ("SicilNo", true) => "sicil-asc",
+                ("SicilNo", false) => "sicil-desc",
+                ("EklenmeTarihi", true) => "date-oldest",
+                ("EklenmeTarihi", false) => "date-newest",
+                _ => "name-asc"
+            };
+
+            ApplyFiltersAndSort();
+        }
+
+        /// <summary>
+        /// Sıralama ok ikonu döndürür (CSS class)
+        /// </summary>
+        private string GetSortIcon(string columnName)
+        {
+            if (currentSortColumn != columnName)
+                return "bx-sort"; // Varsayılan sort ikonu
+
+            return currentSortAscending ? "bx-sort-up" : "bx-sort-down";
+        }
+
+        /// <summary>
+        /// Sütun sıralanabilir mi kontrol eder
+        /// </summary>
+        private bool IsColumnSortable(string columnName)
+        {
+            return columnName is "TcKimlikNo" or "SicilNo" or "AdSoyad" or "DepartmanAdi" or "ServisAdi" or "EklenmeTarihi";
         }
 
         private void ClearFilters()
