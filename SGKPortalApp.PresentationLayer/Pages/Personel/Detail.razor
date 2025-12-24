@@ -148,67 +148,67 @@ else
                         <ul class="nav nav-tabs flex-column flex-md-row mb-3" role="tablist">
                             <li class="nav-item">
                                 <button class="nav-link @(ActiveTab == "personel" ? "active" : "")" 
-                                        @onclick='() => SetActiveTab("personel")' type="button">
+                                        @onclick="SetPersonelTab" type="button">
                                     <i class="bx bx-user me-1"></i>Personel
                                 </button>
                             </li>
                             <li class="nav-item">
                                 <button class="nav-link @(ActiveTab == "iletisim" ? "active" : "")" 
-                                        @onclick='() => SetActiveTab("iletisim")' type="button">
+                                        @onclick="SetIletisimTab" type="button">
                                     <i class="bx bx-phone me-1"></i>İletişim
                                 </button>
                             </li>
                             <li class="nav-item">
                                 <button class="nav-link @(ActiveTab == "kisisel" ? "active" : "")" 
-                                        @onclick='() => SetActiveTab("kisisel")' type="button">
+                                        @onclick="SetKisiselTab" type="button">
                                     <i class="bx bx-id-card me-1"></i>Kişisel
                                 </button>
                             </li>
                             <li class="nav-item">
                                 <button class="nav-link @(ActiveTab == "ozluk" ? "active" : "")" 
-                                        @onclick='() => SetActiveTab("ozluk")' type="button">
+                                        @onclick="SetOzlukTab" type="button">
                                     <i class="bx bx-file me-1"></i>Özlük
                                 </button>
                             </li>
                             <li class="nav-item">
                                 <button class="nav-link @(ActiveTab == "es-cocuk" ? "active" : "")" 
-                                        @onclick='() => SetActiveTab("es-cocuk")' type="button">
+                                        @onclick="SetEsCocukTab" type="button">
                                     <i class="bx bx-group me-1"></i>Eş/Çocuk
                                 </button>
                             </li>
                             <li class="nav-item">
                                 <button class="nav-link @(ActiveTab == "hizmet" ? "active" : "")" 
-                                        @onclick='() => SetActiveTab("hizmet")' type="button">
+                                        @onclick="SetHizmetTab" type="button">
                                     <i class="bx bx-briefcase me-1"></i>Hizmet
                                 </button>
                             </li>
                             <li class="nav-item">
                                 <button class="nav-link @(ActiveTab == "egitim" ? "active" : "")" 
-                                        @onclick='() => SetActiveTab("egitim")' type="button">
+                                        @onclick="SetEgitimTab" type="button">
                                     <i class="bx bx-book me-1"></i>Eğitim
                                 </button>
                             </li>
                             <li class="nav-item">
                                 <button class="nav-link @(ActiveTab == "yetki" ? "active" : "")" 
-                                        @onclick='() => SetActiveTab("yetki")' type="button">
+                                        @onclick="SetYetkiTab" type="button">
                                     <i class="bx bx-key me-1"></i>Yetki
                                 </button>
                             </li>
                             <li class="nav-item">
                                 <button class="nav-link @(ActiveTab == "ceza" ? "active" : "")" 
-                                        @onclick='() => SetActiveTab("ceza")' type="button">
+                                        @onclick="SetCezaTab" type="button">
                                     <i class="bx bx-error me-1"></i>Ceza
                                 </button>
                             </li>
                             <li class="nav-item">
                                 <button class="nav-link @(ActiveTab == "engel" ? "active" : "")" 
-                                        @onclick='() => SetActiveTab("engel")' type="button">
+                                        @onclick="SetEngelTab" type="button">
                                     <i class="bx bx-accessibility me-1"></i>Engel
                                 </button>
                             </li>
                             <li class="nav-item">
                                 <button class="nav-link @(ActiveTab == "fotograf" ? "active" : "")" 
-                                        @onclick='() => SetActiveTab("fotograf")' type="button">
+                                        @onclick="SetFotografTab" type="button">
                                     <i class="bx bx-image me-1"></i>Fotoğraf
                                 </button>
                             </li>
