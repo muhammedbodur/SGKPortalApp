@@ -1,4 +1,6 @@
-﻿namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
+﻿using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
+
+namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
 {
     /// <summary>
     /// Liste görünümü için basitleştirilmiş personel DTO
@@ -14,6 +16,9 @@
         public string UnvanAdi { get; set; } = string.Empty;
         public string? CepTelefonu { get; set; }
         public int Dahili { get; set; }
-        public string PersonelAktiflikDurum { get; set; } = string.Empty;
+        public PersonelAktiflikDurum PersonelAktiflikDurum { get; set; }
+        public string HizmetBinasiAdi { get; set; } = string.Empty;
+        public string Resim { get; set; } = string.Empty;
+        public DateTime EklenmeTarihi { get; set; }
     }
 }

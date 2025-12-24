@@ -212,7 +212,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                     UnvanAdi = p.Unvan != null ? p.Unvan.UnvanAdi : "",
                     Dahili = p.Dahili,
                     CepTelefonu = p.CepTelefonu,
-                    PersonelAktiflikDurum = p.PersonelAktiflikDurum.ToString()
+                    PersonelAktiflikDurum = p.PersonelAktiflikDurum
                 })
                 .ToListAsync();
 
