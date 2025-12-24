@@ -1,4 +1,4 @@
-namespace SGKPortalApp.BusinessObjectLayer.Interfaces.SignalR
+namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR
 {
     /// <summary>
     /// SignalR mesaj yayınlama soyutlaması

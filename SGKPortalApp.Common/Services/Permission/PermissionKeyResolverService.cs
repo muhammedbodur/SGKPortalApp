@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
+using SGKPortalApp.Common.Interfaces.Permission;
 
-namespace SGKPortalApp.BusinessLogicLayer.Services.Common
+namespace SGKPortalApp.Common.Services.Permission
 {
     /// <summary>
     /// HTTP isteğinin route bilgisinden permission key'i otomatik çözümleyen servis.
@@ -93,41 +93,40 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             // 1. Direkt eşleşme dene
             if (routeMap.TryGetValue(normalizedRoute, out var permissionKey))
             {
-                _logger.LogDebug("✅ Route çözümlendi: {Route} → {PermissionKey}", normalizedRoute, permissionKey);
+                _logger.LogDebug("✅ Route mapping bulundu (direkt): {Route} → {Key}", normalizedRoute, permissionKey);
                 return permissionKey;
             }
 
-            // 2. /index ekleyerek dene (örn: /personel/unvan → /personel/unvan/index)
+            // 2. /index ekleyerek dene
             if (!normalizedRoute.EndsWith("/index"))
             {
                 var indexRoute = $"{normalizedRoute}/index";
                 if (routeMap.TryGetValue(indexRoute, out permissionKey))
                 {
-                    _logger.LogDebug("✅ Route çözümlendi (index): {Route} → {PermissionKey}", indexRoute, permissionKey);
+                    _logger.LogDebug("✅ Route mapping bulundu (/index eklendi): {Route} → {Key}", indexRoute, permissionKey);
                     return permissionKey;
                 }
             }
 
-            // 3. /index kaldırarak dene (örn: /personel/unvan/index → /personel/unvan)
+            // 3. /index kaldırarak dene
             if (normalizedRoute.EndsWith("/index"))
             {
-                var baseRoute = normalizedRoute.Substring(0, normalizedRoute.Length - 6); // "/index" = 6 karakter
+                var baseRoute = normalizedRoute.Substring(0, normalizedRoute.Length - 6);
                 if (routeMap.TryGetValue(baseRoute, out permissionKey))
                 {
-                    _logger.LogDebug("✅ Route çözümlendi (base): {Route} → {PermissionKey}", baseRoute, permissionKey);
+                    _logger.LogDebug("✅ Route mapping bulundu (/index kaldırıldı): {Route} → {Key}", baseRoute, permissionKey);
                     return permissionKey;
                 }
             }
 
-            // 4. Dynamic route parametrelerini dene (örn: /personel/manage/12345678901 → /personel/manage/{tcKimlikNo})
-            // Geriye doğru "/" kaldırarak parent route'ları dene
+            // 4. Dynamic route parametrelerini dene (parent route fallback)
             var segments = normalizedRoute.Split('/', StringSplitOptions.RemoveEmptyEntries);
             for (int i = segments.Length - 1; i > 0; i--)
             {
                 var parentRoute = "/" + string.Join("/", segments.Take(i));
                 if (routeMap.TryGetValue(parentRoute, out permissionKey))
                 {
-                    _logger.LogDebug("✅ Route çözümlendi (parent): {ParentRoute} → {PermissionKey}", parentRoute, permissionKey);
+                    _logger.LogDebug("✅ Route mapping bulundu (parent): {Route} → {Key}", parentRoute, permissionKey);
                     return permissionKey;
                 }
             }

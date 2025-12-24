@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
-using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.Common.Interfaces.Permission;
 using SGKPortalApp.PresentationLayer.Services.StateServices;
 
 namespace SGKPortalApp.PresentationLayer.Components.Base

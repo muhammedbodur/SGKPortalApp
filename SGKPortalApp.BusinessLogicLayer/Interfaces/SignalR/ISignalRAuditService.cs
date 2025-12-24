@@ -1,7 +1,7 @@
 using SGKPortalApp.BusinessObjectLayer.Entities.SignalR;
 using SGKPortalApp.BusinessObjectLayer.Enums.SignalR;
 
-namespace SGKPortalApp.BusinessObjectLayer.Interfaces.SignalR
+namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR
 {
     /// <summary>
     /// SignalR Audit Service Interface

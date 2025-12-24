@@ -14,6 +14,7 @@ using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
+using SGKPortalApp.Common.Interfaces.Permission;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using System.Text;
 using System.Text.Json;

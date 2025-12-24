@@ -2,7 +2,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessObjectLayer.Entities.SignalR;
 using SGKPortalApp.BusinessObjectLayer.Enums.SignalR;
-using SGKPortalApp.BusinessObjectLayer.Interfaces.SignalR;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SignalR;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
