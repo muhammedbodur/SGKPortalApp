@@ -1,8 +1,5 @@
-<<<<<<<< HEAD:SGKPortalApp.Common/Interfaces/Permission/IPermissionKeyResolverService.cs
-namespace SGKPortalApp.Common.Interfaces.Permission
-========
+
 namespace SGKPortalApp.BusinessObjectLayer.Interfaces.Common
->>>>>>>> master:SGKPortalApp.BusinessObjectLayer/Interfaces/Common/IPermissionKeyResolverService.cs
 {
     /// <summary>
     /// HTTP isteğinin route bilgisinden permission key'i otomatik çözümleyen servis.
