@@ -927,6 +927,106 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 return new List<HubConnection>();
             }
         }
+
+        // ═══════════════════════════════════════════════════════
+        // CLEANUP METHODS (Background Service için API endpoint'ler)
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Uygulama başlangıcında tüm online connection'ları offline yapar
+        /// Sunucu restart'larında eski kayıtlar temizlenir
+        /// </summary>
+        public async Task<int> CleanupAllOnStartupAsync()
+        {
+            try
+            {
+                var hubConnectionRepo = _unitOfWork.GetRepository<IHubConnectionRepository>();
+                var onlineConnections = await hubConnectionRepo.GetActiveConnectionsAsync();
+
+                var toCleanup = onlineConnections
+                    .Where(c => c.ConnectionStatus == ConnectionStatus.online && !c.SilindiMi)
+                    .ToList();
+
+                if (!toCleanup.Any())
+                {
+                    _logger.LogInformation("Başlangıç temizliği: Temizlenecek online connection yok");
+                    return 0;
+                }
+
+                foreach (var conn in toCleanup)
+                {
+                    conn.ConnectionStatus = ConnectionStatus.offline;
+                    conn.DuzenlenmeTarihi = DateTime.Now;
+                    ClearNavigationReferences(conn);
+                    hubConnectionRepo.Update(conn);
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+                _logger.LogInformation("✅ Başlangıç temizliği: {Count} connection offline yapıldı", toCleanup.Count);
+
+                return toCleanup.Count;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "CleanupAllOnStartupAsync hatası");
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Stale connection'ları temizle (LastActivityAt + threshold geçmişse)
+        /// </summary>
+        /// <param name="staleThresholdMinutes">Stale kabul edilme süresi (dakika)</param>
+        public async Task<int> CleanupStaleConnectionsAsync(int staleThresholdMinutes)
+        {
+            try
+            {
+                var hubConnectionRepo = _unitOfWork.GetRepository<IHubConnectionRepository>();
+                var cutoffTime = DateTime.Now.AddMinutes(-staleThresholdMinutes);
+
+                var onlineConnections = await hubConnectionRepo.GetActiveConnectionsAsync();
+                var staleConnections = onlineConnections
+                    .Where(c => c.ConnectionStatus == ConnectionStatus.online
+                             && !c.SilindiMi
+                             && c.LastActivityAt < cutoffTime)
+                    .ToList();
+
+                if (!staleConnections.Any())
+                {
+                    _logger.LogDebug("Stale connection temizliği: Temizlenecek kayıt yok");
+                    return 0;
+                }
+
+                foreach (var conn in staleConnections)
+                {
+                    conn.ConnectionStatus = ConnectionStatus.offline;
+                    conn.DuzenlenmeTarihi = DateTime.Now;
+                    ClearNavigationReferences(conn);
+                    hubConnectionRepo.Update(conn);
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+                _logger.LogInformation("✅ Stale connection temizliği: {Count} connection offline yapıldı (Threshold: {Threshold} dakika)",
+                    staleConnections.Count, staleThresholdMinutes);
+
+                return staleConnections.Count;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "CleanupStaleConnectionsAsync hatası");
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Entity navigation referanslarını temizle (EF tracking sorunlarını önlemek için)
+        /// </summary>
+        private static void ClearNavigationReferences(HubConnection connection)
+        {
+            connection.User = null;
+            connection.HubBankoConnection = null;
+            connection.HubTvConnection = null;
+        }
     }
 }
 

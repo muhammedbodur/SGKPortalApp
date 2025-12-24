@@ -1,41 +1,36 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
-using SGKPortalApp.BusinessObjectLayer.Entities.Common;
-using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
-using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
-using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
+using System.Net.Http.Json;
 
 namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
 {
     /// <summary>
     /// Stale (eski/geçersiz) SignalR connection'larını periyodik olarak temizler.
-    /// Sunucu restart'larında veya beklenmedik bağlantı kopmalarında
-    /// "online" olarak kalan kayıtları "offline" yapar.
+    /// API endpoint'ler üzerinden temizlik yapar (Layered Architecture uyumlu)
     /// </summary>
     public class StaleConnectionCleanupService : BackgroundService
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<StaleConnectionCleanupService> _logger;
-        
+
         // Temizlik aralığı (5 dakikada bir kontrol)
         private readonly TimeSpan _cleanupInterval = TimeSpan.FromMinutes(5);
-        
+
         // Stale kabul edilme süresi (10 dakika aktivite yoksa)
-        private readonly TimeSpan _staleThreshold = TimeSpan.FromMinutes(10);
+        private readonly int _staleThresholdMinutes = 10;
 
         public StaleConnectionCleanupService(
-            IServiceProvider serviceProvider,
+            IHttpClientFactory httpClientFactory,
             ILogger<StaleConnectionCleanupService> logger)
         {
-            _serviceProvider = serviceProvider;
+            _httpClientFactory = httpClientFactory;
             _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("StaleConnectionCleanupService başlatıldı. Aralık: {Interval}, Threshold: {Threshold}",
-                _cleanupInterval, _staleThreshold);
+            _logger.LogInformation("StaleConnectionCleanupService başlatıldı. Aralık: {Interval}, Threshold: {Threshold} dakika",
+                _cleanupInterval, _staleThresholdMinutes);
 
             // İlk başlangıçta tüm online connection'ları offline yap (sunucu restart)
             await CleanupAllOnStartupAsync();
@@ -63,93 +58,78 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
 
         /// <summary>
         /// Uygulama başlangıcında tüm online connection'ları offline yap.
-        /// Sunucu restart'larında eski kayıtlar temizlenir.
+        /// API endpoint üzerinden çağrılır (Layered Architecture)
         /// </summary>
         private async Task CleanupAllOnStartupAsync()
         {
             try
             {
-                using var scope = _serviceProvider.CreateScope();
-                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                var hubConnectionRepo = unitOfWork.GetRepository<IHubConnectionRepository>();
+                var httpClient = _httpClientFactory.CreateClient("ApiClient");
+                var response = await httpClient.PostAsync("/api/hub-connections/cleanup/startup", null);
 
-                var onlineConnections = await hubConnectionRepo.GetActiveConnectionsAsync();
-                var toCleanup = onlineConnections
-                    .Where(c => c.ConnectionStatus == ConnectionStatus.online && !c.SilindiMi)
-                    .ToList();
-
-                if (!toCleanup.Any())
+                if (response.IsSuccessStatusCode)
                 {
-                    _logger.LogInformation("Başlangıç temizliği: Temizlenecek online connection yok");
-                    return;
+                    var result = await response.Content.ReadFromJsonAsync<CleanupResponse>();
+                    _logger.LogInformation("✅ Başlangıç temizliği: {Count} connection offline yapıldı",
+                        result?.CleanedCount ?? 0);
                 }
-
-                foreach (var conn in toCleanup)
+                else
                 {
-                    conn.ConnectionStatus = ConnectionStatus.offline;
-                    conn.DuzenlenmeTarihi = DateTime.Now;
-                    ClearNavigationReferences(conn);
-                    hubConnectionRepo.Update(conn);
+                    _logger.LogWarning("⚠️ Başlangıç temizliği API çağrısı başarısız: {StatusCode}",
+                        response.StatusCode);
                 }
-
-                await unitOfWork.SaveChangesAsync();
-                _logger.LogInformation("Başlangıç temizliği: {Count} connection offline yapıldı", toCleanup.Count);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Başlangıç temizliği hatası");
+                _logger.LogError(ex, "Başlangıç temizliği hatası (API çağrısı)");
             }
         }
 
         /// <summary>
         /// Stale connection'ları temizle (LastActivityAt + threshold geçmişse)
+        /// API endpoint üzerinden çağrılır (Layered Architecture)
         /// </summary>
         private async Task CleanupStaleConnectionsAsync()
         {
             try
             {
-                using var scope = _serviceProvider.CreateScope();
-                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                var hubConnectionRepo = unitOfWork.GetRepository<IHubConnectionRepository>();
+                var httpClient = _httpClientFactory.CreateClient("ApiClient");
+                var response = await httpClient.PostAsync(
+                    $"/api/hub-connections/cleanup/stale?staleThresholdMinutes={_staleThresholdMinutes}",
+                    null);
 
-                var cutoffTime = DateTime.Now.Subtract(_staleThreshold);
-                
-                var onlineConnections = await hubConnectionRepo.GetActiveConnectionsAsync();
-                var staleConnections = onlineConnections
-                    .Where(c => c.ConnectionStatus == ConnectionStatus.online 
-                             && !c.SilindiMi 
-                             && c.LastActivityAt < cutoffTime)
-                    .ToList();
-
-                if (!staleConnections.Any())
+                if (response.IsSuccessStatusCode)
                 {
-                    _logger.LogDebug("Stale connection temizliği: Temizlenecek kayıt yok");
-                    return;
+                    var result = await response.Content.ReadFromJsonAsync<CleanupResponse>();
+                    if (result?.CleanedCount > 0)
+                    {
+                        _logger.LogInformation("✅ Stale connection temizliği: {Count} connection offline yapıldı",
+                            result.CleanedCount);
+                    }
+                    else
+                    {
+                        _logger.LogDebug("Stale connection temizliği: Temizlenecek kayıt yok");
+                    }
                 }
-
-                foreach (var conn in staleConnections)
+                else
                 {
-                    conn.ConnectionStatus = ConnectionStatus.offline;
-                    conn.DuzenlenmeTarihi = DateTime.Now;
-                    ClearNavigationReferences(conn);
-                    hubConnectionRepo.Update(conn);
+                    _logger.LogWarning("⚠️ Stale connection temizliği API çağrısı başarısız: {StatusCode}",
+                        response.StatusCode);
                 }
-
-                await unitOfWork.SaveChangesAsync();
-                _logger.LogInformation("Stale connection temizliği: {Count} connection offline yapıldı (Threshold: {Threshold})",
-                    staleConnections.Count, _staleThreshold);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Stale connection temizliği hatası");
+                _logger.LogError(ex, "Stale connection temizliği hatası (API çağrısı)");
             }
         }
 
-        private static void ClearNavigationReferences(HubConnection connection)
+        /// <summary>
+        /// API cleanup endpoint response DTO
+        /// </summary>
+        private class CleanupResponse
         {
-            connection.User = null;
-            connection.HubBankoConnection = null;
-            connection.HubTvConnection = null;
+            public int CleanedCount { get; set; }
+            public string? Message { get; set; }
         }
     }
 }
