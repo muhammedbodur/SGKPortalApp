@@ -113,6 +113,9 @@ namespace SGKPortalApp.ApiLayer
 
             builder.Services.AddAuthorization();
 
+            // Common Layer (Shared services)
+            builder.Services.AddCommonServices();
+
             // Business Logic Layer
             builder.Services.AddBusinessLogicLayer();
 

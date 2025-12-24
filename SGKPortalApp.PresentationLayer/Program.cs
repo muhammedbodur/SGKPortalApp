@@ -101,7 +101,10 @@ Console.WriteLine($"✅ HttpClient configured - BaseAddress: {apiUrl}");
 // 1. Data Access Layer + core servisler (Shared connection string kullanıyor)
 builder.Services.AddSGKPortalServices(builder.Configuration);
 
-// 2. Presentation Layer (UI Services)
+// 2. Common Layer (Shared services - hem Presentation hem BusinessLogic kullanır)
+builder.Services.AddCommonServices();
+
+// 3. Presentation Layer (UI Services)
 builder.Services.AddPresentationServices(builder.Configuration);
 
 builder.Services.AddScoped<Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider,
