@@ -45,8 +45,14 @@
                     <div class="mb-3">
                         <label class="form-label small text-muted">Arama (Ad, Soyad, TC veya Sicil)</label>
                         <div class="input-group input-group-sm">
-                            <input type="text" class="form-control" @bind="SearchTerm" @bind:event="oninput" 
-                                   @onkeypress="HandleSearchKeyPress" placeholder="Ara..." />
+                            <input type="text" 
+                                   id="personelSearchInput"
+                                   class="form-control" 
+                                   @bind="SearchTerm" 
+                                   @oninput="OnSearchInput"
+                                   @onkeypress="HandleSearchKeyPress" 
+                                   placeholder="Ara..." 
+                                   autocomplete="off" />
                             <button class="btn btn-outline-primary" @onclick="SearchPersonel" disabled="@IsSearching">
                                 <i class="bx bx-search"></i>
                             </button>
@@ -55,7 +61,7 @@
                     <div class="row g-2 mb-3">
                         <div class="col-6">
                             <label class="form-label small text-muted">Departman</label>
-                            <select class="form-select form-select-sm" @bind="FilterDepartmanId" @bind:after="SearchPersonel">
+                            <select class="form-select form-select-sm" @bind="FilterDepartmanId" @bind:after="OnDepartmanChanged">
                                 <option value="0">Tümü</option>
                                 @foreach (var d in DepartmanDropdown)
                                 {
@@ -65,7 +71,7 @@
                         </div>
                         <div class="col-6">
                             <label class="form-label small text-muted">Servis</label>
-                            <select class="form-select form-select-sm" @bind="FilterServisId" @bind:after="SearchPersonel">
+                            <select class="form-select form-select-sm" @bind="FilterServisId" @bind:after="SearchPersonel" disabled="@(FilterDepartmanId <= 0)">
                                 <option value="0">Tümü</option>
                                 @foreach (var s in ServisDropdown)
                                 {
@@ -100,6 +106,7 @@
                                             @onclick="() => SelectPersonel(p)">
                                         <div class="d-flex w-100 justify-content-between">
                                             <h6 class="mb-1 small">@p.AdSoyad</h6>
+                                            <span class="text-muted small">(@p.SicilNo)</span>
                                         </div>
                                         <small class="@(SelectedPersonel?.TcKimlikNo == p.TcKimlikNo ? "text-white-50" : "text-muted")">
                                             @p.ServisAdi
@@ -248,4 +255,51 @@
     .text-purple {
         color: #9c27b0 !important;
     }
+    
+    /* Typeahead Autocomplete Styles */
+    .typeahead {
+        background-color: #fff;
+    }
+    
+    .tt-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 1000;
+        display: none;
+        float: left;
+        min-width: 160px;
+        padding: 5px 0;
+        margin: 2px 0 0;
+        list-style: none;
+        font-size: 14px;
+        text-align: left;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    }
+    
+    .tt-menu > .tt-suggestion {
+        display: block;
+        padding: 8px 12px;
+        clear: both;
+        font-weight: normal;
+        line-height: 1.42857143;
+        color: #333;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+    
+    .tt-menu > .tt-suggestion:hover,
+    .tt-menu > .tt-suggestion.tt-cursor {
+        color: #fff;
+        background-color: #696cff;
+    }
+    
+    .tt-suggestion strong {
+        font-weight: 600;
+    }
 </style>
+
+<script src="~/js/yetki-atama-autocomplete.js"></script>

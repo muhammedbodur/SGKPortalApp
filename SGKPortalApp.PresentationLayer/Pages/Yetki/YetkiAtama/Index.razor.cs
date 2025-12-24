@@ -91,6 +91,80 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.YetkiAtama
         // amamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamam
         // PERSONEL ARAMA
         // amamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamamam
+        private CancellationTokenSource? _searchCts;
+
+        private async Task OnSearchInput(ChangeEventArgs e)
+        {
+            SearchTerm = e.Value?.ToString() ?? "";
+
+            // Önceki istek iptal
+            _searchCts?.Cancel();
+            _searchCts = new CancellationTokenSource();
+
+            if (string.IsNullOrWhiteSpace(SearchTerm))
+            {
+                PersonelList.Clear();
+            }
+            else if (SearchTerm.Length >= 1)
+            {
+                try
+                {
+                    // 300ms debounce
+                    await Task.Delay(300, _searchCts.Token);
+
+                    IsSearching = true;
+                    var filter = new PersonelFilterRequestDto
+                    {
+                        SearchTerm = SearchTerm.Trim(),
+                        DepartmanId = FilterDepartmanId > 0 ? FilterDepartmanId : null,
+                        ServisId = FilterServisId > 0 ? FilterServisId : null,
+                        AktiflikDurum = PersonelAktiflikDurum.Aktif,
+                        PageNumber = 1,
+                        PageSize = 10
+                    };
+
+                    var result = await _personelService.GetPagedAsync(filter);
+                    if (result.Success && result.Data != null)
+                    {
+                        PersonelList = result.Data.Items.Select(p => new PersonelResponseDto
+                        {
+                            TcKimlikNo = p.TcKimlikNo,
+                            SicilNo = p.SicilNo,
+                            AdSoyad = p.AdSoyad,
+                            Email = p.Email,
+                            DepartmanId = 0,
+                            DepartmanAdi = p.DepartmanAdi,
+                            ServisId = 0,
+                            ServisAdi = p.ServisAdi
+                        }).ToList();
+                    }
+                    else
+                    {
+                        PersonelList = new();
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // İstek iptal edildi, yok say
+                }
+                catch (Exception ex)
+                {
+                    await _toastService.ShowErrorAsync($"Arama hatası: {ex.Message}");
+                }
+                finally
+                {
+                    IsSearching = false;
+                }
+            }
+        }
+
+        private async Task OnDepartmanChanged()
+        {
+            // Departman değiştiğinde servis filtresini sıfırla
+            FilterServisId = 0;
+            await SearchPersonel();
+        }
+
         private async Task HandleSearchKeyPress(KeyboardEventArgs e)
         {
             if (e.Key == "Enter")
@@ -124,16 +198,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.YetkiAtama
                 var result = await _personelService.GetPagedAsync(filter);
                 if (result.Success && result.Data != null)
                 {
-                    // PersonelListResponseDto -> PersonelResponseDto dönüşümü
                     PersonelList = result.Data.Items.Select(p => new PersonelResponseDto
                     {
                         TcKimlikNo = p.TcKimlikNo,
                         SicilNo = p.SicilNo,
                         AdSoyad = p.AdSoyad,
                         Email = p.Email,
-                        DepartmanId = 0, // Liste DTO'da yok
+                        DepartmanId = 0,
                         DepartmanAdi = p.DepartmanAdi,
-                        ServisId = 0, // Liste DTO'da yok
+                        ServisId = 0,
                         ServisAdi = p.ServisAdi
                     }).ToList();
                 }
@@ -150,6 +223,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.YetkiAtama
             {
                 IsSearching = false;
             }
+        }
+
+        private async Task SelectFromSuggestion(PersonelResponseDto personel)
+        {
+            SearchTerm = personel.AdSoyad;
+            PersonelList = new();
+            await SelectPersonel(personel);
         }
 
         private async Task SelectPersonel(PersonelResponseDto personel)
