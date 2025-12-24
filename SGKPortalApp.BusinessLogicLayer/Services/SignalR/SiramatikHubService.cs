@@ -4,7 +4,7 @@ using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SignalR;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SignalR;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
-using SGKPortalApp.BusinessObjectLayer.Interfaces.SignalR;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;

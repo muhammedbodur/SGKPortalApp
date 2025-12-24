@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.Common.Interfaces.Permission;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri;
