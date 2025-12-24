@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
-using SGKPortalApp.BusinessLogicLayer.Extensions;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.PresentationLayer.Extensions;
@@ -99,13 +98,11 @@ Console.WriteLine($"✅ HttpClient configured - BaseAddress: {apiUrl}");
 // ═══════════════════════════════════════════════════════
 // ⭐ KATMAN SERVİSLERİ ⭐
 // ═══════════════════════════════════════════════════════
-// 1. Common Layer (Shared services)
+// 1. Common Layer (Shared services - PresentationLayer sadece Common'a doğrudan erişir)
 builder.Services.AddCommonServices();
 
-// 2. Business Logic Layer
-builder.Services.AddBusinessLogicLayer();
-
-// 3. Presentation Layer (UI Services)
+// 2. Presentation Layer (UI Services)
+// NOT: BusinessLogicLayer ile doğrudan ilişki YOK - ApiLayer üzerinden HTTP ile iletişim
 builder.Services.AddPresentationServices(builder.Configuration);
 
 builder.Services.AddScoped<Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider,
