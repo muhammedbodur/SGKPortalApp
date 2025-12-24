@@ -5,6 +5,7 @@ using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
 {
