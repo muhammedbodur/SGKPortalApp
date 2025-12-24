@@ -4,6 +4,12 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common
 {
     public class ModulControllerUpdateRequestDto
     {
+        /// <summary>
+        /// Güncellenecek controller'ın benzersiz kimliği
+        /// (Field-level permission kontrolünde orijinal değerleri taşıyabilmek için gerekli)
+        /// </summary>
+        public int ModulControllerId { get; set; }
+
         [Required(ErrorMessage = "Controller adı zorunludur")]
         [StringLength(100, ErrorMessage = "Controller adı en fazla 100 karakter olabilir")]
         public string ModulControllerAdi { get; set; } = string.Empty;

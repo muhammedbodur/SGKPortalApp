@@ -8,7 +8,7 @@ using SGKPortalApp.PresentationLayer.Components.Base;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel
 {
-    public partial class Detail : BasePageComponent
+    public partial class Detail
     {
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION

@@ -1,731 +1,741 @@
 @page "/personel/detail/{tcKimlikNo}"
-@inherits SGKPortalApp.PresentationLayer.Components.Base.BasePageComponent
 @using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
-
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 
 <PageTitle>Personel Detay - SGK Portal</PageTitle>
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <h4 class="py-3 mb-4">
+                <span class="text-muted fw-light">Personel /</span> Detay
+            </h4>
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="py-3 mb-4">
-        <span class="text-muted fw-light">Personel /</span> Detay
-    </h4>
-
-    @if (IsLoading)
-    {
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <div class="spinner-border text-primary mb-3" role="status">
-                    <span class="visually-hidden">Yükleniyor...</span>
-                </div>
-                <p class="text-muted">Personel bilgileri yükleniyor...</p>
-            </div>
-        </div>
-    }
-    else if (NotFound)
-    {
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="bx bx-error-circle display-1 text-danger mb-3"></i>
-                <h5 class="mb-3">Personel Bulunamadı</h5>
-                <p class="text-muted mb-4">
-                    Aradığınız personel bulunamadı veya silinmiş olabilir.
-                </p>
-                <button class="btn btn-primary" @onclick="NavigateToPersonelList">
-                    <i class="bx bx-list-ul me-1"></i>Personel Listesine Dön
-                </button>
-            </div>
-        </div>
-    }
-    else
-    {
-        <div class="row">
-            <!-- ═══════════════════════════════════════════════════════ -->
-            <!-- SOL TARAF: PERSONEL KARTI -->
-            <!-- ═══════════════════════════════════════════════════════ -->
-            <div class="col-xl-4 col-lg-5 col-md-5 order-1 order-md-0">
-                <!-- Personel Kartı -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <div class="user-avatar-section">
-                            <div class="d-flex align-items-center flex-column">
-                                @if (!string.IsNullOrEmpty(Personel?.Resim))
-                                {
-                                    <CachedImage @key="@Personel.Resim" Src="@Personel.Resim" Class="img-fluid rounded my-4" Height="110" Width="110" Alt="Personel fotoğrafı" />
-                                }
-                                else
-                                {
-                                    <div class="avatar avatar-xl my-4">
-                                        <span class="avatar-initial rounded bg-label-primary" style="font-size: 3rem;">
-                                            @Personel?.AdSoyad?.Substring(0, 1).ToUpper()
-                                        </span>
-                                    </div>
-                                }
-                                <div class="user-info text-center">
-                                    <h4 class="mb-2">@Personel?.AdSoyad</h4>
-                                    @switch (Personel?.PersonelAktiflikDurum)
-                                    {
-                                        case PersonelAktiflikDurum.Aktif:
-                                            <span class="badge bg-label-success">Aktif</span>
-                                            break;
-                                        case PersonelAktiflikDurum.Pasif:
-                                            <span class="badge bg-label-danger">Pasif</span>
-                                            break;
-                                        case PersonelAktiflikDurum.Emekli:
-                                            <span class="badge bg-label-info">Emekli</span>
-                                            break;
-                                    }
-                                </div>
-                            </div>
+            @if (IsLoading)
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Yükleniyor...</span>
                         </div>
-
-                        <h5 class="pb-2 border-bottom mb-4 mt-4">Temel Bilgiler</h5>
-                        <div class="info-container">
-                            <ul class="list-unstyled">
-                                <li class="mb-3">
-                                    <span class="fw-medium me-2">TC Kimlik No:</span>
-                                    <span>@Personel?.TcKimlikNo</span>
-                                </li>
-                                <li class="mb-3">
-                                    <span class="fw-medium me-2">Sicil No:</span>
-                                    <span>@Personel?.SicilNo</span>
-                                </li>
-                                <li class="mb-3">
-                                    <span class="fw-medium me-2">Email:</span>
-                                    <span>@Personel?.Email</span>
-                                </li>
-                                <li class="mb-3">
-                                    <span class="fw-medium me-2">Departman:</span>
-                                    <span>@Personel?.DepartmanAdi</span>
-                                </li>
-                                <li class="mb-3">
-                                    <span class="fw-medium me-2">Servis:</span>
-                                    <span>@Personel?.ServisAdi</span>
-                                </li>
-                                <li class="mb-3">
-                                    <span class="fw-medium me-2">Ünvan:</span>
-                                    <span>@Personel?.UnvanAdi</span>
-                                </li>
-                                <li class="mb-3">
-                                    <span class="fw-medium me-2">Personel Tipi:</span>
-                                    <span>@(Personel?.PersonelTipi != null ? GetEnumDisplayName(Personel.PersonelTipi) : "-")</span>
-                                </li>
-                                <li class="mb-3">
-                                    <span class="fw-medium me-2">Dahili:</span>
-                                    <span>@Personel?.Dahili</span>
-                                </li>
-                                <li class="mb-3">
-                                    <span class="fw-medium me-2">Cep Telefonu:</span>
-                                    <span>@Personel?.CepTelefonu</span>
-                                </li>
-                            </ul>
-                            <div class="d-flex justify-content-center gap-2 pt-3">
-                                <button class="btn btn-primary" @onclick="NavigateToEdit">
-                                    <i class="bx bx-edit me-1"></i>Düzenle
-                                </button>
-                                <button class="btn btn-outline-secondary" @onclick="NavigateToPersonelList">
-                                    <i class="bx bx-arrow-back me-1"></i>Geri
-                                </button>
-                            </div>
-                        </div>
+                        <p class="text-muted">Personel bilgileri yükleniyor...</p>
                     </div>
                 </div>
-            </div>
-
-            <!-- ═══════════════════════════════════════════════════════ -->
-            <!-- SAĞ TARAF: TABS + İÇERİK -->
-            <!-- ═══════════════════════════════════════════════════════ -->
-            <div class="col-xl-8 col-lg-7 col-md-7 order-0 order-md-1">
-                <!-- Tabs -->
-                <ul class="nav nav-tabs flex-column flex-md-row mb-3" role="tablist">
-                    <li class="nav-item">
-                        <button class="nav-link @(ActiveTab == "personel" ? "active" : "")" 
-                                @onclick='() => SetActiveTab("personel")' type="button">
-                            <i class="bx bx-user me-1"></i>Personel
+            }
+            else if (NotFound)
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="bx bx-error-circle display-1 text-danger mb-3"></i>
+                        <h5 class="mb-3">Personel Bulunamadı</h5>
+                        <p class="text-muted mb-4">
+                            Aradığınız personel bulunamadı veya silinmiş olabilir.
+                        </p>
+                        <button class="btn btn-primary" @onclick="NavigateToPersonelList">
+                            <i class="bx bx-list-ul me-1"></i>Personel Listesine Dön
                         </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link @(ActiveTab == "iletisim" ? "active" : "")" 
-                                @onclick='() => SetActiveTab("iletisim")' type="button">
-                            <i class="bx bx-phone me-1"></i>İletişim
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link @(ActiveTab == "kisisel" ? "active" : "")" 
-                                @onclick='() => SetActiveTab("kisisel")' type="button">
-                            <i class="bx bx-id-card me-1"></i>Kişisel
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link @(ActiveTab == "ozluk" ? "active" : "")" 
-                                @onclick='() => SetActiveTab("ozluk")' type="button">
-                            <i class="bx bx-file me-1"></i>Özlük
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link @(ActiveTab == "es-cocuk" ? "active" : "")" 
-                                @onclick='() => SetActiveTab("es-cocuk")' type="button">
-                            <i class="bx bx-group me-1"></i>Eş/Çocuk
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link @(ActiveTab == "hizmet" ? "active" : "")" 
-                                @onclick='() => SetActiveTab("hizmet")' type="button">
-                            <i class="bx bx-briefcase me-1"></i>Hizmet
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link @(ActiveTab == "egitim" ? "active" : "")" 
-                                @onclick='() => SetActiveTab("egitim")' type="button">
-                            <i class="bx bx-book me-1"></i>Eğitim
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link @(ActiveTab == "yetki" ? "active" : "")" 
-                                @onclick='() => SetActiveTab("yetki")' type="button">
-                            <i class="bx bx-key me-1"></i>Yetki
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link @(ActiveTab == "ceza" ? "active" : "")" 
-                                @onclick='() => SetActiveTab("ceza")' type="button">
-                            <i class="bx bx-error me-1"></i>Ceza
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link @(ActiveTab == "engel" ? "active" : "")" 
-                                @onclick='() => SetActiveTab("engel")' type="button">
-                            <i class="bx bx-accessibility me-1"></i>Engel
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link @(ActiveTab == "fotograf" ? "active" : "")" 
-                                @onclick='() => SetActiveTab("fotograf")' type="button">
-                            <i class="bx bx-image me-1"></i>Fotoğraf
-                        </button>
-                    </li>
-                </ul>
-
-                <!-- Tab İçerikleri -->
-                @if (ActiveTab == "personel")
-                {
-                    <div class="card mb-4">
-                        <h5 class="card-header">Personel Bilgileri</h5>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">TC Kimlik No</label>
-                                    <p class="fw-medium">@Personel?.TcKimlikNo</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Sicil No</label>
-                                    <p class="fw-medium">@Personel?.SicilNo</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Ad Soyad</label>
-                                    <p class="fw-medium">@Personel?.AdSoyad</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Departman</label>
-                                    <p class="fw-medium">@Personel?.DepartmanAdi</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Servis</label>
-                                    <p class="fw-medium">@Personel?.ServisAdi</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Ünvan</label>
-                                    <p class="fw-medium">@Personel?.UnvanAdi</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Hizmet Binası</label>
-                                    <p class="fw-medium">@Personel?.HizmetBinasiAdi</p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
-                }
-
-                @if (ActiveTab == "iletisim")
-                {
-                    <div class="card mb-4">
-                        <h5 class="card-header">İletişim Bilgileri</h5>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">E-Posta</label>
-                                    <p class="fw-medium">@Personel?.Email</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Dahili Tel No</label>
-                                    <p class="fw-medium">@Personel?.Dahili</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Cep Tel No 1</label>
-                                    <p class="fw-medium">@Personel?.CepTelefonu</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Cep Tel No 2</label>
-                                    <p class="fw-medium">@Personel?.CepTelefonu2</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Ev Tel No</label>
-                                    <p class="fw-medium">@Personel?.EvTelefonu</p>
-                                </div>
-                                <div class="col-12 mb-3">
-                                    <label class="form-label text-muted small">Adres</label>
-                                    <p class="fw-medium">@Personel?.Adres</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Semt</label>
-                                    <p class="fw-medium">@Personel?.Semt</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-
-                @if (ActiveTab == "kisisel")
-                {
-                    <div class="card mb-4">
-                        <h5 class="card-header">Kişisel Bilgiler</h5>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Doğum Tarihi</label>
-                                    <p class="fw-medium">@Personel?.DogumTarihi.ToString("dd.MM.yyyy")</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Yaş</label>
-                                    <p class="fw-medium">@Personel?.Yas</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Cinsiyet</label>
-                                    <p class="fw-medium">@(Personel?.Cinsiyet != null ? GetEnumDisplayName(Personel.Cinsiyet) : "-")</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Medeni Durumu</label>
-                                    <p class="fw-medium">@(Personel?.MedeniDurumu != null ? GetEnumDisplayName(Personel.MedeniDurumu) : "-")</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Kan Grubu</label>
-                                    <p class="fw-medium">@(Personel?.KanGrubu != null ? GetEnumDisplayName(Personel.KanGrubu) : "-")</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Ev Durumu</label>
-                                    <p class="fw-medium">@(Personel?.EvDurumu != null ? GetEnumDisplayName(Personel.EvDurumu) : "-")</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Ulaştırma Servisi 1</label>
-                                    <p class="fw-medium">@(Personel?.UlasimServis1 == 0 ? "-" : Personel?.UlasimServis1.ToString())</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Ulaştırma Servisi 2</label>
-                                    <p class="fw-medium">@(Personel?.UlasimServis2 == 0 ? "-" : Personel?.UlasimServis2.ToString())</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Tabldot Servisi</label>
-                                    <p class="fw-medium">@(Personel?.Tabldot == 0 ? "-" : Personel?.Tabldot.ToString())</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">PDKS Kart No</label>
-                                    <p class="fw-medium">@(Personel?.KartNo == 0 ? "-" : Personel?.KartNo.ToString())</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Kart Aktiflik Tarihi</label>
-                                    <p class="fw-medium">@(Personel?.KartNoAktiflikTarihi?.ToString("dd.MM.yyyy") ?? "-")</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Kart Düzenleme Tarihi</label>
-                                    <p class="fw-medium">@(Personel?.KartNoDuzenlenmeTarihi?.ToString("dd.MM.yyyy") ?? "-")</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Kart Gönderim Tarihi</label>
-                                    <p class="fw-medium">@(Personel?.KartNoGonderimTarihi?.ToString("dd.MM.yyyy") ?? "-")</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Kart Gönderim Başarı</label>
-                                    <p class="fw-medium">
-                                        @if (Personel?.KartGonderimIslemBasari == IslemBasari.Basarili)
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <!-- SOL TARAF: PERSONEL KARTI -->
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <div class="col-xl-4 col-lg-5 col-md-5 order-1 order-md-0">
+                        <!-- Personel Kartı -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="user-avatar-section">
+                                    <div class="d-flex align-items-center flex-column">
+                                        @if (!string.IsNullOrEmpty(Personel?.Resim))
                                         {
-                                            <span class="badge bg-success">Başarılı</span>
-                                        }
-                                        else if (Personel?.KartGonderimIslemBasari == IslemBasari.Basarisiz)
-                                        {
-                                            <span class="badge bg-danger">Başarısız</span>
+                                            <CachedImage @key="@Personel.Resim" Src="@Personel.Resim" Class="img-fluid rounded my-4" Height="110" Width="110" Alt="Personel fotoğrafı" />
                                         }
                                         else
                                         {
-                                            <span class="badge bg-secondary">Beklemede</span>
-                                        }
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-
-                @if (ActiveTab == "ozluk")
-                {
-                    <div class="card mb-4">
-                        <h5 class="card-header">Özlük Bilgileri</h5>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Öğrenim Durumu</label>
-                                    <p class="fw-medium">@(Personel?.OgrenimDurumu != null ? GetEnumDisplayName(Personel.OgrenimDurumu) : "-")</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Bitirdiği Okul</label>
-                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.BitirdigiOkul) ? "-" : Personel.BitirdigiOkul)</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Bitirdiği Bölüm</label>
-                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.BitirdigiBolum) ? "-" : Personel.BitirdigiBolum)</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Öğrenim Süresi</label>
-                                    <p class="fw-medium">@Personel?.OgrenimSuresi yıl</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Branşı</label>
-                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.Bransi) ? "-" : Personel.Bransi)</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Emekli Sicil No</label>
-                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.EmekliSicilNo) ? "-" : Personel.EmekliSicilNo)</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Sendika</label>
-                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.SendikaAdi) ? "-" : Personel.SendikaAdi)</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Şehit Yakınlığı</label>
-                                    <p class="fw-medium">@(Personel?.SehitYakinligi != null ? GetEnumDisplayName(Personel.SehitYakinligi) : "-")</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-
-                @if (ActiveTab == "es-cocuk")
-                {
-                    <div class="card mb-4">
-                        <h5 class="card-header">Eş Bilgileri</h5>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Eş Adı</label>
-                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.EsininAdi) ? "-" : Personel.EsininAdi)</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Eş İş Durumu</label>
-                                    <p class="fw-medium">@(Personel?.EsininIsDurumu != null ? GetEnumDisplayName(Personel.EsininIsDurumu) : "-")</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Eş Unvanı</label>
-                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.EsininUnvani) ? "-" : Personel.EsininUnvani)</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Eş İş Adresi</label>
-                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.EsininIsAdresi) ? "-" : Personel.EsininIsAdresi)</p>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label text-muted small">Eş İş Semt</label>
-                                    <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.EsininIsSemt) ? "-" : Personel.EsininIsSemt)</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card mb-4">
-                        <h5 class="card-header">Çocuk Bilgileri</h5>
-                        <div class="card-body">
-                            @if (Cocuklar?.Any() == true)
-                            {
-                                <div class="row">
-                                    @foreach (var cocuk in Cocuklar)
-                                    {
-                                        <div class="col-md-6 mb-3">
-                                            <div class="card border">
-                                                <div class="card-body">
-                                                    <h6 class="card-title">
-                                                        <i class="bx bx-user text-primary me-2"></i>@cocuk.CocukAdi
-                                                    </h6>
-                                                    <p class="mb-1">
-                                                        <small class="text-muted">Doğum Tarihi:</small>
-                                                        <strong>@cocuk.CocukDogumTarihi.ToString("dd.MM.yyyy")</strong>
-                                                    </p>
-                                                    <p class="mb-1">
-                                                        <small class="text-muted">Yaş:</small>
-                                                        <strong>@cocuk.Yas</strong>
-                                                    </p>
-                                                    <p class="mb-0">
-                                                        <small class="text-muted">Öğrenim Durumu:</small>
-                                                        <strong>@GetEnumDisplayName(cocuk.OgrenimDurumu)</strong>
-                                                    </p>
-                                                </div>
+                                            <div class="avatar avatar-xl my-4">
+                                                <span class="avatar-initial rounded bg-label-primary" style="font-size: 3rem;">
+                                                    @Personel?.AdSoyad?.Substring(0, 1).ToUpper()
+                                                </span>
                                             </div>
+                                        }
+                                        <div class="user-info text-center">
+                                            <h4 class="mb-2">@Personel?.AdSoyad</h4>
+                                            @switch (Personel?.PersonelAktiflikDurum)
+                                            {
+                                                case PersonelAktiflikDurum.Aktif:
+                                                    <span class="badge bg-label-success">Aktif</span>
+                                                    break;
+                                                case PersonelAktiflikDurum.Pasif:
+                                                    <span class="badge bg-label-danger">Pasif</span>
+                                                    break;
+                                                case PersonelAktiflikDurum.Emekli:
+                                                    <span class="badge bg-label-info">Emekli</span>
+                                                    break;
+                                            }
                                         </div>
-                                    }
+                                    </div>
                                 </div>
-                            }
-                            else
-                            {
-                                <div class="alert alert-info">
-                                    <i class="bx bx-info-circle me-2"></i>
-                                    Çocuk bilgisi bulunmamaktadır.
+
+                                <h5 class="pb-2 border-bottom mb-4 mt-4">Temel Bilgiler</h5>
+                                <div class="info-container">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-3">
+                                            <span class="fw-medium me-2">TC Kimlik No:</span>
+                                            <span>@Personel?.TcKimlikNo</span>
+                                        </li>
+                                        <li class="mb-3">
+                                            <span class="fw-medium me-2">Sicil No:</span>
+                                            <span>@Personel?.SicilNo</span>
+                                        </li>
+                                        <li class="mb-3">
+                                            <span class="fw-medium me-2">Email:</span>
+                                            <span>@Personel?.Email</span>
+                                        </li>
+                                        <li class="mb-3">
+                                            <span class="fw-medium me-2">Departman:</span>
+                                            <span>@Personel?.DepartmanAdi</span>
+                                        </li>
+                                        <li class="mb-3">
+                                            <span class="fw-medium me-2">Servis:</span>
+                                            <span>@Personel?.ServisAdi</span>
+                                        </li>
+                                        <li class="mb-3">
+                                            <span class="fw-medium me-2">Ünvan:</span>
+                                            <span>@Personel?.UnvanAdi</span>
+                                        </li>
+                                        <li class="mb-3">
+                                            <span class="fw-medium me-2">Personel Tipi:</span>
+                                            <span>@(Personel?.PersonelTipi != null ? GetEnumDisplayName(Personel.PersonelTipi) : "-")</span>
+                                        </li>
+                                        <li class="mb-3">
+                                            <span class="fw-medium me-2">Dahili:</span>
+                                            <span>@Personel?.Dahili</span>
+                                        </li>
+                                        <li class="mb-3">
+                                            <span class="fw-medium me-2">Cep Telefonu:</span>
+                                            <span>@Personel?.CepTelefonu</span>
+                                        </li>
+                                    </ul>
+                                    <div class="d-flex justify-content-center gap-2 pt-3">
+                                        <button class="btn btn-primary" @onclick="NavigateToEdit">
+                                            <i class="bx bx-edit me-1"></i>Düzenle
+                                        </button>
+                                        <button class="btn btn-outline-secondary" @onclick="NavigateToPersonelList">
+                                            <i class="bx bx-arrow-back me-1"></i>Geri
+                                        </button>
+                                    </div>
                                 </div>
-                            }
+                            </div>
                         </div>
                     </div>
-                }
 
-                @if (ActiveTab == "hizmet")
-                {
-                    <div class="card mb-4">
-                        <h5 class="card-header">Hizmet Geçmişi</h5>
-                        <div class="card-body">
-                            @if (Hizmetler?.Any() == true)
-                            {
-                                <div class="table-responsive">
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th>Departman</th>
-                                                <th>Servis</th>
-                                                <th>Göreve Başlama</th>
-                                                <th>Görevden Ayrılma</th>
-                                                <th>Sebep</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var hizmet in Hizmetler.OrderByDescending(h => h.GorevBaslamaTarihi))
-                                            {
-                                                <tr>
-                                                    <td>@hizmet.DepartmanAdi</td>
-                                                    <td>@hizmet.ServisAdi</td>
-                                                    <td>@hizmet.GorevBaslamaTarihi.ToString("dd.MM.yyyy")</td>
-                                                    <td>@(hizmet.GorevAyrilmaTarihi?.ToString("dd.MM.yyyy") ?? "Devam Ediyor")</td>
-                                                    <td>@(string.IsNullOrEmpty(hizmet.Sebep) ? "-" : hizmet.Sebep)</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="alert alert-info">
-                                    <i class="bx bx-info-circle me-2"></i>
-                                    Hizmet geçmişi bulunmamaktadır.
-                                </div>
-                            }
-                        </div>
-                    </div>
-                }
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <!-- SAĞ TARAF: TABS + İÇERİK -->
+                    <!-- ═══════════════════════════════════════════════════════ -->
+                    <div class="col-xl-8 col-lg-7 col-md-7 order-0 order-md-1">
+                        <!-- Tabs -->
+                        <ul class="nav nav-tabs flex-column flex-md-row mb-3" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link @(ActiveTab == "personel" ? "active" : "")" 
+                                        @onclick='() => SetActiveTab("personel")' type="button">
+                                    <i class="bx bx-user me-1"></i>Personel
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link @(ActiveTab == "iletisim" ? "active" : "")" 
+                                        @onclick='() => SetActiveTab("iletisim")' type="button">
+                                    <i class="bx bx-phone me-1"></i>İletişim
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link @(ActiveTab == "kisisel" ? "active" : "")" 
+                                        @onclick='() => SetActiveTab("kisisel")' type="button">
+                                    <i class="bx bx-id-card me-1"></i>Kişisel
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link @(ActiveTab == "ozluk" ? "active" : "")" 
+                                        @onclick='() => SetActiveTab("ozluk")' type="button">
+                                    <i class="bx bx-file me-1"></i>Özlük
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link @(ActiveTab == "es-cocuk" ? "active" : "")" 
+                                        @onclick='() => SetActiveTab("es-cocuk")' type="button">
+                                    <i class="bx bx-group me-1"></i>Eş/Çocuk
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link @(ActiveTab == "hizmet" ? "active" : "")" 
+                                        @onclick='() => SetActiveTab("hizmet")' type="button">
+                                    <i class="bx bx-briefcase me-1"></i>Hizmet
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link @(ActiveTab == "egitim" ? "active" : "")" 
+                                        @onclick='() => SetActiveTab("egitim")' type="button">
+                                    <i class="bx bx-book me-1"></i>Eğitim
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link @(ActiveTab == "yetki" ? "active" : "")" 
+                                        @onclick='() => SetActiveTab("yetki")' type="button">
+                                    <i class="bx bx-key me-1"></i>Yetki
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link @(ActiveTab == "ceza" ? "active" : "")" 
+                                        @onclick='() => SetActiveTab("ceza")' type="button">
+                                    <i class="bx bx-error me-1"></i>Ceza
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link @(ActiveTab == "engel" ? "active" : "")" 
+                                        @onclick='() => SetActiveTab("engel")' type="button">
+                                    <i class="bx bx-accessibility me-1"></i>Engel
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link @(ActiveTab == "fotograf" ? "active" : "")" 
+                                        @onclick='() => SetActiveTab("fotograf")' type="button">
+                                    <i class="bx bx-image me-1"></i>Fotoğraf
+                                </button>
+                            </li>
+                        </ul>
 
-                @if (ActiveTab == "egitim")
-                {
-                    <div class="card mb-4">
-                        <h5 class="card-header">Eğitim Bilgileri</h5>
-                        <div class="card-body">
-                            @if (Egitimler?.Any() == true)
-                            {
-                                <div class="table-responsive">
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th>Eğitim Adı</th>
-                                                <th>Başlangıç Tarihi</th>
-                                                <th>Bitiş Tarihi</th>
-                                                <th>Açıklama</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var egitim in Egitimler.OrderByDescending(e => e.EgitimBaslangicTarihi))
-                                            {
-                                                <tr>
-                                                    <td><strong>@egitim.EgitimAdi</strong></td>
-                                                    <td>@egitim.EgitimBaslangicTarihi.ToString("dd.MM.yyyy")</td>
-                                                    <td>@(egitim.EgitimBitisTarihi?.ToString("dd.MM.yyyy") ?? "Devam Ediyor")</td>
-                                                    <td>@(string.IsNullOrEmpty(egitim.Aciklama) ? "-" : egitim.Aciklama)</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
+                        <!-- Tab İçerikleri -->
+                        @if (ActiveTab == "personel")
+                        {
+                            <div class="card mb-4">
+                                <h5 class="card-header">Personel Bilgileri</h5>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">TC Kimlik No</label>
+                                            <p class="fw-medium">@Personel?.TcKimlikNo</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Sicil No</label>
+                                            <p class="fw-medium">@Personel?.SicilNo</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Ad Soyad</label>
+                                            <p class="fw-medium">@Personel?.AdSoyad</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Departman</label>
+                                            <p class="fw-medium">@Personel?.DepartmanAdi</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Servis</label>
+                                            <p class="fw-medium">@Personel?.ServisAdi</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Ünvan</label>
+                                            <p class="fw-medium">@Personel?.UnvanAdi</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Hizmet Binası</label>
+                                            <p class="fw-medium">@Personel?.HizmetBinasiAdi</p>
+                                        </div>
+                                    </div>
                                 </div>
-                            }
-                            else
-                            {
-                                <div class="alert alert-info">
-                                    <i class="bx bx-info-circle me-2"></i>
-                                    Eğitim bilgisi bulunmamaktadır.
-                                </div>
-                            }
-                        </div>
-                    </div>
-                }
+                            </div>
+                        }
 
-                @if (ActiveTab == "yetki")
-                {
-                    <div class="card mb-4">
-                        <h5 class="card-header">İmza Yetkileri</h5>
-                        <div class="card-body">
-                            @if (ImzaYetkileri?.Any() == true)
-                            {
-                                <div class="table-responsive">
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th>Departman</th>
-                                                <th>Servis</th>
-                                                <th>Görev Değişim Sebebi</th>
-                                                <th>Başlama Tarihi</th>
-                                                <th>Bitiş Tarihi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var yetki in ImzaYetkileri.OrderByDescending(y => y.ImzaYetkisiBaslamaTarihi))
-                                            {
-                                                <tr>
-                                                    <td>@yetki.DepartmanAdi</td>
-                                                    <td>@yetki.ServisAdi</td>
-                                                    <td>@(string.IsNullOrEmpty(yetki.GorevDegisimSebebi) ? "-" : yetki.GorevDegisimSebebi)</td>
-                                                    <td>@yetki.ImzaYetkisiBaslamaTarihi.ToString("dd.MM.yyyy")</td>
-                                                    <td>@(yetki.ImzaYetkisiBitisTarihi?.ToString("dd.MM.yyyy") ?? "Devam Ediyor")</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
+                        @if (ActiveTab == "iletisim")
+                        {
+                            <div class="card mb-4">
+                                <h5 class="card-header">İletişim Bilgileri</h5>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">E-Posta</label>
+                                            <p class="fw-medium">@Personel?.Email</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Dahili Tel No</label>
+                                            <p class="fw-medium">@Personel?.Dahili</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Cep Tel No 1</label>
+                                            <p class="fw-medium">@Personel?.CepTelefonu</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Cep Tel No 2</label>
+                                            <p class="fw-medium">@Personel?.CepTelefonu2</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Ev Tel No</label>
+                                            <p class="fw-medium">@Personel?.EvTelefonu</p>
+                                        </div>
+                                        <div class="col-12 mb-3">
+                                            <label class="form-label text-muted small">Adres</label>
+                                            <p class="fw-medium">@Personel?.Adres</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Semt</label>
+                                            <p class="fw-medium">@Personel?.Semt</p>
+                                        </div>
+                                    </div>
                                 </div>
-                            }
-                            else
-                            {
-                                <div class="alert alert-info">
-                                    <i class="bx bx-info-circle me-2"></i>
-                                    İmza yetkisi bulunmamaktadır.
-                                </div>
-                            }
-                        </div>
-                    </div>
-                }
+                            </div>
+                        }
 
-                @if (ActiveTab == "ceza")
-                {
-                    <div class="card mb-4">
-                        <h5 class="card-header">Ceza Durumu</h5>
-                        <div class="card-body">
-                            @if (Cezalar?.Any() == true)
-                            {
-                                <div class="table-responsive">
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th>Ceza Sebebi</th>
-                                                <th>Alt Bendi</th>
-                                                <th>Ceza Tarihi</th>
-                                                <th>Açıklama</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var ceza in Cezalar.OrderByDescending(c => c.CezaTarihi))
-                                            {
-                                                <tr>
-                                                    <td><strong>@ceza.CezaSebebi</strong></td>
-                                                    <td>@(string.IsNullOrEmpty(ceza.AltBendi) ? "-" : ceza.AltBendi)</td>
-                                                    <td>@ceza.CezaTarihi.ToString("dd.MM.yyyy")</td>
-                                                    <td>@(string.IsNullOrEmpty(ceza.Aciklama) ? "-" : ceza.Aciklama)</td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
+                        @if (ActiveTab == "kisisel")
+                        {
+                            <div class="card mb-4">
+                                <h5 class="card-header">Kişisel Bilgiler</h5>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Doğum Tarihi</label>
+                                            <p class="fw-medium">@Personel?.DogumTarihi.ToString("dd.MM.yyyy")</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Yaş</label>
+                                            <p class="fw-medium">@Personel?.Yas</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Cinsiyet</label>
+                                            <p class="fw-medium">@(Personel?.Cinsiyet != null ? GetEnumDisplayName(Personel.Cinsiyet) : "-")</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Medeni Durumu</label>
+                                            <p class="fw-medium">@(Personel?.MedeniDurumu != null ? GetEnumDisplayName(Personel.MedeniDurumu) : "-")</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Kan Grubu</label>
+                                            <p class="fw-medium">@(Personel?.KanGrubu != null ? GetEnumDisplayName(Personel.KanGrubu) : "-")</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Ev Durumu</label>
+                                            <p class="fw-medium">@(Personel?.EvDurumu != null ? GetEnumDisplayName(Personel.EvDurumu) : "-")</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Ulaştırma Servisi 1</label>
+                                            <p class="fw-medium">@(Personel?.UlasimServis1 == 0 ? "-" : Personel?.UlasimServis1.ToString())</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Ulaştırma Servisi 2</label>
+                                            <p class="fw-medium">@(Personel?.UlasimServis2 == 0 ? "-" : Personel?.UlasimServis2.ToString())</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Tabldot Servisi</label>
+                                            <p class="fw-medium">@(Personel?.Tabldot == 0 ? "-" : Personel?.Tabldot.ToString())</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">PDKS Kart No</label>
+                                            <p class="fw-medium">@(Personel?.KartNo == 0 ? "-" : Personel?.KartNo.ToString())</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Kart Aktiflik Tarihi</label>
+                                            <p class="fw-medium">@(Personel?.KartNoAktiflikTarihi?.ToString("dd.MM.yyyy") ?? "-")</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Kart Düzenleme Tarihi</label>
+                                            <p class="fw-medium">@(Personel?.KartNoDuzenlenmeTarihi?.ToString("dd.MM.yyyy") ?? "-")</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Kart Gönderim Tarihi</label>
+                                            <p class="fw-medium">@(Personel?.KartNoGonderimTarihi?.ToString("dd.MM.yyyy") ?? "-")</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Kart Gönderim Başarı</label>
+                                            <p class="fw-medium">
+                                                @if (Personel?.KartGonderimIslemBasari == IslemBasari.Basarili)
+                                                {
+                                                    <span class="badge bg-success">Başarılı</span>
+                                                }
+                                                else if (Personel?.KartGonderimIslemBasari == IslemBasari.Basarisiz)
+                                                {
+                                                    <span class="badge bg-danger">Başarısız</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Beklemede</span>
+                                                }
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
-                            }
-                            else
-                            {
-                                <div class="alert alert-success">
-                                    <i class="bx bx-check-circle me-2"></i>
-                                    Personelin ceza kaydı bulunmamaktadır.
-                                </div>
-                            }
-                        </div>
-                    </div>
-                }
+                            </div>
+                        }
 
-                @if (ActiveTab == "engel")
-                {
-                    <div class="card mb-4">
-                        <h5 class="card-header">Engel Bilgileri</h5>
-                        <div class="card-body">
-                            @if (Engeller?.Any() == true)
-                            {
-                                <div class="row">
-                                    @foreach (var engel in Engeller)
+                        @if (ActiveTab == "ozluk")
+                        {
+                            <div class="card mb-4">
+                                <h5 class="card-header">Özlük Bilgileri</h5>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Öğrenim Durumu</label>
+                                            <p class="fw-medium">@(Personel?.OgrenimDurumu != null ? GetEnumDisplayName(Personel.OgrenimDurumu) : "-")</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Bitirdiği Okul</label>
+                                            <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.BitirdigiOkul) ? "-" : Personel.BitirdigiOkul)</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Bitirdiği Bölüm</label>
+                                            <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.BitirdigiBolum) ? "-" : Personel.BitirdigiBolum)</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Öğrenim Süresi</label>
+                                            <p class="fw-medium">@Personel?.OgrenimSuresi yıl</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Branşı</label>
+                                            <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.Bransi) ? "-" : Personel.Bransi)</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Emekli Sicil No</label>
+                                            <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.EmekliSicilNo) ? "-" : Personel.EmekliSicilNo)</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Sendika</label>
+                                            <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.SendikaAdi) ? "-" : Personel.SendikaAdi)</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Şehit Yakınlığı</label>
+                                            <p class="fw-medium">@(Personel?.SehitYakinligi != null ? GetEnumDisplayName(Personel.SehitYakinligi) : "-")</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        @if (ActiveTab == "es-cocuk")
+                        {
+                            <div class="card mb-4">
+                                <h5 class="card-header">Eş Bilgileri</h5>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Eş Adı</label>
+                                            <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.EsininAdi) ? "-" : Personel.EsininAdi)</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Eş İş Durumu</label>
+                                            <p class="fw-medium">@(Personel?.EsininIsDurumu != null ? GetEnumDisplayName(Personel.EsininIsDurumu) : "-")</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Eş Unvanı</label>
+                                            <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.EsininUnvani) ? "-" : Personel.EsininUnvani)</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Eş İş Adresi</label>
+                                            <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.EsininIsAdresi) ? "-" : Personel.EsininIsAdresi)</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">Eş İş Semt</label>
+                                            <p class="fw-medium">@(string.IsNullOrEmpty(Personel?.EsininIsSemt) ? "-" : Personel.EsininIsSemt)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mb-4">
+                                <h5 class="card-header">Çocuk Bilgileri</h5>
+                                <div class="card-body">
+                                    @if (Cocuklar?.Any() == true)
                                     {
-                                        <div class="col-md-12 mb-3">
-                                            <div class="card border-warning">
-                                                <div class="card-body">
-                                                    <h6 class="card-title">
-                                                        <span class="badge bg-warning">Engel Derecesi: @engel.EngelDerecesi</span>
-                                                    </h6>
-                                                    <div class="mt-3">
-                                                        @if (!string.IsNullOrEmpty(engel.EngelNedeni1))
-                                                        {
-                                                            <p class="mb-2"><strong>Engel Nedeni 1:</strong> @engel.EngelNedeni1</p>
-                                                        }
-                                                        @if (!string.IsNullOrEmpty(engel.EngelNedeni2))
-                                                        {
-                                                            <p class="mb-2"><strong>Engel Nedeni 2:</strong> @engel.EngelNedeni2</p>
-                                                        }
-                                                        @if (!string.IsNullOrEmpty(engel.EngelNedeni3))
-                                                        {
-                                                            <p class="mb-2"><strong>Engel Nedeni 3:</strong> @engel.EngelNedeni3</p>
-                                                        }
-                                                        @if (!string.IsNullOrEmpty(engel.Aciklama))
-                                                        {
-                                                            <p class="mb-0"><strong>Açıklama:</strong> @engel.Aciklama</p>
-                                                        }
+                                        <div class="row">
+                                            @foreach (var cocuk in Cocuklar)
+                                            {
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="card border">
+                                                        <div class="card-body">
+                                                            <h6 class="card-title">
+                                                                <i class="bx bx-user text-primary me-2"></i>@cocuk.CocukAdi
+                                                            </h6>
+                                                            <p class="mb-1">
+                                                                <small class="text-muted">Doğum Tarihi:</small>
+                                                                <strong>@cocuk.CocukDogumTarihi.ToString("dd.MM.yyyy")</strong>
+                                                            </p>
+                                                            <p class="mb-1">
+                                                                <small class="text-muted">Yaş:</small>
+                                                                <strong>@cocuk.Yas</strong>
+                                                            </p>
+                                                            <p class="mb-0">
+                                                                <small class="text-muted">Öğrenim Durumu:</small>
+                                                                <strong>@GetEnumDisplayName(cocuk.OgrenimDurumu)</strong>
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="alert alert-info">
+                                            <i class="bx bx-info-circle me-2"></i>
+                                            Çocuk bilgisi bulunmamaktadır.
                                         </div>
                                     }
                                 </div>
-                            }
-                            else
-                            {
-                                <div class="alert alert-info">
-                                    <i class="bx bx-info-circle me-2"></i>
-                                    Engel bilgisi bulunmamaktadır.
-                                </div>
-                            }
-                        </div>
-                    </div>
-                }
+                            </div>
+                        }
 
-                @if (ActiveTab == "fotograf")
-                {
-                    <div class="card mb-4">
-                        <h5 class="card-header">Fotoğraf</h5>
-                        <div class="card-body text-center">
-                            @if (!string.IsNullOrEmpty(Personel?.Resim))
-                            {
-                                <CachedImage @key="@Personel.Resim" Src="@Personel.Resim" Alt="Personel Fotoğrafı" Class="img-fluid rounded" Style="max-width: 300px;" />
-                            }
-                            else
-                            {
-                                <div class="avatar avatar-xl">
-                                    <span class="avatar-initial rounded bg-label-primary" style="font-size: 4rem;">
-                                        @Personel?.AdSoyad?.Substring(0, 1).ToUpper()
-                                    </span>
+                        @if (ActiveTab == "hizmet")
+                        {
+                            <div class="card mb-4">
+                                <h5 class="card-header">Hizmet Geçmişi</h5>
+                                <div class="card-body">
+                                    @if (Hizmetler?.Any() == true)
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Departman</th>
+                                                        <th>Servis</th>
+                                                        <th>Göreve Başlama</th>
+                                                        <th>Görevden Ayrılma</th>
+                                                        <th>Sebep</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var hizmet in Hizmetler.OrderByDescending(h => h.GorevBaslamaTarihi))
+                                                    {
+                                                        <tr>
+                                                            <td>@hizmet.DepartmanAdi</td>
+                                                            <td>@hizmet.ServisAdi</td>
+                                                            <td>@hizmet.GorevBaslamaTarihi.ToString("dd.MM.yyyy")</td>
+                                                            <td>@(hizmet.GorevAyrilmaTarihi?.ToString("dd.MM.yyyy") ?? "Devam Ediyor")</td>
+                                                            <td>@(string.IsNullOrEmpty(hizmet.Sebep) ? "-" : hizmet.Sebep)</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="alert alert-info">
+                                            <i class="bx bx-info-circle me-2"></i>
+                                            Hizmet geçmişi bulunmamaktadır.
+                                        </div>
+                                    }
                                 </div>
-                                <p class="text-muted mt-3">Fotoğraf yüklenmemiş</p>
-                            }
-                        </div>
+                            </div>
+                        }
+
+                        @if (ActiveTab == "egitim")
+                        {
+                            <div class="card mb-4">
+                                <h5 class="card-header">Eğitim Bilgileri</h5>
+                                <div class="card-body">
+                                    @if (Egitimler?.Any() == true)
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Eğitim Adı</th>
+                                                        <th>Başlangıç Tarihi</th>
+                                                        <th>Bitiş Tarihi</th>
+                                                        <th>Açıklama</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var egitim in Egitimler.OrderByDescending(e => e.EgitimBaslangicTarihi))
+                                                    {
+                                                        <tr>
+                                                            <td><strong>@egitim.EgitimAdi</strong></td>
+                                                            <td>@egitim.EgitimBaslangicTarihi.ToString("dd.MM.yyyy")</td>
+                                                            <td>@(egitim.EgitimBitisTarihi?.ToString("dd.MM.yyyy") ?? "Devam Ediyor")</td>
+                                                            <td>@(string.IsNullOrEmpty(egitim.Aciklama) ? "-" : egitim.Aciklama)</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="alert alert-info">
+                                            <i class="bx bx-info-circle me-2"></i>
+                                            Eğitim bilgisi bulunmamaktadır.
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        @if (ActiveTab == "yetki")
+                        {
+                            <div class="card mb-4">
+                                <h5 class="card-header">İmza Yetkileri</h5>
+                                <div class="card-body">
+                                    @if (ImzaYetkileri?.Any() == true)
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Departman</th>
+                                                        <th>Servis</th>
+                                                        <th>Görev Değişim Sebebi</th>
+                                                        <th>Başlama Tarihi</th>
+                                                        <th>Bitiş Tarihi</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var yetki in ImzaYetkileri.OrderByDescending(y => y.ImzaYetkisiBaslamaTarihi))
+                                                    {
+                                                        <tr>
+                                                            <td>@yetki.DepartmanAdi</td>
+                                                            <td>@yetki.ServisAdi</td>
+                                                            <td>@(string.IsNullOrEmpty(yetki.GorevDegisimSebebi) ? "-" : yetki.GorevDegisimSebebi)</td>
+                                                            <td>@yetki.ImzaYetkisiBaslamaTarihi.ToString("dd.MM.yyyy")</td>
+                                                            <td>@(yetki.ImzaYetkisiBitisTarihi?.ToString("dd.MM.yyyy") ?? "Devam Ediyor")</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="alert alert-info">
+                                            <i class="bx bx-info-circle me-2"></i>
+                                            İmza yetkisi bulunmamaktadır.
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        @if (ActiveTab == "ceza")
+                        {
+                            <div class="card mb-4">
+                                <h5 class="card-header">Ceza Durumu</h5>
+                                <div class="card-body">
+                                    @if (Cezalar?.Any() == true)
+                                    {
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Ceza Sebebi</th>
+                                                        <th>Alt Bendi</th>
+                                                        <th>Ceza Tarihi</th>
+                                                        <th>Açıklama</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var ceza in Cezalar.OrderByDescending(c => c.CezaTarihi))
+                                                    {
+                                                        <tr>
+                                                            <td><strong>@ceza.CezaSebebi</strong></td>
+                                                            <td>@(string.IsNullOrEmpty(ceza.AltBendi) ? "-" : ceza.AltBendi)</td>
+                                                            <td>@ceza.CezaTarihi.ToString("dd.MM.yyyy")</td>
+                                                            <td>@(string.IsNullOrEmpty(ceza.Aciklama) ? "-" : ceza.Aciklama)</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="alert alert-success">
+                                            <i class="bx bx-check-circle me-2"></i>
+                                            Personelin ceza kaydı bulunmamaktadır.
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        @if (ActiveTab == "engel")
+                        {
+                            <div class="card mb-4">
+                                <h5 class="card-header">Engel Bilgileri</h5>
+                                <div class="card-body">
+                                    @if (Engeller?.Any() == true)
+                                    {
+                                        <div class="row">
+                                            @foreach (var engel in Engeller)
+                                            {
+                                                <div class="col-md-12 mb-3">
+                                                    <div class="card border-warning">
+                                                        <div class="card-body">
+                                                            <h6 class="card-title">
+                                                                <span class="badge bg-warning">Engel Derecesi: @engel.EngelDerecesi</span>
+                                                            </h6>
+                                                            <div class="mt-3">
+                                                                @if (!string.IsNullOrEmpty(engel.EngelNedeni1))
+                                                                {
+                                                                    <p class="mb-2"><strong>Engel Nedeni 1:</strong> @engel.EngelNedeni1</p>
+                                                                }
+                                                                @if (!string.IsNullOrEmpty(engel.EngelNedeni2))
+                                                                {
+                                                                    <p class="mb-2"><strong>Engel Nedeni 2:</strong> @engel.EngelNedeni2</p>
+                                                                }
+                                                                @if (!string.IsNullOrEmpty(engel.EngelNedeni3))
+                                                                {
+                                                                    <p class="mb-2"><strong>Engel Nedeni 3:</strong> @engel.EngelNedeni3</p>
+                                                                }
+                                                                @if (!string.IsNullOrEmpty(engel.Aciklama))
+                                                                {
+                                                                    <p class="mb-0"><strong>Açıklama:</strong> @engel.Aciklama</p>
+                                                                }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="alert alert-info">
+                                            <i class="bx bx-info-circle me-2"></i>
+                                            Engel bilgisi bulunmamaktadır.
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        @if (ActiveTab == "fotograf")
+                        {
+                            <div class="card mb-4">
+                                <h5 class="card-header">Fotoğraf</h5>
+                                <div class="card-body text-center">
+                                    @if (!string.IsNullOrEmpty(Personel?.Resim))
+                                    {
+                                        <CachedImage @key="@Personel.Resim" Src="@Personel.Resim" Alt="Personel Fotoğrafı" Class="img-fluid rounded" Style="max-width: 300px;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="avatar avatar-xl">
+                                            <span class="avatar-initial rounded bg-label-primary" style="font-size: 4rem;">
+                                                @Personel?.AdSoyad?.Substring(0, 1).ToUpper()
+                                            </span>
+                                        </div>
+                                        <p class="text-muted mt-3">Fotoğraf yüklenmemiş</p>
+                                    }
+                                </div>
+                            </div>
+                        }
                     </div>
-                }
-            </div>
+                </div>
+            }
         </div>
-    }
-</div>
+    </FieldPermissionScope>
+}
