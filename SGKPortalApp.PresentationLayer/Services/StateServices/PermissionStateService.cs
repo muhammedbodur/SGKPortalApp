@@ -459,9 +459,11 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
         /// <summary>
         /// Route'tan PermissionKey'i çözümler
         /// Örnek: "/personel/departman" → "PER.DEPARTMAN.INDEX"
-        /// 
+        ///
         /// ASP.NET Core Routing: /personel ve /personel/index aynı sayfaya gider
         /// Bu yüzden her iki route'u da kontrol ediyoruz
+        ///
+        /// ID Parameter Handling: /personel/manage/123 → /personel/manage
         /// </summary>
         public string? GetPermissionKeyByRoute(string route)
         {
@@ -519,6 +521,38 @@ namespace SGKPortalApp.PresentationLayer.Services.StateServices
                 {
                     _logger.LogInformation("✅ Route resolved (without /index): {Route} - /index → {PermissionKey}", normalizedRoute, permissionKey);
                     return permissionKey;
+                }
+            }
+
+            // 4. ID Parameter Handling: Son segment ID gibi görünüyorsa kaldır
+            // Örnek: /personel/manage/16406457430 → /personel/manage
+            // Örnek: /siramatik/banko/5 → /siramatik/banko
+            var segments = normalizedRoute.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            if (segments.Length > 2) // En az 3 segment olmalı (/controller/action/id)
+            {
+                var lastSegment = segments[^1]; // Son segment
+
+                // Son segment sayısal mı veya GUID mi kontrol et
+                if (long.TryParse(lastSegment, out _) || Guid.TryParse(lastSegment, out _))
+                {
+                    // ID parametresini kaldır
+                    var routeWithoutId = "/" + string.Join("/", segments.Take(segments.Length - 1));
+                    _logger.LogInformation("🔍 ID parametresi tespit edildi: {Route} → {RouteWithoutId}", normalizedRoute, routeWithoutId);
+
+                    // ID'siz route ile tekrar dene
+                    if (_routeToPermissionKey.TryGetValue(routeWithoutId, out permissionKey))
+                    {
+                        _logger.LogInformation("✅ Route resolved (without ID parameter): {Route} → {PermissionKey}", routeWithoutId, permissionKey);
+                        return permissionKey;
+                    }
+
+                    // ID'siz route'a /index ekleyip dene
+                    var routeWithoutIdAndWithIndex = $"{routeWithoutId}/index";
+                    if (_routeToPermissionKey.TryGetValue(routeWithoutIdAndWithIndex, out permissionKey))
+                    {
+                        _logger.LogInformation("✅ Route resolved (without ID + with /index): {Route} → {PermissionKey}", routeWithoutIdAndWithIndex, permissionKey);
+                        return permissionKey;
+                    }
                 }
             }
 
