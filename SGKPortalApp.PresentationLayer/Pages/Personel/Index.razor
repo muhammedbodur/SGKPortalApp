@@ -222,25 +222,25 @@ else
                                 <thead>
                                     <tr>
                                         <th style="width: 50px;">#</th>
-                                        <th class="sortable" @onclick="() => SortByColumn(\"TcKimlikNo\")" style="cursor: pointer;">
+                                        <th class="sortable" @onclick="SortByTcKimlikNo" style="cursor: pointer;">
                                             TC Kimlik No
-                                            <i class="bx @GetSortIcon(\"TcKimlikNo\") ms-1"></i>
+                                            <i class="bx @GetTcKimlikNoSortIcon() ms-1"></i>
                                         </th>
-                                        <th class="sortable" @onclick="() => SortByColumn(\"SicilNo\")" style="cursor: pointer;">
+                                        <th class="sortable" @onclick="SortBySicilNo" style="cursor: pointer;">
                                             Sicil No
-                                            <i class="bx @GetSortIcon(\"SicilNo\") ms-1"></i>
+                                            <i class="bx @GetSicilNoSortIcon() ms-1"></i>
                                         </th>
-                                        <th class="sortable" @onclick="() => SortByColumn(\"AdSoyad\")" style="cursor: pointer;">
+                                        <th class="sortable" @onclick="SortByAdSoyad" style="cursor: pointer;">
                                             Ad Soyad
-                                            <i class="bx @GetSortIcon(\"AdSoyad\") ms-1"></i>
+                                            <i class="bx @GetAdSoyadSortIcon() ms-1"></i>
                                         </th>
-                                        <th class="sortable" @onclick="() => SortByColumn(\"DepartmanAdi\")" style="cursor: pointer;">
+                                        <th class="sortable" @onclick="SortByDepartmanAdi" style="cursor: pointer;">
                                             Departman
-                                            <i class="bx @GetSortIcon(\"DepartmanAdi\") ms-1"></i>
+                                            <i class="bx @GetDepartmanAdiSortIcon() ms-1"></i>
                                         </th>
-                                        <th class="sortable" @onclick="() => SortByColumn(\"ServisAdi\")" style="cursor: pointer;">
+                                        <th class="sortable" @onclick="SortByServisAdi" style="cursor: pointer;">
                                             Servis
-                                            <i class="bx @GetSortIcon(\"ServisAdi\") ms-1"></i>
+                                            <i class="bx @GetServisAdiSortIcon() ms-1"></i>
                                         </th>
                                         <th>Hizmet Binası</th>
                                         <th>Ünvan</th>
