@@ -1,4 +1,4 @@
-namespace SGKPortalApp.BusinessLogicLayer.Interfaces.Common
+namespace SGKPortalApp.BusinessObjectLayer.Interfaces.Common
 {
     /// <summary>
     /// HTTP isteğinin route bilgisinden permission key'i otomatik çözümleyen servis.

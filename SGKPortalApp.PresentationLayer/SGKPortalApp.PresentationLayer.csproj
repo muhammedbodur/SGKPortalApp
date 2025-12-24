@@ -47,7 +47,6 @@
 
   <ItemGroup>
 	  <ProjectReference Include="..\SGKPortalApp.Common\SGKPortalApp.Common.csproj" />
-	  <ProjectReference Include="..\SGKPortalApp.DataAccessLayer\SGKPortalApp.DataAccessLayer.csproj" />
   </ItemGroup>
 
 </Project>
