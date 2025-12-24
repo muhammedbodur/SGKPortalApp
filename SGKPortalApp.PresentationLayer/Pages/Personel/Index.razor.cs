@@ -6,6 +6,7 @@ using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
@@ -66,17 +67,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private int filterAktiflik = -1; // -1: Tümü, 0: Aktif, 1: Pasif, 2: Emekli
         private string sortBy = "name-asc";
 
-        // Column Header Sorting
-        private string currentSortColumn = "AdSoyad"; // Varsayılan sıralama kolonu
-        private bool currentSortAscending = true; // Varsayılan artan sıralama
-
         // ═══════════════════════════════════════════════════════
         // PAGINATION PROPERTIES
         // ═══════════════════════════════════════════════════════
 
         private int CurrentPage { get; set; } = 1;
         private int PageSize { get; set; } = 10;
-        private int TotalPages => (int)Math.Ceiling(FilteredPersoneller.Count / (double)PageSize);
+        private int TotalCount { get; set; } = 0;
+        private int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
 
         // ═══════════════════════════════════════════════════════
         // UI STATE
@@ -122,25 +120,21 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             IsLoading = true;
             try
             {
-                // Tüm verileri paralel olarak yükle
-                var personelTask = _personelApiService.GetAllAsync();
+                // Lookup verilerini yükle
                 var departmanTask = _departmanApiService.GetAllAsync();
                 var servisTask = _servisApiService.GetAllAsync();
                 var unvanTask = _unvanApiService.GetAllAsync();
                 var hizmetBinasiTask = _hizmetBinasiApiService.GetAllAsync();
 
-                await Task.WhenAll(personelTask, departmanTask, servisTask, unvanTask, hizmetBinasiTask);
+                await Task.WhenAll(departmanTask, servisTask, unvanTask, hizmetBinasiTask);
 
-                var personelResult = await personelTask;
-                Personeller = personelResult.Success ? personelResult.Data ?? new List<PersonelResponseDto>() : new List<PersonelResponseDto>();
-                
                 Departmanlar = (await departmanTask)?.Data ?? new List<DepartmanResponseDto>();
                 Servisler = (await servisTask)?.Data ?? new List<ServisResponseDto>();
                 Unvanlar = (await unvanTask)?.Data ?? new List<UnvanResponseDto>();
                 HizmetBinalari = (await hizmetBinasiTask)?.Data ?? new List<HizmetBinasiResponseDto>();
 
-                // Filtreleri uygula
-                ApplyFiltersAndSort();
+                // Personelleri server-side pagination ile yükle
+                await LoadPersonelWithPagination();
             }
             catch (Exception ex)
             {
@@ -152,189 +146,143 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             }
         }
 
+        private async Task LoadPersonelWithPagination()
+        {
+            try
+            {
+                var filter = new PersonelFilterRequestDto
+                {
+                    SearchTerm = string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm.Trim(),
+                    DepartmanId = filterDepartmanId > 0 ? filterDepartmanId : null,
+                    ServisId = filterServisId > 0 ? filterServisId : null,
+                    UnvanId = filterUnvanId > 0 ? filterUnvanId : null,
+                    HizmetBinasiId = filterHizmetBinasiId > 0 ? filterHizmetBinasiId : null,
+                    AktiflikDurum = filterAktiflik >= 0 ? (PersonelAktiflikDurum)filterAktiflik : null,
+                    PageNumber = CurrentPage,
+                    PageSize = PageSize,
+                    SortBy = MapSortByToFieldName(sortBy),
+                    SortDescending = sortBy.EndsWith("-desc")
+                };
+
+                var result = await _personelApiService.GetPagedAsync(filter);
+                
+                if (result.Success && result.Data != null)
+                {
+                    FilteredPersoneller = result.Data.Items.Select(p => new PersonelResponseDto
+                    {
+                        TcKimlikNo = p.TcKimlikNo,
+                        SicilNo = p.SicilNo,
+                        AdSoyad = p.AdSoyad,
+                        Email = p.Email,
+                        DepartmanId = 0,
+                        DepartmanAdi = p.DepartmanAdi,
+                        ServisId = 0,
+                        ServisAdi = p.ServisAdi,
+                        UnvanId = 0,
+                        UnvanAdi = p.UnvanAdi,
+                        HizmetBinasiAdi = p.HizmetBinasiAdi,
+                        Dahili = p.Dahili,
+                        Resim = p.Resim,
+                        PersonelAktiflikDurum = p.PersonelAktiflikDurum,
+                        EklenmeTarihi = p.EklenmeTarihi
+                    }).ToList();
+
+                    TotalCount = result.Data.TotalCount;
+                }
+                else
+                {
+                    FilteredPersoneller = new List<PersonelResponseDto>();
+                    TotalCount = 0;
+                }
+                
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                await _toastService.ShowErrorAsync($"Personel yüklenirken hata oluştu: {ex.Message}");
+                FilteredPersoneller = new List<PersonelResponseDto>();
+            }
+        }
+
+        private string MapSortByToFieldName(string sortBy)
+        {
+            return sortBy switch
+            {
+                "tc-asc" or "tc-desc" => "TcKimlikNo",
+                "sicil-asc" or "sicil-desc" => "SicilNo",
+                "name-asc" or "name-desc" => "AdSoyad",
+                "dept-asc" or "dept-desc" => "DepartmanAdi",
+                "servis-asc" or "servis-desc" => "ServisAdi",
+                "bina-asc" or "bina-desc" => "HizmetBinasiAdi",
+                "unvan-asc" or "unvan-desc" => "UnvanAdi",
+                "dahili-asc" or "dahili-desc" => "Dahili",
+                "date-newest" or "date-oldest" => "EklenmeTarihi",
+                _ => "AdSoyad"
+            };
+        }
+
         // ═══════════════════════════════════════════════════════
         // FILTER & SORT METHODS
         // ═══════════════════════════════════════════════════════
 
-        private void ApplyFiltersAndSort()
+        private async Task ApplyFiltersAndSort()
         {
-            FilteredPersoneller = Personeller.Where(p =>
-            {
-                // TC / Sicil / Ad Soyad arama
-                if (!string.IsNullOrEmpty(searchTerm))
-                {
-                    var term = searchTerm.ToLower();
-                    if (!p.TcKimlikNo.Contains(term) &&
-                        !p.SicilNo.ToString().Contains(term) &&
-                        !p.AdSoyad.ToLower().Contains(term))
-                    {
-                        return false;
-                    }
-                }
-
-                // Departman filtresi
-                if (filterDepartmanId > 0 && p.DepartmanId != filterDepartmanId)
-                    return false;
-
-                // Servis filtresi
-                if (filterServisId > 0 && p.ServisId != filterServisId)
-                    return false;
-
-                // Ünvan filtresi
-                if (filterUnvanId > 0 && p.UnvanId != filterUnvanId)
-                    return false;
-
-                // Aktiflik filtresi
-                if (filterAktiflik >= 0)
-                {
-                    var aktiflik = (PersonelAktiflikDurum)filterAktiflik;
-                    if (p.PersonelAktiflikDurum != aktiflik)
-                        return false;
-                }
-
-                return true;
-            }).ToList();
-
-            // Sıralama - Dinamik sütun sıralaması
-            FilteredPersoneller = (currentSortColumn, currentSortAscending) switch
-            {
-                ("TcKimlikNo", true) => FilteredPersoneller.OrderBy(p => p.TcKimlikNo).ToList(),
-                ("TcKimlikNo", false) => FilteredPersoneller.OrderByDescending(p => p.TcKimlikNo).ToList(),
-                ("SicilNo", true) => FilteredPersoneller.OrderBy(p => p.SicilNo).ToList(),
-                ("SicilNo", false) => FilteredPersoneller.OrderByDescending(p => p.SicilNo).ToList(),
-                ("AdSoyad", true) => FilteredPersoneller.OrderBy(p => p.AdSoyad).ToList(),
-                ("AdSoyad", false) => FilteredPersoneller.OrderByDescending(p => p.AdSoyad).ToList(),
-                ("DepartmanAdi", true) => FilteredPersoneller.OrderBy(p => p.DepartmanAdi).ToList(),
-                ("DepartmanAdi", false) => FilteredPersoneller.OrderByDescending(p => p.DepartmanAdi).ToList(),
-                ("ServisAdi", true) => FilteredPersoneller.OrderBy(p => p.ServisAdi).ToList(),
-                ("ServisAdi", false) => FilteredPersoneller.OrderByDescending(p => p.ServisAdi).ToList(),
-                ("EklenmeTarihi", true) => FilteredPersoneller.OrderBy(p => p.EklenmeTarihi).ToList(),
-                ("EklenmeTarihi", false) => FilteredPersoneller.OrderByDescending(p => p.EklenmeTarihi).ToList(),
-                _ => FilteredPersoneller.OrderBy(p => p.AdSoyad).ToList()
-            };
-
             CurrentPage = 1;
-            StateHasChanged();
+            await LoadPersonelWithPagination();
         }
 
         private void OnSearchChanged()
         {
-            ApplyFiltersAndSort();
+            _ = ApplyFiltersAndSort();
         }
 
         private void OnFilterDepartmanChanged(ChangeEventArgs e)
         {
             filterDepartmanId = int.Parse(e.Value?.ToString() ?? "0");
-            ApplyFiltersAndSort();
+            _ = ApplyFiltersAndSort();
         }
 
         private void OnFilterServisChanged(ChangeEventArgs e)
         {
             filterServisId = int.Parse(e.Value?.ToString() ?? "0");
-            ApplyFiltersAndSort();
+            _ = ApplyFiltersAndSort();
         }
 
         private void OnFilterHizmetBinasiChanged(ChangeEventArgs e)
         {
             filterHizmetBinasiId = int.Parse(e.Value?.ToString() ?? "0");
-            ApplyFiltersAndSort();
+            _ = ApplyFiltersAndSort();
         }
 
         private void OnFilterUnvanChanged(ChangeEventArgs e)
         {
             filterUnvanId = int.Parse(e.Value?.ToString() ?? "0");
-            ApplyFiltersAndSort();
+            _ = ApplyFiltersAndSort();
         }
 
         private void OnFilterAktiflikChanged(ChangeEventArgs e)
         {
             filterAktiflik = int.Parse(e.Value?.ToString() ?? "-1");
-            ApplyFiltersAndSort();
+            _ = ApplyFiltersAndSort();
         }
 
         private void OnSortByChanged(ChangeEventArgs e)
         {
             sortBy = e.Value?.ToString() ?? "name-asc";
-
-            // Dropdown değiştiğinde column sorting'i de senkronize et
-            (currentSortColumn, currentSortAscending) = sortBy switch
-            {
-                "name-asc" => ("AdSoyad", true),
-                "name-desc" => ("AdSoyad", false),
-                "sicil-asc" => ("SicilNo", true),
-                "sicil-desc" => ("SicilNo", false),
-                "date-newest" => ("EklenmeTarihi", false),
-                "date-oldest" => ("EklenmeTarihi", true),
-                _ => ("AdSoyad", true)
-            };
-
-            ApplyFiltersAndSort();
+            _ = ApplyFiltersAndSort();
         }
 
-        /// <summary>
-        /// Tablo başlığına tıklandığında sıralama yapır
-        /// </summary>
-        private void SortByColumn(string columnName)
+        private void ToggleSort(string ascValue, string descValue)
         {
-            // Aynı kolona tıklanırsa direction'ı değiştir, farklı kolona tıklanırsa ascending yap
-            if (currentSortColumn == columnName)
+            if (sortBy == ascValue)
             {
-                currentSortAscending = !currentSortAscending;
+                sortBy = descValue;
             }
             else
             {
-                currentSortColumn = columnName;
-                currentSortAscending = true;
+                sortBy = ascValue;
             }
-
-            // Dropdown'ı da senkronize et
-            sortBy = (currentSortColumn, currentSortAscending) switch
-            {
-                ("AdSoyad", true) => "name-asc",
-                ("AdSoyad", false) => "name-desc",
-                ("SicilNo", true) => "sicil-asc",
-                ("SicilNo", false) => "sicil-desc",
-                ("EklenmeTarihi", true) => "date-oldest",
-                ("EklenmeTarihi", false) => "date-newest",
-                _ => "name-asc"
-            };
-
-            ApplyFiltersAndSort();
-        }
-
-        // ═══════════════════════════════════════════════════════
-        // COLUMN SORTING HELPER METHODS (Blazor Server Compatible)
-        // ═══════════════════════════════════════════════════════
-
-        private void SortByTcKimlikNo() => SortByColumn("TcKimlikNo");
-        private void SortBySicilNo() => SortByColumn("SicilNo");
-        private void SortByAdSoyad() => SortByColumn("AdSoyad");
-        private void SortByDepartmanAdi() => SortByColumn("DepartmanAdi");
-        private void SortByServisAdi() => SortByColumn("ServisAdi");
-
-        private string GetTcKimlikNoSortIcon() => GetSortIcon("TcKimlikNo");
-        private string GetSicilNoSortIcon() => GetSortIcon("SicilNo");
-        private string GetAdSoyadSortIcon() => GetSortIcon("AdSoyad");
-        private string GetDepartmanAdiSortIcon() => GetSortIcon("DepartmanAdi");
-        private string GetServisAdiSortIcon() => GetSortIcon("ServisAdi");
-
-        /// <summary>
-        /// Sıralama ok ikonu döndürür (CSS class)
-        /// </summary>
-        private string GetSortIcon(string columnName)
-        {
-            if (currentSortColumn != columnName)
-                return "bx-sort"; // Varsayılan sort ikonu
-
-            return currentSortAscending ? "bx-sort-up" : "bx-sort-down";
-        }
-
-        /// <summary>
-        /// Sütun sıralanabilir mi kontrol eder
-        /// </summary>
-        private bool IsColumnSortable(string columnName)
-        {
-            return columnName is "TcKimlikNo" or "SicilNo" or "AdSoyad" or "DepartmanAdi" or "ServisAdi" or "EklenmeTarihi";
+            _ = ApplyFiltersAndSort();
         }
 
         private void ClearFilters()
@@ -346,19 +294,29 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             filterUnvanId = 0;
             filterAktiflik = -1;
             sortBy = "name-asc";
-            ApplyFiltersAndSort();
+            _ = ApplyFiltersAndSort();
         }
 
         // ═══════════════════════════════════════════════════════
         // PAGINATION METHODS
         // ═══════════════════════════════════════════════════════
 
-        private void ChangePage(int page)
+        private async Task ChangePage(int page)
         {
             if (page >= 1 && page <= TotalPages)
             {
                 CurrentPage = page;
-                StateHasChanged();
+                await LoadPersonelWithPagination();
+            }
+        }
+
+        private async Task OnPageSizeChanged(ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out int newPageSize))
+            {
+                PageSize = newPageSize;
+                CurrentPage = 1;
+                await LoadPersonelWithPagination();
             }
         }
 

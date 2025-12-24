@@ -128,19 +128,6 @@ else
                                 <option value="2">Emekli</option>
                             </select>
                         </div>
-
-                        <!-- Sıralama -->
-                        <div class="col-md-3">
-                            <label class="form-label">Sıralama</label>
-                            <select class="form-select" value="@sortBy" @onchange="OnSortByChanged">
-                                <option value="name-asc">Ad Soyad (A-Z)</option>
-                                <option value="name-desc">Ad Soyad (Z-A)</option>
-                                <option value="sicil-asc">Sicil (Küçük-Büyük)</option>
-                                <option value="sicil-desc">Sicil (Büyük-Küçük)</option>
-                                <option value="date-newest">En Yeni</option>
-                                <option value="date-oldest">En Eski</option>
-                            </select>
-                        </div>
                     </div>
 
                     <!-- İstatistikler -->
@@ -218,63 +205,73 @@ else
                     {
                         <!-- Table -->
                         <div class="table-container">
-                            <table class="table table-hover table-wide">
+                            <table class="table table-hover table-sm">
                                 <thead>
                                     <tr>
-                                        <th style="width: 50px;">#</th>
-                                        <th class="sortable" @onclick="SortByTcKimlikNo" style="cursor: pointer;">
+                                        <th style="width: 40px; padding: 0.5rem 0.25rem;">#</th>
+                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="() => ToggleSort('tc-asc', 'tc-desc')">
                                             TC Kimlik No
-                                            <i class="bx @GetTcKimlikNoSortIcon() ms-1"></i>
+                                            @if (sortBy == "tc-asc") { <i class="bx bx-chevron-up ms-1"></i> }
+                                            else if (sortBy == "tc-desc") { <i class="bx bx-chevron-down ms-1"></i> }
                                         </th>
-                                        <th class="sortable" @onclick="SortBySicilNo" style="cursor: pointer;">
+                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="() => ToggleSort('sicil-asc', 'sicil-desc')">
                                             Sicil No
-                                            <i class="bx @GetSicilNoSortIcon() ms-1"></i>
+                                            @if (sortBy == "sicil-asc") { <i class="bx bx-chevron-up ms-1"></i> }
+                                            else if (sortBy == "sicil-desc") { <i class="bx bx-chevron-down ms-1"></i> }
                                         </th>
-                                        <th class="sortable" @onclick="SortByAdSoyad" style="cursor: pointer;">
+                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="() => ToggleSort('name-asc', 'name-desc')">
                                             Ad Soyad
-                                            <i class="bx @GetAdSoyadSortIcon() ms-1"></i>
+                                            @if (sortBy == "name-asc") { <i class="bx bx-chevron-up ms-1"></i> }
+                                            else if (sortBy == "name-desc") { <i class="bx bx-chevron-down ms-1"></i> }
                                         </th>
-                                        <th class="sortable" @onclick="SortByDepartmanAdi" style="cursor: pointer;">
-                                            Departman
-                                            <i class="bx @GetDepartmanAdiSortIcon() ms-1"></i>
+                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="() => ToggleSort('dept-asc', 'dept-desc')">
+                                            Departman   
+                                            @if (sortBy == "dept-asc") { <i class="bx bx-chevron-up ms-1"></i> }
+                                            else if (sortBy == "dept-desc") { <i class="bx bx-chevron-down ms-1"></i> }
                                         </th>
-                                        <th class="sortable" @onclick="SortByServisAdi" style="cursor: pointer;">
+                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="() => ToggleSort('servis-asc', 'servis-desc')">
                                             Servis
-                                            <i class="bx @GetServisAdiSortIcon() ms-1"></i>
+                                            @if (sortBy == "servis-asc") { <i class="bx bx-chevron-up ms-1"></i> }
+                                            else if (sortBy == "servis-desc") { <i class="bx bx-chevron-down ms-1"></i> }
                                         </th>
-                                        <th>Hizmet Binası</th>
-                                        <th>Ünvan</th>
-                                        <th>Dahili</th>
-                                        <th class="text-center" style="width: 100px;">Durum</th>
-                                        <th class="text-center" style="width: 180px;">İşlemler</th>
+                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="() => ToggleSort('bina-asc', 'bina-desc')">
+                                            Hizmet Binası
+                                            @if (sortBy == "bina-asc") { <i class="bx bx-chevron-up ms-1"></i> }
+                                            else if (sortBy == "bina-desc") { <i class="bx bx-chevron-down ms-1"></i> }
+                                        </th>
+                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="() => ToggleSort('unvan-asc', 'unvan-desc')">
+                                            Ünvan
+                                            @if (sortBy == "unvan-asc") { <i class="bx bx-chevron-up ms-1"></i> }
+                                            else if (sortBy == "unvan-desc") { <i class="bx bx-chevron-down ms-1"></i> }
+                                        </th>
+                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="() => ToggleSort('dahili-asc', 'dahili-desc')">
+                                            Dahili
+                                            @if (sortBy == "dahili-asc") { <i class="bx bx-chevron-up ms-1"></i> }
+                                            else if (sortBy == "dahili-desc") { <i class="bx bx-chevron-down ms-1"></i> }
+                                        </th>
+                                        <th class="text-center" style="width: 80px; padding: 0.5rem 0.25rem;">Durum</th>
+                                        <th class="text-center" style="width: 120px; padding: 0.5rem 0.25rem;">İşlemler</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @{
-                                        var pagedData = FilteredPersoneller
-                                        .Skip((CurrentPage - 1) * PageSize)
-                                        .Take(PageSize)
-                                        .ToList();
-                                    }
-
-                                    @foreach (var (personel, index) in pagedData.Select((p, i) => (p, i)))
+                                    @foreach (var (personel, index) in FilteredPersoneller.Select((p, i) => (p, i)))
                                     {
                                         <tr style="@GetClickableRowStyle(ActionType.DETAIL)" @onclick="() => TryNavigateToDetail(personel.TcKimlikNo)">
-                                            <td>@((CurrentPage - 1) * PageSize + index + 1)</td>
-                                            <td class="text-break">
+                                            <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@((CurrentPage - 1) * PageSize + index + 1)</td>
+                                            <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
                                                 <span class="fw-medium">@personel.TcKimlikNo</span>
                                             </td>
-                                            <td class="text-break">@personel.SicilNo</td>
-                                            <td>
+                                            <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.SicilNo</td>
+                                            <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
                                                 <div class="d-flex align-items-center avatar-offline">
                                                     @if (!string.IsNullOrEmpty(personel.Resim))
                                                     {
-                                                        <CachedImage @key="@personel.Resim" Src="@personel.Resim" Alt="avatar" Class="rounded-circle me-2" Width="32" Height="32" />
+                                                        <CachedImage @key="@personel.Resim" Src="@personel.Resim" Alt="avatar" Class="rounded-circle me-1" Width="28" Height="28" />
                                                     }
                                                     else
                                                     {
-                                                        <div class="avatar avatar-sm me-2">
-                                                            <span class="avatar-initial rounded-circle bg-label-primary">
+                                                        <div class="avatar avatar-sm me-1" style="width: 28px; height: 28px;">
+                                                            <span class="avatar-initial rounded-circle bg-label-primary" style="font-size: 0.75rem;">
                                                                 @personel.AdSoyad.Substring(0, 1).ToUpper()
                                                             </span>
                                                         </div>
@@ -283,17 +280,17 @@ else
                                                         <span class="fw-medium">@personel.AdSoyad</span>
                                                         @if (!string.IsNullOrEmpty(personel.Email))
                                                         {
-                                                            <br /><small class="text-muted">@personel.Email</small>
+                                                            <br /><a href="mailto:@personel.Email" class="text-muted" style="font-size: 0.75rem; text-decoration: none;" ondblclick="event.preventDefault(); window.location.href='mailto:@personel.Email';">@personel.Email</a>
                                                         }
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="text-break">@personel.DepartmanAdi</td>
-                                            <td class="text-break">@personel.ServisAdi</td>
-                                            <td class="text-break">@personel.HizmetBinasiAdi</td>
-                                            <td class="text-break">@personel.UnvanAdi</td>
-                                            <td class="text-break">@personel.Dahili</td>
-                                            <td class="text-center">
+                                            <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.DepartmanAdi</td>
+                                            <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.ServisAdi</td>
+                                            <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.HizmetBinasiAdi</td>
+                                            <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.UnvanAdi</td>
+                                            <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.Dahili</td>
+                                            <td class="text-center" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
                                                 @switch (personel.PersonelAktiflikDurum)
                                                 {
                                                     case PersonelAktiflikDurum.Aktif:
@@ -341,13 +338,22 @@ else
                         @if (TotalPages > 1)
                         {
                             <div class="d-flex justify-content-between align-items-center mt-3">
-                                <div class="text-muted small">
-                                    Gösterilen: @((CurrentPage - 1) * PageSize + 1) - @Math.Min(CurrentPage * PageSize, FilteredPersoneller.Count) / @FilteredPersoneller.Count
+                                <div class="d-flex align-items-center gap-2">
+                                    <label class="text-muted small mb-0">Sayfa boyutu:</label>
+                                    <select class="form-select form-select-sm" style="width: 80px;" @onchange="OnPageSizeChanged">
+                                        <option value="10" selected="@(PageSize == 10)">10</option>
+                                        <option value="25" selected="@(PageSize == 25)">25</option>
+                                        <option value="50" selected="@(PageSize == 50)">50</option>
+                                        <option value="100" selected="@(PageSize == 100)">100</option>
+                                    </select>
+                                    <span class="text-muted small">
+                                        Gösterilen: @((CurrentPage - 1) * PageSize + 1) - @Math.Min(CurrentPage * PageSize, TotalCount) / @TotalCount
+                                    </span>
                                 </div>
                                 <nav>
                                     <ul class="pagination pagination-sm mb-0">
                                         <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
-                                            <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">
+                                            <button class="page-link" @onclick="() => _ = ChangePage(CurrentPage - 1)">
                                                 <i class="bx bx-chevron-left"></i>
                                             </button>
                                         </li>
@@ -356,12 +362,12 @@ else
                                         {
                                             var pageNum = i;
                                             <li class="page-item @(CurrentPage == pageNum ? "active" : "")">
-                                                <button class="page-link" @onclick="() => ChangePage(pageNum)">@pageNum</button>
+                                                <button class="page-link" @onclick="() => _ = ChangePage(pageNum)">@pageNum</button>
                                             </li>
                                         }
 
                                         <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
-                                            <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">
+                                            <button class="page-link" @onclick="() => _ = ChangePage(CurrentPage + 1)">
                                                 <i class="bx bx-chevron-right"></i>
                                             </button>
                                         </li>

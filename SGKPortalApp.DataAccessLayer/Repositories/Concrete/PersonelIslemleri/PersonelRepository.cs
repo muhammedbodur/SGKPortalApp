@@ -160,10 +160,14 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
             // Filtreleme
             if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
             {
+                var trimmedTerm = filter.SearchTerm.Trim();
+                var isNumeric = int.TryParse(trimmedTerm, out var sicilNoSearch);
+                
                 query = query.Where(p =>
-                    p.AdSoyad.Contains(filter.SearchTerm) ||
-                    p.TcKimlikNo.Contains(filter.SearchTerm) ||
-                    p.Email.Contains(filter.SearchTerm));
+                    p.AdSoyad.Contains(trimmedTerm) ||
+                    p.TcKimlikNo.Contains(trimmedTerm) ||
+                    p.Email.Contains(trimmedTerm) ||
+                    (isNumeric && p.SicilNo == sicilNoSearch));
             }
 
             if (filter.DepartmanId.HasValue && filter.DepartmanId > 0)
@@ -208,7 +212,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                     UnvanAdi = p.Unvan != null ? p.Unvan.UnvanAdi : "",
                     Dahili = p.Dahili,
                     CepTelefonu = p.CepTelefonu,
-                    PersonelAktiflikDurum = p.PersonelAktiflikDurum.ToString()
+                    PersonelAktiflikDurum = p.PersonelAktiflikDurum
                 })
                 .ToListAsync();
 

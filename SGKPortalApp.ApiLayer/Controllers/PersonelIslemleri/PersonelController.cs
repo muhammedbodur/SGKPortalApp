@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 
 namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
 {
@@ -114,6 +115,39 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
 
             var result = await _personelService.UpdateCompleteAsync(tcKimlikNo, request);
             return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpGet("suggestions")]
+        public async Task<IActionResult> GetSuggestions([FromQuery] string? term, [FromQuery] int limit = 10)
+        {
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 1)
+                return Ok(new List<object>());
+
+            var filter = new PersonelFilterRequestDto
+            {
+                SearchTerm = term.Trim(),
+                AktiflikDurum = PersonelAktiflikDurum.Aktif,
+                PageNumber = 1,
+                PageSize = limit
+            };
+
+            var result = await _personelService.GetPagedAsync(filter);
+            
+            if (!result.Success || result.Data?.Items == null)
+                return Ok(new List<object>());
+
+            var suggestions = result.Data.Items.Select(p => new
+            {
+                id = p.TcKimlikNo,
+                sicilNo = p.SicilNo,
+                adSoyad = p.AdSoyad,
+                tcKimlikNo = p.TcKimlikNo,
+                servisAdi = p.ServisAdi,
+                departmanAdi = p.DepartmanAdi,
+                displayText = $"{p.AdSoyad} ({p.SicilNo})"
+            }).ToList();
+
+            return Ok(suggestions);
         }
     }
 }
