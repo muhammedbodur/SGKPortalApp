@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
-using SGKPortalApp.BusinessObjectLayer.Interfaces.SignalR;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 
 namespace SGKPortalApp.ApiLayer.Services.Hubs.Concrete
 {

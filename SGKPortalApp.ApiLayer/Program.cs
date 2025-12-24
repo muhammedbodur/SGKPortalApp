@@ -9,7 +9,7 @@ using SGKPortalApp.ApiLayer.Services.Hubs;
 using SGKPortalApp.ApiLayer.Services.Hubs.Concrete;
 using SGKPortalApp.ApiLayer.Services.Hubs.Interfaces;
 using SGKPortalApp.ApiLayer.Services.State;
-using SGKPortalApp.BusinessObjectLayer.Interfaces.SignalR;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.BusinessLogicLayer.Extensions;
 using SGKPortalApp.DataAccessLayer.Context;
