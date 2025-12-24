@@ -13,6 +13,7 @@ using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.BusinessLogicLayer.Extensions;
 using SGKPortalApp.DataAccessLayer.Context;
+using SGKPortalApp.DataAccessLayer.Extensions;
 using System.Text.Json.Serialization;
 
 namespace SGKPortalApp.ApiLayer
@@ -127,10 +128,14 @@ namespace SGKPortalApp.ApiLayer
 
             builder.Services.AddAuthorization();
 
-            // Common Layer (Shared services)
+            // ⭐ KATMAN SERVİSLERİ ⭐
+            // 1. DataAccessLayer (Repository Pattern + UnitOfWork)
+            builder.Services.AddDataAccessLayer();
+
+            // 2. Common Layer (Shared services - Frontend ve Backend ortak)
             builder.Services.AddCommonServices();
 
-            // Business Logic Layer
+            // 3. Business Logic Layer (Backend iş mantığı)
             builder.Services.AddBusinessLogicLayer();
 
             // ═══════════════════════════════════════════════════════
