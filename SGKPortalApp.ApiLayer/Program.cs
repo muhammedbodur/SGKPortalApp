@@ -106,6 +106,25 @@ namespace SGKPortalApp.ApiLayer
                     };
                 });
 
+            // ═══════════════════════════════════════════════════════
+            // 💾 DATABASE CONTEXT
+            // ═══════════════════════════════════════════════════════
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("❌ DefaultConnection bağlantı dizesi bulunamadı!");
+
+            Console.WriteLine($"📊 Database Connection: {connectionString.Substring(0, Math.Min(50, connectionString.Length))}...");
+
+            builder.Services.AddDbContext<SGKDbContext>(options =>
+            {
+                options.UseSqlServer(connectionString);
+
+                if (builder.Environment.IsDevelopment())
+                {
+                    options.EnableSensitiveDataLogging();
+                    options.EnableDetailedErrors();
+                }
+            });
+
             builder.Services.AddAuthorization();
 
             // Common Layer (Shared services)
