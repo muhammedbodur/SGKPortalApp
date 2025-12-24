@@ -302,6 +302,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             ApplyFiltersAndSort();
         }
 
+        // ═══════════════════════════════════════════════════════
+        // COLUMN SORTING HELPER METHODS (Blazor Server Compatible)
+        // ═══════════════════════════════════════════════════════
+
+        private void SortByTcKimlikNo() => SortByColumn("TcKimlikNo");
+        private void SortBySicilNo() => SortByColumn("SicilNo");
+        private void SortByAdSoyad() => SortByColumn("AdSoyad");
+        private void SortByDepartmanAdi() => SortByColumn("DepartmanAdi");
+        private void SortByServisAdi() => SortByColumn("ServisAdi");
+
+        private string GetTcKimlikNoSortIcon() => GetSortIcon("TcKimlikNo");
+        private string GetSicilNoSortIcon() => GetSortIcon("SicilNo");
+        private string GetAdSoyadSortIcon() => GetSortIcon("AdSoyad");
+        private string GetDepartmanAdiSortIcon() => GetSortIcon("DepartmanAdi");
+        private string GetServisAdiSortIcon() => GetSortIcon("ServisAdi");
+
         /// <summary>
         /// Sıralama ok ikonu döndürür (CSS class)
         /// </summary>
