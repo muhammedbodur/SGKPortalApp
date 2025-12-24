@@ -101,6 +101,12 @@ Console.WriteLine($"✅ HttpClient configured - BaseAddress: {apiUrl}");
 // 1. Common Layer (Shared services - PresentationLayer sadece Common'a doğrudan erişir)
 builder.Services.AddCommonServices();
 
+// OVERRIDE: Frontend için PermissionKeyResolverAdapter kullan (PermissionStateService cache kullanır)
+// Backend PermissionKeyResolverService yerine bu adapter kullanılmalı
+builder.Services.AddScoped<SGKPortalApp.Common.Interfaces.Permission.IPermissionKeyResolverService,
+    SGKPortalApp.PresentationLayer.Services.Permission.PermissionKeyResolverAdapter>();
+Console.WriteLine("  ✅ IPermissionKeyResolverService → PermissionKeyResolverAdapter (PresentationLayer override)");
+
 // 2. Presentation Layer (UI Services)
 // NOT: BusinessLogicLayer ile doğrudan ilişki YOK - ApiLayer üzerinden HTTP ile iletişim
 builder.Services.AddPresentationServices(builder.Configuration);
