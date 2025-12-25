@@ -154,6 +154,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                 .Include(p => p.Departman)
                 .Include(p => p.Servis)
                 .Include(p => p.Unvan)
+                .Include(p => p.HizmetBinasi)
                 .Where(p => !p.SilindiMi)
                 .AsQueryable();
 
@@ -162,7 +163,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
             {
                 var trimmedTerm = filter.SearchTerm.Trim();
                 var isNumeric = int.TryParse(trimmedTerm, out var sicilNoSearch);
-                
+
                 query = query.Where(p =>
                     p.AdSoyad.Contains(trimmedTerm) ||
                     p.TcKimlikNo.Contains(trimmedTerm) ||
@@ -180,6 +181,16 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                 query = query.Where(p => p.ServisId == filter.ServisId.Value);
             }
 
+            if (filter.UnvanId.HasValue && filter.UnvanId > 0)
+            {
+                query = query.Where(p => p.UnvanId == filter.UnvanId.Value);
+            }
+
+            if (filter.HizmetBinasiId.HasValue && filter.HizmetBinasiId > 0)
+            {
+                query = query.Where(p => p.HizmetBinasiId == filter.HizmetBinasiId.Value);
+            }
+
             if (filter.AktiflikDurum.HasValue)
             {
                 query = query.Where(p => p.PersonelAktiflikDurum == filter.AktiflikDurum.Value);
@@ -188,12 +199,45 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
             // Toplam kayıt sayısı
             var totalCount = await query.CountAsync();
 
-            // Sıralama
+            // Sıralama - TÜM ALANLAR İÇİN
             query = filter.SortBy?.ToLower() switch
             {
-                "adsoyad" => filter.SortDescending ? query.OrderByDescending(p => p.AdSoyad) : query.OrderBy(p => p.AdSoyad),
-                "sicilno" => filter.SortDescending ? query.OrderByDescending(p => p.SicilNo) : query.OrderBy(p => p.SicilNo),
-                "departman" => filter.SortDescending ? query.OrderByDescending(p => p.Departman!.DepartmanAdi) : query.OrderBy(p => p.Departman!.DepartmanAdi),
+                "tckimlikno" => filter.SortDescending
+                    ? query.OrderByDescending(p => p.TcKimlikNo)
+                    : query.OrderBy(p => p.TcKimlikNo),
+
+                "sicilno" => filter.SortDescending
+                    ? query.OrderByDescending(p => p.SicilNo)
+                    : query.OrderBy(p => p.SicilNo),
+
+                "adsoyad" => filter.SortDescending
+                    ? query.OrderByDescending(p => p.AdSoyad)
+                    : query.OrderBy(p => p.AdSoyad),
+
+                "departmanadi" => filter.SortDescending
+                    ? query.OrderByDescending(p => p.Departman != null ? p.Departman.DepartmanAdi : "")
+                    : query.OrderBy(p => p.Departman != null ? p.Departman.DepartmanAdi : ""),
+
+                "servisadi" => filter.SortDescending
+                    ? query.OrderByDescending(p => p.Servis != null ? p.Servis.ServisAdi : "")
+                    : query.OrderBy(p => p.Servis != null ? p.Servis.ServisAdi : ""),
+
+                "hizmetbinasiadi" => filter.SortDescending
+                    ? query.OrderByDescending(p => p.HizmetBinasi != null ? p.HizmetBinasi.HizmetBinasiAdi : "")
+                    : query.OrderBy(p => p.HizmetBinasi != null ? p.HizmetBinasi.HizmetBinasiAdi : ""),
+
+                "unvanadi" => filter.SortDescending
+                    ? query.OrderByDescending(p => p.Unvan != null ? p.Unvan.UnvanAdi : "")
+                    : query.OrderBy(p => p.Unvan != null ? p.Unvan.UnvanAdi : ""),
+
+                "dahili" => filter.SortDescending
+                    ? query.OrderByDescending(p => p.Dahili)
+                    : query.OrderBy(p => p.Dahili),
+
+                "eklenmetarihi" => filter.SortDescending
+                    ? query.OrderByDescending(p => p.EklenmeTarihi)
+                    : query.OrderBy(p => p.EklenmeTarihi),
+
                 _ => query.OrderBy(p => p.AdSoyad)
             };
 
@@ -210,9 +254,12 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                     DepartmanAdi = p.Departman != null ? p.Departman.DepartmanAdi : "",
                     ServisAdi = p.Servis != null ? p.Servis.ServisAdi : "",
                     UnvanAdi = p.Unvan != null ? p.Unvan.UnvanAdi : "",
+                    HizmetBinasiAdi = p.HizmetBinasi != null ? p.HizmetBinasi.HizmetBinasiAdi : "",
                     Dahili = p.Dahili,
                     CepTelefonu = p.CepTelefonu,
-                    PersonelAktiflikDurum = p.PersonelAktiflikDurum
+                    Resim = p.Resim ?? "",
+                    PersonelAktiflikDurum = p.PersonelAktiflikDurum,
+                    EklenmeTarihi = p.EklenmeTarihi
                 })
                 .ToListAsync();
 
