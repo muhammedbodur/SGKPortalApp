@@ -46,7 +46,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         // DATA PROPERTIES
         // ═══════════════════════════════════════════════════════
 
-        private List<PersonelResponseDto> Personeller { get; set; } = new();
         private List<PersonelResponseDto> FilteredPersoneller { get; set; } = new();
         
         // Lookup Lists
@@ -221,6 +220,30 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             };
         }
 
+        private string GetSortDisplayName()
+        {
+            return sortBy switch
+            {
+                "tc-asc" => "TC ↑",
+                "tc-desc" => "TC ↓",
+                "sicil-asc" => "Sicil ↑",
+                "sicil-desc" => "Sicil ↓",
+                "name-asc" => "Ad Soyad ↑",
+                "name-desc" => "Ad Soyad ↓",
+                "dept-asc" => "Departman ↑",
+                "dept-desc" => "Departman ↓",
+                "servis-asc" => "Servis ↑",
+                "servis-desc" => "Servis ↓",
+                "bina-asc" => "Hizmet Binası ↑",
+                "bina-desc" => "Hizmet Binası ↓",
+                "unvan-asc" => "Ünvan ↑",
+                "unvan-desc" => "Ünvan ↓",
+                "dahili-asc" => "Dahili ↑",
+                "dahili-desc" => "Dahili ↓",
+                _ => "Ad Soyad ↑"
+            };
+        }
+
         // ═══════════════════════════════════════════════════════
         // FILTER & SORT METHODS
         // ═══════════════════════════════════════════════════════
@@ -286,14 +309,53 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         }
 
         // Sütun bazlı sort methodları
-        private void SortByTc() => ToggleSort("tc-asc", "tc-desc");
-        private void SortBySicil() => ToggleSort("sicil-asc", "sicil-desc");
-        private void SortByName() => ToggleSort("name-asc", "name-desc");
-        private void SortByDepartman() => ToggleSort("dept-asc", "dept-desc");
-        private void SortByServis() => ToggleSort("servis-asc", "servis-desc");
-        private void SortByBina() => ToggleSort("bina-asc", "bina-desc");
-        private void SortByUnvan() => ToggleSort("unvan-asc", "unvan-desc");
-        private void SortByDahili() => ToggleSort("dahili-asc", "dahili-desc");
+        private async Task SortByTc()
+        {
+            sortBy = sortBy == "tc-asc" ? "tc-desc" : "tc-asc";
+            await ApplyFiltersAndSort();
+        }
+
+        private async Task SortBySicil()
+        {
+            sortBy = sortBy == "sicil-asc" ? "sicil-desc" : "sicil-asc";
+            await ApplyFiltersAndSort();
+        }
+
+        private async Task SortByName()
+        {
+            sortBy = sortBy == "name-asc" ? "name-desc" : "name-asc";
+            await ApplyFiltersAndSort();
+        }
+
+        private async Task SortByDepartman()
+        {
+            sortBy = sortBy == "dept-asc" ? "dept-desc" : "dept-asc";
+            await ApplyFiltersAndSort();
+        }
+
+        private async Task SortByServis()
+        {
+            sortBy = sortBy == "servis-asc" ? "servis-desc" : "servis-asc";
+            await ApplyFiltersAndSort();
+        }
+
+        private async Task SortByBina()
+        {
+            sortBy = sortBy == "bina-asc" ? "bina-desc" : "bina-asc";
+            await ApplyFiltersAndSort();
+        }
+
+        private async Task SortByUnvan()
+        {
+            sortBy = sortBy == "unvan-asc" ? "unvan-desc" : "unvan-asc";
+            await ApplyFiltersAndSort();
+        }
+
+        private async Task SortByDahili()
+        {
+            sortBy = sortBy == "dahili-asc" ? "dahili-desc" : "dahili-asc";
+            await ApplyFiltersAndSort();
+        }
 
         private void ClearFilters()
         {
