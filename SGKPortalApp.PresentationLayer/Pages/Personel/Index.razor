@@ -136,23 +136,15 @@ else
                             <div class="d-flex gap-4 text-muted small">
                                 <span>
                                     <i class="bx bx-user text-primary"></i>
-                                    Toplam: <strong>@Personeller.Count</strong>
+                                    Toplam Kayıt: <strong>@TotalCount</strong>
                                 </span>
                                 <span>
-                                    <i class="bx bx-check-circle text-success"></i>
-                                    Aktif: <strong>@Personeller.Count(p => p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif)</strong>
+                                    <i class="bx bx-file text-info"></i>
+                                    Bu Sayfada: <strong>@FilteredPersoneller.Count</strong>
                                 </span>
                                 <span>
-                                    <i class="bx bx-x-circle text-danger"></i>
-                                    Pasif: <strong>@Personeller.Count(p => p.PersonelAktiflikDurum == PersonelAktiflikDurum.Pasif)</strong>
-                                </span>
-                                <span>
-                                    <i class="bx bx-user-check text-info"></i>
-                                    Emekli: <strong>@Personeller.Count(p => p.PersonelAktiflikDurum == PersonelAktiflikDurum.Emekli)</strong>
-                                </span>
-                                <span>
-                                    <i class="bx bx-filter-alt text-warning"></i>
-                                    Filtrelenen: <strong>@FilteredPersoneller.Count</strong>
+                                    <i class="bx bx-sort text-secondary"></i>
+                                    Sıralama: <strong>@GetSortDisplayName()</strong>
                                 </span>
                             </div>
                         </div>
