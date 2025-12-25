@@ -209,42 +209,42 @@ else
                                 <thead>
                                     <tr>
                                         <th style="width: 40px; padding: 0.5rem 0.25rem;">#</th>
-                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByTc">
+                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByTc" @onclick:stopPropagation="true">
                                             TC Kimlik No
                                             @if (sortBy == "tc-asc") { <i class="bx bx-chevron-up ms-1"></i> }
                                             else if (sortBy == "tc-desc") { <i class="bx bx-chevron-down ms-1"></i> }
                                         </th>
-                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortBySicil">
+                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortBySicil" @onclick:stopPropagation="true">
                                             Sicil No
                                             @if (sortBy == "sicil-asc") { <i class="bx bx-chevron-up ms-1"></i> }
                                             else if (sortBy == "sicil-desc") { <i class="bx bx-chevron-down ms-1"></i> }
                                         </th>
-                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByName">
+                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByName" @onclick:stopPropagation="true">
                                             Ad Soyad
                                             @if (sortBy == "name-asc") { <i class="bx bx-chevron-up ms-1"></i> }
                                             else if (sortBy == "name-desc") { <i class="bx bx-chevron-down ms-1"></i> }
                                         </th>
-                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByDepartman">
+                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByDepartman" @onclick:stopPropagation="true">
                                             Departman
                                             @if (sortBy == "dept-asc") { <i class="bx bx-chevron-up ms-1"></i> }
                                             else if (sortBy == "dept-desc") { <i class="bx bx-chevron-down ms-1"></i> }
                                         </th>
-                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByServis">
+                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByServis" @onclick:stopPropagation="true">
                                             Servis
                                             @if (sortBy == "servis-asc") { <i class="bx bx-chevron-up ms-1"></i> }
                                             else if (sortBy == "servis-desc") { <i class="bx bx-chevron-down ms-1"></i> }
                                         </th>
-                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByBina">
+                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByBina" @onclick:stopPropagation="true">
                                             Hizmet Binası
                                             @if (sortBy == "bina-asc") { <i class="bx bx-chevron-up ms-1"></i> }
                                             else if (sortBy == "bina-desc") { <i class="bx bx-chevron-down ms-1"></i> }
                                         </th>
-                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByUnvan">
+                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByUnvan" @onclick:stopPropagation="true">
                                             Ünvan
                                             @if (sortBy == "unvan-asc") { <i class="bx bx-chevron-up ms-1"></i> }
                                             else if (sortBy == "unvan-desc") { <i class="bx bx-chevron-down ms-1"></i> }
                                         </th>
-                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByDahili">
+                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByDahili" @onclick:stopPropagation="true">
                                             Dahili
                                             @if (sortBy == "dahili-asc") { <i class="bx bx-chevron-up ms-1"></i> }
                                             else if (sortBy == "dahili-desc") { <i class="bx bx-chevron-down ms-1"></i> }

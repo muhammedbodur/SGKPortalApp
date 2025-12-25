@@ -285,53 +285,61 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             _ = ApplyFiltersAndSort();
         }
 
-        // Sütun bazlı sort methodları - async yapıldı
+        // Sütun bazlı sort methodları - StateHasChanged() eklendi
         private async Task SortByTc()
         {
             sortBy = sortBy == "tc-asc" ? "tc-desc" : "tc-asc";
             await ApplyFiltersAndSort();
+            StateHasChanged();
         }
 
         private async Task SortBySicil()
         {
             sortBy = sortBy == "sicil-asc" ? "sicil-desc" : "sicil-asc";
             await ApplyFiltersAndSort();
+            StateHasChanged();
         }
 
         private async Task SortByName()
         {
             sortBy = sortBy == "name-asc" ? "name-desc" : "name-asc";
             await ApplyFiltersAndSort();
+            StateHasChanged();
         }
 
         private async Task SortByDepartman()
         {
             sortBy = sortBy == "dept-asc" ? "dept-desc" : "dept-asc";
             await ApplyFiltersAndSort();
+            StateHasChanged();
         }
 
         private async Task SortByServis()
         {
             sortBy = sortBy == "servis-asc" ? "servis-desc" : "servis-asc";
             await ApplyFiltersAndSort();
+            StateHasChanged();
         }
 
         private async Task SortByBina()
         {
             sortBy = sortBy == "bina-asc" ? "bina-desc" : "bina-asc";
             await ApplyFiltersAndSort();
+            StateHasChanged();
         }
 
         private async Task SortByUnvan()
         {
             sortBy = sortBy == "unvan-asc" ? "unvan-desc" : "unvan-asc";
             await ApplyFiltersAndSort();
+            StateHasChanged();
         }
 
         private async Task SortByDahili()
         {
             sortBy = sortBy == "dahili-asc" ? "dahili-desc" : "dahili-asc";
             await ApplyFiltersAndSort();
+            StateHasChanged();
         }
 
         private void ClearFilters()
