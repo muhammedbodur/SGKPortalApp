@@ -285,15 +285,54 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             _ = ApplyFiltersAndSort();
         }
 
-        // Sütun bazlı sort methodları
-        private void SortByTc() => ToggleSort("tc-asc", "tc-desc");
-        private void SortBySicil() => ToggleSort("sicil-asc", "sicil-desc");
-        private void SortByName() => ToggleSort("name-asc", "name-desc");
-        private void SortByDepartman() => ToggleSort("dept-asc", "dept-desc");
-        private void SortByServis() => ToggleSort("servis-asc", "servis-desc");
-        private void SortByBina() => ToggleSort("bina-asc", "bina-desc");
-        private void SortByUnvan() => ToggleSort("unvan-asc", "unvan-desc");
-        private void SortByDahili() => ToggleSort("dahili-asc", "dahili-desc");
+        // Sütun bazlı sort methodları - async yapıldı
+        private async Task SortByTc()
+        {
+            sortBy = sortBy == "tc-asc" ? "tc-desc" : "tc-asc";
+            await ApplyFiltersAndSort();
+        }
+
+        private async Task SortBySicil()
+        {
+            sortBy = sortBy == "sicil-asc" ? "sicil-desc" : "sicil-asc";
+            await ApplyFiltersAndSort();
+        }
+
+        private async Task SortByName()
+        {
+            sortBy = sortBy == "name-asc" ? "name-desc" : "name-asc";
+            await ApplyFiltersAndSort();
+        }
+
+        private async Task SortByDepartman()
+        {
+            sortBy = sortBy == "dept-asc" ? "dept-desc" : "dept-asc";
+            await ApplyFiltersAndSort();
+        }
+
+        private async Task SortByServis()
+        {
+            sortBy = sortBy == "servis-asc" ? "servis-desc" : "servis-asc";
+            await ApplyFiltersAndSort();
+        }
+
+        private async Task SortByBina()
+        {
+            sortBy = sortBy == "bina-asc" ? "bina-desc" : "bina-asc";
+            await ApplyFiltersAndSort();
+        }
+
+        private async Task SortByUnvan()
+        {
+            sortBy = sortBy == "unvan-asc" ? "unvan-desc" : "unvan-asc";
+            await ApplyFiltersAndSort();
+        }
+
+        private async Task SortByDahili()
+        {
+            sortBy = sortBy == "dahili-asc" ? "dahili-desc" : "dahili-asc";
+            await ApplyFiltersAndSort();
+        }
 
         private void ClearFilters()
         {
