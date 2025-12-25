@@ -285,6 +285,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             _ = ApplyFiltersAndSort();
         }
 
+        // Sütun bazlı sort methodları
+        private void SortByTc() => ToggleSort("tc-asc", "tc-desc");
+        private void SortBySicil() => ToggleSort("sicil-asc", "sicil-desc");
+        private void SortByName() => ToggleSort("name-asc", "name-desc");
+        private void SortByDepartman() => ToggleSort("dept-asc", "dept-desc");
+        private void SortByServis() => ToggleSort("servis-asc", "servis-desc");
+        private void SortByBina() => ToggleSort("bina-asc", "bina-desc");
+        private void SortByUnvan() => ToggleSort("unvan-asc", "unvan-desc");
+        private void SortByDahili() => ToggleSort("dahili-asc", "dahili-desc");
+
         private void ClearFilters()
         {
             searchTerm = string.Empty;
