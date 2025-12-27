@@ -74,7 +74,7 @@
         </div>
     </div>
 
-    @* Sonuçlar *@
+    @* Sonuçlar - Transaction Gruplu Görünüm *@
     @if (isLoading)
     {
         <div class="text-center py-5">
@@ -86,83 +86,143 @@
     }
     else if (result != null && result.Logs.Any())
     {
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">📊 Sonuçlar</h5>
-                <span class="badge bg-primary">Toplam: @result.TotalCount kayıt</span>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover table-sm mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Tarih/Saat</th>
-                                <th>Kullanıcı</th>
-                                <th>Tablo</th>
-                                <th>İşlem</th>
-                                <th>Değişen Alanlar</th>
-                                <th>Depolama</th>
-                                <th>Boyut</th>
-                                <th>IP</th>
-                                <th>İşlemler</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var log in result.Logs)
+        @* Sayfalama Üst *@
+        <div class="card mb-2">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge bg-primary">Toplam: @result.TotalCount kayıt</span>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item @(!result.HasPreviousPage ? "disabled" : "")">
+                                <button class="page-link" @onclick="() => GoToPage(result.PageNumber - 1)" disabled="@(!result.HasPreviousPage)">
+                                    Önceki
+                                </button>
+                            </li>
+                            @for (int i = Math.Max(1, result.PageNumber - 2); i <= Math.Min(result.TotalPages, result.PageNumber + 2); i++)
                             {
-                                <tr>
-                                    <td class="text-nowrap">
-                                        <small>@log.IslemZamaniText</small>
-                                    </td>
-                                    <td>
-                                        <small>@log.TcKimlikNo</small>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-info">@log.TabloAdi</span>
-                                    </td>
-                                    <td>
-                                        <span class="badge @GetActionBadgeClass(log.IslemTuru)">
-                                            @log.IslemTuruText
-                                        </span>
-                                    </td>
-                                    <td>
-                                        @if (log.ChangedFieldCount.HasValue)
-                                        {
-                                            <small class="text-muted">@log.ChangedFieldCount alan</small>
-                                        }
-                                        else
-                                        {
-                                            <small class="text-muted">-</small>
-                                        }
-                                    </td>
-                                    <td>
-                                        <small class="text-muted">@log.StorageTypeText</small>
-                                    </td>
-                                    <td>
-                                        <small class="text-muted">@log.DataSizeText</small>
-                                    </td>
-                                    <td>
-                                        <small class="text-muted">@(log.IpAddress ?? "-")</small>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary" @onclick="() => ShowDetailAsync(log.DatabaseLogId)">
-                                            Detay
-                                        </button>
-                                        @if (log.TransactionId.HasValue)
-                                        {
-                                            <button class="btn btn-sm btn-outline-secondary ms-1"
-                                                    @onclick="() => ShowTransactionLogsAsync(log.TransactionId.Value)">
-                                                Grup
-                                            </button>
-                                        }
-                                    </td>
-                                </tr>
+                                var pageNum = i;
+                                <li class="page-item @(pageNum == result.PageNumber ? "active" : "")">
+                                    <button class="page-link" @onclick="() => GoToPage(pageNum)">
+                                        @pageNum
+                                    </button>
+                                </li>
                             }
-                        </tbody>
-                    </table>
+                            <li class="page-item @(!result.HasNextPage ? "disabled" : "")">
+                                <button class="page-link" @onclick="() => GoToPage(result.PageNumber + 1)" disabled="@(!result.HasNextPage)">
+                                    Sonraki
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
+                    <small class="text-muted">
+                        Sayfa @result.PageNumber / @result.TotalPages
+                    </small>
                 </div>
             </div>
-            <div class="card-footer">
+        </div>
+
+        @* Transaction Grupları - Hepsi Alt Alta Açık *@
+        @foreach (var transactionGroup in GetTransactionGroups())
+        {
+            var groupLogs = transactionGroup.Logs.OrderBy(l => l.IslemZamani).ToList();
+            var firstLog = groupLogs.First();
+
+            <div class="card mb-3 border-primary">
+                @* Grup Başlığı *@
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">
+                                🔗 İşlem Grubu #@(transactionGroup.TransactionId?.ToString().Substring(0, 8) ?? "Tekil")
+                            </h6>
+                            <small class="text-muted">
+                                @firstLog.IslemZamaniText - @firstLog.TcKimlikNo
+                                @if (transactionGroup.TransactionId.HasValue)
+                                {
+                                    <span class="badge bg-info ms-2">@groupLogs.Count değişiklik</span>
+                                }
+                            </small>
+                        </div>
+                        <div>
+                            <small class="text-muted">IP: @(firstLog.IpAddress ?? "-")</small>
+                        </div>
+                    </div>
+                </div>
+
+                @* Grup İçeriği - Alt Alta Açık *@
+                <div class="card-body">
+                    @foreach (var log in groupLogs)
+                    {
+                        <div class="border-start border-3 @GetBorderClass(log.IslemTuru) ps-3 mb-3">
+                            @* Log Başlığı *@
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <strong>@log.TabloAdi</strong>
+                                    <span class="badge @GetActionBadgeClass(log.IslemTuru) ms-2">
+                                        @log.IslemTuruText
+                                    </span>
+                                    @if (log.ChangedFieldCount.HasValue)
+                                    {
+                                        <span class="badge bg-secondary ms-1">@log.ChangedFieldCount alan</span>
+                                    }
+                                </div>
+                                <div>
+                                    <small class="text-muted">@log.StorageTypeText | @log.DataSizeText</small>
+                                </div>
+                            </div>
+
+                            @* Değişiklik Detayları - Eğer yüklendiyse *@
+                            @if (expandedLogIds.Contains(log.DatabaseLogId) && logDetails.ContainsKey(log.DatabaseLogId))
+                            {
+                                var detail = logDetails[log.DatabaseLogId];
+
+                                @if (detail.FieldChanges.Any())
+                                {
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th style="width: 30%">Alan Adı</th>
+                                                    <th style="width: 35%">Eski Değer</th>
+                                                    <th style="width: 35%">Yeni Değer</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var change in detail.FieldChanges)
+                                                {
+                                                    <tr class="@(change.IsChanged ? "table-warning" : "")">
+                                                        <td><strong>@change.FieldName</strong></td>
+                                                        <td><code>@(change.OldValue ?? "null")</code></td>
+                                                        <td><code>@(change.NewValue ?? "null")</code></td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="alert alert-info alert-sm mb-0">
+                                        Detay bilgisi yok
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                @* Detay Göster Butonu *@
+                                <button class="btn btn-sm btn-outline-primary" @onclick="() => ToggleLogDetail(log.DatabaseLogId)">
+                                    <i class="bx bx-show me-1"></i> Detayı Göster
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @* Sayfalama Alt *@
+        <div class="card">
+            <div class="card-body p-2">
                 <nav>
                     <ul class="pagination pagination-sm justify-content-center mb-0">
                         <li class="page-item @(!result.HasPreviousPage ? "disabled" : "")">
@@ -170,7 +230,6 @@
                                 Önceki
                             </button>
                         </li>
-
                         @for (int i = Math.Max(1, result.PageNumber - 2); i <= Math.Min(result.TotalPages, result.PageNumber + 2); i++)
                         {
                             var pageNum = i;
@@ -180,7 +239,6 @@
                                 </button>
                             </li>
                         }
-
                         <li class="page-item @(!result.HasNextPage ? "disabled" : "")">
                             <button class="page-link" @onclick="() => GoToPage(result.PageNumber + 1)" disabled="@(!result.HasNextPage)">
                                 Sonraki
@@ -188,12 +246,6 @@
                         </li>
                     </ul>
                 </nav>
-                <div class="text-center mt-2">
-                    <small class="text-muted">
-                        Sayfa @result.PageNumber / @result.TotalPages
-                        (@result.Logs.Count kayıt gösteriliyor)
-                    </small>
-                </div>
             </div>
         </div>
     }
@@ -205,90 +257,6 @@
     }
 </div>
 
-@* Detay Modal *@
-@if (selectedDetail != null)
-{
-    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">📋 Audit Log Detayı</h5>
-                    <button type="button" class="btn-close" @onclick="CloseDetail"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <p><strong>Tarih/Saat:</strong> @selectedDetail.IslemZamani.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss")</p>
-                            <p><strong>Kullanıcı:</strong> @selectedDetail.TcKimlikNo</p>
-                            <p><strong>Tablo:</strong> @selectedDetail.TabloAdi</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>İşlem Türü:</strong> @selectedDetail.IslemTuru</p>
-                            <p><strong>Depolama:</strong> @selectedDetail.StorageType</p>
-                            <p><strong>IP Adresi:</strong> @(selectedDetail.IpAddress ?? "-")</p>
-                        </div>
-                    </div>
-
-                    @if (selectedDetail.FieldChanges.Any())
-                    {
-                        <h6>🔄 Değişiklikler</h6>
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Alan Adı</th>
-                                        <th>Eski Değer</th>
-                                        <th>Yeni Değer</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var change in selectedDetail.FieldChanges)
-                                    {
-                                        <tr class="@(change.IsChanged ? "table-warning" : "")">
-                                            <td><strong>@change.FieldName</strong></td>
-                                            <td><code>@(change.OldValue ?? "null")</code></td>
-                                            <td><code>@(change.NewValue ?? "null")</code></td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-
-                    @if (selectedDetail.RelatedLogs?.Any() == true)
-                    {
-                        <h6 class="mt-4">🔗 Transaction Grubu</h6>
-                        <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Tablo</th>
-                                        <th>İşlem</th>
-                                        <th>Tarih/Saat</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var related in selectedDetail.RelatedLogs)
-                                    {
-                                        <tr>
-                                            <td>@related.TabloAdi</td>
-                                            <td><span class="badge @GetActionBadgeClass(related.IslemTuru)">@related.IslemTuruText</span></td>
-                                            <td>@related.IslemZamaniText</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseDetail">Kapat</button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
 @code {
     private AuditLogFilterDto Filter = new()
     {
@@ -299,8 +267,9 @@
     };
 
     private AuditLogPagedResultDto? result;
-    private AuditLogDetailDto? selectedDetail;
     private bool isLoading = false;
+    private HashSet<int> expandedLogIds = new();
+    private Dictionary<int, AuditLogDetailDto> logDetails = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -313,6 +282,8 @@
         try
         {
             result = await AuditLogApiService.GetLogsAsync(Filter);
+            expandedLogIds.Clear();
+            logDetails.Clear();
         }
         finally
         {
@@ -329,21 +300,22 @@
         await LoadLogsAsync();
     }
 
-    private async Task ShowDetailAsync(int logId)
+    private async Task ToggleLogDetail(int logId)
     {
-        selectedDetail = await AuditLogApiService.GetLogDetailAsync(logId);
-    }
-
-    private async Task ShowTransactionLogsAsync(Guid transactionId)
-    {
-        Filter.TransactionId = transactionId;
-        Filter.PageNumber = 1;
-        await LoadLogsAsync();
-    }
-
-    private void CloseDetail()
-    {
-        selectedDetail = null;
+        if (expandedLogIds.Contains(logId))
+        {
+            expandedLogIds.Remove(logId);
+            logDetails.Remove(logId);
+        }
+        else
+        {
+            expandedLogIds.Add(logId);
+            var detail = await AuditLogApiService.GetLogDetailAsync(logId);
+            if (detail != null)
+            {
+                logDetails[logId] = detail;
+            }
+        }
     }
 
     private void ResetFilters()
@@ -357,6 +329,21 @@
         };
     }
 
+    private List<TransactionGroup> GetTransactionGroups()
+    {
+        if (result == null || !result.Logs.Any())
+            return new List<TransactionGroup>();
+
+        return result.Logs
+            .GroupBy(l => l.TransactionId ?? Guid.Empty)
+            .Select(g => new TransactionGroup
+            {
+                TransactionId = g.Key == Guid.Empty ? null : g.Key,
+                Logs = g.ToList()
+            })
+            .ToList();
+    }
+
     private string GetActionBadgeClass(DatabaseAction action)
     {
         return action switch
@@ -366,5 +353,22 @@
             DatabaseAction.DELETE => "bg-danger",
             _ => "bg-secondary"
         };
+    }
+
+    private string GetBorderClass(DatabaseAction action)
+    {
+        return action switch
+        {
+            DatabaseAction.INSERT or DatabaseAction.CREATE_COMPLETE => "border-success",
+            DatabaseAction.UPDATE or DatabaseAction.UPDATE_COMPLETE => "border-warning",
+            DatabaseAction.DELETE => "border-danger",
+            _ => "border-secondary"
+        };
+    }
+
+    private class TransactionGroup
+    {
+        public Guid? TransactionId { get; set; }
+        public List<AuditLogDto> Logs { get; set; } = new();
     }
 }
