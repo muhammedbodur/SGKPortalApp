@@ -1,8 +1,8 @@
 @page "/admin/audit-logs"
-@using SGKPortalApp.BusinessLogicLayer.Interfaces.Common
+@using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
 @using SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
-@inject IAuditLogService AuditLogService
+@inject IAuditLogApiService AuditLogApiService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Audit Log'ları - SGK Portal</PageTitle>
@@ -312,7 +312,7 @@
         isLoading = true;
         try
         {
-            result = await AuditLogService.GetLogsAsync(Filter);
+            result = await AuditLogApiService.GetLogsAsync(Filter);
         }
         finally
         {
@@ -331,7 +331,7 @@
 
     private async Task ShowDetailAsync(int logId)
     {
-        selectedDetail = await AuditLogService.GetLogDetailAsync(logId);
+        selectedDetail = await AuditLogApiService.GetLogDetailAsync(logId);
     }
 
     private async Task ShowTransactionLogsAsync(Guid transactionId)

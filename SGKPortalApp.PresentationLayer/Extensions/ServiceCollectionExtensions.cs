@@ -69,13 +69,6 @@ namespace SGKPortalApp.PresentationLayer.Extensions
             services.RegisterApiServices(assembly, apiUrl, "Pdks");
             services.RegisterApiServices(assembly, apiUrl, "Eshot");
 
-            // ═══════════════════════════════════════════════════════
-            // 6️⃣ AUDIT LOG SERVICE
-            // ═══════════════════════════════════════════════════════
-            services.AddScoped<SGKPortalApp.BusinessLogicLayer.Interfaces.Common.IAuditLogService,
-                SGKPortalApp.BusinessLogicLayer.Services.Common.AuditLogService>();
-            Console.WriteLine("✅ IAuditLogService → AuditLogService");
-
             Console.WriteLine("🎉 Presentation Layer hazır!\n");
             return services;
         }
