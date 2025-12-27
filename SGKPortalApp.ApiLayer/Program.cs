@@ -45,6 +45,26 @@ namespace SGKPortalApp.ApiLayer
                 Console.WriteLine($"⚠️  Shared configuration bulunamadı: {sharedConfigPath}");
             }
 
+            // Audit Logging Configuration
+            var auditConfigPath = Path.Combine(
+                Directory.GetParent(Directory.GetCurrentDirectory())!.FullName,
+                "appsettings.AuditLogging.json"
+            );
+
+            if (File.Exists(auditConfigPath))
+            {
+                builder.Configuration.AddJsonFile(
+                    auditConfigPath,
+                    optional: false,
+                    reloadOnChange: true
+                );
+                Console.WriteLine($"✅ Audit logging configuration yüklendi: {auditConfigPath}");
+            }
+            else
+            {
+                Console.WriteLine($"⚠️  Audit logging configuration bulunamadı: {auditConfigPath}");
+            }
+
             // ═══════════════════════════════════════════════════════
             // 📌 PORT AYARLARI
             // ═══════════════════════════════════════════════════════
