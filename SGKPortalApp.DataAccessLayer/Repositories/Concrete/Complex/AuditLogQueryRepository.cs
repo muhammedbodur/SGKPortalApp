@@ -225,5 +225,146 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                 .OrderBy(l => l.IslemZamani)
                 .ToListAsync();
         }
+
+        /// <summary>
+        /// Field value için FK lookup yaparak kullanıcı dostu gösterim döndürür
+        /// </summary>
+        public async Task<string?> ResolveFieldValueAsync(string fieldName, string? value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return null;
+
+            // ID parse et
+            if (!int.TryParse(value, out int id))
+                return null;
+
+            try
+            {
+                // FK field'larını tespit et ve lookup yap
+                return fieldName switch
+                {
+                    // Organizasyon
+                    "DepartmanId" => await _context.Departmanlar
+                        .Where(d => d.DepartmanId == id)
+                        .Select(d => d.DepartmanAdi)
+                        .FirstOrDefaultAsync(),
+
+                    "ServisId" => await _context.Servisler
+                        .Where(s => s.ServisId == id)
+                        .Select(s => s.ServisAdi)
+                        .FirstOrDefaultAsync(),
+
+                    "UnvanId" => await _context.Unvanlar
+                        .Where(u => u.UnvanId == id)
+                        .Select(u => u.UnvanAdi)
+                        .FirstOrDefaultAsync(),
+
+                    "SendikaId" => await _context.Sendikalar
+                        .Where(s => s.SendikaId == id)
+                        .Select(s => s.SendikaAdi)
+                        .FirstOrDefaultAsync(),
+
+                    "AtanmaNedeniId" => await _context.AtanmaNedenleri
+                        .Where(a => a.AtanmaNedeniId == id)
+                        .Select(a => a.AtanmaNedeni)
+                        .FirstOrDefaultAsync(),
+
+                    // Lokasyon
+                    "HizmetBinasiId" => await _context.HizmetBinalari
+                        .Where(h => h.HizmetBinasiId == id)
+                        .Select(h => h.HizmetBinasiAdi)
+                        .FirstOrDefaultAsync(),
+
+                    "IlId" or "EsininIsIlId" => await _context.Iller
+                        .Where(i => i.IlId == id)
+                        .Select(i => i.IlAdi)
+                        .FirstOrDefaultAsync(),
+
+                    "IlceId" or "EsininIsIlceId" => await _context.Ilceler
+                        .Where(i => i.IlceId == id)
+                        .Select(i => i.IlceAdi)
+                        .FirstOrDefaultAsync(),
+
+                    // Yetki/Modül Sistemi
+                    "ModulId" => await _context.Moduller
+                        .Where(m => m.ModulId == id)
+                        .Select(m => m.ModulAdi)
+                        .FirstOrDefaultAsync(),
+
+                    "ModulControllerId" or "UstModulControllerId" => await _context.ModulControllers
+                        .Where(m => m.ModulControllerId == id)
+                        .Select(m => m.ModulControllerAdi)
+                        .FirstOrDefaultAsync(),
+
+                    "ModulControllerIslemId" or "UstIslemId" => await _context.ModulControllerIslemleri
+                        .Where(m => m.ModulControllerIslemId == id)
+                        .Select(m => m.ModulControllerIslemAdi + " (" + m.PermissionKey + ")")
+                        .FirstOrDefaultAsync(),
+
+                    // Sıramatik - Banko
+                    "BankoId" or "YonlendirenBankoId" or "HedefBankoId" or "AktifBankoId" => await _context.Bankolar
+                        .Include(b => b.HizmetBinasi)
+                        .Where(b => b.BankoId == id)
+                        .Select(b => "Banko #" + b.BankoNo + " (" + b.HizmetBinasi.HizmetBinasiAdi + ")")
+                        .FirstOrDefaultAsync(),
+
+                    // Sıramatik - Tv
+                    "TvId" => await _context.Tvler
+                        .Where(t => t.TvId == id)
+                        .Select(t => t.TvAdi)
+                        .FirstOrDefaultAsync(),
+
+                    // Sıramatik - Kiosk
+                    "KioskId" => await _context.Kiosklar
+                        .Where(k => k.KioskId == id)
+                        .Select(k => k.KioskAdi)
+                        .FirstOrDefaultAsync(),
+
+                    // Sıramatik - Sıra
+                    "SiraId" => await _context.Siralar
+                        .Where(s => s.SiraId == id)
+                        .Select(s => "Sıra #" + s.SiraNo)
+                        .FirstOrDefaultAsync(),
+
+                    // Sıramatik - Kanal
+                    "KanalId" => await _context.Kanallar
+                        .Where(k => k.KanalId == id)
+                        .Select(k => k.KanalAdi)
+                        .FirstOrDefaultAsync(),
+
+                    // Sıramatik - KanalAlt
+                    "KanalAltId" => await _context.KanalAltlar
+                        .Where(k => k.KanalAltId == id)
+                        .Select(k => k.KanalAltAdi)
+                        .FirstOrDefaultAsync(),
+
+                    // Sıramatik - KanalIslem
+                    "KanalIslemId" => await _context.KanalIslemleri
+                        .Where(k => k.KanalIslemId == id)
+                        .Select(k => k.KanalIslemAdi)
+                        .FirstOrDefaultAsync(),
+
+                    // Sıramatik - KanalAltIslem
+                    "KanalAltIslemId" => await _context.KanalAltIslemleri
+                        .Where(k => k.KanalAltIslemId == id)
+                        .Select(k => k.KanalAltIslemAdi)
+                        .FirstOrDefaultAsync(),
+
+                    // PDKS
+                    "PdksCihazId" => await _context.PdksCihazlar
+                        .Include(p => p.Departman)
+                        .Where(p => p.PdksCihazId == id)
+                        .Select(p => p.CihazIP + " (" + p.Departman.DepartmanAdi + ")")
+                        .FirstOrDefaultAsync(),
+
+                    _ => null
+                };
+            }
+            catch
+            {
+                // Lookup hatası - null dön
+                return null;
+            }
+        }
     }
 }

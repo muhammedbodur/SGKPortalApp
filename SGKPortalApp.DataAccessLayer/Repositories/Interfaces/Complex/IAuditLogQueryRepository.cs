@@ -56,5 +56,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex
         /// Transaction'daki diğer log'ları getirir (belirli bir log hariç)
         /// </summary>
         Task<List<DatabaseLog>> GetRelatedLogsInTransactionAsync(System.Guid transactionId, int excludeLogId);
+
+        /// <summary>
+        /// Field value için FK lookup yaparak kullanıcı dostu gösterim döndürür
+        /// </summary>
+        /// <param name="fieldName">Alan adı (örn: DepartmanId, ServisId)</param>
+        /// <param name="value">Alan değeri (ID)</param>
+        /// <returns>Kullanıcı dostu gösterim (örn: "Bilgi İşlem", "Banko #5 (Merkez)")</returns>
+        Task<string?> ResolveFieldValueAsync(string fieldName, string? value);
     }
 }
