@@ -114,11 +114,17 @@
                                 @foreach (var change in detail.FieldChanges)
                                 {
                                     <tr class="table-warning">
-                                        <td><strong>@change.FieldName</strong></td>
+                                        <td>
+                                            <strong>@GetFriendlyFieldName(change.FieldName)</strong>
+                                            <br />
+                                            <small class="text-muted">@change.FieldName</small>
+                                        </td>
                                         <td>
                                             @if (!string.IsNullOrEmpty(change.OldValue))
                                             {
-                                                <code>@change.OldValue</code>
+                                                <div>
+                                                    <code>@GetFriendlyValue(change.FieldName, change.OldValue)</code>
+                                                </div>
                                             }
                                             else
                                             {
@@ -128,7 +134,9 @@
                                         <td>
                                             @if (!string.IsNullOrEmpty(change.NewValue))
                                             {
-                                                <code>@change.NewValue</code>
+                                                <div>
+                                                    <code>@GetFriendlyValue(change.FieldName, change.NewValue)</code>
+                                                </div>
                                             }
                                             else
                                             {
