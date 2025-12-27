@@ -82,7 +82,20 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
 
                 // ExcludedTables kontrolü
                 if (_options.ExcludedTables != null && _options.ExcludedTables.Contains(tableName))
+                {
+                    System.Diagnostics.Debug.WriteLine($"[AuditLog] Skipping excluded table: {tableName}");
                     continue;
+                }
+
+                // Debug: Log the table name being processed
+                if (tableName.Contains("Hub"))
+                {
+                    System.Diagnostics.Debug.WriteLine($"[AuditLog] Processing Hub table: {tableName}, ExcludedTables count: {_options.ExcludedTables?.Count ?? 0}");
+                    if (_options.ExcludedTables != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[AuditLog] ExcludedTables: {string.Join(", ", _options.ExcludedTables)}");
+                    }
+                }
 
                 // Configuration'ı cache'den al
                 var config = _configCache.GetConfig(entityType);
