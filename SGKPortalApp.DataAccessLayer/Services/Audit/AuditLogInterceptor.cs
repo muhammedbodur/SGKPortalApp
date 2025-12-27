@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Options;
-using SGKPortalApp.BusinessLogicLayer.Services.Common;
+using SGKPortalApp.Common.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -160,7 +160,7 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
                 EntityState.Added => DatabaseAction.INSERT,
                 EntityState.Modified => isSoftDelete ? DatabaseAction.DELETE : DatabaseAction.UPDATE,
                 EntityState.Deleted => DatabaseAction.DELETE,
-                _ => DatabaseAction.SELECT
+                _ => DatabaseAction.NONE
             };
 
             // Changed fields'ı hesapla
@@ -179,14 +179,13 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
 
             var log = new DatabaseLog
             {
-                TcKimlikNo = tcKimlikNo,
-                TabloAdi = tableName,
-                IslemTuru = action,
+                TcKimlikNo = tcKimlikNo ?? "SYSTEM",
+                TableName = tableName,
+                DatabaseAction = action,
                 IslemZamani = DateTime.UtcNow,
                 StorageType = storageType,
                 TransactionId = TransactionContext.TransactionId,
                 IsGroupedLog = false, // Grouped log'lar ayrıca oluşturulur
-                ChangedFields = changedFields,
                 ChangedFieldCount = changedFields?.Split(',').Length ?? 0,
                 DataSizeBytes = dataSize,
                 IpAddress = ipAddress,
@@ -341,42 +340,11 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
         }
 
         /// <summary>
-        /// Masking uygular
+        /// Masking uygular - her zaman "***" döndürür
         /// </summary>
         private string ApplyMasking(string value, SensitiveDataConfig config)
         {
-            if (config.ShowFirstChars.HasValue && config.ShowLastChars.HasValue)
-            {
-                var firstChars = config.ShowFirstChars.Value;
-                var lastChars = config.ShowLastChars.Value;
-
-                if (value.Length <= firstChars + lastChars)
-                    return config.MaskFormat;
-
-                var first = value.Substring(0, firstChars);
-                var last = value.Substring(value.Length - lastChars);
-                return $"{first}{config.MaskFormat}{last}";
-            }
-            else if (config.ShowFirstChars.HasValue)
-            {
-                var firstChars = config.ShowFirstChars.Value;
-                if (value.Length <= firstChars)
-                    return config.MaskFormat;
-
-                var first = value.Substring(0, firstChars);
-                return $"{first}{config.MaskFormat}";
-            }
-            else if (config.ShowLastChars.HasValue)
-            {
-                var lastChars = config.ShowLastChars.Value;
-                if (value.Length <= lastChars)
-                    return config.MaskFormat;
-
-                var last = value.Substring(value.Length - lastChars);
-                return $"{config.MaskFormat}{last}";
-            }
-
-            return config.MaskFormat;
+            return "***";
         }
 
         /// <summary>

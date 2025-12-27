@@ -1,5 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
+using SGKPortalApp.Common.Interfaces;
 using SGKPortalApp.Common.Interfaces.Permission;
+using SGKPortalApp.Common.Services;
 using SGKPortalApp.Common.Services.Permission;
 
 namespace SGKPortalApp.Common.Extensions
@@ -20,6 +22,10 @@ namespace SGKPortalApp.Common.Extensions
             // Memory Cache (PermissionKeyResolverService için gerekli)
             services.AddMemoryCache();
             Console.WriteLine("  ✅ IMemoryCache → MemoryCache");
+
+            // Current User Service (Audit logging için gerekli)
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
+            Console.WriteLine("  ✅ ICurrentUserService → CurrentUserService");
 
             // Permission Services
             services.AddScoped<IPermissionKeyResolverService, PermissionKeyResolverService>();

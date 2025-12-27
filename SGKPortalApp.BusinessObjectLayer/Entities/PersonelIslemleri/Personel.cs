@@ -27,7 +27,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
     {
         [Key]
         [StringLength(11)]
-        [SensitiveData(ShowFirstChars = 3, MaskFormat = "****")] // Örnek: 123****4567
+        [SensitiveData]
         public string TcKimlikNo { get; set; } = string.Empty;
 
         public int SicilNo { get; set; }
@@ -110,19 +110,19 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         public int Dahili { get; set; }
 
         [StringLength(20)]
-        [SensitiveData(ShowLastChars = 4, MaskFormat = "***")] // Örnek: ***1234
+        [SensitiveData]
         public string? CepTelefonu { get; set; }
 
         [StringLength(20)]
-        [SensitiveData(ShowLastChars = 4, MaskFormat = "***")] // Örnek: ***1234
+        [SensitiveData]
         public string? CepTelefonu2 { get; set; }
 
         [StringLength(20)]
-        [SensitiveData(ShowLastChars = 4, MaskFormat = "***")] // Örnek: ***1234
+        [SensitiveData]
         public string? EvTelefonu { get; set; }
 
         [StringLength(500)]
-        [SensitiveData(MaskFormat = "***")] // Tamamen maskeli
+        [SensitiveData]
         public string? Adres { get; set; }
 
         [StringLength(100)]

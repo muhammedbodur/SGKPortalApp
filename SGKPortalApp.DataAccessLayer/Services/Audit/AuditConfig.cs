@@ -69,9 +69,6 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
     /// </summary>
     public class SensitiveDataConfig
     {
-        public string MaskFormat { get; set; } = "***";
         public bool ExcludeFromLog { get; set; } = false;
-        public int? ShowFirstChars { get; set; }
-        public int? ShowLastChars { get; set; }
     }
 }

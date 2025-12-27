@@ -132,10 +132,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Log
             {
                 Filter.DepartmanId = deptId;
 
-                // Servisleri filtrele (departmana göre)
-                FiltreliServisler = TumServisler
-                    .Where(s => s.DepartmanId == deptId)
-                    .ToList();
+                // Servisler global - tüm servisleri göster
+                FiltreliServisler = TumServisler.ToList();
 
                 // Servis seçimini sıfırla
                 selectedServisId = 0;
@@ -144,7 +142,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Log
             else
             {
                 Filter.DepartmanId = null;
-                FiltreliServisler = new List<ServisResponseDto>();
+                FiltreliServisler = TumServisler.ToList();
                 selectedServisId = 0;
                 Filter.ServisId = null;
             }

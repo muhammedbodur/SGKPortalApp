@@ -3,16 +3,15 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using SGKPortalApp.ApiLayer.Services.Hubs;
 using SGKPortalApp.ApiLayer.Services.Hubs.Concrete;
 using SGKPortalApp.ApiLayer.Services.Hubs.Interfaces;
 using SGKPortalApp.ApiLayer.Services.State;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Database;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.BusinessLogicLayer.Extensions;
-using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Extensions;
 using System.Text.Json.Serialization;
 
@@ -20,7 +19,7 @@ namespace SGKPortalApp.ApiLayer
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -107,35 +106,24 @@ namespace SGKPortalApp.ApiLayer
                     };
                 });
 
+            builder.Services.AddAuthorization();
+
             // ═══════════════════════════════════════════════════════
-            // 💾 DATABASE CONTEXT
+            // ⭐ KATMAN SERVİSLERİ ⭐
             // ═══════════════════════════════════════════════════════
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("❌ DefaultConnection bağlantı dizesi bulunamadı!");
 
             Console.WriteLine($"📊 Database Connection: {connectionString.Substring(0, Math.Min(50, connectionString.Length))}...");
 
-            builder.Services.AddDbContext<SGKDbContext>(options =>
-            {
-                options.UseSqlServer(connectionString);
-
-                if (builder.Environment.IsDevelopment())
-                {
-                    options.EnableSensitiveDataLogging();
-                    options.EnableDetailedErrors();
-                }
-            });
-
-            builder.Services.AddAuthorization();
-
-            // ⭐ KATMAN SERVİSLERİ ⭐
-            // 1. DataAccessLayer (Repository Pattern + UnitOfWork)
-            builder.Services.AddDataAccessLayer();
-
-            // 2. Common Layer (Shared services - Frontend ve Backend ortak)
+            // 1. Common Layer (Shared services)
             builder.Services.AddCommonServices();
 
-            // 3. Business Logic Layer (Backend iş mantığı)
+            // 2. Data Access Layer (DbContext + Repository + UnitOfWork)
+            builder.Services.AddDataAccessLayer(connectionString);
+            builder.Services.AddAuditLogging(builder.Configuration);
+
+            // 3. Business Logic Layer (Business Services)
             builder.Services.AddBusinessLogicLayer();
 
             // ═══════════════════════════════════════════════════════
@@ -158,8 +146,7 @@ namespace SGKPortalApp.ApiLayer
             // ═══════════════════════════════════════════════════════
             // ❤️ HEALTH CHECKS
             // ═══════════════════════════════════════════════════════
-            builder.Services.AddHealthChecks()
-                .AddDbContextCheck<SGKDbContext>("database", tags: new[] { "db", "sql" });
+            builder.Services.AddHealthChecks();
 
             // ═══════════════════════════════════════════════════════
             // 📖 SWAGGER/OpenAPI
@@ -326,41 +313,29 @@ namespace SGKPortalApp.ApiLayer
             }).WithTags("Info");
 
             // ═══════════════════════════════════════════════════════
-            // 🗄️ DATABASE MIGRATION & SCRIPTS
+            // 🗄️ DATABASE MIGRATION (Sadece Production)
             // ═══════════════════════════════════════════════════════
-            using (var scope = app.Services.CreateScope())
+            // Development'ta manuel migration kullanılır: Add-Migration, Update-Database
+            // Production'da otomatik migration uygulanır
+            if (!app.Environment.IsDevelopment())
             {
-                try
+                using (var scope = app.Services.CreateScope())
                 {
-                    var context = scope.ServiceProvider.GetRequiredService<SGKDbContext>();
-                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-
-                    if (context.Database.GetPendingMigrations().Any())
+                    try
                     {
-                        Console.WriteLine("📊 Bekleyen migration'lar uygulanıyor...");
-                        context.Database.Migrate();
-                        Console.WriteLine("✅ Migration'lar başarıyla uygulandı");
+                        var migrationService = scope.ServiceProvider.GetRequiredService<IDatabaseMigrationService>();
+                        await migrationService.ApplyMigrationsAsync();
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        Console.WriteLine("✅ Veritabanı güncel");
-                    }
-
-                    // SQL Script'leri çalıştır (View, SP, Function)
-                    var scriptsPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", 
-                        "SGKPortalApp.DataAccessLayer", "Scripts");
-                    
-                    if (Directory.Exists(scriptsPath))
-                    {
-                        Console.WriteLine("📜 SQL Script'leri çalıştırılıyor...");
-                        SGKPortalApp.DataAccessLayer.Scripts.DatabaseScriptRunner
-                            .RunScriptsFromFolderAsync(context, scriptsPath, logger).Wait();
+                        Console.WriteLine($"❌ Migration hatası: {ex.Message}");
+                        throw; // Production'da migration hatası kritik
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"❌ Migration/Script hatası: {ex.Message}");
-                }
+            }
+            else
+            {
+                Console.WriteLine("ℹ️  Development ortamı - Migration'lar manuel uygulanmalı (Add-Migration, Update-Database)");
             }
 
             Console.WriteLine("\n╔════════════════════════════════════════════════════════╗");

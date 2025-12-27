@@ -1,4 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using System.Reflection;
@@ -14,9 +17,21 @@ namespace SGKPortalApp.DataAccessLayer.Extensions
         /// <summary>
         /// DataAccessLayer servislerini DI container'a kaydet
         /// </summary>
-        public static IServiceCollection AddDataAccessLayer(this IServiceCollection services)
+        public static IServiceCollection AddDataAccessLayer(
+            this IServiceCollection services,
+            string connectionString)
         {
             Console.WriteLine("📦 DataAccessLayer servisleri kaydediliyor...");
+
+            // DbContext kaydet
+            services.AddDbContext<SGKDbContext>((serviceProvider, options) =>
+            {
+                options.UseSqlServer(connectionString);
+
+                // Audit logging interceptor'ı ekle
+                options.AddAuditLoggingInterceptor(serviceProvider);
+            });
+            Console.WriteLine("  ✅ SGKDbContext kaydedildi");
 
             // UnitOfWork Pattern
             services.AddScoped<IUnitOfWork, UnitOfWork>();

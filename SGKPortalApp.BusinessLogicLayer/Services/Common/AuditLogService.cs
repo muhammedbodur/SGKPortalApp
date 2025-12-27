@@ -3,6 +3,7 @@ using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Options;
+using SGKPortalApp.Common.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
 using SGKPortalApp.DataAccessLayer.Services.Audit;
 using System;
@@ -53,14 +54,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             {
                 DatabaseLogId = l.DatabaseLogId,
                 TcKimlikNo = l.TcKimlikNo,
-                TabloAdi = l.TabloAdi,
-                IslemTuru = l.IslemTuru,
+                TabloAdi = l.TableName,
+                IslemTuru = l.DatabaseAction,
                 IslemZamani = l.IslemZamani,
                 StorageType = l.StorageType,
                 FileReference = l.FileReference,
                 TransactionId = l.TransactionId,
                 IsGroupedLog = l.IsGroupedLog,
-                ChangedFields = l.ChangedFields,
                 ChangedFieldCount = l.ChangedFieldCount,
                 DataSizeBytes = l.DataSizeBytes,
                 IpAddress = l.IpAddress,
@@ -96,14 +96,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             {
                 DatabaseLogId = log.DatabaseLogId,
                 TcKimlikNo = log.TcKimlikNo,
-                TabloAdi = log.TabloAdi,
-                IslemTuru = log.IslemTuru,
+                TabloAdi = log.TableName,
+                IslemTuru = log.DatabaseAction,
                 IslemZamani = log.IslemZamani,
                 StorageType = log.StorageType,
                 FileReference = log.FileReference,
                 TransactionId = log.TransactionId,
                 IsGroupedLog = log.IsGroupedLog,
-                ChangedFields = log.ChangedFields,
                 ChangedFieldCount = log.ChangedFieldCount,
                 DataSizeBytes = log.DataSizeBytes,
                 IpAddress = log.IpAddress,
@@ -136,23 +135,21 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             // Transaction içindeki diğer log'ları al
             if (log.TransactionId.HasValue)
             {
-                detail.RelatedLogs = await _dbContext.DatabaseLogs
-                    .Where(l => l.TransactionId == log.TransactionId && l.DatabaseLogId != logId)
-                    .OrderBy(l => l.IslemZamani)
-                    .Select(l => new AuditLogDto
-                    {
-                        DatabaseLogId = l.DatabaseLogId,
-                        TcKimlikNo = l.TcKimlikNo,
-                        TabloAdi = l.TabloAdi,
-                        IslemTuru = l.IslemTuru,
-                        IslemZamani = l.IslemZamani,
-                        StorageType = l.StorageType,
-                        FileReference = l.FileReference,
-                        TransactionId = l.TransactionId,
-                        IsGroupedLog = l.IsGroupedLog,
-                        ChangedFields = l.ChangedFields
-                    })
-                    .ToListAsync();
+                var relatedLogs = await _auditLogQueryRepository.GetRelatedLogsInTransactionAsync(
+                    log.TransactionId.Value, logId);
+                
+                detail.RelatedLogs = relatedLogs.Select(l => new AuditLogDto
+                {
+                    DatabaseLogId = l.DatabaseLogId,
+                    TcKimlikNo = l.TcKimlikNo,
+                    TabloAdi = l.TableName,
+                    IslemTuru = l.DatabaseAction,
+                    IslemZamani = l.IslemZamani,
+                    StorageType = l.StorageType,
+                    FileReference = l.FileReference,
+                    TransactionId = l.TransactionId,
+                    IsGroupedLog = l.IsGroupedLog,
+                }).ToList();
             }
 
             return detail;
@@ -160,71 +157,57 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 
         public async Task<List<AuditLogDto>> GetTransactionLogsAsync(Guid transactionId)
         {
-            return await _dbContext.DatabaseLogs
-                .Where(l => l.TransactionId == transactionId)
-                .OrderBy(l => l.IslemZamani)
-                .Select(l => new AuditLogDto
-                {
-                    DatabaseLogId = l.DatabaseLogId,
-                    TcKimlikNo = l.TcKimlikNo,
-                    TabloAdi = l.TabloAdi,
-                    IslemTuru = l.IslemTuru,
-                    IslemZamani = l.IslemZamani,
-                    StorageType = l.StorageType,
-                    FileReference = l.FileReference,
-                    TransactionId = l.TransactionId,
-                    IsGroupedLog = l.IsGroupedLog,
-                    ChangedFields = l.ChangedFields,
-                    ChangedFieldCount = l.ChangedFieldCount
-                })
-                .ToListAsync();
+            var logs = await _auditLogQueryRepository.GetTransactionLogsAsync(transactionId);
+            
+            return logs.Select(l => new AuditLogDto
+            {
+                DatabaseLogId = l.DatabaseLogId,
+                TcKimlikNo = l.TcKimlikNo,
+                TabloAdi = l.TableName,
+                IslemTuru = l.DatabaseAction,
+                IslemZamani = l.IslemZamani,
+                StorageType = l.StorageType,
+                FileReference = l.FileReference,
+                TransactionId = l.TransactionId,
+                IsGroupedLog = l.IsGroupedLog,
+                ChangedFieldCount = l.ChangedFieldCount
+            }).ToList();
         }
 
         public async Task<List<AuditLogDto>> GetUserRecentLogsAsync(string tcKimlikNo, int count = 50)
         {
-            return await _dbContext.DatabaseLogs
-                .Where(l => l.TcKimlikNo == tcKimlikNo)
-                .OrderByDescending(l => l.IslemZamani)
-                .Take(count)
-                .Select(l => new AuditLogDto
-                {
-                    DatabaseLogId = l.DatabaseLogId,
-                    TcKimlikNo = l.TcKimlikNo,
-                    TabloAdi = l.TabloAdi,
-                    IslemTuru = l.IslemTuru,
-                    IslemZamani = l.IslemZamani,
-                    StorageType = l.StorageType,
-                    FileReference = l.FileReference,
-                    TransactionId = l.TransactionId,
-                    IsGroupedLog = l.IsGroupedLog,
-                    ChangedFields = l.ChangedFields
-                })
-                .ToListAsync();
+            var logs = await _auditLogQueryRepository.GetUserRecentLogsAsync(tcKimlikNo, count);
+            
+            return logs.Select(l => new AuditLogDto
+            {
+                DatabaseLogId = l.DatabaseLogId,
+                TcKimlikNo = l.TcKimlikNo,
+                TabloAdi = l.TableName,
+                IslemTuru = l.DatabaseAction,
+                IslemZamani = l.IslemZamani,
+                StorageType = l.StorageType,
+                FileReference = l.FileReference,
+                TransactionId = l.TransactionId,
+                IsGroupedLog = l.IsGroupedLog,
+            }).ToList();
         }
 
         public async Task<List<AuditLogDto>> GetEntityHistoryAsync(string tableName, string entityId)
         {
-            // Entity ID'yi içeren değişiklikleri bul
-            // NOT: Bu basit bir implementasyon - production'da daha gelişmiş arama gerekebilir
-            return await _dbContext.DatabaseLogs
-                .Where(l => l.TabloAdi == tableName)
-                .Where(l => (l.BeforeData != null && l.BeforeData.Contains(entityId)) ||
-                           (l.AfterData != null && l.AfterData.Contains(entityId)))
-                .OrderBy(l => l.IslemZamani)
-                .Select(l => new AuditLogDto
-                {
-                    DatabaseLogId = l.DatabaseLogId,
-                    TcKimlikNo = l.TcKimlikNo,
-                    TabloAdi = l.TabloAdi,
-                    IslemTuru = l.IslemTuru,
-                    IslemZamani = l.IslemZamani,
-                    StorageType = l.StorageType,
-                    FileReference = l.FileReference,
-                    TransactionId = l.TransactionId,
-                    IsGroupedLog = l.IsGroupedLog,
-                    ChangedFields = l.ChangedFields
-                })
-                .ToListAsync();
+            var logs = await _auditLogQueryRepository.GetEntityHistoryAsync(tableName, entityId);
+            
+            return logs.Select(l => new AuditLogDto
+            {
+                DatabaseLogId = l.DatabaseLogId,
+                TcKimlikNo = l.TcKimlikNo,
+                TabloAdi = l.TableName,
+                IslemTuru = l.DatabaseAction,
+                IslemZamani = l.IslemZamani,
+                StorageType = l.StorageType,
+                FileReference = l.FileReference,
+                TransactionId = l.TransactionId,
+                IsGroupedLog = l.IsGroupedLog,
+            }).ToList();
         }
 
         #region Helper Methods

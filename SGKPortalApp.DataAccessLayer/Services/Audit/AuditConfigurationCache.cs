@@ -81,10 +81,7 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
                 config.SensitiveProperties.Add(prop.Name);
                 config.SensitiveDataConfigs[prop.Name] = new SensitiveDataConfig
                 {
-                    MaskFormat = sensitiveAttr.MaskFormat,
-                    ExcludeFromLog = sensitiveAttr.ExcludeFromLog,
-                    ShowFirstChars = sensitiveAttr.ShowFirstChars,
-                    ShowLastChars = sensitiveAttr.ShowLastChars
+                    ExcludeFromLog = sensitiveAttr.ExcludeFromLog
                 };
             }
 

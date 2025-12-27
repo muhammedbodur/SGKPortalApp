@@ -36,7 +36,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
         public DateTime IslemZamani { get; set; } = DateTime.Now;
 
         [Obsolete("Use IslemZamani instead")]
-        public DateTime ActionTime { get; set; }
+        public DateTime? ActionTime { get; set; }
 
         // ═══════ HYBRID STORAGE ═══════
         public LogStorageType StorageType { get; set; } = LogStorageType.Database;

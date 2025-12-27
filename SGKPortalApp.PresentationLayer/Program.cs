@@ -1,10 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.Common.Extensions;
-using SGKPortalApp.DataAccessLayer.Context;
-using SGKPortalApp.DataAccessLayer.Extensions;
 using SGKPortalApp.PresentationLayer.Extensions;
 using SGKPortalApp.PresentationLayer.Helpers;
 using SGKPortalApp.PresentationLayer.Middleware;
@@ -89,20 +86,6 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 Console.WriteLine($"📊 Database Connection: {connectionString.Substring(0, Math.Min(50, connectionString.Length))}...");
 
-builder.Services.AddDbContext<SGKDbContext>((serviceProvider, options) =>
-{
-    options.UseSqlServer(connectionString);
-
-    if (builder.Environment.IsDevelopment())
-    {
-        options.EnableSensitiveDataLogging();
-        options.EnableDetailedErrors();
-    }
-
-    // Audit logging interceptor'ı ekle
-    options.AddAuditLoggingInterceptor(serviceProvider);
-});
-
 // ═══════════════════════════════════════════════════════
 // 🌐 HTTP CLIENT (API çağrıları için)
 // ═══════════════════════════════════════════════════════
@@ -118,12 +101,12 @@ Console.WriteLine($"✅ HttpClient configured - BaseAddress: {apiUrl}");
 // ═══════════════════════════════════════════════════════
 // ⭐ KATMAN SERVİSLERİ ⭐
 // ═══════════════════════════════════════════════════════
-// 1. Common Layer (Shared services - PresentationLayer sadece Common'a doğrudan erişir)
+// 1. Common Layer (Shared services)
 builder.Services.AddCommonServices();
 
-// 2. Audit Logging Services
-builder.Services.AddAuditLogging(builder.Configuration);
-Console.WriteLine("✅ Audit logging services registered");
+// NOT: PresentationLayer sadece HTTP üzerinden ApiLayer ile iletişim kurar
+// Backend servisleri (BusinessLogicLayer, DataAccessLayer) ApiLayer'da kayıtlı olmalı
+Console.WriteLine("✅ PresentationLayer services registered (HTTP-only communication)");
 
 // OVERRIDE: Frontend için PermissionKeyResolverAdapter kullan (PermissionStateService cache kullanır)
 // Backend PermissionKeyResolverService yerine bu adapter kullanılmalı
@@ -350,30 +333,8 @@ app.MapFallbackToPage("/_Host");
 // ═══════════════════════════════════════════════════════
 // 🗄️ DATABASE MIGRATION
 // ═══════════════════════════════════════════════════════
-using (var scope = app.Services.CreateScope())
-{
-    try
-    {
-        var context = scope.ServiceProvider.GetRequiredService<SGKDbContext>();
-
-        if (context.Database.GetPendingMigrations().Any())
-        {
-            Console.WriteLine("📊 Bekleyen migration'lar uygulanıyor...");
-            context.Database.Migrate();
-            Console.WriteLine("✅ Migration'lar başarıyla uygulandı");
-        }
-        else
-        {
-            Console.WriteLine("✅ Veritabanı güncel");
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"❌ Migration hatası: {ex.Message}");
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Migration uygulanırken hata oluştu.");
-    }
-}
+// NOT: PresentationLayer'da DbContext yok - migration ApiLayer'da yapılmalı
+Console.WriteLine("ℹ️  Database migration ApiLayer tarafından yönetiliyor");
 
 Console.WriteLine("\n╔════════════════════════════════════════════════════════╗");
 Console.WriteLine("║      SGK PORTAL PRESENTATION BAŞLATILIYOR...           ║");

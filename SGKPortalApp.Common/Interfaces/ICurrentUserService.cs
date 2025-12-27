@@ -1,4 +1,4 @@
-namespace SGKPortalApp.BusinessLogicLayer.Interfaces.Common
+namespace SGKPortalApp.Common.Interfaces
 {
     /// <summary>
     /// Mevcut kullanıcı bilgilerini sağlar (audit logging için)

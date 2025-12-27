@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
-using SGKPortalApp.BusinessLogicLayer.Services.Common;
+using SGKPortalApp.Common.Interfaces;
 using SGKPortalApp.BusinessObjectLayer.Options;
 using SGKPortalApp.DataAccessLayer.Services.Audit;
+using Microsoft.Extensions.Options;
 
 namespace SGKPortalApp.DataAccessLayer.Extensions
 {
@@ -24,11 +24,12 @@ namespace SGKPortalApp.DataAccessLayer.Extensions
             IConfiguration configuration)
         {
             // Configuration options
-            services.Configure<AuditLoggingOptions>(
-                configuration.GetSection(AuditLoggingOptions.SectionName));
+            var section = configuration.GetSection(AuditLoggingOptions.SectionName);
+            services.AddOptions<AuditLoggingOptions>()
+                .Bind(section);
 
             // Core services
-            services.AddScoped<ICurrentUserService, CurrentUserService>();
+            // Note: ICurrentUserService should be registered by the application layer
             services.AddSingleton<IAuditConfigurationCache, AuditConfigurationCache>();
             services.AddSingleton<IAuditFileWriter, AuditFileWriter>();
 

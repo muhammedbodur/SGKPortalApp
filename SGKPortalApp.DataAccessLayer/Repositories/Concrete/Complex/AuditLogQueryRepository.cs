@@ -114,11 +114,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
 
             // Tablo adı filtresi
             if (!string.IsNullOrWhiteSpace(filter.TableName))
-                query = query.Where(l => l.TabloAdi == filter.TableName);
+                query = query.Where(l => l.TableName == filter.TableName);
 
             // İşlem türü filtresi
             if (filter.Action.HasValue)
-                query = query.Where(l => l.IslemTuru == filter.Action.Value);
+                query = query.Where(l => l.DatabaseAction == filter.Action.Value);
 
             // Transaction ID filtresi
             if (filter.TransactionId.HasValue)
@@ -189,6 +189,41 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             }
 
             return log;
+        }
+
+        public async Task<List<DatabaseLog>> GetTransactionLogsAsync(Guid transactionId)
+        {
+            return await _context.DatabaseLogs
+                .Where(l => l.TransactionId == transactionId)
+                .OrderBy(l => l.IslemZamani)
+                .ToListAsync();
+        }
+
+        public async Task<List<DatabaseLog>> GetUserRecentLogsAsync(string tcKimlikNo, int count)
+        {
+            return await _context.DatabaseLogs
+                .Where(l => l.TcKimlikNo == tcKimlikNo)
+                .OrderByDescending(l => l.IslemZamani)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<List<DatabaseLog>> GetEntityHistoryAsync(string tableName, string entityId)
+        {
+            return await _context.DatabaseLogs
+                .Where(l => l.TableName == tableName)
+                .Where(l => (l.BeforeData != null && l.BeforeData.Contains(entityId)) ||
+                           (l.AfterData != null && l.AfterData.Contains(entityId)))
+                .OrderBy(l => l.IslemZamani)
+                .ToListAsync();
+        }
+
+        public async Task<List<DatabaseLog>> GetRelatedLogsInTransactionAsync(Guid transactionId, int excludeLogId)
+        {
+            return await _context.DatabaseLogs
+                .Where(l => l.TransactionId == transactionId && l.DatabaseLogId != excludeLogId)
+                .OrderBy(l => l.IslemZamani)
+                .ToListAsync();
         }
     }
 }

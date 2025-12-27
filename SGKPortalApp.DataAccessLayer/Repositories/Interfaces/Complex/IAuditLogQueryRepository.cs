@@ -36,5 +36,25 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex
             int logId,
             int? userDepartmanId,
             int? userServisId);
+
+        /// <summary>
+        /// Transaction'a ait tüm log'ları getirir
+        /// </summary>
+        Task<List<DatabaseLog>> GetTransactionLogsAsync(System.Guid transactionId);
+
+        /// <summary>
+        /// Kullanıcının son N log kaydını getirir
+        /// </summary>
+        Task<List<DatabaseLog>> GetUserRecentLogsAsync(string tcKimlikNo, int count);
+
+        /// <summary>
+        /// Belirli bir entity'nin geçmişini getirir
+        /// </summary>
+        Task<List<DatabaseLog>> GetEntityHistoryAsync(string tableName, string entityId);
+
+        /// <summary>
+        /// Transaction'daki diğer log'ları getirir (belirli bir log hariç)
+        /// </summary>
+        Task<List<DatabaseLog>> GetRelatedLogsInTransactionAsync(System.Guid transactionId, int excludeLogId);
     }
 }

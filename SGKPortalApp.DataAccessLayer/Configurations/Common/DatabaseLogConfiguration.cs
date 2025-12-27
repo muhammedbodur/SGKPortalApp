@@ -33,8 +33,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.Common
             builder.Property(dl => dl.IslemZamani)
                 .IsRequired();
 
-            builder.Property(dl => dl.ActionTime)
-                .IsRequired(false); // Obsolete field, nullable for backward compatibility
+            // ActionTime is obsolete and nullable - no configuration needed
 
             // ═══════ HYBRID STORAGE ═══════
             builder.Property(dl => dl.StorageType)

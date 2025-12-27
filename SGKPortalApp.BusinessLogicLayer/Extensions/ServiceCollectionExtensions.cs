@@ -38,6 +38,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Extensions
             services.RegisterModuleServices(businessAssembly, "PdksIslemleri");
             services.RegisterModuleServices(businessAssembly, "EshotIslemleri");
             services.RegisterModuleServices(businessAssembly, "SignalR");
+            services.RegisterModuleServices(businessAssembly, "Database");
 
             Console.WriteLine("  🎉 Business Logic Layer hazır!\n");
             return services;
