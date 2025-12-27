@@ -33,6 +33,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         {
             var query = _context.DatabaseLogs.AsQueryable();
 
+            query = query.Where(l => l.ChangedFieldCount.HasValue && l.ChangedFieldCount > 0);
+
             // ═══════════════════════════════════════════════════════════
             // ✅ KATMAN 1: GÜVENLİK - YETKİ BAZLI KISITLAMA (EN ÖNCELİKLİ)
             // Bu filtre MUTLAKA uygulanır, kullanıcı bypass edemez
@@ -333,7 +335,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                         .FirstOrDefaultAsync(),
 
                     // Sıramatik - KanalAlt
-                    "KanalAltId" => await _context.KanalAltlar
+                    "KanalAltId" => await _context.KanallarAlt
                         .Where(k => k.KanalAltId == id)
                         .Select(k => k.KanalAltAdi)
                         .FirstOrDefaultAsync(),
@@ -341,21 +343,21 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                     // Sıramatik - KanalIslem
                     "KanalIslemId" => await _context.KanalIslemleri
                         .Where(k => k.KanalIslemId == id)
-                        .Select(k => k.KanalIslemAdi)
+                        .Select(k => k.Kanal.KanalAdi)
                         .FirstOrDefaultAsync(),
 
                     // Sıramatik - KanalAltIslem
                     "KanalAltIslemId" => await _context.KanalAltIslemleri
                         .Where(k => k.KanalAltIslemId == id)
-                        .Select(k => k.KanalAltIslemAdi)
+                        .Select(k => k.KanalAlt.KanalAltAdi)
                         .FirstOrDefaultAsync(),
 
-                    // PDKS
-                    "PdksCihazId" => await _context.PdksCihazlar
-                        .Include(p => p.Departman)
-                        .Where(p => p.PdksCihazId == id)
-                        .Select(p => p.CihazIP + " (" + p.Departman.DepartmanAdi + ")")
-                        .FirstOrDefaultAsync(),
+                    //// PDKS
+                    //"PdksCihazId" => await _context.PdksCihazlar
+                    //    .Include(p => p.Departman)
+                    //    .Where(p => p.PdksCihazId == id)
+                    //    .Select(p => p.CihazIP + " (" + p.Departman.DepartmanAdi + ")")
+                    //    .FirstOrDefaultAsync(),
 
                     _ => null
                 };

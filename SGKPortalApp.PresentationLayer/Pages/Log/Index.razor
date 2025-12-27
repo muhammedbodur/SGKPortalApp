@@ -252,48 +252,45 @@ else
                             <tbody>
                                 @foreach (var log in groupLogs)
                                 {
-                                    if (log.ChangedFieldCount.HasValue && log.ChangedFieldCount > 0)
-                                    {
-                                        <tr>
-                                            <td>
-                                                <small class="text-muted">
-                                                    @log.IslemZamani.ToLocalTime().ToString("HH:mm:ss")
-                                                </small>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-info-subtle text-info">
-                                                    @log.TabloAdi
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="badge @GetActionBadgeClass(log.IslemTuru)">
-                                                    @log.IslemTuruText
-                                                </span>
-                                            </td>
-                                            <td>
-                                                @if (log.ChangedFieldCount.HasValue && log.ChangedFieldCount > 0)
-                                                {
-                                                    <div class="d-flex align-items-center">
-                                                        <span class="badge bg-warning-subtle text-warning me-2">
-                                                            @log.ChangedFieldCount
-                                                        </span>
-                                                        <small class="text-muted">alan değişti</small>
-                                                    </div>
-                                                }
-                                                else
-                                                {
-                                                    <small class="text-muted fst-italic">Değişiklik yok</small>
-                                                }
-                                            </td>
-                                            <td class="text-center">
-                                                <a href="/log/detail/@log.DatabaseLogId"
-                                                   class="btn btn-sm btn-outline-primary"
-                                                   title="Detayları Görüntüle">
-                                                    <i class="bx bx-show-alt me-1"></i>Detay
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    }
+                                    <tr>
+                                        <td>
+                                            <small class="text-muted">
+                                                @log.IslemZamani.ToLocalTime().ToString("HH:mm:ss")
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info-subtle text-info">
+                                                @log.TabloAdi
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge @GetActionBadgeClass(log.IslemTuru)">
+                                                @log.IslemTuruText
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if (log.ChangedFieldCount.HasValue && log.ChangedFieldCount > 0)
+                                            {
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge bg-warning-subtle text-warning me-2">
+                                                        @log.ChangedFieldCount
+                                                    </span>
+                                                    <small class="text-muted">alan değişti</small>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <small class="text-muted fst-italic">Değişiklik yok</small>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="/log/detail/@log.DatabaseLogId"
+                                                class="btn btn-sm btn-outline-primary"
+                                                title="Detayları Görüntüle">
+                                                <i class="bx bx-show-alt me-1"></i>Detay
+                                            </a>
+                                        </td>
+                                    </tr>
                                 }
                             </tbody>
                         </table>
