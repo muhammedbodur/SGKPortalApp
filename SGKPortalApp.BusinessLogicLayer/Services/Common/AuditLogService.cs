@@ -213,7 +213,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         #region Helper Methods
 
         /// <summary>
-        /// Before/After JSON'larını parse ederek field changes listesi oluşturur
+        /// Before/After JSON'larını parse ederek SADECE değişen alanları döndürür
         /// </summary>
         private List<FieldChangeDto> ParseFieldChanges(string? beforeJson, string? afterJson)
         {
@@ -249,12 +249,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                         ? afterDict[key].ToString()
                         : null;
 
-                    changes.Add(new FieldChangeDto
+                    // Sadece değişen alanları ekle
+                    if (oldValue != newValue)
                     {
-                        FieldName = key,
-                        OldValue = oldValue,
-                        NewValue = newValue
-                    });
+                        changes.Add(new FieldChangeDto
+                        {
+                            FieldName = key,
+                            OldValue = oldValue,
+                            NewValue = newValue
+                        });
+                    }
                 }
             }
             catch

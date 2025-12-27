@@ -97,14 +97,11 @@
         </div>
 
         @* Değişiklik Detayları *@
-        @{
-            var changedFields = detail.FieldChanges.Where(c => c.IsChanged).ToList();
-        }
-        @if (changedFields.Any())
+        @if (detail.FieldChanges.Any())
         {
             <div class="card mb-3">
                 <div class="card-header bg-light">
-                    <h5 class="mb-0">🔄 Değişen Alanlar (@changedFields.Count alan)</h5>
+                    <h5 class="mb-0">🔄 Değişen Alanlar (@detail.FieldChanges.Count alan)</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -117,7 +114,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var change in changedFields)
+                                @foreach (var change in detail.FieldChanges)
                                 {
                                     <tr class="table-warning">
                                         <td><strong>@change.FieldName</strong></td>
