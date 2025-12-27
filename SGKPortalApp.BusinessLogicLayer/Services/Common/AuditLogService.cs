@@ -308,6 +308,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 // FK field'larını tespit et ve lookup yap
                 return fieldName switch
                 {
+                    // Organizasyon
                     "DepartmanId" => await _dbContext.Departmanlar
                         .Where(d => d.DepartmanId == id)
                         .Select(d => d.DepartmanAdi)
@@ -323,24 +324,46 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                         .Select(u => u.UnvanAdi)
                         .FirstOrDefaultAsync(),
 
+                    "SendikaId" => await _dbContext.Sendikalar
+                        .Where(s => s.SendikaId == id)
+                        .Select(s => s.SendikaAdi)
+                        .FirstOrDefaultAsync(),
+
+                    "AtanmaNedeniId" => await _dbContext.AtanmaNedenleri
+                        .Where(a => a.AtanmaNedeniId == id)
+                        .Select(a => a.AtanmaNedeni)
+                        .FirstOrDefaultAsync(),
+
+                    // Lokasyon
                     "HizmetBinasiId" => await _dbContext.HizmetBinalari
                         .Where(h => h.HizmetBinasiId == id)
                         .Select(h => h.HizmetBinasiAdi)
                         .FirstOrDefaultAsync(),
 
-                    "ModulControllerIslemId" => await _dbContext.ModulControllerIslemleri
-                        .Where(m => m.ModulControllerIslemId == id)
-                        .Select(m => m.ModulControllerIslemAdi + " (" + m.PermissionKey + ")")
-                        .FirstOrDefaultAsync(),
-
-                    "IlId" => await _dbContext.Iller
+                    "IlId" or "EsininIsIlId" => await _dbContext.Iller
                         .Where(i => i.IlId == id)
                         .Select(i => i.IlAdi)
                         .FirstOrDefaultAsync(),
 
-                    "IlceId" => await _dbContext.Ilceler
+                    "IlceId" or "EsininIsIlceId" => await _dbContext.Ilceler
                         .Where(i => i.IlceId == id)
                         .Select(i => i.IlceAdi)
+                        .FirstOrDefaultAsync(),
+
+                    // Yetki/Modül Sistemi
+                    "ModulId" => await _dbContext.Moduller
+                        .Where(m => m.ModulId == id)
+                        .Select(m => m.ModulAdi)
+                        .FirstOrDefaultAsync(),
+
+                    "ModulControllerId" => await _dbContext.ModulControllers
+                        .Where(m => m.ModulControllerId == id)
+                        .Select(m => m.ModulControllerAdi)
+                        .FirstOrDefaultAsync(),
+
+                    "ModulControllerIslemId" => await _dbContext.ModulControllerIslemleri
+                        .Where(m => m.ModulControllerIslemId == id)
+                        .Select(m => m.ModulControllerIslemAdi + " (" + m.PermissionKey + ")")
                         .FirstOrDefaultAsync(),
 
                     _ => null

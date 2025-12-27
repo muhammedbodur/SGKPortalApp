@@ -75,7 +75,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Log
                 ["DepartmanId"] = "Departman",
                 ["ServisId"] = "Servis",
                 ["UnvanId"] = "Ünvan",
+                ["SendikaId"] = "Sendika",
+                ["AtanmaNedeniId"] = "Atanma Nedeni",
                 ["HizmetBinasiId"] = "Hizmet Binası",
+
+                // Modül/Yetki Sistemi
+                ["ModulId"] = "Modül",
+                ["ModulControllerId"] = "Controller",
 
                 // İletişim
                 ["Email"] = "E-posta",
