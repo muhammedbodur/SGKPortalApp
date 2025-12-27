@@ -1,0 +1,163 @@
+@page "/test/domain-info"
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<PageTitle>Domain Bilgisi Test</PageTitle>
+
+<div class="container mt-4">
+    <h2>🔍 Domain Bilgisi Test Sayfası</h2>
+    <p class="text-muted">Bu sayfa domain bilgilerini alıp alamadığımızı test eder.</p>
+
+    <hr />
+
+    <!-- Test 1: Server-Side Bilgiler -->
+    <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+            <h5>Test 1: Server-Side Domain Bilgileri</h5>
+        </div>
+        <div class="card-body">
+            <button class="btn btn-primary" @onclick="GetServerInfo">
+                🖥️ Server Bilgilerini Al
+            </button>
+
+            @if (serverInfo != null)
+            {
+                <div class="mt-3">
+                    <pre class="bg-light p-3">@serverInfo</pre>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Test 2: Email'den Varsayım -->
+    <div class="card mb-3">
+        <div class="card-header bg-success text-white">
+            <h5>Test 2: Email'den Domain User Varsayımı</h5>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label">Email:</label>
+                <input type="email" class="form-control" @bind="testEmail"
+                       placeholder="ornek: ahmet.yilmaz@sgk.gov.tr" />
+            </div>
+            <button class="btn btn-success" @onclick="TestEmailToDomain">
+                ✉️ Email'den Domain User Hesapla
+            </button>
+
+            @if (emailResult != null)
+            {
+                <div class="mt-3">
+                    <pre class="bg-light p-3">@emailResult</pre>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Test 3: Client-Side Bilgiler -->
+    <div class="card mb-3">
+        <div class="card-header bg-warning text-dark">
+            <h5>Test 3: Client-Side Bilgiler (JavaScript)</h5>
+        </div>
+        <div class="card-body">
+            <button class="btn btn-warning" @onclick="GetClientInfo">
+                💻 Browser Bilgilerini Al
+            </button>
+
+            @if (clientInfo != null)
+            {
+                <div class="mt-3">
+                    <pre class="bg-light p-3">@clientInfo</pre>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Sonuç ve Öneriler -->
+    <div class="alert alert-info">
+        <h5>📋 Sonuçlar:</h5>
+        <ul>
+            <li><strong>Server bilgileri:</strong> Server process'in çalıştığı user'ı gösterir (genelde IIS AppPool)</li>
+            <li><strong>Email varsayımı:</strong> En pratik yöntem. Email'den domain username çıkarılır.</li>
+            <li><strong>Client bilgileri:</strong> Browser'dan domain bilgisi alınamaz (güvenlik kısıtlaması)</li>
+        </ul>
+        <hr />
+        <h6>💡 Öneri:</h6>
+        <p>
+            <strong>Email'den varsayım</strong> yöntemi kullanılması önerilir:<br />
+            <code>ahmet.yilmaz@sgk.gov.tr</code> → <code>SGKDOMAIN\ahmet.yilmaz</code>
+        </p>
+    </div>
+</div>
+
+@code {
+    private string? serverInfo;
+    private string? emailResult;
+    private string? clientInfo;
+    private string testEmail = "ahmet.yilmaz@sgk.gov.tr";
+
+    private async Task GetServerInfo()
+    {
+        try
+        {
+            var response = await Http.GetFromJsonAsync<object>("/api/TestDomainInfo/server-info");
+            serverInfo = System.Text.Json.JsonSerializer.Serialize(response,
+                new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        }
+        catch (Exception ex)
+        {
+            serverInfo = $"Hata: {ex.Message}";
+        }
+    }
+
+    private async Task TestEmailToDomain()
+    {
+        try
+        {
+            var response = await Http.GetFromJsonAsync<object>($"/api/TestDomainInfo/ad-query?email={testEmail}");
+            emailResult = System.Text.Json.JsonSerializer.Serialize(response,
+                new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        }
+        catch (Exception ex)
+        {
+            emailResult = $"Hata: {ex.Message}";
+        }
+    }
+
+    private async Task GetClientInfo()
+    {
+        try
+        {
+            // JavaScript ile browser bilgilerini al
+            var jsInfo = await JS.InvokeAsync<ClientJsInfo>("getClientInfo");
+
+            var clientRequest = new
+            {
+                UserAgent = jsInfo.UserAgent,
+                Platform = jsInfo.Platform,
+                Language = jsInfo.Language,
+                ScreenResolution = jsInfo.ScreenResolution,
+                TimeZone = jsInfo.TimeZone
+            };
+
+            var response = await Http.PostAsJsonAsync("/api/TestDomainInfo/client-info", clientRequest);
+            var result = await response.Content.ReadAsStringAsync();
+
+            clientInfo = System.Text.Json.JsonSerializer.Serialize(
+                System.Text.Json.JsonSerializer.Deserialize<object>(result),
+                new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+        }
+        catch (Exception ex)
+        {
+            clientInfo = $"Hata: {ex.Message}";
+        }
+    }
+
+    public class ClientJsInfo
+    {
+        public string UserAgent { get; set; } = "";
+        public string Platform { get; set; } = "";
+        public string Language { get; set; } = "";
+        public string ScreenResolution { get; set; } = "";
+        public string TimeZone { get; set; } = "";
+    }
+}
