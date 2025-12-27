@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.DataAccessLayer.Context;
+using SGKPortalApp.DataAccessLayer.Extensions;
 using SGKPortalApp.PresentationLayer.Extensions;
 using SGKPortalApp.PresentationLayer.Helpers;
 using SGKPortalApp.PresentationLayer.Middleware;
@@ -32,6 +33,22 @@ if (File.Exists(sharedConfigPath))
 else
 {
     Console.WriteLine($"⚠️  Shared configuration bulunamadı: {sharedConfigPath}");
+}
+
+// Audit Logging Configuration
+var auditConfigPath = Path.Combine(
+    Directory.GetParent(Directory.GetCurrentDirectory())!.FullName,
+    "appsettings.AuditLogging.json"
+);
+
+if (File.Exists(auditConfigPath))
+{
+    builder.Configuration.AddJsonFile(
+        auditConfigPath,
+        optional: true,
+        reloadOnChange: true
+    );
+    Console.WriteLine($"✅ Audit logging configuration yüklendi: {auditConfigPath}");
 }
 
 // ═══════════════════════════════════════════════════════
@@ -72,7 +89,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 Console.WriteLine($"📊 Database Connection: {connectionString.Substring(0, Math.Min(50, connectionString.Length))}...");
 
-builder.Services.AddDbContext<SGKDbContext>(options =>
+builder.Services.AddDbContext<SGKDbContext>((serviceProvider, options) =>
 {
     options.UseSqlServer(connectionString);
 
@@ -81,6 +98,9 @@ builder.Services.AddDbContext<SGKDbContext>(options =>
         options.EnableSensitiveDataLogging();
         options.EnableDetailedErrors();
     }
+
+    // Audit logging interceptor'ı ekle
+    options.AddAuditLoggingInterceptor(serviceProvider);
 });
 
 // ═══════════════════════════════════════════════════════
@@ -100,6 +120,10 @@ Console.WriteLine($"✅ HttpClient configured - BaseAddress: {apiUrl}");
 // ═══════════════════════════════════════════════════════
 // 1. Common Layer (Shared services - PresentationLayer sadece Common'a doğrudan erişir)
 builder.Services.AddCommonServices();
+
+// 2. Audit Logging Services
+builder.Services.AddAuditLogging(builder.Configuration);
+Console.WriteLine("✅ Audit logging services registered");
 
 // OVERRIDE: Frontend için PermissionKeyResolverAdapter kullan (PermissionStateService cache kullanır)
 // Backend PermissionKeyResolverService yerine bu adapter kullanılmalı
