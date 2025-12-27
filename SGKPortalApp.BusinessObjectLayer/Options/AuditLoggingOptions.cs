@@ -30,6 +30,11 @@ namespace SGKPortalApp.BusinessObjectLayer.Options
         public int HybridThresholdBytes { get; set; } = 1024; // 1 KB
 
         /// <summary>
+        /// Loglanmayacak tablo isimleri (örn: CMN_HubConnections, AspNetSessionData vb.)
+        /// </summary>
+        public List<string> ExcludedTables { get; set; } = new();
+
+        /// <summary>
         /// Retention (saklama) ayarları
         /// </summary>
         public RetentionOptions Retention { get; set; } = new();
