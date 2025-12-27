@@ -322,6 +322,7 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
 
         /// <summary>
         /// Değişen field'ları virgülle ayrılmış string olarak döner
+        /// SADECE gerçekten değişen alanları döndürür (OriginalValue != CurrentValue)
         /// </summary>
         private string? GetChangedFields(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry entry)
         {
@@ -329,7 +330,22 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
                 return null;
 
             var changedFields = entry.Properties
-                .Where(p => p.IsModified && !p.Metadata.IsShadowProperty())
+                .Where(p => !p.Metadata.IsShadowProperty() && p.IsModified)
+                .Where(p =>
+                {
+                    // OriginalValue ve CurrentValue'yu karşılaştır
+                    var originalValue = p.OriginalValue;
+                    var currentValue = p.CurrentValue;
+
+                    // Null kontrolü
+                    if (originalValue == null && currentValue == null)
+                        return false;
+                    if (originalValue == null || currentValue == null)
+                        return true;
+
+                    // Değer karşılaştırması
+                    return !originalValue.Equals(currentValue);
+                })
                 .Select(p => p.Metadata.Name)
                 .ToList();
 

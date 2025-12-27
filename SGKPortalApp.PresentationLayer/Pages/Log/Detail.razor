@@ -1,9 +1,6 @@
 @page "/log/detail/{LogId:int}"
-@using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
 @using SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
-@inject IAuditLogApiService AuditLogApiService
-@inject NavigationManager NavigationManager
 
 <PageTitle>Log Detay - SGK Portal</PageTitle>
 
@@ -219,40 +216,3 @@
         </div>
     }
 </div>
-
-@code {
-    [Parameter]
-    public int LogId { get; set; }
-
-    private AuditLogDetailDto? detail;
-    private bool isLoading = true;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadDetailAsync();
-    }
-
-    private async Task LoadDetailAsync()
-    {
-        isLoading = true;
-        try
-        {
-            detail = await AuditLogApiService.GetLogDetailAsync(LogId);
-        }
-        finally
-        {
-            isLoading = false;
-        }
-    }
-
-    private string GetActionBadgeClass(DatabaseAction action)
-    {
-        return action switch
-        {
-            DatabaseAction.INSERT or DatabaseAction.CREATE_COMPLETE => "bg-success",
-            DatabaseAction.UPDATE or DatabaseAction.UPDATE_COMPLETE => "bg-warning text-dark",
-            DatabaseAction.DELETE => "bg-danger",
-            _ => "bg-secondary"
-        };
-    }
-}
