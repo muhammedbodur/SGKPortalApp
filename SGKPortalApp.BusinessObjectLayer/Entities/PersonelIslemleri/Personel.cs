@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using SGKPortalApp.BusinessObjectLayer.Attributes;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
@@ -9,10 +10,24 @@ using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
 {
+    /// <summary>
+    /// Personel entity - Audit logging aktif
+    /// Smart Hybrid: Küçük değişiklikler DB'de, büyük değişiklikler dosyada
+    /// Transaction grouping: CreateComplete/UpdateComplete işlemlerinde tüm değişiklikler tek log
+    /// </summary>
+    [AuditLog(
+        Insert = true,
+        Update = true,
+        Delete = true,
+        StorageStrategy = StorageStrategy.SmartHybrid,
+        HybridThresholdBytes = 1024,
+        BulkThreshold = 50,
+        GroupRelatedChanges = true)]
     public class Personel : AuditableEntity
     {
         [Key]
         [StringLength(11)]
+        [SensitiveData(ShowFirstChars = 3, MaskFormat = "****")] // Örnek: 123****4567
         public string TcKimlikNo { get; set; } = string.Empty;
 
         public int SicilNo { get; set; }
@@ -95,15 +110,19 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         public int Dahili { get; set; }
 
         [StringLength(20)]
+        [SensitiveData(ShowLastChars = 4, MaskFormat = "***")] // Örnek: ***1234
         public string? CepTelefonu { get; set; }
 
         [StringLength(20)]
+        [SensitiveData(ShowLastChars = 4, MaskFormat = "***")] // Örnek: ***1234
         public string? CepTelefonu2 { get; set; }
 
         [StringLength(20)]
+        [SensitiveData(ShowLastChars = 4, MaskFormat = "***")] // Örnek: ***1234
         public string? EvTelefonu { get; set; }
 
         [StringLength(500)]
+        [SensitiveData(MaskFormat = "***")] // Tamamen maskeli
         public string? Adres { get; set; }
 
         [StringLength(100)]

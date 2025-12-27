@@ -1,3 +1,4 @@
+using SGKPortalApp.BusinessObjectLayer.Attributes;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,10 @@ using System.Threading.Tasks;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
 {
+    /// <summary>
+    /// Database log table - IMPORTANT: NoAuditLog prevents infinite recursion
+    /// </summary>
+    [NoAuditLog(Reason = "This is a log table - logging the log table would cause infinite recursion")]
     public class DatabaseLog : BaseEntity
     {
         [Key]
