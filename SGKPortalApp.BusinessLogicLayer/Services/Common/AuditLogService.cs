@@ -1,11 +1,9 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Options;
 using SGKPortalApp.Common.Interfaces;
-using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
 using SGKPortalApp.DataAccessLayer.Services.Audit;
 using System;
@@ -26,20 +24,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly IAuditFileWriter _fileWriter;
         private readonly AuditLoggingOptions _options;
         private readonly ICurrentUserService _currentUserService;
-        private readonly ApplicationDbContext _dbContext;
 
         public AuditLogService(
             IAuditLogQueryRepository auditLogQueryRepository,
             IAuditFileWriter fileWriter,
             IOptions<AuditLoggingOptions> options,
-            ICurrentUserService currentUserService,
-            ApplicationDbContext dbContext)
+            ICurrentUserService currentUserService)
         {
             _auditLogQueryRepository = auditLogQueryRepository;
             _fileWriter = fileWriter;
             _options = options.Value;
             _currentUserService = currentUserService;
-            _dbContext = dbContext;
         }
 
         public async Task<AuditLogPagedResultDto> GetLogsAsync(AuditLogFilterDto filter)
@@ -293,143 +288,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 
         /// <summary>
         /// Field value için kullanıcı dostu gösterim oluşturur (FK lookup yapar)
+        /// Repository'ye delege eder - katman ayrımı
         /// </summary>
         private async Task<string?> ResolveFieldValueAsync(string fieldName, string? value)
         {
-            if (string.IsNullOrEmpty(value))
-                return null;
-
-            // ID parse et
-            if (!int.TryParse(value, out int id))
-                return null;
-
-            try
-            {
-                // FK field'larını tespit et ve lookup yap
-                return fieldName switch
-                {
-                    // Organizasyon
-                    "DepartmanId" => await _dbContext.Departmanlar
-                        .Where(d => d.DepartmanId == id)
-                        .Select(d => d.DepartmanAdi)
-                        .FirstOrDefaultAsync(),
-
-                    "ServisId" => await _dbContext.Servisler
-                        .Where(s => s.ServisId == id)
-                        .Select(s => s.ServisAdi)
-                        .FirstOrDefaultAsync(),
-
-                    "UnvanId" => await _dbContext.Unvanlar
-                        .Where(u => u.UnvanId == id)
-                        .Select(u => u.UnvanAdi)
-                        .FirstOrDefaultAsync(),
-
-                    "SendikaId" => await _dbContext.Sendikalar
-                        .Where(s => s.SendikaId == id)
-                        .Select(s => s.SendikaAdi)
-                        .FirstOrDefaultAsync(),
-
-                    "AtanmaNedeniId" => await _dbContext.AtanmaNedenleri
-                        .Where(a => a.AtanmaNedeniId == id)
-                        .Select(a => a.AtanmaNedeni)
-                        .FirstOrDefaultAsync(),
-
-                    // Lokasyon
-                    "HizmetBinasiId" => await _dbContext.HizmetBinalari
-                        .Where(h => h.HizmetBinasiId == id)
-                        .Select(h => h.HizmetBinasiAdi)
-                        .FirstOrDefaultAsync(),
-
-                    "IlId" or "EsininIsIlId" => await _dbContext.Iller
-                        .Where(i => i.IlId == id)
-                        .Select(i => i.IlAdi)
-                        .FirstOrDefaultAsync(),
-
-                    "IlceId" or "EsininIsIlceId" => await _dbContext.Ilceler
-                        .Where(i => i.IlceId == id)
-                        .Select(i => i.IlceAdi)
-                        .FirstOrDefaultAsync(),
-
-                    // Yetki/Modül Sistemi
-                    "ModulId" => await _dbContext.Moduller
-                        .Where(m => m.ModulId == id)
-                        .Select(m => m.ModulAdi)
-                        .FirstOrDefaultAsync(),
-
-                    "ModulControllerId" or "UstModulControllerId" => await _dbContext.ModulControllers
-                        .Where(m => m.ModulControllerId == id)
-                        .Select(m => m.ModulControllerAdi)
-                        .FirstOrDefaultAsync(),
-
-                    "ModulControllerIslemId" or "UstIslemId" => await _dbContext.ModulControllerIslemleri
-                        .Where(m => m.ModulControllerIslemId == id)
-                        .Select(m => m.ModulControllerIslemAdi + " (" + m.PermissionKey + ")")
-                        .FirstOrDefaultAsync(),
-
-                    // Sıramatik - Banko
-                    "BankoId" or "YonlendirenBankoId" or "HedefBankoId" or "AktifBankoId" => await _dbContext.Bankolar
-                        .Include(b => b.HizmetBinasi)
-                        .Where(b => b.BankoId == id)
-                        .Select(b => "Banko #" + b.BankoNo + " (" + b.HizmetBinasi.HizmetBinasiAdi + ")")
-                        .FirstOrDefaultAsync(),
-
-                    // Sıramatik - Tv
-                    "TvId" => await _dbContext.Tvler
-                        .Where(t => t.TvId == id)
-                        .Select(t => t.TvAdi)
-                        .FirstOrDefaultAsync(),
-
-                    // Sıramatik - Kiosk
-                    "KioskId" => await _dbContext.Kiosklar
-                        .Where(k => k.KioskId == id)
-                        .Select(k => k.KioskAdi)
-                        .FirstOrDefaultAsync(),
-
-                    // Sıramatik - Sıra
-                    "SiraId" => await _dbContext.Siralar
-                        .Where(s => s.SiraId == id)
-                        .Select(s => "Sıra #" + s.SiraNo)
-                        .FirstOrDefaultAsync(),
-
-                    // Sıramatik - Kanal
-                    "KanalId" => await _dbContext.Kanallar
-                        .Where(k => k.KanalId == id)
-                        .Select(k => k.KanalAdi)
-                        .FirstOrDefaultAsync(),
-
-                    // Sıramatik - KanalAlt
-                    "KanalAltId" => await _dbContext.KanalAltlar
-                        .Where(k => k.KanalAltId == id)
-                        .Select(k => k.KanalAltAdi)
-                        .FirstOrDefaultAsync(),
-
-                    // Sıramatik - KanalIslem
-                    "KanalIslemId" => await _dbContext.KanalIslemleri
-                        .Where(k => k.KanalIslemId == id)
-                        .Select(k => k.KanalIslemAdi)
-                        .FirstOrDefaultAsync(),
-
-                    // Sıramatik - KanalAltIslem
-                    "KanalAltIslemId" => await _dbContext.KanalAltIslemleri
-                        .Where(k => k.KanalAltIslemId == id)
-                        .Select(k => k.KanalAltIslemAdi)
-                        .FirstOrDefaultAsync(),
-
-                    // PDKS
-                    "PdksCihazId" => await _dbContext.PdksCihazlar
-                        .Include(p => p.Departman)
-                        .Where(p => p.PdksCihazId == id)
-                        .Select(p => p.CihazIP + " (" + p.Departman.DepartmanAdi + ")")
-                        .FirstOrDefaultAsync(),
-
-                    _ => null
-                };
-            }
-            catch
-            {
-                // Lookup hatası - null dön
-                return null;
-            }
+            return await _auditLogQueryRepository.ResolveFieldValueAsync(fieldName, value);
         }
 
         #endregion
