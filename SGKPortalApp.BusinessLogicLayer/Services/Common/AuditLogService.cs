@@ -356,14 +356,70 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                         .Select(m => m.ModulAdi)
                         .FirstOrDefaultAsync(),
 
-                    "ModulControllerId" => await _dbContext.ModulControllers
+                    "ModulControllerId" or "UstModulControllerId" => await _dbContext.ModulControllers
                         .Where(m => m.ModulControllerId == id)
                         .Select(m => m.ModulControllerAdi)
                         .FirstOrDefaultAsync(),
 
-                    "ModulControllerIslemId" => await _dbContext.ModulControllerIslemleri
+                    "ModulControllerIslemId" or "UstIslemId" => await _dbContext.ModulControllerIslemleri
                         .Where(m => m.ModulControllerIslemId == id)
                         .Select(m => m.ModulControllerIslemAdi + " (" + m.PermissionKey + ")")
+                        .FirstOrDefaultAsync(),
+
+                    // Sıramatik - Banko
+                    "BankoId" or "YonlendirenBankoId" or "HedefBankoId" or "AktifBankoId" => await _dbContext.Bankolar
+                        .Include(b => b.HizmetBinasi)
+                        .Where(b => b.BankoId == id)
+                        .Select(b => "Banko #" + b.BankoNo + " (" + b.HizmetBinasi.HizmetBinasiAdi + ")")
+                        .FirstOrDefaultAsync(),
+
+                    // Sıramatik - Tv
+                    "TvId" => await _dbContext.Tvler
+                        .Where(t => t.TvId == id)
+                        .Select(t => t.TvAdi)
+                        .FirstOrDefaultAsync(),
+
+                    // Sıramatik - Kiosk
+                    "KioskId" => await _dbContext.Kiosklar
+                        .Where(k => k.KioskId == id)
+                        .Select(k => k.KioskAdi)
+                        .FirstOrDefaultAsync(),
+
+                    // Sıramatik - Sıra
+                    "SiraId" => await _dbContext.Siralar
+                        .Where(s => s.SiraId == id)
+                        .Select(s => "Sıra #" + s.SiraNo)
+                        .FirstOrDefaultAsync(),
+
+                    // Sıramatik - Kanal
+                    "KanalId" => await _dbContext.Kanallar
+                        .Where(k => k.KanalId == id)
+                        .Select(k => k.KanalAdi)
+                        .FirstOrDefaultAsync(),
+
+                    // Sıramatik - KanalAlt
+                    "KanalAltId" => await _dbContext.KanalAltlar
+                        .Where(k => k.KanalAltId == id)
+                        .Select(k => k.KanalAltAdi)
+                        .FirstOrDefaultAsync(),
+
+                    // Sıramatik - KanalIslem
+                    "KanalIslemId" => await _dbContext.KanalIslemleri
+                        .Where(k => k.KanalIslemId == id)
+                        .Select(k => k.KanalIslemAdi)
+                        .FirstOrDefaultAsync(),
+
+                    // Sıramatik - KanalAltIslem
+                    "KanalAltIslemId" => await _dbContext.KanalAltIslemleri
+                        .Where(k => k.KanalAltIslemId == id)
+                        .Select(k => k.KanalAltIslemAdi)
+                        .FirstOrDefaultAsync(),
+
+                    // PDKS
+                    "PdksCihazId" => await _dbContext.PdksCihazlar
+                        .Include(p => p.Departman)
+                        .Where(p => p.PdksCihazId == id)
+                        .Select(p => p.CihazIP + " (" + p.Departman.DepartmanAdi + ")")
                         .FirstOrDefaultAsync(),
 
                     _ => null

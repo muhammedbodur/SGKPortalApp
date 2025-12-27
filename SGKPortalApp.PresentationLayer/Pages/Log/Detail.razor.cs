@@ -61,6 +61,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Log
                 // Yetki alanları
                 ["YetkiSeviyesi"] = "Yetki Seviyesi",
                 ["ModulControllerIslemId"] = "İşlem/Sayfa",
+                ["UstIslemId"] = "Üst İşlem",
 
                 // Kişisel bilgiler
                 ["AdSoyad"] = "Ad Soyad",
@@ -79,9 +80,44 @@ namespace SGKPortalApp.PresentationLayer.Pages.Log
                 ["AtanmaNedeniId"] = "Atanma Nedeni",
                 ["HizmetBinasiId"] = "Hizmet Binası",
 
+                // Lokasyon
+                ["IlId"] = "İl",
+                ["IlceId"] = "İlçe",
+                ["EsininIsIlId"] = "Eşinin İş İli",
+                ["EsininIsIlceId"] = "Eşinin İş İlçesi",
+
                 // Modül/Yetki Sistemi
                 ["ModulId"] = "Modül",
                 ["ModulControllerId"] = "Controller",
+                ["UstModulControllerId"] = "Üst Controller",
+
+                // Sıramatik - Banko
+                ["BankoId"] = "Banko",
+                ["YonlendirenBankoId"] = "Yönlendiren Banko",
+                ["HedefBankoId"] = "Hedef Banko",
+                ["AktifBankoId"] = "Aktif Banko",
+                ["BankoNo"] = "Banko No",
+
+                // Sıramatik - Diğer
+                ["TvId"] = "TV",
+                ["TvAdi"] = "TV Adı",
+                ["KioskId"] = "Kiosk",
+                ["KioskAdi"] = "Kiosk Adı",
+                ["SiraId"] = "Sıra",
+                ["SiraNo"] = "Sıra No",
+                ["KanalId"] = "Kanal",
+                ["KanalAdi"] = "Kanal Adı",
+                ["KanalAltId"] = "Kanal Alt",
+                ["KanalAltAdi"] = "Kanal Alt Adı",
+                ["KanalIslemId"] = "Kanal İşlem",
+                ["KanalIslemAdi"] = "Kanal İşlem Adı",
+                ["KanalAltIslemId"] = "Kanal Alt İşlem",
+                ["KanalAltIslemAdi"] = "Kanal Alt İşlem Adı",
+
+                // PDKS
+                ["PdksCihazId"] = "PDKS Cihazı",
+                ["CihazIP"] = "Cihaz IP",
+                ["CihazPort"] = "Cihaz Port",
 
                 // İletişim
                 ["Email"] = "E-posta",
@@ -93,11 +129,24 @@ namespace SGKPortalApp.PresentationLayer.Pages.Log
                 ["EklenmeTarihi"] = "Eklenme Tarihi",
                 ["DuzenlenmeTarihi"] = "Düzenlenme Tarihi",
                 ["SilinmeTarihi"] = "Silinme Tarihi",
+                ["IslemZamani"] = "İşlem Zamanı",
+                ["KontrolZamani"] = "Kontrol Zamanı",
 
                 // Kullanıcı alanları
                 ["EkleyenKullanici"] = "Ekleyen Kullanıcı",
                 ["DuzenleyenKullanici"] = "Düzenleyen Kullanıcı",
-                ["SilenKullanici"] = "Silen Kullanıcı"
+                ["SilenKullanici"] = "Silen Kullanıcı",
+
+                // Diğer yaygın alanlar
+                ["Aktiflik"] = "Aktiflik",
+                ["Durum"] = "Durum",
+                ["Aciklama"] = "Açıklama",
+                ["IslemSayisi"] = "İşlem Sayısı",
+                ["IslemBasari"] = "İşlem Başarı",
+                ["IslemDurum"] = "İşlem Durum",
+                ["KontrolSayisi"] = "Kontrol Sayısı",
+                ["KontrolBasari"] = "Kontrol Başarı",
+                ["KontrolDurum"] = "Kontrol Durum"
             };
 
             return fieldMappings.TryGetValue(fieldName, out var friendlyName)
