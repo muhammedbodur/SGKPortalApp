@@ -1,9 +1,11 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Options;
 using SGKPortalApp.Common.Interfaces;
+using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
 using SGKPortalApp.DataAccessLayer.Services.Audit;
 using System;
@@ -24,17 +26,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly IAuditFileWriter _fileWriter;
         private readonly AuditLoggingOptions _options;
         private readonly ICurrentUserService _currentUserService;
+        private readonly ApplicationDbContext _dbContext;
 
         public AuditLogService(
             IAuditLogQueryRepository auditLogQueryRepository,
             IAuditFileWriter fileWriter,
             IOptions<AuditLoggingOptions> options,
-            ICurrentUserService currentUserService)
+            ICurrentUserService currentUserService,
+            ApplicationDbContext dbContext)
         {
             _auditLogQueryRepository = auditLogQueryRepository;
             _fileWriter = fileWriter;
             _options = options.Value;
             _currentUserService = currentUserService;
+            _dbContext = dbContext;
         }
 
         public async Task<AuditLogPagedResultDto> GetLogsAsync(AuditLogFilterDto filter)
@@ -129,8 +134,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 }
             }
 
-            // Field changes'i parse et
-            detail.FieldChanges = ParseFieldChanges(detail.BeforeDataJson, detail.AfterDataJson);
+            // Field changes'i parse et ve FK lookuplarını yap
+            detail.FieldChanges = await ParseFieldChangesWithLookupsAsync(detail.BeforeDataJson, detail.AfterDataJson);
 
             // Transaction içindeki diğer log'ları al
             if (log.TransactionId.HasValue)
@@ -213,6 +218,23 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         #region Helper Methods
 
         /// <summary>
+        /// Before/After JSON'larını parse ederek SADECE değişen alanları döndürür (FK lookuplarıyla birlikte)
+        /// </summary>
+        private async Task<List<FieldChangeDto>> ParseFieldChangesWithLookupsAsync(string? beforeJson, string? afterJson)
+        {
+            var changes = ParseFieldChanges(beforeJson, afterJson);
+
+            // Her field için FK lookup yap
+            foreach (var change in changes)
+            {
+                change.OldValueDisplay = await ResolveFieldValueAsync(change.FieldName, change.OldValue);
+                change.NewValueDisplay = await ResolveFieldValueAsync(change.FieldName, change.NewValue);
+            }
+
+            return changes;
+        }
+
+        /// <summary>
         /// Before/After JSON'larını parse ederek SADECE değişen alanları döndürür
         /// </summary>
         private List<FieldChangeDto> ParseFieldChanges(string? beforeJson, string? afterJson)
@@ -267,6 +289,68 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             }
 
             return changes;
+        }
+
+        /// <summary>
+        /// Field value için kullanıcı dostu gösterim oluşturur (FK lookup yapar)
+        /// </summary>
+        private async Task<string?> ResolveFieldValueAsync(string fieldName, string? value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return null;
+
+            // ID parse et
+            if (!int.TryParse(value, out int id))
+                return null;
+
+            try
+            {
+                // FK field'larını tespit et ve lookup yap
+                return fieldName switch
+                {
+                    "DepartmanId" => await _dbContext.Departmanlar
+                        .Where(d => d.DepartmanId == id)
+                        .Select(d => d.DepartmanAdi)
+                        .FirstOrDefaultAsync(),
+
+                    "ServisId" => await _dbContext.Servisler
+                        .Where(s => s.ServisId == id)
+                        .Select(s => s.ServisAdi)
+                        .FirstOrDefaultAsync(),
+
+                    "UnvanId" => await _dbContext.Unvanlar
+                        .Where(u => u.UnvanId == id)
+                        .Select(u => u.UnvanAdi)
+                        .FirstOrDefaultAsync(),
+
+                    "HizmetBinasiId" => await _dbContext.HizmetBinalari
+                        .Where(h => h.HizmetBinasiId == id)
+                        .Select(h => h.HizmetBinasiAdi)
+                        .FirstOrDefaultAsync(),
+
+                    "ModulControllerIslemId" => await _dbContext.ModulControllerIslemleri
+                        .Where(m => m.ModulControllerIslemId == id)
+                        .Select(m => m.ModulControllerIslemAdi + " (" + m.PermissionKey + ")")
+                        .FirstOrDefaultAsync(),
+
+                    "IlId" => await _dbContext.Iller
+                        .Where(i => i.IlId == id)
+                        .Select(i => i.IlAdi)
+                        .FirstOrDefaultAsync(),
+
+                    "IlceId" => await _dbContext.Ilceler
+                        .Where(i => i.IlceId == id)
+                        .Select(i => i.IlceAdi)
+                        .FirstOrDefaultAsync(),
+
+                    _ => null
+                };
+            }
+            catch
+            {
+                // Lookup hatası - null dön
+                return null;
+            }
         }
 
         #endregion

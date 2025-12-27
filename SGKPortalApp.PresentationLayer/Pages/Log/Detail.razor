@@ -123,7 +123,16 @@
                                             @if (!string.IsNullOrEmpty(change.OldValue))
                                             {
                                                 <div>
-                                                    <code>@GetFriendlyValue(change.FieldName, change.OldValue)</code>
+                                                    @if (!string.IsNullOrEmpty(change.OldValueDisplay))
+                                                    {
+                                                        <strong>@change.OldValueDisplay</strong>
+                                                        <br />
+                                                        <small class="text-muted">ID: @change.OldValue</small>
+                                                    }
+                                                    else
+                                                    {
+                                                        <code>@GetFriendlyValue(change.FieldName, change.OldValue)</code>
+                                                    }
                                                 </div>
                                             }
                                             else
@@ -135,7 +144,16 @@
                                             @if (!string.IsNullOrEmpty(change.NewValue))
                                             {
                                                 <div>
-                                                    <code>@GetFriendlyValue(change.FieldName, change.NewValue)</code>
+                                                    @if (!string.IsNullOrEmpty(change.NewValueDisplay))
+                                                    {
+                                                        <strong>@change.NewValueDisplay</strong>
+                                                        <br />
+                                                        <small class="text-muted">ID: @change.NewValue</small>
+                                                    }
+                                                    else
+                                                    {
+                                                        <code>@GetFriendlyValue(change.FieldName, change.NewValue)</code>
+                                                    }
                                                 </div>
                                             }
                                             else
