@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using SGKPortalApp.Common.Interfaces;
-using SGKPortalApp.BusinessObjectLayer.Options;
-using SGKPortalApp.DataAccessLayer.Services.Audit;
 using Microsoft.Extensions.Options;
+using SGKPortalApp.BusinessObjectLayer.Options;
+using SGKPortalApp.Common.Interfaces;
+using SGKPortalApp.DataAccessLayer.Services.Audit;
+using System.IO;
 
 namespace SGKPortalApp.DataAccessLayer.Extensions
 {
@@ -26,7 +27,21 @@ namespace SGKPortalApp.DataAccessLayer.Extensions
             // Configuration options
             var section = configuration.GetSection(AuditLoggingOptions.SectionName);
             services.AddOptions<AuditLoggingOptions>()
-                .Bind(section);
+                .Bind(section)
+                .PostConfigure(options =>
+                {
+                    // Relative path ise solution root'a göre absolute path'e çevir
+                    if (!Path.IsPathRooted(options.BasePath))
+                    {
+                        // ApiLayer veya PresentationLayer working directory'sinden çık, solution root'a git
+                        var currentDir = Directory.GetCurrentDirectory();
+                        var solutionRoot = Directory.GetParent(currentDir)?.FullName ?? currentDir;
+                        options.BasePath = Path.GetFullPath(Path.Combine(solutionRoot, options.BasePath));
+                    }
+
+                    // BasePath klasörünü oluştur
+                    Directory.CreateDirectory(options.BasePath);
+                });
 
             // Core services
             // Note: ICurrentUserService should be registered by the application layer
