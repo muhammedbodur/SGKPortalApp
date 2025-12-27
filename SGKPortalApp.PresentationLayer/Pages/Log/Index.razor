@@ -194,30 +194,38 @@ else
         @* Transaction Grupları *@
         @foreach (var group in GetTransactionGroups())
         {
-            var groupLogs = group.Logs.OrderBy(l => l.IslemZamani).ToList();
+            var groupLogs = group.Logs.OrderByDescending(l => l.IslemZamani).ToList();
             var firstLog = groupLogs.First();
 
             <div class="card mb-3">
                 <div class="card-header bg-light">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="mb-0">
-                                🔗 İşlem Grubu
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="bx bx-calendar me-2 text-primary"></i>
+                                <h6 class="mb-0 me-3">
+                                    <strong>@firstLog.IslemZamaniText</strong>
+                                </h6>
                                 @if (group.TransactionId.HasValue)
                                 {
-                                    <span class="text-muted">#@group.TransactionId.Value.ToString().Substring(0, 8)</span>
+                                    <span class="badge bg-info">@groupLogs.Count değişiklik</span>
                                 }
-                            </h6>
+                            </div>
                             <small class="text-muted">
-                                @firstLog.IslemZamaniText - TC: @firstLog.TcKimlikNo
+                                <i class="bx bx-user me-1"></i>TC: @firstLog.TcKimlikNo
                                 @if (group.TransactionId.HasValue)
                                 {
-                                    <span class="badge bg-info ms-2">@groupLogs.Count değişiklik</span>
+                                    <span class="ms-2">
+                                        <i class="bx bx-link me-1"></i>
+                                        Transaction: #@group.TransactionId.Value.ToString().Substring(0, 8)
+                                    </span>
                                 }
                             </small>
                         </div>
                         <div>
-                            <small class="text-muted">IP: @(firstLog.IpAddress ?? "-")</small>
+                            <small class="text-muted">
+                                <i class="bx bx-globe me-1"></i>@(firstLog.IpAddress ?? "-")
+                            </small>
                         </div>
                     </div>
                 </div>
