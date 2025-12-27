@@ -97,11 +97,14 @@
         </div>
 
         @* Değişiklik Detayları *@
-        @if (detail.FieldChanges.Any())
+        @{
+            var changedFields = detail.FieldChanges.Where(c => c.IsChanged).ToList();
+        }
+        @if (changedFields.Any())
         {
             <div class="card mb-3">
                 <div class="card-header bg-light">
-                    <h5 class="mb-0">🔄 Değişen Alanlar (@detail.FieldChanges.Count alan)</h5>
+                    <h5 class="mb-0">🔄 Değişen Alanlar (@changedFields.Count alan)</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -114,28 +117,28 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var change in detail.FieldChanges)
+                                @foreach (var change in changedFields)
                                 {
-                                    <tr class="@(change.IsChanged ? "table-warning" : "")">
+                                    <tr class="table-warning">
                                         <td><strong>@change.FieldName</strong></td>
                                         <td>
-                                            @if (change.OldValue != null)
+                                            @if (!string.IsNullOrEmpty(change.OldValue))
                                             {
                                                 <code>@change.OldValue</code>
                                             }
                                             else
                                             {
-                                                <span class="text-muted">null</span>
+                                                <span class="text-muted fst-italic">boş</span>
                                             }
                                         </td>
                                         <td>
-                                            @if (change.NewValue != null)
+                                            @if (!string.IsNullOrEmpty(change.NewValue))
                                             {
                                                 <code>@change.NewValue</code>
                                             }
                                             else
                                             {
-                                                <span class="text-muted">null</span>
+                                                <span class="text-muted fst-italic">boş</span>
                                             }
                                         </td>
                                     </tr>
@@ -143,17 +146,13 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="alert alert-info alert-sm mb-0">
-                        <i class="bi bi-info-circle"></i>
-                        <strong>Sarı arka plan:</strong> Değişen alanları gösterir
-                    </div>
                 </div>
             </div>
         }
         else
         {
             <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i> Bu log için detaylı değişiklik bilgisi bulunmuyor.
+                <i class="bi bi-info-circle"></i> Bu işlemde hiçbir alan değişmedi.
             </div>
         }
 
