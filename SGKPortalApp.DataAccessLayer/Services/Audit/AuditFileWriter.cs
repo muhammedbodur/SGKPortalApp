@@ -28,6 +28,8 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
 
         public AuditFileWriter(IOptions<AuditLoggingOptions> options)
         {
+            // BasePath, AuditLoggingServiceExtensions.AddAuditLogging metodunda
+            // PostConfigure ile solution root'a göre resolve edilmiştir
             _options = options.Value;
         }
 
