@@ -341,6 +341,7 @@
                 TransactionId = g.Key == Guid.Empty ? null : g.Key,
                 Logs = g.ToList()
             })
+            .OrderByDescending(g => g.Logs.Max(l => l.IslemZamani)) // En yeni grup en üstte
             .ToList();
     }
 
