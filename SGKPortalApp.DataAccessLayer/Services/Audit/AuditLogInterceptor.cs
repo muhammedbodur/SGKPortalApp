@@ -74,9 +74,14 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
             foreach (var entry in entries)
             {
                 var entityType = entry.Entity.GetType();
+                var tableName = entry.Metadata.GetTableName() ?? entityType.Name;
 
                 // DatabaseLog'un kendisini loglama (sonsuz döngü engelleme)
                 if (entityType == typeof(DatabaseLog))
+                    continue;
+
+                // ExcludedTables kontrolü
+                if (_options.ExcludedTables != null && _options.ExcludedTables.Contains(tableName))
                     continue;
 
                 // Configuration'ı cache'den al
@@ -143,6 +148,7 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
             var tableName = entry.Metadata.GetTableName() ?? entityType.Name;
 
             // Before ve After state'leri al
+            // UPDATE için sadece değişen alanları kaydet
             var beforeData = GetBeforeData(entry);
             var afterData = GetAfterData(entry);
 
@@ -247,6 +253,7 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
 
         /// <summary>
         /// Before data'yı dictionary olarak döner
+        /// UPDATE için sadece değişen alanları içerir
         /// </summary>
         private Dictionary<string, object?>? GetBeforeData(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry entry)
         {
@@ -261,6 +268,10 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
                 if (prop.Metadata.IsShadowProperty())
                     continue;
 
+                // UPDATE işleminde sadece değişen alanları kaydet
+                if (entry.State == EntityState.Modified && !prop.IsModified)
+                    continue;
+
                 data[prop.Metadata.Name] = entry.State == EntityState.Deleted
                     ? prop.CurrentValue
                     : prop.OriginalValue;
@@ -271,6 +282,7 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
 
         /// <summary>
         /// After data'yı dictionary olarak döner
+        /// UPDATE için sadece değişen alanları içerir
         /// </summary>
         private Dictionary<string, object?>? GetAfterData(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry entry)
         {
@@ -283,6 +295,10 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
             {
                 // Navigation properties hariç
                 if (prop.Metadata.IsShadowProperty())
+                    continue;
+
+                // UPDATE işleminde sadece değişen alanları kaydet
+                if (entry.State == EntityState.Modified && !prop.IsModified)
                     continue;
 
                 data[prop.Metadata.Name] = prop.CurrentValue;
