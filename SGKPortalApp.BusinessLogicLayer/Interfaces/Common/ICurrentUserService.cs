@@ -24,5 +24,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.Common
         /// Kullanıcı authenticated mi?
         /// </summary>
         bool IsAuthenticated();
+
+        /// <summary>
+        /// Mevcut kullanıcının Departman ID'sini döndürür
+        /// </summary>
+        int? GetDepartmanId();
+
+        /// <summary>
+        /// Mevcut kullanıcının Servis ID'sini döndürür
+        /// </summary>
+        int? GetServisId();
     }
 }

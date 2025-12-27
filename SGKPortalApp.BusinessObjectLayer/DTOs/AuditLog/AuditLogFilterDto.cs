@@ -24,6 +24,16 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog
         public string? TcKimlikNo { get; set; }
 
         /// <summary>
+        /// Departman ID (yetki bazlı filtreleme)
+        /// </summary>
+        public int? DepartmanId { get; set; }
+
+        /// <summary>
+        /// Servis ID (yetki bazlı filtreleme)
+        /// </summary>
+        public int? ServisId { get; set; }
+
+        /// <summary>
         /// Tablo adı
         /// </summary>
         public string? TableName { get; set; }

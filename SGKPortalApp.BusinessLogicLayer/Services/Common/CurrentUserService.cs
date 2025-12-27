@@ -73,5 +73,43 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             // User.Identity kontrolü
             return httpContext.User?.Identity?.IsAuthenticated ?? false;
         }
+
+        public int? GetDepartmanId()
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext == null)
+                return null;
+
+            // Session'dan al
+            var departmanIdStr = httpContext.Session.GetString("DepartmanId");
+            if (!string.IsNullOrEmpty(departmanIdStr) && int.TryParse(departmanIdStr, out var departmanId))
+                return departmanId;
+
+            // Claim'den al
+            var claim = httpContext.User?.FindFirst("DepartmanId");
+            if (claim != null && int.TryParse(claim.Value, out var claimDepartmanId))
+                return claimDepartmanId;
+
+            return null;
+        }
+
+        public int? GetServisId()
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext == null)
+                return null;
+
+            // Session'dan al
+            var servisIdStr = httpContext.Session.GetString("ServisId");
+            if (!string.IsNullOrEmpty(servisIdStr) && int.TryParse(servisIdStr, out var servisId))
+                return servisId;
+
+            // Claim'den al
+            var claim = httpContext.User?.FindFirst("ServisId");
+            if (claim != null && int.TryParse(claim.Value, out var claimServisId))
+                return claimServisId;
+
+            return null;
+        }
     }
 }
