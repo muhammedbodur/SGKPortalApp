@@ -24,6 +24,11 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog
         public string? TcKimlikNo { get; set; }
 
         /// <summary>
+        /// Arama metni (Ad Soyad, Sicil No)
+        /// </summary>
+        public string? SearchText { get; set; }
+
+        /// <summary>
         /// Departman ID (yetki bazlı filtreleme)
         /// </summary>
         public int? DepartmanId { get; set; }

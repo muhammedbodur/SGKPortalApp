@@ -24,15 +24,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private readonly SGKDbContext _dbContext;
         private readonly IAuditFileWriter _fileWriter;
         private readonly AuditLoggingOptions _options;
+        private readonly ICurrentUserService _currentUserService;
 
         public AuditLogService(
             SGKDbContext dbContext,
             IAuditFileWriter fileWriter,
-            IOptions<AuditLoggingOptions> options)
+            IOptions<AuditLoggingOptions> options,
+            ICurrentUserService currentUserService)
         {
             _dbContext = dbContext;
             _fileWriter = fileWriter;
             _options = options.Value;
+            _currentUserService = currentUserService;
         }
 
         public async Task<AuditLogPagedResultDto> GetLogsAsync(AuditLogFilterDto filter)
@@ -40,25 +43,100 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             // Build query
             var query = _dbContext.DatabaseLogs.AsQueryable();
 
-            // Apply filters
+            // ═══════════════════════════════════════════════════════════
+            // ✅ KATMAN 1: GÜVENLİK - YETKİ BAZLI KISITLAMA (EN ÖNCELİKLİ)
+            // Bu filtre MUTLAKA uygulanır, kullanıcı bypass edemez
+            // ═══════════════════════════════════════════════════════════
+            var currentUserDepartmanId = _currentUserService.GetDepartmanId();
+            var currentUserServisId = _currentUserService.GetServisId();
+
+            // Eğer kullanıcının departman kısıtlaması varsa
+            if (currentUserDepartmanId.HasValue)
+            {
+                // Sadece kendi departmanındaki kullanıcıların loglarını görebilir
+                query = query.Where(l =>
+                    _dbContext.Users
+                        .Where(u => u.TcKimlikNo == l.TcKimlikNo)
+                        .Where(u => u.Personel != null && u.Personel.DepartmanId == currentUserDepartmanId.Value)
+                        .Any()
+                );
+            }
+
+            // Eğer kullanıcının servis kısıtlaması varsa
+            if (currentUserServisId.HasValue)
+            {
+                query = query.Where(l =>
+                    _dbContext.Users
+                        .Where(u => u.TcKimlikNo == l.TcKimlikNo)
+                        .Where(u => u.Personel != null && u.Personel.ServisId == currentUserServisId.Value)
+                        .Any()
+                );
+            }
+
+            // ═══════════════════════════════════════════════════════════
+            // ✅ KATMAN 2: KULLANICI FİLTRELERİ (İsteğe bağlı daralma)
+            // Yukarıdaki güvenlik kısıtlaması içinde arama yapar
+            // ═══════════════════════════════════════════════════════════
+
+            // Departman filtresi (isteğe bağlı daralma)
+            if (filter.DepartmanId.HasValue)
+            {
+                query = query.Where(l =>
+                    _dbContext.Users
+                        .Where(u => u.TcKimlikNo == l.TcKimlikNo)
+                        .Where(u => u.Personel != null && u.Personel.DepartmanId == filter.DepartmanId.Value)
+                        .Any()
+                );
+            }
+
+            // Servis filtresi (isteğe bağlı daralma)
+            if (filter.ServisId.HasValue)
+            {
+                query = query.Where(l =>
+                    _dbContext.Users
+                        .Where(u => u.TcKimlikNo == l.TcKimlikNo)
+                        .Where(u => u.Personel != null && u.Personel.ServisId == filter.ServisId.Value)
+                        .Any()
+                );
+            }
+
+            // Tarih filtreleri
             if (filter.StartDate.HasValue)
                 query = query.Where(l => l.IslemZamani >= filter.StartDate.Value);
 
             if (filter.EndDate.HasValue)
                 query = query.Where(l => l.IslemZamani <= filter.EndDate.Value);
 
+            // TC Kimlik No filtresi
             if (!string.IsNullOrWhiteSpace(filter.TcKimlikNo))
                 query = query.Where(l => l.TcKimlikNo == filter.TcKimlikNo);
 
+            // Ad Soyad / Sicil No arama (SearchText)
+            if (!string.IsNullOrWhiteSpace(filter.SearchText))
+            {
+                query = query.Where(l =>
+                    _dbContext.Users
+                        .Where(u => u.TcKimlikNo == l.TcKimlikNo)
+                        .Where(u => u.Personel != null &&
+                                   (u.Personel.AdSoyad.Contains(filter.SearchText) ||
+                                    u.Personel.SicilNo.ToString().Contains(filter.SearchText)))
+                        .Any()
+                );
+            }
+
+            // Tablo adı filtresi
             if (!string.IsNullOrWhiteSpace(filter.TableName))
                 query = query.Where(l => l.TabloAdi == filter.TableName);
 
+            // İşlem türü filtresi
             if (filter.Action.HasValue)
                 query = query.Where(l => l.IslemTuru == filter.Action.Value);
 
+            // Transaction ID filtresi
             if (filter.TransactionId.HasValue)
                 query = query.Where(l => l.TransactionId == filter.TransactionId.Value);
 
+            // Storage type filtreleri
             if (filter.OnlyFileBased == true)
                 query = query.Where(l => l.StorageType == LogStorageType.File);
 
@@ -110,6 +188,37 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 
             if (log == null)
                 return null;
+
+            // ═══════════════════════════════════════════════════════════
+            // ✅ YETKİ KONTROLÜ: Kullanıcı bu log'u görüntüleyebilir mi?
+            // ═══════════════════════════════════════════════════════════
+            var currentUserDepartmanId = _currentUserService.GetDepartmanId();
+            var currentUserServisId = _currentUserService.GetServisId();
+
+            // Eğer kullanıcının departman kısıtlaması varsa
+            if (currentUserDepartmanId.HasValue)
+            {
+                // Log'un sahibi kullanıcının departmanını kontrol et
+                var hasAccess = await _dbContext.Users
+                    .Where(u => u.TcKimlikNo == log.TcKimlikNo)
+                    .Where(u => u.Personel != null && u.Personel.DepartmanId == currentUserDepartmanId.Value)
+                    .AnyAsync();
+
+                if (!hasAccess)
+                    return null; // Yetkisiz erişim
+            }
+
+            // Eğer kullanıcının servis kısıtlaması varsa
+            if (currentUserServisId.HasValue)
+            {
+                var hasAccess = await _dbContext.Users
+                    .Where(u => u.TcKimlikNo == log.TcKimlikNo)
+                    .Where(u => u.Personel != null && u.Personel.ServisId == currentUserServisId.Value)
+                    .AnyAsync();
+
+                if (!hasAccess)
+                    return null; // Yetkisiz erişim
+            }
 
             var detail = new AuditLogDetailDto
             {
