@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.ApiLayer.Services.Hubs.Base;
 using SGKPortalApp.ApiLayer.Services.Hubs.Constants;
 using SGKPortalApp.ApiLayer.Services.Hubs.Interfaces;
 using SGKPortalApp.ApiLayer.Services.State;
+using SGKPortalApp.DataAccessLayer.Context;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -20,6 +22,7 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
         private readonly IHubConnectionService _connectionService;
         private readonly IBankoModeService _bankoModeService;
         private readonly BankoModeStateService _stateService;
+        private readonly SGKDbContext _context;
         private static readonly ConcurrentDictionary<string, string> ConnectionTabSessions = new();
         private static readonly ConcurrentDictionary<string, string> PersonelBankoTabSessions = new();
 
@@ -27,11 +30,13 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
             ILogger<SiramatikHub> logger,
             IHubConnectionService connectionService,
             IBankoModeService bankoModeService,
-            BankoModeStateService stateService) : base(logger)
+            BankoModeStateService stateService,
+            SGKDbContext context) : base(logger)
         {
             _connectionService = connectionService;
             _bankoModeService = bankoModeService;
             _stateService = stateService;
+            _context = context;
         }
 
         #region Connection Management
@@ -200,7 +205,37 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
             var connectionId = Context.ConnectionId;
             var tcKimlikNo = Context.User?.FindFirst("TcKimlikNo")?.Value;
             ConnectionTabSessions.TryRemove(connectionId, out _);
-            
+
+            // 🔄 Browser kapatıldığında logout kaydını güncelle
+            if (!string.IsNullOrEmpty(tcKimlikNo))
+            {
+                try
+                {
+                    var user = await _context.Users
+                        .FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo);
+
+                    if (user != null && !string.IsNullOrEmpty(user.SessionID))
+                    {
+                        // Aktif LoginLogoutLog kaydını bul ve LogoutTime güncelle
+                        var loginLog = await _context.LoginLogoutLogs
+                            .Where(l => l.SessionID == user.SessionID && !l.LogoutTime.HasValue)
+                            .OrderByDescending(l => l.LoginTime)
+                            .FirstOrDefaultAsync();
+
+                        if (loginLog != null)
+                        {
+                            loginLog.LogoutTime = DateTime.Now;
+                            await _context.SaveChangesAsync();
+                            _logger.LogInformation("✅ Browser kapatıldı, logout log kaydı güncellendi - SessionID: {SessionID}", user.SessionID);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "❌ OnDisconnectedAsync: Logout log güncellenirken hata - {TcKimlikNo}", tcKimlikNo);
+                }
+            }
+
             try
             {
                 // 1. HubConnection'ı bul
