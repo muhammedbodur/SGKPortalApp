@@ -1,0 +1,362 @@
+@page "/log"
+@page "/log/list"
+@using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
+@using SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+@attribute [Authorize]
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>Log Listeleme - SGK Portal</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-fluid">
+            <div class="row mb-3">
+                <div class="col">
+                    <h3>📋 Log Listeleme</h3>
+                    <p class="text-muted">Sistemdeki tüm değişiklikleri görüntüleyin</p>
+                </div>
+            </div>
+
+            @* Arama ve Filtreler *@
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">🔍 Arama ve Filtreler</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        @* Departman Filtresi (Yetki Bazlı) *@
+                        @if (IsFieldVisibleInList("DEPARTMANID"))
+                        {
+                            <div class="col-md-3">
+                                <label class="form-label">
+                                    <i class="bx bx-building me-1"></i>Departman
+                                    @if (!CanEditFieldInList("DEPARTMANID"))
+                                    {
+                                        <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
+                                            <i class="bx bx-lock-alt"></i>
+                                        </span>
+                                    }
+                                </label>
+                                <select class="form-select"
+                                        @onchange="OnDepartmanChangedEvent"
+                                        value="@selectedDepartmanId"
+                                        disabled="@IsFieldDisabledInList("DEPARTMANID")">
+                                    <option value="0">-- Tüm Departmanlar --</option>
+                                    @foreach (var dept in Departmanlar)
+                                    {
+                                        <option value="@dept.DepartmanId">@dept.DepartmanAdi</option>
+                                    }
+                                </select>
+                            </div>
+                        }
+
+                        @* Servis Filtresi (Yetki Bazlı, Departmana Bağlı) *@
+                        @if (IsFieldVisibleInList("SERVISID"))
+                        {
+                            <div class="col-md-3">
+                                <label class="form-label">
+                                    <i class="bx bx-briefcase me-1"></i>Servis
+                                    @if (!CanEditFieldInList("SERVISID"))
+                                    {
+                                        <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
+                                            <i class="bx bx-lock-alt"></i>
+                                        </span>
+                                    }
+                                </label>
+                                <select class="form-select"
+                                        @onchange="OnServisChangedEvent"
+                                        value="@selectedServisId"
+                                        disabled="@(IsFieldDisabledInList("SERVISID") || selectedDepartmanId == 0)">
+                                    <option value="0">-- Tüm Servisler --</option>
+                                    @foreach (var servis in FiltreliServisler)
+                                    {
+                                        <option value="@servis.ServisId">@servis.ServisAdi</option>
+                                    }
+                                </select>
+                            </div>
+                        }
+
+                        @* Ad Soyad / Sicil Arama *@
+                        <div class="col-md-3">
+                            <label class="form-label">Ad Soyad / Sicil</label>
+                            <input type="text" class="form-control" @bind="SearchText" placeholder="Arama..." />
+                        </div>
+
+                        @* Başlangıç Tarihi *@
+                        <div class="col-md-3">
+                            <label class="form-label">Başlangıç Tarihi</label>
+                            <input type="date" class="form-control" @bind="Filter.StartDate" @bind:format="yyyy-MM-dd" />
+                        </div>
+
+                        @* Bitiş Tarihi *@
+                        <div class="col-md-3">
+                            <label class="form-label">Bitiş Tarihi</label>
+                            <input type="date" class="form-control" @bind="Filter.EndDate" @bind:format="yyyy-MM-dd" />
+                        </div>
+
+                        @* Tablo Adı *@
+                        <div class="col-md-3">
+                            <label class="form-label">Tablo Adı</label>
+                            <input type="text" class="form-control" @bind="Filter.TableName" placeholder="Personel, User..." />
+                        </div>
+
+                        @* İşlem Türü *@
+                        <div class="col-md-3">
+                            <label class="form-label">İşlem Türü</label>
+                            <select class="form-select" @bind="Filter.Action">
+                                <option value="">Tümü</option>
+                                <option value="@DatabaseAction.INSERT">INSERT</option>
+                                <option value="@DatabaseAction.UPDATE">UPDATE</option>
+                                <option value="@DatabaseAction.DELETE">DELETE</option>
+                            </select>
+                        </div>
+
+                        @* Sayfa Başına Kayıt *@
+                        <div class="col-md-2">
+                            <label class="form-label">Sayfa Başına</label>
+                            <select class="form-select" @bind="Filter.PageSize">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+
+                        @* Butonlar *@
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button class="btn btn-primary me-2" @onclick="SearchAsync" disabled="@isLoading">
+                                @if (isLoading)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                }
+                                Ara
+                            </button>
+                            <button class="btn btn-secondary" @onclick="ResetFilters" disabled="@isLoading">
+                                Temizle
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    @* Sonuçlar *@
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="mt-2">Log'lar yükleniyor...</p>
+        </div>
+    }
+    else if (result != null && result.Logs.Any())
+    {
+        @* Pagination Üst *@
+        <div class="card mb-2">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge bg-primary">Toplam: @result.TotalCount kayıt</span>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item @(!result.HasPreviousPage ? "disabled" : "")">
+                                <button class="page-link" @onclick="() => GoToPage(result.PageNumber - 1)" disabled="@(!result.HasPreviousPage)">
+                                    Önceki
+                                </button>
+                            </li>
+                            @for (int i = Math.Max(1, result.PageNumber - 2); i <= Math.Min(result.TotalPages, result.PageNumber + 2); i++)
+                            {
+                                var pageNum = i;
+                                <li class="page-item @(pageNum == result.PageNumber ? "active" : "")">
+                                    <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
+                                </li>
+                            }
+                            <li class="page-item @(!result.HasNextPage ? "disabled" : "")">
+                                <button class="page-link" @onclick="() => GoToPage(result.PageNumber + 1)" disabled="@(!result.HasNextPage)">
+                                    Sonraki
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
+                    <small class="text-muted">Sayfa @result.PageNumber / @result.TotalPages</small>
+                </div>
+            </div>
+        </div>
+
+        @* Transaction Grupları *@
+        @foreach (var group in GetTransactionGroups())
+        {
+            var groupLogs = group.Logs.OrderByDescending(l => l.IslemZamani).ToList();
+            var firstLog = groupLogs.First();
+
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="bx bx-calendar me-2 text-primary"></i>
+                                <h6 class="mb-0 me-3">
+                                    <strong>@firstLog.IslemZamaniText</strong>
+                                </h6>
+                                @if (group.TransactionId.HasValue)
+                                {
+                                    <span class="badge bg-info">@groupLogs.Count değişiklik</span>
+                                }
+                            </div>
+                            <small class="text-muted">
+                                <i class="bx bx-user me-1"></i>TC: @firstLog.TcKimlikNo
+                                @if (group.TransactionId.HasValue)
+                                {
+                                    <span class="ms-2">
+                                        <i class="bx bx-link me-1"></i>
+                                        Transaction: #@group.TransactionId.Value.ToString().Substring(0, 8)
+                                    </span>
+                                }
+                            </small>
+                        </div>
+                        <div>
+                            <small class="text-muted">
+                                <i class="bx bx-globe me-1"></i>@(firstLog.IpAddress ?? "-")
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 180px">
+                                        <i class="bx bx-time-five me-1"></i>Tarih/Saat
+                                    </th>
+                                    <th style="width: 200px">
+                                        <i class="bx bx-data me-1"></i>Tablo
+                                    </th>
+                                    <th style="width: 120px">
+                                        <i class="bx bx-transfer me-1"></i>İşlem
+                                    </th>
+                                    <th style="width: 180px">
+                                        <i class="bx bx-user me-1"></i>İşlem Yapılan
+                                    </th>
+                                    <th>
+                                        <i class="bx bx-edit me-1"></i>Değişiklik
+                                    </th>
+                                    <th style="width: 100px" class="text-center">İşlemler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var log in groupLogs)
+                                {
+                                    <tr>
+                                        <td>
+                                            <small class="text-muted">
+                                                @log.IslemZamani.ToLocalTime().ToString("HH:mm:ss")
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info-subtle text-info">
+                                                @log.TabloAdi
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge @GetActionBadgeClass(log.IslemTuru)">
+                                                @log.IslemTuruText
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(log.TargetPersonAdSoyad))
+                                            {
+                                                <div>
+                                                    <strong>@log.TargetPersonAdSoyad</strong>
+                                                    <br />
+                                                    <small class="text-muted">TC: @log.TargetPersonTcKimlikNo</small>
+                                                </div>
+                                            }
+                                            else if (!string.IsNullOrEmpty(log.TargetEntityInfo))
+                                            {
+                                                <div>
+                                                    <span class="badge bg-secondary-subtle text-secondary">
+                                                        <i class="bx bx-folder me-1"></i>@log.TargetEntityInfo
+                                                    </span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <small class="text-muted fst-italic">-</small>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (log.ChangedFieldCount.HasValue && log.ChangedFieldCount > 0)
+                                            {
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge bg-warning-subtle text-warning me-2">
+                                                        @log.ChangedFieldCount
+                                                    </span>
+                                                    <small class="text-muted">alan değişti</small>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <small class="text-muted fst-italic">Değişiklik yok</small>
+                                            }
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="/log/detail/@log.DatabaseLogId"
+                                                class="btn btn-sm btn-outline-primary"
+                                                title="Detayları Görüntüle">
+                                                <i class="bx bx-show-alt me-1"></i>Detay
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @* Pagination Alt *@
+        <div class="card">
+            <div class="card-body p-2">
+                <nav>
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        <li class="page-item @(!result.HasPreviousPage ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => GoToPage(result.PageNumber - 1)" disabled="@(!result.HasPreviousPage)">
+                                Önceki
+                            </button>
+                        </li>
+                        @for (int i = Math.Max(1, result.PageNumber - 2); i <= Math.Min(result.TotalPages, result.PageNumber + 2); i++)
+                        {
+                            var pageNum = i;
+                            <li class="page-item @(pageNum == result.PageNumber ? "active" : "")">
+                                <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
+                            </li>
+                        }
+                        <li class="page-item @(!result.HasNextPage ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => GoToPage(result.PageNumber + 1)" disabled="@(!result.HasNextPage)">
+                                Sonraki
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        }
+        else if (!isLoading && result != null)
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Seçili filtrelere uygun kayıt bulunamadı.
+            </div>
+        }
+        </div>
+    </FieldPermissionScope>
+}

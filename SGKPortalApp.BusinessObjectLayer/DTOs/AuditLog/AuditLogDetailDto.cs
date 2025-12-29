@@ -25,6 +25,21 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog
         public string? UserAgent { get; set; }
 
         /// <summary>
+        /// İşlemin yapıldığı kişinin TC Kimlik No (entity'deki TcKimlikNo field'ından)
+        /// </summary>
+        public string? TargetPersonTcKimlikNo { get; set; }
+
+        /// <summary>
+        /// İşlemin yapıldığı kişinin Ad Soyad
+        /// </summary>
+        public string? TargetPersonAdSoyad { get; set; }
+
+        /// <summary>
+        /// İşlem yapılan entity'nin tanımlayıcı bilgisi (TcKimlikNo yoksa: ServisAdi, DepartmanAdi, vs.)
+        /// </summary>
+        public string? TargetEntityInfo { get; set; }
+
+        /// <summary>
         /// Before data (JSON veya Dictionary olarak)
         /// </summary>
         public string? BeforeDataJson { get; set; }

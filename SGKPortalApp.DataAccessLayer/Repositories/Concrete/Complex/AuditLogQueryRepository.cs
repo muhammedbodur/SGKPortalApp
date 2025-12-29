@@ -368,5 +368,26 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                 return null;
             }
         }
+
+        /// <summary>
+        /// TC Kimlik No'dan Ad Soyad'ı getirir
+        /// </summary>
+        public async Task<string?> GetAdSoyadByTcKimlikNoAsync(string? tcKimlikNo)
+        {
+            if (string.IsNullOrWhiteSpace(tcKimlikNo))
+                return null;
+
+            try
+            {
+                return await _context.Personeller
+                    .Where(p => p.TcKimlikNo == tcKimlikNo)
+                    .Select(p => p.AdSoyad)
+                    .FirstOrDefaultAsync();
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

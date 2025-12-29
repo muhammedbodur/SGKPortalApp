@@ -1,0 +1,266 @@
+@page "/log/detail/{LogId:int}"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+
+<PageTitle>Log Detay - SGK Portal</PageTitle>
+
+<div class="container-fluid">
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary"></div>
+            <p class="mt-2">Log detayı yükleniyor...</p>
+        </div>
+    }
+    else if (detail == null)
+    {
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i> Log bulunamadı.
+        </div>
+        <a href="/log" class="btn btn-secondary">← Geri Dön</a>
+    }
+    else
+    {
+        @* Başlık *@
+        <div class="row mb-3">
+            <div class="col">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3>📋 Log Detayı</h3>
+                        <p class="text-muted mb-0">Log ID: #@LogId</p>
+                    </div>
+                    <a href="/log" class="btn btn-secondary">← Geri Dön</a>
+                </div>
+            </div>
+        </div>
+
+        @* Genel Bilgiler *@
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">ℹ️ Genel Bilgiler</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-sm table-borderless">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 150px">Tarih/Saat:</th>
+                                    <td>@detail.IslemZamani.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss")</td>
+                                </tr>
+                                <tr>
+                                    <th>İşlemi Yapan:</th>
+                                    <td><code>@detail.TcKimlikNo</code></td>
+                                </tr>
+                                @if (!string.IsNullOrEmpty(detail.TargetPersonTcKimlikNo))
+                                {
+                                    <tr>
+                                        <th>İşlem Yapılan Kişi:</th>
+                                        <td>
+                                            <strong>@detail.TargetPersonAdSoyad</strong>
+                                            <br />
+                                            <small class="text-muted">TC: @detail.TargetPersonTcKimlikNo</small>
+                                        </td>
+                                    </tr>
+                                }
+                                else if (!string.IsNullOrEmpty(detail.TargetEntityInfo))
+                                {
+                                    <tr>
+                                        <th>İşlem Yapılan Kayıt:</th>
+                                        <td>
+                                            <span class="badge bg-secondary">
+                                                <i class="bx bx-folder me-1"></i>@detail.TargetEntityInfo
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <th>Tablo:</th>
+                                    <td><span class="badge bg-info">@detail.TabloAdi</span></td>
+                                </tr>
+                                <tr>
+                                    <th>İşlem Türü:</th>
+                                    <td>
+                                        <span class="badge @GetActionBadgeClass(detail.IslemTuru)">
+                                            @detail.IslemTuru.ToString()
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-sm table-borderless">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 150px">Depolama:</th>
+                                    <td>@detail.StorageType.ToString()</td>
+                                </tr>
+                                <tr>
+                                    <th>IP Adresi:</th>
+                                    <td>@(detail.IpAddress ?? "-")</td>
+                                </tr>
+                                <tr>
+                                    <th>User Agent:</th>
+                                    <td><small>@(detail.UserAgent ?? "-")</small></td>
+                                </tr>
+                                <tr>
+                                    <th>Data Boyutu:</th>
+                                    <td>@(detail.DataSizeBytes.HasValue ? $"{detail.DataSizeBytes.Value} bytes" : "-")</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        @* Değişiklik Detayları *@
+        @if (detail.FieldChanges.Any())
+        {
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">🔄 Değişen Alanlar (@detail.FieldChanges.Count alan)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 25%">Alan Adı</th>
+                                    <th style="width: 37.5%">Eski Değer (Before)</th>
+                                    <th style="width: 37.5%">Yeni Değer (After)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var change in detail.FieldChanges)
+                                {
+                                    <tr class="table-warning">
+                                        <td>
+                                            <strong>@GetFriendlyFieldName(change.FieldName)</strong>
+                                            <br />
+                                            <small class="text-muted">@change.FieldName</small>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(change.OldValue))
+                                            {
+                                                <div>
+                                                    @if (!string.IsNullOrEmpty(change.OldValueDisplay))
+                                                    {
+                                                        <strong>@change.OldValueDisplay</strong>
+                                                        <br />
+                                                        <small class="text-muted">ID: @change.OldValue</small>
+                                                    }
+                                                    else
+                                                    {
+                                                        <code>@GetFriendlyValue(change.FieldName, change.OldValue)</code>
+                                                    }
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted fst-italic">boş</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(change.NewValue))
+                                            {
+                                                <div>
+                                                    @if (!string.IsNullOrEmpty(change.NewValueDisplay))
+                                                    {
+                                                        <strong>@change.NewValueDisplay</strong>
+                                                        <br />
+                                                        <small class="text-muted">ID: @change.NewValue</small>
+                                                    }
+                                                    else
+                                                    {
+                                                        <code>@GetFriendlyValue(change.FieldName, change.NewValue)</code>
+                                                    }
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted fst-italic">boş</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Bu işlemde hiçbir alan değişmedi.
+            </div>
+        }
+
+        @* Transaction Grubu (Varsa) *@
+        @if (detail.TransactionId.HasValue && detail.RelatedLogs?.Any() == true)
+        {
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        🔗 Transaction Grubu
+                        <span class="text-muted">#@detail.TransactionId.Value.ToString().Substring(0, 8)</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        Bu log, @detail.RelatedLogs.Count adet diğer log ile aynı transaction içinde gerçekleştirildi.
+                    </p>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tablo</th>
+                                    <th>İşlem</th>
+                                    <th>Tarih/Saat</th>
+                                    <th>Değişen Alanlar</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var relatedLog in detail.RelatedLogs.OrderBy(l => l.IslemZamani))
+                                {
+                                    <tr>
+                                        <td><span class="badge bg-info">@relatedLog.TabloAdi</span></td>
+                                        <td>
+                                            <span class="badge @GetActionBadgeClass(relatedLog.IslemTuru)">
+                                                @relatedLog.IslemTuruText
+                                            </span>
+                                        </td>
+                                        <td><small>@relatedLog.IslemZamaniText</small></td>
+                                        <td>
+                                            @if (relatedLog.ChangedFieldCount.HasValue)
+                                            {
+                                                <small class="text-muted">@relatedLog.ChangedFieldCount alan</small>
+                                            }
+                                            else
+                                            {
+                                                <small class="text-muted">-</small>
+                                            }
+                                        </td>
+                                        <td>
+                                            <a href="/log/detail/@relatedLog.DatabaseLogId" class="btn btn-sm btn-outline-primary">
+                                                Detay
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @* Alt Buton *@
+        <div class="text-center mb-4">
+            <a href="/log" class="btn btn-secondary">← Log Listesine Dön</a>
+        </div>
+    }
+</div>

@@ -64,5 +64,12 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex
         /// <param name="value">Alan değeri (ID)</param>
         /// <returns>Kullanıcı dostu gösterim (örn: "Bilgi İşlem", "Banko #5 (Merkez)")</returns>
         Task<string?> ResolveFieldValueAsync(string fieldName, string? value);
+
+        /// <summary>
+        /// TC Kimlik No'dan Ad Soyad'ı getirir
+        /// </summary>
+        /// <param name="tcKimlikNo">TC Kimlik No</param>
+        /// <returns>Ad Soyad veya null</returns>
+        Task<string?> GetAdSoyadByTcKimlikNoAsync(string? tcKimlikNo);
     }
 }
