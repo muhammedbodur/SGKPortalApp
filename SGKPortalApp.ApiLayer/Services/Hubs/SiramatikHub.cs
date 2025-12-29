@@ -206,59 +206,64 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
             var tcKimlikNo = Context.User?.FindFirst("TcKimlikNo")?.Value;
             ConnectionTabSessions.TryRemove(connectionId, out _);
 
-            // 🔄 Browser kapatıldığında logout kaydını güncelle (sadece son bağlantı kapanırsa)
-            if (!string.IsNullOrEmpty(tcKimlikNo))
-            {
-                try
-                {
-                    // ⚠️ Önemli: Birden fazla tab açıksa hepsi aynı SessionID'yi kullanır
-                    // Son bağlantı kapanana kadar logout kaydetmemeliyiz!
-                    var remainingConnections = await _connectionService.GetActiveConnectionsByTcKimlikNoAsync(tcKimlikNo);
-                    var otherActiveConnections = remainingConnections.Where(c => c.ConnectionId != connectionId).ToList();
-
-                    if (otherActiveConnections.Count == 0)
-                    {
-                        // ✅ Bu son bağlantı, şimdi logout kaydedebiliriz
-                        var user = await _context.Users
-                            .FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo);
-
-                        if (user != null && !string.IsNullOrEmpty(user.SessionID))
-                        {
-                            // Aktif LoginLogoutLog kaydını bul ve LogoutTime güncelle
-                            var loginLog = await _context.LoginLogoutLogs
-                                .Where(l => l.SessionID == user.SessionID && !l.LogoutTime.HasValue)
-                                .OrderByDescending(l => l.LoginTime)
-                                .FirstOrDefaultAsync();
-
-                            if (loginLog != null)
-                            {
-                                loginLog.LogoutTime = DateTime.Now;
-                                await _context.SaveChangesAsync();
-                                _logger.LogInformation("✅ Son tab kapatıldı, logout log kaydı güncellendi - SessionID: {SessionID}", user.SessionID);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        _logger.LogDebug("ℹ️ Tab kapatıldı ama {Count} aktif bağlantı daha var, logout kaydedilmedi - {TcKimlikNo}",
-                            otherActiveConnections.Count, tcKimlikNo);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "❌ OnDisconnectedAsync: Logout log güncellenirken hata - {TcKimlikNo}", tcKimlikNo);
-                }
-            }
-
             try
             {
-                // 1. HubConnection'ı bul
+                // 1. ⚠️ Önce HubConnection'ı bul ve doğrula
                 var hubConnection = await _connectionService.GetByConnectionIdAsync(connectionId);
-                
-                if (hubConnection != null)
+
+                if (hubConnection == null)
                 {
-                    // 2. ConnectionType'a göre temizlik
-                    switch (hubConnection.ConnectionType)
+                    _logger.LogWarning("⚠️ OnDisconnectedAsync: HubConnection bulunamadı - {ConnectionId}", connectionId);
+                    await base.OnDisconnectedAsync(exception);
+                    return;
+                }
+
+                // 2. 🔄 Browser kapatıldığında logout kaydını güncelle (sadece son bağlantı kapanırsa)
+                if (!string.IsNullOrEmpty(tcKimlikNo))
+                {
+                    try
+                    {
+                        // ⚠️ Önemli: Birden fazla tab açıksa hepsi aynı SessionID'yi kullanır
+                        // Son bağlantı kapanana kadar logout kaydetmemeliyiz!
+                        var remainingConnections = await _connectionService.GetActiveConnectionsByTcKimlikNoAsync(tcKimlikNo);
+                        var otherActiveConnections = remainingConnections.Where(c => c.ConnectionId != connectionId).ToList();
+
+                        if (otherActiveConnections.Count == 0)
+                        {
+                            // ✅ Bu son bağlantı, şimdi logout kaydedebiliriz
+                            var user = await _context.Users
+                                .FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo);
+
+                            if (user != null && !string.IsNullOrEmpty(user.SessionID))
+                            {
+                                // Aktif LoginLogoutLog kaydını bul ve LogoutTime güncelle
+                                var loginLog = await _context.LoginLogoutLogs
+                                    .Where(l => l.SessionID == user.SessionID && !l.LogoutTime.HasValue)
+                                    .OrderByDescending(l => l.LoginTime)
+                                    .FirstOrDefaultAsync();
+
+                                if (loginLog != null)
+                                {
+                                    loginLog.LogoutTime = DateTime.Now;
+                                    await _context.SaveChangesAsync();
+                                    _logger.LogInformation("✅ Son tab kapatıldı, logout log kaydı güncellendi - SessionID: {SessionID}", user.SessionID);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogDebug("ℹ️ Tab kapatıldı ama {Count} aktif bağlantı daha var, logout kaydedilmedi - {TcKimlikNo}",
+                                otherActiveConnections.Count, tcKimlikNo);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "❌ OnDisconnectedAsync: Logout log güncellenirken hata - {TcKimlikNo}", tcKimlikNo);
+                    }
+                }
+
+                // 3. ConnectionType'a göre temizlik
+                switch (hubConnection.ConnectionType)
                     {
                         case "BankoMode":
                             // ⚠️ ÖNEMLI: Banko modundan ÇIKMA!
@@ -314,11 +319,10 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
                             // Normal personel bağlantısı koptu
                             _logger.LogInformation($"ℹ️ Personel bağlantısı koptu: {hubConnection.TcKimlikNo}");
                             break;
-                    }
-                    
-                    // 3. Bağlantıyı kapat
-                    await _connectionService.DisconnectAsync(connectionId);
                 }
+
+                // 4. Bağlantıyı kapat
+                await _connectionService.DisconnectAsync(connectionId);
             }
             catch (Exception ex)
             {
