@@ -104,6 +104,12 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Generic
             }
 
             entry.State = EntityState.Modified;
+
+            // ⭐ ÖNEMLI: EklenmeTarihi asla güncellenmemeli (sadece INSERT'te set edilir)
+            if (entity is BaseEntity)
+            {
+                entry.Property(nameof(BaseEntity.EklenmeTarihi)).IsModified = false;
+            }
         }
 
         /// <summary>
@@ -115,6 +121,15 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Generic
                 throw new ArgumentException("Entities cannot be null or empty", nameof(entities));
 
             _dbSet.UpdateRange(entities);
+
+            // ⭐ ÖNEMLI: EklenmeTarihi asla güncellenmemeli
+            foreach (var entity in entities)
+            {
+                if (entity is BaseEntity)
+                {
+                    _context.Entry(entity).Property(nameof(BaseEntity.EklenmeTarihi)).IsModified = false;
+                }
+            }
         }
 
         /// <summary>
