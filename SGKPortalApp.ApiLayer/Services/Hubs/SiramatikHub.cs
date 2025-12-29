@@ -206,28 +206,42 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
             var tcKimlikNo = Context.User?.FindFirst("TcKimlikNo")?.Value;
             ConnectionTabSessions.TryRemove(connectionId, out _);
 
-            // 🔄 Browser kapatıldığında logout kaydını güncelle
+            // 🔄 Browser kapatıldığında logout kaydını güncelle (sadece son bağlantı kapanırsa)
             if (!string.IsNullOrEmpty(tcKimlikNo))
             {
                 try
                 {
-                    var user = await _context.Users
-                        .FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo);
+                    // ⚠️ Önemli: Birden fazla tab açıksa hepsi aynı SessionID'yi kullanır
+                    // Son bağlantı kapanana kadar logout kaydetmemeliyiz!
+                    var remainingConnections = await _connectionService.GetActiveConnectionsByTcKimlikNoAsync(tcKimlikNo);
+                    var otherActiveConnections = remainingConnections.Where(c => c.ConnectionId != connectionId).ToList();
 
-                    if (user != null && !string.IsNullOrEmpty(user.SessionID))
+                    if (otherActiveConnections.Count == 0)
                     {
-                        // Aktif LoginLogoutLog kaydını bul ve LogoutTime güncelle
-                        var loginLog = await _context.LoginLogoutLogs
-                            .Where(l => l.SessionID == user.SessionID && !l.LogoutTime.HasValue)
-                            .OrderByDescending(l => l.LoginTime)
-                            .FirstOrDefaultAsync();
+                        // ✅ Bu son bağlantı, şimdi logout kaydedebiliriz
+                        var user = await _context.Users
+                            .FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo);
 
-                        if (loginLog != null)
+                        if (user != null && !string.IsNullOrEmpty(user.SessionID))
                         {
-                            loginLog.LogoutTime = DateTime.Now;
-                            await _context.SaveChangesAsync();
-                            _logger.LogInformation("✅ Browser kapatıldı, logout log kaydı güncellendi - SessionID: {SessionID}", user.SessionID);
+                            // Aktif LoginLogoutLog kaydını bul ve LogoutTime güncelle
+                            var loginLog = await _context.LoginLogoutLogs
+                                .Where(l => l.SessionID == user.SessionID && !l.LogoutTime.HasValue)
+                                .OrderByDescending(l => l.LoginTime)
+                                .FirstOrDefaultAsync();
+
+                            if (loginLog != null)
+                            {
+                                loginLog.LogoutTime = DateTime.Now;
+                                await _context.SaveChangesAsync();
+                                _logger.LogInformation("✅ Son tab kapatıldı, logout log kaydı güncellendi - SessionID: {SessionID}", user.SessionID);
+                            }
                         }
+                    }
+                    else
+                    {
+                        _logger.LogDebug("ℹ️ Tab kapatıldı ama {Count} aktif bağlantı daha var, logout kaydedilmedi - {TcKimlikNo}",
+                            otherActiveConnections.Count, tcKimlikNo);
                     }
                 }
                 catch (Exception ex)
