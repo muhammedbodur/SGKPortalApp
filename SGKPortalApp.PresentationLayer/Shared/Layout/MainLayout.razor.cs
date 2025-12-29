@@ -74,8 +74,13 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                     // NOT: Banko modu senkronizasyonu API üzerinden yapılacak
                 }
 
-                // 2. İlk session kontrolü
-                await CheckSessionValidityThrottledAsync();
+                // 2. İlk session kontrolü - Login sonrası ilk yüklemede atla (cookie henüz güncel değil olabilir)
+                // Session kontrolü sadece navigation sırasında yapılacak (OnLocationChanged)
+                // ⚠️ Timer'ı başlat: 30 saniye sonra ilk kontrol yapılacak
+                _lastSessionCheck = DateTime.UtcNow;
+                Logger.LogDebug("ℹ️ İlk yüklemede session kontrolü atlandı (login sonrası cookie güncellenme süresi için)");
+                Logger.LogDebug("ℹ️ Session kontrolü {Seconds} saniye sonra yapılacak", _sessionCheckInterval.TotalSeconds);
+                // await CheckSessionValidityThrottledAsync(); // REMOVED: İlk yüklemede session kontrolü yapma
 
                 // 2.5 Route-based permission kontrolü
                 await CheckPagePermissionAsync();
