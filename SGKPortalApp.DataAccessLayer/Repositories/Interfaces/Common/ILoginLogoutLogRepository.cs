@@ -2,6 +2,7 @@
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common
@@ -31,5 +32,16 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common
         // İstatistik
         Task<int> GetDailyLoginCountAsync(DateTime date);
         Task<int> GetActiveUserCountAsync();
+
+        // Filtreleme ve sayfalama
+        Task<(IEnumerable<LoginLogoutLog> Logs, int TotalCount)> GetFilteredLogsAsync(
+            string? searchText,
+            DateTime? startDate,
+            DateTime? endDate,
+            bool? onlyActiveSession,
+            bool? onlyFailedLogins,
+            string? ipAddress,
+            int pageNumber,
+            int pageSize);
     }
 }
