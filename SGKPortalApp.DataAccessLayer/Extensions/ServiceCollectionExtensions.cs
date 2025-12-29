@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
+using SGKPortalApp.DataAccessLayer.Services.Database;
+using SGKPortalApp.DataAccessLayer.Services.Interfaces;
 using System.Reflection;
 
 namespace SGKPortalApp.DataAccessLayer.Extensions
@@ -36,6 +38,10 @@ namespace SGKPortalApp.DataAccessLayer.Extensions
             // UnitOfWork Pattern
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             Console.WriteLine("  ✅ IUnitOfWork → UnitOfWork");
+
+            // Database Migration Service
+            services.AddScoped<IDatabaseMigrationService, DatabaseMigrationService>();
+            Console.WriteLine("  ✅ IDatabaseMigrationService → DatabaseMigrationService");
 
             // Tüm repository interface ve implementation'larını otomatik kaydet
             RegisterRepositories(services);

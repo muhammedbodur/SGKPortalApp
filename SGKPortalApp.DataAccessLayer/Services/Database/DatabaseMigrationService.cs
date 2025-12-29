@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using SGKPortalApp.BusinessLogicLayer.Interfaces.Database;
 using SGKPortalApp.DataAccessLayer.Context;
+using SGKPortalApp.DataAccessLayer.Services.Interfaces;
 
-namespace SGKPortalApp.BusinessLogicLayer.Services.Database
+namespace SGKPortalApp.DataAccessLayer.Services.Database
 {
     /// <summary>
     /// Database Migration yönetimi servisi
@@ -28,7 +28,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Database
             try
             {
                 var pendingMigrations = await _context.Database.GetPendingMigrationsAsync();
-                
+
                 if (pendingMigrations.Any())
                 {
                     _logger.LogInformation("📊 Bekleyen migration'lar uygulanıyor...");
