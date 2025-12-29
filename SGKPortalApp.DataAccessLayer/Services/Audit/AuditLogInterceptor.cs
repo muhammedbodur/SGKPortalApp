@@ -322,32 +322,60 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
 
         /// <summary>
         /// Değişen field'ları virgülle ayrılmış string olarak döner
-        /// SADECE gerçekten değişen alanları döndürür (OriginalValue != CurrentValue)
+        /// Kritik Kural: Before veya After değerlerinden en az biri null olmamalı
         /// </summary>
         private string? GetChangedFields(Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry entry)
         {
-            if (entry.State == EntityState.Added || entry.State == EntityState.Deleted)
-                return null;
+            var changedFields = new List<string>();
 
-            var changedFields = entry.Properties
-                .Where(p => !p.Metadata.IsShadowProperty() && p.IsModified)
-                .Where(p =>
-                {
-                    // OriginalValue ve CurrentValue'yu karşılaştır
-                    var originalValue = p.OriginalValue;
-                    var currentValue = p.CurrentValue;
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    // INSERT: CurrentValue null olmayan alanlar
+                    changedFields = entry.Properties
+                        .Where(p => !p.Metadata.IsShadowProperty())
+                        .Where(p => p.CurrentValue != null)  // ⭐ Sadece dolu alanlar
+                        .Select(p => p.Metadata.Name)
+                        .ToList();
+                    break;
 
-                    // Null kontrolü
-                    if (originalValue == null && currentValue == null)
-                        return false;
-                    if (originalValue == null || currentValue == null)
-                        return true;
+                case EntityState.Deleted:
+                    // DELETE: OriginalValue null olmayan alanlar
+                    changedFields = entry.Properties
+                        .Where(p => !p.Metadata.IsShadowProperty())
+                        .Where(p => p.OriginalValue != null)  // ⭐ Sadece silinirken dolu olanlar
+                        .Select(p => p.Metadata.Name)
+                        .ToList();
+                    break;
 
-                    // Değer karşılaştırması
-                    return !originalValue.Equals(currentValue);
-                })
-                .Select(p => p.Metadata.Name)
-                .ToList();
+                case EntityState.Modified:
+                    // UPDATE: Gerçekten değişen alanlar (Before != After VE en az biri null değil)
+                    changedFields = entry.Properties
+                        .Where(p => !p.Metadata.IsShadowProperty())
+                        .Where(p => p.IsModified)
+                        .Where(p =>
+                        {
+                            var originalValue = p.OriginalValue;
+                            var currentValue = p.CurrentValue;
+
+                            // ⭐ İKİSİ DE NULL: Değişiklik yok
+                            if (originalValue == null && currentValue == null)
+                                return false;
+
+                            // ⭐ BİRİ NULL, DİĞERİ DOLU: Değişiklik var
+                            if (originalValue == null || currentValue == null)
+                                return true;
+
+                            // ⭐ İKİSİ DE DOLU: Değer karşılaştır
+                            return !originalValue.Equals(currentValue);
+                        })
+                        .Select(p => p.Metadata.Name)
+                        .ToList();
+                    break;
+
+                default:
+                    return null;
+            }
 
             return changedFields.Any() ? string.Join(",", changedFields) : null;
         }
