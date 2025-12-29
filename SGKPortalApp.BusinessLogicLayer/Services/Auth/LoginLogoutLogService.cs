@@ -2,13 +2,10 @@ using AutoMapper;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
-using SGKPortalApp.DataAccessLayer.UnitOfWork;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
 {

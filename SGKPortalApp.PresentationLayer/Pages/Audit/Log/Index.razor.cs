@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SGKPortalApp.PresentationLayer.Pages.Log
+namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
 {
     public partial class Index : FieldPermissionPageBase
     {

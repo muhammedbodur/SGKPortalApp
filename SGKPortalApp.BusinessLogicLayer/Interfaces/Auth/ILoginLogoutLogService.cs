@@ -1,6 +1,7 @@
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using System.Threading.Tasks;
 
 namespace SGKPortalApp.BusinessLogicLayer.Interfaces.Auth
