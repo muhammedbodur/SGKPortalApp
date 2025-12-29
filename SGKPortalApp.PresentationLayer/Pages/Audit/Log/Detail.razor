@@ -17,7 +17,7 @@
         <div class="alert alert-danger">
             <i class="bi bi-exclamation-triangle"></i> Log bulunamadı.
         </div>
-        <a href="/log" class="btn btn-secondary">← Geri Dön</a>
+        <a href="/audit/log" class="btn btn-secondary">← Geri Dön</a>
     }
     else
     {
@@ -29,7 +29,7 @@
                         <h3>📋 Log Detayı</h3>
                         <p class="text-muted mb-0">Log ID: #@LogId</p>
                     </div>
-                    <a href="/log" class="btn btn-secondary">← Geri Dön</a>
+                    <a href="/audit/log" class="btn btn-secondary">← Geri Dön</a>
                 </div>
             </div>
         </div>
@@ -245,7 +245,7 @@
                                             }
                                         </td>
                                         <td>
-                                            <a href="/log/detail/@relatedLog.DatabaseLogId" class="btn btn-sm btn-outline-primary">
+                                            <a href="audit/log/detail/@relatedLog.DatabaseLogId" class="btn btn-sm btn-outline-primary">
                                                 Detay
                                             </a>
                                         </td>
@@ -260,7 +260,7 @@
 
         @* Alt Buton *@
         <div class="text-center mb-4">
-            <a href="/log" class="btn btn-secondary">← Log Listesine Dön</a>
+            <a href="/audit/log" class="btn btn-secondary">← Log Listesine Dön</a>
         </div>
     }
 </div>
