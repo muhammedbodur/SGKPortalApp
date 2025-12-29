@@ -50,7 +50,18 @@
                                 </tr>
                                 <tr>
                                     <th>İşlemi Yapan:</th>
-                                    <td><code>@detail.TcKimlikNo</code></td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(detail.PerformedByAdSoyad))
+                                        {
+                                            <strong>@detail.PerformedByAdSoyad</strong>
+                                            <br />
+                                            <small class="text-muted">TC: @detail.TcKimlikNo</small>
+                                        }
+                                        else
+                                        {
+                                            <code>@detail.TcKimlikNo</code>
+                                        }
+                                    </td>
                                 </tr>
                                 @if (!string.IsNullOrEmpty(detail.TargetPersonTcKimlikNo))
                                 {

@@ -122,7 +122,9 @@ else
                         @* Sayfa Başına Kayıt *@
                         <div class="col-md-2">
                             <label class="form-label">Sayfa Başına</label>
-                            <select class="form-select" @bind="Filter.PageSize">
+                            <select class="form-select"
+                                    @onchange="OnPageSizeChangedEvent"
+                                    value="@Filter.PageSize">
                                 <option value="10">10</option>
                                 <option value="25">25</option>
                                 <option value="50">50</option>
@@ -210,22 +212,32 @@ else
                                     <span class="badge bg-info">@groupLogs.Count değişiklik</span>
                                 }
                             </div>
-                            <small class="text-muted">
-                                <i class="bx bx-user me-1"></i>TC: @firstLog.TcKimlikNo
+                            <div class="d-flex align-items-center gap-3">
+                                <small class="text-muted">
+                                    <i class="bx bx-user me-1"></i>
+                                    @if (!string.IsNullOrEmpty(firstLog.PerformedByAdSoyad))
+                                    {
+                                        <strong>@firstLog.PerformedByAdSoyad</strong>
+                                        <span class="ms-1">(@firstLog.TcKimlikNo)</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@firstLog.TcKimlikNo</span>
+                                    }
+                                </small>
+                                <small class="text-muted">
+                                    <i class="bx bx-globe me-1"></i>@(firstLog.IpAddress ?? "-")
+                                </small>
                                 @if (group.TransactionId.HasValue)
                                 {
-                                    <span class="ms-2">
+                                    <small class="text-muted">
                                         <i class="bx bx-link me-1"></i>
                                         Transaction: #@group.TransactionId.Value.ToString().Substring(0, 8)
-                                    </span>
+                                    </small>
                                 }
-                            </small>
+                            </div>
                         </div>
                         <div>
-                            <small class="text-muted">
-                                <i class="bx bx-globe me-1"></i>@(firstLog.IpAddress ?? "-")
-                            </small>
-                        </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -233,19 +245,22 @@ else
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width: 180px">
-                                        <i class="bx bx-time-five me-1"></i>Tarih/Saat
+                                    <th style="width: 100px">
+                                        <i class="bx bx-time-five me-1"></i>Saat
                                     </th>
-                                    <th style="width: 200px">
+                                    <th style="width: 180px">
                                         <i class="bx bx-data me-1"></i>Tablo
                                     </th>
-                                    <th style="width: 120px">
+                                    <th style="width: 100px">
                                         <i class="bx bx-transfer me-1"></i>İşlem
                                     </th>
                                     <th style="width: 180px">
-                                        <i class="bx bx-user me-1"></i>İşlem Yapılan
+                                        <i class="bx bx-user-circle me-1"></i>İşlemi Yapan
                                     </th>
-                                    <th>
+                                    <th style="width: 180px">
+                                        <i class="bx bx-user-check me-1"></i>İşlem Yapılan
+                                    </th>
+                                    <th style="width: 120px">
                                         <i class="bx bx-edit me-1"></i>Değişiklik
                                     </th>
                                     <th style="width: 100px" class="text-center">İşlemler</th>
@@ -271,12 +286,22 @@ else
                                             </span>
                                         </td>
                                         <td>
+                                            @if (!string.IsNullOrEmpty(log.PerformedByAdSoyad))
+                                            {
+                                                <div>
+                                                    <strong>@log.PerformedByAdSoyad</strong>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <small class="text-muted">@log.TcKimlikNo</small>
+                                            }
+                                        </td>
+                                        <td>
                                             @if (!string.IsNullOrEmpty(log.TargetPersonAdSoyad))
                                             {
                                                 <div>
                                                     <strong>@log.TargetPersonAdSoyad</strong>
-                                                    <br />
-                                                    <small class="text-muted">TC: @log.TargetPersonTcKimlikNo</small>
                                                 </div>
                                             }
                                             else if (!string.IsNullOrEmpty(log.TargetEntityInfo))
