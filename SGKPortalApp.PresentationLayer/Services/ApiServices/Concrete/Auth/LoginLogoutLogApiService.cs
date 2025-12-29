@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Auth;
 using System;
 using System.Net.Http;
