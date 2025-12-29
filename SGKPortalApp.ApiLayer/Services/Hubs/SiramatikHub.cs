@@ -1,11 +1,10 @@
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.ApiLayer.Services.Hubs.Base;
 using SGKPortalApp.ApiLayer.Services.Hubs.Constants;
 using SGKPortalApp.ApiLayer.Services.Hubs.Interfaces;
 using SGKPortalApp.ApiLayer.Services.State;
-using SGKPortalApp.DataAccessLayer.Context;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -22,7 +21,7 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
         private readonly IHubConnectionService _connectionService;
         private readonly IBankoModeService _bankoModeService;
         private readonly BankoModeStateService _stateService;
-        private readonly SGKDbContext _context;
+        private readonly ILoginLogoutLogService _loginLogoutLogService;
         private static readonly ConcurrentDictionary<string, string> ConnectionTabSessions = new();
         private static readonly ConcurrentDictionary<string, string> PersonelBankoTabSessions = new();
 
@@ -31,12 +30,12 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
             IHubConnectionService connectionService,
             IBankoModeService bankoModeService,
             BankoModeStateService stateService,
-            SGKDbContext context) : base(logger)
+            ILoginLogoutLogService loginLogoutLogService) : base(logger)
         {
             _connectionService = connectionService;
             _bankoModeService = bankoModeService;
             _stateService = stateService;
-            _context = context;
+            _loginLogoutLogService = loginLogoutLogService;
         }
 
         #region Connection Management
@@ -231,22 +230,18 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
                         if (otherActiveConnections.Count == 0)
                         {
                             // ✅ Bu son bağlantı, şimdi logout kaydedebiliriz
-                            var user = await _context.Users
-                                .FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo);
-
-                            if (user != null && !string.IsNullOrEmpty(user.SessionID))
+                            if (hubConnection.User != null && !string.IsNullOrEmpty(hubConnection.User.SessionID))
                             {
-                                // Aktif LoginLogoutLog kaydını bul ve LogoutTime güncelle
-                                var loginLog = await _context.LoginLogoutLogs
-                                    .Where(l => l.SessionID == user.SessionID && !l.LogoutTime.HasValue)
-                                    .OrderByDescending(l => l.LoginTime)
-                                    .FirstOrDefaultAsync();
+                                var sessionId = hubConnection.User.SessionID;
+                                var result = await _loginLogoutLogService.UpdateLogoutTimeBySessionIdAsync(sessionId);
 
-                                if (loginLog != null)
+                                if (result.Success && result.Data)
                                 {
-                                    loginLog.LogoutTime = DateTime.Now;
-                                    await _context.SaveChangesAsync();
-                                    _logger.LogInformation("✅ Son tab kapatıldı, logout log kaydı güncellendi - SessionID: {SessionID}", user.SessionID);
+                                    _logger.LogInformation("✅ Son tab kapatıldı, logout log kaydı güncellendi - SessionID: {SessionID}", sessionId);
+                                }
+                                else
+                                {
+                                    _logger.LogWarning("⚠️ Logout log güncellenemedi - SessionID: {SessionID}", sessionId);
                                 }
                             }
                         }

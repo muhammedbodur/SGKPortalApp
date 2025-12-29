@@ -43,5 +43,14 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common
             string? ipAddress,
             int pageNumber,
             int pageSize);
+
+        // SessionID bazında işlemler
+        Task<LoginLogoutLog?> GetActiveSessionBySessionIdAsync(string sessionId);
+        Task<bool> UpdateLogoutTimeBySessionIdAsync(string sessionId, DateTime logoutTime);
+
+        // Cleanup işlemleri (Background Service için)
+        Task<IEnumerable<LoginLogoutLog>> GetOrphanSessionsAsync(DateTime timeoutThreshold);
+        Task<IEnumerable<LoginLogoutLog>> GetDisconnectedButNotLoggedOutSessionsAsync(DateTime timeoutThreshold, IEnumerable<string> activeSessionIds);
+        Task<int> UpdateOrphanSessionsLogoutTimeAsync(DateTime timeoutThreshold, DateTime logoutTime);
     }
 }

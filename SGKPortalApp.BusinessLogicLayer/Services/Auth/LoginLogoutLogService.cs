@@ -109,5 +109,129 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                 return ApiResponseDto<int>.ErrorResult("Bugünkü login sayısı getirilirken bir hata oluştu");
             }
         }
+
+        public async Task<ApiResponseDto<bool>> UpdateLogoutTimeBySessionIdAsync(string sessionId)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(sessionId))
+                    return ApiResponseDto<bool>.ErrorResult("SessionId boş olamaz");
+
+                var loginLogoutRepo = _unitOfWork.GetRepository<ILoginLogoutLogRepository>();
+                var result = await loginLogoutRepo.UpdateLogoutTimeBySessionIdAsync(sessionId, DateTime.Now);
+
+                if (result)
+                {
+                    await _unitOfWork.SaveChangesAsync();
+                    _logger.LogInformation("✅ Logout time güncellendi - SessionID: {SessionId}", sessionId);
+                }
+                else
+                {
+                    _logger.LogWarning("⚠️ SessionID ile aktif login log bulunamadı - SessionID: {SessionId}", sessionId);
+                }
+
+                return ApiResponseDto<bool>.SuccessResult(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Logout time güncellenirken hata - SessionID: {SessionId}", sessionId);
+                return ApiResponseDto<bool>.ErrorResult("Logout time güncellenirken bir hata oluştu");
+            }
+        }
+
+        public async Task<ApiResponseDto<bool>> UpdateLogoutTimeByTcKimlikNoAsync(string tcKimlikNo)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(tcKimlikNo))
+                    return ApiResponseDto<bool>.ErrorResult("TcKimlikNo boş olamaz");
+
+                // User'dan SessionID'yi al
+                var userRepo = _unitOfWork.GetRepository<IUserRepository>();
+                var user = await userRepo.GetByTcKimlikNoAsync(tcKimlikNo);
+
+                if (user == null || string.IsNullOrWhiteSpace(user.SessionID))
+                {
+                    _logger.LogWarning("⚠️ User veya SessionID bulunamadı - TcKimlikNo: {TcKimlikNo}", tcKimlikNo);
+                    return ApiResponseDto<bool>.SuccessResult(false);
+                }
+
+                // LoginLogoutLog güncelle
+                var loginLogoutRepo = _unitOfWork.GetRepository<ILoginLogoutLogRepository>();
+                var result = await loginLogoutRepo.UpdateLogoutTimeBySessionIdAsync(user.SessionID, DateTime.Now);
+
+                if (result)
+                {
+                    await _unitOfWork.SaveChangesAsync();
+                    _logger.LogInformation("✅ Logout time güncellendi - TcKimlikNo: {TcKimlikNo}, SessionID: {SessionID}",
+                        tcKimlikNo, user.SessionID);
+                }
+                else
+                {
+                    _logger.LogWarning("⚠️ SessionID ile aktif login log bulunamadı - SessionID: {SessionID}", user.SessionID);
+                }
+
+                return ApiResponseDto<bool>.SuccessResult(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Logout time güncellenirken hata - TcKimlikNo: {TcKimlikNo}", tcKimlikNo);
+                return ApiResponseDto<bool>.ErrorResult("Logout time güncellenirken bir hata oluştu");
+            }
+        }
+
+        public async Task<ApiResponseDto<int>> CleanupOrphanSessionsAsync()
+        {
+            try
+            {
+                var loginLogoutRepo = _unitOfWork.GetRepository<ILoginLogoutLogRepository>();
+                var hubConnectionRepo = _unitOfWork.GetRepository<IHubConnectionRepository>();
+
+                var sessionTimeout = TimeSpan.FromHours(8);
+                var hubConnectionTimeout = TimeSpan.FromMinutes(15);
+                var now = DateTime.Now;
+
+                int totalCleaned = 0;
+
+                // 1️⃣ Orphan LoginLogoutLog kayıtlarını temizle (LogoutTime null ve çok eski)
+                var sessionTimeoutThreshold = now.Subtract(sessionTimeout);
+                var orphanCount = await loginLogoutRepo.UpdateOrphanSessionsLogoutTimeAsync(
+                    sessionTimeoutThreshold,
+                    sessionTimeoutThreshold.Add(sessionTimeout)); // LoginTime + 8 saat
+
+                totalCleaned += orphanCount;
+                _logger.LogInformation("🧹 {Count} orphan session temizlendi", orphanCount);
+
+                // 2️⃣ Stale HubConnection kayıtlarını pasifleştir
+                var hubTimeoutThreshold = now.Subtract(hubConnectionTimeout);
+                var staleCount = await hubConnectionRepo.DeactivateStaleConnectionsAsync(hubTimeoutThreshold);
+                totalCleaned += staleCount;
+                _logger.LogInformation("🧹 {Count} stale hub connection pasifleştirildi", staleCount);
+
+                // 3️⃣ Disconnected-but-not-logged-out sessions
+                var activeSessionIds = await hubConnectionRepo.GetActiveSessionIdsAsync();
+                var disconnectedSessions = await loginLogoutRepo.GetDisconnectedButNotLoggedOutSessionsAsync(
+                    hubTimeoutThreshold,
+                    activeSessionIds);
+
+                foreach (var session in disconnectedSessions)
+                {
+                    session.LogoutTime = now;
+                    totalCleaned++;
+                }
+
+                _logger.LogInformation("🧹 {Count} disconnected-but-not-logged-out session temizlendi", disconnectedSessions.Count());
+
+                await _unitOfWork.SaveChangesAsync();
+                _logger.LogInformation("✅ Toplam {Count} kayıt temizlendi", totalCleaned);
+
+                return ApiResponseDto<int>.SuccessResult(totalCleaned);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Orphan session cleanup hatası");
+                return ApiResponseDto<int>.ErrorResult("Cleanup işlemi sırasında hata oluştu");
+            }
+        }
     }
 }

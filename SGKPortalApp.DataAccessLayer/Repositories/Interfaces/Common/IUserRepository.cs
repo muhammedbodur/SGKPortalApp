@@ -9,6 +9,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common
     {
         // Authentication
         Task<User?> GetByTcKimlikNoAsync(string tcKimlikNo);
+        Task<User?> GetBySessionIdAsync(string sessionId);
 
         // Kullanıcı durumu
         Task<IEnumerable<User>> GetActiveUsersAsync();

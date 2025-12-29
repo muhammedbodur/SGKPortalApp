@@ -166,5 +166,70 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
 
             return (logs, totalCount);
         }
+
+        public async Task<LoginLogoutLog?> GetActiveSessionBySessionIdAsync(string sessionId)
+        {
+            if (string.IsNullOrWhiteSpace(sessionId))
+                return null;
+
+            return await _dbSet
+                .Where(l => l.SessionID == sessionId && !l.LogoutTime.HasValue)
+                .OrderByDescending(l => l.LoginTime)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> UpdateLogoutTimeBySessionIdAsync(string sessionId, DateTime logoutTime)
+        {
+            if (string.IsNullOrWhiteSpace(sessionId))
+                return false;
+
+            var loginLog = await _dbSet
+                .Where(l => l.SessionID == sessionId && !l.LogoutTime.HasValue)
+                .OrderByDescending(l => l.LoginTime)
+                .FirstOrDefaultAsync();
+
+            if (loginLog != null)
+            {
+                loginLog.LogoutTime = logoutTime;
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<IEnumerable<LoginLogoutLog>> GetOrphanSessionsAsync(DateTime timeoutThreshold)
+        {
+            return await _dbSet
+                .Where(l => !l.LogoutTime.HasValue && l.LoginTime < timeoutThreshold)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<LoginLogoutLog>> GetDisconnectedButNotLoggedOutSessionsAsync(
+            DateTime timeoutThreshold,
+            IEnumerable<string> activeSessionIds)
+        {
+            var activeSessionIdList = activeSessionIds.ToList();
+
+            return await _dbSet
+                .Where(l => !l.LogoutTime.HasValue
+                    && l.SessionID != null
+                    && !activeSessionIdList.Contains(l.SessionID)
+                    && l.LoginTime < timeoutThreshold)
+                .ToListAsync();
+        }
+
+        public async Task<int> UpdateOrphanSessionsLogoutTimeAsync(DateTime timeoutThreshold, DateTime logoutTime)
+        {
+            var orphanSessions = await _dbSet
+                .Where(l => !l.LogoutTime.HasValue && l.LoginTime < timeoutThreshold)
+                .ToListAsync();
+
+            foreach (var session in orphanSessions)
+            {
+                session.LogoutTime = logoutTime;
+            }
+
+            return orphanSessions.Count;
+        }
     }
 }

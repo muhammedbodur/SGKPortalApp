@@ -101,5 +101,40 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
                 )
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<HubConnection>> GetStaleConnectionsAsync(System.DateTime timeoutThreshold)
+        {
+            return await _dbSet
+                .Where(h => h.AktifMi && h.ConnectedAt < timeoutThreshold)
+                .ToListAsync();
+        }
+
+        public async Task<int> DeactivateStaleConnectionsAsync(System.DateTime timeoutThreshold)
+        {
+            var staleConnections = await _dbSet
+                .Where(h => h.AktifMi && h.ConnectedAt < timeoutThreshold)
+                .ToListAsync();
+
+            foreach (var connection in staleConnections)
+            {
+                connection.AktifMi = false;
+                connection.DisconnectedAt = System.DateTime.Now;
+            }
+
+            return staleConnections.Count;
+        }
+
+        public async Task<IEnumerable<string>> GetActiveSessionIdsAsync()
+        {
+            return await _dbSet
+                .Where(h => h.AktifMi)
+                .Join(_context.Users,
+                    h => h.TcKimlikNo,
+                    u => u.TcKimlikNo,
+                    (h, u) => u.SessionID)
+                .Where(sessionId => !string.IsNullOrEmpty(sessionId))
+                .Distinct()
+                .ToListAsync();
+        }
     }
 }

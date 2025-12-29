@@ -24,7 +24,23 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
             return await _dbSet
                 .AsNoTracking()
                 .Include(u => u.Personel)
+                    .ThenInclude(p => p.Departman)
+                .Include(u => u.Personel)
+                    .ThenInclude(p => p.Servis)
+                .Include(u => u.Personel)
+                    .ThenInclude(p => p.HizmetBinasi)
                 .FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo && !u.SilindiMi);
+        }
+
+        public async Task<User?> GetBySessionIdAsync(string sessionId)
+        {
+            if (string.IsNullOrWhiteSpace(sessionId))
+                return null;
+
+            return await _dbSet
+                .AsNoTracking()
+                .Include(u => u.Personel)
+                .FirstOrDefaultAsync(u => u.SessionID == sessionId && !u.SilindiMi);
         }
 
         public async Task<IEnumerable<User>> GetActiveUsersAsync()

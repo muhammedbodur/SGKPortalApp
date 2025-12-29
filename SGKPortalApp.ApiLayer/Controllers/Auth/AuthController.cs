@@ -1,13 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.ApiLayer.Services.Hubs;
 using SGKPortalApp.ApiLayer.Services.Hubs.Constants;
 using SGKPortalApp.ApiLayer.Services.Hubs.Interfaces;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
-using SGKPortalApp.DataAccessLayer.Context;
 
 namespace SGKPortalApp.ApiLayer.Controllers.Auth
 {
@@ -20,7 +18,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
         private readonly IHubConnectionService _hubConnectionService;
         private readonly IHubContext<SiramatikHub> _hubContext;
         private readonly ILogger<AuthController> _logger;
-        private readonly SGKDbContext _context;
+        private readonly ILoginLogoutLogService _loginLogoutLogService;
 
         public AuthController(
             IAuthService authService,
@@ -28,14 +26,14 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
             IHubConnectionService hubConnectionService,
             IHubContext<SiramatikHub> hubContext,
             ILogger<AuthController> logger,
-            SGKDbContext context)
+            ILoginLogoutLogService loginLogoutLogService)
         {
             _authService = authService;
             _bankoModeService = bankoModeService;
             _hubConnectionService = hubConnectionService;
             _hubContext = hubContext;
             _logger = logger;
-            _context = context;
+            _loginLogoutLogService = loginLogoutLogService;
         }
 
         /// <summary>
@@ -133,24 +131,11 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
                 {
                     _logger.LogInformation("🔄 Logout: {TcKimlikNo} çıkış yapıyor...", tcKimlikNo);
 
-                    // SessionID'yi User'dan çek
-                    var user = await _context.Users
-                        .FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo);
-
-                    if (user != null && !string.IsNullOrEmpty(user.SessionID))
+                    // LoginLogoutLog kaydını güncelle
+                    var result = await _loginLogoutLogService.UpdateLogoutTimeByTcKimlikNoAsync(tcKimlikNo);
+                    if (result.Success && result.Data)
                     {
-                        // LoginLogoutLog kaydını bul ve LogoutTime'ı güncelle
-                        var loginLog = await _context.LoginLogoutLogs
-                            .Where(l => l.SessionID == user.SessionID && !l.LogoutTime.HasValue)
-                            .OrderByDescending(l => l.LoginTime)
-                            .FirstOrDefaultAsync();
-
-                        if (loginLog != null)
-                        {
-                            loginLog.LogoutTime = DateTime.Now;
-                            await _context.SaveChangesAsync();
-                            _logger.LogInformation("✅ Logout log kaydı güncellendi - SessionID: {SessionID}", user.SessionID);
-                        }
+                        _logger.LogInformation("✅ Logout log kaydı güncellendi - TcKimlikNo: {TcKimlikNo}", tcKimlikNo);
                     }
 
                     // Banko modundan çık (flag temizle)

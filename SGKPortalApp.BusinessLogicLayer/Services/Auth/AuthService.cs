@@ -1,12 +1,12 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
-using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
 {
@@ -15,18 +15,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
     /// </summary>
     public class AuthService : IAuthService
     {
-        private readonly SGKDbContext _context;
         private readonly ILogger<AuthService> _logger;
         private readonly IPersonelYetkiService _personelYetkiService;
         private readonly IUnitOfWork _unitOfWork;
 
         public AuthService(
-            SGKDbContext context,
             ILogger<AuthService> logger,
             IPersonelYetkiService personelYetkiService,
             IUnitOfWork unitOfWork)
         {
-            _context = context;
             _logger = logger;
             _personelYetkiService = personelYetkiService;
             _unitOfWork = unitOfWork;
@@ -37,14 +34,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
             try
             {
                 // 🆕 User tablosundan kullanıcıyı bul (Personel ile birlikte - opsiyonel)
-                var user = await _context.Users
-                    .Include(u => u.Personel)
-                        .ThenInclude(p => p.Departman)
-                    .Include(u => u.Personel)
-                        .ThenInclude(p => p.Servis)
-                    .Include(u => u.Personel)
-                        .ThenInclude(p => p.HizmetBinasi)
-                    .FirstOrDefaultAsync(u => u.TcKimlikNo == request.TcKimlikNo);
+                var userRepo = _unitOfWork.GetRepository<IUserRepository>();
+                var user = await userRepo.GetByTcKimlikNoAsync(request.TcKimlikNo);
 
                 if (user == null)
                 {
@@ -104,7 +95,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                     {
                         user.HesapKilitTarihi = DateTime.Now;
                         user.AktifMi = false;
-                        await _context.SaveChangesAsync();
+                        await _unitOfWork.SaveChangesAsync();
 
                         _logger.LogWarning("Hesap kilitlendi (5 başarısız deneme) - {TcKimlikNo}", request.TcKimlikNo);
 
@@ -119,7 +110,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                         };
                     }
 
-                    await _context.SaveChangesAsync();
+                    await _unitOfWork.SaveChangesAsync();
 
                     _logger.LogWarning("Login başarısız: Hatalı şifre ({Deneme}/5) - {TcKimlikNo}",
                         user.BasarisizGirisSayisi, request.TcKimlikNo);
@@ -152,7 +143,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                     _logger.LogInformation("✅ Orphan banko mode flag temizlendi: {TcKimlikNo}", user.TcKimlikNo);
                 }
 
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 // 🔥 Eski oturum varsa loglayalım (farklı cihazdan login uyarısı için)
                 if (!string.IsNullOrEmpty(oldSessionId) && oldSessionId != sessionId)
@@ -235,12 +226,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
             try
             {
                 // 4 alan ile kullanıcıyı doğrula
-                var personel = await _context.Personeller
-                    .FirstOrDefaultAsync(p =>
-                        p.TcKimlikNo == request.TcKimlikNo &&
-                        p.SicilNo == request.SicilNo &&
-                        p.DogumTarihi.Date == request.DogumTarihi.Date &&
-                        p.Email.ToLower() == request.Email.ToLower());
+                var personelRepo = _unitOfWork.Repository<Personel>();
+                var allPersonel = await personelRepo.GetAllAsync();
+                var personel = allPersonel.FirstOrDefault(p =>
+                    p.TcKimlikNo == request.TcKimlikNo &&
+                    p.SicilNo == request.SicilNo &&
+                    p.DogumTarihi.Date == request.DogumTarihi.Date &&
+                    p.Email != null && p.Email.ToLower() == request.Email.ToLower());
 
                 if (personel == null)
                 {
@@ -277,8 +269,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
         {
             try
             {
-                var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.TcKimlikNo == request.TcKimlikNo);
+                var userRepo = _unitOfWork.GetRepository<IUserRepository>();
+                var user = await userRepo.GetByTcKimlikNoAsync(request.TcKimlikNo);
 
                 if (user == null)
                 {
@@ -288,7 +280,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
 
                 // Yeni şifreyi düz metin olarak kaydet
                 user.PassWord = request.NewPassword;
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 _logger.LogInformation("Şifre başarıyla sıfırlandı - {TcKimlikNo}", request.TcKimlikNo);
                 return true;
