@@ -14,6 +14,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
             CreateMap<SendikaCreateRequestDto, Sendika>();
             CreateMap<SendikaUpdateRequestDto, Sendika>();
 
+            // ⭐ Field-level permission revert için gerekli (Entity → UpdateRequestDto)
+            CreateMap<Sendika, SendikaUpdateRequestDto>();
+
             // Entity -> Response
             CreateMap<Sendika, SendikaResponseDto>()
                 .ForMember(dest => dest.PersonelSayisi,

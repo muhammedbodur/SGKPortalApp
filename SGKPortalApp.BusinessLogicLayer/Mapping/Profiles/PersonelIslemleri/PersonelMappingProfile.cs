@@ -31,6 +31,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore());
 
+            // ⭐ Field-level permission revert için gerekli (Entity → UpdateRequestDto)
+            CreateMap<Departman, DepartmanUpdateRequestDto>();
+
             CreateMap<DepartmanResponseDto, DepartmanCreateRequestDto>();
             CreateMap<DepartmanResponseDto, DepartmanUpdateRequestDto>();
 
@@ -57,6 +60,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore());
 
+            // ⭐ Field-level permission revert için gerekli (Entity → UpdateRequestDto)
+            CreateMap<Servis, ServisUpdateRequestDto>();
+
 
             // ═══════════════════════════════════════════════════════
             // UNVAN MAPPING'LERİ
@@ -79,6 +85,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore());
+
+            // ⭐ Field-level permission revert için gerekli (Entity → UpdateRequestDto)
+            CreateMap<Unvan, UnvanUpdateRequestDto>();
 
 
             // ═══════════════════════════════════════════════════════
