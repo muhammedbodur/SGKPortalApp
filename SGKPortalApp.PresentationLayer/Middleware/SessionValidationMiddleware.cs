@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
-using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
 using System.Threading.Tasks;
 
 namespace SGKPortalApp.PresentationLayer.Middleware
@@ -78,7 +77,7 @@ namespace SGKPortalApp.PresentationLayer.Middleware
             HttpContext context,
             IUserInfoService userInfoService,
             IUserApiService userApiService,
-            ILoginLogoutLogService loginLogoutLogService)
+            IHttpClientFactory httpClientFactory)
         {
             // Session expired sayfasını ve login sayfasını kontrol dışında tut
             var path = context.Request.Path.Value?.ToLower() ?? "";
@@ -127,18 +126,25 @@ namespace SGKPortalApp.PresentationLayer.Middleware
                                     "TcKimlikNo: {TcKimlikNo}, Cookie SessionID: {CookieSessionId}, DB SessionID: {DbSessionId}",
                                     tcKimlikNo, currentSessionId, dbSessionId);
 
-                                // ⚠️ Logout time'ı güncelle (eski session için)
+                                // ⚠️ Logout time'ı güncelle (eski session için) - API çağrısı
                                 try
                                 {
-                                    var logoutResult = await loginLogoutLogService.UpdateLogoutTimeBySessionIdAsync(currentSessionId);
-                                    if (logoutResult.Success && logoutResult.Data)
+                                    var httpClient = httpClientFactory.CreateClient("ApiClient");
+                                    var response = await httpClient.PostAsync($"auth/logout-by-session/{currentSessionId}", null);
+
+                                    if (response.IsSuccessStatusCode)
                                     {
                                         _logger.LogInformation("✅ Logout time güncellendi - SessionID: {SessionID}", currentSessionId);
+                                    }
+                                    else
+                                    {
+                                        _logger.LogWarning("⚠️ Logout time güncellenemedi - SessionID: {SessionID}, Status: {Status}",
+                                            currentSessionId, response.StatusCode);
                                     }
                                 }
                                 catch (Exception ex)
                                 {
-                                    _logger.LogError(ex, "❌ Logout time güncellenemedi - SessionID: {SessionID}", currentSessionId);
+                                    _logger.LogError(ex, "❌ Logout API çağrısı hatası - SessionID: {SessionID}", currentSessionId);
                                 }
 
                                 // HTTP response logout
