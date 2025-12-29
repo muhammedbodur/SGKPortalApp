@@ -196,56 +196,15 @@ else
         @foreach (var group in GetTransactionGroups())
         {
             var groupLogs = group.Logs.OrderByDescending(l => l.IslemZamani).ToList();
-            var firstLog = groupLogs.First();
 
             <div class="card mb-3">
-                <div class="card-header bg-light">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="d-flex align-items-center mb-1">
-                                <i class="bx bx-calendar me-2 text-primary"></i>
-                                <h6 class="mb-0 me-3">
-                                    <strong>@firstLog.IslemZamaniText</strong>
-                                </h6>
-                                @if (group.TransactionId.HasValue)
-                                {
-                                    <span class="badge bg-info">@groupLogs.Count değişiklik</span>
-                                }
-                            </div>
-                            <div class="d-flex align-items-center gap-3">
-                                <small class="text-muted">
-                                    <i class="bx bx-user me-1"></i>
-                                    @if (!string.IsNullOrEmpty(firstLog.PerformedByAdSoyad))
-                                    {
-                                        <strong>@firstLog.PerformedByAdSoyad</strong>
-                                        <span class="ms-1">(@firstLog.TcKimlikNo)</span>
-                                    }
-                                    else
-                                    {
-                                        <span>@firstLog.TcKimlikNo</span>
-                                    }
-                                </small>
-                                <small class="text-muted">
-                                    <i class="bx bx-globe me-1"></i>@(firstLog.IpAddress ?? "-")
-                                </small>
-                                @if (group.TransactionId.HasValue)
-                                {
-                                    <small class="text-muted">
-                                        <i class="bx bx-link me-1"></i>
-                                        Transaction: #@group.TransactionId.Value.ToString().Substring(0, 8)
-                                    </small>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th style="width: 100px">
-                                        <i class="bx bx-time-five me-1"></i>Saat
+                                        <i class="bx bx-time-five me-1"></i>Tarih/Saat
                                     </th>
                                     <th style="width: 180px">
                                         <i class="bx bx-data me-1"></i>Tablo
@@ -271,7 +230,7 @@ else
                                     <tr>
                                         <td>
                                             <small class="text-muted">
-                                                @log.IslemZamani.ToLocalTime().ToString("HH:mm:ss")
+                                                        @log.IslemZamani.ToLocalTime().ToString("dd-MM-yyyy HH:mm:ss")
                                             </small>
                                         </td>
                                         <td>
