@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using SGKPortalApp.BusinessLogicLayer.Services.Auth.Interfaces;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Auth;
@@ -11,12 +10,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth
 {
     public class LoginLogoutLogApiService : ILoginLogoutLogApiService
     {
-        private readonly ILoginLogoutLogService _loginLogoutLogService;
+        private readonly ILoginLogoutLogApiService _loginLogoutLogService;
         private readonly IToastService _toastService;
         private readonly ILogger<LoginLogoutLogApiService> _logger;
 
         public LoginLogoutLogApiService(
-            ILoginLogoutLogService loginLogoutLogService,
+            ILoginLogoutLogApiService loginLogoutLogService,
             IToastService toastService,
             ILogger<LoginLogoutLogApiService> logger)
         {
