@@ -270,7 +270,8 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs.Concrete
                 ConnectionType = entity.ConnectionType,
                 ConnectionStatus = entity.ConnectionStatus,
                 ConnectedAt = entity.ConnectedAt,
-                LastActivityAt = entity.LastActivityAt
+                LastActivityAt = entity.LastActivityAt,
+                SessionID = entity.User?.SessionID
             };
 
         private static HubBankoConnectionResponseDto MapHubBankoConnection(HubBankoConnection entity)

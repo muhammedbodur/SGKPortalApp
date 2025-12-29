@@ -14,5 +14,8 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SignalR
         public ConnectionStatus ConnectionStatus { get; set; }
         public DateTime ConnectedAt { get; set; }
         public DateTime LastActivityAt { get; set; }
+
+        // User bilgileri (logout tracking için)
+        public string? SessionID { get; set; }
     }
 }

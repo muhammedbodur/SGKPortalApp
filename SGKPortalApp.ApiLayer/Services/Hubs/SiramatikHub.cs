@@ -230,9 +230,9 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
                         if (otherActiveConnections.Count == 0)
                         {
                             // ✅ Bu son bağlantı, şimdi logout kaydedebiliriz
-                            if (hubConnection.User != null && !string.IsNullOrEmpty(hubConnection.User.SessionID))
+                            if (!string.IsNullOrEmpty(hubConnection.SessionID))
                             {
-                                var sessionId = hubConnection.User.SessionID;
+                                var sessionId = hubConnection.SessionID;
                                 var result = await _loginLogoutLogService.UpdateLogoutTimeBySessionIdAsync(sessionId);
 
                                 if (result.Success && result.Data)
