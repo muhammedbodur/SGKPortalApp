@@ -166,10 +166,6 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
             var beforeData = GetBeforeData(entry);
             var afterData = GetAfterData(entry);
 
-            // Sensitive data masking uygula
-            ApplySensitiveDataMasking(beforeData, config);
-            ApplySensitiveDataMasking(afterData, config);
-
             // JSON'a serialize et
             var beforeJson = beforeData != null ? JsonSerializer.Serialize(beforeData, _jsonOptions) : null;
             var afterJson = afterData != null ? JsonSerializer.Serialize(afterData, _jsonOptions) : null;
@@ -391,46 +387,6 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
             }
 
             return changedFields.Any() ? string.Join(",", changedFields) : null;
-        }
-
-        /// <summary>
-        /// Sensitive data masking uygular
-        /// </summary>
-        private void ApplySensitiveDataMasking(Dictionary<string, object?>? data, AuditConfig config)
-        {
-            if (data == null || !config.SensitiveProperties.Any())
-                return;
-
-            foreach (var propName in config.SensitiveProperties)
-            {
-                if (!data.ContainsKey(propName))
-                    continue;
-
-                var sensitiveConfig = config.SensitiveDataConfigs[propName];
-
-                // Exclude ise log'dan çıkar
-                if (sensitiveConfig.ExcludeFromLog)
-                {
-                    data.Remove(propName);
-                    continue;
-                }
-
-                // Masking uygula
-                var value = data[propName]?.ToString();
-                if (string.IsNullOrEmpty(value))
-                    continue;
-
-                var maskedValue = ApplyMasking(value, sensitiveConfig);
-                data[propName] = maskedValue;
-            }
-        }
-
-        /// <summary>
-        /// Masking uygular - her zaman "***" döndürür
-        /// </summary>
-        private string ApplyMasking(string value, SensitiveDataConfig config)
-        {
-            return "***";
         }
 
         /// <summary>
