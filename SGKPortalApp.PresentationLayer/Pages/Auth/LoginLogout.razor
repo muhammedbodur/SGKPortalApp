@@ -1,0 +1,289 @@
+@page "/auth/login-logout"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth
+@attribute [Authorize]
+
+<PageTitle>Login/Logout İşlemleri - SGK Portal</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h3>🔐 Login/Logout İşlemleri</h3>
+            <p class="text-muted">Kullanıcıların giriş/çıkış işlemlerini görüntüleyin</p>
+        </div>
+    </div>
+
+    @* İstatistik Kartları *@
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar avatar-md">
+                                <span class="avatar-initial rounded bg-label-primary">
+                                    <i class="bx bx-user-check fs-3"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <small class="text-muted d-block">Aktif Oturum</small>
+                            <h4 class="mb-0">@ActiveSessionCount</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-success">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar avatar-md">
+                                <span class="avatar-initial rounded bg-label-success">
+                                    <i class="bx bx-log-in fs-3"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <small class="text-muted d-block">Bugünkü Giriş</small>
+                            <h4 class="mb-0">@TodayLoginCount</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Filtreler *@
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5 class="mb-0">🔍 Filtreler</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                @* Arama *@
+                <div class="col-md-3">
+                    <label class="form-label">Ad Soyad / TC Kimlik No</label>
+                    <input type="text" class="form-control" @bind="Filter.SearchText" placeholder="Ara..." />
+                </div>
+
+                @* Başlangıç Tarihi *@
+                <div class="col-md-2">
+                    <label class="form-label">Başlangıç Tarihi</label>
+                    <input type="date" class="form-control" @bind="Filter.StartDate" @bind:format="yyyy-MM-dd" />
+                </div>
+
+                @* Bitiş Tarihi *@
+                <div class="col-md-2">
+                    <label class="form-label">Bitiş Tarihi</label>
+                    <input type="date" class="form-control" @bind="Filter.EndDate" @bind:format="yyyy-MM-dd" />
+                </div>
+
+                @* IP Adresi *@
+                <div class="col-md-2">
+                    <label class="form-label">IP Adresi</label>
+                    <input type="text" class="form-control" @bind="Filter.IpAddress" placeholder="IP..." />
+                </div>
+
+                @* Sadece Aktif Oturumlar *@
+                <div class="col-md-2">
+                    <label class="form-label d-block">&nbsp;</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="onlyActive" @bind="OnlyActiveSession" />
+                        <label class="form-check-label" for="onlyActive">
+                            Sadece Aktif Oturumlar
+                        </label>
+                    </div>
+                </div>
+
+                @* Sadece Başarısız Loginler *@
+                <div class="col-md-2">
+                    <label class="form-label d-block">&nbsp;</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="onlyFailed" @bind="OnlyFailedLogins" />
+                        <label class="form-check-label" for="onlyFailed">
+                            Sadece Başarısız Girişler
+                        </label>
+                    </div>
+                </div>
+
+                @* Sayfa Başına Kayıt *@
+                <div class="col-md-2">
+                    <label class="form-label">Sayfa Başına</label>
+                    <select class="form-select" @onchange="OnPageSizeChangedEvent" value="@Filter.PageSize">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+
+                @* Butonlar *@
+                <div class="col-md-4 d-flex align-items-end">
+                    <button class="btn btn-primary me-2" @onclick="SearchAsync" disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        Ara
+                    </button>
+                    <button class="btn btn-secondary" @onclick="ResetFilters" disabled="@isLoading">
+                        Temizle
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Sonuçlar *@
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="mt-2">Kayıtlar yükleniyor...</p>
+        </div>
+    }
+    else if (result != null && result.Logs.Any())
+    {
+        @* Pagination Üst *@
+        <div class="card mb-2">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge bg-primary">Toplam: @result.TotalCount kayıt</span>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item @(!result.HasPreviousPage ? "disabled" : "")">
+                                <button class="page-link" @onclick="() => GoToPage(result.PageNumber - 1)" disabled="@(!result.HasPreviousPage)">
+                                    Önceki
+                                </button>
+                            </li>
+                            @for (int i = Math.Max(1, result.PageNumber - 2); i <= Math.Min(result.TotalPages, result.PageNumber + 2); i++)
+                            {
+                                var pageNum = i;
+                                <li class="page-item @(pageNum == result.PageNumber ? "active" : "")">
+                                    <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
+                                </li>
+                            }
+                            <li class="page-item @(!result.HasNextPage ? "disabled" : "")">
+                                <button class="page-link" @onclick="() => GoToPage(result.PageNumber + 1)" disabled="@(!result.HasNextPage)">
+                                    Sonraki
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
+                    <small class="text-muted">Sayfa @result.PageNumber / @result.TotalPages</small>
+                </div>
+            </div>
+        </div>
+
+        @* Tablo *@
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Kullanıcı</th>
+                            <th>Giriş Zamanı</th>
+                            <th>Çıkış Zamanı</th>
+                            <th>Süre</th>
+                            <th>IP Adresi</th>
+                            <th>Tarayıcı</th>
+                            <th>İşletim Sistemi</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in result.Logs)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(log.AdSoyad))
+                                    {
+                                        <div>
+                                            <strong>@log.AdSoyad</strong>
+                                        </div>
+                                        <small class="text-muted">@log.TcKimlikNo</small>
+                                    }
+                                    else
+                                    {
+                                        <code>@log.TcKimlikNo</code>
+                                    }
+                                </td>
+                                <td>
+                                    <small>@log.LoginTimeText</small>
+                                </td>
+                                <td>
+                                    <small>@log.LogoutTimeText</small>
+                                </td>
+                                <td>
+                                    <small class="@(log.IsActiveSession ? "text-success fw-bold" : "")">
+                                        @log.SessionDurationText
+                                    </small>
+                                </td>
+                                <td>
+                                    <code>@(log.IpAddress ?? "-")</code>
+                                </td>
+                                <td>
+                                    <small>@(log.Browser ?? "-")</small>
+                                </td>
+                                <td>
+                                    <small>@(log.OperatingSystem ?? "-")</small>
+                                </td>
+                                <td>
+                                    @if (!log.LoginSuccessful)
+                                    {
+                                        <span class="badge bg-danger" title="@log.FailureReason">Başarısız</span>
+                                    }
+                                    else if (log.IsActiveSession)
+                                    {
+                                        <span class="badge bg-success">Aktif</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Sonlandı</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @* Pagination Alt *@
+        <div class="card mt-2">
+            <div class="card-body p-2">
+                <nav>
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
+                        <li class="page-item @(!result.HasPreviousPage ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => GoToPage(result.PageNumber - 1)" disabled="@(!result.HasPreviousPage)">
+                                Önceki
+                            </button>
+                        </li>
+                        @for (int i = Math.Max(1, result.PageNumber - 2); i <= Math.Min(result.TotalPages, result.PageNumber + 2); i++)
+                        {
+                            var pageNum = i;
+                            <li class="page-item @(pageNum == result.PageNumber ? "active" : "")">
+                                <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
+                            </li>
+                        }
+                        <li class="page-item @(!result.HasNextPage ? "disabled" : "")">
+                            <button class="page-link" @onclick="() => GoToPage(result.PageNumber + 1)" disabled="@(!result.HasNextPage)">
+                                Sonraki
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    }
+    else if (!isLoading && result != null)
+    {
+        <div class="alert alert-info">
+            <i class="bx bx-info-circle me-2"></i>Seçili filtrelere uygun kayıt bulunamadı.
+        </div>
+    }
+</div>

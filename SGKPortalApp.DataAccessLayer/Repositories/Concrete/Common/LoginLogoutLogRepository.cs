@@ -113,5 +113,58 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
             var activeSessions = await GetActiveSessionsAsync();
             return activeSessions.Select(lll => lll.TcKimlikNo).Distinct().Count();
         }
+
+        public async Task<(IEnumerable<LoginLogoutLog> Logs, int TotalCount)> GetFilteredLogsAsync(
+            string? searchText,
+            DateTime? startDate,
+            DateTime? endDate,
+            bool? onlyActiveSession,
+            bool? onlyFailedLogins,
+            string? ipAddress,
+            int pageNumber,
+            int pageSize)
+        {
+            var query = _dbSet.AsNoTracking().AsQueryable();
+
+            // Tarih filtreleme
+            if (startDate.HasValue)
+                query = query.Where(l => l.LoginTime >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(l => l.LoginTime <= endDate.Value);
+
+            // Arama (Ad Soyad, TC Kimlik No)
+            if (!string.IsNullOrWhiteSpace(searchText))
+            {
+                var search = searchText.Trim().ToLower();
+                query = query.Where(l =>
+                    (l.AdSoyad != null && l.AdSoyad.ToLower().Contains(search)) ||
+                    (l.TcKimlikNo != null && l.TcKimlikNo.Contains(search)));
+            }
+
+            // Aktif oturum filtresi
+            if (onlyActiveSession.HasValue && onlyActiveSession.Value)
+                query = query.Where(l => !l.LogoutTime.HasValue);
+
+            // Başarısız login filtresi
+            if (onlyFailedLogins.HasValue && onlyFailedLogins.Value)
+                query = query.Where(l => !l.LoginSuccessful);
+
+            // IP adresi filtresi
+            if (!string.IsNullOrWhiteSpace(ipAddress))
+                query = query.Where(l => l.IpAddress != null && l.IpAddress.Contains(ipAddress.Trim()));
+
+            // Toplam sayı
+            var totalCount = await query.CountAsync();
+
+            // Sayfalama ve sıralama
+            var logs = await query
+                .OrderByDescending(l => l.LoginTime)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (logs, totalCount);
+        }
     }
 }
