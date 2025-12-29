@@ -244,19 +244,22 @@ else
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th style="width: 180px">
-                                        <i class="bx bx-time-five me-1"></i>Tarih/Saat
+                                    <th style="width: 100px">
+                                        <i class="bx bx-time-five me-1"></i>Saat
                                     </th>
-                                    <th style="width: 200px">
+                                    <th style="width: 180px">
                                         <i class="bx bx-data me-1"></i>Tablo
                                     </th>
-                                    <th style="width: 120px">
+                                    <th style="width: 100px">
                                         <i class="bx bx-transfer me-1"></i>İşlem
                                     </th>
                                     <th style="width: 180px">
-                                        <i class="bx bx-user me-1"></i>İşlem Yapılan
+                                        <i class="bx bx-user-circle me-1"></i>İşlemi Yapan
                                     </th>
-                                    <th>
+                                    <th style="width: 180px">
+                                        <i class="bx bx-user-check me-1"></i>İşlem Yapılan
+                                    </th>
+                                    <th style="width: 120px">
                                         <i class="bx bx-edit me-1"></i>Değişiklik
                                     </th>
                                     <th style="width: 100px" class="text-center">İşlemler</th>
@@ -282,12 +285,22 @@ else
                                             </span>
                                         </td>
                                         <td>
+                                            @if (!string.IsNullOrEmpty(log.PerformedByAdSoyad))
+                                            {
+                                                <div>
+                                                    <strong>@log.PerformedByAdSoyad</strong>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <small class="text-muted">@log.TcKimlikNo</small>
+                                            }
+                                        </td>
+                                        <td>
                                             @if (!string.IsNullOrEmpty(log.TargetPersonAdSoyad))
                                             {
                                                 <div>
                                                     <strong>@log.TargetPersonAdSoyad</strong>
-                                                    <br />
-                                                    <small class="text-muted">TC: @log.TargetPersonTcKimlikNo</small>
                                                 </div>
                                             }
                                             else if (!string.IsNullOrEmpty(log.TargetEntityInfo))
