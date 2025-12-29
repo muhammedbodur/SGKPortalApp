@@ -1,4 +1,4 @@
-namespace SGKPortalApp.BusinessLogicLayer.Interfaces.Database
+namespace SGKPortalApp.DataAccessLayer.Services.Interfaces
 {
     /// <summary>
     /// Database Migration yönetimi için servis interface
