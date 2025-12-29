@@ -5,7 +5,7 @@ using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace SGKPortalApp.PresentationLayer.Pages.Log
+namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
 {
     public partial class Detail
     {

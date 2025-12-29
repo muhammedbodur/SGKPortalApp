@@ -1,5 +1,4 @@
-@page "/log"
-@page "/log/list"
+@page "/audit/log"
 @using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
 @using SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
@@ -309,7 +308,7 @@ else
                                             }
                                         </td>
                                         <td class="text-center">
-                                            <a href="/log/detail/@log.DatabaseLogId"
+                                            <a href="/audit/log/detail/@log.DatabaseLogId"
                                                 class="btn btn-sm btn-outline-primary"
                                                 title="Detayları Görüntüle">
                                                 <i class="bx bx-show-alt me-1"></i>Detay
