@@ -130,14 +130,31 @@
                 <span class="menu-header-text">Log İşlemleri</span>
             </li>
 
-            <li class="menu-item @(IsSectionActive("/log") ? "active open" : "")">
+            <li class="menu-item @(IsSectionActive("/audit") ? "active open" : "")">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="menu-icon tf-icons bx bx-file-find"></i>
+                    <div>Log Yönetimi</div>
+                </a>
                 <ul class="menu-sub">
-                    <li class="menu-item @(IsSectionActive("/log") ? "active" : "")">
-                        <a href="/log" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-map-pin"></i>
-                            <div>Loglar</div>
+                    <li class="menu-item @(IsActive("/audit/log") ? "active" : "")">
+                        <a href="/audit/log" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-detail"></i>
+                            <div>Denetim Logları</div>
                         </a>
                     </li>
+                    <li class="menu-item @(IsActive("/audit/login-logout") ? "active" : "")">
+                        <a href="/audit/login-logout" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-log-in"></i>
+                            <div>Giriş/Çıkış Logları</div>
+                        </a>
+                    </li>
+                    <!-- Gelecekte eklenebilir:
+                    <li class="menu-item">
+                        <a href="/audit/signalr" class="menu-link">
+                            <div>SignalR Logları</div>
+                        </a>
+                    </li>
+                    -->
                 </ul>
             </li>
 
