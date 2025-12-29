@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
 using System.Threading.Tasks;
 
 namespace SGKPortalApp.PresentationLayer.Middleware
@@ -76,7 +77,8 @@ namespace SGKPortalApp.PresentationLayer.Middleware
         public async Task InvokeAsync(
             HttpContext context,
             IUserInfoService userInfoService,
-            IUserApiService userApiService)
+            IUserApiService userApiService,
+            ILoginLogoutLogService loginLogoutLogService)
         {
             // Session expired sayfasını ve login sayfasını kontrol dışında tut
             var path = context.Request.Path.Value?.ToLower() ?? "";
@@ -124,6 +126,20 @@ namespace SGKPortalApp.PresentationLayer.Middleware
                                 _logger.LogWarning("⚠️ Session uyuşmazlığı tespit edildi! " +
                                     "TcKimlikNo: {TcKimlikNo}, Cookie SessionID: {CookieSessionId}, DB SessionID: {DbSessionId}",
                                     tcKimlikNo, currentSessionId, dbSessionId);
+
+                                // ⚠️ Logout time'ı güncelle (eski session için)
+                                try
+                                {
+                                    var logoutResult = await loginLogoutLogService.UpdateLogoutTimeBySessionIdAsync(currentSessionId);
+                                    if (logoutResult.Success && logoutResult.Data)
+                                    {
+                                        _logger.LogInformation("✅ Logout time güncellendi - SessionID: {SessionID}", currentSessionId);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, "❌ Logout time güncellenemedi - SessionID: {SessionID}", currentSessionId);
+                                }
 
                                 // HTTP response logout
                                 await context.SignOutAsync();
