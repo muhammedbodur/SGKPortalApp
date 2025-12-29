@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
 using SGKPortalApp.PresentationLayer.Services.State;
+using SGKPortalApp.PresentationLayer.Middleware;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -117,6 +118,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
 
                 _logger.LogInformation("✅ Kullanıcı giriş yaptı: {AdSoyad} ({TcKimlikNo}) - {UserType}",
                     loginResponse.AdSoyad, loginResponse.TcKimlikNo, loginResponse.UserType);
+
+                // ⚠️ Session validation grace period başlat (3 saniye)
+                // Login sonrası cookie henüz tam güncel olmayabilir, o yüzden hemen session kontrolü yapma
+                SessionValidationMiddleware.StartGracePeriod(loginResponse.TcKimlikNo);
+                _logger.LogDebug("🕐 Grace period başlatıldı - TcKimlikNo: {TcKimlikNo}", loginResponse.TcKimlikNo);
 
                 // Ana sayfaya yönlendir
                 _logger.LogDebug("🔵 Ana sayfaya yönlendiriliyor");

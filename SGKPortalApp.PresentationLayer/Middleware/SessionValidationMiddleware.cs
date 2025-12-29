@@ -15,10 +15,62 @@ namespace SGKPortalApp.PresentationLayer.Middleware
         private readonly RequestDelegate _next;
         private readonly ILogger<SessionValidationMiddleware> _logger;
 
+        // ⚠️ Login sonrası grace period için cache
+        // Key: TcKimlikNo, Value: Login time
+        private static readonly Dictionary<string, DateTime> _recentLogins = new();
+        private static readonly TimeSpan _gracePeriod = TimeSpan.FromSeconds(3); // 3 saniye grace period
+
         public SessionValidationMiddleware(RequestDelegate next, ILogger<SessionValidationMiddleware> logger)
         {
             _next = next;
             _logger = logger;
+        }
+
+        /// <summary>
+        /// Login sonrası grace period'u başlat
+        /// LoginHandler tarafından çağrılır
+        /// </summary>
+        public static void StartGracePeriod(string tcKimlikNo)
+        {
+            lock (_recentLogins)
+            {
+                _recentLogins[tcKimlikNo] = DateTime.UtcNow;
+
+                // Eski kayıtları temizle (10 dakikadan eski)
+                var oldKeys = _recentLogins
+                    .Where(x => (DateTime.UtcNow - x.Value).TotalMinutes > 10)
+                    .Select(x => x.Key)
+                    .ToList();
+
+                foreach (var key in oldKeys)
+                {
+                    _recentLogins.Remove(key);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Kullanıcı için grace period aktif mi kontrol et
+        /// </summary>
+        private static bool IsInGracePeriod(string tcKimlikNo)
+        {
+            lock (_recentLogins)
+            {
+                if (_recentLogins.TryGetValue(tcKimlikNo, out var loginTime))
+                {
+                    var elapsed = DateTime.UtcNow - loginTime;
+                    if (elapsed < _gracePeriod)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        // Grace period bitti, cache'den kaldır
+                        _recentLogins.Remove(tcKimlikNo);
+                    }
+                }
+            }
+            return false;
         }
 
         public async Task InvokeAsync(
@@ -30,6 +82,7 @@ namespace SGKPortalApp.PresentationLayer.Middleware
             var path = context.Request.Path.Value?.ToLower() ?? "";
             if (path.Contains("/auth/session-expired") ||
                 path.Contains("/auth/login") ||
+                path.Contains("/auth/loginhandler") || // ⚠️ ADDED: Login sonrası cookie set ediliyor, session kontrolü atla
                 path.Contains("/auth/logout") ||
                 path.Contains("/_blazor"))
             {
@@ -50,6 +103,14 @@ namespace SGKPortalApp.PresentationLayer.Middleware
 
                     if (!string.IsNullOrEmpty(currentSessionId) && !string.IsNullOrEmpty(tcKimlikNo))
                     {
+                        // ⚠️ Grace period kontrolü: Login'den sonra 3 saniye içinde session kontrolü yapma
+                        if (IsInGracePeriod(tcKimlikNo))
+                        {
+                            _logger.LogDebug("ℹ️ Grace period aktif, session kontrolü atlandı - TcKimlikNo: {TcKimlikNo}", tcKimlikNo);
+                            await _next(context);
+                            return;
+                        }
+
                         // Database'den kullanıcının aktif session ID'sini al
                         var userResult = await userApiService.GetByTcKimlikNoAsync(tcKimlikNo);
 
