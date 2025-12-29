@@ -10,6 +10,12 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog
     {
         public int DatabaseLogId { get; set; }
         public string TcKimlikNo { get; set; } = string.Empty;
+
+        /// <summary>
+        /// İşlemi yapan kullanıcının Ad Soyad bilgisi
+        /// </summary>
+        public string? PerformedByAdSoyad { get; set; }
+
         public string TabloAdi { get; set; } = string.Empty;
         public DatabaseAction IslemTuru { get; set; }
         public DateTime IslemZamani { get; set; }

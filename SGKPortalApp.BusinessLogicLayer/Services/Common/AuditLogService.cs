@@ -90,6 +90,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     }
                 }
 
+                // İşlemi yapan kişinin AdSoyad'ını getir
+                dto.PerformedByAdSoyad = await _auditLogQueryRepository.GetAdSoyadByTcKimlikNoAsync(dto.TcKimlikNo);
+
                 dto.TargetPersonTcKimlikNo = ExtractTcKimlikNoFromJson(beforeData, afterData);
                 if (!string.IsNullOrEmpty(dto.TargetPersonTcKimlikNo))
                 {
@@ -145,6 +148,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 IpAddress = log.IpAddress,
                 UserAgent = log.UserAgent
             };
+
+            // İşlemi yapan kişinin AdSoyad'ını getir
+            detail.PerformedByAdSoyad = await _auditLogQueryRepository.GetAdSoyadByTcKimlikNoAsync(detail.TcKimlikNo);
 
             // Before/After data'yı al
             if (log.StorageType == LogStorageType.Database)
