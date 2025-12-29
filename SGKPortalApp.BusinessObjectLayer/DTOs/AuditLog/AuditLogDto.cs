@@ -24,6 +24,16 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog
         public string? UserAgent { get; set; }
         public int? BulkOperationCount { get; set; }
 
+        /// <summary>
+        /// İşlemin yapıldığı kişinin TC Kimlik No (entity'deki TcKimlikNo field'ından)
+        /// </summary>
+        public string? TargetPersonTcKimlikNo { get; set; }
+
+        /// <summary>
+        /// İşlemin yapıldığı kişinin Ad Soyad
+        /// </summary>
+        public string? TargetPersonAdSoyad { get; set; }
+
         // Display helpers
         public string IslemTuruText => IslemTuru.ToString();
         public string IslemZamaniText => IslemZamani.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss");

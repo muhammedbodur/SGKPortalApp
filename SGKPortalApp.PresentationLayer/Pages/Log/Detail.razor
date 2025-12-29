@@ -49,9 +49,20 @@
                                     <td>@detail.IslemZamani.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss")</td>
                                 </tr>
                                 <tr>
-                                    <th>Kullanıcı TC:</th>
-                                    <td>@detail.TcKimlikNo</td>
+                                    <th>İşlemi Yapan:</th>
+                                    <td><code>@detail.TcKimlikNo</code></td>
                                 </tr>
+                                @if (!string.IsNullOrEmpty(detail.TargetPersonTcKimlikNo))
+                                {
+                                    <tr>
+                                        <th>İşlem Yapılan Kişi:</th>
+                                        <td>
+                                            <strong>@detail.TargetPersonAdSoyad</strong>
+                                            <br />
+                                            <small class="text-muted">TC: @detail.TargetPersonTcKimlikNo</small>
+                                        </td>
+                                    </tr>
+                                }
                                 <tr>
                                     <th>Tablo:</th>
                                     <td><span class="badge bg-info">@detail.TabloAdi</span></td>

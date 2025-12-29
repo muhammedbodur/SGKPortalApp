@@ -49,24 +49,55 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 currentUserDepartmanId,
                 currentUserServisId);
 
-            // Map to DTO
-            var logs = databaseLogs.Select(l => new AuditLogDto
+            // Map to DTO and enrich with TargetPerson info
+            var logs = new List<AuditLogDto>();
+            foreach (var l in databaseLogs)
             {
-                DatabaseLogId = l.DatabaseLogId,
-                TcKimlikNo = l.TcKimlikNo,
-                TabloAdi = l.TableName,
-                IslemTuru = l.DatabaseAction,
-                IslemZamani = l.IslemZamani,
-                StorageType = l.StorageType,
-                FileReference = l.FileReference,
-                TransactionId = l.TransactionId,
-                IsGroupedLog = l.IsGroupedLog,
-                ChangedFieldCount = l.ChangedFieldCount,
-                DataSizeBytes = l.DataSizeBytes,
-                IpAddress = l.IpAddress,
-                UserAgent = l.UserAgent,
-                BulkOperationCount = l.BulkOperationCount
-            }).ToList();
+                var dto = new AuditLogDto
+                {
+                    DatabaseLogId = l.DatabaseLogId,
+                    TcKimlikNo = l.TcKimlikNo,
+                    TabloAdi = l.TableName,
+                    IslemTuru = l.DatabaseAction,
+                    IslemZamani = l.IslemZamani,
+                    StorageType = l.StorageType,
+                    FileReference = l.FileReference,
+                    TransactionId = l.TransactionId,
+                    IsGroupedLog = l.IsGroupedLog,
+                    ChangedFieldCount = l.ChangedFieldCount,
+                    DataSizeBytes = l.DataSizeBytes,
+                    IpAddress = l.IpAddress,
+                    UserAgent = l.UserAgent,
+                    BulkOperationCount = l.BulkOperationCount
+                };
+
+                // İşlem yapılan kişi bilgisini extract et
+                string? beforeData = null;
+                string? afterData = null;
+
+                if (l.StorageType == LogStorageType.Database)
+                {
+                    beforeData = l.BeforeData;
+                    afterData = l.AfterData;
+                }
+                else if (l.StorageType == LogStorageType.File && !string.IsNullOrEmpty(l.FileReference))
+                {
+                    var fileEntry = await _fileWriter.ReadAsync(l.FileReference);
+                    if (fileEntry != null)
+                    {
+                        beforeData = fileEntry.Before != null ? JsonSerializer.Serialize(fileEntry.Before) : null;
+                        afterData = fileEntry.After != null ? JsonSerializer.Serialize(fileEntry.After) : null;
+                    }
+                }
+
+                dto.TargetPersonTcKimlikNo = ExtractTcKimlikNoFromJson(beforeData, afterData);
+                if (!string.IsNullOrEmpty(dto.TargetPersonTcKimlikNo))
+                {
+                    dto.TargetPersonAdSoyad = await _auditLogQueryRepository.GetAdSoyadByTcKimlikNoAsync(dto.TargetPersonTcKimlikNo);
+                }
+
+                logs.Add(dto);
+            }
 
             return new AuditLogPagedResultDto
             {
@@ -131,6 +162,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 
             // Field changes'i parse et ve FK lookuplarını yap
             detail.FieldChanges = await ParseFieldChangesWithLookupsAsync(detail.BeforeDataJson, detail.AfterDataJson);
+
+            // İşlem yapılan kişi bilgisini çıkar (TcKimlikNo field'ı varsa)
+            detail.TargetPersonTcKimlikNo = ExtractTcKimlikNoFromJson(detail.BeforeDataJson, detail.AfterDataJson);
+            if (!string.IsNullOrEmpty(detail.TargetPersonTcKimlikNo))
+            {
+                detail.TargetPersonAdSoyad = await _auditLogQueryRepository.GetAdSoyadByTcKimlikNoAsync(detail.TargetPersonTcKimlikNo);
+            }
 
             // Transaction içindeki diğer log'ları al
             if (log.TransactionId.HasValue)
@@ -266,6 +304,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                         ? afterDict[key].ToString()
                         : null;
 
+                    // Her iki değer de boşsa skip et (gereksiz kayıt)
+                    var oldValueEmpty = string.IsNullOrWhiteSpace(oldValue);
+                    var newValueEmpty = string.IsNullOrWhiteSpace(newValue);
+                    if (oldValueEmpty && newValueEmpty)
+                        continue;
+
                     // Sadece değişen alanları ekle
                     if (oldValue != newValue)
                     {
@@ -293,6 +337,46 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         private async Task<string?> ResolveFieldValueAsync(string fieldName, string? value)
         {
             return await _auditLogQueryRepository.ResolveFieldValueAsync(fieldName, value);
+        }
+
+        /// <summary>
+        /// Before/After JSON'larından TcKimlikNo field'ını extract eder
+        /// (Entity'de TcKimlikNo field'ı varsa, işlem yapılan kişiyi belirtir)
+        /// </summary>
+        private string? ExtractTcKimlikNoFromJson(string? beforeJson, string? afterJson)
+        {
+            try
+            {
+                // Önce After'dan dene (INSERT/UPDATE için)
+                if (!string.IsNullOrWhiteSpace(afterJson))
+                {
+                    var afterDict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(afterJson);
+                    if (afterDict != null && afterDict.ContainsKey("TcKimlikNo"))
+                    {
+                        var tcValue = afterDict["TcKimlikNo"].ToString();
+                        if (!string.IsNullOrWhiteSpace(tcValue))
+                            return tcValue;
+                    }
+                }
+
+                // After'da yoksa Before'dan dene (DELETE için)
+                if (!string.IsNullOrWhiteSpace(beforeJson))
+                {
+                    var beforeDict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(beforeJson);
+                    if (beforeDict != null && beforeDict.ContainsKey("TcKimlikNo"))
+                    {
+                        var tcValue = beforeDict["TcKimlikNo"].ToString();
+                        if (!string.IsNullOrWhiteSpace(tcValue))
+                            return tcValue;
+                    }
+                }
+            }
+            catch
+            {
+                // Parse hatası - null dön
+            }
+
+            return null;
         }
 
         #endregion

@@ -243,6 +243,9 @@ else
                                     <th style="width: 120px">
                                         <i class="bx bx-transfer me-1"></i>İşlem
                                     </th>
+                                    <th style="width: 180px">
+                                        <i class="bx bx-user me-1"></i>İşlem Yapılan
+                                    </th>
                                     <th>
                                         <i class="bx bx-edit me-1"></i>Değişiklik
                                     </th>
@@ -267,6 +270,20 @@ else
                                             <span class="badge @GetActionBadgeClass(log.IslemTuru)">
                                                 @log.IslemTuruText
                                             </span>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(log.TargetPersonAdSoyad))
+                                            {
+                                                <div>
+                                                    <strong>@log.TargetPersonAdSoyad</strong>
+                                                    <br />
+                                                    <small class="text-muted">@log.TargetPersonTcKimlikNo</small>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <small class="text-muted fst-italic">-</small>
+                                            }
                                         </td>
                                         <td>
                                             @if (log.ChangedFieldCount.HasValue && log.ChangedFieldCount > 0)
