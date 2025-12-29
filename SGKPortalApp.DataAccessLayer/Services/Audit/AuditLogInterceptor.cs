@@ -80,8 +80,9 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
                 if (entityType == typeof(DatabaseLog))
                     continue;
 
-                // ExcludedTables kontrolü
-                if (_options.ExcludedTables != null && _options.ExcludedTables.Contains(tableName))
+                // ExcludedTables kontrolü (case-insensitive)
+                if (_options.ExcludedTables != null &&
+                    _options.ExcludedTables.Any(t => t.Equals(tableName, StringComparison.OrdinalIgnoreCase)))
                 {
                     System.Diagnostics.Debug.WriteLine($"[AuditLog] Skipping excluded table: {tableName}");
                     continue;
@@ -282,8 +283,14 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
                     continue;
 
                 // UPDATE işleminde sadece değişen alanları kaydet
+                // ANCAK: Identifier field'ları (TcKimlikNo, SicilNo, vs.) her zaman dahil et
                 if (entry.State == EntityState.Modified && !prop.IsModified)
-                    continue;
+                {
+                    // Identifier field'ları kontrol et - bunlar değişmese de JSON'a dahil edilmeli
+                    var propName = prop.Metadata.Name;
+                    if (!IsIdentifierField(propName))
+                        continue;
+                }
 
                 data[prop.Metadata.Name] = entry.State == EntityState.Deleted
                     ? prop.CurrentValue
@@ -311,8 +318,14 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
                     continue;
 
                 // UPDATE işleminde sadece değişen alanları kaydet
+                // ANCAK: Identifier field'ları (TcKimlikNo, SicilNo, vs.) her zaman dahil et
                 if (entry.State == EntityState.Modified && !prop.IsModified)
-                    continue;
+                {
+                    // Identifier field'ları kontrol et - bunlar değişmese de JSON'a dahil edilmeli
+                    var propName = prop.Metadata.Name;
+                    if (!IsIdentifierField(propName))
+                        continue;
+                }
 
                 data[prop.Metadata.Name] = prop.CurrentValue;
             }
@@ -434,6 +447,36 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
                     : LogStorageType.File,
                 _ => LogStorageType.Database
             };
+        }
+
+        /// <summary>
+        /// Bir field'ın identifier (kimlik belirleyici) olup olmadığını kontrol eder
+        /// Identifier field'lar UPDATE işlemlerinde değişmese bile JSON'a dahil edilir
+        /// </summary>
+        private bool IsIdentifierField(string fieldName)
+        {
+            // Primary key ve yaygın identifier field'lar
+            var identifierFields = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "TcKimlikNo",
+                "SicilNo",
+                "PersonelKayitNo",
+                "BankoNo",
+                "SiraNo",
+                "PdksNo",
+                "KartNo",
+                // ID field'ları (her tablonun kendi PK'si)
+                "PersonelId",
+                "DepartmanId",
+                "ServisId",
+                "UnvanId",
+                "BankoId",
+                "KanalId",
+                "KioskId",
+                "UserId"
+            };
+
+            return identifierFields.Contains(fieldName);
         }
     }
 }
