@@ -25,5 +25,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common
 
         // Kullanıcının aktif bağlantılarını listeler (BankoMode için)
         Task<IEnumerable<HubConnection>> GetActiveConnectionsByTcKimlikNoAsync(string tcKimlikNo);
+
+        // Cleanup işlemleri (Background Service için)
+        Task<IEnumerable<HubConnection>> GetStaleConnectionsAsync(System.DateTime timeoutThreshold);
+        Task<int> DeactivateStaleConnectionsAsync(System.DateTime timeoutThreshold);
+        Task<IEnumerable<string>> GetActiveSessionIdsAsync();
     }
 }

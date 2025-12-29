@@ -18,19 +18,22 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
         private readonly IHubConnectionService _hubConnectionService;
         private readonly IHubContext<SiramatikHub> _hubContext;
         private readonly ILogger<AuthController> _logger;
+        private readonly ILoginLogoutLogService _loginLogoutLogService;
 
         public AuthController(
             IAuthService authService,
             IBankoModeService bankoModeService,
             IHubConnectionService hubConnectionService,
             IHubContext<SiramatikHub> hubContext,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,
+            ILoginLogoutLogService loginLogoutLogService)
         {
             _authService = authService;
             _bankoModeService = bankoModeService;
             _hubConnectionService = hubConnectionService;
             _hubContext = hubContext;
             _logger = logger;
+            _loginLogoutLogService = loginLogoutLogService;
         }
 
         /// <summary>
@@ -46,6 +49,10 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
             {
                 return BadRequest(ModelState);
             }
+
+            // HTTP context bilgilerini ekle
+            request.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+            request.UserAgent = HttpContext.Request.Headers["User-Agent"].ToString();
 
             var result = await _authService.LoginAsync(request);
 
@@ -123,6 +130,13 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
                 if (!string.IsNullOrEmpty(tcKimlikNo))
                 {
                     _logger.LogInformation("🔄 Logout: {TcKimlikNo} çıkış yapıyor...", tcKimlikNo);
+
+                    // LoginLogoutLog kaydını güncelle
+                    var result = await _loginLogoutLogService.UpdateLogoutTimeByTcKimlikNoAsync(tcKimlikNo);
+                    if (result.Success && result.Data)
+                    {
+                        _logger.LogInformation("✅ Logout log kaydı güncellendi - TcKimlikNo: {TcKimlikNo}", tcKimlikNo);
+                    }
 
                     // Banko modundan çık (flag temizle)
                     try

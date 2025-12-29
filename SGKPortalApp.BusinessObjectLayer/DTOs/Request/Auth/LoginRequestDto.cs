@@ -20,5 +20,15 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth
         /// Beni hatırla seçeneği (opsiyonel)
         /// </summary>
         public bool RememberMe { get; set; } = false;
+
+        /// <summary>
+        /// İstemci IP adresi (Controller tarafından set edilir)
+        /// </summary>
+        public string? IpAddress { get; set; }
+
+        /// <summary>
+        /// İstemci User-Agent bilgisi (Controller tarafından set edilir)
+        /// </summary>
+        public string? UserAgent { get; set; }
     }
 }

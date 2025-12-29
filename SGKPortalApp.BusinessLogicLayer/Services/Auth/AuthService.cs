@@ -1,10 +1,12 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
-using SGKPortalApp.DataAccessLayer.Context;
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
 {
@@ -13,18 +15,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
     /// </summary>
     public class AuthService : IAuthService
     {
-        private readonly SGKDbContext _context;
         private readonly ILogger<AuthService> _logger;
         private readonly IPersonelYetkiService _personelYetkiService;
+        private readonly IUnitOfWork _unitOfWork;
 
         public AuthService(
-            SGKDbContext context, 
             ILogger<AuthService> logger,
-            IPersonelYetkiService personelYetkiService)
+            IPersonelYetkiService personelYetkiService,
+            IUnitOfWork unitOfWork)
         {
-            _context = context;
             _logger = logger;
             _personelYetkiService = personelYetkiService;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)
@@ -32,18 +34,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
             try
             {
                 // 🆕 User tablosundan kullanıcıyı bul (Personel ile birlikte - opsiyonel)
-                var user = await _context.Users
-                    .Include(u => u.Personel)
-                        .ThenInclude(p => p.Departman)
-                    .Include(u => u.Personel)
-                        .ThenInclude(p => p.Servis)
-                    .Include(u => u.Personel)
-                        .ThenInclude(p => p.HizmetBinasi)
-                    .FirstOrDefaultAsync(u => u.TcKimlikNo == request.TcKimlikNo);
+                var userRepo = _unitOfWork.GetRepository<IUserRepository>();
+                var user = await userRepo.GetByTcKimlikNoAsync(request.TcKimlikNo);
 
                 if (user == null)
                 {
                     _logger.LogWarning("Login başarısız: Kullanıcı bulunamadı - {TcKimlikNo}", request.TcKimlikNo);
+
+                    // Başarısız login kaydı
+                    await CreateLoginLogAsync(request.TcKimlikNo, null, null,
+                        request.IpAddress, request.UserAgent, false, "Kullanıcı bulunamadı");
+
                     return new LoginResponseDto
                     {
                         Success = false,
@@ -55,6 +56,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                 if (!user.AktifMi)
                 {
                     _logger.LogWarning("Login başarısız: Hesap pasif - {TcKimlikNo}", request.TcKimlikNo);
+
+                    // Başarısız login kaydı
+                    await CreateLoginLogAsync(user.TcKimlikNo, user.Personel?.AdSoyad, null,
+                        request.IpAddress, request.UserAgent, false, "Hesap pasif");
+
                     return new LoginResponseDto
                     {
                         Success = false,
@@ -66,6 +72,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                 if (user.HesapKilitTarihi.HasValue)
                 {
                     _logger.LogWarning("Login başarısız: Hesap kilitli - {TcKimlikNo}", request.TcKimlikNo);
+
+                    // Başarısız login kaydı
+                    await CreateLoginLogAsync(user.TcKimlikNo, user.Personel?.AdSoyad, null,
+                        request.IpAddress, request.UserAgent, false, "Hesap kilitli");
+
                     return new LoginResponseDto
                     {
                         Success = false,
@@ -84,9 +95,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                     {
                         user.HesapKilitTarihi = DateTime.Now;
                         user.AktifMi = false;
-                        await _context.SaveChangesAsync();
+                        await _unitOfWork.SaveChangesAsync();
 
                         _logger.LogWarning("Hesap kilitlendi (5 başarısız deneme) - {TcKimlikNo}", request.TcKimlikNo);
+
+                        // Başarısız login kaydı
+                        await CreateLoginLogAsync(user.TcKimlikNo, user.Personel?.AdSoyad, null,
+                            request.IpAddress, request.UserAgent, false, "5 başarısız deneme - hesap kilitlendi");
+
                         return new LoginResponseDto
                         {
                             Success = false,
@@ -94,10 +110,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                         };
                     }
 
-                    await _context.SaveChangesAsync();
+                    await _unitOfWork.SaveChangesAsync();
 
                     _logger.LogWarning("Login başarısız: Hatalı şifre ({Deneme}/5) - {TcKimlikNo}",
                         user.BasarisizGirisSayisi, request.TcKimlikNo);
+
+                    // Başarısız login kaydı
+                    await CreateLoginLogAsync(user.TcKimlikNo, user.Personel?.AdSoyad, null,
+                        request.IpAddress, request.UserAgent, false, $"Hatalı şifre ({user.BasarisizGirisSayisi}/5)");
 
                     return new LoginResponseDto
                     {
@@ -123,7 +143,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                     _logger.LogInformation("✅ Orphan banko mode flag temizlendi: {TcKimlikNo}", user.TcKimlikNo);
                 }
 
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 // 🔥 Eski oturum varsa loglayalım (farklı cihazdan login uyarısı için)
                 if (!string.IsNullOrEmpty(oldSessionId) && oldSessionId != sessionId)
@@ -137,6 +157,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                 {
                     // TV Login
                     _logger.LogInformation("TV Login başarılı - {TcKimlikNo}", user.TcKimlikNo);
+
+                    // ✅ Başarılı login kaydı
+                    await CreateLoginLogAsync(user.TcKimlikNo, "TV Kullanıcısı", sessionId,
+                        request.IpAddress, request.UserAgent, true, null);
 
                     return new LoginResponseDto
                     {
@@ -154,6 +178,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                     // Personel Login
                     _logger.LogInformation("Login başarılı - {TcKimlikNo} - {AdSoyad}",
                         user.TcKimlikNo, user.Personel.AdSoyad);
+
+                    // ✅ Başarılı login kaydı
+                    await CreateLoginLogAsync(user.TcKimlikNo, user.Personel.AdSoyad, sessionId,
+                        request.IpAddress, request.UserAgent, true, null);
 
                     // 🔑 Yetkileri çek (atanmış + MinYetkiSeviyesi >= None olan varsayılanlar)
                     var permissions = await _personelYetkiService.GetUserPermissionsWithDefaultsAsync(user.TcKimlikNo);
@@ -198,12 +226,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
             try
             {
                 // 4 alan ile kullanıcıyı doğrula
-                var personel = await _context.Personeller
-                    .FirstOrDefaultAsync(p =>
-                        p.TcKimlikNo == request.TcKimlikNo &&
-                        p.SicilNo == request.SicilNo &&
-                        p.DogumTarihi.Date == request.DogumTarihi.Date &&
-                        p.Email.ToLower() == request.Email.ToLower());
+                var personelRepo = _unitOfWork.Repository<Personel>();
+                var allPersonel = await personelRepo.GetAllAsync();
+                var personel = allPersonel.FirstOrDefault(p =>
+                    p.TcKimlikNo == request.TcKimlikNo &&
+                    p.SicilNo == request.SicilNo &&
+                    p.DogumTarihi.Date == request.DogumTarihi.Date &&
+                    p.Email != null && p.Email.ToLower() == request.Email.ToLower());
 
                 if (personel == null)
                 {
@@ -240,8 +269,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
         {
             try
             {
-                var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.TcKimlikNo == request.TcKimlikNo);
+                var userRepo = _unitOfWork.GetRepository<IUserRepository>();
+                var user = await userRepo.GetByTcKimlikNoAsync(request.TcKimlikNo);
 
                 if (user == null)
                 {
@@ -251,7 +280,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
 
                 // Yeni şifreyi düz metin olarak kaydet
                 user.PassWord = request.NewPassword;
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 _logger.LogInformation("Şifre başarıyla sıfırlandı - {TcKimlikNo}", request.TcKimlikNo);
                 return true;
@@ -273,6 +302,91 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
         {
             // Düz metin karşılaştırması
             return password == storedPassword;
+        }
+
+        /// <summary>
+        /// UserAgent string'inden browser bilgisini çıkarır
+        /// </summary>
+        private string ParseBrowser(string? userAgent)
+        {
+            if (string.IsNullOrEmpty(userAgent)) return "Unknown";
+
+            if (userAgent.Contains("Edg/")) return "Edge";
+            if (userAgent.Contains("Chrome/")) return "Chrome";
+            if (userAgent.Contains("Firefox/")) return "Firefox";
+            if (userAgent.Contains("Safari/") && !userAgent.Contains("Chrome")) return "Safari";
+            if (userAgent.Contains("Opera/") || userAgent.Contains("OPR/")) return "Opera";
+
+            return "Other";
+        }
+
+        /// <summary>
+        /// UserAgent string'inden işletim sistemi bilgisini çıkarır
+        /// </summary>
+        private string ParseOperatingSystem(string? userAgent)
+        {
+            if (string.IsNullOrEmpty(userAgent)) return "Unknown";
+
+            if (userAgent.Contains("Windows NT 10.0")) return "Windows 10/11";
+            if (userAgent.Contains("Windows NT 6.3")) return "Windows 8.1";
+            if (userAgent.Contains("Windows NT 6.2")) return "Windows 8";
+            if (userAgent.Contains("Windows NT 6.1")) return "Windows 7";
+            if (userAgent.Contains("Mac OS X")) return "macOS";
+            if (userAgent.Contains("Linux")) return "Linux";
+            if (userAgent.Contains("Android")) return "Android";
+            if (userAgent.Contains("iPhone") || userAgent.Contains("iPad")) return "iOS";
+
+            return "Other";
+        }
+
+        /// <summary>
+        /// UserAgent string'inden cihaz tipi bilgisini çıkarır
+        /// </summary>
+        private string ParseDeviceType(string? userAgent)
+        {
+            if (string.IsNullOrEmpty(userAgent)) return "Unknown";
+
+            if (userAgent.Contains("Mobile") || userAgent.Contains("Android")) return "Mobile";
+            if (userAgent.Contains("Tablet") || userAgent.Contains("iPad")) return "Tablet";
+
+            return "Desktop";
+        }
+
+        /// <summary>
+        /// Login/Logout log kaydı oluşturur
+        /// </summary>
+        private async Task CreateLoginLogAsync(string? tcKimlikNo, string? adSoyad, string? sessionId,
+            string? ipAddress, string? userAgent, bool loginSuccessful, string? failureReason = null)
+        {
+            try
+            {
+                var loginLog = new LoginLogoutLog
+                {
+                    TcKimlikNo = tcKimlikNo,
+                    AdSoyad = adSoyad,
+                    LoginTime = DateTime.Now,
+                    SessionID = sessionId,
+                    IpAddress = ipAddress,
+                    UserAgent = userAgent,
+                    Browser = ParseBrowser(userAgent),
+                    OperatingSystem = ParseOperatingSystem(userAgent),
+                    DeviceType = ParseDeviceType(userAgent),
+                    LoginSuccessful = loginSuccessful,
+                    FailureReason = failureReason
+                };
+
+                var loginLogRepo = _unitOfWork.Repository<LoginLogoutLog>();
+                await loginLogRepo.AddAsync(loginLog);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("LoginLogoutLog kaydı oluşturuldu - TC: {TcKimlikNo}, Success: {Success}",
+                    tcKimlikNo, loginSuccessful);
+            }
+            catch (Exception ex)
+            {
+                // Log kaydı hata verirse ana işlemi etkilemesin
+                _logger.LogError(ex, "LoginLogoutLog kaydı oluşturulurken hata - TC: {TcKimlikNo}", tcKimlikNo);
+            }
         }
     }
 }
