@@ -115,6 +115,34 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
         }
 
         /// <summary>
+        /// Session ID ile logout time güncelleme
+        /// Başka cihazdan login yapıldığında eski session'ı kapatmak için kullanılır
+        /// </summary>
+        [HttpPost("logout-by-session/{sessionId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> LogoutBySessionId(string sessionId)
+        {
+            try
+            {
+                _logger.LogInformation("🔄 Logout by SessionID: {SessionId}", sessionId);
+
+                var result = await _loginLogoutLogService.UpdateLogoutTimeBySessionIdAsync(sessionId);
+                if (result.Success && result.Data)
+                {
+                    _logger.LogInformation("✅ Logout time güncellendi - SessionID: {SessionId}", sessionId);
+                    return Ok(new { success = true, message = "Logout time güncellendi" });
+                }
+
+                return Ok(new { success = false, message = "Logout time güncellenemedi" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Logout by SessionID hatası - SessionID: {SessionId}", sessionId);
+                return Ok(new { success = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>
         /// Çıkış işlemi
         /// Banko modundan çıkış ve session temizleme
         /// </summary>
