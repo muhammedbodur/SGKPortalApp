@@ -1,26 +1,25 @@
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Auth;
-using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth
 {
     public class LoginLogoutLogApiService : ILoginLogoutLogApiService
     {
-        private readonly ILoginLogoutLogApiService _loginLogoutLogService;
-        private readonly IToastService _toastService;
+        private readonly HttpClient _httpClient;
         private readonly ILogger<LoginLogoutLogApiService> _logger;
 
         public LoginLogoutLogApiService(
-            ILoginLogoutLogApiService loginLogoutLogService,
-            IToastService toastService,
+            HttpClient httpClient,
             ILogger<LoginLogoutLogApiService> logger)
         {
-            _loginLogoutLogService = loginLogoutLogService;
-            _toastService = toastService;
+            _httpClient = httpClient;
             _logger = logger;
         }
 
@@ -28,19 +27,28 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth
         {
             try
             {
-                var result = await _loginLogoutLogService.GetLogsAsync(filter);
-                if (!result.Success)
+                var response = await _httpClient.PostAsJsonAsync("loginlogoutlog/logs", filter);
+
+                if (!response.IsSuccessStatusCode)
                 {
-                    await _toastService.ShowErrorAsync(result.Message ?? "Log'lar yüklenirken hata oluştu");
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetLogsAsync failed: {Error}", errorContent);
                     return null;
                 }
 
-                return result.Data;
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<LoginLogoutLogPagedResultDto>>();
+
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return apiResponse.Data;
+                }
+
+                _logger.LogWarning("GetLogsAsync returned no data: {Message}", apiResponse?.Message);
+                return null;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "GetLogsAsync failed");
-                await _toastService.ShowErrorAsync("Log'lar yüklenirken bir hata oluştu");
+                _logger.LogError(ex, "GetLogsAsync Exception");
                 return null;
             }
         }
@@ -49,19 +57,28 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth
         {
             try
             {
-                var result = await _loginLogoutLogService.GetLogByIdAsync(id);
-                if (!result.Success)
+                var response = await _httpClient.GetAsync($"loginlogoutlog/{id}");
+
+                if (!response.IsSuccessStatusCode)
                 {
-                    await _toastService.ShowErrorAsync(result.Message ?? "Log yüklenirken hata oluştu");
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetLogByIdAsync failed: {Error}", errorContent);
                     return null;
                 }
 
-                return result.Data;
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<LoginLogoutLogResponseDto>>();
+
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return apiResponse.Data;
+                }
+
+                _logger.LogWarning("GetLogByIdAsync returned no data: {Message}", apiResponse?.Message);
+                return null;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "GetLogByIdAsync failed for ID: {Id}", id);
-                await _toastService.ShowErrorAsync("Log yüklenirken bir hata oluştu");
+                _logger.LogError(ex, "GetLogByIdAsync Exception for ID: {Id}", id);
                 return null;
             }
         }
@@ -70,12 +87,28 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth
         {
             try
             {
-                var result = await _loginLogoutLogService.GetActiveSessionCountAsync();
-                return result.Success ? result.Data : 0;
+                var response = await _httpClient.GetAsync("loginlogoutlog/active-session-count");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetActiveSessionCountAsync failed: {Error}", errorContent);
+                    return 0;
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<int>>();
+
+                if (apiResponse?.Success == true)
+                {
+                    return apiResponse.Data;
+                }
+
+                _logger.LogWarning("GetActiveSessionCountAsync returned no data: {Message}", apiResponse?.Message);
+                return 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "GetActiveSessionCountAsync failed");
+                _logger.LogError(ex, "GetActiveSessionCountAsync Exception");
                 return 0;
             }
         }
@@ -84,12 +117,28 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth
         {
             try
             {
-                var result = await _loginLogoutLogService.GetTodayLoginCountAsync();
-                return result.Success ? result.Data : 0;
+                var response = await _httpClient.GetAsync("loginlogoutlog/today-login-count");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetTodayLoginCountAsync failed: {Error}", errorContent);
+                    return 0;
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<int>>();
+
+                if (apiResponse?.Success == true)
+                {
+                    return apiResponse.Data;
+                }
+
+                _logger.LogWarning("GetTodayLoginCountAsync returned no data: {Message}", apiResponse?.Message);
+                return 0;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "GetTodayLoginCountAsync failed");
+                _logger.LogError(ex, "GetTodayLoginCountAsync Exception");
                 return 0;
             }
         }
