@@ -34,6 +34,11 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog
         /// </summary>
         public string? TargetPersonAdSoyad { get; set; }
 
+        /// <summary>
+        /// İşlem yapılan entity'nin tanımlayıcı bilgisi (TcKimlikNo yoksa: ServisAdi, DepartmanAdi, vs.)
+        /// </summary>
+        public string? TargetEntityInfo { get; set; }
+
         // Display helpers
         public string IslemTuruText => IslemTuru.ToString();
         public string IslemZamaniText => IslemZamani.ToLocalTime().ToString("dd.MM.yyyy HH:mm:ss");

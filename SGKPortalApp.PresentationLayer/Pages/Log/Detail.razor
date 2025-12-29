@@ -63,6 +63,17 @@
                                         </td>
                                     </tr>
                                 }
+                                else if (!string.IsNullOrEmpty(detail.TargetEntityInfo))
+                                {
+                                    <tr>
+                                        <th>İşlem Yapılan Kayıt:</th>
+                                        <td>
+                                            <span class="badge bg-secondary">
+                                                <i class="bx bx-folder me-1"></i>@detail.TargetEntityInfo
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
                                 <tr>
                                     <th>Tablo:</th>
                                     <td><span class="badge bg-info">@detail.TabloAdi</span></td>

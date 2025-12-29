@@ -96,6 +96,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     dto.TargetPersonAdSoyad = await _auditLogQueryRepository.GetAdSoyadByTcKimlikNoAsync(dto.TargetPersonTcKimlikNo);
                 }
 
+                // Tanım tabloları için entity bilgisini extract et (TcKimlikNo yoksa)
+                if (string.IsNullOrEmpty(dto.TargetPersonTcKimlikNo))
+                {
+                    dto.TargetEntityInfo = ExtractTargetEntityInfo(l.TableName, beforeData, afterData);
+                }
+
                 logs.Add(dto);
             }
 
@@ -168,6 +174,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             if (!string.IsNullOrEmpty(detail.TargetPersonTcKimlikNo))
             {
                 detail.TargetPersonAdSoyad = await _auditLogQueryRepository.GetAdSoyadByTcKimlikNoAsync(detail.TargetPersonTcKimlikNo);
+            }
+
+            // Tanım tabloları için entity bilgisini extract et (TcKimlikNo yoksa)
+            if (string.IsNullOrEmpty(detail.TargetPersonTcKimlikNo))
+            {
+                detail.TargetEntityInfo = ExtractTargetEntityInfo(log.TableName, detail.BeforeDataJson, detail.AfterDataJson);
             }
 
             // Transaction içindeki diğer log'ları al
@@ -377,6 +389,113 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Tanım tabloları için entity'nin tanımlayıcı bilgisini extract eder
+        /// Tablo adına göre ilgili field'ı (ServisAdi, DepartmanAdi, vs.) döndürür
+        /// </summary>
+        private string? ExtractTargetEntityInfo(string tableName, string? beforeJson, string? afterJson)
+        {
+            // Tablo adına göre hangi field'a bakacağımızı belirle
+            var identifierFieldMapping = new Dictionary<string, string>
+            {
+                // Organizasyon Tanımları
+                ["PER_Departmanlar"] = "DepartmanAdi",
+                ["PER_Servisler"] = "ServisAdi",
+                ["PER_Unvanlar"] = "UnvanAdi",
+                ["PER_Sendikalar"] = "SendikaAdi",
+                ["PER_AtanmaNedenleri"] = "AtanmaNedeni",
+                ["PER_HizmetBinalari"] = "HizmetBinasiAdi",
+
+                // Lokasyon Tanımları
+                ["CMN_Iller"] = "IlAdi",
+                ["CMN_Ilceler"] = "IlceAdi",
+
+                // Modül/Yetki Tanımları
+                ["PER_Moduller"] = "ModulAdi",
+                ["PER_ModulControllers"] = "ModulControllerAdi",
+                ["PER_ModulControllerIslemleri"] = "ModulControllerIslemAdi",
+
+                // Sıramatik Tanımları
+                ["SRM_Bankolar"] = "BankoNo",
+                ["SRM_Tvler"] = "TvAdi",
+                ["SRM_Kiosklar"] = "KioskAdi",
+                ["SRM_Siralar"] = "SiraNo",
+                ["SRM_Kanallar"] = "KanalAdi",
+                ["SRM_KanallarAlt"] = "KanalAltAdi",
+                ["SRM_KanalIslemleri"] = "KanalIslemAdi",
+                ["SRM_KanalAltIslemleri"] = "KanalAltIslemAdi",
+
+                // PDKS Tanımları
+                ["PDKS_Cihazlar"] = "CihazIP",
+
+                // User Tabloları
+                ["CMN_Users"] = "UserName",
+                ["CMN_Roles"] = "RoleName"
+            };
+
+            if (!identifierFieldMapping.TryGetValue(tableName, out var fieldName))
+                return null; // Bu tablo için mapping yok
+
+            try
+            {
+                // Önce After'dan dene (INSERT/UPDATE için)
+                if (!string.IsNullOrWhiteSpace(afterJson))
+                {
+                    var afterDict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(afterJson);
+                    if (afterDict != null && afterDict.ContainsKey(fieldName))
+                    {
+                        var value = afterDict[fieldName].ToString();
+                        if (!string.IsNullOrWhiteSpace(value))
+                            return FormatEntityInfo(tableName, fieldName, value, afterDict);
+                    }
+                }
+
+                // After'da yoksa Before'dan dene (DELETE için)
+                if (!string.IsNullOrWhiteSpace(beforeJson))
+                {
+                    var beforeDict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(beforeJson);
+                    if (beforeDict != null && beforeDict.ContainsKey(fieldName))
+                    {
+                        var value = beforeDict[fieldName].ToString();
+                        if (!string.IsNullOrWhiteSpace(value))
+                            return FormatEntityInfo(tableName, fieldName, value, beforeDict);
+                    }
+                }
+            }
+            catch
+            {
+                // Parse hatası - null dön
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Entity bilgisini kullanıcı dostu formatta biçimlendirir
+        /// </summary>
+        private string FormatEntityInfo(string tableName, string fieldName, string value, Dictionary<string, JsonElement> data)
+        {
+            // Özel formatlamalar
+            switch (tableName)
+            {
+                case "SRM_Bankolar":
+                    // "Banko #5" formatında göster
+                    return $"Banko #{value}";
+
+                case "SRM_Siralar":
+                    // "Sıra #123" formatında göster
+                    return $"Sıra #{value}";
+
+                case "PDKS_Cihazlar":
+                    // "Cihaz: 192.168.1.10" formatında göster
+                    return $"Cihaz: {value}";
+
+                default:
+                    // Diğer tablolar için sadece değeri döndür
+                    return value;
+            }
         }
 
         #endregion

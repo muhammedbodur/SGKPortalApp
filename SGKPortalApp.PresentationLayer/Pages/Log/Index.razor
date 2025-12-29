@@ -277,7 +277,15 @@ else
                                                 <div>
                                                     <strong>@log.TargetPersonAdSoyad</strong>
                                                     <br />
-                                                    <small class="text-muted">@log.TargetPersonTcKimlikNo</small>
+                                                    <small class="text-muted">TC: @log.TargetPersonTcKimlikNo</small>
+                                                </div>
+                                            }
+                                            else if (!string.IsNullOrEmpty(log.TargetEntityInfo))
+                                            {
+                                                <div>
+                                                    <span class="badge bg-secondary-subtle text-secondary">
+                                                        <i class="bx bx-folder me-1"></i>@log.TargetEntityInfo
+                                                    </span>
                                                 </div>
                                             }
                                             else
