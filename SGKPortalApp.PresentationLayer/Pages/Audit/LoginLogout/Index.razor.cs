@@ -6,9 +6,9 @@ using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System;
 using System.Threading.Tasks;
 
-namespace SGKPortalApp.PresentationLayer.Pages.Auth
+namespace SGKPortalApp.PresentationLayer.Pages.Audit.LoginLogout
 {
-    public partial class LoginLogout
+    public partial class Index
     {
         [Inject] private ILoginLogoutLogApiService _loginLogoutLogApiService { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
