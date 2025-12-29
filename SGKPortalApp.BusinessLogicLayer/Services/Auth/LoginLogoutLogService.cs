@@ -32,7 +32,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
         {
             try
             {
-                var loginLogoutRepo = _unitOfWork.Repository<ILoginLogoutLogRepository>();
+                var loginLogoutRepo = _unitOfWork.GetRepository<ILoginLogoutLogRepository>();
 
                 var (logs, totalCount) = await loginLogoutRepo.GetFilteredLogsAsync(
                     filter.SearchText,
@@ -67,7 +67,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
         {
             try
             {
-                var loginLogoutRepo = _unitOfWork.Repository<ILoginLogoutLogRepository>();
+                var loginLogoutRepo = _unitOfWork.GetRepository<ILoginLogoutLogRepository>();
                 var log = await loginLogoutRepo.GetByIdAsync(id);
 
                 if (log == null)
@@ -87,7 +87,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
         {
             try
             {
-                var loginLogoutRepo = _unitOfWork.Repository<ILoginLogoutLogRepository>();
+                var loginLogoutRepo = _unitOfWork.GetRepository<ILoginLogoutLogRepository>();
                 var count = await loginLogoutRepo.GetActiveUserCountAsync();
                 return ApiResponseDto<int>.SuccessResult(count);
             }
@@ -102,7 +102,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
         {
             try
             {
-                var loginLogoutRepo = _unitOfWork.Repository<ILoginLogoutLogRepository>();
+                var loginLogoutRepo = _unitOfWork.GetRepository<ILoginLogoutLogRepository>();
                 var count = await loginLogoutRepo.GetDailyLoginCountAsync(DateTime.Today);
                 return ApiResponseDto<int>.SuccessResult(count);
             }
