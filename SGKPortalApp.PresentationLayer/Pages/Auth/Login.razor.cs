@@ -14,6 +14,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
         [Inject] private ICookieAuthService CookieAuthService { get; set; } = default!;
         [Inject] private NavigationManager Navigation { get; set; } = default!;
         [Inject] private IJSRuntime JS { get; set; } = default!;
+        [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
 
         [Parameter]
         [SupplyParameterFromQuery(Name = "sessionExpired")]
@@ -46,6 +47,20 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
             {
                 await JS.InvokeVoidAsync("console.log", "🔵 1. HandleLogin başladı");
                 await JS.InvokeVoidAsync("console.log", $"🔵 2. TC: {loginModel.TcKimlikNo}, Şifre uzunluğu: {loginModel.Password?.Length}");
+
+                // ⚠️ User-Agent ve IpAddress bilgilerini ekle
+                // JavaScript'ten User-Agent al (daha güvenilir - tarayıcı bilgisi)
+                var userAgent = await JS.InvokeAsync<string>("eval", "navigator.userAgent");
+                loginModel.UserAgent = userAgent;
+
+                // IpAddress'i HttpContext'ten al (server-side)
+                var httpContext = HttpContextAccessor.HttpContext;
+                if (httpContext != null)
+                {
+                    loginModel.IpAddress = httpContext.Connection.RemoteIpAddress?.ToString();
+                }
+
+                await JS.InvokeVoidAsync("console.log", $"🔵 2.5. UserAgent: {loginModel.UserAgent}, IP: {loginModel.IpAddress}");
 
                 await JS.InvokeVoidAsync("console.log", "🔵 3. API çağrısı yapılıyor...");
                 var response = await AuthApiService.LoginAsync(loginModel);
