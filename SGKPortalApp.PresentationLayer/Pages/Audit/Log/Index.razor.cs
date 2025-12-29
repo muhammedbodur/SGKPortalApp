@@ -167,6 +167,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Log
             }
         }
 
+        private async Task OnPageSizeChangedEvent(ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out int pageSize))
+            {
+                Filter.PageSize = pageSize;
+                Filter.PageNumber = 1; // Sayfa boyutu değiştiğinde ilk sayfaya dön
+                await SearchAsync();
+            }
+        }
+
         // ═══════════════════════════════════════════════════════
         // SEARCH & PAGINATION
         // ═══════════════════════════════════════════════════════

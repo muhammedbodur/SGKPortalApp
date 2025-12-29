@@ -123,7 +123,9 @@ else
                         @* Sayfa Başına Kayıt *@
                         <div class="col-md-2">
                             <label class="form-label">Sayfa Başına</label>
-                            <select class="form-select" @bind="Filter.PageSize">
+                            <select class="form-select"
+                                    @onchange="OnPageSizeChangedEvent"
+                                    value="@Filter.PageSize">
                                 <option value="10">10</option>
                                 <option value="25">25</option>
                                 <option value="50">50</option>
