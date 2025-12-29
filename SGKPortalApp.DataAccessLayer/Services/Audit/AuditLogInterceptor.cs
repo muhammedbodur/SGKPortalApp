@@ -80,8 +80,9 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
                 if (entityType == typeof(DatabaseLog))
                     continue;
 
-                // ExcludedTables kontrolü
-                if (_options.ExcludedTables != null && _options.ExcludedTables.Contains(tableName))
+                // ExcludedTables kontrolü (case-insensitive)
+                if (_options.ExcludedTables != null &&
+                    _options.ExcludedTables.Any(t => t.Equals(tableName, StringComparison.OrdinalIgnoreCase)))
                 {
                     System.Diagnostics.Debug.WriteLine($"[AuditLog] Skipping excluded table: {tableName}");
                     continue;
