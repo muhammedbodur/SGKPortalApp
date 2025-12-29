@@ -309,11 +309,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 foreach (var key in allKeys.OrderBy(k => k))
                 {
                     var oldValue = beforeDict?.ContainsKey(key) == true
-                        ? beforeDict[key].ToString()
+                        ? GetStringFromJsonElement(beforeDict[key])
                         : null;
 
                     var newValue = afterDict?.ContainsKey(key) == true
-                        ? afterDict[key].ToString()
+                        ? GetStringFromJsonElement(afterDict[key])
                         : null;
 
                     // Her iki değer de boşsa skip et (gereksiz kayıt)
@@ -365,7 +365,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     var afterDict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(afterJson);
                     if (afterDict != null && afterDict.ContainsKey("TcKimlikNo"))
                     {
-                        var tcValue = afterDict["TcKimlikNo"].ToString();
+                        var tcValue = GetStringFromJsonElement(afterDict["TcKimlikNo"]);
                         if (!string.IsNullOrWhiteSpace(tcValue))
                             return tcValue;
                     }
@@ -377,7 +377,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     var beforeDict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(beforeJson);
                     if (beforeDict != null && beforeDict.ContainsKey("TcKimlikNo"))
                     {
-                        var tcValue = beforeDict["TcKimlikNo"].ToString();
+                        var tcValue = GetStringFromJsonElement(beforeDict["TcKimlikNo"]);
                         if (!string.IsNullOrWhiteSpace(tcValue))
                             return tcValue;
                     }
@@ -446,7 +446,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     var afterDict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(afterJson);
                     if (afterDict != null && afterDict.ContainsKey(fieldName))
                     {
-                        var value = afterDict[fieldName].ToString();
+                        var value = GetStringFromJsonElement(afterDict[fieldName]);
                         if (!string.IsNullOrWhiteSpace(value))
                             return FormatEntityInfo(tableName, fieldName, value, afterDict);
                     }
@@ -458,7 +458,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     var beforeDict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(beforeJson);
                     if (beforeDict != null && beforeDict.ContainsKey(fieldName))
                     {
-                        var value = beforeDict[fieldName].ToString();
+                        var value = GetStringFromJsonElement(beforeDict[fieldName]);
                         if (!string.IsNullOrWhiteSpace(value))
                             return FormatEntityInfo(tableName, fieldName, value, beforeDict);
                     }
@@ -496,6 +496,23 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     // Diğer tablolar için sadece değeri döndür
                     return value;
             }
+        }
+
+        /// <summary>
+        /// JsonElement'ten string değer çıkarır (ToString() yerine güvenli yöntem)
+        /// </summary>
+        private string? GetStringFromJsonElement(JsonElement element)
+        {
+            return element.ValueKind switch
+            {
+                JsonValueKind.String => element.GetString(),
+                JsonValueKind.Number => element.ToString(),
+                JsonValueKind.True => "true",
+                JsonValueKind.False => "false",
+                JsonValueKind.Null => null,
+                JsonValueKind.Undefined => null,
+                _ => element.ToString()
+            };
         }
 
         #endregion
