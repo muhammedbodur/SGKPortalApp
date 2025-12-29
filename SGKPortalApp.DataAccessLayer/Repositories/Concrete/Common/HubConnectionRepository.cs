@@ -105,20 +105,20 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
         public async Task<IEnumerable<HubConnection>> GetStaleConnectionsAsync(System.DateTime timeoutThreshold)
         {
             return await _dbSet
-                .Where(h => h.AktifMi && h.ConnectedAt < timeoutThreshold)
+                .Where(h => h.ConnectionStatus == ConnectionStatus.online && h.ConnectedAt < timeoutThreshold)
                 .ToListAsync();
         }
 
         public async Task<int> DeactivateStaleConnectionsAsync(System.DateTime timeoutThreshold)
         {
             var staleConnections = await _dbSet
-                .Where(h => h.AktifMi && h.ConnectedAt < timeoutThreshold)
+                .Where(h => h.ConnectionStatus == ConnectionStatus.online && h.ConnectedAt < timeoutThreshold)
                 .ToListAsync();
 
             foreach (var connection in staleConnections)
             {
-                connection.AktifMi = false;
-                connection.DisconnectedAt = System.DateTime.Now;
+                connection.ConnectionStatus = ConnectionStatus.offline;
+                connection.SilindiMi = true;
             }
 
             return staleConnections.Count;
@@ -127,7 +127,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
         public async Task<IEnumerable<string>> GetActiveSessionIdsAsync()
         {
             return await _dbSet
-                .Where(h => h.AktifMi)
+                .Where(h => h.ConnectionStatus == ConnectionStatus.online)
                 .Join(_context.Users,
                     h => h.TcKimlikNo,
                     u => u.TcKimlikNo,
