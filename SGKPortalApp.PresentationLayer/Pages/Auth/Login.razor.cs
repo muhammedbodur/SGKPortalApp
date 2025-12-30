@@ -82,10 +82,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
                 var loginDataJson = System.Text.Json.JsonSerializer.Serialize(response);
                 await JS.InvokeVoidAsync("submitLoginForm", loginDataJson);
             }
+            catch (TaskCanceledException)
+            {
+                // ✅ NORMAL: Redirect olurken Blazor circuit kesiliyor, görmezden gel
+                // Kullanıcı zaten giriş yapmış durumda
+            }
             catch (Exception ex)
             {
                 errorMessage = "Bir hata oluştu. Lütfen tekrar deneyin.";
-                await JS.InvokeVoidAsync("console.error", $"❌ Hata: {ex.Message}");
+                try
+                {
+                    await JS.InvokeVoidAsync("console.error", $"❌ Hata: {ex.Message}");
+                }
+                catch (TaskCanceledException)
+                {
+                    // Hata loglama sırasında da circuit kesilmiş olabilir
+                }
             }
             finally
             {
