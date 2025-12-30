@@ -152,7 +152,11 @@ class SignalRConnectionManager {
      */
     async checkConnection() {
         const state = this.getConnectionState();
-        console.log('🔍 Bağlantı durumu:', state);
+
+        // Sadece localhost'ta veya bağlantı kopuksa log yaz
+        if (window.location.hostname === 'localhost' || state === 'Disconnected') {
+            console.log('🔍 Bağlantı durumu:', state);
+        }
 
         if (state === 'Disconnected') {
             console.log('⚠️ Bağlantı kopuk, yeniden bağlanılıyor...');
@@ -163,7 +167,7 @@ class SignalRConnectionManager {
         if (state === 'Connected') {
             try {
                 await this.connection.invoke('BankoHeartbeat');
-                console.log('💓 Banko heartbeat gönderildi');
+                // Heartbeat başarılı, log gereksiz (sadece hata durumunda log)
             } catch (error) {
                 console.warn('⚠️ Banko heartbeat hatası:', error);
             }

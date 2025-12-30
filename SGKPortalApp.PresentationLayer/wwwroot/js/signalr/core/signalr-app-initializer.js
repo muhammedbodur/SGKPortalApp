@@ -33,7 +33,7 @@
         // appsettings.json'dan gelen API URL'i kullanır (dinamik)
         hubUrl: window.appConfig?.apiUrl ? `${window.appConfig.apiUrl}/hubs/siramatik` : 'https://localhost:9080/hubs/siramatik',
         loginRedirectUrl: '/Account/Login',
-        enableDebugLogs: true
+        enableDebugLogs: window.location.hostname === 'localhost' // Sadece localhost'ta debug log
     };
 
     // ============================================
