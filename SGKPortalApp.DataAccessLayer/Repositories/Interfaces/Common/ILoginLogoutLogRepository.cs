@@ -45,6 +45,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common
             int pageSize);
 
         // SessionID bazında işlemler
+        Task<LoginLogoutLog?> GetBySessionIdAsync(string sessionId);
         Task<LoginLogoutLog?> GetActiveSessionBySessionIdAsync(string sessionId);
         Task<bool> UpdateLogoutTimeBySessionIdAsync(string sessionId, DateTime logoutTime);
 
