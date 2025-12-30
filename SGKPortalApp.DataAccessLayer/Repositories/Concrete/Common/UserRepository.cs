@@ -144,7 +144,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
 
             user.BankoModuAktif = false;
             user.AktifBankoId = null;
-            // BankoModuBaslangic'i null yapma - log için sakla
+            user.BankoModuBaslangic = null;
+            user.DuzenlenmeTarihi = DateTime.Now;
 
             return true;
         }
