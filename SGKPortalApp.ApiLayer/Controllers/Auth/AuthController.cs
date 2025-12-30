@@ -19,6 +19,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
         private readonly IHubContext<SiramatikHub> _hubContext;
         private readonly ILogger<AuthController> _logger;
         private readonly ILoginLogoutLogService _loginLogoutLogService;
+        private readonly IWindowsUsernameService _windowsUsernameService;
 
         public AuthController(
             IAuthService authService,
@@ -26,7 +27,8 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
             IHubConnectionService hubConnectionService,
             IHubContext<SiramatikHub> hubContext,
             ILogger<AuthController> logger,
-            ILoginLogoutLogService loginLogoutLogService)
+            ILoginLogoutLogService loginLogoutLogService,
+            IWindowsUsernameService windowsUsernameService)
         {
             _authService = authService;
             _bankoModeService = bankoModeService;
@@ -34,6 +36,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
             _hubContext = hubContext;
             _logger = logger;
             _loginLogoutLogService = loginLogoutLogService;
+            _windowsUsernameService = windowsUsernameService;
         }
 
         /// <summary>
@@ -112,6 +115,40 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
             }
 
             return Ok(new { message = "Şifreniz başarıyla değiştirildi. Giriş yapabilirsiniz." });
+        }
+
+        /// <summary>
+        /// Domain bilgisi (Domain detection için)
+        /// Bilgisayarın domain altında olup olmadığını kontrol eder
+        /// </summary>
+        /// <returns>Domain bilgisi</returns>
+        [HttpGet("domain-info")]
+        [AllowAnonymous]
+        public IActionResult GetDomainInfo()
+        {
+            try
+            {
+                var isDomainJoined = _windowsUsernameService.IsDomainJoined();
+                var domainName = _windowsUsernameService.GetDomainName();
+                var windowsUsername = _windowsUsernameService.GetWindowsUsername();
+
+                return Ok(new
+                {
+                    isDomainJoined,
+                    domainName,
+                    windowsUsername
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Domain bilgisi alınırken hata oluştu");
+                return Ok(new
+                {
+                    isDomainJoined = false,
+                    domainName = (string?)null,
+                    windowsUsername = (string?)null
+                });
+            }
         }
 
         /// <summary>

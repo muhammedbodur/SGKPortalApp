@@ -33,5 +33,10 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth
             var response = await PostAsync<object, object>("auth/logout", new { });
             return response != null;
         }
+
+        public async Task<DomainInfoDto?> GetDomainInfoAsync()
+        {
+            return await GetAsync<DomainInfoDto>("auth/domain-info");
+        }
     }
 }
