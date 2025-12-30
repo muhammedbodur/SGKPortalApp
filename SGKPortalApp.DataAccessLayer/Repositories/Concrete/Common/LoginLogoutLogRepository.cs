@@ -167,6 +167,18 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
             return (logs, totalCount);
         }
 
+        public async Task<LoginLogoutLog?> GetBySessionIdAsync(string sessionId)
+        {
+            if (string.IsNullOrWhiteSpace(sessionId))
+                return null;
+
+            // SessionID'ye göre son login kaydını getir (LogoutTime olsun olmasın)
+            return await _dbSet
+                .Where(l => l.SessionID == sessionId)
+                .OrderByDescending(l => l.LoginTime)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<LoginLogoutLog?> GetActiveSessionBySessionIdAsync(string sessionId)
         {
             if (string.IsNullOrWhiteSpace(sessionId))
