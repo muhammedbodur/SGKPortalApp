@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Auth;
 using SGKPortalApp.PresentationLayer.Services.AuthenticationServices.Interfaces;
@@ -16,7 +15,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
         [Inject] private NavigationManager Navigation { get; set; } = default!;
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
-        [Inject] private IWindowsUsernameService WindowsUsernameService { get; set; } = default!;
 
         [Parameter]
         [SupplyParameterFromQuery(Name = "sessionExpired")]
@@ -31,20 +29,28 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
         private bool isDomainJoined = false;
         private string? domainName = null;
 
-        protected override void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
-            // Domain detection
-            isDomainJoined = WindowsUsernameService.IsDomainJoined();
-            domainName = WindowsUsernameService.GetDomainName();
+            // Domain detection - API'den al
+            try
+            {
+                var domainInfo = await AuthApiService.GetDomainInfoAsync();
+                if (domainInfo != null)
+                {
+                    isDomainJoined = domainInfo.IsDomainJoined;
+                    domainName = domainInfo.DomainName;
 
-            // Login mode'u otomatik belirle
-            if (isDomainJoined)
-            {
-                loginModel.Mode = LoginMode.ActiveDirectory;
+                    // Login mode'u otomatik belirle
+                    loginModel.Mode = isDomainJoined ? LoginMode.ActiveDirectory : LoginMode.Standard;
+                }
             }
-            else
+            catch (Exception ex)
             {
+                // Domain detection başarısız olursa, default olarak Standard mode kullan
+                isDomainJoined = false;
+                domainName = null;
                 loginModel.Mode = LoginMode.Standard;
+                await JS.InvokeVoidAsync("console.warn", $"Domain detection başarısız: {ex.Message}");
             }
         }
 

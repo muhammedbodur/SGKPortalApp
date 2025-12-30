@@ -24,5 +24,10 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Auth
         /// Çıkış
         /// </summary>
         Task<bool> LogoutAsync();
+
+        /// <summary>
+        /// Domain detection - Bilgisayar domain altında mı?
+        /// </summary>
+        Task<DomainInfoDto?> GetDomainInfoAsync();
     }
 }
