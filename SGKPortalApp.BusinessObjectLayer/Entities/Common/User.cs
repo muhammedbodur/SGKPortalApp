@@ -53,6 +53,13 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
         public bool AktifMi { get; set; } = false;
 
         public DateTime? SonGirisTarihi { get; set; }
+
+        /// <summary>
+        /// Kullanıcının son aktivite zamanı (her request'te güncellenir)
+        /// 30 dakika idle session timeout için kullanılır
+        /// </summary>
+        public DateTime? SonAktiviteZamani { get; set; }
+
         public int BasarisizGirisSayisi { get; set; } = 0;
         public DateTime? HesapKilitTarihi { get; set; }
 

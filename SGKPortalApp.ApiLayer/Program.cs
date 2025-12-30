@@ -162,6 +162,7 @@ namespace SGKPortalApp.ApiLayer
             // 🧹 BACKGROUND SERVICES
             // ═══════════════════════════════════════════════════════
             builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.SessionCleanupService>();
+            builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.IdleSessionCleanupService>(); // 30 dakika idle timeout
 
             // ═══════════════════════════════════════════════════════
             // 🔧 AUTOMAPPER

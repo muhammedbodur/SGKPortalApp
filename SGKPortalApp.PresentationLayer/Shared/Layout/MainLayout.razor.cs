@@ -137,6 +137,14 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
 
                     // NOT: ForceLogout handler'ı signalr-app-initializer.js içinde zaten kuruluyor
 
+                    // ⭐ Aktivite heartbeat başlat (30 dakika idle timeout için)
+                    // Her 5 dakikada bir server'a ping at, son aktivite zamanını güncelle
+                    if (!string.IsNullOrEmpty(_tcKimlikNo))
+                    {
+                        await JS.InvokeVoidAsync("startActivityHeartbeat", 5); // 5 dakika interval
+                        Logger.LogInformation("✅ Aktivite heartbeat başlatıldı (5 dakika interval)");
+                    }
+
                     Logger.LogInformation("✅ MainLayout JS initialization tamamlandı (OnAfterRenderAsync)");
                 }
                 catch (Exception ex)
