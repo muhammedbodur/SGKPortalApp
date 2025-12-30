@@ -77,6 +77,7 @@ namespace SGKPortalApp.PresentationLayer.Middleware
             HttpContext context,
             IUserInfoService userInfoService,
             IUserApiService userApiService,
+            ILoginLogoutLogApiService loginLogoutLogApiService,
             IHttpClientFactory httpClientFactory)
         {
             // Session expired sayfasını ve login sayfasını kontrol dışında tut
@@ -109,6 +110,19 @@ namespace SGKPortalApp.PresentationLayer.Middleware
                         {
                             _logger.LogDebug("ℹ️ Grace period aktif, session kontrolü atlandı - TcKimlikNo: {TcKimlikNo}", tcKimlikNo);
                             await _next(context);
+                            return;
+                        }
+
+                        // 🔐 ÖNCE: Session hala geçerli mi kontrol et (LogoutTime set edilmemiş mi?)
+                        var isSessionValid = await loginLogoutLogApiService.IsSessionStillValidAsync(currentSessionId);
+                        if (!isSessionValid)
+                        {
+                            _logger.LogWarning("🚪 Session sonlanmış (LogoutTime set) - SessionID: {SessionId}, TcKimlikNo: {TcKimlikNo}",
+                                currentSessionId, tcKimlikNo);
+
+                            // Claims'leri temizle ve login sayfasına yönlendir
+                            await context.SignOutAsync();
+                            context.Response.Redirect("/auth/login?sessionExpired=true");
                             return;
                         }
 

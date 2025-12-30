@@ -10,5 +10,10 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Auth
         Task<LoginLogoutLogResponseDto?> GetLogByIdAsync(int id);
         Task<int> GetActiveSessionCountAsync();
         Task<int> GetTodayLoginCountAsync();
+
+        /// <summary>
+        /// Session hala geçerli mi? (LogoutTime set edilmemiş mi?)
+        /// </summary>
+        Task<bool> IsSessionStillValidAsync(string sessionId);
     }
 }
