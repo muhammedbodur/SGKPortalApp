@@ -57,7 +57,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR
         /// Orphan HubBankoConnection kayıtlarını temizler
         /// HubConnection offline/silinmiş ama HubBankoConnection hala aktif olanları bulur ve temizler
         /// </summary>
-        Task<int> CleanupOrphanBankoConnectionsAsync();
+        Task<(int count, List<string> cleanedTcKimlikNoList)> CleanupOrphanBankoConnectionsAsync();
 
         /// <summary>
         /// Orphan HubTvConnection kayıtlarını temizler

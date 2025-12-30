@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using SGKPortalApp.ApiLayer.Hubs;
+using SGKPortalApp.ApiLayer.Services.State;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SignalR;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
@@ -13,13 +16,19 @@ namespace SGKPortalApp.ApiLayer.Controllers.SignalR
     {
         private readonly IHubConnectionBusinessService _hubConnectionService;
         private readonly ILogger<HubConnectionController> _logger;
+        private readonly BankoModeStateService _stateService;
+        private readonly IHubContext<SiramatikHub> _hubContext;
 
         public HubConnectionController(
             IHubConnectionBusinessService hubConnectionService,
-            ILogger<HubConnectionController> logger)
+            ILogger<HubConnectionController> logger,
+            BankoModeStateService stateService,
+            IHubContext<SiramatikHub> hubContext)
         {
             _hubConnectionService = hubConnectionService;
             _logger = logger;
+            _stateService = stateService;
+            _hubContext = hubContext;
         }
 
         [HttpPost("connect")]
@@ -424,11 +433,29 @@ namespace SGKPortalApp.ApiLayer.Controllers.SignalR
         {
             try
             {
-                var count = await _hubConnectionService.CleanupOrphanBankoConnectionsAsync();
+                var (count, cleanedTcKimlikNoList) = await _hubConnectionService.CleanupOrphanBankoConnectionsAsync();
+
                 if (count > 0)
                 {
                     _logger.LogInformation("Cleanup orphan banko: {Count} kayıt temizlendi", count);
+
+                    // Her temizlenen kullanıcı için state service ve SignalR notification
+                    foreach (var tcKimlikNo in cleanedTcKimlikNoList)
+                    {
+                        // 1. Memory state'den temizle
+                        _stateService.DeactivateBankoMode(tcKimlikNo);
+
+                        // 2. SignalR ile client'a bildirim gönder (localStorage temizlesin diye)
+                        await _hubContext.Clients.User(tcKimlikNo).SendAsync("BankoModeExited", new
+                        {
+                            message = "Banko modu orphan cleanup tarafından kapatıldı",
+                            reason = "OrphanCleanup"
+                        });
+
+                        _logger.LogInformation($"🔔 Orphan cleanup notification gönderildi: {tcKimlikNo}");
+                    }
                 }
+
                 return Ok(new { cleanedCount = count, message = $"{count} orphan HubBankoConnection temizlendi" });
             }
             catch (Exception ex)
