@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using System.Threading.Tasks;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Auth;
 
 namespace SGKPortalApp.PresentationLayer.Middleware
 {
