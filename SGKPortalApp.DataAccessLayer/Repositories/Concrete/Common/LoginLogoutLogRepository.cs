@@ -173,8 +173,12 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
                 return null;
 
             // SessionID'ye göre son login kaydını getir (LogoutTime olsun olmasın)
+            // User ilişkisini de dahil ederek her iki tablodaki SessionID'lerin eşleşmesini kontrol et
             return await _dbSet
-                .Where(l => l.SessionID == sessionId)
+                .Include(l => l.User)
+                .Where(l => l.SessionID == sessionId
+                    && l.User != null
+                    && l.User.SessionID == sessionId)
                 .OrderByDescending(l => l.LoginTime)
                 .FirstOrDefaultAsync();
         }
