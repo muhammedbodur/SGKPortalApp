@@ -76,7 +76,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
 
                 if (connection != null)
                 {
-                    // 1. HubConnection'ı offline yap
+                    // Sadece HubConnection'ı offline yap
+                    // İlişkili HubBankoConnection ve HubTvConnection temizliği
+                    // OnDisconnectedAsync içinde ConnectionType'a göre yapılıyor:
+                    // - BankoMode: HubBankoConnection KORUNUR (sayfa yenileme için TransferBankoConnectionAsync kullanılır)
+                    // - TvMode: HubTvConnection TEMİZLENİR (DeactivateTvConnectionByHubConnectionIdAsync ile)
                     connection.ConnectionStatus = BusinessObjectLayer.Enums.SiramatikIslemleri.ConnectionStatus.offline;
                     connection.IslemZamani = DateTime.Now;
                     connection.DuzenlenmeTarihi = DateTime.Now;
@@ -85,36 +89,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     connection.SilinmeTarihi = DateTime.Now;
                     connection.SilenKullanici = "SignalR_Disconnect";
                     repo.Update(connection);
-
-                    // 2. İlişkili HubBankoConnection varsa deaktif et
-                    var bankoRepo = _unitOfWork.Repository<HubBankoConnection>();
-                    var bankoConnection = await bankoRepo.FirstOrDefaultAsync(
-                        b => b.HubConnectionId == connection.HubConnectionId && b.BankoModuAktif);
-
-                    if (bankoConnection != null)
-                    {
-                        bankoConnection.BankoModuAktif = false;
-                        bankoConnection.BankoModuBitis = DateTime.Now;
-                        bankoConnection.DuzenlenmeTarihi = DateTime.Now;
-                        bankoRepo.Update(bankoConnection);
-                        _logger.LogInformation($"✅ HubBankoConnection otomatik kapatıldı: Banko#{bankoConnection.BankoId} | {bankoConnection.TcKimlikNo}");
-                    }
-
-                    // 3. İlişkili HubTvConnection varsa soft-delete yap
-                    var tvRepo = _unitOfWork.Repository<HubTvConnection>();
-                    var tvConnection = await tvRepo.FirstOrDefaultAsync(
-                        t => t.HubConnectionId == connection.HubConnectionId && !t.SilindiMi);
-
-                    if (tvConnection != null)
-                    {
-                        tvConnection.SilindiMi = true;
-                        tvConnection.SilinmeTarihi = DateTime.Now;
-                        tvConnection.SilenKullanici = "SignalR_Disconnect";
-                        tvConnection.DuzenlenmeTarihi = DateTime.Now;
-                        tvRepo.Update(tvConnection);
-                        _logger.LogInformation($"✅ HubTvConnection otomatik kapatıldı: TV#{tvConnection.TvId}");
-                    }
-
                     await _unitOfWork.SaveChangesAsync();
                 }
 
