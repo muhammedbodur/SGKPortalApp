@@ -98,6 +98,15 @@ builder.Services.AddHttpClient("ApiClient", client =>
 
 Console.WriteLine($"✅ HttpClient configured - BaseAddress: {apiUrl}");
 
+// HttpClient for Background Services (No authentication handler)
+builder.Services.AddHttpClient("CleanupClient", client =>
+{
+    client.BaseAddress = new Uri(apiUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
+Console.WriteLine($"✅ CleanupClient configured (no auth) - BaseAddress: {apiUrl}");
+
 // ═══════════════════════════════════════════════════════
 // ⭐ KATMAN SERVİSLERİ ⭐
 // ═══════════════════════════════════════════════════════

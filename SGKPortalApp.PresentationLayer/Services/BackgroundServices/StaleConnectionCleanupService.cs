@@ -91,7 +91,7 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
         {
             try
             {
-                var httpClient = _httpClientFactory.CreateClient("ApiClient");
+                var httpClient = _httpClientFactory.CreateClient("CleanupClient");
                 var response = await httpClient.PostAsync("/api/hub-connections/cleanup/startup", null);
 
                 if (response.IsSuccessStatusCode)
@@ -120,7 +120,7 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
         {
             try
             {
-                var httpClient = _httpClientFactory.CreateClient("ApiClient");
+                var httpClient = _httpClientFactory.CreateClient("CleanupClient");
                 var response = await httpClient.PostAsync(
                     $"/api/hub-connections/cleanup/stale?staleThresholdMinutes={_staleThresholdMinutes}",
                     null);
@@ -158,7 +158,7 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
         {
             try
             {
-                var httpClient = _httpClientFactory.CreateClient("ApiClient");
+                var httpClient = _httpClientFactory.CreateClient("CleanupClient");
 
                 // Orphan Banko Cleanup
                 var bankoResponse = await httpClient.PostAsync("/api/hub-connections/cleanup/orphan-banko", null);

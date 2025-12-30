@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SignalR;
@@ -374,6 +375,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.SignalR
         /// Frontend BackgroundService tarafından çağrılır
         /// </summary>
         [HttpPost("cleanup/startup")]
+        [AllowAnonymous] // BackgroundService'ten authentication olmadan çağrılıyor
         public async Task<IActionResult> CleanupAllOnStartup()
         {
             try
@@ -395,6 +397,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.SignalR
         /// </summary>
         /// <param name="staleThresholdMinutes">Stale kabul edilme süresi (dakika). Default: 10</param>
         [HttpPost("cleanup/stale")]
+        [AllowAnonymous] // BackgroundService'ten authentication olmadan çağrılıyor
         public async Task<IActionResult> CleanupStaleConnections([FromQuery] int staleThresholdMinutes = 10)
         {
             try
@@ -416,6 +419,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.SignalR
         /// Frontend BackgroundService tarafından periyodik olarak çağrılır
         /// </summary>
         [HttpPost("cleanup/orphan-banko")]
+        [AllowAnonymous] // BackgroundService'ten authentication olmadan çağrılıyor
         public async Task<IActionResult> CleanupOrphanBankoConnections()
         {
             try
@@ -440,6 +444,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.SignalR
         /// Frontend BackgroundService tarafından periyodik olarak çağrılır
         /// </summary>
         [HttpPost("cleanup/orphan-tv")]
+        [AllowAnonymous] // BackgroundService'ten authentication olmadan çağrılıyor
         public async Task<IActionResult> CleanupOrphanTvConnections()
         {
             try
