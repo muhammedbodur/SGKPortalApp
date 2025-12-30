@@ -1053,8 +1053,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         /// Orphan HubBankoConnection kayıtlarını temizle
         /// HubConnection offline/silinmiş ama HubBankoConnection hala aktif olanları bulur ve temizler
         /// </summary>
-        /// <returns>Temizlenen kayıt sayısı</returns>
-        public async Task<int> CleanupOrphanBankoConnectionsAsync()
+        /// <returns>Temizlenen kayıt sayısı ve TcKimlikNo listesi</returns>
+        public async Task<(int count, List<string> cleanedTcKimlikNoList)> CleanupOrphanBankoConnectionsAsync()
         {
             try
             {
@@ -1068,10 +1068,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 if (!activeBankoConnections.Any())
                 {
                     _logger.LogDebug("Orphan Banko temizliği: Aktif HubBankoConnection yok");
-                    return 0;
+                    return (0, new List<string>());
                 }
 
                 var orphanCount = 0;
+                var cleanedTcKimlikNoList = new List<string>();
 
                 // 2. Her birinin HubConnection'ını kontrol et
                 foreach (var bankoConn in activeBankoConnections)
@@ -1107,6 +1108,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                         }
 
                         orphanCount++;
+                        cleanedTcKimlikNoList.Add(bankoConn.TcKimlikNo);
                         _logger.LogInformation($"🧹 Orphan HubBankoConnection temizlendi: Banko#{bankoConn.BankoId} | {bankoConn.TcKimlikNo}");
                     }
                 }
@@ -1117,12 +1119,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     _logger.LogInformation($"✅ Orphan Banko temizliği: {orphanCount} kayıt temizlendi");
                 }
 
-                return orphanCount;
+                return (orphanCount, cleanedTcKimlikNoList);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "CleanupOrphanBankoConnectionsAsync hatası");
-                return 0;
+                return (0, new List<string>());
             }
         }
 
