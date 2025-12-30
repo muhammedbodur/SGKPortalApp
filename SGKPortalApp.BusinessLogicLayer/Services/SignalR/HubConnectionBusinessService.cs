@@ -175,13 +175,35 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         {
             try
             {
-                var repo = _unitOfWork.Repository<HubBankoConnection>();
-                var bankoConnection = await repo.FirstOrDefaultAsync(c => c.TcKimlikNo == tcKimlikNo);
+                var bankoRepo = _unitOfWork.Repository<HubBankoConnection>();
+                var userRepo = _unitOfWork.Repository<User>();
+
+                var bankoConnection = await bankoRepo.FirstOrDefaultAsync(c => c.TcKimlikNo == tcKimlikNo && c.BankoModuAktif);
 
                 if (bankoConnection != null)
                 {
-                    repo.Delete(bankoConnection);
+                    // HubBankoConnection'ı deaktif et ve soft-delete yap
+                    bankoConnection.BankoModuAktif = false;
+                    bankoConnection.BankoModuBitis = DateTime.Now;
+                    bankoConnection.SilindiMi = true;
+                    bankoConnection.SilinmeTarihi = DateTime.Now;
+                    bankoConnection.SilenKullanici = "ExitBankoMode";
+                    bankoConnection.DuzenlenmeTarihi = DateTime.Now;
+                    bankoRepo.Update(bankoConnection);
+
+                    // User tablosunu temizle
+                    var user = await userRepo.FirstOrDefaultAsync(x => x.TcKimlikNo == tcKimlikNo);
+                    if (user != null)
+                    {
+                        user.BankoModuAktif = false;
+                        user.AktifBankoId = null;
+                        user.BankoModuBaslangic = null;
+                        user.DuzenlenmeTarihi = DateTime.Now;
+                        userRepo.Update(user);
+                    }
+
                     await _unitOfWork.SaveChangesAsync();
+                    _logger.LogInformation($"✅ Banko modundan çıkış: {tcKimlikNo} | Banko#{bankoConnection.BankoId}");
                 }
 
                 return true;
@@ -505,9 +527,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     return false;
                 }
 
-                // HubBankoConnection'ı deaktif et
+                // HubBankoConnection'ı deaktif et ve soft-delete yap
                 bankoConnection.BankoModuAktif = false;
                 bankoConnection.BankoModuBitis = DateTime.Now;
+                bankoConnection.SilindiMi = true;
+                bankoConnection.SilinmeTarihi = DateTime.Now;
+                bankoConnection.SilenKullanici = "ExitBankoMode";
                 bankoConnection.DuzenlenmeTarihi = DateTime.Now;
                 bankoRepo.Update(bankoConnection);
 
@@ -1059,9 +1084,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                         hubConnection.ConnectionStatus == ConnectionStatus.offline ||
                         hubConnection.SilindiMi)
                     {
-                        // HubBankoConnection'ı deaktif et
+                        // HubBankoConnection'ı deaktif et ve soft-delete yap
                         bankoConn.BankoModuAktif = false;
                         bankoConn.BankoModuBitis = DateTime.Now;
+                        bankoConn.SilindiMi = true;
+                        bankoConn.SilinmeTarihi = DateTime.Now;
+                        bankoConn.SilenKullanici = "OrphanCleanup";
                         bankoConn.DuzenlenmeTarihi = DateTime.Now;
                         bankoRepo.Update(bankoConn);
 
