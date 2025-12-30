@@ -20,23 +20,69 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
         private readonly IPersonelYetkiService _personelYetkiService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILoginLogoutLogService _loginLogoutLogService;
+        private readonly IWindowsUsernameService _windowsUsernameService;
+        private readonly IActiveDirectoryService _activeDirectoryService;
 
         public AuthService(
             ILogger<AuthService> logger,
             IPersonelYetkiService personelYetkiService,
             IUnitOfWork unitOfWork,
-            ILoginLogoutLogService loginLogoutLogService)
+            ILoginLogoutLogService loginLogoutLogService,
+            IWindowsUsernameService windowsUsernameService,
+            IActiveDirectoryService activeDirectoryService)
         {
             _logger = logger;
             _personelYetkiService = personelYetkiService;
             _unitOfWork = unitOfWork;
             _loginLogoutLogService = loginLogoutLogService;
+            _windowsUsernameService = windowsUsernameService;
+            _activeDirectoryService = activeDirectoryService;
         }
 
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)
         {
             try
             {
+                // 🔑 Active Directory login ise, önce AD'den validate et ve TC'yi al
+                if (request.Mode == LoginMode.ActiveDirectory)
+                {
+                    if (string.IsNullOrEmpty(request.DomainUsername))
+                    {
+                        return new LoginResponseDto
+                        {
+                            Success = false,
+                            Message = "Domain kullanıcı adı boş olamaz!"
+                        };
+                    }
+
+                    _logger.LogInformation("Active Directory login denemesi - Username: {Username}", request.DomainUsername);
+
+                    // AD validation ve email-to-TC mapping
+                    var adResult = await _activeDirectoryService.ValidateAndMapUserAsync(request.DomainUsername, request.Password);
+
+                    if (!adResult.Success)
+                    {
+                        _logger.LogWarning("AD login başarısız - Username: {Username}, Reason: {Reason}",
+                            request.DomainUsername, adResult.Message);
+
+                        // Başarısız AD login kaydı
+                        var windowsUsernameForFailedLogin = _windowsUsernameService.GetWindowsUsername();
+                        await CreateLoginLogAsync(null, null, null,
+                            request.IpAddress, request.UserAgent, windowsUsernameForFailedLogin, false, $"AD Login: {adResult.Message}");
+
+                        return new LoginResponseDto
+                        {
+                            Success = false,
+                            Message = adResult.Message
+                        };
+                    }
+
+                    // AD validation başarılı - TC'yi request'e set et ve normal login flow'una devam et
+                    request.TcKimlikNo = adResult.TcKimlikNo;
+                    _logger.LogInformation("AD login başarılı - Username: {Username}, TC: {TcKimlikNo}, AdSoyad: {AdSoyad}",
+                        request.DomainUsername, adResult.TcKimlikNo, adResult.AdSoyad);
+                }
+
                 // 🆕 User tablosundan kullanıcıyı bul (Personel ile birlikte - opsiyonel)
                 var userRepo = _unitOfWork.GetRepository<IUserRepository>();
                 var user = await userRepo.GetByTcKimlikNoAsync(request.TcKimlikNo);
@@ -45,9 +91,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                 {
                     _logger.LogWarning("Login başarısız: Kullanıcı bulunamadı - {TcKimlikNo}", request.TcKimlikNo);
 
+                    // 🪟 Windows username'i yakala (başarısız login için)
+                    var windowsUsernameForFailedLogin = _windowsUsernameService.GetWindowsUsername();
+
                     // Başarısız login kaydı
                     await CreateLoginLogAsync(request.TcKimlikNo, null, null,
-                        request.IpAddress, request.UserAgent, false, "Kullanıcı bulunamadı");
+                        request.IpAddress, request.UserAgent, windowsUsernameForFailedLogin, false, "Kullanıcı bulunamadı");
 
                     return new LoginResponseDto
                     {
@@ -61,9 +110,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                 {
                     _logger.LogWarning("Login başarısız: Hesap pasif - {TcKimlikNo}", request.TcKimlikNo);
 
+                    // 🪟 Windows username'i yakala (başarısız login için)
+                    var windowsUsernameForFailedLogin = _windowsUsernameService.GetWindowsUsername();
+
                     // Başarısız login kaydı
                     await CreateLoginLogAsync(user.TcKimlikNo, user.Personel?.AdSoyad, null,
-                        request.IpAddress, request.UserAgent, false, "Hesap pasif");
+                        request.IpAddress, request.UserAgent, windowsUsernameForFailedLogin, false, "Hesap pasif");
 
                     return new LoginResponseDto
                     {
@@ -77,9 +129,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                 {
                     _logger.LogWarning("Login başarısız: Hesap kilitli - {TcKimlikNo}", request.TcKimlikNo);
 
+                    // 🪟 Windows username'i yakala (başarısız login için)
+                    var windowsUsernameForFailedLogin = _windowsUsernameService.GetWindowsUsername();
+
                     // Başarısız login kaydı
                     await CreateLoginLogAsync(user.TcKimlikNo, user.Personel?.AdSoyad, null,
-                        request.IpAddress, request.UserAgent, false, "Hesap kilitli");
+                        request.IpAddress, request.UserAgent, windowsUsernameForFailedLogin, false, "Hesap kilitli");
 
                     return new LoginResponseDto
                     {
@@ -88,9 +143,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                     };
                 }
 
-                // Şifre kontrolü
-                if (request.Password != user.PassWord)
+                // Şifre kontrolü (AD mode için atla - AD zaten doğruladı)
+                if (request.Mode == LoginMode.Standard && request.Password != user.PassWord)
                 {
+                    // 🪟 Windows username'i yakala (başarısız login için)
+                    var windowsUsernameForFailedLogin = _windowsUsernameService.GetWindowsUsername();
+
                     // Başarısız giriş sayısını artır
                     user.BasarisizGirisSayisi++;
 
@@ -105,7 +163,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
 
                         // Başarısız login kaydı
                         await CreateLoginLogAsync(user.TcKimlikNo, user.Personel?.AdSoyad, null,
-                            request.IpAddress, request.UserAgent, false, "5 başarısız deneme - hesap kilitlendi");
+                            request.IpAddress, request.UserAgent, windowsUsernameForFailedLogin, false, "5 başarısız deneme - hesap kilitlendi");
 
                         return new LoginResponseDto
                         {
@@ -121,7 +179,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
 
                     // Başarısız login kaydı
                     await CreateLoginLogAsync(user.TcKimlikNo, user.Personel?.AdSoyad, null,
-                        request.IpAddress, request.UserAgent, false, $"Hatalı şifre ({user.BasarisizGirisSayisi}/5)");
+                        request.IpAddress, request.UserAgent, windowsUsernameForFailedLogin, false, $"Hatalı şifre ({user.BasarisizGirisSayisi}/5)");
 
                     return new LoginResponseDto
                     {
@@ -137,6 +195,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                 user.SonGirisTarihi = DateTime.Now;
                 user.SonAktiviteZamani = DateTime.Now; // İlk aktivite zamanı
                 user.BasarisizGirisSayisi = 0; // Başarılı girişte sıfırla
+
+                // 🪟 Windows username'i yakala ve kaydet
+                var windowsUsername = _windowsUsernameService.GetWindowsUsername();
+                user.WindowsUsername = windowsUsername;
+                if (!string.IsNullOrEmpty(windowsUsername))
+                {
+                    _logger.LogInformation("🪟 Windows username yakalandı: {WindowsUsername}", windowsUsername);
+                }
 
                 // ⚠️ Yeni login sonrası orphan banko mode flag'ini temizle
                 // (Önceki oturumdan kalmış olabilir - HubBankoConnection kaydı yok ama User flag'i aktif)
@@ -184,7 +250,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
 
                     // ✅ Başarılı login kaydı
                     await CreateLoginLogAsync(user.TcKimlikNo, "TV Kullanıcısı", sessionId,
-                        request.IpAddress, request.UserAgent, true, null);
+                        request.IpAddress, request.UserAgent, windowsUsername, true, null);
 
                     return new LoginResponseDto
                     {
@@ -205,7 +271,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
 
                     // ✅ Başarılı login kaydı
                     await CreateLoginLogAsync(user.TcKimlikNo, user.Personel.AdSoyad, sessionId,
-                        request.IpAddress, request.UserAgent, true, null);
+                        request.IpAddress, request.UserAgent, windowsUsername, true, null);
 
                     // 🔑 Yetkileri çek (atanmış + MinYetkiSeviyesi >= None olan varsayılanlar)
                     var permissions = await _personelYetkiService.GetUserPermissionsWithDefaultsAsync(user.TcKimlikNo);
@@ -380,7 +446,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
         /// Login/Logout log kaydı oluşturur
         /// </summary>
         private async Task CreateLoginLogAsync(string? tcKimlikNo, string? adSoyad, string? sessionId,
-            string? ipAddress, string? userAgent, bool loginSuccessful, string? failureReason = null)
+            string? ipAddress, string? userAgent, string? windowsUsername, bool loginSuccessful, string? failureReason = null)
         {
             try
             {
@@ -395,6 +461,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                     Browser = ParseBrowser(userAgent),
                     OperatingSystem = ParseOperatingSystem(userAgent),
                     DeviceType = ParseDeviceType(userAgent),
+                    WindowsUsername = windowsUsername,
                     LoginSuccessful = loginSuccessful,
                     FailureReason = failureReason
                 };

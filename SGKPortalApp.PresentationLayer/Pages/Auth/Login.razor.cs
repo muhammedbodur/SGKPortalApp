@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Auth;
 using SGKPortalApp.PresentationLayer.Services.AuthenticationServices.Interfaces;
@@ -15,6 +16,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
         [Inject] private NavigationManager Navigation { get; set; } = default!;
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
+        [Inject] private IWindowsUsernameService WindowsUsernameService { get; set; } = default!;
 
         [Parameter]
         [SupplyParameterFromQuery(Name = "sessionExpired")]
@@ -24,6 +26,27 @@ namespace SGKPortalApp.PresentationLayer.Pages.Auth
         private bool showPassword = false;
         private bool isLoading = false;
         private string? errorMessage;
+
+        // Domain detection
+        private bool isDomainJoined = false;
+        private string? domainName = null;
+
+        protected override void OnInitialized()
+        {
+            // Domain detection
+            isDomainJoined = WindowsUsernameService.IsDomainJoined();
+            domainName = WindowsUsernameService.GetDomainName();
+
+            // Login mode'u otomatik belirle
+            if (isDomainJoined)
+            {
+                loginModel.Mode = LoginMode.ActiveDirectory;
+            }
+            else
+            {
+                loginModel.Mode = LoginMode.Standard;
+            }
+        }
 
         protected override void OnParametersSet()
         {

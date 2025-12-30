@@ -21,7 +21,20 @@
                     <!-- /Logo -->
                     
                     <h4 class="mb-2">Hoş Geldiniz! 👋</h4>
-                    <p class="mb-4">Lütfen TC Kimlik Numaranız ve şifreniz ile giriş yapın</p>
+
+                    @if (isDomainJoined)
+                    {
+                        <p class="mb-4">
+                            <i class="bx bx-network-chart text-success me-1"></i>
+                            Domain: <strong>@domainName</strong>
+                            <br />
+                            <small class="text-muted">Lütfen domain kullanıcı adınız ve şifreniz ile giriş yapın</small>
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="mb-4">Lütfen TC Kimlik Numaranız ve şifreniz ile giriş yapın</p>
+                    }
 
                     @if (!string.IsNullOrEmpty(errorMessage))
                     {
@@ -34,18 +47,40 @@
 
                     <EditForm Model="@loginModel" OnValidSubmit="HandleLogin" class="mb-3">
                         <DataAnnotationsValidator />
-                        
-                        <!-- TC Kimlik No -->
-                        <div class="mb-3">
-                            <label for="tcKimlikNo" class="form-label">TC Kimlik No</label>
-                            <InputText @bind-Value="loginModel.TcKimlikNo" 
-                                       class="form-control" 
-                                       id="tcKimlikNo" 
-                                       placeholder="11 haneli TC Kimlik No" 
-                                       maxlength="11"
-                                       autofocus />
-                            <ValidationMessage For="@(() => loginModel.TcKimlikNo)" class="text-danger" />
-                        </div>
+
+                        @if (loginModel.Mode == LoginMode.Standard)
+                        {
+                            <!-- TC Kimlik No (Standart Login) -->
+                            <div class="mb-3">
+                                <label for="tcKimlikNo" class="form-label">TC Kimlik No</label>
+                                <InputText @bind-Value="loginModel.TcKimlikNo"
+                                           class="form-control"
+                                           id="tcKimlikNo"
+                                           placeholder="11 haneli TC Kimlik No"
+                                           maxlength="11"
+                                           autofocus
+                                           required />
+                                <ValidationMessage For="@(() => loginModel.TcKimlikNo)" class="text-danger" />
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Domain Username (Active Directory Login) -->
+                            <div class="mb-3">
+                                <label for="domainUsername" class="form-label">
+                                    <i class="bx bx-user me-1"></i>
+                                    Domain Kullanıcı Adı
+                                </label>
+                                <InputText @bind-Value="loginModel.DomainUsername"
+                                           class="form-control"
+                                           id="domainUsername"
+                                           placeholder="Örnek: mbodur3"
+                                           autofocus
+                                           required />
+                                <small class="form-text text-muted">Domain prefix olmadan sadece kullanıcı adınızı girin</small>
+                                <ValidationMessage For="@(() => loginModel.DomainUsername)" class="text-danger" />
+                            </div>
+                        }
 
                         <!-- Şifre -->
                         <div class="mb-3 form-password-toggle">
@@ -96,7 +131,14 @@
 
                     <p class="text-center">
                         <small class="text-muted">
-                            İlk kez giriş yapıyorsanız, şifreniz TC Kimlik Numaranız ile aynıdır.
+                            @if (loginModel.Mode == LoginMode.Standard)
+                            {
+                                <span>İlk kez giriş yapıyorsanız, şifreniz TC Kimlik Numaranız ile aynıdır.</span>
+                            }
+                            else
+                            {
+                                <span>Domain şifrenizi kullanarak giriş yapın.</span>
+                            }
                         </small>
                     </p>
                 </div>
