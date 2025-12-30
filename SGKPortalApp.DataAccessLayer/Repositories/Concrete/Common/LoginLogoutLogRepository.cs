@@ -188,8 +188,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
             if (string.IsNullOrWhiteSpace(sessionId))
                 return null;
 
+            // User ilişkisini de dahil ederek her iki tablodaki SessionID'lerin eşleşmesini kontrol et
             return await _dbSet
-                .Where(l => l.SessionID == sessionId && !l.LogoutTime.HasValue)
+                .Include(l => l.User)
+                .Where(l => l.SessionID == sessionId
+                    && !l.LogoutTime.HasValue
+                    && l.User != null
+                    && l.User.SessionID == sessionId)
                 .OrderByDescending(l => l.LoginTime)
                 .FirstOrDefaultAsync();
         }
@@ -199,8 +204,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
             if (string.IsNullOrWhiteSpace(sessionId))
                 return false;
 
+            // User ilişkisini de dahil ederek her iki tablodaki SessionID'lerin eşleşmesini kontrol et
             var loginLog = await _dbSet
-                .Where(l => l.SessionID == sessionId && !l.LogoutTime.HasValue)
+                .Include(l => l.User)
+                .Where(l => l.SessionID == sessionId
+                    && !l.LogoutTime.HasValue
+                    && l.User != null
+                    && l.User.SessionID == sessionId)
                 .OrderByDescending(l => l.LoginTime)
                 .FirstOrDefaultAsync();
 
