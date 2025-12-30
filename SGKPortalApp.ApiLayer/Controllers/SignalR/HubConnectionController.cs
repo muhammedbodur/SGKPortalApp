@@ -409,6 +409,54 @@ namespace SGKPortalApp.ApiLayer.Controllers.SignalR
                 return StatusCode(500, new { message = "Cleanup stale hatası", error = ex.Message });
             }
         }
+
+        /// <summary>
+        /// Orphan HubBankoConnection kayıtlarını temizle
+        /// HubConnection offline/silinmiş ama HubBankoConnection aktif olanları temizler
+        /// Frontend BackgroundService tarafından periyodik olarak çağrılır
+        /// </summary>
+        [HttpPost("cleanup/orphan-banko")]
+        public async Task<IActionResult> CleanupOrphanBankoConnections()
+        {
+            try
+            {
+                var count = await _hubConnectionService.CleanupOrphanBankoConnectionsAsync();
+                if (count > 0)
+                {
+                    _logger.LogInformation("Cleanup orphan banko: {Count} kayıt temizlendi", count);
+                }
+                return Ok(new { cleanedCount = count, message = $"{count} orphan HubBankoConnection temizlendi" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Cleanup orphan banko hatası");
+                return StatusCode(500, new { message = "Cleanup orphan banko hatası", error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Orphan HubTvConnection kayıtlarını temizle
+        /// HubConnection offline/silinmiş ama HubTvConnection aktif olanları temizler
+        /// Frontend BackgroundService tarafından periyodik olarak çağrılır
+        /// </summary>
+        [HttpPost("cleanup/orphan-tv")]
+        public async Task<IActionResult> CleanupOrphanTvConnections()
+        {
+            try
+            {
+                var count = await _hubConnectionService.CleanupOrphanTvConnectionsAsync();
+                if (count > 0)
+                {
+                    _logger.LogInformation("Cleanup orphan TV: {Count} kayıt temizlendi", count);
+                }
+                return Ok(new { cleanedCount = count, message = $"{count} orphan HubTvConnection temizlendi" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Cleanup orphan TV hatası");
+                return StatusCode(500, new { message = "Cleanup orphan TV hatası", error = ex.Message });
+            }
+        }
     }
 
     // Request DTOs
