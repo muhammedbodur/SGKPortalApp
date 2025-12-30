@@ -19,15 +19,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
         private readonly ILogger<AuthService> _logger;
         private readonly IPersonelYetkiService _personelYetkiService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILoginLogoutLogService _loginLogoutLogService;
 
         public AuthService(
             ILogger<AuthService> logger,
             IPersonelYetkiService personelYetkiService,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ILoginLogoutLogService loginLogoutLogService)
         {
             _logger = logger;
             _personelYetkiService = personelYetkiService;
             _unitOfWork = unitOfWork;
+            _loginLogoutLogService = loginLogoutLogService;
         }
 
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)
@@ -146,11 +149,30 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
 
                 await _unitOfWork.SaveChangesAsync();
 
-                // 🔥 Eski oturum varsa loglayalım (farklı cihazdan login uyarısı için)
+                // 🔥 Eski oturum varsa loglayalım ve eski session'ın logout time'ını güncelleyelim
                 if (!string.IsNullOrEmpty(oldSessionId) && oldSessionId != sessionId)
                 {
                     _logger.LogWarning("⚠️ Kullanıcı farklı bir cihazdan/tarayıcıdan giriş yaptı - TcKimlikNo: {TcKimlikNo}, Eski SessionID: {OldSessionId}, Yeni SessionID: {NewSessionId}",
                         user.TcKimlikNo, oldSessionId, sessionId);
+
+                    // Eski session'ın logout time'ını güncelle (farklı cihazdan login olundu)
+                    try
+                    {
+                        var logoutResult = await _loginLogoutLogService.UpdateLogoutTimeBySessionIdAsync(oldSessionId);
+                        if (logoutResult.Success && logoutResult.Data)
+                        {
+                            _logger.LogInformation("✅ Eski session logout time güncellendi - SessionID: {OldSessionId}", oldSessionId);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("⚠️ Eski session logout time güncellenemedi - SessionID: {OldSessionId}", oldSessionId);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Logout time güncellemesi başarısız olsa bile login işlemine devam et
+                        _logger.LogError(ex, "❌ Eski session logout time güncellenirken hata - SessionID: {OldSessionId}", oldSessionId);
+                    }
                 }
 
                 // 🔥 TV login mi yoksa Personel login mi?
