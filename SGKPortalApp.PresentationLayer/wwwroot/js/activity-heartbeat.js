@@ -43,16 +43,23 @@ window.stopActivityHeartbeat = function () {
  * Server'a aktivite ping'i gönderir
  */
 function sendActivityPing() {
+    // API URL'ini al (window.appConfig'den)
+    const apiUrl = window.appConfig?.apiUrl || 'https://localhost:9080';
+
     // API endpoint'e POST request at
-    fetch('/api/auth/ping-activity', {
+    fetch(`${apiUrl}/api/auth/ping-activity`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
-        }
+        },
+        credentials: 'include' // ⚠️ COOKIE GÖNDERİMİ İÇİN GEREKLİ!
     })
         .then(response => {
             if (response.ok) {
-                console.log('🔔 Aktivite ping başarılı');
+                // Production'da gereksiz log, sadece debug modunda
+                if (window.location.hostname === 'localhost') {
+                    console.log('🔔 Aktivite ping başarılı');
+                }
             } else {
                 console.warn('⚠️ Aktivite ping başarısız:', response.status);
             }
