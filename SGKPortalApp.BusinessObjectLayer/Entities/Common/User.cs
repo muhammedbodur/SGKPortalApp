@@ -60,6 +60,14 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
         /// </summary>
         public DateTime? SonAktiviteZamani { get; set; }
 
+        /// <summary>
+        /// Windows kullanıcı adı (domain\\username veya local username)
+        /// Domain ortamında: DOMAIN\username
+        /// Lokal ortamda: username
+        /// </summary>
+        [StringLength(100)]
+        public string? WindowsUsername { get; set; }
+
         public int BasarisizGirisSayisi { get; set; } = 0;
         public DateTime? HesapKilitTarihi { get; set; }
 

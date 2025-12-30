@@ -49,6 +49,10 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
         [StringLength(50)]
         public string? DeviceType { get; set; }
 
+        [Column("WindowsUsername")]
+        [StringLength(100)]
+        public string? WindowsUsername { get; set; }
+
         [Column("LoginSuccessful")]
         public bool LoginSuccessful { get; set; } = true;
 
