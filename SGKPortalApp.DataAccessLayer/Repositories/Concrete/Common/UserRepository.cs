@@ -21,8 +21,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
             if (string.IsNullOrWhiteSpace(tcKimlikNo))
                 return null;
 
+            // ⚠️ AsNoTracking kaldırıldı - Login sırasında SessionID güncellemesi için tracking gerekli
             return await _dbSet
-                .AsNoTracking()
                 .Include(u => u.Personel)
                     .ThenInclude(p => p.Departman)
                 .Include(u => u.Personel)
