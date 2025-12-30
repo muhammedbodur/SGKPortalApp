@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Components.Web
 @namespace SGKPortalApp.PresentationLayer.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, SGKPortalApp.PresentationLayer
 @attribute [Microsoft.AspNetCore.Authorization.AllowAnonymous]
 @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 
@@ -112,10 +113,10 @@
     </style>
 
     <!-- Custom Site CSS - EN SONDA YÜKLENMELİ -->
-    <link rel="stylesheet" href="/css/site.css" asp-append-version="true">
-    
+    <link rel="stylesheet" href="/css/site.css">
+
     <!-- Sıramatik Module CSS -->
-    <link rel="stylesheet" href="/css/modules/siramatik.css" asp-append-version="true">
+    <link rel="stylesheet" href="/css/modules/siramatik.css">
 
     <component type="typeof(HeadOutlet)" render-mode="Server" />
 </head>
@@ -220,7 +221,7 @@
     <script src="/lib/microsoft/signalr/dist/browser/signalr.js"></script>
     <script src="~/js/signalr/core/signalr-connection-manager.js"></script>
     <script src="~/js/signalr/modules/signalr-manager.js"></script>
-    <script src="~/js/signalr/modules/banko-mode.js?v=2"></script>
+    <script src="~/js/signalr/modules/banko-mode.js"></script>
     <script src="~/js/signalr/modules/tv-display.js"></script>
     <script src="~/js/signalr/core/signalr-app-initializer.js"></script>
 
@@ -241,6 +242,6 @@
     <script src="/js/blazor-sneat-init.js"></script>
 
     <!-- ================== SIRA ÇAĞIRMA PANEL ================== -->
-    <script src="/js/SiraCagirmaPanel.js" asp-append-version="true"></script>
+    <script src="/js/SiraCagirmaPanel.js"></script>
 </body>
 </html>
