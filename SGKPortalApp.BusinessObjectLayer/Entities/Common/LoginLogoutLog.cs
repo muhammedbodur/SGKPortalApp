@@ -59,5 +59,9 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
         [Column("FailureReason")]
         [StringLength(500)]
         public string? FailureReason { get; set; }
+
+        // Navigation Property (Opsiyonel - başarısız loginlerde user olmayabilir)
+        [ForeignKey(nameof(TcKimlikNo))]
+        public User? User { get; set; }
     }
 }
