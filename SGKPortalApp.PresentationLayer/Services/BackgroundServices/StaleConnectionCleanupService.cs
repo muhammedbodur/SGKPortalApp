@@ -19,6 +19,10 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
         // Stale kabul edilme süresi (10 dakika aktivite yoksa)
         private readonly int _staleThresholdMinutes = 10;
 
+        // Orphan cleanup aralığı (120 saniye = 2 dakika)
+        private readonly TimeSpan _orphanCleanupInterval = TimeSpan.FromSeconds(120);
+        private DateTime _lastOrphanCleanup = DateTime.MinValue;
+
         public StaleConnectionCleanupService(
             IHttpClientFactory httpClientFactory,
             ILogger<StaleConnectionCleanupService> logger)
@@ -29,8 +33,8 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("StaleConnectionCleanupService başlatıldı. Aralık: {Interval}, Threshold: {Threshold} dakika",
-                _cleanupInterval, _staleThresholdMinutes);
+            _logger.LogInformation("StaleConnectionCleanupService başlatıldı. Stale Aralık: {StaleInterval}, Orphan Aralık: {OrphanInterval}",
+                _cleanupInterval, _orphanCleanupInterval);
 
             // İlk başlangıçta tüm online connection'ları offline yap (sunucu restart)
             await CleanupAllOnStartupAsync();
@@ -40,7 +44,17 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
                 try
                 {
                     await Task.Delay(_cleanupInterval, stoppingToken);
+
+                    // Stale connection temizliği (her 5 dakika)
                     await CleanupStaleConnectionsAsync();
+
+                    // Orphan cleanup (120 saniye geçtiyse)
+                    var timeSinceLastOrphanCleanup = DateTime.Now - _lastOrphanCleanup;
+                    if (timeSinceLastOrphanCleanup >= _orphanCleanupInterval)
+                    {
+                        await CleanupOrphanConnectionsAsync();
+                        _lastOrphanCleanup = DateTime.Now;
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -120,6 +134,52 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Stale connection temizliği hatası (API çağrısı)");
+            }
+        }
+
+        /// <summary>
+        /// Orphan HubBankoConnection ve HubTvConnection kayıtlarını temizle
+        /// API endpoint üzerinden çağrılır (Layered Architecture)
+        /// </summary>
+        private async Task CleanupOrphanConnectionsAsync()
+        {
+            try
+            {
+                var httpClient = _httpClientFactory.CreateClient("ApiClient");
+
+                // Orphan Banko Cleanup
+                var bankoResponse = await httpClient.PostAsync("/api/hub-connections/cleanup/orphan-banko", null);
+                if (bankoResponse.IsSuccessStatusCode)
+                {
+                    var bankoResult = await bankoResponse.Content.ReadFromJsonAsync<CleanupResponse>();
+                    if (bankoResult?.CleanedCount > 0)
+                    {
+                        _logger.LogInformation("🧹 Orphan Banko temizliği: {Count} kayıt temizlendi", bankoResult.CleanedCount);
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("⚠️ Orphan Banko temizliği API çağrısı başarısız: {StatusCode}", bankoResponse.StatusCode);
+                }
+
+                // Orphan TV Cleanup
+                var tvResponse = await httpClient.PostAsync("/api/hub-connections/cleanup/orphan-tv", null);
+                if (tvResponse.IsSuccessStatusCode)
+                {
+                    var tvResult = await tvResponse.Content.ReadFromJsonAsync<CleanupResponse>();
+                    if (tvResult?.CleanedCount > 0)
+                    {
+                        _logger.LogInformation("🧹 Orphan TV temizliği: {Count} kayıt temizlendi", tvResult.CleanedCount);
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("⚠️ Orphan TV temizliği API çağrısı başarısız: {StatusCode}", tvResponse.StatusCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Orphan connection temizliği hatası (API çağrısı)");
             }
         }
 

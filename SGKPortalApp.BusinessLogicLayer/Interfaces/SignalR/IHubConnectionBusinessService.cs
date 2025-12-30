@@ -52,6 +52,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR
         /// </summary>
         /// <param name="staleThresholdMinutes">Stale kabul edilme süresi (dakika)</param>
         Task<int> CleanupStaleConnectionsAsync(int staleThresholdMinutes);
+
+        /// <summary>
+        /// Orphan HubBankoConnection kayıtlarını temizler
+        /// HubConnection offline/silinmiş ama HubBankoConnection hala aktif olanları bulur ve temizler
+        /// </summary>
+        Task<int> CleanupOrphanBankoConnectionsAsync();
+
+        /// <summary>
+        /// Orphan HubTvConnection kayıtlarını temizler
+        /// HubConnection offline/silinmiş ama HubTvConnection hala aktif olanları bulur ve temizler
+        /// </summary>
+        Task<int> CleanupOrphanTvConnectionsAsync();
     }
 }
 
