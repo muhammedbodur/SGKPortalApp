@@ -15,6 +15,11 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
         [StringLength(11)]
         public string? TcKimlikNo { get; set; }
 
+        // User ile Many-to-One ilişki
+        [ForeignKey(nameof(TcKimlikNo))]
+        [InverseProperty("LoginLogoutLogs")]
+        public User? User { get; set; }
+
         [Column("AdSoyad")]
         [StringLength(200)]
         public string? AdSoyad { get; set; }

@@ -40,6 +40,10 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
         [InverseProperty("User")]
         public Tv? Tv { get; set; }
 
+        // LoginLogoutLog ile One-to-Many ilişki (Bir user'ın birden fazla login/logout kaydı olabilir)
+        [InverseProperty("User")]
+        public ICollection<LoginLogoutLog> LoginLogoutLogs { get; set; } = new List<LoginLogoutLog>();
+
         // Güvenlik Bilgileri (Dinamik)
         [Required]
         [StringLength(255)]
