@@ -1025,6 +1025,141 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         }
 
         /// <summary>
+        /// Orphan HubBankoConnection kayıtlarını temizle
+        /// HubConnection offline/silinmiş ama HubBankoConnection hala aktif olanları bulur ve temizler
+        /// </summary>
+        /// <returns>Temizlenen kayıt sayısı</returns>
+        public async Task<int> CleanupOrphanBankoConnectionsAsync()
+        {
+            try
+            {
+                var bankoRepo = _unitOfWork.Repository<HubBankoConnection>();
+                var hubRepo = _unitOfWork.Repository<HubConnection>();
+                var userRepo = _unitOfWork.Repository<User>();
+
+                // 1. Tüm aktif HubBankoConnection'ları al
+                var activeBankoConnections = await bankoRepo.FindAsync(b => b.BankoModuAktif);
+
+                if (!activeBankoConnections.Any())
+                {
+                    _logger.LogDebug("Orphan Banko temizliği: Aktif HubBankoConnection yok");
+                    return 0;
+                }
+
+                var orphanCount = 0;
+
+                // 2. Her birinin HubConnection'ını kontrol et
+                foreach (var bankoConn in activeBankoConnections)
+                {
+                    var hubConnection = await hubRepo.FirstOrDefaultAsync(
+                        h => h.HubConnectionId == bankoConn.HubConnectionId);
+
+                    // 3. HubConnection yok, offline veya silinmiş ise → Orphan!
+                    if (hubConnection == null ||
+                        hubConnection.ConnectionStatus == ConnectionStatus.offline ||
+                        hubConnection.SilindiMi)
+                    {
+                        // HubBankoConnection'ı deaktif et
+                        bankoConn.BankoModuAktif = false;
+                        bankoConn.BankoModuBitis = DateTime.Now;
+                        bankoConn.DuzenlenmeTarihi = DateTime.Now;
+                        bankoRepo.Update(bankoConn);
+
+                        // User tablosunu temizle
+                        var user = await userRepo.FirstOrDefaultAsync(
+                            u => u.TcKimlikNo == bankoConn.TcKimlikNo);
+
+                        if (user != null)
+                        {
+                            user.BankoModuAktif = false;
+                            user.AktifBankoId = null;
+                            user.BankoModuBaslangic = null;
+                            user.DuzenlenmeTarihi = DateTime.Now;
+                            userRepo.Update(user);
+                        }
+
+                        orphanCount++;
+                        _logger.LogInformation($"🧹 Orphan HubBankoConnection temizlendi: Banko#{bankoConn.BankoId} | {bankoConn.TcKimlikNo}");
+                    }
+                }
+
+                if (orphanCount > 0)
+                {
+                    await _unitOfWork.SaveChangesAsync();
+                    _logger.LogInformation($"✅ Orphan Banko temizliği: {orphanCount} kayıt temizlendi");
+                }
+
+                return orphanCount;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "CleanupOrphanBankoConnectionsAsync hatası");
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Orphan HubTvConnection kayıtlarını temizle
+        /// HubConnection offline/silinmiş ama HubTvConnection hala aktif olanları bulur ve temizler
+        /// </summary>
+        /// <returns>Temizlenen kayıt sayısı</returns>
+        public async Task<int> CleanupOrphanTvConnectionsAsync()
+        {
+            try
+            {
+                var tvRepo = _unitOfWork.Repository<HubTvConnection>();
+                var hubRepo = _unitOfWork.Repository<HubConnection>();
+
+                // 1. Tüm aktif HubTvConnection'ları al (SilindiMi = false)
+                var activeTvConnections = await tvRepo.FindAsync(t => !t.SilindiMi);
+
+                if (!activeTvConnections.Any())
+                {
+                    _logger.LogDebug("Orphan TV temizliği: Aktif HubTvConnection yok");
+                    return 0;
+                }
+
+                var orphanCount = 0;
+
+                // 2. Her birinin HubConnection'ını kontrol et
+                foreach (var tvConn in activeTvConnections)
+                {
+                    var hubConnection = await hubRepo.FirstOrDefaultAsync(
+                        h => h.HubConnectionId == tvConn.HubConnectionId);
+
+                    // 3. HubConnection yok, offline veya silinmiş ise → Orphan!
+                    if (hubConnection == null ||
+                        hubConnection.ConnectionStatus == ConnectionStatus.offline ||
+                        hubConnection.SilindiMi)
+                    {
+                        // HubTvConnection'ı soft-delete yap
+                        tvConn.SilindiMi = true;
+                        tvConn.SilinmeTarihi = DateTime.Now;
+                        tvConn.SilenKullanici = "OrphanCleanup";
+                        tvConn.DuzenlenmeTarihi = DateTime.Now;
+                        tvRepo.Update(tvConn);
+
+                        orphanCount++;
+                        _logger.LogInformation($"🧹 Orphan HubTvConnection temizlendi: TV#{tvConn.TvId} | HubConnectionId={tvConn.HubConnectionId}");
+                    }
+                }
+
+                if (orphanCount > 0)
+                {
+                    await _unitOfWork.SaveChangesAsync();
+                    _logger.LogInformation($"✅ Orphan TV temizliği: {orphanCount} kayıt temizlendi");
+                }
+
+                return orphanCount;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "CleanupOrphanTvConnectionsAsync hatası");
+                return 0;
+            }
+        }
+
+        /// <summary>
         /// Entity navigation referanslarını temizle (EF tracking sorunlarını önlemek için)
         /// </summary>
         private static void ClearNavigationReferences(HubConnection connection)
