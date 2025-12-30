@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Components.Web
 @namespace SGKPortalApp.PresentationLayer.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, SGKPortalApp.PresentationLayer
 @attribute [Microsoft.AspNetCore.Authorization.AllowAnonymous]
 @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 
@@ -112,10 +113,10 @@
     </style>
 
     <!-- Custom Site CSS - EN SONDA YÜKLENMELİ -->
-    <link rel="stylesheet" href="/css/site.css" asp-append-version="true">
-    
+    <link rel="stylesheet" href="/css/site.css">
+
     <!-- Sıramatik Module CSS -->
-    <link rel="stylesheet" href="/css/modules/siramatik.css" asp-append-version="true">
+    <link rel="stylesheet" href="/css/modules/siramatik.css">
 
     <component type="typeof(HeadOutlet)" render-mode="Server" />
 </head>
@@ -194,13 +195,13 @@
     <script src="/portal/assets/js/main.js"></script>
 
     <!-- ================== BLAZOR RECONNECTION CONTROL ================== -->
-    <script src="~/js/blazor-reconnect.js" asp-append-version="true"></script>
+    <script src="~/js/blazor-reconnect.js"></script>
 
     <!-- ================== PAGE LIFECYCLE DETECTOR ================== -->
-    <script src="~/js/page-lifecycle-detector.js" asp-append-version="true"></script>
+    <script src="~/js/page-lifecycle-detector.js"></script>
 
     <!-- ================== ACTIVITY HEARTBEAT (30 dakika idle timeout) ================== -->
-    <script src="~/js/activity-heartbeat.js" asp-append-version="true"></script>
+    <script src="~/js/activity-heartbeat.js"></script>
 
     <!-- ================== API & USER CONFIGURATION ================== -->
     <script>
@@ -218,29 +219,29 @@
 
     <!-- ================== SIGNALR ================== -->
     <script src="/lib/microsoft/signalr/dist/browser/signalr.js"></script>
-    <script src="~/js/signalr/core/signalr-connection-manager.js" asp-append-version="true"></script>
-    <script src="~/js/signalr/modules/signalr-manager.js" asp-append-version="true"></script>
-    <script src="~/js/signalr/modules/banko-mode.js" asp-append-version="true"></script>
-    <script src="~/js/signalr/modules/tv-display.js" asp-append-version="true"></script>
-    <script src="~/js/signalr/core/signalr-app-initializer.js" asp-append-version="true"></script>
+    <script src="~/js/signalr/core/signalr-connection-manager.js"></script>
+    <script src="~/js/signalr/modules/signalr-manager.js"></script>
+    <script src="~/js/signalr/modules/banko-mode.js"></script>
+    <script src="~/js/signalr/modules/tv-display.js"></script>
+    <script src="~/js/signalr/core/signalr-app-initializer.js"></script>
 
-    <script src="~/js/fileDownload.js" asp-append-version="true"></script>
+    <script src="~/js/fileDownload.js"></script>
 
     <!-- ================== SELECT2 ================== -->
     <script src="/portal/assets/vendor/libs/select2/select2.js"></script>
-    <script src="~/js/select2-blazor.js" asp-append-version="true"></script>
+    <script src="~/js/select2-blazor.js"></script>
 
     <!-- ================== FLATPICKR ================== -->
     <script src="/portal/assets/vendor/libs/flatpickr/flatpickr.js"></script>
-    <script src="~/js/flatpickr-blazor.js" asp-append-version="true"></script>
+    <script src="~/js/flatpickr-blazor.js"></script>
 
     <!-- ================== BLAZOR FRAMEWORK ================== -->
     <script src="~/_framework/blazor.server.js"></script>
 
     <!-- ================== BLAZOR SNEAT INIT ================== -->
-    <script src="/js/blazor-sneat-init.js" asp-append-version="true"></script>
+    <script src="/js/blazor-sneat-init.js"></script>
 
     <!-- ================== SIRA ÇAĞIRMA PANEL ================== -->
-    <script src="/js/SiraCagirmaPanel.js" asp-append-version="true"></script>
+    <script src="/js/SiraCagirmaPanel.js"></script>
 </body>
 </html>
