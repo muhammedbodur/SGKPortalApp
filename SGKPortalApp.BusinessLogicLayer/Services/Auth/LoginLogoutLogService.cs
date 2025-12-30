@@ -233,5 +233,40 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                 return ApiResponseDto<int>.ErrorResult("Cleanup işlemi sırasında hata oluştu");
             }
         }
+
+        public async Task<ApiResponseDto<bool>> IsSessionValidAsync(string sessionId)
+        {
+            try
+            {
+                var loginLogoutRepo = _unitOfWork.GetRepository<ILoginLogoutLogRepository>();
+
+                // SessionID ile log kaydını bul
+                var log = await loginLogoutRepo.GetBySessionIdAsync(sessionId);
+
+                if (log == null)
+                {
+                    // Session kaydı yok - geçersiz
+                    _logger.LogWarning("⚠️ Session kaydı bulunamadı - SessionID: {SessionId}", sessionId);
+                    return ApiResponseDto<bool>.SuccessResult(false, "Session kaydı bulunamadı");
+                }
+
+                // LogoutTime set edilmişse session geçersiz
+                if (log.LogoutTime.HasValue)
+                {
+                    _logger.LogInformation("🚪 Session sonlanmış (LogoutTime set) - SessionID: {SessionId}, LogoutTime: {LogoutTime}",
+                        sessionId, log.LogoutTime.Value);
+                    return ApiResponseDto<bool>.SuccessResult(false, "Session sonlanmış");
+                }
+
+                // LogoutTime yok - session geçerli
+                _logger.LogDebug("✅ Session geçerli - SessionID: {SessionId}", sessionId);
+                return ApiResponseDto<bool>.SuccessResult(true, "Session geçerli");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Session validity kontrolü hatası - SessionID: {SessionId}", sessionId);
+                return ApiResponseDto<bool>.ErrorResult("Session validity kontrolü sırasında hata oluştu");
+            }
+        }
     }
 }

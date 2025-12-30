@@ -95,5 +95,32 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
 
             return Ok(result);
         }
+
+        /// <summary>
+        /// Session hala geçerli mi kontrol et (LogoutTime set edilmemiş mi?)
+        /// </summary>
+        /// <param name="sessionId">Session ID</param>
+        /// <returns>True: Session geçerli, False: Session sonlanmış</returns>
+        [HttpGet("is-session-valid/{sessionId}")]
+        [AllowAnonymous] // Middleware'den çağrılacak, authentication öncesi
+        public async Task<IActionResult> IsSessionValid(string sessionId)
+        {
+            try
+            {
+                var result = await _loginLogoutLogService.IsSessionValidAsync(sessionId);
+
+                if (!result.Success)
+                {
+                    return Ok(result); // Success=false döndür ama HTTP 200
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Session validity kontrolü hatası - SessionID: {SessionId}", sessionId);
+                return Ok(new { success = false, data = false, message = "Session kontrolü başarısız" });
+            }
+        }
     }
 }

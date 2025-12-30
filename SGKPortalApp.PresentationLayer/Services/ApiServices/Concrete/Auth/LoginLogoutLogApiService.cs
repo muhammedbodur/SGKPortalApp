@@ -143,5 +143,34 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth
                 return 0;
             }
         }
+
+        public async Task<bool> IsSessionStillValidAsync(string sessionId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"loginlogoutlog/is-session-valid/{sessionId}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("IsSessionStillValidAsync failed for SessionID: {SessionId}", sessionId);
+                    return false; // Hata durumunda güvenli taraf: session geçersiz say
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
+
+                if (apiResponse?.Success == true)
+                {
+                    return apiResponse.Data;
+                }
+
+                _logger.LogWarning("IsSessionStillValidAsync returned no data for SessionID: {SessionId}", sessionId);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "IsSessionStillValidAsync Exception for SessionID: {SessionId}", sessionId);
+                return false; // Hata durumunda güvenli taraf: session geçersiz say
+            }
+        }
     }
 }

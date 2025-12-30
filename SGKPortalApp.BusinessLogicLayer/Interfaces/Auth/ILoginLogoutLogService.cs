@@ -21,5 +21,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.Auth
 
         // Cleanup işlemleri (Background Service için)
         Task<ApiResponseDto<int>> CleanupOrphanSessionsAsync();
+
+        // Session validity kontrolü
+        Task<ApiResponseDto<bool>> IsSessionValidAsync(string sessionId);
     }
 }
