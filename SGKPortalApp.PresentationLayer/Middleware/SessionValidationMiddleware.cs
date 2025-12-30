@@ -155,6 +155,22 @@ namespace SGKPortalApp.PresentationLayer.Middleware
                             else
                             {
                                 _logger.LogDebug("✅ Session ID eşleşti - Kullanıcı geçerli");
+
+                                // ⚠️ Son aktivite zamanını güncelle (30 dakika idle timeout için)
+                                try
+                                {
+                                    var httpClient = httpClientFactory.CreateClient("ApiClient");
+                                    var response = await httpClient.PostAsync($"auth/update-activity/{tcKimlikNo}", null);
+
+                                    if (!response.IsSuccessStatusCode)
+                                    {
+                                        _logger.LogWarning("⚠️ Son aktivite zamanı güncellenemedi - TC: {TcKimlikNo}", tcKimlikNo);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.LogError(ex, "❌ Aktivite güncelleme API çağrısı hatası - TC: {TcKimlikNo}", tcKimlikNo);
+                                }
                             }
                         }
                     }

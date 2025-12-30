@@ -135,6 +135,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                 var sessionId = Guid.NewGuid().ToString();
                 user.SessionID = sessionId;
                 user.SonGirisTarihi = DateTime.Now;
+                user.SonAktiviteZamani = DateTime.Now; // İlk aktivite zamanı
                 user.BasarisizGirisSayisi = 0; // Başarılı girişte sıfırla
 
                 // ⚠️ Yeni login sonrası orphan banko mode flag'ini temizle

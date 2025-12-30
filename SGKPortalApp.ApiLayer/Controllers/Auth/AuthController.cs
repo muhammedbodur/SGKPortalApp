@@ -189,6 +189,90 @@ namespace SGKPortalApp.ApiLayer.Controllers.Auth
             }
         }
 
+        /// <summary>
+        /// Kullanıcı aktivitesini güncelle (heartbeat için)
+        /// JavaScript heartbeat tarafından çağrılır
+        /// </summary>
+        [HttpPost("ping-activity")]
+        public async Task<IActionResult> PingActivity()
+        {
+            try
+            {
+                // HttpContext'ten TC Kimlik No al
+                var tcKimlikNo = User.FindFirst("TcKimlikNo")?.Value;
+                if (string.IsNullOrEmpty(tcKimlikNo))
+                {
+                    return Unauthorized(new { message = "TC Kimlik No bulunamadı" });
+                }
+
+                return await UpdateUserActivity(tcKimlikNo);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Ping activity hatası");
+                return StatusCode(500, new { message = "Aktivite güncellenirken hata oluştu" });
+            }
+        }
+
+        /// <summary>
+        /// Belirli bir kullanıcının son aktivite zamanını güncelle
+        /// Middleware tarafından çağrılır
+        /// </summary>
+        [HttpPost("update-activity/{tcKimlikNo}")]
+        public async Task<IActionResult> UpdateActivity(string tcKimlikNo)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(tcKimlikNo))
+                {
+                    return BadRequest(new { message = "TC Kimlik No gerekli" });
+                }
+
+                return await UpdateUserActivity(tcKimlikNo);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Update activity hatası - TC: {TcKimlikNo}", tcKimlikNo);
+                return StatusCode(500, new { message = "Aktivite güncellenirken hata oluştu" });
+            }
+        }
+
+        /// <summary>
+        /// Ortak aktivite güncelleme metodu
+        /// </summary>
+        private async Task<IActionResult> UpdateUserActivity(string tcKimlikNo)
+        {
+            try
+            {
+                // User repository'den kullanıcıyı al ve son aktivite zamanını güncelle
+                var userService = HttpContext.RequestServices.GetService<SGKPortalApp.DataAccessLayer.Repositories.Interfaces.IUnitOfWork>();
+                if (userService == null)
+                {
+                    return StatusCode(500, new { message = "User service bulunamadı" });
+                }
+
+                var userRepo = userService.GetRepository<SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common.IUserRepository>();
+                var user = await userRepo.GetByTcKimlikNoAsync(tcKimlikNo);
+
+                if (user == null)
+                {
+                    return NotFound(new { message = "Kullanıcı bulunamadı" });
+                }
+
+                // Son aktivite zamanını güncelle
+                user.SonAktiviteZamani = DateTime.Now;
+                await userService.SaveChangesAsync();
+
+                _logger.LogDebug("✅ Son aktivite zamanı güncellendi - TC: {TcKimlikNo}", tcKimlikNo);
+                return Ok(new { success = true, message = "Aktivite güncellendi" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Aktivite güncelleme hatası - TC: {TcKimlikNo}", tcKimlikNo);
+                return StatusCode(500, new { message = "Aktivite güncellenirken hata oluştu" });
+            }
+        }
+
         private async Task ForceLogoutActiveSessionsAsync(string tcKimlikNo)
         {
             try
