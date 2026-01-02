@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.OpenApi.Models;
 using SGKPortalApp.ApiLayer.Services.Hubs;
 using SGKPortalApp.ApiLayer.Services.Hubs.Concrete;
+using SGKPortalApp.ApiLayer.Services.Hubs.Filters;
 using SGKPortalApp.ApiLayer.Services.Hubs.Interfaces;
 using SGKPortalApp.ApiLayer.Services.State;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
@@ -149,7 +150,11 @@ namespace SGKPortalApp.ApiLayer
             // ═══════════════════════════════════════════════════════
             // 📡 SIGNALR SERVİSLERİ
             // ═══════════════════════════════════════════════════════
-            builder.Services.AddSignalR();
+            builder.Services.AddSignalR(options =>
+            {
+                // Activity tracking filter ekle (Blazor Server için SonAktiviteZamani güncelleme)
+                options.AddFilter<ActivityTrackingHubFilter>();
+            });
             builder.Services.AddSingleton<BankoModeStateService>();
             builder.Services.AddScoped<IHubConnectionService, HubConnectionService>();
             builder.Services.AddScoped<IBankoModeService, BankoModeService>();
