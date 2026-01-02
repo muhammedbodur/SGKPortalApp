@@ -1052,6 +1052,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         /// <summary>
         /// Orphan HubBankoConnection kayıtlarını temizle
         /// HubConnection offline/silinmiş ama HubBankoConnection hala aktif olanları bulur ve temizler
+        /// NOT: Bu backup mekanizmadır. Primary cleanup IdleSessionCleanupService'te yapılır (30 dk idle timeout).
         /// </summary>
         /// <returns>Temizlenen kayıt sayısı ve TcKimlikNo listesi</returns>
         public async Task<(int count, List<string> cleanedTcKimlikNoList)> CleanupOrphanBankoConnectionsAsync()
@@ -1059,28 +1060,37 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
             try
             {
                 var bankoRepo = _unitOfWork.Repository<HubBankoConnection>();
-                var hubRepo = _unitOfWork.Repository<HubConnection>();
                 var userRepo = _unitOfWork.Repository<User>();
 
-                // 1. Tüm aktif HubBankoConnection'ları al
-                var activeBankoConnections = await bankoRepo.FindAsync(b => b.BankoModuAktif);
+                // 1. Tüm aktif HubBankoConnection'ları HubConnection navigation property ile al (eager loading - N+1 önleme)
+                var activeBankoConnections = await bankoRepo.GetAllAsync(
+                    includeProperties: b => b.HubConnection);
 
-                if (!activeBankoConnections.Any())
+                // Sadece aktif olanları filtrele
+                var activeBankoList = activeBankoConnections
+                    .Where(b => b.BankoModuAktif)
+                    .ToList();
+
+                if (!activeBankoList.Any())
                 {
                     _logger.LogDebug("Orphan Banko temizliği: Aktif HubBankoConnection yok");
                     return (0, new List<string>());
                 }
 
+                // 2. İlgili User'ları tek sorguda çek (N+1 önleme)
+                var tcKimlikNoList = activeBankoList.Select(b => b.TcKimlikNo).Distinct().ToList();
+                var users = await userRepo.FindAsync(u => tcKimlikNoList.Contains(u.TcKimlikNo));
+                var userDict = users.ToDictionary(u => u.TcKimlikNo);
+
                 var orphanCount = 0;
                 var cleanedTcKimlikNoList = new List<string>();
 
-                // 2. Her birinin HubConnection'ını kontrol et
-                foreach (var bankoConn in activeBankoConnections)
+                // 3. Her birinin HubConnection'ını kontrol et (artık memory'de, sorgu YOK)
+                foreach (var bankoConn in activeBankoList)
                 {
-                    var hubConnection = await hubRepo.FirstOrDefaultAsync(
-                        h => h.HubConnectionId == bankoConn.HubConnectionId);
+                    var hubConnection = bankoConn.HubConnection;
 
-                    // 3. HubConnection yok, offline veya silinmiş ise → Orphan!
+                    // 4. HubConnection yok, offline veya silinmiş ise → Orphan!
                     if (hubConnection == null ||
                         hubConnection.ConnectionStatus == ConnectionStatus.offline ||
                         hubConnection.SilindiMi)
@@ -1094,11 +1104,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                         bankoConn.DuzenlenmeTarihi = DateTime.Now;
                         bankoRepo.Update(bankoConn);
 
-                        // User tablosunu temizle
-                        var user = await userRepo.FirstOrDefaultAsync(
-                            u => u.TcKimlikNo == bankoConn.TcKimlikNo);
-
-                        if (user != null)
+                        // User tablosunu temizle (dictionary'den al, sorgu YOK)
+                        if (userDict.TryGetValue(bankoConn.TcKimlikNo, out var user))
                         {
                             user.BankoModuAktif = false;
                             user.AktifBankoId = null;
@@ -1116,7 +1123,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 if (orphanCount > 0)
                 {
                     await _unitOfWork.SaveChangesAsync();
-                    _logger.LogInformation($"✅ Orphan Banko temizliği: {orphanCount} kayıt temizlendi");
+                    _logger.LogInformation($"✅ Orphan Banko temizliği (BACKUP): {orphanCount} kayıt temizlendi");
                 }
 
                 return (orphanCount, cleanedTcKimlikNoList);
