@@ -13,11 +13,8 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<StaleConnectionCleanupService> _logger;
 
-        // Ana loop aralığı (120 saniye = 2 dakika)
-        private readonly TimeSpan _loopInterval = TimeSpan.FromSeconds(120);
-
-        // Stale cleanup aralığı (5 dakika)
-        private readonly TimeSpan _staleCleanupInterval = TimeSpan.FromMinutes(5);
+        // Ana loop aralığı (5 dakika)
+        private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(5);
 
         // Stale kabul edilme süresi (10 dakika aktivite yoksa)
         private readonly int _staleThresholdMinutes = 10;
@@ -25,7 +22,6 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
         // Orphan cleanup aralığı (30 dakika) - nadiren gerekli, agresif olmamalı
         private readonly TimeSpan _orphanCleanupInterval = TimeSpan.FromMinutes(30);
 
-        private DateTime _lastStaleCleanup = DateTime.MinValue;
         private DateTime _lastOrphanCleanup = DateTime.MinValue;
 
         public StaleConnectionCleanupService(
@@ -38,28 +34,23 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("StaleConnectionCleanupService başlatıldı. Loop: {LoopInterval}, Stale: {StaleInterval}, Orphan: {OrphanInterval}",
-                _loopInterval, _staleCleanupInterval, _orphanCleanupInterval);
+            _logger.LogInformation("StaleConnectionCleanupService başlatıldı. Interval: {Interval} dakika, Stale Threshold: {StaleThreshold} dakika, Orphan Interval: {OrphanInterval} dakika",
+                _checkInterval.TotalMinutes, _staleThresholdMinutes, _orphanCleanupInterval.TotalMinutes);
 
             // İlk başlangıçta tüm online connection'ları offline yap (sunucu restart)
             await CleanupAllOnStartupAsync();
 
-            _logger.LogInformation("Periyodik temizlik başlatılıyor...");
+            _logger.LogInformation("Periyodik temizlik başlatılıyor (her {Interval} dakikada bir)...", _checkInterval.TotalMinutes);
 
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-                    // Her 120 saniyede bir loop
-                    await Task.Delay(_loopInterval, stoppingToken);
+                    // Her 5 dakikada bir çalış
+                    await Task.Delay(_checkInterval, stoppingToken);
 
-                    // Stale cleanup (5 dakikada bir - 10 dk aktivite yoksa offline yapar)
-                    var timeSinceLastStaleCleanup = DateTime.Now - _lastStaleCleanup;
-                    if (timeSinceLastStaleCleanup >= _staleCleanupInterval)
-                    {
-                        await CleanupStaleConnectionsAsync();
-                        _lastStaleCleanup = DateTime.Now;
-                    }
+                    // Stale cleanup (her çalışmada - 10 dk aktivite yoksa offline yapar)
+                    await CleanupStaleConnectionsAsync();
 
                     // Orphan cleanup (30 dakikada bir - offline olmuş banko connection'ları temizler)
                     var timeSinceLastOrphanCleanup = DateTime.Now - _lastOrphanCleanup;
