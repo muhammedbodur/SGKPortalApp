@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 
 namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
 {
@@ -57,6 +58,7 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
             using var scope = _serviceProvider.CreateScope();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var loginLogoutLogService = scope.ServiceProvider.GetRequiredService<ILoginLogoutLogService>();
+            var hubConnectionService = scope.ServiceProvider.GetRequiredService<IHubConnectionBusinessService>();
 
             try
             {
@@ -80,6 +82,7 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
 
                 var now = DateTime.Now;
                 int logoutCount = 0;
+                int bankoCleanupCount = 0;
 
                 foreach (var user in activeUsers)
                 {
@@ -108,7 +111,18 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
 
                         try
                         {
-                            // LoginLogoutLog kaydının LogoutTime'ını güncelle
+                            // 1. Eğer banko modundaysa, önce banko modundan çık
+                            if (user.BankoModuAktif)
+                            {
+                                var bankoResult = await hubConnectionService.DeactivateBankoConnectionAsync(user.TcKimlikNo);
+                                if (bankoResult)
+                                {
+                                    bankoCleanupCount++;
+                                    _logger.LogInformation("🏦 Idle timeout: Banko modu kapatıldı - TC: {TcKimlikNo}", user.TcKimlikNo);
+                                }
+                            }
+
+                            // 2. LoginLogoutLog kaydının LogoutTime'ını güncelle
                             var sessionId = user.SessionID;
                             var result = await loginLogoutLogService.UpdateLogoutTimeBySessionIdAsync(sessionId);
 
@@ -137,7 +151,8 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
 
                 if (logoutCount > 0)
                 {
-                    _logger.LogInformation("✅ Idle session cleanup tamamlandı - {Count} kullanıcı logout edildi", logoutCount);
+                    _logger.LogInformation("✅ Idle session cleanup tamamlandı - {Count} kullanıcı logout edildi, {BankoCount} banko modu kapatıldı",
+                        logoutCount, bankoCleanupCount);
                 }
                 else
                 {
