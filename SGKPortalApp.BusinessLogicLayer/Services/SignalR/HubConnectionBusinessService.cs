@@ -1063,8 +1063,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 var userRepo = _unitOfWork.Repository<User>();
 
                 // 1. Tüm aktif HubBankoConnection'ları HubConnection navigation property ile al (eager loading - N+1 önleme)
-                var activeBankoConnections = await bankoRepo.GetAllAsync(
-                    includeProperties: b => b.HubConnection);
+                var activeBankoConnections = await bankoRepo.GetAllAsync(b => b.HubConnection);
 
                 // Sadece aktif olanları filtrele
                 var activeBankoList = activeBankoConnections
