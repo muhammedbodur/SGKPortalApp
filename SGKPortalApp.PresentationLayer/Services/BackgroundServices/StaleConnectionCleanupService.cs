@@ -22,8 +22,8 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
         // Stale kabul edilme süresi (10 dakika aktivite yoksa)
         private readonly int _staleThresholdMinutes = 10;
 
-        // Orphan cleanup aralığı (120 saniye = 2 dakika) - her loop'ta çalışacak
-        private readonly TimeSpan _orphanCleanupInterval = TimeSpan.FromSeconds(120);
+        // Orphan cleanup aralığı (30 dakika) - nadiren gerekli, agresif olmamalı
+        private readonly TimeSpan _orphanCleanupInterval = TimeSpan.FromMinutes(30);
 
         private DateTime _lastStaleCleanup = DateTime.MinValue;
         private DateTime _lastOrphanCleanup = DateTime.MinValue;
@@ -44,11 +44,7 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
             // İlk başlangıçta tüm online connection'ları offline yap (sunucu restart)
             await CleanupAllOnStartupAsync();
 
-            // İlk orphan cleanup'ı hemen yap (startup'tan hemen sonra)
-            await CleanupOrphanConnectionsAsync();
-            _lastOrphanCleanup = DateTime.Now;
-
-            _logger.LogInformation("İlk orphan cleanup tamamlandı, periyodik temizlik başlatılıyor...");
+            _logger.LogInformation("Periyodik temizlik başlatılıyor...");
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -57,16 +53,20 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
                     // Her 120 saniyede bir loop
                     await Task.Delay(_loopInterval, stoppingToken);
 
-                    // Orphan cleanup (her loop'ta çalış - 120 saniye)
-                    await CleanupOrphanConnectionsAsync();
-                    _lastOrphanCleanup = DateTime.Now;
-
-                    // Stale cleanup (5 dakikada bir)
+                    // Stale cleanup (5 dakikada bir - 10 dk aktivite yoksa offline yapar)
                     var timeSinceLastStaleCleanup = DateTime.Now - _lastStaleCleanup;
                     if (timeSinceLastStaleCleanup >= _staleCleanupInterval)
                     {
                         await CleanupStaleConnectionsAsync();
                         _lastStaleCleanup = DateTime.Now;
+                    }
+
+                    // Orphan cleanup (30 dakikada bir - offline olmuş banko connection'ları temizler)
+                    var timeSinceLastOrphanCleanup = DateTime.Now - _lastOrphanCleanup;
+                    if (timeSinceLastOrphanCleanup >= _orphanCleanupInterval)
+                    {
+                        await CleanupOrphanConnectionsAsync();
+                        _lastOrphanCleanup = DateTime.Now;
                     }
                 }
                 catch (OperationCanceledException)
