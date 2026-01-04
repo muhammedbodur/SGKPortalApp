@@ -153,10 +153,20 @@ namespace SGKPortalApp.ApiLayer
             var zkTecoApiBaseUrl = builder.Configuration["ZKTecoApi:BaseUrl"]
                 ?? throw new InvalidOperationException("❌ ZKTecoApi:BaseUrl yapılandırması bulunamadı!");
 
-            builder.Services.AddHttpClient<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IZKTecoApiClient, SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoApiClient>((serviceProvider, client) =>
+            // Named HttpClient yapılandırması
+            builder.Services.AddHttpClient("ZKTecoApiClient", client =>
             {
+                client.BaseAddress = new Uri(zkTecoApiBaseUrl);
+                client.Timeout = TimeSpan.FromSeconds(builder.Configuration.GetValue<int>("ZKTecoApi:Timeout", 30));
+            });
+
+            // ZKTecoApiClient servis kaydı
+            builder.Services.AddTransient<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IZKTecoApiClient>(serviceProvider =>
+            {
+                var httpClientFactory = serviceProvider.GetRequiredService<System.Net.Http.IHttpClientFactory>();
+                var httpClient = httpClientFactory.CreateClient("ZKTecoApiClient");
                 var logger = serviceProvider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoApiClient>>();
-                return new SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoApiClient(client, logger, zkTecoApiBaseUrl);
+                return new SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoApiClient(httpClient, logger, zkTecoApiBaseUrl);
             });
 
             Console.WriteLine($"🔌 ZKTeco API Client yapılandırıldı: {zkTecoApiBaseUrl}");
