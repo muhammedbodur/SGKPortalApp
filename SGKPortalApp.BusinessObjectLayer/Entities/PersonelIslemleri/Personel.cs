@@ -129,6 +129,10 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         public string? Semt { get; set; }
 
         public DateTime DogumTarihi { get; set; }
+
+        [StringLength(200)]
+        public string? DogumYeri { get; set; }  // PDKS.Net4.8 personelBirthplace uyumluluğu
+
         public Cinsiyet Cinsiyet { get; set; }
         public MedeniDurumu MedeniDurumu { get; set; }
         public KanGrubu KanGrubu { get; set; }
@@ -138,6 +142,10 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         public int Tabldot { get; set; } = 0;
         
         public PersonelAktiflikDurum PersonelAktiflikDurum { get; set; }
+
+        // PDKS.Net4.8 mesai saatleri uyumluluğu (mesaiBaslar, mesaiBiter)
+        public TimeSpan? MesaiBaslangicSaati { get; set; }
+        public TimeSpan? MesaiBitisSaati { get; set; }
 
         [StringLength(20)]
         public string? EmekliSicilNo { get; set; }
