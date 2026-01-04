@@ -19,7 +19,7 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
         // Bağlı kullanıcıları takip et (Monitoring sayfası açık olanlar)
         private static readonly ConcurrentDictionary<string, DateTime> ActiveMonitors = new();
 
-        public PdksHub(ILogger<PdksHub> logger) : base(logger)
+        public PdksHub(I_logger<PdksHub> logger) : base(logger)
         {
         }
 
@@ -35,7 +35,7 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
             var connectionId = Context.ConnectionId;
             ActiveMonitors.TryAdd(connectionId, DateTime.Now);
 
-            Logger.LogInformation($"PDKS Hub - Client connected: {connectionId}. Total monitors: {ActiveMonitors.Count}");
+            _logger.LogInformation($"PDKS Hub - Client connected: {connectionId}. Total monitors: {ActiveMonitors.Count}");
 
             // Bağlanan client'a hoş geldin mesajı
             await Clients.Caller.SendAsync("OnConnected", new
@@ -54,11 +54,11 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
             var connectionId = Context.ConnectionId;
             ActiveMonitors.TryRemove(connectionId, out _);
 
-            Logger.LogInformation($"PDKS Hub - Client disconnected: {connectionId}. Remaining monitors: {ActiveMonitors.Count}");
+            _logger.LogInformation($"PDKS Hub - Client disconnected: {connectionId}. Remaining monitors: {ActiveMonitors.Count}");
 
             if (exception != null)
             {
-                Logger.LogError(exception, $"PDKS Hub - Connection closed with error: {connectionId}");
+                _logger.LogError(exception, $"PDKS Hub - Connection closed with error: {connectionId}");
             }
 
             await base.OnDisconnectedAsync(exception);
@@ -77,7 +77,7 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
         {
             try
             {
-                Logger.LogInformation(
+                _logger.LogInformation(
                     $"PDKS Hub - Broadcasting event: EnrollNumber={eventDto.EnrollNumber}, " +
                     $"EventTime={eventDto.EventTime}, Device={eventDto.DeviceIp}");
 
@@ -86,7 +86,7 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "PDKS Hub - Error broadcasting realtime event");
+                _logger.LogError(ex, "PDKS Hub - Error broadcasting realtime event");
             }
         }
 
@@ -102,7 +102,7 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, $"PDKS Hub - Error broadcasting device event: {deviceIp}");
+                _logger.LogError(ex, $"PDKS Hub - Error broadcasting device event: {deviceIp}");
             }
         }
 
@@ -126,7 +126,7 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
             try
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, $"Device_{deviceIp}");
-                Logger.LogInformation($"PDKS Hub - Client {Context.ConnectionId} subscribed to device: {deviceIp}");
+                _logger.LogInformation($"PDKS Hub - Client {Context.ConnectionId} subscribed to device: {deviceIp}");
 
                 await Clients.Caller.SendAsync("OnDeviceSubscribed", new
                 {
@@ -136,7 +136,7 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, $"PDKS Hub - Error subscribing to device: {deviceIp}");
+                _logger.LogError(ex, $"PDKS Hub - Error subscribing to device: {deviceIp}");
             }
         }
 
@@ -148,7 +148,7 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
             try
             {
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"Device_{deviceIp}");
-                Logger.LogInformation($"PDKS Hub - Client {Context.ConnectionId} unsubscribed from device: {deviceIp}");
+                _logger.LogInformation($"PDKS Hub - Client {Context.ConnectionId} unsubscribed from device: {deviceIp}");
 
                 await Clients.Caller.SendAsync("OnDeviceUnsubscribed", new
                 {
@@ -158,7 +158,7 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, $"PDKS Hub - Error unsubscribing from device: {deviceIp}");
+                _logger.LogError(ex, $"PDKS Hub - Error unsubscribing from device: {deviceIp}");
             }
         }
 
