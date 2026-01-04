@@ -162,6 +162,18 @@ namespace SGKPortalApp.ApiLayer
             Console.WriteLine($"🔌 ZKTeco API Client yapılandırıldı: {zkTecoApiBaseUrl}");
 
             // ═══════════════════════════════════════════════════════
+            // 🔄 ZKTeco REALTIME SERVICE (SignalR Client)
+            // ═══════════════════════════════════════════════════════
+            var zkTecoSignalRUrl = $"{zkTecoApiBaseUrl}/signalr";
+            builder.Services.AddSingleton<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IZKTecoRealtimeService>(serviceProvider =>
+            {
+                var logger = serviceProvider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoRealtimeService>>();
+                return new SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoRealtimeService(logger, zkTecoSignalRUrl);
+            });
+
+            Console.WriteLine($"🔄 ZKTeco Realtime Service yapılandırıldı: {zkTecoSignalRUrl}");
+
+            // ═══════════════════════════════════════════════════════
             // 📡 SIGNALR SERVİSLERİ
             // ═══════════════════════════════════════════════════════
             builder.Services.AddSignalR(options =>
@@ -182,6 +194,7 @@ namespace SGKPortalApp.ApiLayer
             // ═══════════════════════════════════════════════════════
             builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.SessionCleanupService>();
             builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.IdleSessionCleanupService>(); // 30 dakika idle timeout
+            builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService>(); // ZKTeco realtime event listener
 
             // ═══════════════════════════════════════════════════════
             // 🔧 AUTOMAPPER
@@ -322,6 +335,7 @@ namespace SGKPortalApp.ApiLayer
             // 📡 SIGNALR HUB ENDPOINTS
             // ═══════════════════════════════════════════════════════
             app.MapHub<SiramatikHub>("/hubs/siramatik");
+            app.MapHub<PdksHub>("/hubs/pdks"); // ZKTeco realtime events
 
             // ═══════════════════════════════════════════════════════
             // 🏠 ROOT ENDPOINT (API Info)
