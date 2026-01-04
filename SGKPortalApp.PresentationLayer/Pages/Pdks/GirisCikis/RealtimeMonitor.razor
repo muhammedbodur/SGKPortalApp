@@ -112,10 +112,10 @@
                                                 <span class="badge bg-secondary">@evt.EnrollNumber</span>
                                             </td>
                                             <td>
-                                                @GetVerifyMethodBadge(evt.VerifyMethod)
+                                                @((MarkupString)GetVerifyMethodBadge(evt.VerifyMethod))
                                             </td>
                                             <td>
-                                                @GetInOutModeBadge(evt.InOutMode)
+                                                @((MarkupString)GetInOutModeBadge(evt.InOutMode))
                                             </td>
                                             <td>
                                                 <span class="text-monospace">@evt.DeviceIp</span>
@@ -268,9 +268,6 @@
             _ => $"<span class='badge bg-dark'>{inOutMode}</span>"
         };
     }
-
-    private MarkupString GetVerifyMethodBadge(int verifyMethod) => new(GetVerifyMethodBadge(verifyMethod));
-    private MarkupString GetInOutModeBadge(int inOutMode) => new(GetInOutModeBadge(inOutMode));
 
     public class RealtimeEventModel
     {
