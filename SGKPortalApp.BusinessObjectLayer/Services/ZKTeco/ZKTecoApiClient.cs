@@ -345,6 +345,79 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
             }
         }
 
+        // ========== Realtime Operations ==========
+
+        public async Task<bool> StartRealtimeMonitoringAsync(string deviceIp, int port = 4370)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsync(
+                    $"{_baseUrl}/api/realtime/{deviceIp}/start?port={port}",
+                    null);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning($"Start realtime monitoring failed: {deviceIp}:{port} - {response.StatusCode}");
+                    return false;
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse>();
+                return result?.Success ?? false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Start realtime monitoring error: {deviceIp}:{port}");
+                return false;
+            }
+        }
+
+        public async Task<bool> StopRealtimeMonitoringAsync(string deviceIp, int port = 4370)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsync(
+                    $"{_baseUrl}/api/realtime/{deviceIp}/stop?port={port}",
+                    null);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning($"Stop realtime monitoring failed: {deviceIp}:{port} - {response.StatusCode}");
+                    return false;
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse>();
+                return result?.Success ?? false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Stop realtime monitoring error: {deviceIp}:{port}");
+                return false;
+            }
+        }
+
+        public async Task<bool> GetRealtimeMonitoringStatusAsync(string deviceIp, int port = 4370)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync(
+                    $"{_baseUrl}/api/realtime/{deviceIp}/status?port={port}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning($"Get realtime monitoring status failed: {deviceIp}:{port} - {response.StatusCode}");
+                    return false;
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse<RealtimeStatusData>>();
+                return result?.Data?.IsMonitoring ?? false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Get realtime monitoring status error: {deviceIp}:{port}");
+                return false;
+            }
+        }
+
         // ========== Helper Classes ==========
 
         private class ApiResponse
@@ -369,6 +442,11 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
         private class AttendanceCountData
         {
             public int Count { get; set; }
+        }
+
+        private class RealtimeStatusData
+        {
+            public bool IsMonitoring { get; set; }
         }
     }
 }

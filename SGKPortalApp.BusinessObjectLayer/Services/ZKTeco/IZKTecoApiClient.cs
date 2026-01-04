@@ -82,5 +82,24 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
         /// Cihazdaki tüm attendance log'larını sil
         /// </summary>
         Task<bool> ClearAttendanceLogsAsync(string deviceIp, int port = 4370);
+
+        // ========== Realtime Operations ==========
+
+        /// <summary>
+        /// Cihazdan realtime event dinlemeyi başlat
+        /// ZKTecoApi üzerinde SDK event listener'ı başlatır
+        /// </summary>
+        Task<bool> StartRealtimeMonitoringAsync(string deviceIp, int port = 4370);
+
+        /// <summary>
+        /// Realtime event dinlemeyi durdur
+        /// </summary>
+        Task<bool> StopRealtimeMonitoringAsync(string deviceIp, int port = 4370);
+
+        /// <summary>
+        /// Realtime monitoring durumunu kontrol et
+        /// Cihaz için event listener aktif mi?
+        /// </summary>
+        Task<bool> GetRealtimeMonitoringStatusAsync(string deviceIp, int port = 4370);
     }
 }
