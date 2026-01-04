@@ -2,10 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using SGKPortalApp.DataAccessLayer.Configurations.Common;
 using SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri;
 using SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Configurations.SignalR;
+using SGKPortalApp.DataAccessLayer.Configurations.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.SignalR;
 
 namespace SGKPortalApp.DataAccessLayer.Context
@@ -71,6 +73,11 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<SignalREventLog> SignalREventLogs { get; set; }
         #endregion
 
+        #region ZKTeco
+        public DbSet<ZKTecoDevice> ZKTecoDevices { get; set; }
+        public DbSet<CekilenData> CekilenDatalar { get; set; }
+        #endregion
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -133,6 +140,10 @@ namespace SGKPortalApp.DataAccessLayer.Context
 
             // SignalR
             modelBuilder.ApplyConfiguration(new SignalREventLogConfiguration());
+
+            // ZKTeco
+            modelBuilder.ApplyConfiguration(new ZKTecoDeviceConfiguration());
+            modelBuilder.ApplyConfiguration(new CekilenDataConfiguration());
         }
         #endregion
 

@@ -148,6 +148,20 @@ namespace SGKPortalApp.ApiLayer
             builder.Services.AddBusinessLogicLayer();
 
             // ═══════════════════════════════════════════════════════
+            // 🔌 ZKTeco API CLIENT
+            // ═══════════════════════════════════════════════════════
+            var zkTecoApiBaseUrl = builder.Configuration["ZKTecoApi:BaseUrl"]
+                ?? throw new InvalidOperationException("❌ ZKTecoApi:BaseUrl yapılandırması bulunamadı!");
+
+            builder.Services.AddHttpClient<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IZKTecoApiClient, SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoApiClient>((serviceProvider, client) =>
+            {
+                var logger = serviceProvider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoApiClient>>();
+                return new SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoApiClient(client, logger, zkTecoApiBaseUrl);
+            });
+
+            Console.WriteLine($"🔌 ZKTeco API Client yapılandırıldı: {zkTecoApiBaseUrl}");
+
+            // ═══════════════════════════════════════════════════════
             // 📡 SIGNALR SERVİSLERİ
             // ═══════════════════════════════════════════════════════
             builder.Services.AddSignalR(options =>
