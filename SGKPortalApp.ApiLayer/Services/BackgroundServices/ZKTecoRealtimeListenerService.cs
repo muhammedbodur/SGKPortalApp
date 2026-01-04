@@ -208,17 +208,18 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                 // CekilenData tablosuna kaydet
                 var record = new CekilenData
                 {
-                    EnrollNumber = evt.EnrollNumber,
-                    DateTime = evt.EventTime,
-                    VerifyMethod = evt.VerifyMethod,
-                    InOutMode = evt.InOutMode,
-                    WorkCode = evt.WorkCode,
-                    DeviceIp = evt.DeviceIp,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
+                    KayitNo = evt.EnrollNumber,
+                    Tarih = evt.EventTime.Date,
+                    Saat = evt.EventTime.TimeOfDay,
+                    Dogrulama = evt.VerifyMethod.ToString(),
+                    GirisCikisModu = evt.InOutMode.ToString(),
+                    WorkCode = evt.WorkCode.ToString(),
+                    CihazIp = evt.DeviceIp,
+                    CekilmeTarihi = DateTime.Now,
+                    IsProcessed = false
                 };
 
-                await dbContext.CekilenDatas.AddAsync(record);
+                await dbContext.CekilenDatalar.AddAsync(record);
                 await dbContext.SaveChangesAsync();
 
                 _logger.LogInformation(
