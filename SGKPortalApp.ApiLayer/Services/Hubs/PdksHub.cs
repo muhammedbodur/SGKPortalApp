@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using SGKPortalApp.ApiLayer.Services.Hubs.Base;
 using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 using System;
