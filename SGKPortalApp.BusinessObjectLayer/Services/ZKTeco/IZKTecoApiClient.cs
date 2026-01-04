@@ -41,6 +41,11 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
         Task<UserInfoDto?> GetUserAsync(string deviceIp, string enrollNumber, int port = 4370);
 
         /// <summary>
+        /// Kart numarasıyla kullanıcıyı bul
+        /// </summary>
+        Task<UserInfoDto?> GetUserByCardNumberAsync(string deviceIp, long cardNumber, int port = 4370);
+
+        /// <summary>
         /// Cihaza kullanıcı ekle
         /// NOT: Database değil, direkt cihaza
         /// </summary>

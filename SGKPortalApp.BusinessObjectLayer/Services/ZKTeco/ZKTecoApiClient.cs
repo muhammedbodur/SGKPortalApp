@@ -150,6 +150,29 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
             }
         }
 
+        public async Task<UserInfoDto?> GetUserByCardNumberAsync(string deviceIp, long cardNumber, int port = 4370)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync(
+                    $"{_baseUrl}/api/users/{deviceIp}/card/{cardNumber}?port={port}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning($"Get user by card failed: {deviceIp}:{port} - Card: {cardNumber} - {response.StatusCode}");
+                    return null;
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse<UserInfoDto>>();
+                return result?.Data;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Get user by card error: {deviceIp}:{port} - Card: {cardNumber}");
+                return null;
+            }
+        }
+
         public async Task<bool> AddUserToDeviceAsync(string deviceIp, UserCreateUpdateDto user, int port = 4370)
         {
             try
