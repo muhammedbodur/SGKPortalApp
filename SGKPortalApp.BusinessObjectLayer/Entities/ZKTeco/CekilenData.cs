@@ -1,3 +1,4 @@
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -10,7 +11,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
     /// Tablo adı: ZKTeco_CekilenData
     /// </summary>
     [Table("ZKTeco_CekilenData")]
-    public class CekilenData
+    public class CekilenData : BaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
