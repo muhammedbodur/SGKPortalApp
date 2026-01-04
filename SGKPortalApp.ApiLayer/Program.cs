@@ -335,6 +335,7 @@ namespace SGKPortalApp.ApiLayer
             // 📡 SIGNALR HUB ENDPOINTS
             // ═══════════════════════════════════════════════════════
             app.MapHub<SiramatikHub>("/hubs/siramatik");
+            app.MapHub<PdksHub>("/hubs/pdks"); // ZKTeco realtime events
 
             // ═══════════════════════════════════════════════════════
             // 🏠 ROOT ENDPOINT (API Info)

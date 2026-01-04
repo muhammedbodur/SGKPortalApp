@@ -1,7 +1,10 @@
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.ApiLayer.Services.Hubs;
 using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Services.ZKTeco;
@@ -16,22 +19,34 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
     /// <summary>
     /// ZKTeco cihazlarından realtime event'leri dinleyen background service
     /// Uygulama başladığında aktif cihazlara abone olur
-    /// Gelen event'leri veritabanına kaydeder
+    /// Gelen event'leri PdksHub'a broadcast eder
+    /// Opsiyonel olarak veritabanına kaydeder (configuration ile kontrol)
     /// </summary>
     public class ZKTecoRealtimeListenerService : BackgroundService
     {
         private readonly ILogger<ZKTecoRealtimeListenerService> _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly IZKTecoRealtimeService _realtimeService;
+        private readonly IHubContext<PdksHub> _pdksHubContext;
+        private readonly IConfiguration _configuration;
+        private readonly bool _saveToDatabase;
 
         public ZKTecoRealtimeListenerService(
             ILogger<ZKTecoRealtimeListenerService> logger,
             IServiceProvider serviceProvider,
-            IZKTecoRealtimeService realtimeService)
+            IZKTecoRealtimeService realtimeService,
+            IHubContext<PdksHub> pdksHubContext,
+            IConfiguration configuration)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
             _realtimeService = realtimeService;
+            _pdksHubContext = pdksHubContext;
+            _configuration = configuration;
+
+            // Configuration'dan veritabanına kaydetme seçeneğini oku
+            _saveToDatabase = _configuration.GetValue<bool>("ZKTecoApi:Realtime:SaveToDatabase", false);
+            _logger.LogInformation($"ZKTeco Realtime - SaveToDatabase: {_saveToDatabase}");
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -121,7 +136,9 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
         }
 
         /// <summary>
-        /// Realtime event'i işle ve veritabanına kaydet
+        /// Realtime event'i işle:
+        /// 1. PdksHub'a broadcast et (realtime gösterim için)
+        /// 2. Opsiyonel olarak veritabanına kaydet
         /// </summary>
         private async Task ProcessRealtimeEventAsync(RealtimeEventDto evt)
         {
@@ -132,6 +149,59 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                     $"EventTime={evt.EventTime}, Device={evt.DeviceIp}, " +
                     $"VerifyMethod={evt.VerifyMethod}, InOutMode={evt.InOutMode}");
 
+                // 1. PdksHub'a broadcast et (tüm bağlı client'lara gönder)
+                await BroadcastToPdksHubAsync(evt);
+
+                // 2. Opsiyonel: Veritabanına kaydet
+                if (_saveToDatabase)
+                {
+                    await SaveToDatabaseAsync(evt);
+                }
+                else
+                {
+                    _logger.LogDebug("Event database'e kaydedilmedi (SaveToDatabase=false)");
+                }
+
+                // TODO: İlerisi için iş kuralları eklenebilir:
+                // - Personel kontrolü (EnrollNumber ile Personel tablosundan sorgula)
+                // - Mesai dışı giriş kontrolü
+                // - E-posta/SMS bildirimi
+                // - Geç kalma, erken çıkış hesaplamaları
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    $"Failed to process realtime event: EnrollNumber={evt.EnrollNumber}, " +
+                    $"EventTime={evt.EventTime}");
+            }
+        }
+
+        /// <summary>
+        /// Event'i PdksHub'a broadcast et
+        /// </summary>
+        private async Task BroadcastToPdksHubAsync(RealtimeEventDto evt)
+        {
+            try
+            {
+                // PdksHub'a gönder - tüm bağlı client'lar bu event'i alacak
+                await _pdksHubContext.Clients.All.SendAsync("OnRealtimeEvent", evt);
+
+                _logger.LogInformation(
+                    $"Event broadcast to PdksHub: {evt.EnrollNumber} - {evt.EventTime}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to broadcast event to PdksHub");
+            }
+        }
+
+        /// <summary>
+        /// Event'i veritabanına kaydet (opsiyonel)
+        /// </summary>
+        private async Task SaveToDatabaseAsync(RealtimeEventDto evt)
+        {
+            try
+            {
                 using var scope = _serviceProvider.CreateScope();
                 var dbContext = scope.ServiceProvider.GetRequiredService<SGKDbContext>();
 
@@ -153,19 +223,10 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
 
                 _logger.LogInformation(
                     $"Realtime event saved to database: {evt.EnrollNumber} - {evt.EventTime}");
-
-                // TODO: İlerisi için iş kuralları eklenebilir:
-                // - Personel kontrolü (EnrollNumber ile Personel tablosundan sorgula)
-                // - Mesai dışı giriş kontrolü
-                // - E-posta/SMS bildirimi
-                // - Dashboard'a realtime bildirim gönder
-                // - Geç kalma, erken çıkış hesaplamaları
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    $"Failed to process realtime event: EnrollNumber={evt.EnrollNumber}, " +
-                    $"EventTime={evt.EventTime}");
+                _logger.LogError(ex, "Failed to save event to database");
             }
         }
 

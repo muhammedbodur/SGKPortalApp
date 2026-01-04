@@ -1,0 +1,286 @@
+@page "/pdks/giris-cikis/realtime"
+@using SGKPortalApp.PresentationLayer.Components.Common
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+@inject IConfiguration Configuration
+
+<PageTitle>PDKS Realtime İzleme</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">
+                        <i class="bi bi-broadcast"></i>
+                        PDKS Realtime İzleme
+                    </h3>
+                    <small class="text-muted">ZKTeco cihazlarından gelen giriş/çıkış kayıtlarını canlı izleyin</small>
+                </div>
+                <div>
+                    @if (IsConnected)
+                    {
+                        <span class="badge bg-success pulse">
+                            <i class="bi bi-wifi"></i> Bağlı
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">
+                            <i class="bi bi-wifi-off"></i> Bağlantı Yok
+                        </span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İstatistikler -->
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Toplam Event</h6>
+                    <h3 class="mb-0">@TotalEvents</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Giriş</h6>
+                    <h3 class="mb-0">@CheckInCount</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Çıkış</h6>
+                    <h3 class="mb-0">@CheckOutCount</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Son Event</h6>
+                    <h3 class="mb-0">@LastEventTime</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Realtime Event Tablosu -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <span>
+                        <i class="bi bi-table"></i> Canlı Giriş/Çıkış Kayıtları
+                        <small class="text-muted ms-2">(Son @MaxEvents kayıt gösteriliyor)</small>
+                    </span>
+                    <button class="btn btn-sm btn-light" @onclick="ClearEvents">
+                        <i class="bi bi-trash"></i> Temizle
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                        <table class="table table-hover table-striped mb-0">
+                            <thead class="table-dark sticky-top">
+                                <tr>
+                                    <th>Zaman</th>
+                                    <th>Sicil No</th>
+                                    <th>Doğrulama</th>
+                                    <th>Tip</th>
+                                    <th>Cihaz IP</th>
+                                    <th>Kart No</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Events.Any())
+                                {
+                                    @foreach (var evt in Events.OrderByDescending(e => e.EventTime))
+                                    {
+                                        <tr class="event-row-animation">
+                                            <td>
+                                                <strong>@evt.EventTime.ToString("HH:mm:ss")</strong>
+                                                <br />
+                                                <small class="text-muted">@evt.EventTime.ToString("dd.MM.yyyy")</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">@evt.EnrollNumber</span>
+                                            </td>
+                                            <td>
+                                                @GetVerifyMethodBadge(evt.VerifyMethod)
+                                            </td>
+                                            <td>
+                                                @GetInOutModeBadge(evt.InOutMode)
+                                            </td>
+                                            <td>
+                                                <span class="text-monospace">@evt.DeviceIp</span>
+                                            </td>
+                                            <td>
+                                                @if (evt.CardNumber.HasValue)
+                                                {
+                                                    <span class="badge bg-info">@evt.CardNumber.Value</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">
+                                            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                                            <p class="mt-2">Henüz event alınmadı. Cihazlarda kart okutmayı bekliyor...</p>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pulse {
+        animation: pulse-animation 2s infinite;
+    }
+
+    @@keyframes pulse-animation {
+        0% {
+            box-shadow: 0 0 0 0px rgba(0, 255, 0, 0.7);
+        }
+        100% {
+            box-shadow: 0 0 0 10px rgba(0, 255, 0, 0);
+        }
+    }
+
+    .event-row-animation {
+        animation: slideIn 0.5s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+            background-color: #fff3cd;
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+            background-color: transparent;
+        }
+    }
+
+    .text-monospace {
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+    }
+</style>
+
+@code {
+    private List<RealtimeEventModel> Events = new();
+    private bool IsConnected = false;
+    private int MaxEvents = 100;
+
+    // İstatistikler
+    private int TotalEvents => Events.Count;
+    private int CheckInCount => Events.Count(e => e.InOutMode == 0);
+    private int CheckOutCount => Events.Count(e => e.InOutMode == 1);
+    private string LastEventTime => Events.Any() ? Events.Max(e => e.EventTime).ToString("HH:mm:ss") : "-";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InitializeSignalRAsync();
+        }
+    }
+
+    private async Task InitializeSignalRAsync()
+    {
+        var apiUrl = Configuration["AppSettings:ApiUrl"] ?? "https://localhost:9080";
+        var hubUrl = $"{apiUrl}/hubs/pdks";
+
+        await JS.InvokeVoidAsync("PdksRealtimeMonitor.initialize", hubUrl,
+            DotNetObjectReference.Create(this));
+    }
+
+    [JSInvokable]
+    public async Task OnRealtimeEvent(RealtimeEventModel evt)
+    {
+        Events.Insert(0, evt);
+
+        // Max event sayısını aş önce eski kayıtları sil
+        if (Events.Count > MaxEvents)
+        {
+            Events = Events.Take(MaxEvents).ToList();
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task OnConnectionStateChanged(bool isConnected)
+    {
+        IsConnected = isConnected;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void ClearEvents()
+    {
+        Events.Clear();
+        StateHasChanged();
+    }
+
+    private string GetVerifyMethodBadge(int verifyMethod)
+    {
+        return verifyMethod switch
+        {
+            0 => "<span class='badge bg-secondary'>Şifre</span>",
+            1 => "<span class='badge bg-primary'>Parmak İzi</span>",
+            3 => "<span class='badge bg-info'>Yüz Tanıma</span>",
+            15 => "<span class='badge bg-success'>Kart</span>",
+            _ => $"<span class='badge bg-warning'>{verifyMethod}</span>"
+        };
+    }
+
+    private string GetInOutModeBadge(int inOutMode)
+    {
+        return inOutMode switch
+        {
+            0 => "<span class='badge bg-success'>Giriş</span>",
+            1 => "<span class='badge bg-warning'>Çıkış</span>",
+            2 => "<span class='badge bg-info'>Mola Başlangıç</span>",
+            3 => "<span class='badge bg-info'>Mola Bitiş</span>",
+            4 => "<span class='badge bg-secondary'>Mesai Başlangıç</span>",
+            5 => "<span class='badge bg-secondary'>Mesai Bitiş</span>",
+            _ => $"<span class='badge bg-dark'>{inOutMode}</span>"
+        };
+    }
+
+    private MarkupString GetVerifyMethodBadge(int verifyMethod) => new(GetVerifyMethodBadge(verifyMethod));
+    private MarkupString GetInOutModeBadge(int inOutMode) => new(GetInOutModeBadge(inOutMode));
+
+    public class RealtimeEventModel
+    {
+        public string EnrollNumber { get; set; } = string.Empty;
+        public DateTime EventTime { get; set; }
+        public int VerifyMethod { get; set; }
+        public int InOutMode { get; set; }
+        public int WorkCode { get; set; }
+        public string DeviceIp { get; set; } = string.Empty;
+        public bool IsValid { get; set; }
+        public long? CardNumber { get; set; }
+    }
+}
