@@ -98,9 +98,25 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Generic
 
             // Entity zaten track ediliyor mu kontrol et
             var entry = _context.Entry(entity);
+
             if (entry.State == EntityState.Detached)
             {
-                _dbSet.Attach(entity);
+                // Detached ise, aynı key ile zaten tracked bir entity var mı kontrol et
+                // Eğer varsa SetValues ile güncelle, yoksa Attach et
+                var keyValues = GetPrimaryKeyValues(entity);
+                var existingEntity = _dbSet.Local.FirstOrDefault(e => KeysMatch(e, keyValues));
+
+                if (existingEntity != null)
+                {
+                    // Zaten tracked olan entity'nin değerlerini güncelle
+                    _context.Entry(existingEntity).CurrentValues.SetValues(entity);
+                    entry = _context.Entry(existingEntity);
+                }
+                else
+                {
+                    // Tracked entity yok, attach et
+                    _dbSet.Attach(entity);
+                }
             }
 
             entry.State = EntityState.Modified;
@@ -110,6 +126,30 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Generic
             {
                 entry.Property(nameof(BaseEntity.EklenmeTarihi)).IsModified = false;
             }
+        }
+
+        /// <summary>
+        /// Entity'nin primary key değerlerini döndürür
+        /// </summary>
+        private object[] GetPrimaryKeyValues(T entity)
+        {
+            var keyProperties = _context.Model.FindEntityType(typeof(T))?.FindPrimaryKey()?.Properties;
+            if (keyProperties == null)
+                return Array.Empty<object>();
+
+            return keyProperties.Select(p => p.PropertyInfo?.GetValue(entity)).ToArray();
+        }
+
+        /// <summary>
+        /// İki entity'nin primary key değerleri eşleşiyor mu kontrol eder
+        /// </summary>
+        private bool KeysMatch(T entity, object[] keyValues)
+        {
+            var entityKeyValues = GetPrimaryKeyValues(entity);
+            if (entityKeyValues.Length != keyValues.Length)
+                return false;
+
+            return entityKeyValues.SequenceEqual(keyValues);
         }
 
         /// <summary>
