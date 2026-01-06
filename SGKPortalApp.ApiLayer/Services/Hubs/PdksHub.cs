@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using SGKPortalApp.ApiLayer.Services.Hubs.Base;
 using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 using System;
@@ -18,7 +19,7 @@ namespace SGKPortalApp.ApiLayer.Services.Hubs
         // Bağlı kullanıcıları takip et (Monitoring sayfası açık olanlar)
         private static readonly ConcurrentDictionary<string, DateTime> ActiveMonitors = new();
 
-        public PdksHub(I_logger<PdksHub> logger) : base(logger)
+        public PdksHub(Logger<PdksHub> logger) : base(logger)
         {
         }
 

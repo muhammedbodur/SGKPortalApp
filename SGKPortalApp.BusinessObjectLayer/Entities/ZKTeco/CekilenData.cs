@@ -1,3 +1,4 @@
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -9,7 +10,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
     /// PDKS.Net4.8 tbCekilenData ile uyumlu
     /// Tablo adı: ZKTeco_CekilenData (Configuration'da tanımlı)
     /// </summary>
-    public class CekilenData
+    public class CekilenData : BaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
