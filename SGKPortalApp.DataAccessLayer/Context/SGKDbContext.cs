@@ -75,9 +75,10 @@ namespace SGKPortalApp.DataAccessLayer.Context
 
         #region ZKTeco
         public DbSet<ZKTecoDevice> ZKTecoDevices { get; set; }
-        public DbSet<ZKTecoUser> ZKTecoUsers { get; set; }
+        public DbSet<ZKTecoPersonelDevice> ZKTecoPersonelDevices { get; set; }
         public DbSet<ZKTecoSpecialCard> ZKTecoSpecialCards { get; set; }
         public DbSet<CekilenData> CekilenDatalar { get; set; }
+        // public DbSet<ZKTecoUser> ZKTecoUsers { get; set; } // DEPRECATED: Personel tablosu kullanılıyor, bu mapping tablosuna dönüştürüldü
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
