@@ -17,8 +17,21 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         public int Id { get; set; }
 
         /// <summary>
+        /// Personel Sicil No (FK to Personel)
+        /// Personel tablosuyla ilişki
+        /// </summary>
+        public int? PersonelSicilNo { get; set; }
+
+        /// <summary>
+        /// Navigation property - İlişkili personel
+        /// </summary>
+        [ForeignKey("PersonelSicilNo")]
+        public virtual PersonelIslemleri.Personel? Personel { get; set; }
+
+        /// <summary>
         /// Kayıt/Sicil numarası (EnrollNumber)
         /// ZKTeco cihazındaki unique user ID
+        /// Genellikle PersonelSicilNo ile aynı olur ama manuel kart için farklı olabilir
         /// </summary>
         [Required]
         [StringLength(50)]
@@ -26,6 +39,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
 
         /// <summary>
         /// Kullanıcı adı (Ad Soyad)
+        /// Personel'den otomatik doldurulur ama manuel kart için manuel girilebilir
         /// </summary>
         [Required]
         [StringLength(100)]

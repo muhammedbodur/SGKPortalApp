@@ -76,6 +76,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
         #region ZKTeco
         public DbSet<ZKTecoDevice> ZKTecoDevices { get; set; }
         public DbSet<ZKTecoUser> ZKTecoUsers { get; set; }
+        public DbSet<ZKTecoSpecialCard> ZKTecoSpecialCards { get; set; }
         public DbSet<CekilenData> CekilenDatalar { get; set; }
         #endregion
 

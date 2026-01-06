@@ -58,6 +58,18 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         /// </summary>
         public bool IsActive { get; set; } = true;
 
+        /// <summary>
+        /// Hizmet Binası ID (FK)
+        /// Cihazın hangi hizmet binasında olduğu
+        /// </summary>
+        public int? HizmetBinasiId { get; set; }
+
+        /// <summary>
+        /// Navigation property - İlişkili hizmet binası
+        /// </summary>
+        [ForeignKey("HizmetBinasiId")]
+        public virtual Common.HizmetBinasi? HizmetBinasi { get; set; }
+
         // ========== Son İşlem Bilgileri (Attendance çekme) ==========
 
         /// <summary>
