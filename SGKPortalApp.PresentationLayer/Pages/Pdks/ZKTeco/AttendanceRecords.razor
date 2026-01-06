@@ -1,9 +1,5 @@
 @page "/pdks/zkteco/attendance"
 @using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
-@using System.Net.Http.Json
-@inject HttpClient Http
-@inject IConfiguration Configuration
-@inject IJSRuntime JS
 
 <PageTitle>PDKS Kayıt Listesi</PageTitle>
 
@@ -111,48 +107,3 @@
         }
     }
 </div>
-
-@code {
-    private List<CekilenData>? records;
-    private List<dynamic>? devices;
-    private string apiBaseUrl = "";
-    private int selectedDeviceId = 0;
-
-    protected override async Task OnInitializedAsync()
-    {
-        apiBaseUrl = Configuration["AppSettings:Urls:HttpsUrl"] ?? "https://localhost:9080";
-        await LoadDevices();
-        await LoadRecords();
-    }
-
-    private async Task LoadDevices()
-    {
-        devices = await Http.GetFromJsonAsync<List<dynamic>>($"{apiBaseUrl}/api/ZKTecoDevice/active");
-    }
-
-    private async Task LoadRecords()
-    {
-        records = await Http.GetFromJsonAsync<List<CekilenData>>($"{apiBaseUrl}/api/ZKTecoAttendance");
-    }
-
-    private async Task OnDeviceChanged(ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), out int deviceId))
-        {
-            selectedDeviceId = deviceId;
-        }
-        else
-        {
-            selectedDeviceId = 0;
-        }
-    }
-
-    private async Task SyncFromDevice()
-    {
-        if (selectedDeviceId == 0) return;
-
-        var response = await Http.PostAsync($"{apiBaseUrl}/api/ZKTecoAttendance/device/{selectedDeviceId}/sync", null);
-        await JS.InvokeVoidAsync("alert", "Kayıtlar cihazdan senkronize edildi!");
-        await LoadRecords();
-    }
-}
