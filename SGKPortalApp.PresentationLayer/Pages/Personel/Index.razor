@@ -209,11 +209,42 @@ else
                     }
                     else
                     {
+                        <!-- Toplu İşlemler Toolbar -->
+                        @if (SelectedPersonelIds.Any())
+                        {
+                            <div class="alert alert-info d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <i class="bx bx-check-circle me-2"></i>
+                                    <strong>@SelectedPersonelIds.Count</strong> personel seçildi
+                                </div>
+                                <div class="btn-group">
+                                    @if (filterZKTecoDeviceId > 0)
+                                    {
+                                        <button class="btn btn-sm btn-primary" @onclick="SendSelectedToDevice">
+                                            <i class="bx bx-upload me-1"></i>Seçili Cihaza Gönder
+                                        </button>
+                                    }
+                                    <button class="btn btn-sm btn-success" @onclick="SendSelectedToAllDevices">
+                                        <i class="bx bx-devices me-1"></i>Tüm Cihazlara Gönder
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" @onclick="ClearSelection">
+                                        <i class="bx bx-x me-1"></i>Seçimi Temizle
+                                    </button>
+                                </div>
+                            </div>
+                        }
+
                         <!-- Table -->
                         <div class="table-container">
                             <table class="table table-hover table-sm">
                                 <thead>
                                     <tr>
+                                        <th style="width: 40px; padding: 0.5rem 0.25rem;">
+                                            <input type="checkbox"
+                                                   class="form-check-input"
+                                                   @onchange="ToggleSelectAll"
+                                                   checked="@IsAllSelected" />
+                                        </th>
                                         <th style="width: 40px; padding: 0.5rem 0.25rem;">#</th>
                                         <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByTc" @onclick:stopPropagation="true">
                                             TC Kimlik No
@@ -266,6 +297,12 @@ else
                                     @foreach (var (personel, index) in FilteredPersoneller.Select((p, i) => (p, i)))
                                     {
                                         <tr style="@GetClickableRowStyle(ActionType.DETAIL)" @onclick="() => TryNavigateToDetail(personel.TcKimlikNo)">
+                                            <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;" @onclick:stopPropagation="true">
+                                                <input type="checkbox"
+                                                       class="form-check-input"
+                                                       checked="@SelectedPersonelIds.Contains(personel.TcKimlikNo)"
+                                                       @onchange="() => TogglePersonelSelection(personel.TcKimlikNo)" />
+                                            </td>
                                             <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@((CurrentPage - 1) * PageSize + index + 1)</td>
                                             <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
                                                 <span class="fw-medium">@personel.TcKimlikNo</span>

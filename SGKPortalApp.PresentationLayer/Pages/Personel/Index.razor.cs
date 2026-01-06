@@ -844,6 +844,107 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         }
 
         // ═══════════════════════════════════════════════════════
+        // TOPLU SEÇİM VE İŞLEMLER
+        // ═══════════════════════════════════════════════════════
+
+        private List<string> SelectedPersonelIds { get; set; } = new();
+        private bool IsAllSelected => FilteredPersoneller.Any() &&
+                                      FilteredPersoneller.All(p => SelectedPersonelIds.Contains(p.TcKimlikNo));
+
+        private void ToggleSelectAll(ChangeEventArgs e)
+        {
+            var isChecked = (bool)(e.Value ?? false);
+
+            if (isChecked)
+            {
+                // Tüm personelleri seç
+                SelectedPersonelIds = FilteredPersoneller.Select(p => p.TcKimlikNo).ToList();
+            }
+            else
+            {
+                // Seçimi temizle
+                SelectedPersonelIds.Clear();
+            }
+
+            StateHasChanged();
+        }
+
+        private void TogglePersonelSelection(string tcKimlikNo)
+        {
+            if (SelectedPersonelIds.Contains(tcKimlikNo))
+            {
+                SelectedPersonelIds.Remove(tcKimlikNo);
+            }
+            else
+            {
+                SelectedPersonelIds.Add(tcKimlikNo);
+            }
+
+            StateHasChanged();
+        }
+
+        private async Task SendSelectedToDevice()
+        {
+            if (filterZKTecoDeviceId == 0)
+            {
+                await _toastService.ShowWarningAsync("Lütfen önce bir cihaz seçiniz!");
+                return;
+            }
+
+            if (!SelectedPersonelIds.Any())
+            {
+                await _toastService.ShowWarningAsync("Lütfen personel seçiniz!");
+                return;
+            }
+
+            var device = ZKTecoDevices.FirstOrDefault(d => d.Id == filterZKTecoDeviceId);
+            if (device == null)
+            {
+                await _toastService.ShowErrorAsync("Cihaz bulunamadı!");
+                return;
+            }
+
+            await _toastService.ShowInfoAsync($"{SelectedPersonelIds.Count} personel {device.DeviceName} cihazına gönderiliyor...");
+
+            // TODO: API çağrısı yapılacak
+            // await _zktecoUserApiService.SendMultipleUsersToDeviceAsync(SelectedPersonelIds, filterZKTecoDeviceId);
+
+            await _toastService.ShowSuccessAsync($"{SelectedPersonelIds.Count} personel başarıyla {device.DeviceName} cihazına gönderildi!");
+            SelectedPersonelIds.Clear();
+            await LoadPersonelWithPagination();
+        }
+
+        private async Task SendSelectedToAllDevices()
+        {
+            if (!SelectedPersonelIds.Any())
+            {
+                await _toastService.ShowWarningAsync("Lütfen personel seçiniz!");
+                return;
+            }
+
+            if (!ZKTecoDevices.Any())
+            {
+                await _toastService.ShowWarningAsync("Aktif cihaz bulunamadı!");
+                return;
+            }
+
+            await _toastService.ShowInfoAsync($"{SelectedPersonelIds.Count} personel tüm cihazlara gönderiliyor...");
+
+            // TODO: API çağrısı yapılacak
+            // await _zktecoUserApiService.SendMultipleUsersToAllDevicesAsync(SelectedPersonelIds);
+
+            await _toastService.ShowSuccessAsync($"{SelectedPersonelIds.Count} personel başarıyla tüm cihazlara gönderildi!");
+            SelectedPersonelIds.Clear();
+            await LoadPersonelWithPagination();
+        }
+
+        private void ClearSelection()
+        {
+            SelectedPersonelIds.Clear();
+            StateHasChanged();
+        }
+
+        // ═══════════════════════════════════════════════════════
         // KART NO DÜZENLEME
         // ═══════════════════════════════════════════════════════
 
