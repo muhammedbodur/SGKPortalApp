@@ -1,10 +1,8 @@
-@page "/pdks/zkteco/sync"
+@page "/pdks/zkteco/device-sync"
 @using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco
-@using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
 @using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco
 @using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces
 @inject IZKTecoDeviceApiService _deviceApiService
-@inject IZKTecoUserApiService _userApiService
 @inject IToastService _toastService
 
 <PageTitle>Cihaz Senkronizasyonu - SGK Portal</PageTitle>
@@ -16,37 +14,8 @@
                 <i class="bx bx-sync me-2"></i>Cihaz Senkronizasyonu
             </h4>
             <p class="text-muted mb-0">
-                Cihazlardaki ve veritabanındaki kayıtları karşılaştırın ve yönetin
+                ZKTeco cihazlarını yönetin ve senkronize edin
             </p>
-        </div>
-    </div>
-
-    <!-- Cihaz Seçimi -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-6">
-                    <label class="form-label">
-                        <i class="bx bx-devices me-1"></i>Cihaz Seçin
-                    </label>
-                    <select class="form-select" @bind="SelectedDeviceId">
-                        <option value="0">-- Cihaz seçiniz --</option>
-                        @foreach (var device in Devices)
-                        {
-                            <option value="@device.Id">@device.DeviceName (@device.IpAddress)</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <button class="btn btn-primary" @onclick="LoadSyncData" disabled="@(SelectedDeviceId == 0 || IsLoading)">
-                        @if (IsLoading)
-                        {
-                            <span class="spinner-border spinner-border-sm me-1"></span>
-                        }
-                        <i class="bx bx-refresh me-1"></i>Verileri Yükle
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -56,267 +25,56 @@
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Yükleniyor...</span>
             </div>
-            <p class="mt-2 text-muted">Cihaz ve veritabanı kayıtları karşılaştırılıyor...</p>
         </div>
     }
-    else if (HasLoadedData)
+    else
     {
-        <!-- İstatistikler -->
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card bg-success text-white">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-success">
-                                    <i class="bx bx-check-double bx-md"></i>
-                                </span>
+        <div class="row">
+            @foreach (var device in Devices)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">@device.DeviceName</h5>
+                                    <span class="badge bg-label-@(device.IsActive ? "success" : "secondary")">
+                                        @(device.IsActive ? "Aktif" : "Pasif")
+                                    </span>
+                                </div>
+                                <i class="bx bx-devices bx-lg text-primary"></i>
                             </div>
-                            <div>
-                                <p class="mb-0">Senkronize</p>
-                                <h4 class="mb-0 text-white">@SyncedUsers.Count</h4>
-                                <small>Hem cihazda hem veritabanında</small>
+                            
+                            <div class="mb-2">
+                                <small class="text-muted">IP Adresi:</small>
+                                <div>@device.IpAddress:@device.Port</div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card bg-warning text-white">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-warning">
-                                    <i class="bx bx-error bx-md"></i>
-                                </span>
-                            </div>
-                            <div>
-                                <p class="mb-0">Sadece Cihazda</p>
-                                <h4 class="mb-0 text-white">@OrphanedDeviceUsers.Count</h4>
-                                <small>Veritabanında yok (Orphaned)</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card bg-info text-white">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-info">
-                                    <i class="bx bx-info-circle bx-md"></i>
-                                </span>
-                            </div>
-                            <div>
-                                <p class="mb-0">Sadece Veritabanında</p>
-                                <h4 class="mb-0 text-white">@OnlyInDbUsers.Count</h4>
-                                <small>Cihazda yok</small>
+                            
+                            @if (!string.IsNullOrEmpty(device.Location))
+                            {
+                                <div class="mb-2">
+                                    <small class="text-muted">Konum:</small>
+                                    <div>@device.Location</div>
+                                </div>
+                            }
+                            
+                            @if (device.LastSyncTime.HasValue)
+                            {
+                                <div class="mb-3">
+                                    <small class="text-muted">Son Senkronizasyon:</small>
+                                    <div>@device.LastSyncTime.Value.ToString("dd.MM.yyyy HH:mm")</div>
+                                </div>
+                            }
+                            
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-sm btn-primary" @onclick="() => SyncDevice(device.Id)">
+                                    <i class="bx bx-sync me-1"></i>Senkronize Et
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            }
         </div>
-
-        <!-- Orphaned Users (Sadece Cihazda Olanlar) -->
-        @if (OrphanedDeviceUsers.Any())
-        {
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center bg-warning">
-                    <h5 class="mb-0 text-white">
-                        <i class="bx bx-error-circle me-2"></i>Sadece Cihazda Olan Kayıtlar (Orphaned)
-                    </h5>
-                    <button class="btn btn-sm btn-light" @onclick="SyncAllOrphanedToDb" disabled="@IsSyncing">
-                        @if (IsSyncing)
-                        {
-                            <span class="spinner-border spinner-border-sm me-1"></span>
-                        }
-                        <i class="bx bx-sync me-1"></i>Tümünü Veritabanına Aktar
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-warning">
-                        <i class="bx bx-info-circle me-2"></i>
-                        <strong>Dikkat:</strong> Bu kayıtlar cihazda mevcut ancak veritabanında bulunmuyor.
-                        Muhtemelen başka bir program tarafından eklenmiş olabilir.
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Enroll No</th>
-                                    <th>Ad Soyad</th>
-                                    <th>Kart No</th>
-                                    <th>Yetki</th>
-                                    <th>Durum</th>
-                                    <th class="text-center">İşlem</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var user in OrphanedDeviceUsers)
-                                {
-                                    <tr>
-                                        <td><span class="badge bg-label-primary">@user.EnrollNumber</span></td>
-                                        <td><strong>@user.Name</strong></td>
-                                        <td>
-                                            @if (user.CardNumber.HasValue && user.CardNumber > 0)
-                                            {
-                                                <span class="badge bg-label-info">@user.CardNumber</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted">-</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-label-secondary">
-                                                @GetPrivilegeText(user.Privilege)
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge @(user.Enabled ? "bg-label-success" : "bg-label-danger")">
-                                                @(user.Enabled ? "Aktif" : "Pasif")
-                                            </span>
-                                        </td>
-                                        <td class="text-center">
-                                            <button class="btn btn-sm btn-outline-info"
-                                                    @onclick="() => ShowUserDetails(user)"
-                                                    title="Detay">
-                                                <i class="bx bx-info-circle"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        }
-
-        <!-- Synced Users (Her İki Yerde de Olanlar) -->
-        @if (SyncedUsers.Any())
-        {
-            <div class="card mb-4">
-                <div class="card-header bg-success">
-                    <h5 class="mb-0 text-white">
-                        <i class="bx bx-check-double me-2"></i>Senkronize Kayıtlar
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-success">
-                        <i class="bx bx-check-circle me-2"></i>
-                        Bu kayıtlar hem cihazda hem de veritabanında mevcut ve senkronize durumda.
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Enroll No</th>
-                                    <th>Ad Soyad</th>
-                                    <th>Kart No (Cihaz)</th>
-                                    <th>Kart No (DB)</th>
-                                    <th>Durum</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var sync in SyncedUsers)
-                                {
-                                    <tr>
-                                        <td><span class="badge bg-label-primary">@sync.DeviceUser.EnrollNumber</span></td>
-                                        <td><strong>@sync.DeviceUser.Name</strong></td>
-                                        <td>
-                                            @if (sync.DeviceUser.CardNumber.HasValue && sync.DeviceUser.CardNumber > 0)
-                                            {
-                                                <span class="badge bg-label-info">@sync.DeviceUser.CardNumber</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted">-</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            @if (sync.DbUser.CardNumber.HasValue && sync.DbUser.CardNumber > 0)
-                                            {
-                                                <span class="badge bg-label-info">@sync.DbUser.CardNumber</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted">-</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-label-success">
-                                                <i class="bx bx-check me-1"></i>Senkronize
-                                            </span>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        }
-
-        <!-- Only in DB Users -->
-        @if (OnlyInDbUsers.Any())
-        {
-            <div class="card">
-                <div class="card-header bg-info">
-                    <h5 class="mb-0 text-white">
-                        <i class="bx bx-info-circle me-2"></i>Sadece Veritabanında Olan Kayıtlar
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-info">
-                        <i class="bx bx-info-circle me-2"></i>
-                        Bu kayıtlar veritabanında mevcut ancak cihaza henüz gönderilmemiş.
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Enroll No</th>
-                                    <th>Ad Soyad</th>
-                                    <th>Kart No</th>
-                                    <th>Son Sync</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var user in OnlyInDbUsers)
-                                {
-                                    <tr>
-                                        <td><span class="badge bg-label-primary">@user.EnrollNumber</span></td>
-                                        <td><strong>@user.Name</strong></td>
-                                        <td>
-                                            @if (user.CardNumber.HasValue && user.CardNumber > 0)
-                                            {
-                                                <span class="badge bg-label-info">@user.CardNumber</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted">-</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            @if (user.LastSyncTime.HasValue)
-                                            {
-                                                <small class="text-muted">@user.LastSyncTime.Value.ToString("dd.MM.yyyy HH:mm")</small>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted">Hiç</span>
-                                            }
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        }
     }
 </div>

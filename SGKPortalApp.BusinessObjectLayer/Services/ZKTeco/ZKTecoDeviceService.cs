@@ -1,8 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
-using SGKPortalApp.DataAccessLayer.Context;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,104 +10,59 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
 {
     public class DeviceService : IDeviceService
     {
-        private readonly SGKDbContext _dbContext;
         private readonly IZKTecoApiClient _apiClient;
         private readonly ILogger<DeviceService> _logger;
 
         public DeviceService(
-            SGKDbContext dbContext,
             IZKTecoApiClient apiClient,
             ILogger<DeviceService> logger)
         {
-            _dbContext = dbContext;
             _apiClient = apiClient;
             _logger = logger;
         }
 
         // ========== Database Operations ==========
 
-        public async Task<List<Device>> GetAllDevicesAsync()
+        public Task<List<Device>> GetAllDevicesAsync()
         {
-            return await _dbContext.Devices
-                .OrderBy(d => d.DeviceName)
-                .ToListAsync();
+            throw new NotImplementedException("This method should be implemented in BusinessLogicLayer with repository access");
         }
 
-        public async Task<Device?> GetDeviceByIdAsync(int id)
+        public Task<Device?> GetDeviceByIdAsync(int id)
         {
-            return await _dbContext.Devices.FindAsync(id);
+            throw new NotImplementedException("This method should be implemented in BusinessLogicLayer with repository access");
         }
 
-        public async Task<Device?> GetDeviceByIpAsync(string ipAddress)
+        public Task<Device?> GetDeviceByIpAsync(string ipAddress)
         {
-            return await _dbContext.Devices
-                .FirstOrDefaultAsync(d => d.IpAddress == ipAddress);
+            throw new NotImplementedException("This method should be implemented in BusinessLogicLayer with repository access");
         }
 
-        public async Task<Device> CreateDeviceAsync(Device device)
+        public Task<Device> CreateDeviceAsync(Device device)
         {
-            device.CreatedAt = DateTime.Now;
-            device.UpdatedAt = DateTime.Now;
-
-            _dbContext.Devices.Add(device);
-            await _dbContext.SaveChangesAsync();
-
-            _logger.LogInformation($"Device created: {device.DeviceName} ({device.IpAddress})");
-            return device;
+            throw new NotImplementedException("This method should be implemented in BusinessLogicLayer with repository access");
         }
 
-        public async Task<Device> UpdateDeviceAsync(Device device)
+        public Task<Device> UpdateDeviceAsync(Device device)
         {
-            device.UpdatedAt = DateTime.Now;
-
-            _dbContext.Devices.Update(device);
-            await _dbContext.SaveChangesAsync();
-
-            _logger.LogInformation($"Device updated: {device.DeviceName} ({device.IpAddress})");
-            return device;
+            throw new NotImplementedException("This method should be implemented in BusinessLogicLayer with repository access");
         }
 
-        public async Task<bool> DeleteDeviceAsync(int id)
+        public Task<bool> DeleteDeviceAsync(int id)
         {
-            var device = await GetDeviceByIdAsync(id);
-            if (device == null) return false;
-
-            _dbContext.Devices.Remove(device);
-            await _dbContext.SaveChangesAsync();
-
-            _logger.LogInformation($"Device deleted: {device.DeviceName}");
-            return true;
+            throw new NotImplementedException("This method should be implemented in BusinessLogicLayer with repository access");
         }
 
-        public async Task<List<Device>> GetActiveDevicesAsync()
+        public Task<List<Device>> GetActiveDevicesAsync()
         {
-            return await _dbContext.Devices
-                .Where(d => d.IsActive)
-                .OrderBy(d => d.DeviceName)
-                .ToListAsync();
+            throw new NotImplementedException("This method should be implemented in BusinessLogicLayer with repository access");
         }
 
         // ========== Device Operations (API Calls) ==========
 
-        public async Task<DeviceStatusDto?> GetDeviceStatusAsync(int deviceId)
+        public Task<DeviceStatusDto?> GetDeviceStatusAsync(int deviceId)
         {
-            var device = await GetDeviceByIdAsync(deviceId);
-            if (device == null) return null;
-
-            var port = int.TryParse(device.Port, out var p) ? p : 4370;
-            var status = await _apiClient.GetDeviceStatusAsync(device.IpAddress, port);
-
-            if (status != null)
-            {
-                // Update device info
-                device.LastHealthCheckTime = DateTime.Now;
-                device.LastHealthCheckSuccess = true;
-                device.HealthCheckCount++;
-                device.LastHealthCheckStatus = "Başarılı";
-                await UpdateDeviceAsync(device);
-            }
-
-            return status;
+            throw new NotImplementedException("This method should be implemented in BusinessLogicLayer with repository access");
         }
 
         public async Task<DeviceStatusDto?> GetDeviceStatusByIpAsync(string deviceIp, int port = 4370)

@@ -444,9 +444,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     // PersonelKayitNo otomatik arttırım (ZKTeco PDKS için)
                     if (personel.PersonelKayitNo == 0)
                     {
-                        var maxKayitNo = await _unitOfWork.Repository<Personel>()
-                            .GetQueryable()
-                            .MaxAsync(p => (int?)p.PersonelKayitNo) ?? 0;
+                        var allPersonel = await _unitOfWork.Repository<Personel>().GetAllAsync();
+                        var maxKayitNo = allPersonel.Any() 
+                            ? allPersonel.Max(p => p.PersonelKayitNo) 
+                            : 0;
                         personel.PersonelKayitNo = maxKayitNo + 1;
 
                         _logger.LogInformation(

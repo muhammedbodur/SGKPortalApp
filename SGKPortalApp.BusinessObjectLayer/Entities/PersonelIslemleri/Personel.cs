@@ -6,6 +6,7 @@ using SGKPortalApp.BusinessObjectLayer.Attributes;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
@@ -45,6 +46,11 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         public DateTime? KartNoDuzenlenmeTarihi { get; set; }
         public DateTime? KartNoGonderimTarihi { get; set; }
         public IslemBasari KartGonderimIslemBasari { get; set; }
+
+        /// <summary>
+        /// Kart tipi - Personel kartı veya geçici kart
+        /// </summary>
+        public CardType KartTipi { get; set; } = CardType.PersonelKarti;
 
         [Required]
         public int DepartmanId { get; set; }

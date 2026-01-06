@@ -7,10 +7,12 @@ using QuestPDF.Infrastructure;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.Common.Extensions;
-using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco;
 using System.ComponentModel.DataAnnotations;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Components.Base;
@@ -41,7 +43,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         [Inject] private IServisApiService _servisApiService { get; set; } = default!;
         [Inject] private IUnvanApiService _unvanApiService { get; set; } = default!;
         [Inject] private IHizmetBinasiApiService _hizmetBinasiApiService { get; set; } = default!;
-        [Inject] private SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco.IZKTecoDeviceApiService _zktecoDeviceApiService { get; set; } = default!;
+        [Inject] private IZKTecoDeviceApiService _zktecoDeviceApiService { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════
         // DATA PROPERTIES
@@ -54,7 +56,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private List<ServisResponseDto> Servisler { get; set; } = new();
         private List<UnvanResponseDto> Unvanlar { get; set; } = new();
         private List<HizmetBinasiResponseDto> HizmetBinalari { get; set; } = new();
-        private List<SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco.Device> ZKTecoDevices { get; set; } = new();
+        private List<DeviceResponseDto> ZKTecoDevices { get; set; } = new();
 
         // ═══════════════════════════════════════════════════════
         // FILTER PROPERTIES
@@ -135,7 +137,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 Servisler = (await servisTask)?.Data ?? new List<ServisResponseDto>();
                 Unvanlar = (await unvanTask)?.Data ?? new List<UnvanResponseDto>();
                 HizmetBinalari = (await hizmetBinasiTask)?.Data ?? new List<HizmetBinasiResponseDto>();
-                ZKTecoDevices = (await zktecoDeviceTask)?.Data ?? new List<SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco.Device>();
+                ZKTecoDevices = (await zktecoDeviceTask)?.Data ?? new List<SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco.DeviceResponseDto>();
 
                 // Personelleri server-side pagination ile yükle
                 await LoadPersonelWithPagination();
@@ -188,12 +190,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                         Dahili = p.Dahili,
                         Resim = p.Resim,
                         PersonelAktiflikDurum = p.PersonelAktiflikDurum,
-                        EklenmeTarihi = p.EklenmeTarihi,
-                        // ZKTeco PDKS alanları
-                        PersonelKayitNo = p.PersonelKayitNo,
-                        KartNo = p.KartNo,
-                        KartNoGonderimTarihi = p.KartNoGonderimTarihi,
-                        KartGonderimIslemBasari = p.KartGonderimIslemBasari
+                        EklenmeTarihi = p.EklenmeTarihi
                     }).ToList();
 
                     TotalCount = result.Data.TotalCount;

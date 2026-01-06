@@ -1,414 +1,68 @@
 @page "/pdks/zkteco/users"
-@using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco
-@using System.Net.Http.Json
-@using System.Linq
-@inject HttpClient Http
-@inject IConfiguration Configuration
-@inject IJSRuntime JS
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
+@using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel
+@using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces
+@inject IPersonelApiService _personelApiService
+@inject IToastService _toastService
 
-<PageTitle>ZKTeco Kullanıcı Yönetimi</PageTitle>
+<PageTitle>PDKS Kullanıcıları - SGK Portal</PageTitle>
 
-<div class="container-fluid">
-    <div class="row mb-3">
-        <div class="col">
-            <h3>👥 ZKTeco Kullanıcı Yönetimi</h3>
-        </div>
-        <div class="col-auto">
-            <button class="btn btn-primary" @onclick="ToggleAddForm">
-                <i class="bx bx-plus"></i> @(showAddForm ? "Formu Kapat" : "Yeni Personel")
-            </button>
-        </div>
-    </div>
-
-    @if (showAddForm)
-    {
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Yeni Personel Ekle</h5>
-                <div class="row">
-                    <div class="col-md-3">
-                        <label class="form-label">Sicil No *</label>
-                        <input type="text" class="form-control" @bind="newUser.EnrollNumber" placeholder="12345" />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Ad Soyad *</label>
-                        <input type="text" class="form-control" @bind="newUser.Name" placeholder="Ahmet Yılmaz" />
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Kart No</label>
-                        <input type="number" class="form-control" @bind="newUser.CardNumber" placeholder="1234567890" />
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Yetki</label>
-                        <select class="form-select" @bind="newUser.Privilege">
-                            <option value="0">Kullanıcı</option>
-                            <option value="1">Kayıt Yetkilisi</option>
-                            <option value="2">Yönetici</option>
-                            <option value="3">Süper Admin</option>
-                        </select>
-                    </div>
-                    <div class="col-md-1">
-                        <label class="form-label">Aktif</label>
-                        <div class="form-check form-switch mt-2">
-                            <input class="form-check-input" type="checkbox" @bind="newUser.Enabled" />
-                        </div>
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col">
-                        <button class="btn btn-success" @onclick="SaveUser">
-                            <i class="bx bx-save"></i> Kaydet
-                        </button>
-                        <button class="btn btn-secondary ms-2" @onclick="ToggleAddForm">İptal</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-
-    @if (editingUserId != null)
-    {
-        var editingUser = users?.FirstOrDefault(u => u.Id == editingUserId);
-        <div class="card mb-3 border-warning">
-            <div class="card-body">
-                <h5 class="card-title text-warning">
-                    <i class="bx bx-edit"></i> Personel Düzenle - Sicil No: @editingUser?.EnrollNumber
-                </h5>
-                <div class="row">
-                    <div class="col-md-4">
-                        <label class="form-label">Ad Soyad *</label>
-                        <input type="text" class="form-control" @bind="editUser.Name" />
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Kart No</label>
-                        <input type="number" class="form-control" @bind="editUser.CardNumber" placeholder="1234567890" />
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Şifre</label>
-                        <input type="text" class="form-control" @bind="editUser.Password" placeholder="Opsiyonel" />
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Yetki</label>
-                        <select class="form-select" @bind="editUser.Privilege">
-                            <option value="0">Kullanıcı</option>
-                            <option value="1">Kayıt Yetkilisi</option>
-                            <option value="2">Yönetici</option>
-                            <option value="3">Süper Admin</option>
-                        </select>
-                    </div>
-                    <div class="col-md-1">
-                        <label class="form-label">Aktif</label>
-                        <div class="form-check form-switch mt-2">
-                            <input class="form-check-input" type="checkbox" @bind="editUser.Enabled" />
-                        </div>
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col">
-                        <button class="btn btn-warning" @onclick="UpdateUser">
-                            <i class="bx bx-save"></i> Güncelle
-                        </button>
-                        <button class="btn btn-secondary ms-2" @onclick="CancelEdit">İptal</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
-
-    <div class="row mb-3">
-        <div class="col-auto">
-            <select class="form-select" @onchange="OnDeviceChanged">
-                <option value="">Tüm Kullanıcılar</option>
-                @if (devices != null)
-                {
-                    @foreach (var device in devices)
-                    {
-                        <option value="@device.Id">@device.DeviceName (@device.IpAddress)</option>
-                    }
-                }
-            </select>
-        </div>
-        <div class="col-auto">
-            <button class="btn btn-success" @onclick="SyncFromDevice" disabled="@(selectedDeviceId == 0)">
-                <i class="bx bx-download"></i> Cihazdan Senkronize Et
-            </button>
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="bx bx-user me-2"></i>PDKS Kullanıcıları
+            </h4>
+            <p class="text-muted mb-0">
+                Personel listesi ve PDKS kayıt bilgileri
+            </p>
         </div>
     </div>
 
-    @if (users == null)
+    @if (IsLoading)
     {
-        <p><em>Yükleniyor...</em></p>
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+        </div>
     }
     else
     {
-        <div class="table-responsive">
-            <table class="table table-hover table-sm">
-                <thead>
-                    <tr>
-                        <th>Sicil No</th>
-                        <th>Ad Soyad</th>
-                        <th>Kart No</th>
-                        <th>Yetki</th>
-                        <th>Durum</th>
-                        <th>Son Sync</th>
-                        <th style="min-width: 350px;">İşlemler</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var user in users)
-                    {
-                        <tr>
-                            <td><code>@user.EnrollNumber</code></td>
-                            <td><strong>@user.Name</strong></td>
-                            <td>@user.CardNumber</td>
-                            <td><span class="badge bg-info">@user.PrivilegeText</span></td>
-                            <td>
-                                <span class="badge @(user.Enabled ? "bg-success" : "bg-secondary")">
-                                    @user.StatusText
-                                </span>
-                            </td>
-                            <td><small>@user.LastSyncTime?.ToString("dd.MM HH:mm")</small></td>
-                            <td>
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <button class="btn btn-outline-warning" @onclick="() => StartEdit(user)" title="Düzenle">
-                                        <i class="bx bx-edit"></i> Düzenle
-                                    </button>
-                                    @if (selectedDeviceId > 0)
-                                    {
-                                        <button class="btn btn-outline-primary" @onclick="() => SyncToDevice(user.Id)" title="Bu Cihaza Gönder">
-                                            <i class="bx bx-export"></i> Cihaza
-                                        </button>
-                                        <button class="btn btn-outline-danger" @onclick="() => DeleteFromDevice(user.EnrollNumber)" title="Bu Cihazdan Sil">
-                                            <i class="bx bx-trash"></i> Cihazdan Sil
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <button class="btn btn-outline-primary" @onclick="() => SyncToAllDevices(user.Id)" title="Tüm Cihazlara Gönder">
-                                            <i class="bx bx-export"></i> Tüm Cihazlara
-                                        </button>
-                                        <button class="btn btn-outline-warning" @onclick="() => DeleteFromAllDevices(user.EnrollNumber)" title="Tüm Cihazlardan Sil">
-                                            <i class="bx bx-trash"></i> Tüm Cihazlardan
-                                        </button>
-                                    }
-                                    <button class="btn btn-outline-danger" @onclick="() => DeleteUser(user.Id)" title="DB'den Sil">
-                                        <i class="bx bx-x-circle"></i> DB'den Sil
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Sicil No</th>
+                                <th>Ad Soyad</th>
+                                <th>Departman</th>
+                                <th>Kayıt No</th>
+                                <th>Kart No</th>
+                                <th>Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var personel in Personeller)
+                            {
+                                <tr>
+                                    <td>@personel.SicilNo</td>
+                                    <td>@personel.AdSoyad</td>
+                                    <td>@personel.DepartmanAdi</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>
+                                        <span class="badge bg-label-@(personel.PersonelAktiflikDurum == BusinessObjectLayer.Enums.PersonelIslemleri.PersonelAktiflikDurum.Aktif ? "success" : "secondary")">
+                                            @personel.PersonelAktiflikDurum
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     }
 </div>
-
-@code {
-    private List<ZKTecoUserDto>? users;
-    private List<dynamic>? devices;
-    private string apiBaseUrl = "";
-    private int selectedDeviceId = 0;
-    private bool showAddForm = false;
-    private CreateZKTecoUserDto newUser = new CreateZKTecoUserDto { Privilege = 0, Enabled = true };
-    private int? editingUserId = null;
-    private UpdateZKTecoUserDto editUser = new UpdateZKTecoUserDto();
-
-    protected override async Task OnInitializedAsync()
-    {
-        apiBaseUrl = Configuration["AppSettings:Urls:HttpsUrl"] ?? "https://localhost:9080";
-        await LoadDevices();
-        await LoadUsers();
-    }
-
-    private async Task LoadDevices()
-    {
-        devices = await Http.GetFromJsonAsync<List<dynamic>>($"{apiBaseUrl}/api/ZKTecoDevice");
-    }
-
-    private async Task LoadUsers()
-    {
-        users = await Http.GetFromJsonAsync<List<ZKTecoUserDto>>($"{apiBaseUrl}/api/ZKTecoUser");
-    }
-
-    private void ToggleAddForm()
-    {
-        showAddForm = !showAddForm;
-        if (showAddForm)
-        {
-            newUser = new CreateZKTecoUserDto { Privilege = 0, Enabled = true };
-            editingUserId = null; // Düzenleme formunu kapat
-        }
-    }
-
-    private async Task SaveUser()
-    {
-        if (string.IsNullOrWhiteSpace(newUser.EnrollNumber) || string.IsNullOrWhiteSpace(newUser.Name))
-        {
-            await JS.InvokeVoidAsync("alert", "Sicil no ve ad soyad zorunludur!");
-            return;
-        }
-
-        try
-        {
-            var response = await Http.PostAsJsonAsync($"{apiBaseUrl}/api/ZKTecoUser", newUser);
-            if (response.IsSuccessStatusCode)
-            {
-                await JS.InvokeVoidAsync("alert", "✅ Personel başarıyla eklendi!");
-                showAddForm = false;
-                await LoadUsers();
-            }
-            else
-            {
-                await JS.InvokeVoidAsync("alert", "❌ Personel eklenemedi!");
-            }
-        }
-        catch (Exception ex)
-        {
-            await JS.InvokeVoidAsync("alert", $"❌ Hata: {ex.Message}");
-        }
-    }
-
-    private async Task OnDeviceChanged(ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), out int deviceId))
-        {
-            selectedDeviceId = deviceId;
-            users = await Http.GetFromJsonAsync<List<ZKTecoUserDto>>($"{apiBaseUrl}/api/ZKTecoUser/device/{deviceId}");
-        }
-        else
-        {
-            selectedDeviceId = 0;
-            await LoadUsers();
-        }
-    }
-
-    private async Task SyncFromDevice()
-    {
-        var response = await Http.PostAsync($"{apiBaseUrl}/api/ZKTecoUser/device/{selectedDeviceId}/sync-from-device", null);
-        await JS.InvokeVoidAsync("alert", "✅ Kullanıcılar cihazdan senkronize edildi!");
-        await LoadUsers();
-    }
-
-    private async Task SyncToDevice(int userId)
-    {
-        if (await JS.InvokeAsync<bool>("confirm", $"Seçili personeli cihaza göndermek istediğinize emin misiniz?"))
-        {
-            var response = await Http.PostAsync($"{apiBaseUrl}/api/ZKTecoUser/{userId}/sync-to-device/{selectedDeviceId}", null);
-            await JS.InvokeVoidAsync("alert", "✅ Personel cihaza gönderildi!");
-        }
-    }
-
-    private async Task SyncToAllDevices(int userId)
-    {
-        if (await JS.InvokeAsync<bool>("confirm", "⚠️ Seçili personeli TÜM AKTİF CİHAZLARA göndermek istediğinize emin misiniz?"))
-        {
-            var response = await Http.PostAsync($"{apiBaseUrl}/api/ZKTecoUser/{userId}/sync-to-all-devices", null);
-            await JS.InvokeVoidAsync("alert", "✅ Personel tüm cihazlara gönderildi!");
-        }
-    }
-
-    private async Task DeleteFromDevice(string enrollNumber)
-    {
-        if (await JS.InvokeAsync<bool>("confirm", $"Personeli seçili cihazdan silmek istediğinize emin misiniz?\n\nSicil No: {enrollNumber}"))
-        {
-            var response = await Http.DeleteAsync($"{apiBaseUrl}/api/ZKTecoUser/{enrollNumber}/delete-from-device/{selectedDeviceId}");
-            await JS.InvokeVoidAsync("alert", "✅ Personel cihazdan silindi!");
-        }
-    }
-
-    private async Task DeleteFromAllDevices(string enrollNumber)
-    {
-        if (await JS.InvokeAsync<bool>("confirm", $"⚠️ Personeli TÜM CİHAZLARDAN silmek istediğinize emin misiniz?\n\nSicil No: {enrollNumber}\n\nBu işlem geri alınamaz!"))
-        {
-            var response = await Http.DeleteAsync($"{apiBaseUrl}/api/ZKTecoUser/{enrollNumber}/delete-from-all-devices");
-            await JS.InvokeVoidAsync("alert", "✅ Personel tüm cihazlardan silindi!");
-        }
-    }
-
-    private async Task DeleteUser(int userId)
-    {
-        if (await JS.InvokeAsync<bool>("confirm", "⚠️ Personeli veritabanından silmek istediğinize emin misiniz?\n\nNOT: Bu işlem sadece DB'den siler, cihazlardan silmez!"))
-        {
-            await Http.DeleteAsync($"{apiBaseUrl}/api/ZKTecoUser/{userId}");
-            await JS.InvokeVoidAsync("alert", "✅ Personel DB'den silindi!");
-            await LoadUsers();
-        }
-    }
-
-    private void StartEdit(ZKTecoUserDto user)
-    {
-        editingUserId = user.Id;
-        editUser = new UpdateZKTecoUserDto
-        {
-            Name = user.Name,
-            Password = user.Password,
-            CardNumber = user.CardNumber,
-            Privilege = user.Privilege,
-            Enabled = user.Enabled
-        };
-        showAddForm = false; // Ekleme formunu kapat
-    }
-
-    private void CancelEdit()
-    {
-        editingUserId = null;
-        editUser = new UpdateZKTecoUserDto();
-    }
-
-    private async Task UpdateUser()
-    {
-        if (editingUserId == null) return;
-
-        if (string.IsNullOrWhiteSpace(editUser.Name))
-        {
-            await JS.InvokeVoidAsync("alert", "Ad soyad zorunludur!");
-            return;
-        }
-
-        try
-        {
-            var response = await Http.PutAsJsonAsync($"{apiBaseUrl}/api/ZKTecoUser/{editingUserId}", editUser);
-            if (response.IsSuccessStatusCode)
-            {
-                await JS.InvokeVoidAsync("alert", "✅ Personel başarıyla güncellendi!");
-
-                // Cihaza göndermek isteyip istemediğini sor
-                var syncTrigger = await JS.InvokeAsync<bool>("confirm",
-                    "✅ Güncelleme başarılı!\n\n" +
-                    "Güncellenmiş bilgileri cihaz(lar)a göndermek ister misiniz?\n\n" +
-                    "• Evet = Senkronizasyon seçeneği göster\n" +
-                    "• Hayır = Sadece DB güncellendi");
-
-                if (syncTrigger)
-                {
-                    var syncChoice = await JS.InvokeAsync<string>("prompt",
-                        "Nereye gönderilsin?\n\n" +
-                        "1 = Seçili cihaza\n" +
-                        "2 = Tüm cihazlara\n" +
-                        "Boş = İptal");
-
-                    if (syncChoice == "1" && selectedDeviceId > 0)
-                    {
-                        await SyncToDevice(editingUserId.Value);
-                    }
-                    else if (syncChoice == "2")
-                    {
-                        await SyncToAllDevices(editingUserId.Value);
-                    }
-                }
-
-                editingUserId = null;
-                await LoadUsers();
-            }
-            else
-            {
-                await JS.InvokeVoidAsync("alert", "❌ Personel güncellenemedi!");
-            }
-        }
-        catch (Exception ex)
-        {
-            await JS.InvokeVoidAsync("alert", $"❌ Hata: {ex.Message}");
-        }
-    }
-}

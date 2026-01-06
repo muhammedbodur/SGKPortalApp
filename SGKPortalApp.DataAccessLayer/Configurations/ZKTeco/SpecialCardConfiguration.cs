@@ -14,15 +14,13 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
             // Table
             builder.ToTable($"{TablePrefix}SpecialCard");
 
-            // Primary Key
+            // Primary Key (Id BaseEntity'den geliyor)
             builder.HasKey(c => c.Id);
 
             // Properties
-            builder.Property(c => c.Id)
-                   .ValueGeneratedOnAdd();
-
             builder.Property(c => c.CardType)
                    .IsRequired()
+                   .HasConversion<string>()
                    .HasMaxLength(50);
 
             builder.Property(c => c.CardNumber)
@@ -36,23 +34,8 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
                    .IsRequired()
                    .HasMaxLength(50);
 
-            builder.Property(c => c.IsActive)
-                   .HasDefaultValue(true);
-
-            builder.Property(c => c.TemporaryUserName)
-                   .HasMaxLength(100);
-
             builder.Property(c => c.Notes)
                    .HasMaxLength(500);
-
-            builder.Property(c => c.CreatedByTcKimlikNo)
-                   .HasMaxLength(11);
-
-            // Relationships
-            builder.HasOne(c => c.CurrentUser)
-                   .WithMany()
-                   .HasForeignKey(c => c.CurrentUserSicilNo)
-                   .OnDelete(DeleteBehavior.SetNull);
 
             // Indexes
             builder.HasIndex(c => c.CardNumber)
@@ -65,12 +48,6 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
 
             builder.HasIndex(c => c.CardType)
                    .HasDatabaseName($"{IndexPrefix}SpecialCard_CardType");
-
-            builder.HasIndex(c => c.IsActive)
-                   .HasDatabaseName($"{IndexPrefix}SpecialCard_IsActive");
-
-            builder.HasIndex(c => c.CurrentUserSicilNo)
-                   .HasDatabaseName($"{IndexPrefix}SpecialCard_CurrentUserSicilNo");
         }
     }
 }

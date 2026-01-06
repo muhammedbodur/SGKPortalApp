@@ -67,32 +67,32 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
         /// GET /api/users/{ip}
         /// NOT: Database değil, direkt cihazdan
         /// </summary>
-        Task<List<ZKTecoApiUserDto>> GetAllUsersFromDeviceAsync(string deviceIp, int port = 4370);
+        Task<List<ApiUserDto>> GetAllUsersFromDeviceAsync(string deviceIp, int port = 4370);
 
         /// <summary>
         /// Cihazdan belirli bir kullanıcıyı getir
         /// GET /api/users/{ip}/{enrollNumber}
         /// </summary>
-        Task<ZKTecoApiUserDto?> GetUserFromDeviceAsync(string deviceIp, string enrollNumber, int port = 4370);
+        Task<ApiUserDto?> GetUserFromDeviceAsync(string deviceIp, string enrollNumber, int port = 4370);
 
         /// <summary>
         /// Kart numarasıyla kullanıcıyı bul
         /// GET /api/users/{ip}/card/{cardNumber}
         /// </summary>
-        Task<ZKTecoApiUserDto?> GetUserByCardNumberAsync(string deviceIp, long cardNumber, int port = 4370);
+        Task<ApiUserDto?> GetUserByCardNumberAsync(string deviceIp, long cardNumber, int port = 4370);
 
         /// <summary>
         /// Cihaza kullanıcı ekle
         /// POST /api/users/{ip}
         /// NOT: Database değil, direkt cihaza
         /// </summary>
-        Task<bool> AddUserToDeviceAsync(string deviceIp, ZKTecoApiUserDto user, int port = 4370);
+        Task<bool> AddUserToDeviceAsync(string deviceIp, ApiUserDto user, int port = 4370);
 
         /// <summary>
         /// Cihazdaki kullanıcıyı güncelle
         /// PUT /api/users/{ip}/{enrollNumber}
         /// </summary>
-        Task<bool> UpdateUserOnDeviceAsync(string deviceIp, string enrollNumber, ZKTecoApiUserDto user, int port = 4370);
+        Task<bool> UpdateUserOnDeviceAsync(string deviceIp, string enrollNumber, ApiUserDto user, int port = 4370);
 
         /// <summary>
         /// Cihazdan kullanıcıyı sil

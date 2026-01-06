@@ -1,14 +1,13 @@
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response;
-using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco
 {
     public interface IZKTecoDeviceApiService
     {
-        Task<ApiResponse<List<Device>>> GetAllAsync();
-        Task<ApiResponse<List<Device>>> GetActiveAsync();
-        Task<ApiResponse<Device>> GetByIdAsync(int id);
+        Task<ServiceResult<List<DeviceResponseDto>>> GetAllAsync();
+        Task<ServiceResult<List<DeviceResponseDto>>> GetActiveAsync();
+        Task<ServiceResult<DeviceResponseDto>> GetByIdAsync(int id);
+        Task<ServiceResult<DeviceStatusDto>> GetStatusAsync(int deviceId);
     }
 }

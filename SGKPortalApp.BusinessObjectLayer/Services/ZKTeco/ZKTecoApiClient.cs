@@ -223,7 +223,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
 
         // ========== User Operations ==========
 
-        public async Task<List<ZKTecoApiUserDto>> GetAllUsersFromDeviceAsync(string deviceIp, int port = 4370)
+        public async Task<List<ApiUserDto>> GetAllUsersFromDeviceAsync(string deviceIp, int port = 4370)
         {
             try
             {
@@ -233,20 +233,20 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogWarning($"Get all users failed: {deviceIp}:{port} - {response.StatusCode}");
-                    return new List<ZKTecoApiUserDto>();
+                    return new List<ApiUserDto>();
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<ZKTecoApiUserDto>>>();
-                return result?.Data ?? new List<ZKTecoApiUserDto>();
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<ApiUserDto>>>();
+                return result?.Data ?? new List<ApiUserDto>();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Get all users error: {deviceIp}:{port}");
-                return new List<ZKTecoApiUserDto>();
+                return new List<ApiUserDto>();
             }
         }
 
-        public async Task<ZKTecoApiUserDto?> GetUserFromDeviceAsync(string deviceIp, string enrollNumber, int port = 4370)
+        public async Task<ApiUserDto?> GetUserFromDeviceAsync(string deviceIp, string enrollNumber, int port = 4370)
         {
             try
             {
@@ -259,7 +259,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
                     return null;
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<ApiResponse<ZKTecoApiUserDto>>();
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse<ApiUserDto>>();
                 return result?.Data;
             }
             catch (Exception ex)
@@ -269,7 +269,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
             }
         }
 
-        public async Task<ZKTecoApiUserDto?> GetUserByCardNumberAsync(string deviceIp, long cardNumber, int port = 4370)
+        public async Task<ApiUserDto?> GetUserByCardNumberAsync(string deviceIp, long cardNumber, int port = 4370)
         {
             try
             {
@@ -282,7 +282,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
                     return null;
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<ApiResponse<ZKTecoApiUserDto>>();
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse<ApiUserDto>>();
                 return result?.Data;
             }
             catch (Exception ex)
@@ -292,7 +292,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
             }
         }
 
-        public async Task<bool> AddUserToDeviceAsync(string deviceIp, ZKTecoApiUserDto user, int port = 4370)
+        public async Task<bool> AddUserToDeviceAsync(string deviceIp, ApiUserDto user, int port = 4370)
         {
             try
             {
@@ -317,7 +317,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
             }
         }
 
-        public async Task<bool> UpdateUserOnDeviceAsync(string deviceIp, string enrollNumber, ZKTecoApiUserDto user, int port = 4370)
+        public async Task<bool> UpdateUserOnDeviceAsync(string deviceIp, string enrollNumber, ApiUserDto user, int port = 4370)
         {
             try
             {

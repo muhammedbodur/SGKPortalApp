@@ -87,6 +87,11 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
                 .HasConversion<string>()
                 .HasMaxLength(20);
 
+            builder.Property(p => p.KartTipi)
+                .HasConversion<string>()
+                .HasMaxLength(50)
+                .IsRequired();
+
             // Auditing
             builder.Property(p => p.EklenmeTarihi)
                 .IsRequired()
