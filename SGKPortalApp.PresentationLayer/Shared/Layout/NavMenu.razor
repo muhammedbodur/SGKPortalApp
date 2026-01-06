@@ -386,12 +386,18 @@
                         </a>
                     </li>
 
-                    <li class="menu-header small text-uppercase"><span class="menu-header-text">ZKTeco</span></li>
+                    <li class="menu-header small text-uppercase"><span class="menu-header-text">ZKTeco PDKS</span></li>
 
                     <li class="menu-item @(IsActive("/pdks/zkteco/devices") ? "active" : "")">
                         <a href="/pdks/zkteco/devices" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-devices"></i>
                             <div>Cihaz Yönetimi</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(IsActive("/pdks/zkteco/device-sync") ? "active" : "")">
+                        <a href="/pdks/zkteco/device-sync" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-sync"></i>
+                            <div>Cihaz Senkronizasyonu</div>
                         </a>
                     </li>
                     <li class="menu-item @(IsActive("/pdks/zkteco/users") ? "active" : "")">
@@ -403,7 +409,7 @@
                     <li class="menu-item @(IsActive("/pdks/zkteco/attendance") ? "active" : "")">
                         <a href="/pdks/zkteco/attendance" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-list-ul"></i>
-                            <div>Kayıt Listesi</div>
+                            <div>Devam Kayıtları</div>
                         </a>
                     </li>
 
