@@ -41,6 +41,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         [Inject] private IServisApiService _servisApiService { get; set; } = default!;
         [Inject] private IUnvanApiService _unvanApiService { get; set; } = default!;
         [Inject] private IHizmetBinasiApiService _hizmetBinasiApiService { get; set; } = default!;
+        [Inject] private SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco.IZKTecoDeviceApiService _zktecoDeviceApiService { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════
         // DATA PROPERTIES
