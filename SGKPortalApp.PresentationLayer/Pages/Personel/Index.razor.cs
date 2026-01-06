@@ -183,7 +183,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                         Dahili = p.Dahili,
                         Resim = p.Resim,
                         PersonelAktiflikDurum = p.PersonelAktiflikDurum,
-                        EklenmeTarihi = p.EklenmeTarihi
+                        EklenmeTarihi = p.EklenmeTarihi,
+                        // ZKTeco PDKS alanları
+                        PersonelKayitNo = p.PersonelKayitNo,
+                        KartNo = p.KartNo,
+                        KartNoGonderimTarihi = p.KartNoGonderimTarihi,
+                        KartGonderimIslemBasari = p.KartGonderimIslemBasari
                     }).ToList();
 
                     TotalCount = result.Data.TotalCount;
@@ -526,11 +531,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 // Headers
                 worksheet.Cell(1, 1).Value = "TC Kimlik No";
                 worksheet.Cell(1, 2).Value = "Sicil No";
-                worksheet.Cell(1, 3).Value = "Ad Soyad";
-                worksheet.Cell(1, 4).Value = "Departman";
-                worksheet.Cell(1, 5).Value = "Servis";
-                worksheet.Cell(1, 6).Value = "Ünvan";
-                worksheet.Cell(1, 7).Value = "Durum";
+                worksheet.Cell(1, 3).Value = "PDKS Kayıt No";
+                worksheet.Cell(1, 4).Value = "Kart No";
+                worksheet.Cell(1, 5).Value = "Son Gönderim";
+                worksheet.Cell(1, 6).Value = "Gönderim Durumu";
+                worksheet.Cell(1, 7).Value = "Ad Soyad";
+                worksheet.Cell(1, 8).Value = "Departman";
+                worksheet.Cell(1, 9).Value = "Servis";
+                worksheet.Cell(1, 10).Value = "Ünvan";
+                worksheet.Cell(1, 11).Value = "Durum";
 
                 // Data
                 for (int i = 0; i < FilteredPersoneller.Count; i++)
@@ -538,11 +547,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                     var personel = FilteredPersoneller[i];
                     worksheet.Cell(i + 2, 1).Value = personel.TcKimlikNo;
                     worksheet.Cell(i + 2, 2).Value = personel.SicilNo;
-                    worksheet.Cell(i + 2, 3).Value = personel.AdSoyad;
-                    worksheet.Cell(i + 2, 4).Value = personel.DepartmanAdi;
-                    worksheet.Cell(i + 2, 5).Value = personel.ServisAdi;
-                    worksheet.Cell(i + 2, 6).Value = personel.UnvanAdi;
-                    worksheet.Cell(i + 2, 7).Value = personel.PersonelAktiflikDurum.ToString();
+                    worksheet.Cell(i + 2, 3).Value = personel.PersonelKayitNo;
+                    worksheet.Cell(i + 2, 4).Value = personel.KartNo > 0 ? personel.KartNo : 0;
+                    worksheet.Cell(i + 2, 5).Value = personel.KartNoGonderimTarihi?.ToString("dd.MM.yyyy HH:mm") ?? "-";
+                    worksheet.Cell(i + 2, 6).Value = personel.KartGonderimIslemBasari.ToString();
+                    worksheet.Cell(i + 2, 7).Value = personel.AdSoyad;
+                    worksheet.Cell(i + 2, 8).Value = personel.DepartmanAdi;
+                    worksheet.Cell(i + 2, 9).Value = personel.ServisAdi;
+                    worksheet.Cell(i + 2, 10).Value = personel.UnvanAdi;
+                    worksheet.Cell(i + 2, 11).Value = personel.PersonelAktiflikDurum.ToString();
                 }
 
                 worksheet.Columns().AdjustToContents();

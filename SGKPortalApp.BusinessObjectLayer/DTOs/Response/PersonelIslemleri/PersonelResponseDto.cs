@@ -49,6 +49,9 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
         public int UlasimServis1 { get; set; }
         public int UlasimServis2 { get; set; }
         public int Tabldot { get; set; }
+
+        // ZKTeco PDKS alanları
+        public int PersonelKayitNo { get; set; }
         public int KartNo { get; set; }
         public DateTime? KartNoAktiflikTarihi { get; set; }
         public DateTime? KartNoDuzenlenmeTarihi { get; set; }
