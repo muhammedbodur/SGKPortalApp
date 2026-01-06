@@ -43,7 +43,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
 
         protected override async Task OnInitializedAsync()
         {
-            apiBaseUrl = Configuration["AppSettings:Urls:HttpsUrl"] ?? "https://localhost:9080";
+            apiBaseUrl = Configuration["AppSettings:ApiUrl"] ?? "https://localhost:9080";
             await LoadDevices();
         }
 
@@ -53,7 +53,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
 
         private async Task LoadDevices()
         {
-            devices = await Http.GetFromJsonAsync<List<Device>>($"{apiBaseUrl}/api/Device");
+            try
+            {
+                devices = await Http.GetFromJsonAsync<List<Device>>($"{apiBaseUrl}/api/Device");
+            }
+            catch (Exception ex)
+            {
+                await JS.InvokeVoidAsync("console.error", $"Cihazlar yüklenirken hata oluştu: {ex.Message}");
+                devices = new List<Device>();
+            }
         }
 
         private void ToggleAddForm()
