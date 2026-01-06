@@ -106,6 +106,9 @@
                                     <button class="btn btn-outline-success" @onclick="() => ShowDeviceUsers(device.Id)" title="Cihazdaki Personeller">
                                         <i class="bx bx-group"></i>
                                     </button>
+                                    <button class="btn btn-outline-primary" @onclick="() => OpenSendPersonelModal(device.Id)" title="Personel Gönder">
+                                        <i class="bx bx-user-plus"></i>
+                                    </button>
                                     <button class="btn btn-outline-dark" @onclick="() => RestartDevice(device.Id)" title="Yeniden Başlat">
                                         <i class="bx bx-revision"></i>
                                     </button>
@@ -122,11 +125,167 @@
     }
 </div>
 
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SEND PERSONEL MODAL -->
+<!-- ═══════════════════════════════════════════════════════ -->
+@if (showSendPersonelModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white">
+                        <i class="bx bx-user-plus me-2"></i>Personel Gönder - @selectedDeviceName
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseSendPersonelModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (isLoadingPersonel)
+                    {
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Yükleniyor...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Personeller yükleniyor...</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Arama ve Toplu Seçim -->
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bx bx-search"></i>
+                                    </span>
+                                    <input type="text"
+                                           class="form-control"
+                                           placeholder="Ad, Sicil veya TC ile ara..."
+                                           @bind="personelSearchTerm"
+                                           @bind:event="oninput"
+                                           @onkeyup="FilterPersonel" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-primary w-100" @onclick="ToggleSelectAllPersonel">
+                                    <i class="bx @(IsAllPersonelSelected() ? "bx-checkbox-checked" : "bx-checkbox") me-1"></i>
+                                    @(IsAllPersonelSelected() ? "Tümünün Seçimini Kaldır" : "Tümünü Seç")
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Seçim Bilgisi -->
+                        @if (selectedPersonelIds.Any())
+                        {
+                            <div class="alert alert-info mb-3">
+                                <i class="bx bx-info-circle me-2"></i>
+                                <strong>@selectedPersonelIds.Count</strong> personel seçildi
+                            </div>
+                        }
+
+                        <!-- Personel Listesi -->
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-sm table-hover">
+                                <thead style="position: sticky; top: 0; background: white; z-index: 10;">
+                                    <tr>
+                                        <th style="width: 40px;">
+                                            <input type="checkbox"
+                                                   class="form-check-input"
+                                                   checked="@IsAllPersonelSelected()"
+                                                   @onchange="ToggleSelectAllPersonel" />
+                                        </th>
+                                        <th>Sicil No</th>
+                                        <th>TC Kimlik No</th>
+                                        <th>Ad Soyad</th>
+                                        <th>Departman</th>
+                                        <th>PDKS Kayıt No</th>
+                                        <th>Kart No</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (!filteredPersonelList.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">
+                                                <i class="bx bx-search-alt bx-lg"></i>
+                                                <p class="mb-0 mt-2">Personel bulunamadı</p>
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var personel in filteredPersonelList)
+                                        {
+                                            var isSelected = selectedPersonelIds.Contains(personel.TcKimlikNo);
+                                            <tr class="@(isSelected ? "table-active" : "")"
+                                                style="cursor: pointer;"
+                                                @onclick="() => TogglePersonelSelection(personel.TcKimlikNo)">
+                                                <td>
+                                                    <input type="checkbox"
+                                                           class="form-check-input"
+                                                           checked="@isSelected"
+                                                           @onclick:stopPropagation="true"
+                                                           @onchange="() => TogglePersonelSelection(personel.TcKimlikNo)" />
+                                                </td>
+                                                <td><span class="badge bg-label-secondary">@personel.SicilNo</span></td>
+                                                <td><small>@personel.TcKimlikNo</small></td>
+                                                <td><strong>@personel.AdSoyad</strong></td>
+                                                <td><small class="text-muted">@personel.DepartmanAdi</small></td>
+                                                <td><span class="badge bg-label-info">@personel.PersonelKayitNo</span></td>
+                                                <td>
+                                                    @if (personel.KartNo > 0)
+                                                    {
+                                                        <span class="badge bg-label-primary">@personel.KartNo</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">-</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" @onclick="CloseSendPersonelModal" disabled="@isSendingPersonel">
+                        İptal
+                    </button>
+                    <button type="button"
+                            class="btn btn-primary"
+                            @onclick="SendSelectedPersonelToDevice"
+                            disabled="@(!selectedPersonelIds.Any() || isSendingPersonel)">
+                        @if (isSendingPersonel)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        <i class="bx bx-send me-1"></i>Seçili Personelleri Gönder (@selectedPersonelIds.Count)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
-    private List<ZKTecoDevice>? devices;
+    private List<Device>? devices;
     private string apiBaseUrl = "";
     private bool showAddForm = false;
-    private ZKTecoDevice newDevice = new ZKTecoDevice { Port = "4370", IsActive = true };
+    private Device newDevice = new Device { Port = "4370", IsActive = true };
+
+    // Personel Gönderme Modal
+    private bool showSendPersonelModal = false;
+    private int selectedDeviceId = 0;
+    private string selectedDeviceName = "";
+    private bool isLoadingPersonel = false;
+    private bool isSendingPersonel = false;
+    private List<PersonelDto> personelList = new List<PersonelDto>();
+    private List<PersonelDto> filteredPersonelList = new List<PersonelDto>();
+    private List<string> selectedPersonelIds = new List<string>();
+    private string personelSearchTerm = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -136,7 +295,7 @@
 
     private async Task LoadDevices()
     {
-        devices = await Http.GetFromJsonAsync<List<ZKTecoDevice>>($"{apiBaseUrl}/api/ZKTecoDevice");
+        devices = await Http.GetFromJsonAsync<List<Device>>($"{apiBaseUrl}/api/Device");
     }
 
     private void ToggleAddForm()
@@ -144,7 +303,7 @@
         showAddForm = !showAddForm;
         if (showAddForm)
         {
-            newDevice = new ZKTecoDevice { Port = "4370", IsActive = true };
+            newDevice = new Device { Port = "4370", IsActive = true };
         }
     }
 
@@ -158,7 +317,7 @@
 
         try
         {
-            var response = await Http.PostAsJsonAsync($"{apiBaseUrl}/api/ZKTecoDevice", newDevice);
+            var response = await Http.PostAsJsonAsync($"{apiBaseUrl}/api/Device", newDevice);
             if (response.IsSuccessStatusCode)
             {
                 await JS.InvokeVoidAsync("alert", "✅ Cihaz başarıyla eklendi!");
@@ -178,7 +337,7 @@
 
     private async Task TestConnection(int deviceId)
     {
-        var response = await Http.PostAsync($"{apiBaseUrl}/api/ZKTecoDevice/{deviceId}/test", null);
+        var response = await Http.PostAsync($"{apiBaseUrl}/api/Device/{deviceId}/test", null);
         var result = await response.Content.ReadFromJsonAsync<dynamic>();
         await JS.InvokeVoidAsync("alert", result?.Success == true ? "✅ Bağlantı başarılı!" : "❌ Bağlantı başarısız!");
         await LoadDevices();
@@ -188,7 +347,7 @@
     {
         try
         {
-            var status = await Http.GetFromJsonAsync<dynamic>($"{apiBaseUrl}/api/ZKTecoDevice/{deviceId}/status");
+            var status = await Http.GetFromJsonAsync<dynamic>($"{apiBaseUrl}/api/Device/{deviceId}/status");
             var message = $"📊 Cihaz Durum Bilgisi:\n\n" +
                          $"Firmware: {status?.FirmwareVersion}\n" +
                          $"Seri No: {status?.SerialNumber}\n" +
@@ -208,7 +367,7 @@
     {
         try
         {
-            var timeDto = await Http.GetFromJsonAsync<dynamic>($"{apiBaseUrl}/api/ZKTecoDevice/{deviceId}/time");
+            var timeDto = await Http.GetFromJsonAsync<dynamic>($"{apiBaseUrl}/api/Device/{deviceId}/time");
             var deviceTime = DateTime.Parse(timeDto?.DeviceTime.ToString());
             var diff = timeDto?.TimeDifferenceSeconds;
             await JS.InvokeVoidAsync("alert", $"🕐 Cihaz Saati:\n{deviceTime:dd.MM.yyyy HH:mm:ss}\n\nSunucu ile fark: {diff} saniye");
@@ -225,7 +384,7 @@
         {
             try
             {
-                await Http.PostAsync($"{apiBaseUrl}/api/ZKTecoDevice/{deviceId}/time/sync", null);
+                await Http.PostAsync($"{apiBaseUrl}/api/Device/{deviceId}/time/sync", null);
                 await JS.InvokeVoidAsync("alert", "✅ Cihaz saati senkronize edildi!");
             }
             catch
@@ -261,7 +420,7 @@
         {
             try
             {
-                await Http.PostAsync($"{apiBaseUrl}/api/ZKTecoDevice/{deviceId}/restart", null);
+                await Http.PostAsync($"{apiBaseUrl}/api/Device/{deviceId}/restart", null);
                 await JS.InvokeVoidAsync("alert", "✅ Cihaz yeniden başlatılıyor...");
             }
             catch
@@ -277,7 +436,7 @@
         {
             try
             {
-                await Http.DeleteAsync($"{apiBaseUrl}/api/ZKTecoDevice/{deviceId}");
+                await Http.DeleteAsync($"{apiBaseUrl}/api/Device/{deviceId}");
                 await JS.InvokeVoidAsync("alert", "✅ Cihaz silindi!");
                 await LoadDevices();
             }
@@ -286,5 +445,190 @@
                 await JS.InvokeVoidAsync("alert", "❌ Cihaz silinemedi!");
             }
         }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // PERSONEL GÖNDERME MODALİ
+    // ═══════════════════════════════════════════════════════
+
+    private async Task OpenSendPersonelModal(int deviceId)
+    {
+        var device = devices?.FirstOrDefault(d => d.Id == deviceId);
+        if (device == null) return;
+
+        selectedDeviceId = deviceId;
+        selectedDeviceName = device.DeviceName ?? "";
+        showSendPersonelModal = true;
+        isLoadingPersonel = true;
+
+        try
+        {
+            // Personelleri yükle
+            var result = await Http.GetFromJsonAsync<List<PersonelDto>>($"{apiBaseUrl}/api/Personel");
+            personelList = result ?? new List<PersonelDto>();
+            filteredPersonelList = personelList;
+        }
+        catch
+        {
+            await JS.InvokeVoidAsync("alert", "❌ Personeller yüklenemedi!");
+            personelList = new List<PersonelDto>();
+            filteredPersonelList = new List<PersonelDto>();
+        }
+        finally
+        {
+            isLoadingPersonel = false;
+            StateHasChanged();
+        }
+    }
+
+    private void CloseSendPersonelModal()
+    {
+        showSendPersonelModal = false;
+        selectedDeviceId = 0;
+        selectedDeviceName = "";
+        personelList.Clear();
+        filteredPersonelList.Clear();
+        selectedPersonelIds.Clear();
+        personelSearchTerm = "";
+    }
+
+    private void FilterPersonel()
+    {
+        if (string.IsNullOrWhiteSpace(personelSearchTerm))
+        {
+            filteredPersonelList = personelList;
+        }
+        else
+        {
+            var searchLower = personelSearchTerm.ToLower();
+            filteredPersonelList = personelList
+                .Where(p =>
+                    p.AdSoyad.ToLower().Contains(searchLower) ||
+                    p.TcKimlikNo.Contains(searchLower) ||
+                    p.SicilNo.ToString().Contains(searchLower))
+                .ToList();
+        }
+
+        StateHasChanged();
+    }
+
+    private void TogglePersonelSelection(string tcKimlikNo)
+    {
+        if (selectedPersonelIds.Contains(tcKimlikNo))
+        {
+            selectedPersonelIds.Remove(tcKimlikNo);
+        }
+        else
+        {
+            selectedPersonelIds.Add(tcKimlikNo);
+        }
+
+        StateHasChanged();
+    }
+
+    private void ToggleSelectAllPersonel()
+    {
+        if (IsAllPersonelSelected())
+        {
+            selectedPersonelIds.Clear();
+        }
+        else
+        {
+            selectedPersonelIds = filteredPersonelList.Select(p => p.TcKimlikNo).ToList();
+        }
+
+        StateHasChanged();
+    }
+
+    private bool IsAllPersonelSelected()
+    {
+        return filteredPersonelList.Any() &&
+               filteredPersonelList.All(p => selectedPersonelIds.Contains(p.TcKimlikNo));
+    }
+
+    private async Task SendSelectedPersonelToDevice()
+    {
+        if (!selectedPersonelIds.Any())
+        {
+            await JS.InvokeVoidAsync("alert", "⚠️ Lütfen en az bir personel seçin!");
+            return;
+        }
+
+        if (!await JS.InvokeAsync<bool>("confirm", $"Seçili {selectedPersonelIds.Count} personeli {selectedDeviceName} cihazına göndermek istediğinize emin misiniz?"))
+        {
+            return;
+        }
+
+        isSendingPersonel = true;
+
+        try
+        {
+            // TODO: Toplu personel gönderme API endpoint'i kullanılacak
+            // Şimdilik tek tek gönderelim
+            int successCount = 0;
+            int failCount = 0;
+
+            foreach (var tcKimlikNo in selectedPersonelIds)
+            {
+                try
+                {
+                    var personel = personelList.FirstOrDefault(p => p.TcKimlikNo == tcKimlikNo);
+                    if (personel != null)
+                    {
+                        // POST /api/ZKTecoUser/{userId}/sync-to-device/{deviceId} endpoint'ini kullan
+                        var response = await Http.PostAsync(
+                            $"{apiBaseUrl}/api/ZKTecoUser/{personel.PersonelKayitNo}/sync-to-device/{selectedDeviceId}",
+                            null);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            successCount++;
+                        }
+                        else
+                        {
+                            failCount++;
+                        }
+                    }
+                }
+                catch
+                {
+                    failCount++;
+                }
+            }
+
+            var message = $"✅ İşlem tamamlandı!\n\n" +
+                         $"Başarılı: {successCount}\n" +
+                         $"Başarısız: {failCount}";
+
+            await JS.InvokeVoidAsync("alert", message);
+
+            if (successCount > 0)
+            {
+                CloseSendPersonelModal();
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"❌ Hata: {ex.Message}");
+        }
+        finally
+        {
+            isSendingPersonel = false;
+            StateHasChanged();
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // HELPER CLASS
+    // ═══════════════════════════════════════════════════════
+
+    public class PersonelDto
+    {
+        public string TcKimlikNo { get; set; } = "";
+        public int SicilNo { get; set; }
+        public string AdSoyad { get; set; } = "";
+        public string DepartmanAdi { get; set; } = "";
+        public int PersonelKayitNo { get; set; }
+        public int KartNo { get; set; }
     }
 }
