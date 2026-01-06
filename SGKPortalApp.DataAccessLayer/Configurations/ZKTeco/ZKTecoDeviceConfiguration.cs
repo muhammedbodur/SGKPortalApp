@@ -38,6 +38,12 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
             builder.Property(d => d.IsActive)
                    .HasDefaultValue(true);
 
+            // Relationships
+            builder.HasOne(d => d.HizmetBinasi)
+                   .WithMany()
+                   .HasForeignKey(d => d.HizmetBinasiId)
+                   .OnDelete(DeleteBehavior.SetNull);
+
             // Indexes
             builder.HasIndex(d => d.IpAddress)
                    .HasDatabaseName("IX_ZKTecoDevice_IpAddress");

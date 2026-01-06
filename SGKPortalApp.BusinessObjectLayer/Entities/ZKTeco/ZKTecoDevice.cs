@@ -7,9 +7,8 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
     /// <summary>
     /// ZKTeco cihaz bilgileri
     /// PDKS.Net4.8 tbSgmInfos ile uyumlu
-    /// Tablo adı: ZKTeco_Device
+    /// Tablo adı: ZKTeco_Device (Configuration'da tanımlı)
     /// </summary>
-    [Table("ZKTeco_Device")]
     public class ZKTecoDevice
     {
         [Key]

@@ -7,9 +7,8 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
     /// <summary>
     /// ZKTeco cihazından çekilen ham attendance data
     /// PDKS.Net4.8 tbCekilenData ile uyumlu
-    /// Tablo adı: ZKTeco_CekilenData
+    /// Tablo adı: ZKTeco_CekilenData (Configuration'da tanımlı)
     /// </summary>
-    [Table("ZKTeco_CekilenData")]
     public class CekilenData
     {
         [Key]
