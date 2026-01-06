@@ -78,6 +78,101 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
             }
         }
 
+        public async Task<DeviceTimeDto?> GetDeviceTimeAsync(string deviceIp, int port = 4370)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync(
+                    $"{_baseUrl}/api/device/{deviceIp}/time?port={port}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning($"Get device time failed: {deviceIp}:{port} - {response.StatusCode}");
+                    return null;
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse<DeviceTimeDto>>();
+                return result?.Data;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Get device time error: {deviceIp}:{port}");
+                return null;
+            }
+        }
+
+        public async Task<bool> SetDeviceTimeAsync(string deviceIp, DateTime newTime, int port = 4370)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync(
+                    $"{_baseUrl}/api/device/{deviceIp}/time?port={port}",
+                    newTime.ToString("o")); // ISO 8601 format
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning($"Set device time failed: {deviceIp}:{port} - {response.StatusCode}");
+                    return false;
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse>();
+                return result?.Success ?? false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Set device time error: {deviceIp}:{port}");
+                return false;
+            }
+        }
+
+        public async Task<bool> EnableDeviceAsync(string deviceIp, int port = 4370)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsync(
+                    $"{_baseUrl}/api/device/{deviceIp}/enable?port={port}",
+                    null);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning($"Enable device failed: {deviceIp}:{port} - {response.StatusCode}");
+                    return false;
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse>();
+                return result?.Success ?? false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Enable device error: {deviceIp}:{port}");
+                return false;
+            }
+        }
+
+        public async Task<bool> DisableDeviceAsync(string deviceIp, int port = 4370)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsync(
+                    $"{_baseUrl}/api/device/{deviceIp}/disable?port={port}",
+                    null);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning($"Disable device failed: {deviceIp}:{port} - {response.StatusCode}");
+                    return false;
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse>();
+                return result?.Success ?? false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Disable device error: {deviceIp}:{port}");
+                return false;
+            }
+        }
+
         public async Task<bool> RestartDeviceAsync(string deviceIp, int port = 4370)
         {
             try
@@ -102,9 +197,33 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
             }
         }
 
+        public async Task<bool> PowerOffDeviceAsync(string deviceIp, int port = 4370)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsync(
+                    $"{_baseUrl}/api/device/{deviceIp}/poweroff?port={port}",
+                    null);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning($"Power off device failed: {deviceIp}:{port} - {response.StatusCode}");
+                    return false;
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse>();
+                return result?.Success ?? false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Power off device error: {deviceIp}:{port}");
+                return false;
+            }
+        }
+
         // ========== User Operations ==========
 
-        public async Task<List<UserInfoDto>> GetAllUsersAsync(string deviceIp, int port = 4370)
+        public async Task<List<ZKTecoApiUserDto>> GetAllUsersFromDeviceAsync(string deviceIp, int port = 4370)
         {
             try
             {
@@ -114,20 +233,20 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogWarning($"Get all users failed: {deviceIp}:{port} - {response.StatusCode}");
-                    return new List<UserInfoDto>();
+                    return new List<ZKTecoApiUserDto>();
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<UserInfoDto>>>();
-                return result?.Data ?? new List<UserInfoDto>();
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<ZKTecoApiUserDto>>>();
+                return result?.Data ?? new List<ZKTecoApiUserDto>();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Get all users error: {deviceIp}:{port}");
-                return new List<UserInfoDto>();
+                return new List<ZKTecoApiUserDto>();
             }
         }
 
-        public async Task<UserInfoDto?> GetUserAsync(string deviceIp, string enrollNumber, int port = 4370)
+        public async Task<ZKTecoApiUserDto?> GetUserFromDeviceAsync(string deviceIp, string enrollNumber, int port = 4370)
         {
             try
             {
@@ -140,7 +259,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
                     return null;
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<ApiResponse<UserInfoDto>>();
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse<ZKTecoApiUserDto>>();
                 return result?.Data;
             }
             catch (Exception ex)
@@ -150,7 +269,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
             }
         }
 
-        public async Task<UserInfoDto?> GetUserByCardNumberAsync(string deviceIp, long cardNumber, int port = 4370)
+        public async Task<ZKTecoApiUserDto?> GetUserByCardNumberAsync(string deviceIp, long cardNumber, int port = 4370)
         {
             try
             {
@@ -163,7 +282,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
                     return null;
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<ApiResponse<UserInfoDto>>();
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse<ZKTecoApiUserDto>>();
                 return result?.Data;
             }
             catch (Exception ex)
@@ -173,7 +292,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
             }
         }
 
-        public async Task<bool> AddUserToDeviceAsync(string deviceIp, UserCreateUpdateDto user, int port = 4370)
+        public async Task<bool> AddUserToDeviceAsync(string deviceIp, ZKTecoApiUserDto user, int port = 4370)
         {
             try
             {
@@ -198,7 +317,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
             }
         }
 
-        public async Task<bool> UpdateUserOnDeviceAsync(string deviceIp, string enrollNumber, UserCreateUpdateDto user, int port = 4370)
+        public async Task<bool> UpdateUserOnDeviceAsync(string deviceIp, string enrollNumber, ZKTecoApiUserDto user, int port = 4370)
         {
             try
             {
@@ -246,7 +365,30 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
             }
         }
 
-        public async Task<(int count, int capacity)> GetUserCountAsync(string deviceIp, int port = 4370)
+        public async Task<bool> ClearAllUsersFromDeviceAsync(string deviceIp, int port = 4370)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync(
+                    $"{_baseUrl}/api/users/{deviceIp}?port={port}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning($"Clear all users failed: {deviceIp}:{port} - {response.StatusCode}");
+                    return false;
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse>();
+                return result?.Success ?? false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Clear all users error: {deviceIp}:{port}");
+                return false;
+            }
+        }
+
+        public async Task<int> GetUserCountFromDeviceAsync(string deviceIp, int port = 4370)
         {
             try
             {
@@ -256,27 +398,22 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogWarning($"Get user count failed: {deviceIp}:{port} - {response.StatusCode}");
-                    return (0, 0);
+                    return 0;
                 }
 
                 var result = await response.Content.ReadFromJsonAsync<ApiResponse<UserCountData>>();
-                if (result?.Data != null)
-                {
-                    return (result.Data.Count, result.Data.Capacity);
-                }
-
-                return (0, 0);
+                return result?.Data?.Count ?? 0;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Get user count error: {deviceIp}:{port}");
-                return (0, 0);
+                return 0;
             }
         }
 
         // ========== Attendance Operations ==========
 
-        public async Task<List<AttendanceLogDto>> GetAttendanceLogsAsync(string deviceIp, int port = 4370)
+        public async Task<List<AttendanceRecordDto>> GetAttendanceLogsFromDeviceAsync(string deviceIp, int port = 4370)
         {
             try
             {
@@ -286,20 +423,20 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogWarning($"Get attendance logs failed: {deviceIp}:{port} - {response.StatusCode}");
-                    return new List<AttendanceLogDto>();
+                    return new List<AttendanceRecordDto>();
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<AttendanceLogDto>>>();
-                return result?.Data ?? new List<AttendanceLogDto>();
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<AttendanceRecordDto>>>();
+                return result?.Data ?? new List<AttendanceRecordDto>();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Get attendance logs error: {deviceIp}:{port}");
-                return new List<AttendanceLogDto>();
+                return new List<AttendanceRecordDto>();
             }
         }
 
-        public async Task<int> GetAttendanceLogCountAsync(string deviceIp, int port = 4370)
+        public async Task<int> GetAttendanceLogCountFromDeviceAsync(string deviceIp, int port = 4370)
         {
             try
             {
@@ -322,7 +459,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
             }
         }
 
-        public async Task<bool> ClearAttendanceLogsAsync(string deviceIp, int port = 4370)
+        public async Task<bool> ClearAttendanceLogsFromDeviceAsync(string deviceIp, int port = 4370)
         {
             try
             {

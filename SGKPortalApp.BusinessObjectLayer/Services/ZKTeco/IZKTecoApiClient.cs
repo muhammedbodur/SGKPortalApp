@@ -1,4 +1,5 @@
 using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -19,85 +20,136 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
 
         /// <summary>
         /// Cihaz durumu ve bilgilerini al
+        /// GET /api/device/{ip}/status
         /// </summary>
         Task<DeviceStatusDto?> GetDeviceStatusAsync(string deviceIp, int port = 4370);
 
         /// <summary>
+        /// Cihaz zamanını getir
+        /// GET /api/device/{ip}/time
+        /// </summary>
+        Task<DeviceTimeDto?> GetDeviceTimeAsync(string deviceIp, int port = 4370);
+
+        /// <summary>
+        /// Cihaz zamanını ayarla
+        /// POST /api/device/{ip}/time
+        /// </summary>
+        Task<bool> SetDeviceTimeAsync(string deviceIp, DateTime newTime, int port = 4370);
+
+        /// <summary>
+        /// Cihazı aktif et
+        /// POST /api/device/{ip}/enable
+        /// </summary>
+        Task<bool> EnableDeviceAsync(string deviceIp, int port = 4370);
+
+        /// <summary>
+        /// Cihazı pasif et (kart okumaz)
+        /// POST /api/device/{ip}/disable
+        /// </summary>
+        Task<bool> DisableDeviceAsync(string deviceIp, int port = 4370);
+
+        /// <summary>
         /// Cihazı yeniden başlat
+        /// POST /api/device/{ip}/restart
         /// </summary>
         Task<bool> RestartDeviceAsync(string deviceIp, int port = 4370);
+
+        /// <summary>
+        /// Cihazı kapat
+        /// POST /api/device/{ip}/poweroff
+        /// </summary>
+        Task<bool> PowerOffDeviceAsync(string deviceIp, int port = 4370);
 
         // ========== User Operations (CRUD - Sadece cihaz üzerinde) ==========
 
         /// <summary>
         /// Cihazdaki tüm kullanıcıları getir
+        /// GET /api/users/{ip}
         /// NOT: Database değil, direkt cihazdan
         /// </summary>
-        Task<List<UserInfoDto>> GetAllUsersAsync(string deviceIp, int port = 4370);
+        Task<List<ZKTecoApiUserDto>> GetAllUsersFromDeviceAsync(string deviceIp, int port = 4370);
 
         /// <summary>
         /// Cihazdan belirli bir kullanıcıyı getir
+        /// GET /api/users/{ip}/{enrollNumber}
         /// </summary>
-        Task<UserInfoDto?> GetUserAsync(string deviceIp, string enrollNumber, int port = 4370);
+        Task<ZKTecoApiUserDto?> GetUserFromDeviceAsync(string deviceIp, string enrollNumber, int port = 4370);
 
         /// <summary>
         /// Kart numarasıyla kullanıcıyı bul
+        /// GET /api/users/{ip}/card/{cardNumber}
         /// </summary>
-        Task<UserInfoDto?> GetUserByCardNumberAsync(string deviceIp, long cardNumber, int port = 4370);
+        Task<ZKTecoApiUserDto?> GetUserByCardNumberAsync(string deviceIp, long cardNumber, int port = 4370);
 
         /// <summary>
         /// Cihaza kullanıcı ekle
+        /// POST /api/users/{ip}
         /// NOT: Database değil, direkt cihaza
         /// </summary>
-        Task<bool> AddUserToDeviceAsync(string deviceIp, UserCreateUpdateDto user, int port = 4370);
+        Task<bool> AddUserToDeviceAsync(string deviceIp, ZKTecoApiUserDto user, int port = 4370);
 
         /// <summary>
         /// Cihazdaki kullanıcıyı güncelle
+        /// PUT /api/users/{ip}/{enrollNumber}
         /// </summary>
-        Task<bool> UpdateUserOnDeviceAsync(string deviceIp, string enrollNumber, UserCreateUpdateDto user, int port = 4370);
+        Task<bool> UpdateUserOnDeviceAsync(string deviceIp, string enrollNumber, ZKTecoApiUserDto user, int port = 4370);
 
         /// <summary>
         /// Cihazdan kullanıcıyı sil
+        /// DELETE /api/users/{ip}/{enrollNumber}
         /// </summary>
         Task<bool> DeleteUserFromDeviceAsync(string deviceIp, string enrollNumber, int port = 4370);
 
         /// <summary>
-        /// Cihazdaki kullanıcı sayısını getir
+        /// Cihazdaki tüm kullanıcıları sil
+        /// DELETE /api/users/{ip}
         /// </summary>
-        Task<(int count, int capacity)> GetUserCountAsync(string deviceIp, int port = 4370);
+        Task<bool> ClearAllUsersFromDeviceAsync(string deviceIp, int port = 4370);
+
+        /// <summary>
+        /// Cihazdaki kullanıcı sayısını getir
+        /// GET /api/users/{ip}/count
+        /// </summary>
+        Task<int> GetUserCountFromDeviceAsync(string deviceIp, int port = 4370);
 
         // ========== Attendance Operations ==========
 
         /// <summary>
         /// Cihazdan attendance log'larını çek
+        /// GET /api/attendance/{ip}
         /// </summary>
-        Task<List<AttendanceLogDto>> GetAttendanceLogsAsync(string deviceIp, int port = 4370);
+        Task<List<AttendanceRecordDto>> GetAttendanceLogsFromDeviceAsync(string deviceIp, int port = 4370);
 
         /// <summary>
         /// Attendance log sayısını getir
+        /// GET /api/attendance/{ip}/count
         /// </summary>
-        Task<int> GetAttendanceLogCountAsync(string deviceIp, int port = 4370);
+        Task<int> GetAttendanceLogCountFromDeviceAsync(string deviceIp, int port = 4370);
 
         /// <summary>
         /// Cihazdaki tüm attendance log'larını sil
+        /// DELETE /api/attendance/{ip}
         /// </summary>
-        Task<bool> ClearAttendanceLogsAsync(string deviceIp, int port = 4370);
+        Task<bool> ClearAttendanceLogsFromDeviceAsync(string deviceIp, int port = 4370);
 
         // ========== Realtime Operations ==========
 
         /// <summary>
         /// Cihazdan realtime event dinlemeyi başlat
+        /// POST /api/realtime/{ip}/start
         /// ZKTecoApi üzerinde SDK event listener'ı başlatır
         /// </summary>
         Task<bool> StartRealtimeMonitoringAsync(string deviceIp, int port = 4370);
 
         /// <summary>
         /// Realtime event dinlemeyi durdur
+        /// POST /api/realtime/{ip}/stop
         /// </summary>
         Task<bool> StopRealtimeMonitoringAsync(string deviceIp, int port = 4370);
 
         /// <summary>
         /// Realtime monitoring durumunu kontrol et
+        /// GET /api/realtime/{ip}/status
         /// Cihaz için event listener aktif mi?
         /// </summary>
         Task<bool> GetRealtimeMonitoringStatusAsync(string deviceIp, int port = 4370);
