@@ -6,10 +6,12 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
 {
     public class CekilenDataConfiguration : IEntityTypeConfiguration<CekilenData>
     {
+        private const string TablePrefix = "ZKTeco_";
+
         public void Configure(EntityTypeBuilder<CekilenData> builder)
         {
             // Table
-            builder.ToTable("ZKTeco_CekilenData");
+            builder.ToTable($"{TablePrefix}CekilenData");
 
             // Primary Key
             builder.HasKey(c => c.Id);
@@ -53,19 +55,19 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
 
             // Indexes
             builder.HasIndex(c => c.KayitNo)
-                   .HasDatabaseName("IX_CekilenData_KayitNo");
+                   .HasDatabaseName($"IX_{TablePrefix}CekilenData_KayitNo");
 
             builder.HasIndex(c => c.DeviceId)
-                   .HasDatabaseName("IX_CekilenData_DeviceId");
+                   .HasDatabaseName($"IX_{TablePrefix}CekilenData_DeviceId");
 
             builder.HasIndex(c => c.Tarih)
-                   .HasDatabaseName("IX_CekilenData_Tarih");
+                   .HasDatabaseName($"IX_{TablePrefix}CekilenData_Tarih");
 
             builder.HasIndex(c => c.IsProcessed)
-                   .HasDatabaseName("IX_CekilenData_IsProcessed");
+                   .HasDatabaseName($"IX_{TablePrefix}CekilenData_IsProcessed");
 
             builder.HasIndex(c => new { c.KayitNo, c.Tarih, c.Saat })
-                   .HasDatabaseName("IX_CekilenData_Lookup");
+                   .HasDatabaseName($"IX_{TablePrefix}CekilenData_Lookup");
         }
     }
 }

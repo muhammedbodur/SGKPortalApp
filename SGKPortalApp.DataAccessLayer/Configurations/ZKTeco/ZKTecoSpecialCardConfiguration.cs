@@ -6,10 +6,12 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
 {
     public class ZKTecoSpecialCardConfiguration : IEntityTypeConfiguration<ZKTecoSpecialCard>
     {
+        private const string TablePrefix = "ZKTeco_";
+
         public void Configure(EntityTypeBuilder<ZKTecoSpecialCard> builder)
         {
             // Table
-            builder.ToTable("ZKTeco_SpecialCard");
+            builder.ToTable($"{TablePrefix}SpecialCard");
 
             // Primary Key
             builder.HasKey(c => c.Id);
@@ -54,20 +56,20 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
             // Indexes
             builder.HasIndex(c => c.CardNumber)
                    .IsUnique()
-                   .HasDatabaseName("IX_ZKTecoSpecialCard_CardNumber");
+                   .HasDatabaseName($"IX_{TablePrefix}SpecialCard_CardNumber");
 
             builder.HasIndex(c => c.EnrollNumber)
                    .IsUnique()
-                   .HasDatabaseName("IX_ZKTecoSpecialCard_EnrollNumber");
+                   .HasDatabaseName($"IX_{TablePrefix}SpecialCard_EnrollNumber");
 
             builder.HasIndex(c => c.CardType)
-                   .HasDatabaseName("IX_ZKTecoSpecialCard_CardType");
+                   .HasDatabaseName($"IX_{TablePrefix}SpecialCard_CardType");
 
             builder.HasIndex(c => c.IsActive)
-                   .HasDatabaseName("IX_ZKTecoSpecialCard_IsActive");
+                   .HasDatabaseName($"IX_{TablePrefix}SpecialCard_IsActive");
 
             builder.HasIndex(c => c.CurrentUserSicilNo)
-                   .HasDatabaseName("IX_ZKTecoSpecialCard_CurrentUserSicilNo");
+                   .HasDatabaseName($"IX_{TablePrefix}SpecialCard_CurrentUserSicilNo");
         }
     }
 }
