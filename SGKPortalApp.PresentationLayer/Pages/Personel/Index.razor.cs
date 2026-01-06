@@ -54,6 +54,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private List<ServisResponseDto> Servisler { get; set; } = new();
         private List<UnvanResponseDto> Unvanlar { get; set; } = new();
         private List<HizmetBinasiResponseDto> HizmetBinalari { get; set; } = new();
+        private List<SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco.Device> ZKTecoDevices { get; set; } = new();
 
         // ═══════════════════════════════════════════════════════
         // FILTER PROPERTIES
@@ -65,6 +66,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private int filterHizmetBinasiId = 0;
         private int filterUnvanId = 0;
         private int filterAktiflik = -1; // -1: Tümü, 0: Aktif, 1: Pasif, 2: Emekli
+        private int filterZKTecoDeviceId = 0; // 0: Tüm Cihazlar
         private string sortBy = "name-asc";
 
         // ═══════════════════════════════════════════════════════
@@ -125,13 +127,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 var servisTask = _servisApiService.GetAllAsync();
                 var unvanTask = _unvanApiService.GetAllAsync();
                 var hizmetBinasiTask = _hizmetBinasiApiService.GetAllAsync();
+                var zktecoDeviceTask = _zktecoDeviceApiService.GetActiveAsync();
 
-                await Task.WhenAll(departmanTask, servisTask, unvanTask, hizmetBinasiTask);
+                await Task.WhenAll(departmanTask, servisTask, unvanTask, hizmetBinasiTask, zktecoDeviceTask);
 
                 Departmanlar = (await departmanTask)?.Data ?? new List<DepartmanResponseDto>();
                 Servisler = (await servisTask)?.Data ?? new List<ServisResponseDto>();
                 Unvanlar = (await unvanTask)?.Data ?? new List<UnvanResponseDto>();
                 HizmetBinalari = (await hizmetBinasiTask)?.Data ?? new List<HizmetBinasiResponseDto>();
+                ZKTecoDevices = (await zktecoDeviceTask)?.Data ?? new List<SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco.Device>();
 
                 // Personelleri server-side pagination ile yükle
                 await LoadPersonelWithPagination();
@@ -295,6 +299,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             _ = ApplyFiltersAndSort();
         }
 
+        private void OnFilterDeviceChanged(ChangeEventArgs e)
+        {
+            filterZKTecoDeviceId = int.Parse(e.Value?.ToString() ?? "0");
+            StateHasChanged(); // Filtre değişince butonları güncelle
+        }
+
         private void OnSortByChanged(ChangeEventArgs e)
         {
             sortBy = e.Value?.ToString() ?? "name-asc";
@@ -371,6 +381,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             filterHizmetBinasiId = 0;
             filterUnvanId = 0;
             filterAktiflik = -1;
+            filterZKTecoDeviceId = 0;
             sortBy = "name-asc";
             _ = ApplyFiltersAndSort();
         }
