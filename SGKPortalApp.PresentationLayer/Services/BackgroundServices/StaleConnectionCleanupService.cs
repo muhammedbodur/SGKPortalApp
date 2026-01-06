@@ -38,6 +38,7 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
                 _checkInterval.TotalMinutes, _staleThresholdMinutes, _orphanCleanupInterval.TotalMinutes);
 
             // İlk başlangıçta tüm online connection'ları offline yap (sunucu restart)
+            // NOT: ApiLayer henüz hazır olmayabilir, retry ile bekle
             await CleanupAllOnStartupAsync();
 
             _logger.LogInformation("Periyodik temizlik başlatılıyor (her {Interval} dakikada bir)...", _checkInterval.TotalMinutes);
@@ -77,29 +78,52 @@ namespace SGKPortalApp.PresentationLayer.Services.BackgroundServices
         /// <summary>
         /// Uygulama başlangıcında tüm online connection'ları offline yap.
         /// API endpoint üzerinden çağrılır (Layered Architecture)
+        /// NOT: ApiLayer henüz hazır olmayabilir, retry ile bekler (max 30 saniye)
         /// </summary>
         private async Task CleanupAllOnStartupAsync()
         {
-            try
-            {
-                var httpClient = _httpClientFactory.CreateClient("CleanupClient");
-                var response = await httpClient.PostAsync("/api/hub-connections/cleanup/startup", null);
+            const int maxRetries = 6; // 6 deneme x 5 saniye = 30 saniye max bekleme
+            const int retryDelaySeconds = 5;
 
-                if (response.IsSuccessStatusCode)
-                {
-                    var result = await response.Content.ReadFromJsonAsync<CleanupResponse>();
-                    _logger.LogInformation("✅ Başlangıç temizliği: {Count} connection offline yapıldı",
-                        result?.CleanedCount ?? 0);
-                }
-                else
-                {
-                    _logger.LogWarning("⚠️ Başlangıç temizliği API çağrısı başarısız: {StatusCode}",
-                        response.StatusCode);
-                }
-            }
-            catch (Exception ex)
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
-                _logger.LogError(ex, "Başlangıç temizliği hatası (API çağrısı)");
+                try
+                {
+                    var httpClient = _httpClientFactory.CreateClient("CleanupClient");
+                    var response = await httpClient.PostAsync("/api/hub-connections/cleanup/startup", null);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var result = await response.Content.ReadFromJsonAsync<CleanupResponse>();
+                        _logger.LogInformation("✅ Başlangıç temizliği: {Count} connection offline yapıldı",
+                            result?.CleanedCount ?? 0);
+                        return; // Başarılı, çık
+                    }
+                    else
+                    {
+                        _logger.LogWarning("⚠️ Başlangıç temizliği API çağrısı başarısız: {StatusCode}",
+                            response.StatusCode);
+                    }
+                }
+                catch (HttpRequestException ex) when (attempt < maxRetries)
+                {
+                    // API henüz hazır değil, retry yap
+                    _logger.LogWarning("⏳ ApiLayer henüz hazır değil (deneme {Attempt}/{MaxRetries}). {Delay} saniye sonra tekrar denenecek...",
+                        attempt, maxRetries, retryDelaySeconds);
+                    await Task.Delay(TimeSpan.FromSeconds(retryDelaySeconds));
+                }
+                catch (HttpRequestException ex) when (attempt == maxRetries)
+                {
+                    // Son deneme de başarısız, pes et
+                    _logger.LogWarning(ex, "⚠️ Başlangıç temizliği yapılamadı: ApiLayer {MaxRetries} denemede hazır olmadı. Devam ediliyor...",
+                        maxRetries);
+                    return; // Critical değil, servis devam etsin
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Başlangıç temizliği hatası (API çağrısı)");
+                    return; // Critical değil, servis devam etsin
+                }
             }
         }
 
