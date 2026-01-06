@@ -1,0 +1,206 @@
+@page "/pdks/zkteco/devices"
+@using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject IConfiguration Configuration
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<PageTitle>ZKTeco Cihaz Yönetimi</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h3>📱 ZKTeco Cihaz Yönetimi</h3>
+        </div>
+    </div>
+
+    @if (devices == null)
+    {
+        <p><em>Yükleniyor...</em></p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover table-sm">
+                <thead>
+                    <tr>
+                        <th>Cihaz Adı</th>
+                        <th>IP:Port</th>
+                        <th>Durum</th>
+                        <th>Son Kontrol</th>
+                        <th style="min-width: 400px;">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var device in devices)
+                    {
+                        <tr>
+                            <td><strong>@device.DeviceName</strong></td>
+                            <td><code>@device.IpAddress:@device.Port</code></td>
+                            <td>
+                                <span class="badge @(device.IsActive ? "bg-success" : "bg-secondary")">
+                                    @(device.IsActive ? "Aktif" : "Pasif")
+                                </span>
+                            </td>
+                            <td><small>@device.LastHealthCheckTime?.ToString("dd.MM HH:mm")</small></td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button class="btn btn-outline-info" @onclick="() => TestConnection(device.Id)" title="Bağlantı Testi">
+                                        <i class="bx bx-wifi"></i>
+                                    </button>
+                                    <button class="btn btn-outline-warning" @onclick="() => GetStatus(device.Id)" title="Durum">
+                                        <i class="bx bx-info-circle"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" @onclick="() => GetDeviceTime(device.Id)" title="Cihaz Saati">
+                                        <i class="bx bx-time"></i>
+                                    </button>
+                                    <button class="btn btn-outline-primary" @onclick="() => SyncDeviceTime(device.Id)" title="Saati Senkronize Et">
+                                        <i class="bx bx-sync"></i>
+                                    </button>
+                                    <button class="btn btn-outline-success" @onclick="() => ShowDeviceUsers(device.Id)" title="Cihazdaki Personeller">
+                                        <i class="bx bx-group"></i>
+                                    </button>
+                                    <button class="btn btn-outline-dark" @onclick="() => RestartDevice(device.Id)" title="Yeniden Başlat">
+                                        <i class="bx bx-revision"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger" @onclick="() => Delete(device.Id)" title="Sil">
+                                        <i class="bx bx-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private List<ZKTecoDevice>? devices;
+    private string apiBaseUrl = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        apiBaseUrl = Configuration["AppSettings:Urls:HttpsUrl"] ?? "https://localhost:9080";
+        await LoadDevices();
+    }
+
+    private async Task LoadDevices()
+    {
+        devices = await Http.GetFromJsonAsync<List<ZKTecoDevice>>($"{apiBaseUrl}/api/ZKTecoDevice");
+    }
+
+    private async Task TestConnection(int deviceId)
+    {
+        var response = await Http.PostAsync($"{apiBaseUrl}/api/ZKTecoDevice/{deviceId}/test", null);
+        var result = await response.Content.ReadFromJsonAsync<dynamic>();
+        await JS.InvokeVoidAsync("alert", result?.Success == true ? "✅ Bağlantı başarılı!" : "❌ Bağlantı başarısız!");
+        await LoadDevices();
+    }
+
+    private async Task GetStatus(int deviceId)
+    {
+        try
+        {
+            var status = await Http.GetFromJsonAsync<dynamic>($"{apiBaseUrl}/api/ZKTecoDevice/{deviceId}/status");
+            var message = $"📊 Cihaz Durum Bilgisi:\n\n" +
+                         $"Firmware: {status?.FirmwareVersion}\n" +
+                         $"Seri No: {status?.SerialNumber}\n" +
+                         $"Platform: {status?.Platform}\n" +
+                         $"Kullanıcı: {status?.UserCount} / {status?.UserCapacity}\n" +
+                         $"Kayıt: {status?.AttendanceLogCount} / {status?.AttLogCapacity}\n" +
+                         $"Parmak İzi: {status?.FingerPrintCount} / {status?.FingerPrintCapacity}";
+            await JS.InvokeVoidAsync("alert", message);
+        }
+        catch
+        {
+            await JS.InvokeVoidAsync("alert", "❌ Cihaz durumu alınamadı!");
+        }
+    }
+
+    private async Task GetDeviceTime(int deviceId)
+    {
+        try
+        {
+            var timeDto = await Http.GetFromJsonAsync<dynamic>($"{apiBaseUrl}/api/ZKTecoDevice/{deviceId}/time");
+            var deviceTime = DateTime.Parse(timeDto?.DeviceTime.ToString());
+            var diff = timeDto?.TimeDifferenceSeconds;
+            await JS.InvokeVoidAsync("alert", $"🕐 Cihaz Saati:\n{deviceTime:dd.MM.yyyy HH:mm:ss}\n\nSunucu ile fark: {diff} saniye");
+        }
+        catch
+        {
+            await JS.InvokeVoidAsync("alert", "❌ Cihaz saati alınamadı!");
+        }
+    }
+
+    private async Task SyncDeviceTime(int deviceId)
+    {
+        if (await JS.InvokeAsync<bool>("confirm", "Cihaz saatini şu anki sunucu saatiyle senkronize etmek istediğinize emin misiniz?"))
+        {
+            try
+            {
+                await Http.PostAsync($"{apiBaseUrl}/api/ZKTecoDevice/{deviceId}/time/sync", null);
+                await JS.InvokeVoidAsync("alert", "✅ Cihaz saati senkronize edildi!");
+            }
+            catch
+            {
+                await JS.InvokeVoidAsync("alert", "❌ Cihaz saati senkronize edilemedi!");
+            }
+        }
+    }
+
+    private async Task ShowDeviceUsers(int deviceId)
+    {
+        try
+        {
+            var users = await Http.GetFromJsonAsync<List<dynamic>>($"{apiBaseUrl}/api/ZKTecoUser/device/{deviceId}/from-device");
+            if (users != null && users.Any())
+            {
+                await JS.InvokeVoidAsync("alert", $"👥 Cihazdaki Personel Sayısı: {users.Count}\n\nDetaylı liste için 'Kullanıcı Yönetimi' sayfasını ziyaret edin.");
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "ℹ️ Cihazda kayıtlı personel bulunamadı.");
+            }
+        }
+        catch
+        {
+            await JS.InvokeVoidAsync("alert", "❌ Personel listesi alınamadı!");
+        }
+    }
+
+    private async Task RestartDevice(int deviceId)
+    {
+        if (await JS.InvokeAsync<bool>("confirm", "⚠️ Cihazı yeniden başlatmak istediğinize emin misiniz?\n\nCihaz yaklaşık 30 saniye offline olacak."))
+        {
+            try
+            {
+                await Http.PostAsync($"{apiBaseUrl}/api/ZKTecoDevice/{deviceId}/restart", null);
+                await JS.InvokeVoidAsync("alert", "✅ Cihaz yeniden başlatılıyor...");
+            }
+            catch
+            {
+                await JS.InvokeVoidAsync("alert", "❌ Cihaz yeniden başlatılamadı!");
+            }
+        }
+    }
+
+    private async Task Delete(int deviceId)
+    {
+        if (await JS.InvokeAsync<bool>("confirm", "⚠️ Cihazı silmek istediğinize emin misiniz?\n\nBu işlem geri alınamaz!"))
+        {
+            try
+            {
+                await Http.DeleteAsync($"{apiBaseUrl}/api/ZKTecoDevice/{deviceId}");
+                await JS.InvokeVoidAsync("alert", "✅ Cihaz silindi!");
+                await LoadDevices();
+            }
+            catch
+            {
+                await JS.InvokeVoidAsync("alert", "❌ Cihaz silinemedi!");
+            }
+        }
+    }
+}

@@ -76,6 +76,21 @@ namespace SGKPortalApp.ApiLayer.Controllers
             return Ok(new { Success = success });
         }
 
+        [HttpGet("{id}/time")]
+        public async Task<IActionResult> GetTime(int id)
+        {
+            var time = await _deviceService.GetDeviceTimeAsync(id);
+            if (time == null) return NotFound();
+            return Ok(time);
+        }
+
+        [HttpPost("{id}/time/sync")]
+        public async Task<IActionResult> SyncTime(int id)
+        {
+            var success = await _deviceService.SynchronizeDeviceTimeAsync(id);
+            return Ok(new { Success = success });
+        }
+
         [HttpPost("{id}/restart")]
         public async Task<IActionResult> Restart(int id)
         {

@@ -1,0 +1,135 @@
+@page "/pdks/zkteco/users"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject IConfiguration Configuration
+@inject IJSRuntime JS
+
+<PageTitle>ZKTeco Kullanıcı Yönetimi</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h3>👥 ZKTeco Kullanıcı Yönetimi</h3>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-auto">
+            <select class="form-select" @onchange="OnDeviceChanged">
+                <option value="">Tüm Kullanıcılar</option>
+                @if (devices != null)
+                {
+                    @foreach (var device in devices)
+                    {
+                        <option value="@device.Id">@device.DeviceName (@device.IpAddress)</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-success" @onclick="SyncFromDevice" disabled="@(selectedDeviceId == 0)">
+                <i class="bx bx-download"></i> Cihazdan Senkronize Et
+            </button>
+        </div>
+    </div>
+
+    @if (users == null)
+    {
+        <p><em>Yükleniyor...</em></p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Sicil No</th>
+                        <th>Ad Soyad</th>
+                        <th>Kart No</th>
+                        <th>Yetki</th>
+                        <th>Durum</th>
+                        <th>Son Sync</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in users)
+                    {
+                        <tr>
+                            <td>@user.EnrollNumber</td>
+                            <td>@user.Name</td>
+                            <td>@user.CardNumber</td>
+                            <td>@user.PrivilegeText</td>
+                            <td>
+                                <span class="badge @(user.Enabled ? "bg-success" : "bg-secondary")">
+                                    @user.StatusText
+                                </span>
+                            </td>
+                            <td>@user.LastSyncTime?.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" @onclick="() => Delete(user.Id)">
+                                    Sil
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private List<ZKTecoUserDto>? users;
+    private List<dynamic>? devices;
+    private string apiBaseUrl = "";
+    private int selectedDeviceId = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        apiBaseUrl = Configuration["AppSettings:Urls:HttpsUrl"] ?? "https://localhost:9080";
+        await LoadDevices();
+        await LoadUsers();
+    }
+
+    private async Task LoadDevices()
+    {
+        devices = await Http.GetFromJsonAsync<List<dynamic>>($"{apiBaseUrl}/api/ZKTecoDevice");
+    }
+
+    private async Task LoadUsers()
+    {
+        users = await Http.GetFromJsonAsync<List<ZKTecoUserDto>>($"{apiBaseUrl}/api/ZKTecoUser");
+    }
+
+    private async Task OnDeviceChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int deviceId))
+        {
+            selectedDeviceId = deviceId;
+            users = await Http.GetFromJsonAsync<List<ZKTecoUserDto>>($"{apiBaseUrl}/api/ZKTecoUser/device/{deviceId}");
+        }
+        else
+        {
+            selectedDeviceId = 0;
+            await LoadUsers();
+        }
+    }
+
+    private async Task SyncFromDevice()
+    {
+        var response = await Http.PostAsync($"{apiBaseUrl}/api/ZKTecoUser/device/{selectedDeviceId}/sync-from-device", null);
+        await JS.InvokeVoidAsync("alert", "Kullanıcılar cihazdan senkronize edildi!");
+        await LoadUsers();
+    }
+
+    private async Task Delete(int userId)
+    {
+        if (await JS.InvokeAsync<bool>("confirm", "Kullanıcıyı silmek istediğinize emin misiniz?"))
+        {
+            await Http.DeleteAsync($"{apiBaseUrl}/api/ZKTecoUser/{userId}");
+            await LoadUsers();
+        }
+    }
+}
