@@ -8,19 +8,19 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
 {
     /// <summary>
     /// ZKTeco Device yönetim servisi
-    /// Database (ZKTecoDevices) + ZKTecoApi kombinasyonu
+    /// Database (Devices) + ZKTecoApi kombinasyonu
     /// </summary>
-    public interface IZKTecoDeviceService
+    public interface IDeviceService
     {
         // ========== Database Operations (CRUD) ==========
 
-        Task<List<ZKTecoDevice>> GetAllDevicesAsync();
-        Task<ZKTecoDevice?> GetDeviceByIdAsync(int id);
-        Task<ZKTecoDevice?> GetDeviceByIpAsync(string ipAddress);
-        Task<ZKTecoDevice> CreateDeviceAsync(ZKTecoDevice device);
-        Task<ZKTecoDevice> UpdateDeviceAsync(ZKTecoDevice device);
+        Task<List<Device>> GetAllDevicesAsync();
+        Task<Device?> GetDeviceByIdAsync(int id);
+        Task<Device?> GetDeviceByIpAsync(string ipAddress);
+        Task<Device> CreateDeviceAsync(Device device);
+        Task<Device> UpdateDeviceAsync(Device device);
         Task<bool> DeleteDeviceAsync(int id);
-        Task<List<ZKTecoDevice>> GetActiveDevicesAsync();
+        Task<List<Device>> GetActiveDevicesAsync();
 
         // ========== Device Operations (API Calls) ==========
 

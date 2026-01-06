@@ -7,11 +7,11 @@ namespace SGKPortalApp.ApiLayer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ZKTecoDeviceController : ControllerBase
+    public class DeviceController : ControllerBase
     {
-        private readonly IZKTecoDeviceService _deviceService;
+        private readonly IDeviceService _deviceService;
 
-        public ZKTecoDeviceController(IZKTecoDeviceService deviceService)
+        public DeviceController(IDeviceService deviceService)
         {
             _deviceService = deviceService;
         }
@@ -39,14 +39,14 @@ namespace SGKPortalApp.ApiLayer.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ZKTecoDevice device)
+        public async Task<IActionResult> Create([FromBody] Device device)
         {
             var created = await _deviceService.CreateDeviceAsync(device);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ZKTecoDevice device)
+        public async Task<IActionResult> Update(int id, [FromBody] Device device)
         {
             device.Id = id;
             var updated = await _deviceService.UpdateDeviceAsync(device);

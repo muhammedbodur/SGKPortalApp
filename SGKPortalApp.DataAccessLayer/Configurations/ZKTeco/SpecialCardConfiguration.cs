@@ -4,11 +4,11 @@ using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 
 namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
 {
-    public class ZKTecoSpecialCardConfiguration : IEntityTypeConfiguration<ZKTecoSpecialCard>
+    public class SpecialCardConfiguration : IEntityTypeConfiguration<SpecialCard>
     {
         private const string TablePrefix = "ZKTeco_";
 
-        public void Configure(EntityTypeBuilder<ZKTecoSpecialCard> builder)
+        public void Configure(EntityTypeBuilder<SpecialCard> builder)
         {
             // Table
             builder.ToTable($"{TablePrefix}SpecialCard");

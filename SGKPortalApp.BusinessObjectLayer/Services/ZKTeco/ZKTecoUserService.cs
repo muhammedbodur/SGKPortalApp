@@ -14,13 +14,13 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
     {
         private readonly SGKDbContext _dbContext;
         private readonly IZKTecoApiClient _apiClient;
-        private readonly IZKTecoDeviceService _deviceService;
+        private readonly IDeviceService _deviceService;
         private readonly ILogger<ZKTecoUserService> _logger;
 
         public ZKTecoUserService(
             SGKDbContext dbContext,
             IZKTecoApiClient apiClient,
-            IZKTecoDeviceService deviceService,
+            IDeviceService deviceService,
             ILogger<ZKTecoUserService> logger)
         {
             _dbContext = dbContext;

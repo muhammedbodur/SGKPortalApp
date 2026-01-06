@@ -68,7 +68,7 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
         private async Task SyncAllDevicesAsync(CancellationToken cancellationToken)
         {
             using var scope = _serviceScopeFactory.CreateScope();
-            var deviceService = scope.ServiceProvider.GetRequiredService<IZKTecoDeviceService>();
+            var deviceService = scope.ServiceProvider.GetRequiredService<IDeviceService>();
             var attendanceService = scope.ServiceProvider.GetRequiredService<IZKTecoAttendanceService>();
 
             try

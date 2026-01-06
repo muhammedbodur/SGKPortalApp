@@ -9,7 +9,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
     /// Saatlik izin, vizite, görev kartı gibi kartlar için kullanılır
     /// Tablo adı: ZKTeco_SpecialCard (Configuration'da tanımlı)
     /// </summary>
-    public class ZKTecoSpecialCard
+    public class SpecialCard
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

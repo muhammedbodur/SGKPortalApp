@@ -9,7 +9,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
     /// PDKS.Net4.8 tbSgmInfos ile uyumlu
     /// Tablo adı: ZKTeco_Device (Configuration'da tanımlı)
     /// </summary>
-    public class ZKTecoDevice
+    public class Device
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

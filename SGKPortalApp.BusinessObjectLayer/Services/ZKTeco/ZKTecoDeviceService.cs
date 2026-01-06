@@ -10,16 +10,16 @@ using System.Threading.Tasks;
 
 namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
 {
-    public class ZKTecoDeviceService : IZKTecoDeviceService
+    public class DeviceService : IDeviceService
     {
         private readonly SGKDbContext _dbContext;
         private readonly IZKTecoApiClient _apiClient;
-        private readonly ILogger<ZKTecoDeviceService> _logger;
+        private readonly ILogger<DeviceService> _logger;
 
-        public ZKTecoDeviceService(
+        public DeviceService(
             SGKDbContext dbContext,
             IZKTecoApiClient apiClient,
-            ILogger<ZKTecoDeviceService> logger)
+            ILogger<DeviceService> logger)
         {
             _dbContext = dbContext;
             _apiClient = apiClient;
@@ -28,41 +28,41 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
 
         // ========== Database Operations ==========
 
-        public async Task<List<ZKTecoDevice>> GetAllDevicesAsync()
+        public async Task<List<Device>> GetAllDevicesAsync()
         {
-            return await _dbContext.ZKTecoDevices
+            return await _dbContext.Devices
                 .OrderBy(d => d.DeviceName)
                 .ToListAsync();
         }
 
-        public async Task<ZKTecoDevice?> GetDeviceByIdAsync(int id)
+        public async Task<Device?> GetDeviceByIdAsync(int id)
         {
-            return await _dbContext.ZKTecoDevices.FindAsync(id);
+            return await _dbContext.Devices.FindAsync(id);
         }
 
-        public async Task<ZKTecoDevice?> GetDeviceByIpAsync(string ipAddress)
+        public async Task<Device?> GetDeviceByIpAsync(string ipAddress)
         {
-            return await _dbContext.ZKTecoDevices
+            return await _dbContext.Devices
                 .FirstOrDefaultAsync(d => d.IpAddress == ipAddress);
         }
 
-        public async Task<ZKTecoDevice> CreateDeviceAsync(ZKTecoDevice device)
+        public async Task<Device> CreateDeviceAsync(Device device)
         {
             device.CreatedAt = DateTime.Now;
             device.UpdatedAt = DateTime.Now;
 
-            _dbContext.ZKTecoDevices.Add(device);
+            _dbContext.Devices.Add(device);
             await _dbContext.SaveChangesAsync();
 
             _logger.LogInformation($"Device created: {device.DeviceName} ({device.IpAddress})");
             return device;
         }
 
-        public async Task<ZKTecoDevice> UpdateDeviceAsync(ZKTecoDevice device)
+        public async Task<Device> UpdateDeviceAsync(Device device)
         {
             device.UpdatedAt = DateTime.Now;
 
-            _dbContext.ZKTecoDevices.Update(device);
+            _dbContext.Devices.Update(device);
             await _dbContext.SaveChangesAsync();
 
             _logger.LogInformation($"Device updated: {device.DeviceName} ({device.IpAddress})");
@@ -74,16 +74,16 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
             var device = await GetDeviceByIdAsync(id);
             if (device == null) return false;
 
-            _dbContext.ZKTecoDevices.Remove(device);
+            _dbContext.Devices.Remove(device);
             await _dbContext.SaveChangesAsync();
 
             _logger.LogInformation($"Device deleted: {device.DeviceName}");
             return true;
         }
 
-        public async Task<List<ZKTecoDevice>> GetActiveDevicesAsync()
+        public async Task<List<Device>> GetActiveDevicesAsync()
         {
-            return await _dbContext.ZKTecoDevices
+            return await _dbContext.Devices
                 .Where(d => d.IsActive)
                 .OrderBy(d => d.DeviceName)
                 .ToListAsync();

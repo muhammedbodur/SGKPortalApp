@@ -186,7 +186,7 @@ namespace SGKPortalApp.ApiLayer
             // ═══════════════════════════════════════════════════════
             // 🎯 ZKTeco BUSINESS SERVICES
             // ═══════════════════════════════════════════════════════
-            builder.Services.AddScoped<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IZKTecoDeviceService, SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoDeviceService>();
+            builder.Services.AddScoped<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IDeviceService, SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.DeviceService>();
             builder.Services.AddScoped<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IZKTecoUserService, SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoUserService>();
             builder.Services.AddScoped<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IZKTecoAttendanceService, SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoAttendanceService>();
 
