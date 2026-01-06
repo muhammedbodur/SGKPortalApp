@@ -186,7 +186,7 @@ namespace SGKPortalApp.ApiLayer
             // ═══════════════════════════════════════════════════════
             // 🎯 ZKTeco BUSINESS SERVICES
             // ═══════════════════════════════════════════════════════
-            builder.Services.AddScoped<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IDeviceService, SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.DeviceService>();
+            builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri.IDeviceBusinessService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.DeviceBusinessService>();
             builder.Services.AddScoped<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IZKTecoAttendanceService, SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoAttendanceService>();
 
             Console.WriteLine("🎯 ZKTeco Business Services yapılandırıldı");

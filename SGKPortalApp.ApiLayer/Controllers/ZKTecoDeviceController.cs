@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
-using SGKPortalApp.BusinessObjectLayer.Services.ZKTeco;
 using System.Threading.Tasks;
 
 namespace SGKPortalApp.ApiLayer.Controllers
@@ -9,9 +9,9 @@ namespace SGKPortalApp.ApiLayer.Controllers
     [Route("api/[controller]")]
     public class DeviceController : ControllerBase
     {
-        private readonly IDeviceService _deviceService;
+        private readonly IDeviceBusinessService _deviceService;
 
-        public DeviceController(IDeviceService deviceService)
+        public DeviceController(IDeviceBusinessService deviceService)
         {
             _deviceService = deviceService;
         }
