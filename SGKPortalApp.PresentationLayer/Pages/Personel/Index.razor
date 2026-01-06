@@ -128,6 +128,20 @@ else
                                 <option value="2">Emekli</option>
                             </select>
                         </div>
+
+                        <!-- ZKTeco Cihaz Filtresi -->
+                        <div class="col-md-2">
+                            <label class="form-label">
+                                <i class="bx bx-devices me-1"></i>PDKS Cihazı
+                            </label>
+                            <select class="form-select" value="@filterZKTecoDeviceId" @onchange="OnFilterDeviceChanged">
+                                <option value="0">Tüm Cihazlar</option>
+                                @foreach (var device in ZKTecoDevices)
+                                {
+                                    <option value="@device.Id">@device.DeviceName</option>
+                                }
+                            </select>
+                        </div>
                     </div>
 
                     <!-- İstatistikler -->
@@ -195,11 +209,42 @@ else
                     }
                     else
                     {
+                        <!-- Toplu İşlemler Toolbar -->
+                        @if (SelectedPersonelIds.Any())
+                        {
+                            <div class="alert alert-info d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <i class="bx bx-check-circle me-2"></i>
+                                    <strong>@SelectedPersonelIds.Count</strong> personel seçildi
+                                </div>
+                                <div class="btn-group">
+                                    @if (filterZKTecoDeviceId > 0)
+                                    {
+                                        <button class="btn btn-sm btn-primary" @onclick="SendSelectedToDevice">
+                                            <i class="bx bx-upload me-1"></i>Seçili Cihaza Gönder
+                                        </button>
+                                    }
+                                    <button class="btn btn-sm btn-success" @onclick="SendSelectedToAllDevices">
+                                        <i class="bx bx-devices me-1"></i>Tüm Cihazlara Gönder
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" @onclick="ClearSelection">
+                                        <i class="bx bx-x me-1"></i>Seçimi Temizle
+                                    </button>
+                                </div>
+                            </div>
+                        }
+
                         <!-- Table -->
                         <div class="table-container">
                             <table class="table table-hover table-sm">
                                 <thead>
                                     <tr>
+                                        <th style="width: 40px; padding: 0.5rem 0.25rem;">
+                                            <input type="checkbox"
+                                                   class="form-check-input"
+                                                   @onchange="ToggleSelectAll"
+                                                   checked="@IsAllSelected" />
+                                        </th>
                                         <th style="width: 40px; padding: 0.5rem 0.25rem;">#</th>
                                         <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByTc" @onclick:stopPropagation="true">
                                             TC Kimlik No
@@ -211,6 +256,9 @@ else
                                             @if (sortBy == "sicil-asc") { <i class="bx bx-chevron-up ms-1"></i> }
                                             else if (sortBy == "sicil-desc") { <i class="bx bx-chevron-down ms-1"></i> }
                                         </th>
+                                        <th style="padding: 0.5rem;">PDKS Kayıt No</th>
+                                        <th style="padding: 0.5rem;">Kart No</th>
+                                        <th style="padding: 0.5rem;">Son Gönderim</th>
                                         <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByName" @onclick:stopPropagation="true">
                                             Ad Soyad
                                             @if (sortBy == "name-asc") { <i class="bx bx-chevron-up ms-1"></i> }
@@ -249,11 +297,63 @@ else
                                     @foreach (var (personel, index) in FilteredPersoneller.Select((p, i) => (p, i)))
                                     {
                                         <tr style="@GetClickableRowStyle(ActionType.DETAIL)" @onclick="() => TryNavigateToDetail(personel.TcKimlikNo)">
+                                            <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;" @onclick:stopPropagation="true">
+                                                <input type="checkbox"
+                                                       class="form-check-input"
+                                                       checked="@SelectedPersonelIds.Contains(personel.TcKimlikNo)"
+                                                       @onchange="() => TogglePersonelSelection(personel.TcKimlikNo)" />
+                                            </td>
                                             <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@((CurrentPage - 1) * PageSize + index + 1)</td>
                                             <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
                                                 <span class="fw-medium">@personel.TcKimlikNo</span>
                                             </td>
                                             <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.SicilNo</td>
+                                            <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
+                                                <span class="badge bg-label-info">@personel.PersonelKayitNo</span>
+                                            </td>
+                                            <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
+                                                @if (personel.KartNo > 0)
+                                                {
+                                                    <span class="badge bg-label-primary">@personel.KartNo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted small">-</span>
+                                                }
+                                            </td>
+                                            <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
+                                                @if (personel.KartNoGonderimTarihi.HasValue)
+                                                {
+                                                    <div class="d-flex flex-column">
+                                                        <small class="text-muted">@personel.KartNoGonderimTarihi.Value.ToString("dd.MM.yyyy HH:mm")</small>
+                                                        @switch (personel.KartGonderimIslemBasari)
+                                                        {
+                                                            case IslemBasari.Basarili:
+                                                                <span class="badge bg-label-success" style="font-size: 0.7rem;">
+                                                                    <i class="bx bx-check-circle me-1"></i>Başarılı
+                                                                </span>
+                                                                break;
+                                                            case IslemBasari.Basarisiz:
+                                                                <span class="badge bg-label-danger" style="font-size: 0.7rem;">
+                                                                    <i class="bx bx-x-circle me-1"></i>Başarısız
+                                                                </span>
+                                                                break;
+                                                            case IslemBasari.Bekleniyor:
+                                                                <span class="badge bg-label-warning" style="font-size: 0.7rem;">
+                                                                    <i class="bx bx-time-five me-1"></i>Bekleniyor
+                                                                </span>
+                                                                break;
+                                                            default:
+                                                                <span class="badge bg-label-secondary" style="font-size: 0.7rem;">-</span>
+                                                                break;
+                                                        }
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted small">Hiç gönderilmedi</span>
+                                                }
+                                            </td>
                                             <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
                                                 <div class="d-flex align-items-center avatar-offline">
                                                     @if (!string.IsNullOrEmpty(personel.Resim))
@@ -318,6 +418,54 @@ else
                                                                   IsVisible="@IsActionVisible(ActionType.DELETE)"
                                                                   IsEnabled="@CanEditAction(ActionType.DELETE)"
                                                                   OnClick="() => OpenDeleteModal(personel)" />
+
+                                                    <!-- ZKTeco PDKS İşlemleri Dropdown -->
+                                                    <div class="btn-group" @onclick:stopPropagation="true">
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-outline-primary dropdown-toggle"
+                                                                data-bs-toggle="dropdown"
+                                                                aria-expanded="false"
+                                                                title="PDKS İşlemleri">
+                                                            <i class="bx bx-devices"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <li><h6 class="dropdown-header">Cihaza Gönder</h6></li>
+                                                            @if (filterZKTecoDeviceId > 0)
+                                                            {
+                                                                <li>
+                                                                    <a class="dropdown-item" href="javascript:void(0)" @onclick="() => SendToSelectedDevice(personel)">
+                                                                        <i class="bx bx-upload me-2"></i>Seçili Cihaza Gönder
+                                                                    </a>
+                                                                </li>
+                                                            }
+                                                            <li>
+                                                                <a class="dropdown-item" href="javascript:void(0)" @onclick="() => SendToAllDevices(personel)">
+                                                                    <i class="bx bx-devices me-2"></i>Tüm Cihazlara Gönder
+                                                                </a>
+                                                            </li>
+                                                            <li><hr class="dropdown-divider"></li>
+                                                            <li><h6 class="dropdown-header">Cihazdan Sil</h6></li>
+                                                            @if (filterZKTecoDeviceId > 0)
+                                                            {
+                                                                <li>
+                                                                    <a class="dropdown-item text-warning" href="javascript:void(0)" @onclick="() => DeleteFromSelectedDevice(personel)">
+                                                                        <i class="bx bx-trash me-2"></i>Seçili Cihazdan Sil
+                                                                    </a>
+                                                                </li>
+                                                            }
+                                                            <li>
+                                                                <a class="dropdown-item text-danger" href="javascript:void(0)" @onclick="() => DeleteFromAllDevices(personel)">
+                                                                    <i class="bx bx-trash-alt me-2"></i>Tüm Cihazlardan Sil
+                                                                </a>
+                                                            </li>
+                                                            <li><hr class="dropdown-divider"></li>
+                                                            <li>
+                                                                <a class="dropdown-item" href="javascript:void(0)" @onclick="() => EditCardNumber(personel)">
+                                                                    <i class="bx bx-edit me-2"></i>Kart No Düzenle
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -411,6 +559,58 @@ else
                             <span class="spinner-border spinner-border-sm me-1"></span>
                         }
                         Evet, Sil
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- EDIT CARD NUMBER MODAL -->
+<!-- ═══════════════════════════════════════════════════════ -->
+@if (ShowEditCardModal && EditingPersonel != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white">
+                        <i class="bx bx-credit-card me-2"></i>Kart No Düzenle
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseEditCardModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <div class="alert alert-info">
+                            <strong>@EditingPersonel.AdSoyad</strong>
+                            <br />
+                            <small class="text-muted">TC: @EditingPersonel.TcKimlikNo | Sicil: @EditingPersonel.SicilNo</small>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kart Numarası</label>
+                        <input type="number"
+                               class="form-control"
+                               @bind="EditCardNumberValue"
+                               placeholder="Kart numarasını giriniz"
+                               min="0" />
+                        <small class="text-muted">
+                            <i class="bx bx-info-circle me-1"></i>
+                            Mevcut Kart No: @EditingPersonel.KartNo
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" @onclick="CloseEditCardModal" disabled="@IsEditingCard">
+                        İptal
+                    </button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveCardNumber" disabled="@IsEditingCard">
+                        @if (IsEditingCard)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        <i class="bx bx-save me-1"></i>Kaydet
                     </button>
                 </div>
             </div>

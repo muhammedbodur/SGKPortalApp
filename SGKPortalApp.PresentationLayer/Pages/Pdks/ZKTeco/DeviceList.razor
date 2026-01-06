@@ -1,0 +1,267 @@
+@page "/pdks/zkteco/devices"
+@using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
+
+<PageTitle>ZKTeco Cihaz Yönetimi</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h3>📱 ZKTeco Cihaz Yönetimi</h3>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" @onclick="ToggleAddForm">
+                <i class="bx bx-plus"></i> @(showAddForm ? "Formu Kapat" : "Yeni Cihaz")
+            </button>
+        </div>
+    </div>
+
+    @if (showAddForm)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Yeni Cihaz Ekle</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label class="form-label">Cihaz Adı *</label>
+                        <input type="text" class="form-control" @bind="newDevice.DeviceName" placeholder="Ana Giriş Kapısı" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">IP Adresi *</label>
+                        <input type="text" class="form-control" @bind="newDevice.IpAddress" placeholder="192.168.1.100" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Port</label>
+                        <input type="text" class="form-control" @bind="newDevice.Port" placeholder="4370" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Cihaz Kodu</label>
+                        <input type="text" class="form-control" @bind="newDevice.DeviceCode" placeholder="DEV001" />
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">Aktif</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" @bind="newDevice.IsActive" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col">
+                        <button class="btn btn-success" @onclick="SaveDevice">
+                            <i class="bx bx-save"></i> Kaydet
+                        </button>
+                        <button class="btn btn-secondary ms-2" @onclick="ToggleAddForm">İptal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (devices == null)
+    {
+        <p><em>Yükleniyor...</em></p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover table-sm">
+                <thead>
+                    <tr>
+                        <th>Cihaz Adı</th>
+                        <th>IP:Port</th>
+                        <th>Durum</th>
+                        <th>Son Kontrol</th>
+                        <th style="min-width: 400px;">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var device in devices)
+                    {
+                        <tr>
+                            <td><strong>@device.DeviceName</strong></td>
+                            <td><code>@device.IpAddress:@device.Port</code></td>
+                            <td>
+                                <span class="badge @(device.IsActive ? "bg-success" : "bg-secondary")">
+                                    @(device.IsActive ? "Aktif" : "Pasif")
+                                </span>
+                            </td>
+                            <td><small>@device.LastHealthCheckTime?.ToString("dd.MM HH:mm")</small></td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button class="btn btn-outline-info" @onclick="() => TestConnection(device.Id)" title="Bağlantı Testi">
+                                        <i class="bx bx-wifi"></i>
+                                    </button>
+                                    <button class="btn btn-outline-warning" @onclick="() => GetStatus(device.Id)" title="Durum">
+                                        <i class="bx bx-info-circle"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" @onclick="() => GetDeviceTime(device.Id)" title="Cihaz Saati">
+                                        <i class="bx bx-time"></i>
+                                    </button>
+                                    <button class="btn btn-outline-primary" @onclick="() => SyncDeviceTime(device.Id)" title="Saati Senkronize Et">
+                                        <i class="bx bx-sync"></i>
+                                    </button>
+                                    <button class="btn btn-outline-success" @onclick="() => ShowDeviceUsers(device.Id)" title="Cihazdaki Personeller">
+                                        <i class="bx bx-group"></i>
+                                    </button>
+                                    <button class="btn btn-outline-primary" @onclick="() => OpenSendPersonelModal(device.Id)" title="Personel Gönder">
+                                        <i class="bx bx-user-plus"></i>
+                                    </button>
+                                    <button class="btn btn-outline-dark" @onclick="() => RestartDevice(device.Id)" title="Yeniden Başlat">
+                                        <i class="bx bx-revision"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger" @onclick="() => Delete(device.Id)" title="Sil">
+                                        <i class="bx bx-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SEND PERSONEL MODAL -->
+<!-- ═══════════════════════════════════════════════════════ -->
+@if (showSendPersonelModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white">
+                        <i class="bx bx-user-plus me-2"></i>Personel Gönder - @selectedDeviceName
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseSendPersonelModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (isLoadingPersonel)
+                    {
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Yükleniyor...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Personeller yükleniyor...</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Arama ve Toplu Seçim -->
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bx bx-search"></i>
+                                    </span>
+                                    <input type="text"
+                                           class="form-control"
+                                           placeholder="Ad, Sicil veya TC ile ara..."
+                                           @bind="personelSearchTerm"
+                                           @bind:event="oninput"
+                                           @onkeyup="FilterPersonel" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-primary w-100" @onclick="ToggleSelectAllPersonel">
+                                    <i class="bx @(IsAllPersonelSelected() ? "bx-checkbox-checked" : "bx-checkbox") me-1"></i>
+                                    @(IsAllPersonelSelected() ? "Tümünün Seçimini Kaldır" : "Tümünü Seç")
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Seçim Bilgisi -->
+                        @if (selectedPersonelIds.Any())
+                        {
+                            <div class="alert alert-info mb-3">
+                                <i class="bx bx-info-circle me-2"></i>
+                                <strong>@selectedPersonelIds.Count</strong> personel seçildi
+                            </div>
+                        }
+
+                        <!-- Personel Listesi -->
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-sm table-hover">
+                                <thead style="position: sticky; top: 0; background: white; z-index: 10;">
+                                    <tr>
+                                        <th style="width: 40px;">
+                                            <input type="checkbox"
+                                                   class="form-check-input"
+                                                   checked="@IsAllPersonelSelected()"
+                                                   @onchange="ToggleSelectAllPersonel" />
+                                        </th>
+                                        <th>Sicil No</th>
+                                        <th>TC Kimlik No</th>
+                                        <th>Ad Soyad</th>
+                                        <th>Departman</th>
+                                        <th>PDKS Kayıt No</th>
+                                        <th>Kart No</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (!filteredPersonelList.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">
+                                                <i class="bx bx-search-alt bx-lg"></i>
+                                                <p class="mb-0 mt-2">Personel bulunamadı</p>
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var personel in filteredPersonelList)
+                                        {
+                                            var isSelected = selectedPersonelIds.Contains(personel.TcKimlikNo);
+                                            <tr class="@(isSelected ? "table-active" : "")"
+                                                style="cursor: pointer;"
+                                                @onclick="() => TogglePersonelSelection(personel.TcKimlikNo)">
+                                                <td>
+                                                    <input type="checkbox"
+                                                           class="form-check-input"
+                                                           checked="@isSelected"
+                                                           @onclick:stopPropagation="true"
+                                                           @onchange="() => TogglePersonelSelection(personel.TcKimlikNo)" />
+                                                </td>
+                                                <td><span class="badge bg-label-secondary">@personel.SicilNo</span></td>
+                                                <td><small>@personel.TcKimlikNo</small></td>
+                                                <td><strong>@personel.AdSoyad</strong></td>
+                                                <td><small class="text-muted">@personel.DepartmanAdi</small></td>
+                                                <td><span class="badge bg-label-info">@personel.PersonelKayitNo</span></td>
+                                                <td>
+                                                    @if (personel.KartNo > 0)
+                                                    {
+                                                        <span class="badge bg-label-primary">@personel.KartNo</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">-</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" @onclick="CloseSendPersonelModal" disabled="@isSendingPersonel">
+                        İptal
+                    </button>
+                    <button type="button"
+                            class="btn btn-primary"
+                            @onclick="SendSelectedPersonelToDevice"
+                            disabled="@(!selectedPersonelIds.Any() || isSendingPersonel)">
+                        @if (isSendingPersonel)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        <i class="bx bx-send me-1"></i>Seçili Personelleri Gönder (@selectedPersonelIds.Count)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

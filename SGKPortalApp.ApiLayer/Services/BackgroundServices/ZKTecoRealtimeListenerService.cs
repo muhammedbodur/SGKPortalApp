@@ -94,7 +94,7 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                 var dbContext = scope.ServiceProvider.GetRequiredService<SGKDbContext>();
                 var apiClient = scope.ServiceProvider.GetRequiredService<IZKTecoApiClient>();
 
-                var activeDevices = await dbContext.ZKTecoDevices
+                var activeDevices = await dbContext.Devices
                     .Where(d => d.IsActive)
                     .ToListAsync();
 
@@ -242,7 +242,7 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                 var dbContext = scope.ServiceProvider.GetRequiredService<SGKDbContext>();
                 var apiClient = scope.ServiceProvider.GetRequiredService<IZKTecoApiClient>();
 
-                var activeDevices = await dbContext.ZKTecoDevices
+                var activeDevices = await dbContext.Devices
                     .Where(d => d.IsActive)
                     .ToListAsync(cancellationToken);
 

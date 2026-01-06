@@ -385,6 +385,28 @@
                             <div>Realtime İzleme</div>
                         </a>
                     </li>
+
+                    <li class="menu-header small text-uppercase"><span class="menu-header-text">ZKTeco</span></li>
+
+                    <li class="menu-item @(IsActive("/pdks/zkteco/devices") ? "active" : "")">
+                        <a href="/pdks/zkteco/devices" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-devices"></i>
+                            <div>Cihaz Yönetimi</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(IsActive("/pdks/zkteco/users") ? "active" : "")">
+                        <a href="/pdks/zkteco/users" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-user"></i>
+                            <div>Kullanıcı Yönetimi</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(IsActive("/pdks/zkteco/attendance") ? "active" : "")">
+                        <a href="/pdks/zkteco/attendance" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-list-ul"></i>
+                            <div>Kayıt Listesi</div>
+                        </a>
+                    </li>
+
                     <li class="menu-item @(IsSectionActive("/pdks/izin") ? "active open" : "")">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <div>İzin Yönetimi</div>

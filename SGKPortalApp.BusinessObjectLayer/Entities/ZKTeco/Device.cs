@@ -7,10 +7,9 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
     /// <summary>
     /// ZKTeco cihaz bilgileri
     /// PDKS.Net4.8 tbSgmInfos ile uyumlu
-    /// Tablo adı: ZKTeco_Device
+    /// Tablo adı: ZKTeco_Device (Configuration'da tanımlı)
     /// </summary>
-    [Table("ZKTeco_Device")]
-    public class ZKTecoDevice
+    public class Device
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -57,6 +56,18 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         /// PDKS.Net4.8: aktif
         /// </summary>
         public bool IsActive { get; set; } = true;
+
+        /// <summary>
+        /// Hizmet Binası ID (FK)
+        /// Cihazın hangi hizmet binasında olduğu
+        /// </summary>
+        public int? HizmetBinasiId { get; set; }
+
+        /// <summary>
+        /// Navigation property - İlişkili hizmet binası
+        /// </summary>
+        [ForeignKey("HizmetBinasiId")]
+        public virtual Common.HizmetBinasi? HizmetBinasi { get; set; }
 
         // ========== Son İşlem Bilgileri (Attendance çekme) ==========
 

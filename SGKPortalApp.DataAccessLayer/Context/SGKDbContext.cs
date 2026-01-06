@@ -74,7 +74,8 @@ namespace SGKPortalApp.DataAccessLayer.Context
         #endregion
 
         #region ZKTeco
-        public DbSet<ZKTecoDevice> ZKTecoDevices { get; set; }
+        public DbSet<Device> Devices { get; set; }
+        public DbSet<SpecialCard> SpecialCards { get; set; }
         public DbSet<CekilenData> CekilenDatalar { get; set; }
         #endregion
 
@@ -142,7 +143,8 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.ApplyConfiguration(new SignalREventLogConfiguration());
 
             // ZKTeco
-            modelBuilder.ApplyConfiguration(new ZKTecoDeviceConfiguration());
+            modelBuilder.ApplyConfiguration(new DeviceConfiguration());
+            modelBuilder.ApplyConfiguration(new SpecialCardConfiguration());
             modelBuilder.ApplyConfiguration(new CekilenDataConfiguration());
         }
         #endregion

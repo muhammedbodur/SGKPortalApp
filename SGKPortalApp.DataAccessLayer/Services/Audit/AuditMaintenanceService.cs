@@ -47,30 +47,43 @@ namespace SGKPortalApp.DataAccessLayer.Services.Audit
 
             _logger.LogInformation("Audit maintenance service started");
 
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                try
+                while (!stoppingToken.IsCancellationRequested)
                 {
-                    // Hedef çalışma saatini hesapla
-                    var targetTime = CalculateNextRunTime();
-                    var delay = targetTime - DateTime.Now;
-
-                    if (delay.TotalMilliseconds > 0)
+                    try
                     {
-                        _logger.LogInformation("Next maintenance run scheduled at {TargetTime}", targetTime);
-                        await Task.Delay(delay, stoppingToken);
+                        // Hedef çalışma saatini hesapla
+                        var targetTime = CalculateNextRunTime();
+                        var delay = targetTime - DateTime.Now;
+
+                        if (delay.TotalMilliseconds > 0)
+                        {
+                            _logger.LogInformation("Next maintenance run scheduled at {TargetTime}", targetTime);
+                            await Task.Delay(delay, stoppingToken);
+                        }
+
+                        // Maintenance işlemlerini çalıştır
+                        await RunMaintenanceAsync(stoppingToken);
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException)
+                    {
+                        _logger.LogError(ex, "Error in audit maintenance service");
                     }
 
-                    // Maintenance işlemlerini çalıştır
-                    await RunMaintenanceAsync(stoppingToken);
+                    // Bir sonraki güne kadar bekle
+                    await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error in audit maintenance service");
-                }
-
-                // Bir sonraki güne kadar bekle
-                await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+            }
+            catch (OperationCanceledException)
+            {
+                // Uygulama kapanıyor, normal durum
+                _logger.LogInformation("Audit maintenance service stopped (shutdown signal)");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Critical error in audit maintenance service");
+                throw; // Kritik hatalar için rethrow
             }
 
             _logger.LogInformation("Audit maintenance service stopped");

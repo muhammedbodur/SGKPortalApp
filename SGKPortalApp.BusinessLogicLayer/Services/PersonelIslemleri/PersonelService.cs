@@ -440,6 +440,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
                     // 1. Personel kaydet
                     var personel = _mapper.Map<Personel>(request.Personel);
+
+                    // PersonelKayitNo otomatik arttırım (ZKTeco PDKS için)
+                    if (personel.PersonelKayitNo == 0)
+                    {
+                        var maxKayitNo = await _unitOfWork.Repository<Personel>()
+                            .GetQueryable()
+                            .MaxAsync(p => (int?)p.PersonelKayitNo) ?? 0;
+                        personel.PersonelKayitNo = maxKayitNo + 1;
+
+                        _logger.LogInformation(
+                            "PersonelKayitNo otomatik atandı: {PersonelKayitNo} (TC: {TcKimlikNo})",
+                            personel.PersonelKayitNo, personel.TcKimlikNo);
+                    }
+
                     await _unitOfWork.Repository<Personel>().AddAsync(personel);
                     await _unitOfWork.SaveChangesAsync();
 

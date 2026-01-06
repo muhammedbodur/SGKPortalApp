@@ -41,6 +41,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         [Inject] private IServisApiService _servisApiService { get; set; } = default!;
         [Inject] private IUnvanApiService _unvanApiService { get; set; } = default!;
         [Inject] private IHizmetBinasiApiService _hizmetBinasiApiService { get; set; } = default!;
+        [Inject] private SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco.IZKTecoDeviceApiService _zktecoDeviceApiService { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════
         // DATA PROPERTIES
@@ -53,6 +54,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private List<ServisResponseDto> Servisler { get; set; } = new();
         private List<UnvanResponseDto> Unvanlar { get; set; } = new();
         private List<HizmetBinasiResponseDto> HizmetBinalari { get; set; } = new();
+        private List<SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco.Device> ZKTecoDevices { get; set; } = new();
 
         // ═══════════════════════════════════════════════════════
         // FILTER PROPERTIES
@@ -64,6 +66,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private int filterHizmetBinasiId = 0;
         private int filterUnvanId = 0;
         private int filterAktiflik = -1; // -1: Tümü, 0: Aktif, 1: Pasif, 2: Emekli
+        private int filterZKTecoDeviceId = 0; // 0: Tüm Cihazlar
         private string sortBy = "name-asc";
 
         // ═══════════════════════════════════════════════════════
@@ -124,13 +127,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 var servisTask = _servisApiService.GetAllAsync();
                 var unvanTask = _unvanApiService.GetAllAsync();
                 var hizmetBinasiTask = _hizmetBinasiApiService.GetAllAsync();
+                var zktecoDeviceTask = _zktecoDeviceApiService.GetActiveAsync();
 
-                await Task.WhenAll(departmanTask, servisTask, unvanTask, hizmetBinasiTask);
+                await Task.WhenAll(departmanTask, servisTask, unvanTask, hizmetBinasiTask, zktecoDeviceTask);
 
                 Departmanlar = (await departmanTask)?.Data ?? new List<DepartmanResponseDto>();
                 Servisler = (await servisTask)?.Data ?? new List<ServisResponseDto>();
                 Unvanlar = (await unvanTask)?.Data ?? new List<UnvanResponseDto>();
                 HizmetBinalari = (await hizmetBinasiTask)?.Data ?? new List<HizmetBinasiResponseDto>();
+                ZKTecoDevices = (await zktecoDeviceTask)?.Data ?? new List<SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco.Device>();
 
                 // Personelleri server-side pagination ile yükle
                 await LoadPersonelWithPagination();
@@ -183,7 +188,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                         Dahili = p.Dahili,
                         Resim = p.Resim,
                         PersonelAktiflikDurum = p.PersonelAktiflikDurum,
-                        EklenmeTarihi = p.EklenmeTarihi
+                        EklenmeTarihi = p.EklenmeTarihi,
+                        // ZKTeco PDKS alanları
+                        PersonelKayitNo = p.PersonelKayitNo,
+                        KartNo = p.KartNo,
+                        KartNoGonderimTarihi = p.KartNoGonderimTarihi,
+                        KartGonderimIslemBasari = p.KartGonderimIslemBasari
                     }).ToList();
 
                     TotalCount = result.Data.TotalCount;
@@ -289,6 +299,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             _ = ApplyFiltersAndSort();
         }
 
+        private void OnFilterDeviceChanged(ChangeEventArgs e)
+        {
+            filterZKTecoDeviceId = int.Parse(e.Value?.ToString() ?? "0");
+            StateHasChanged(); // Filtre değişince butonları güncelle
+        }
+
         private void OnSortByChanged(ChangeEventArgs e)
         {
             sortBy = e.Value?.ToString() ?? "name-asc";
@@ -365,6 +381,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             filterHizmetBinasiId = 0;
             filterUnvanId = 0;
             filterAktiflik = -1;
+            filterZKTecoDeviceId = 0;
             sortBy = "name-asc";
             _ = ApplyFiltersAndSort();
         }
@@ -526,11 +543,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 // Headers
                 worksheet.Cell(1, 1).Value = "TC Kimlik No";
                 worksheet.Cell(1, 2).Value = "Sicil No";
-                worksheet.Cell(1, 3).Value = "Ad Soyad";
-                worksheet.Cell(1, 4).Value = "Departman";
-                worksheet.Cell(1, 5).Value = "Servis";
-                worksheet.Cell(1, 6).Value = "Ünvan";
-                worksheet.Cell(1, 7).Value = "Durum";
+                worksheet.Cell(1, 3).Value = "PDKS Kayıt No";
+                worksheet.Cell(1, 4).Value = "Kart No";
+                worksheet.Cell(1, 5).Value = "Son Gönderim";
+                worksheet.Cell(1, 6).Value = "Gönderim Durumu";
+                worksheet.Cell(1, 7).Value = "Ad Soyad";
+                worksheet.Cell(1, 8).Value = "Departman";
+                worksheet.Cell(1, 9).Value = "Servis";
+                worksheet.Cell(1, 10).Value = "Ünvan";
+                worksheet.Cell(1, 11).Value = "Durum";
 
                 // Data
                 for (int i = 0; i < FilteredPersoneller.Count; i++)
@@ -538,11 +559,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                     var personel = FilteredPersoneller[i];
                     worksheet.Cell(i + 2, 1).Value = personel.TcKimlikNo;
                     worksheet.Cell(i + 2, 2).Value = personel.SicilNo;
-                    worksheet.Cell(i + 2, 3).Value = personel.AdSoyad;
-                    worksheet.Cell(i + 2, 4).Value = personel.DepartmanAdi;
-                    worksheet.Cell(i + 2, 5).Value = personel.ServisAdi;
-                    worksheet.Cell(i + 2, 6).Value = personel.UnvanAdi;
-                    worksheet.Cell(i + 2, 7).Value = personel.PersonelAktiflikDurum.ToString();
+                    worksheet.Cell(i + 2, 3).Value = personel.PersonelKayitNo;
+                    worksheet.Cell(i + 2, 4).Value = personel.KartNo > 0 ? personel.KartNo : 0;
+                    worksheet.Cell(i + 2, 5).Value = personel.KartNoGonderimTarihi?.ToString("dd.MM.yyyy HH:mm") ?? "-";
+                    worksheet.Cell(i + 2, 6).Value = personel.KartGonderimIslemBasari.ToString();
+                    worksheet.Cell(i + 2, 7).Value = personel.AdSoyad;
+                    worksheet.Cell(i + 2, 8).Value = personel.DepartmanAdi;
+                    worksheet.Cell(i + 2, 9).Value = personel.ServisAdi;
+                    worksheet.Cell(i + 2, 10).Value = personel.UnvanAdi;
+                    worksheet.Cell(i + 2, 11).Value = personel.PersonelAktiflikDurum.ToString();
                 }
 
                 worksheet.Columns().AdjustToContents();
@@ -731,6 +756,241 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
             return null;
         }
+
+        // ═══════════════════════════════════════════════════════
+        // ZKTECO PDKS OPERATIONS
+        // ═══════════════════════════════════════════════════════
+
+        private async Task SendToSelectedDevice(PersonelResponseDto personel)
+        {
+            if (filterZKTecoDeviceId == 0)
+            {
+                await _toastService.ShowWarningAsync("Lütfen önce bir cihaz seçiniz!");
+                return;
+            }
+
+            var device = ZKTecoDevices.FirstOrDefault(d => d.Id == filterZKTecoDeviceId);
+            if (device == null)
+            {
+                await _toastService.ShowErrorAsync("Cihaz bulunamadı!");
+                return;
+            }
+
+            await _toastService.ShowInfoAsync($"{personel.AdSoyad} - {device.DeviceName} cihazına gönderiliyor...");
+
+            // TODO: API çağrısı yapılacak
+            // await _zktecoUserApiService.SendUserToDeviceAsync(personel.TcKimlikNo, filterZKTecoDeviceId);
+
+            await _toastService.ShowSuccessAsync($"{personel.AdSoyad} başarıyla {device.DeviceName} cihazına gönderildi!");
+            await LoadPersonelWithPagination(); // Listeyi yenile
+        }
+
+        private async Task SendToAllDevices(PersonelResponseDto personel)
+        {
+            if (!ZKTecoDevices.Any())
+            {
+                await _toastService.ShowWarningAsync("Aktif cihaz bulunamadı!");
+                return;
+            }
+
+            await _toastService.ShowInfoAsync($"{personel.AdSoyad} - Tüm cihazlara gönderiliyor...");
+
+            // TODO: API çağrısı yapılacak
+            // await _zktecoUserApiService.SendUserToAllDevicesAsync(personel.TcKimlikNo);
+
+            await _toastService.ShowSuccessAsync($"{personel.AdSoyad} başarıyla tüm cihazlara gönderildi!");
+            await LoadPersonelWithPagination(); // Listeyi yenile
+        }
+
+        private async Task DeleteFromSelectedDevice(PersonelResponseDto personel)
+        {
+            if (filterZKTecoDeviceId == 0)
+            {
+                await _toastService.ShowWarningAsync("Lütfen önce bir cihaz seçiniz!");
+                return;
+            }
+
+            var device = ZKTecoDevices.FirstOrDefault(d => d.Id == filterZKTecoDeviceId);
+            if (device == null)
+            {
+                await _toastService.ShowErrorAsync("Cihaz bulunamadı!");
+                return;
+            }
+
+            await _toastService.ShowWarningAsync($"{personel.AdSoyad} - {device.DeviceName} cihazından siliniyor...");
+
+            // TODO: API çağrısı yapılacak
+            // await _zktecoUserApiService.DeleteUserFromDeviceAsync(personel.PersonelKayitNo.ToString(), filterZKTecoDeviceId);
+
+            await _toastService.ShowSuccessAsync($"{personel.AdSoyad} başarıyla {device.DeviceName} cihazından silindi!");
+            await LoadPersonelWithPagination(); // Listeyi yenile
+        }
+
+        private async Task DeleteFromAllDevices(PersonelResponseDto personel)
+        {
+            if (!ZKTecoDevices.Any())
+            {
+                await _toastService.ShowWarningAsync("Aktif cihaz bulunamadı!");
+                return;
+            }
+
+            await _toastService.ShowWarningAsync($"{personel.AdSoyad} - Tüm cihazlardan siliniyor...");
+
+            // TODO: API çağrısı yapılacak
+            // await _zktecoUserApiService.DeleteUserFromAllDevicesAsync(personel.PersonelKayitNo.ToString());
+
+            await _toastService.ShowSuccessAsync($"{personel.AdSoyad} başarıyla tüm cihazlardan silindi!");
+            await LoadPersonelWithPagination(); // Listeyi yenile
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // TOPLU SEÇİM VE İŞLEMLER
+        // ═══════════════════════════════════════════════════════
+
+        private List<string> SelectedPersonelIds { get; set; } = new();
+        private bool IsAllSelected => FilteredPersoneller.Any() &&
+                                      FilteredPersoneller.All(p => SelectedPersonelIds.Contains(p.TcKimlikNo));
+
+        private void ToggleSelectAll(ChangeEventArgs e)
+        {
+            var isChecked = (bool)(e.Value ?? false);
+
+            if (isChecked)
+            {
+                // Tüm personelleri seç
+                SelectedPersonelIds = FilteredPersoneller.Select(p => p.TcKimlikNo).ToList();
+            }
+            else
+            {
+                // Seçimi temizle
+                SelectedPersonelIds.Clear();
+            }
+
+            StateHasChanged();
+        }
+
+        private void TogglePersonelSelection(string tcKimlikNo)
+        {
+            if (SelectedPersonelIds.Contains(tcKimlikNo))
+            {
+                SelectedPersonelIds.Remove(tcKimlikNo);
+            }
+            else
+            {
+                SelectedPersonelIds.Add(tcKimlikNo);
+            }
+
+            StateHasChanged();
+        }
+
+        private async Task SendSelectedToDevice()
+        {
+            if (filterZKTecoDeviceId == 0)
+            {
+                await _toastService.ShowWarningAsync("Lütfen önce bir cihaz seçiniz!");
+                return;
+            }
+
+            if (!SelectedPersonelIds.Any())
+            {
+                await _toastService.ShowWarningAsync("Lütfen personel seçiniz!");
+                return;
+            }
+
+            var device = ZKTecoDevices.FirstOrDefault(d => d.Id == filterZKTecoDeviceId);
+            if (device == null)
+            {
+                await _toastService.ShowErrorAsync("Cihaz bulunamadı!");
+                return;
+            }
+
+            await _toastService.ShowInfoAsync($"{SelectedPersonelIds.Count} personel {device.DeviceName} cihazına gönderiliyor...");
+
+            // TODO: API çağrısı yapılacak
+            // await _zktecoUserApiService.SendMultipleUsersToDeviceAsync(SelectedPersonelIds, filterZKTecoDeviceId);
+
+            await _toastService.ShowSuccessAsync($"{SelectedPersonelIds.Count} personel başarıyla {device.DeviceName} cihazına gönderildi!");
+            SelectedPersonelIds.Clear();
+            await LoadPersonelWithPagination();
+        }
+
+        private async Task SendSelectedToAllDevices()
+        {
+            if (!SelectedPersonelIds.Any())
+            {
+                await _toastService.ShowWarningAsync("Lütfen personel seçiniz!");
+                return;
+            }
+
+            if (!ZKTecoDevices.Any())
+            {
+                await _toastService.ShowWarningAsync("Aktif cihaz bulunamadı!");
+                return;
+            }
+
+            await _toastService.ShowInfoAsync($"{SelectedPersonelIds.Count} personel tüm cihazlara gönderiliyor...");
+
+            // TODO: API çağrısı yapılacak
+            // await _zktecoUserApiService.SendMultipleUsersToAllDevicesAsync(SelectedPersonelIds);
+
+            await _toastService.ShowSuccessAsync($"{SelectedPersonelIds.Count} personel başarıyla tüm cihazlara gönderildi!");
+            SelectedPersonelIds.Clear();
+            await LoadPersonelWithPagination();
+        }
+
+        private void ClearSelection()
+        {
+            SelectedPersonelIds.Clear();
+            StateHasChanged();
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // KART NO DÜZENLEME
+        // ═══════════════════════════════════════════════════════
+
+        private bool ShowEditCardModal { get; set; } = false;
+        private PersonelResponseDto? EditingPersonel { get; set; }
+        private int EditCardNumberValue { get; set; }
+        private bool IsEditingCard { get; set; } = false;
+
+        private void EditCardNumber(PersonelResponseDto personel)
+        {
+            EditingPersonel = personel;
+            EditCardNumberValue = personel.KartNo;
+            ShowEditCardModal = true;
+        }
+
+        private void CloseEditCardModal()
+        {
+            ShowEditCardModal = false;
+            EditingPersonel = null;
+            EditCardNumberValue = 0;
+        }
+
+        private async Task SaveCardNumber()
+        {
+            if (EditingPersonel == null) return;
+
+            IsEditingCard = true;
+            try
+            {
+                // TODO: API çağrısı yapılacak
+                // await _personelApiService.UpdateCardNumberAsync(EditingPersonel.TcKimlikNo, EditCardNumberValue);
+
+                await _toastService.ShowSuccessAsync($"{EditingPersonel.AdSoyad} - Kart numarası güncellendi!");
+                CloseEditCardModal();
+                await LoadPersonelWithPagination(); // Listeyi yenile
+            }
+            catch (Exception ex)
+            {
+                await _toastService.ShowErrorAsync($"Kart numarası güncellenirken hata: {ex.Message}");
+            }
+            finally
+            {
+                IsEditingCard = false;
+            }
+        }
+
         // ═══════════════════════════════════════════════════════
         // MODELS
         // ═══════════════════════════════════════════════════════

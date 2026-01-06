@@ -4,12 +4,15 @@ using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 
 namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
 {
-    public class ZKTecoDeviceConfiguration : IEntityTypeConfiguration<ZKTecoDevice>
+    public class DeviceConfiguration : IEntityTypeConfiguration<Device>
     {
-        public void Configure(EntityTypeBuilder<ZKTecoDevice> builder)
+        private const string TablePrefix = "ZKTeco_";
+        private const string IndexPrefix = "IX_ZKTeco_";
+
+        public void Configure(EntityTypeBuilder<Device> builder)
         {
             // Table
-            builder.ToTable("ZKTeco_Device");
+            builder.ToTable($"{TablePrefix}Device");
 
             // Primary Key
             builder.HasKey(d => d.Id);
@@ -38,17 +41,23 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
             builder.Property(d => d.IsActive)
                    .HasDefaultValue(true);
 
+            // Relationships
+            builder.HasOne(d => d.HizmetBinasi)
+                   .WithMany()
+                   .HasForeignKey(d => d.HizmetBinasiId)
+                   .OnDelete(DeleteBehavior.SetNull);
+
             // Indexes
             builder.HasIndex(d => d.IpAddress)
-                   .HasDatabaseName("IX_ZKTecoDevice_IpAddress");
+                   .HasDatabaseName($"{IndexPrefix}Device_IpAddress");
 
             builder.HasIndex(d => d.DeviceCode)
                    .IsUnique()
                    .HasFilter("[DeviceCode] IS NOT NULL")
-                   .HasDatabaseName("IX_ZKTecoDevice_DeviceCode");
+                   .HasDatabaseName($"{IndexPrefix}Device_DeviceCode");
 
             builder.HasIndex(d => d.IsActive)
-                   .HasDatabaseName("IX_ZKTecoDevice_IsActive");
+                   .HasDatabaseName($"{IndexPrefix}Device_IsActive");
         }
     }
 }

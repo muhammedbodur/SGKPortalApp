@@ -32,22 +32,35 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
             _logger.LogInformation("🚀 IdleSessionCleanupService başlatıldı - Interval: {Interval} dakika, Timeout: {Timeout} dakika",
                 _checkInterval.TotalMinutes, _idleTimeout.TotalMinutes);
 
-            // İlk çalışmadan önce 1 dakika bekle (startup sırasında yük olmaması için)
-            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
-
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                try
-                {
-                    await CleanupIdleSessionsAsync(stoppingToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "❌ Idle session cleanup sırasında hata oluştu");
-                }
+                // İlk çalışmadan önce 1 dakika bekle (startup sırasında yük olmaması için)
+                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
 
-                // Bir sonraki çalışmaya kadar bekle
-                await Task.Delay(_checkInterval, stoppingToken);
+                while (!stoppingToken.IsCancellationRequested)
+                {
+                    try
+                    {
+                        await CleanupIdleSessionsAsync(stoppingToken);
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException)
+                    {
+                        _logger.LogError(ex, "❌ Idle session cleanup sırasında hata oluştu");
+                    }
+
+                    // Bir sonraki çalışmaya kadar bekle
+                    await Task.Delay(_checkInterval, stoppingToken);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Uygulama kapanıyor, normal durum
+                _logger.LogInformation("⏹️ IdleSessionCleanupService durduruldu (shutdown signal)");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ IdleSessionCleanupService kritik hata");
+                throw; // Kritik hatalar için rethrow
             }
 
             _logger.LogInformation("⏹️ IdleSessionCleanupService durduruldu");

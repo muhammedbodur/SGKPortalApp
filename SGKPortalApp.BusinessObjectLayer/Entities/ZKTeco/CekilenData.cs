@@ -8,9 +8,8 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
     /// <summary>
     /// ZKTeco cihazından çekilen ham attendance data
     /// PDKS.Net4.8 tbCekilenData ile uyumlu
-    /// Tablo adı: ZKTeco_CekilenData
+    /// Tablo adı: ZKTeco_CekilenData (Configuration'da tanımlı)
     /// </summary>
-    [Table("ZKTeco_CekilenData")]
     public class CekilenData : BaseEntity
     {
         [Key]
@@ -84,7 +83,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         public string? CihazAdi { get; set; }
 
         /// <summary>
-        /// Cihaz ID (ZKTecoDevice foreign key)
+        /// Cihaz ID (Device foreign key)
         /// PDKS.Net4.8: sgm_id
         /// </summary>
         public int? DeviceId { get; set; }
@@ -122,6 +121,6 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         /// <summary>
         /// İlişkili cihaz
         /// </summary>
-        public virtual ZKTecoDevice? Device { get; set; }
+        public virtual Device? Device { get; set; }
     }
 }

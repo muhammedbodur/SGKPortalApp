@@ -184,6 +184,15 @@ namespace SGKPortalApp.ApiLayer
             Console.WriteLine($"🔄 ZKTeco Realtime Service yapılandırıldı: {zkTecoSignalRUrl}");
 
             // ═══════════════════════════════════════════════════════
+            // 🎯 ZKTeco BUSINESS SERVICES
+            // ═══════════════════════════════════════════════════════
+            builder.Services.AddScoped<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IDeviceService, SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.DeviceService>();
+            builder.Services.AddScoped<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IZKTecoUserService, SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoUserService>();
+            builder.Services.AddScoped<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IZKTecoAttendanceService, SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoAttendanceService>();
+
+            Console.WriteLine("🎯 ZKTeco Business Services yapılandırıldı");
+
+            // ═══════════════════════════════════════════════════════
             // 📡 SIGNALR SERVİSLERİ
             // ═══════════════════════════════════════════════════════
             builder.Services.AddSignalR(options =>
@@ -205,6 +214,7 @@ namespace SGKPortalApp.ApiLayer
             builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.SessionCleanupService>();
             builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.IdleSessionCleanupService>(); // 30 dakika idle timeout
             builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService>(); // ZKTeco realtime event listener
+            builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.AttendanceSyncBackgroundService>(); // ZKTeco attendance periodic sync
 
             // ═══════════════════════════════════════════════════════
             // 🔧 AUTOMAPPER
