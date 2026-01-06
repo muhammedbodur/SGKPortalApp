@@ -756,6 +756,140 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
             return null;
         }
+
+        // ═══════════════════════════════════════════════════════
+        // ZKTECO PDKS OPERATIONS
+        // ═══════════════════════════════════════════════════════
+
+        private async Task SendToSelectedDevice(PersonelResponseDto personel)
+        {
+            if (filterZKTecoDeviceId == 0)
+            {
+                await _toastService.ShowWarningAsync("Lütfen önce bir cihaz seçiniz!");
+                return;
+            }
+
+            var device = ZKTecoDevices.FirstOrDefault(d => d.Id == filterZKTecoDeviceId);
+            if (device == null)
+            {
+                await _toastService.ShowErrorAsync("Cihaz bulunamadı!");
+                return;
+            }
+
+            await _toastService.ShowInfoAsync($"{personel.AdSoyad} - {device.DeviceName} cihazına gönderiliyor...");
+
+            // TODO: API çağrısı yapılacak
+            // await _zktecoUserApiService.SendUserToDeviceAsync(personel.TcKimlikNo, filterZKTecoDeviceId);
+
+            await _toastService.ShowSuccessAsync($"{personel.AdSoyad} başarıyla {device.DeviceName} cihazına gönderildi!");
+            await LoadPersonelWithPagination(); // Listeyi yenile
+        }
+
+        private async Task SendToAllDevices(PersonelResponseDto personel)
+        {
+            if (!ZKTecoDevices.Any())
+            {
+                await _toastService.ShowWarningAsync("Aktif cihaz bulunamadı!");
+                return;
+            }
+
+            await _toastService.ShowInfoAsync($"{personel.AdSoyad} - Tüm cihazlara gönderiliyor...");
+
+            // TODO: API çağrısı yapılacak
+            // await _zktecoUserApiService.SendUserToAllDevicesAsync(personel.TcKimlikNo);
+
+            await _toastService.ShowSuccessAsync($"{personel.AdSoyad} başarıyla tüm cihazlara gönderildi!");
+            await LoadPersonelWithPagination(); // Listeyi yenile
+        }
+
+        private async Task DeleteFromSelectedDevice(PersonelResponseDto personel)
+        {
+            if (filterZKTecoDeviceId == 0)
+            {
+                await _toastService.ShowWarningAsync("Lütfen önce bir cihaz seçiniz!");
+                return;
+            }
+
+            var device = ZKTecoDevices.FirstOrDefault(d => d.Id == filterZKTecoDeviceId);
+            if (device == null)
+            {
+                await _toastService.ShowErrorAsync("Cihaz bulunamadı!");
+                return;
+            }
+
+            await _toastService.ShowWarningAsync($"{personel.AdSoyad} - {device.DeviceName} cihazından siliniyor...");
+
+            // TODO: API çağrısı yapılacak
+            // await _zktecoUserApiService.DeleteUserFromDeviceAsync(personel.PersonelKayitNo.ToString(), filterZKTecoDeviceId);
+
+            await _toastService.ShowSuccessAsync($"{personel.AdSoyad} başarıyla {device.DeviceName} cihazından silindi!");
+            await LoadPersonelWithPagination(); // Listeyi yenile
+        }
+
+        private async Task DeleteFromAllDevices(PersonelResponseDto personel)
+        {
+            if (!ZKTecoDevices.Any())
+            {
+                await _toastService.ShowWarningAsync("Aktif cihaz bulunamadı!");
+                return;
+            }
+
+            await _toastService.ShowWarningAsync($"{personel.AdSoyad} - Tüm cihazlardan siliniyor...");
+
+            // TODO: API çağrısı yapılacak
+            // await _zktecoUserApiService.DeleteUserFromAllDevicesAsync(personel.PersonelKayitNo.ToString());
+
+            await _toastService.ShowSuccessAsync($"{personel.AdSoyad} başarıyla tüm cihazlardan silindi!");
+            await LoadPersonelWithPagination(); // Listeyi yenile
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // KART NO DÜZENLEME
+        // ═══════════════════════════════════════════════════════
+
+        private bool ShowEditCardModal { get; set; } = false;
+        private PersonelResponseDto? EditingPersonel { get; set; }
+        private int EditCardNumberValue { get; set; }
+        private bool IsEditingCard { get; set; } = false;
+
+        private void EditCardNumber(PersonelResponseDto personel)
+        {
+            EditingPersonel = personel;
+            EditCardNumberValue = personel.KartNo;
+            ShowEditCardModal = true;
+        }
+
+        private void CloseEditCardModal()
+        {
+            ShowEditCardModal = false;
+            EditingPersonel = null;
+            EditCardNumberValue = 0;
+        }
+
+        private async Task SaveCardNumber()
+        {
+            if (EditingPersonel == null) return;
+
+            IsEditingCard = true;
+            try
+            {
+                // TODO: API çağrısı yapılacak
+                // await _personelApiService.UpdateCardNumberAsync(EditingPersonel.TcKimlikNo, EditCardNumberValue);
+
+                await _toastService.ShowSuccessAsync($"{EditingPersonel.AdSoyad} - Kart numarası güncellendi!");
+                CloseEditCardModal();
+                await LoadPersonelWithPagination(); // Listeyi yenile
+            }
+            catch (Exception ex)
+            {
+                await _toastService.ShowErrorAsync($"Kart numarası güncellenirken hata: {ex.Message}");
+            }
+            finally
+            {
+                IsEditingCard = false;
+            }
+        }
+
         // ═══════════════════════════════════════════════════════
         // MODELS
         // ═══════════════════════════════════════════════════════

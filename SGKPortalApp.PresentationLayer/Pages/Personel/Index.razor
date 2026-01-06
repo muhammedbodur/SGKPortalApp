@@ -381,6 +381,54 @@ else
                                                                   IsVisible="@IsActionVisible(ActionType.DELETE)"
                                                                   IsEnabled="@CanEditAction(ActionType.DELETE)"
                                                                   OnClick="() => OpenDeleteModal(personel)" />
+
+                                                    <!-- ZKTeco PDKS İşlemleri Dropdown -->
+                                                    <div class="btn-group" @onclick:stopPropagation="true">
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-outline-primary dropdown-toggle"
+                                                                data-bs-toggle="dropdown"
+                                                                aria-expanded="false"
+                                                                title="PDKS İşlemleri">
+                                                            <i class="bx bx-devices"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <li><h6 class="dropdown-header">Cihaza Gönder</h6></li>
+                                                            @if (filterZKTecoDeviceId > 0)
+                                                            {
+                                                                <li>
+                                                                    <a class="dropdown-item" href="javascript:void(0)" @onclick="() => SendToSelectedDevice(personel)">
+                                                                        <i class="bx bx-upload me-2"></i>Seçili Cihaza Gönder
+                                                                    </a>
+                                                                </li>
+                                                            }
+                                                            <li>
+                                                                <a class="dropdown-item" href="javascript:void(0)" @onclick="() => SendToAllDevices(personel)">
+                                                                    <i class="bx bx-devices me-2"></i>Tüm Cihazlara Gönder
+                                                                </a>
+                                                            </li>
+                                                            <li><hr class="dropdown-divider"></li>
+                                                            <li><h6 class="dropdown-header">Cihazdan Sil</h6></li>
+                                                            @if (filterZKTecoDeviceId > 0)
+                                                            {
+                                                                <li>
+                                                                    <a class="dropdown-item text-warning" href="javascript:void(0)" @onclick="() => DeleteFromSelectedDevice(personel)">
+                                                                        <i class="bx bx-trash me-2"></i>Seçili Cihazdan Sil
+                                                                    </a>
+                                                                </li>
+                                                            }
+                                                            <li>
+                                                                <a class="dropdown-item text-danger" href="javascript:void(0)" @onclick="() => DeleteFromAllDevices(personel)">
+                                                                    <i class="bx bx-trash-alt me-2"></i>Tüm Cihazlardan Sil
+                                                                </a>
+                                                            </li>
+                                                            <li><hr class="dropdown-divider"></li>
+                                                            <li>
+                                                                <a class="dropdown-item" href="javascript:void(0)" @onclick="() => EditCardNumber(personel)">
+                                                                    <i class="bx bx-edit me-2"></i>Kart No Düzenle
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -474,6 +522,58 @@ else
                             <span class="spinner-border spinner-border-sm me-1"></span>
                         }
                         Evet, Sil
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- EDIT CARD NUMBER MODAL -->
+<!-- ═══════════════════════════════════════════════════════ -->
+@if (ShowEditCardModal && EditingPersonel != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white">
+                        <i class="bx bx-credit-card me-2"></i>Kart No Düzenle
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseEditCardModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <div class="alert alert-info">
+                            <strong>@EditingPersonel.AdSoyad</strong>
+                            <br />
+                            <small class="text-muted">TC: @EditingPersonel.TcKimlikNo | Sicil: @EditingPersonel.SicilNo</small>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kart Numarası</label>
+                        <input type="number"
+                               class="form-control"
+                               @bind="EditCardNumberValue"
+                               placeholder="Kart numarasını giriniz"
+                               min="0" />
+                        <small class="text-muted">
+                            <i class="bx bx-info-circle me-1"></i>
+                            Mevcut Kart No: @EditingPersonel.KartNo
+                        </small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" @onclick="CloseEditCardModal" disabled="@IsEditingCard">
+                        İptal
+                    </button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveCardNumber" disabled="@IsEditingCard">
+                        @if (IsEditingCard)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        <i class="bx bx-save me-1"></i>Kaydet
                     </button>
                 </div>
             </div>
