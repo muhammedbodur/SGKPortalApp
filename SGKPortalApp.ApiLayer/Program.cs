@@ -184,6 +184,15 @@ namespace SGKPortalApp.ApiLayer
             Console.WriteLine($"🔄 ZKTeco Realtime Service yapılandırıldı: {zkTecoSignalRUrl}");
 
             // ═══════════════════════════════════════════════════════
+            // 🎯 ZKTeco BUSINESS SERVICES
+            // ═══════════════════════════════════════════════════════
+            builder.Services.AddScoped<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IZKTecoDeviceService, SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoDeviceService>();
+            builder.Services.AddScoped<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IZKTecoUserService, SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoUserService>();
+            builder.Services.AddScoped<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IZKTecoAttendanceService, SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoAttendanceService>();
+
+            Console.WriteLine("🎯 ZKTeco Business Services yapılandırıldı");
+
+            // ═══════════════════════════════════════════════════════
             // 📡 SIGNALR SERVİSLERİ
             // ═══════════════════════════════════════════════════════
             builder.Services.AddSignalR(options =>
