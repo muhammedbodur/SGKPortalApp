@@ -7,6 +7,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
     public class DeviceConfiguration : IEntityTypeConfiguration<Device>
     {
         private const string TablePrefix = "ZKTeco_";
+        private const string IndexPrefix = "IX_ZKTeco_";
 
         public void Configure(EntityTypeBuilder<Device> builder)
         {
@@ -48,15 +49,15 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
 
             // Indexes
             builder.HasIndex(d => d.IpAddress)
-                   .HasDatabaseName($"IX_{TablePrefix}Device_IpAddress");
+                   .HasDatabaseName($"{IndexPrefix}Device_IpAddress");
 
             builder.HasIndex(d => d.DeviceCode)
                    .IsUnique()
                    .HasFilter("[DeviceCode] IS NOT NULL")
-                   .HasDatabaseName($"IX_{TablePrefix}Device_DeviceCode");
+                   .HasDatabaseName($"{IndexPrefix}Device_DeviceCode");
 
             builder.HasIndex(d => d.IsActive)
-                   .HasDatabaseName($"IX_{TablePrefix}Device_IsActive");
+                   .HasDatabaseName($"{IndexPrefix}Device_IsActive");
         }
     }
 }

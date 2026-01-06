@@ -7,6 +7,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
     public class SpecialCardConfiguration : IEntityTypeConfiguration<SpecialCard>
     {
         private const string TablePrefix = "ZKTeco_";
+        private const string IndexPrefix = "IX_ZKTeco_";
 
         public void Configure(EntityTypeBuilder<SpecialCard> builder)
         {
@@ -56,20 +57,20 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
             // Indexes
             builder.HasIndex(c => c.CardNumber)
                    .IsUnique()
-                   .HasDatabaseName($"IX_{TablePrefix}SpecialCard_CardNumber");
+                   .HasDatabaseName($"{IndexPrefix}SpecialCard_CardNumber");
 
             builder.HasIndex(c => c.EnrollNumber)
                    .IsUnique()
-                   .HasDatabaseName($"IX_{TablePrefix}SpecialCard_EnrollNumber");
+                   .HasDatabaseName($"{IndexPrefix}SpecialCard_EnrollNumber");
 
             builder.HasIndex(c => c.CardType)
-                   .HasDatabaseName($"IX_{TablePrefix}SpecialCard_CardType");
+                   .HasDatabaseName($"{IndexPrefix}SpecialCard_CardType");
 
             builder.HasIndex(c => c.IsActive)
-                   .HasDatabaseName($"IX_{TablePrefix}SpecialCard_IsActive");
+                   .HasDatabaseName($"{IndexPrefix}SpecialCard_IsActive");
 
             builder.HasIndex(c => c.CurrentUserSicilNo)
-                   .HasDatabaseName($"IX_{TablePrefix}SpecialCard_CurrentUserSicilNo");
+                   .HasDatabaseName($"{IndexPrefix}SpecialCard_CurrentUserSicilNo");
         }
     }
 }
