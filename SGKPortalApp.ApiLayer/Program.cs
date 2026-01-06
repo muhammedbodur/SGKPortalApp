@@ -212,8 +212,11 @@ namespace SGKPortalApp.ApiLayer
             // ═══════════════════════════════════════════════════════
             builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.SessionCleanupService>();
             builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.IdleSessionCleanupService>(); // 30 dakika idle timeout
-            builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService>(); // ZKTeco realtime event listener
-            builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.AttendanceSyncBackgroundService>(); // ZKTeco attendance periodic sync
+
+            // ZKTeco background services - Geçici olarak devre dışı (ZKTeco API servisi çalışmıyor)
+            // TODO: ZKTeco API servisi çalıştığında aktif et
+            // builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService>(); // ZKTeco realtime event listener
+            // builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.AttendanceSyncBackgroundService>(); // ZKTeco attendance periodic sync
 
             // ═══════════════════════════════════════════════════════
             // 🔧 AUTOMAPPER
