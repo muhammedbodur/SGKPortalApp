@@ -74,10 +74,31 @@ namespace SGKPortalApp.ApiLayer.Controllers
             return Ok(new { Success = success });
         }
 
+        [HttpPost("{userId}/sync-to-all-devices")]
+        public async Task<IActionResult> SyncToAllDevices(int userId)
+        {
+            var success = await _userService.SyncUserToAllDevicesAsync(userId);
+            return Ok(new { Success = success });
+        }
+
         [HttpPost("device/{deviceId}/sync-from-device")]
         public async Task<IActionResult> SyncFromDevice(int deviceId)
         {
             var success = await _userService.SyncUsersFromDeviceToDbAsync(deviceId);
+            return Ok(new { Success = success });
+        }
+
+        [HttpDelete("{enrollNumber}/delete-from-device/{deviceId}")]
+        public async Task<IActionResult> DeleteFromDevice(string enrollNumber, int deviceId)
+        {
+            var success = await _userService.DeleteUserFromDeviceAsync(deviceId, enrollNumber);
+            return Ok(new { Success = success });
+        }
+
+        [HttpDelete("{enrollNumber}/delete-from-all-devices")]
+        public async Task<IActionResult> DeleteFromAllDevices(string enrollNumber)
+        {
+            var success = await _userService.DeleteUserFromAllDevicesAsync(enrollNumber);
             return Ok(new { Success = success });
         }
 

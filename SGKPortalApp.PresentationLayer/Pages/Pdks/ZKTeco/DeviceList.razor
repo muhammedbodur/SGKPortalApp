@@ -4,7 +4,6 @@
 @inject HttpClient Http
 @inject IConfiguration Configuration
 @inject IJSRuntime JS
-@inject NavigationManager Navigation
 
 <PageTitle>ZKTeco Cihaz Yönetimi</PageTitle>
 
@@ -13,7 +12,53 @@
         <div class="col">
             <h3>📱 ZKTeco Cihaz Yönetimi</h3>
         </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" @onclick="ToggleAddForm">
+                <i class="bx bx-plus"></i> @(showAddForm ? "Formu Kapat" : "Yeni Cihaz")
+            </button>
+        </div>
     </div>
+
+    @if (showAddForm)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Yeni Cihaz Ekle</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label class="form-label">Cihaz Adı *</label>
+                        <input type="text" class="form-control" @bind="newDevice.DeviceName" placeholder="Ana Giriş Kapısı" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">IP Adresi *</label>
+                        <input type="text" class="form-control" @bind="newDevice.IpAddress" placeholder="192.168.1.100" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Port</label>
+                        <input type="text" class="form-control" @bind="newDevice.Port" placeholder="4370" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Cihaz Kodu</label>
+                        <input type="text" class="form-control" @bind="newDevice.DeviceCode" placeholder="DEV001" />
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">Aktif</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" @bind="newDevice.IsActive" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col">
+                        <button class="btn btn-success" @onclick="SaveDevice">
+                            <i class="bx bx-save"></i> Kaydet
+                        </button>
+                        <button class="btn btn-secondary ms-2" @onclick="ToggleAddForm">İptal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 
     @if (devices == null)
     {
@@ -80,6 +125,8 @@
 @code {
     private List<ZKTecoDevice>? devices;
     private string apiBaseUrl = "";
+    private bool showAddForm = false;
+    private ZKTecoDevice newDevice = new ZKTecoDevice { Port = "4370", IsActive = true };
 
     protected override async Task OnInitializedAsync()
     {
@@ -90,6 +137,43 @@
     private async Task LoadDevices()
     {
         devices = await Http.GetFromJsonAsync<List<ZKTecoDevice>>($"{apiBaseUrl}/api/ZKTecoDevice");
+    }
+
+    private void ToggleAddForm()
+    {
+        showAddForm = !showAddForm;
+        if (showAddForm)
+        {
+            newDevice = new ZKTecoDevice { Port = "4370", IsActive = true };
+        }
+    }
+
+    private async Task SaveDevice()
+    {
+        if (string.IsNullOrWhiteSpace(newDevice.DeviceName) || string.IsNullOrWhiteSpace(newDevice.IpAddress))
+        {
+            await JS.InvokeVoidAsync("alert", "Cihaz adı ve IP adresi zorunludur!");
+            return;
+        }
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync($"{apiBaseUrl}/api/ZKTecoDevice", newDevice);
+            if (response.IsSuccessStatusCode)
+            {
+                await JS.InvokeVoidAsync("alert", "✅ Cihaz başarıyla eklendi!");
+                showAddForm = false;
+                await LoadDevices();
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "❌ Cihaz eklenemedi!");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"❌ Hata: {ex.Message}");
+        }
     }
 
     private async Task TestConnection(int deviceId)

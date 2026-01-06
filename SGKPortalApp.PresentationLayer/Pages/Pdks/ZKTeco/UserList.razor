@@ -12,7 +12,58 @@
         <div class="col">
             <h3>👥 ZKTeco Kullanıcı Yönetimi</h3>
         </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" @onclick="ToggleAddForm">
+                <i class="bx bx-plus"></i> @(showAddForm ? "Formu Kapat" : "Yeni Personel")
+            </button>
+        </div>
     </div>
+
+    @if (showAddForm)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Yeni Personel Ekle</h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">Sicil No *</label>
+                        <input type="text" class="form-control" @bind="newUser.EnrollNumber" placeholder="12345" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Ad Soyad *</label>
+                        <input type="text" class="form-control" @bind="newUser.Name" placeholder="Ahmet Yılmaz" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Kart No</label>
+                        <input type="number" class="form-control" @bind="newUser.CardNumber" placeholder="1234567890" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Yetki</label>
+                        <select class="form-select" @bind="newUser.Privilege">
+                            <option value="0">Kullanıcı</option>
+                            <option value="1">Kayıt Yetkilisi</option>
+                            <option value="2">Yönetici</option>
+                            <option value="3">Süper Admin</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">Aktif</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" @bind="newUser.Enabled" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col">
+                        <button class="btn btn-success" @onclick="SaveUser">
+                            <i class="bx bx-save"></i> Kaydet
+                        </button>
+                        <button class="btn btn-secondary ms-2" @onclick="ToggleAddForm">İptal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 
     <div class="row mb-3">
         <div class="col-auto">
@@ -41,7 +92,7 @@
     else
     {
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover table-sm">
                 <thead>
                     <tr>
                         <th>Sicil No</th>
@@ -50,27 +101,47 @@
                         <th>Yetki</th>
                         <th>Durum</th>
                         <th>Son Sync</th>
-                        <th>İşlemler</th>
+                        <th style="min-width: 350px;">İşlemler</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var user in users)
                     {
                         <tr>
-                            <td>@user.EnrollNumber</td>
-                            <td>@user.Name</td>
+                            <td><code>@user.EnrollNumber</code></td>
+                            <td><strong>@user.Name</strong></td>
                             <td>@user.CardNumber</td>
-                            <td>@user.PrivilegeText</td>
+                            <td><span class="badge bg-info">@user.PrivilegeText</span></td>
                             <td>
                                 <span class="badge @(user.Enabled ? "bg-success" : "bg-secondary")">
                                     @user.StatusText
                                 </span>
                             </td>
-                            <td>@user.LastSyncTime?.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td><small>@user.LastSyncTime?.ToString("dd.MM HH:mm")</small></td>
                             <td>
-                                <button class="btn btn-sm btn-danger" @onclick="() => Delete(user.Id)">
-                                    Sil
-                                </button>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    @if (selectedDeviceId > 0)
+                                    {
+                                        <button class="btn btn-outline-primary" @onclick="() => SyncToDevice(user.Id)" title="Bu Cihaza Gönder">
+                                            <i class="bx bx-export"></i> Cihaza
+                                        </button>
+                                        <button class="btn btn-outline-danger" @onclick="() => DeleteFromDevice(user.EnrollNumber)" title="Bu Cihazdan Sil">
+                                            <i class="bx bx-trash"></i> Cihazdan Sil
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-outline-primary" @onclick="() => SyncToAllDevices(user.Id)" title="Tüm Cihazlara Gönder">
+                                            <i class="bx bx-export"></i> Tüm Cihazlara
+                                        </button>
+                                        <button class="btn btn-outline-warning" @onclick="() => DeleteFromAllDevices(user.EnrollNumber)" title="Tüm Cihazlardan Sil">
+                                            <i class="bx bx-trash"></i> Tüm Cihazlardan
+                                        </button>
+                                    }
+                                    <button class="btn btn-outline-danger" @onclick="() => DeleteUser(user.Id)" title="DB'den Sil">
+                                        <i class="bx bx-x-circle"></i> DB'den Sil
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -85,6 +156,8 @@
     private List<dynamic>? devices;
     private string apiBaseUrl = "";
     private int selectedDeviceId = 0;
+    private bool showAddForm = false;
+    private CreateZKTecoUserDto newUser = new CreateZKTecoUserDto { Privilege = 0, Enabled = true };
 
     protected override async Task OnInitializedAsync()
     {
@@ -101,6 +174,43 @@
     private async Task LoadUsers()
     {
         users = await Http.GetFromJsonAsync<List<ZKTecoUserDto>>($"{apiBaseUrl}/api/ZKTecoUser");
+    }
+
+    private void ToggleAddForm()
+    {
+        showAddForm = !showAddForm;
+        if (showAddForm)
+        {
+            newUser = new CreateZKTecoUserDto { Privilege = 0, Enabled = true };
+        }
+    }
+
+    private async Task SaveUser()
+    {
+        if (string.IsNullOrWhiteSpace(newUser.EnrollNumber) || string.IsNullOrWhiteSpace(newUser.Name))
+        {
+            await JS.InvokeVoidAsync("alert", "Sicil no ve ad soyad zorunludur!");
+            return;
+        }
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync($"{apiBaseUrl}/api/ZKTecoUser", newUser);
+            if (response.IsSuccessStatusCode)
+            {
+                await JS.InvokeVoidAsync("alert", "✅ Personel başarıyla eklendi!");
+                showAddForm = false;
+                await LoadUsers();
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "❌ Personel eklenemedi!");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"❌ Hata: {ex.Message}");
+        }
     }
 
     private async Task OnDeviceChanged(ChangeEventArgs e)
@@ -120,15 +230,52 @@
     private async Task SyncFromDevice()
     {
         var response = await Http.PostAsync($"{apiBaseUrl}/api/ZKTecoUser/device/{selectedDeviceId}/sync-from-device", null);
-        await JS.InvokeVoidAsync("alert", "Kullanıcılar cihazdan senkronize edildi!");
+        await JS.InvokeVoidAsync("alert", "✅ Kullanıcılar cihazdan senkronize edildi!");
         await LoadUsers();
     }
 
-    private async Task Delete(int userId)
+    private async Task SyncToDevice(int userId)
     {
-        if (await JS.InvokeAsync<bool>("confirm", "Kullanıcıyı silmek istediğinize emin misiniz?"))
+        if (await JS.InvokeAsync<bool>("confirm", $"Seçili personeli cihaza göndermek istediğinize emin misiniz?"))
+        {
+            var response = await Http.PostAsync($"{apiBaseUrl}/api/ZKTecoUser/{userId}/sync-to-device/{selectedDeviceId}", null);
+            await JS.InvokeVoidAsync("alert", "✅ Personel cihaza gönderildi!");
+        }
+    }
+
+    private async Task SyncToAllDevices(int userId)
+    {
+        if (await JS.InvokeAsync<bool>("confirm", "⚠️ Seçili personeli TÜM AKTİF CİHAZLARA göndermek istediğinize emin misiniz?"))
+        {
+            var response = await Http.PostAsync($"{apiBaseUrl}/api/ZKTecoUser/{userId}/sync-to-all-devices", null);
+            await JS.InvokeVoidAsync("alert", "✅ Personel tüm cihazlara gönderildi!");
+        }
+    }
+
+    private async Task DeleteFromDevice(string enrollNumber)
+    {
+        if (await JS.InvokeAsync<bool>("confirm", $"Personeli seçili cihazdan silmek istediğinize emin misiniz?\n\nSicil No: {enrollNumber}"))
+        {
+            var response = await Http.DeleteAsync($"{apiBaseUrl}/api/ZKTecoUser/{enrollNumber}/delete-from-device/{selectedDeviceId}");
+            await JS.InvokeVoidAsync("alert", "✅ Personel cihazdan silindi!");
+        }
+    }
+
+    private async Task DeleteFromAllDevices(string enrollNumber)
+    {
+        if (await JS.InvokeAsync<bool>("confirm", $"⚠️ Personeli TÜM CİHAZLARDAN silmek istediğinize emin misiniz?\n\nSicil No: {enrollNumber}\n\nBu işlem geri alınamaz!"))
+        {
+            var response = await Http.DeleteAsync($"{apiBaseUrl}/api/ZKTecoUser/{enrollNumber}/delete-from-all-devices");
+            await JS.InvokeVoidAsync("alert", "✅ Personel tüm cihazlardan silindi!");
+        }
+    }
+
+    private async Task DeleteUser(int userId)
+    {
+        if (await JS.InvokeAsync<bool>("confirm", "⚠️ Personeli veritabanından silmek istediğinize emin misiniz?\n\nNOT: Bu işlem sadece DB'den siler, cihazlardan silmez!"))
         {
             await Http.DeleteAsync($"{apiBaseUrl}/api/ZKTecoUser/{userId}");
+            await JS.InvokeVoidAsync("alert", "✅ Personel DB'den silindi!");
             await LoadUsers();
         }
     }

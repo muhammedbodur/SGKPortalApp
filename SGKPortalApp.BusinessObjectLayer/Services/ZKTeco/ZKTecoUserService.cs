@@ -199,6 +199,24 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
             return success;
         }
 
+        public async Task<bool> SyncUserToAllDevicesAsync(int userId)
+        {
+            var user = await _dbContext.ZKTecoUsers.FindAsync(userId);
+            if (user == null) return false;
+
+            var activeDevices = await _deviceService.GetActiveDevicesAsync();
+            var successCount = 0;
+
+            foreach (var device in activeDevices)
+            {
+                if (await SyncUserToDeviceAsync(userId, device.Id))
+                    successCount++;
+            }
+
+            _logger.LogInformation($"Synced user {user.Name} to {successCount}/{activeDevices.Count} devices");
+            return successCount > 0;
+        }
+
         public async Task<bool> SyncAllUsersToDeviceAsync(int deviceId)
         {
             var users = await GetUsersByDeviceIdAsync(deviceId);
@@ -287,6 +305,22 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
 
             var port = int.TryParse(device.Port, out var p) ? p : 4370;
             return await _apiClient.DeleteUserFromDeviceAsync(device.IpAddress, enrollNumber, port);
+        }
+
+        public async Task<bool> DeleteUserFromAllDevicesAsync(string enrollNumber)
+        {
+            var activeDevices = await _deviceService.GetActiveDevicesAsync();
+            var successCount = 0;
+
+            foreach (var device in activeDevices)
+            {
+                var port = int.TryParse(device.Port, out var p) ? p : 4370;
+                if (await _apiClient.DeleteUserFromDeviceAsync(device.IpAddress, enrollNumber, port))
+                    successCount++;
+            }
+
+            _logger.LogInformation($"Deleted user {enrollNumber} from {successCount}/{activeDevices.Count} devices");
+            return successCount > 0;
         }
 
         public async Task<bool> ClearAllUsersFromDeviceAsync(int deviceId)

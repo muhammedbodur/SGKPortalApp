@@ -24,11 +24,13 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
 
         Task<List<ZKTecoApiUserDto>> GetUsersFromDeviceAsync(int deviceId);
         Task<bool> SyncUserToDeviceAsync(int userId, int deviceId);
+        Task<bool> SyncUserToAllDevicesAsync(int userId);
         Task<bool> SyncAllUsersToDeviceAsync(int deviceId);
         Task<bool> SyncUsersFromDeviceToDbAsync(int deviceId);
         Task<bool> AddUserToDeviceAsync(int deviceId, ZKTecoApiUserDto user);
         Task<bool> UpdateUserOnDeviceAsync(int deviceId, string enrollNumber, ZKTecoApiUserDto user);
         Task<bool> DeleteUserFromDeviceAsync(int deviceId, string enrollNumber);
+        Task<bool> DeleteUserFromAllDevicesAsync(string enrollNumber);
         Task<bool> ClearAllUsersFromDeviceAsync(int deviceId);
     }
 }
