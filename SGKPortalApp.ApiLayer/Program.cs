@@ -226,12 +226,10 @@ namespace SGKPortalApp.ApiLayer
             // Bu, Microsoft.AspNet.SignalR.Client gibi eski kütüphanelerin TlsCipherSuite hatalarını önler
             builder.Services.AddAutoMapper(cfg =>
             {
-                cfg.AddMaps(new[]
-                {
-                    typeof(SGKPortalApp.BusinessLogicLayer.Services.GenericService<>).Assembly,
-                    typeof(SGKPortalApp.PresentationLayer.Services.ApiServices.Abstract.IApiService).Assembly,
-                    typeof(Program).Assembly
-                });
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+                    .Where(a => a.FullName != null && a.FullName.StartsWith("SGKPortalApp"))
+                    .ToArray();
+                cfg.AddMaps(assemblies);
             });
 
             // ═══════════════════════════════════════════════════════
