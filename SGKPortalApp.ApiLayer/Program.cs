@@ -222,7 +222,17 @@ namespace SGKPortalApp.ApiLayer
             // ═══════════════════════════════════════════════════════
             // 🔧 AUTOMAPPER
             // ═══════════════════════════════════════════════════════
-            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            // Sadece proje assembly'lerini scan et - üçüncü parti kütüphaneleri değil
+            // Bu, Microsoft.AspNet.SignalR.Client gibi eski kütüphanelerin TlsCipherSuite hatalarını önler
+            builder.Services.AddAutoMapper(cfg =>
+            {
+                cfg.AddMaps(new[]
+                {
+                    typeof(SGKPortalApp.BusinessLogicLayer.Services.GenericService<>).Assembly,
+                    typeof(SGKPortalApp.PresentationLayer.Services.ApiServices.Abstract.IApiService).Assembly,
+                    typeof(Program).Assembly
+                });
+            });
 
             // ═══════════════════════════════════════════════════════
             // ❤️ HEALTH CHECKS
