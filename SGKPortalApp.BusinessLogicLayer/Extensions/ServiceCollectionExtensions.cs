@@ -85,7 +85,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Extensions
                     "IZKTecoRealtimeService" // Factory metod ile signalRUrl parametresi gerekiyor
                 };
 
+                var excludedImplementations = new[]
+                {
+                    "ZKTecoApiClient",       // Factory metod ile kayıt ediliyor
+                    "ZKTecoRealtimeService"  // Factory metod ile kayıt ediliyor
+                };
+
                 interfaces = interfaces.Where(i => !excludedTypes.Contains(i.Name)).ToList();
+                implementations = implementations.Where(i => !excludedImplementations.Contains(i.Name)).ToList();
 
                 if (!interfaces.Any() && !implementations.Any())
                 {
