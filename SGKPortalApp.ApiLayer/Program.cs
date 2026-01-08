@@ -223,7 +223,8 @@ namespace SGKPortalApp.ApiLayer
             // 🔧 AUTOMAPPER
             // ═══════════════════════════════════════════════════════
             // Sadece proje assembly'lerini scan et - üçüncü parti kütüphaneleri değil
-            // Bu, Microsoft.AspNet.SignalR.Client gibi eski kütüphanelerin TlsCipherSuite hatalarını önler
+            // Microsoft.AspNet.SignalR.Client artık BusinessLogicLayer'da (sadece orada kullanılıyor)
+            // BusinessObjectLayer temiz (sadece DTOs/Entities) - güvenle scan edilebilir
             builder.Services.AddAutoMapper(cfg =>
             {
                 var assemblies = AppDomain.CurrentDomain.GetAssemblies()
