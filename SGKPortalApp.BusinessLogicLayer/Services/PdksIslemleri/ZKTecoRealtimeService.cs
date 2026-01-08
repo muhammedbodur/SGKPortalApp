@@ -72,10 +72,33 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 await _connection.Start();
                 _logger.LogInformation($"SignalR connection started successfully. State: {_connection.State}");
             }
+            catch (System.Reflection.ReflectionTypeLoadException rtlex)
+            {
+                // TlsCipherSuite ve benzeri tip yükleme hataları - ZKTecoApi servisi çalışmıyor olabilir
+                _logger.LogWarning(rtlex, "ZKTecoApi SignalR bağlantısı başlatılamadı (tip yükleme hatası). " +
+                    "ZKTecoApi servisi çalışmıyor olabilir. Realtime izleme devre dışı.");
+                // Throw etme - uygulama çalışmaya devam etsin
+            }
+            catch (System.IO.FileLoadException flex)
+            {
+                // Assembly yükleme hataları
+                _logger.LogWarning(flex, "ZKTecoApi SignalR bağlantısı başlatılamadı (assembly hatası). " +
+                    "ZKTecoApi servisi çalışmıyor olabilir. Realtime izleme devre dışı.");
+                // Throw etme - uygulama çalışmaya devam etsin
+            }
+            catch (System.Net.Http.HttpRequestException httpEx)
+            {
+                // Bağlantı hataları - servis çalışmıyor
+                _logger.LogWarning(httpEx, "ZKTecoApi servisine bağlanılamadı. " +
+                    "Servis çalışmıyor olabilir. Realtime izleme devre dışı.");
+                // Throw etme - uygulama çalışmaya devam etsin
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to start SignalR connection");
-                throw;
+                // Diğer tüm hatalar
+                _logger.LogWarning(ex, "ZKTecoApi SignalR bağlantısı başlatılamadı. " +
+                    "Realtime izleme devre dışı.");
+                // Throw etme - uygulama çalışmaya devam etsin
             }
         }
 

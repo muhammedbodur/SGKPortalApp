@@ -36,6 +36,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri
         Task<List<ApiUserDto>> GetDeviceUsersAsync(int deviceId);
         Task<ApiUserDto?> GetDeviceUserAsync(int deviceId, string enrollNumber);
         Task<ApiUserDto?> GetDeviceUserByCardAsync(int deviceId, long cardNumber);
+        Task<DeviceUserMatch> GetDeviceUserWithMismatchInfoAsync(int deviceId, string enrollNumber);
+        Task<DeviceUserMatch> GetDeviceUserByCardWithMismatchInfoAsync(int deviceId, long cardNumber);
         Task<CardSearchResponse> SearchUserByCardAsync(CardSearchRequest request);
         Task<CardSearchResponse> SearchUserByCardOnAllDevicesAsync(long cardNumber);
         Task<bool> CreateDeviceUserAsync(int deviceId, UserCreateUpdateDto request, bool force = false);
