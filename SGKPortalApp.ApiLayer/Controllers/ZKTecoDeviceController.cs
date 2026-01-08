@@ -152,6 +152,20 @@ namespace SGKPortalApp.ApiLayer.Controllers
             return Ok(user);
         }
 
+        [HttpGet("{id}/users/{enrollNumber}/with-mismatch")]
+        public async Task<IActionResult> GetDeviceUserWithMismatchInfo(int id, string enrollNumber)
+        {
+            var result = await _deviceService.GetDeviceUserWithMismatchInfoAsync(id, enrollNumber);
+            return Ok(result);
+        }
+
+        [HttpGet("{id}/users/card/{cardNumber}/with-mismatch")]
+        public async Task<IActionResult> GetDeviceUserByCardWithMismatchInfo(int id, long cardNumber)
+        {
+            var result = await _deviceService.GetDeviceUserByCardWithMismatchInfoAsync(id, cardNumber);
+            return Ok(result);
+        }
+
         [HttpPost("users/card/search")]
         public async Task<IActionResult> SearchUserByCard([FromBody] CardSearchRequest request)
         {

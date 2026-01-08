@@ -346,6 +346,162 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             }
         }
 
+        public async Task<DeviceUserMatch> GetDeviceUserWithMismatchInfoAsync(int deviceId, string enrollNumber)
+        {
+            var match = new DeviceUserMatch();
+
+            try
+            {
+                var device = await GetDeviceByIdAsync(deviceId);
+                if (device == null)
+                {
+                    match.Status = MatchStatus.NotFound;
+                    return match;
+                }
+
+                match.Device = new DeviceResponseDto
+                {
+                    DeviceId = device.Id,
+                    DeviceName = device.DeviceName,
+                    IpAddress = device.IpAddress,
+                    Port = device.Port,
+                    IsActive = device.IsActive
+                };
+
+                // Cihazdan kullanıcıyı getir
+                var port = int.TryParse(device.Port, out var p) ? p : 4370;
+                match.DeviceUser = await _apiClient.GetUserFromDeviceAsync(device.IpAddress, enrollNumber, port);
+
+                if (match.DeviceUser == null)
+                {
+                    match.Status = MatchStatus.NotFound;
+                    match.Mismatches.Add(new MismatchDetail
+                    {
+                        Field = "DeviceUser",
+                        Type = MismatchType.UserNotOnDevice,
+                        Description = "Kullanıcı cihazda bulunamadı"
+                    });
+                    return match;
+                }
+
+                // Personel bilgilerini DB'den çek
+                var personelRepo = _unitOfWork.GetRepository<DataAccessLayer.Repositories.Interfaces.PersonelIslemleri.IPersonelRepository>();
+                if (int.TryParse(enrollNumber, out var personelKayitNo))
+                {
+                    var personel = await personelRepo.GetByIdAsync(personelKayitNo);
+                    if (personel != null && !personel.SilindiMi)
+                    {
+                        match.PersonelInfo = new PersonelResponseDto
+                        {
+                            PersonelKayitNo = personel.PersonelKayitNo,
+                            AdSoyad = personel.AdSoyad,
+                            NickName = personel.NickName,
+                            SicilNo = personel.SicilNo,
+                            TcKimlikNo = personel.TcKimlikNo,
+                            KartNo = personel.KartNo,
+                            DepartmanAdi = personel.Departman?.DepartmanAdi,
+                            UnvanAdi = personel.Unvan?.UnvanAdi
+                        };
+                    }
+                }
+
+                // Uyuşmazlık kontrolü
+                var personelDict = new Dictionary<string, PersonelResponseDto>();
+                if (match.PersonelInfo != null)
+                {
+                    personelDict[enrollNumber] = match.PersonelInfo;
+                }
+
+                match.Mismatches = await CheckMismatches(match, personelDict);
+                match.Status = DetermineMatchStatus(match);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting device user with mismatch info {EnrollNumber} for device {DeviceId}", enrollNumber, deviceId);
+                match.Status = MatchStatus.NotFound;
+            }
+
+            return match;
+        }
+
+        public async Task<DeviceUserMatch> GetDeviceUserByCardWithMismatchInfoAsync(int deviceId, long cardNumber)
+        {
+            var match = new DeviceUserMatch();
+
+            try
+            {
+                var device = await GetDeviceByIdAsync(deviceId);
+                if (device == null)
+                {
+                    match.Status = MatchStatus.NotFound;
+                    return match;
+                }
+
+                match.Device = new DeviceResponseDto
+                {
+                    DeviceId = device.Id,
+                    DeviceName = device.DeviceName,
+                    IpAddress = device.IpAddress,
+                    Port = device.Port,
+                    IsActive = device.IsActive
+                };
+
+                // Cihazdan kullanıcıyı kart numarasıyla getir
+                var port = int.TryParse(device.Port, out var p) ? p : 4370;
+                match.DeviceUser = await _apiClient.GetUserByCardNumberAsync(device.IpAddress, cardNumber, port);
+
+                if (match.DeviceUser == null)
+                {
+                    match.Status = MatchStatus.NotFound;
+                    match.Mismatches.Add(new MismatchDetail
+                    {
+                        Field = "DeviceUser",
+                        Type = MismatchType.UserNotOnDevice,
+                        Description = "Kart numarası cihazda bulunamadı"
+                    });
+                    return match;
+                }
+
+                // Personel bilgilerini DB'den çek (EnrollNumber ile)
+                var personelRepo = _unitOfWork.GetRepository<DataAccessLayer.Repositories.Interfaces.PersonelIslemleri.IPersonelRepository>();
+                if (int.TryParse(match.DeviceUser.EnrollNumber, out var personelKayitNo))
+                {
+                    var personel = await personelRepo.GetByIdAsync(personelKayitNo);
+                    if (personel != null && !personel.SilindiMi)
+                    {
+                        match.PersonelInfo = new PersonelResponseDto
+                        {
+                            PersonelKayitNo = personel.PersonelKayitNo,
+                            AdSoyad = personel.AdSoyad,
+                            NickName = personel.NickName,
+                            SicilNo = personel.SicilNo,
+                            TcKimlikNo = personel.TcKimlikNo,
+                            KartNo = personel.KartNo,
+                            DepartmanAdi = personel.Departman?.DepartmanAdi,
+                            UnvanAdi = personel.Unvan?.UnvanAdi
+                        };
+                    }
+                }
+
+                // Uyuşmazlık kontrolü
+                var personelDict = new Dictionary<string, PersonelResponseDto>();
+                if (match.PersonelInfo != null)
+                {
+                    personelDict[match.DeviceUser.EnrollNumber] = match.PersonelInfo;
+                }
+
+                match.Mismatches = await CheckMismatches(match, personelDict);
+                match.Status = DetermineMatchStatus(match);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting device user by card with mismatch info {CardNumber} for device {DeviceId}", cardNumber, deviceId);
+                match.Status = MatchStatus.NotFound;
+            }
+
+            return match;
+        }
+
         public async Task<CardSearchResponse> SearchUserByCardAsync(CardSearchRequest request)
         {
             var response = new CardSearchResponse
