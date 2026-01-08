@@ -78,6 +78,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Extensions
                                 && !t.IsGenericType)
                     .ToList();
 
+                // Özel yapılandırma gerektiren servisleri hariç tut
+                var excludedTypes = new[]
+                {
+                    "IZKTecoApiClient",      // Factory metod ile HttpClient ve baseUrl parametreleri gerekiyor
+                    "IZKTecoRealtimeService" // Factory metod ile signalRUrl parametresi gerekiyor
+                };
+
+                interfaces = interfaces.Where(i => !excludedTypes.Contains(i.Name)).ToList();
+
                 if (!interfaces.Any() && !implementations.Any())
                 {
                     Console.WriteLine($"    ⚠️  {moduleName} modülünde servis bulunamadı");
