@@ -1,109 +1,203 @@
 @page "/pdks/zkteco/attendance"
-@using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
+@using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco
+@using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 
-<PageTitle>PDKS Kayıt Listesi</PageTitle>
+<PageTitle>PDKS Attendance Kayıtları</PageTitle>
 
 <div class="container-fluid">
+    <!-- Header -->
     <div class="row mb-3">
         <div class="col">
             <h3>📋 PDKS Attendance Kayıtları</h3>
-        </div>
-    </div>
-
-    <div class="row mb-3">
-        <div class="col-auto">
-            <select class="form-select" @onchange="OnDeviceChanged">
-                <option value="">Cihaz Seç</option>
-                @if (devices != null)
-                {
-                    @foreach (var device in devices)
-                    {
-                        <option value="@device.Id">@device.DeviceName (@device.IpAddress)</option>
-                    }
-                }
-            </select>
+            <p class="text-muted">Cihazdan çekilen kayıtlar otomatik olarak personel bilgileri ile eşleştirilir</p>
         </div>
         <div class="col-auto">
-            <button class="btn btn-success" @onclick="SyncFromDevice" disabled="@(selectedDeviceId == 0)">
-                <i class="bx bx-download"></i> Cihazdan Kayıtları Çek
-            </button>
-        </div>
-        <div class="col-auto">
-            <button class="btn btn-info" @onclick="LoadRecords">
+            <button class="btn btn-primary" @onclick="() => LoadRecords()" disabled="@(selectedDeviceId == 0 || isLoading)">
                 <i class="bx bx-refresh"></i> Yenile
             </button>
+            <button class="btn btn-danger" @onclick="ClearAllLogs" disabled="@(selectedDeviceId == 0)">
+                <i class="bx bx-trash"></i> Tümünü Sil
+            </button>
         </div>
     </div>
 
-    @if (records == null)
+    <!-- Device Selection -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label">Cihaz Seçin *</label>
+                    <select class="form-select" @onchange="OnDeviceChanged" disabled="@isLoading">
+                        <option value="0">-- Cihaz Seçin --</option>
+                        @foreach (var device in devices)
+                        {
+                            <option value="@device.DeviceId" selected="@(device.DeviceId == selectedDeviceId)">
+                                @device.DeviceName (@device.IpAddress)
+                            </option>
+                        }
+                    </select>
+                </div>
+                @if (selectedDeviceId > 0)
+                {
+                    <div class="col-md-8">
+                        <label class="form-label">İstatistikler</label>
+                        <div class="d-flex gap-3">
+                            <div class="badge bg-label-primary p-2">
+                                Toplam: <strong>@totalCount</strong>
+                            </div>
+                            <div class="badge bg-label-success p-2">
+                                Gösterilen: <strong>@filteredRecords.Count</strong>
+                            </div>
+                            <div class="badge bg-label-info p-2">
+                                Eşleşen Personel: <strong>@filteredRecords.Count(r => !string.IsNullOrEmpty(r.PersonelAdSoyad))</strong>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    @if (selectedDeviceId > 0)
     {
-        <p><em>Yükleniyor...</em></p>
+        <div class="card mb-3">
+            <div class="card-body">
+                <h6 class="card-title">🔍 Filtreler</h6>
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">Başlangıç Tarihi</label>
+                        <input type="date" class="form-control" @bind="startDate" @bind:event="oninput" @onchange="() => ApplyFilters()" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Bitiş Tarihi</label>
+                        <input type="date" class="form-control" @bind="endDate" @bind:event="oninput" @onchange="() => ApplyFilters()" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Kayıt No</label>
+                        <input type="text" class="form-control" placeholder="Ara..." @bind="enrollNumberFilter" @bind:event="oninput" @onkeyup="ApplyFilters" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Doğrulama</label>
+                        <select class="form-select" @bind="verifyMethodFilter" @bind:after="ApplyFilters">
+                            <option value="">Tümü</option>
+                            <option value="@VerifyMethod.Card">Kart</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Giriş/Çıkış</label>
+                        <select class="form-select" @bind="inOutModeFilter" @bind:after="ApplyFilters">
+                            <option value="">Tümü</option>
+                            <option value="@InOutMode.CheckIn">Giriş</option>
+                            <option value="@InOutMode.CheckOut">Çıkış</option>
+                            <option value="@InOutMode.BreakOut">Mola Çıkış</option>
+                            <option value="@InOutMode.BreakIn">Mola Giriş</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col">
+                        <button class="btn btn-sm btn-outline-secondary" @onclick="ClearFilters">
+                            <i class="bx bx-x"></i> Filtreleri Temizle
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="mt-2">Kayıtlar yükleniyor...</p>
+        </div>
+    }
+    else if (selectedDeviceId == 0)
+    {
+        <div class="alert alert-info">
+            <i class="bx bx-info-circle me-2"></i>
+            Lütfen yukarıdan bir cihaz seçin
+        </div>
+    }
+    else if (!filteredRecords.Any())
+    {
+        <div class="alert alert-warning">
+            <i class="bx bx-search-alt me-2"></i>
+            Kayıt bulunamadı
+        </div>
     }
     else
     {
-        <div class="alert alert-info">
-            Toplam Kayıt: <strong>@records.Count</strong>
-        </div>
-
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Sicil No</th>
-                        <th>Tarih</th>
-                        <th>Saat</th>
-                        <th>Doğrulama</th>
-                        <th>Giriş/Çıkış</th>
-                        <th>Cihaz IP</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var record in records.Take(100))
-                    {
-                        <tr>
-                            <td>@record.KayitNo</td>
-                            <td>@record.Tarih?.ToString("dd.MM.yyyy")</td>
-                            <td>@record.Saat?.ToString(@"hh\:mm\:ss")</td>
-                            <td>
-                                @if (record.Dogrulama == "1")
-                                {
-                                    <span class="badge bg-primary">Parmak İzi</span>
-                                }
-                                else if (record.Dogrulama == "15")
-                                {
-                                    <span class="badge bg-info">Kart</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">@record.Dogrulama</span>
-                                }
-                            </td>
-                            <td>
-                                @if (record.GirisCikisModu == "0")
-                                {
-                                    <span class="badge bg-success">Giriş</span>
-                                }
-                                else if (record.GirisCikisModu == "1")
-                                {
-                                    <span class="badge bg-warning">Çıkış</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">@record.GirisCikisModu</span>
-                                }
-                            </td>
-                            <td>@record.CihazIp</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-
-        @if (records.Count > 100)
-        {
-            <div class="alert alert-warning">
-                Not: Performans için ilk 100 kayıt gösteriliyor. Toplam kayıt sayısı: @records.Count
+        <!-- Records Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm">
+                        <thead>
+                            <tr>
+                                <th>Kayıt No</th>
+                                <th>Personel</th>
+                                <th>Sicil No</th>
+                                <th>Departman</th>
+                                <th>Tarih/Saat</th>
+                                <th>Doğrulama</th>
+                                <th>Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var record in filteredRecords.OrderByDescending(r => r.DateTime))
+                            {
+                                <tr class="@(string.IsNullOrEmpty(record.PersonelAdSoyad) ? "table-warning" : "")">
+                                    <td><code>@record.EnrollNumber</code></td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(record.PersonelAdSoyad))
+                                        {
+                                            <strong>@record.PersonelAdSoyad</strong>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                <i class="bx bx-user-x"></i> Eşleşmedi
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(record.PersonelSicilNo))
+                                        {
+                                            <span class="badge bg-label-secondary">@record.PersonelSicilNo</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@(record.PersonelDepartman ?? "-")</small>
+                                    </td>
+                                    <td>
+                                        <div>@record.DateTime.ToString("dd.MM.yyyy")</div>
+                                        <small class="text-muted">@record.DateTime.ToString("HH:mm:ss")</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge @record.VerifyMethod.ToBadgeClass()">
+                                            @record.VerifyMethod.ToDisplayText()
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge @record.InOutMode.ToBadgeClass()">
+                                            @record.InOutMode.ToDisplayText()
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        }
+        </div>
     }
 </div>

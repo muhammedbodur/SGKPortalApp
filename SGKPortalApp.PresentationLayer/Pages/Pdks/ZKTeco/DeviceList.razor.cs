@@ -1,28 +1,31 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Configuration;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
+using SGKPortalApp.PresentationLayer.Components.Base;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco;
+using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
 {
-    public partial class DeviceList
+    public partial class DeviceList : FieldPermissionPageBase
     {
-        [Inject] private HttpClient Http { get; set; } = default!;
-        [Inject] private IConfiguration Configuration { get; set; } = default!;
+        // ═══════════════════════════════════════════════════════
+        // DEPENDENCY INJECTION
+        // ═══════════════════════════════════════════════════════
+
+        [Inject] private IZKTecoDeviceApiService DeviceApiService { get; set; } = default!;
         [Inject] private IJSRuntime JS { get; set; } = default!;
+        [Inject] private IToastService ToastService { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════
         // PROPERTIES
         // ═══════════════════════════════════════════════════════
 
         private List<Device>? devices;
-        private string apiBaseUrl = "";
         private bool showAddForm = false;
         private Device newDevice = new Device { Port = "4370", IsActive = true };
 
@@ -43,7 +46,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
 
         protected override async Task OnInitializedAsync()
         {
-            apiBaseUrl = Configuration["AppSettings:ApiUrl"] ?? "https://localhost:9080";
+            await base.OnInitializedAsync();
             await LoadDevices();
         }
 
@@ -55,11 +58,29 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         {
             try
             {
-                devices = await Http.GetFromJsonAsync<List<Device>>($"{apiBaseUrl}/api/Device");
+                var result = await DeviceApiService.GetAllAsync();
+                if (result.Success && result.Data != null)
+                {
+                    devices = result.Data.Select(d => new Device 
+                    { 
+                        Id = d.DeviceId,
+                        DeviceName = d.DeviceName,
+                        IpAddress = d.IpAddress,
+                        Port = d.Port,
+                        IsActive = d.IsActive,
+                        LastHealthCheckTime = d.LastHealthCheckTime,
+                        LastHealthCheckSuccess = d.LastHealthCheckSuccess
+                    }).ToList();
+                }
+                else
+                {
+                    await ToastService.ShowErrorAsync(result.Message ?? "Cihazlar yüklenemedi");
+                    devices = new List<Device>();
+                }
             }
             catch (Exception ex)
             {
-                await JS.InvokeVoidAsync("console.error", $"Cihazlar yüklenirken hata oluştu: {ex.Message}");
+                await ToastService.ShowErrorAsync($"Hata: {ex.Message}");
                 devices = new List<Device>();
             }
         }
@@ -77,70 +98,77 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         {
             if (string.IsNullOrWhiteSpace(newDevice.DeviceName) || string.IsNullOrWhiteSpace(newDevice.IpAddress))
             {
-                await JS.InvokeVoidAsync("alert", "Cihaz adı ve IP adresi zorunludur!");
+                await ToastService.ShowWarningAsync("Cihaz adı ve IP adresi zorunludur!");
                 return;
             }
 
             try
             {
-                var response = await Http.PostAsJsonAsync($"{apiBaseUrl}/api/Device", newDevice);
-                if (response.IsSuccessStatusCode)
+                var result = await DeviceApiService.CreateAsync(newDevice);
+                if (result.Success)
                 {
-                    await JS.InvokeVoidAsync("alert", "✅ Cihaz başarıyla eklendi!");
+                    await ToastService.ShowSuccessAsync("Cihaz başarıyla eklendi!");
                     showAddForm = false;
                     await LoadDevices();
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("alert", "❌ Cihaz eklenemedi!");
+                    await ToastService.ShowErrorAsync(result.Message ?? "Cihaz eklenemedi!");
                 }
             }
             catch (Exception ex)
             {
-                await JS.InvokeVoidAsync("alert", $"❌ Hata: {ex.Message}");
+                await ToastService.ShowErrorAsync($"Hata: {ex.Message}");
             }
         }
 
         private async Task TestConnection(int deviceId)
         {
-            var response = await Http.PostAsync($"{apiBaseUrl}/api/Device/{deviceId}/test", null);
-            var result = await response.Content.ReadFromJsonAsync<dynamic>();
-            await JS.InvokeVoidAsync("alert", result?.Success == true ? "✅ Bağlantı başarılı!" : "❌ Bağlantı başarısız!");
+            var result = await DeviceApiService.TestConnectionAsync(deviceId);
+            if (result.Success && result.Data)
+            {
+                await ToastService.ShowSuccessAsync("Bağlantı başarılı!");
+            }
+            else
+            {
+                await ToastService.ShowErrorAsync("Bağlantı başarısız!");
+            }
             await LoadDevices();
         }
 
         private async Task GetStatus(int deviceId)
         {
-            try
+            var result = await DeviceApiService.GetStatusAsync(deviceId);
+            if (result.Success && result.Data != null)
             {
-                var status = await Http.GetFromJsonAsync<dynamic>($"{apiBaseUrl}/api/Device/{deviceId}/status");
+                var status = result.Data;
                 var message = $"📊 Cihaz Durum Bilgisi:\n\n" +
-                             $"Firmware: {status?.FirmwareVersion}\n" +
-                             $"Seri No: {status?.SerialNumber}\n" +
-                             $"Platform: {status?.Platform}\n" +
-                             $"Kullanıcı: {status?.UserCount} / {status?.UserCapacity}\n" +
-                             $"Kayıt: {status?.AttendanceLogCount} / {status?.AttLogCapacity}\n" +
-                             $"Parmak İzi: {status?.FingerPrintCount} / {status?.FingerPrintCapacity}";
+                             $"Firmware: {status.FirmwareVersion}\n" +
+                             $"Seri No: {status.SerialNumber}\n" +
+                             $"Platform: {status.Platform}\n" +
+                             $"Kullanıcı: {status.UserCount} / {status.UserCapacity}\n" +
+                             $"Kayıt: {status.AttendanceLogCount} / {status.AttLogCapacity}\n" +
+                             $"Parmak İzi: {status.FingerPrintCount} / {status.FingerPrintCapacity}";
                 await JS.InvokeVoidAsync("alert", message);
             }
-            catch
+            else
             {
-                await JS.InvokeVoidAsync("alert", "❌ Cihaz durumu alınamadı!");
+                await ToastService.ShowErrorAsync(result.Message ?? "Cihaz durumu alınamadı!");
             }
         }
 
         private async Task GetDeviceTime(int deviceId)
         {
-            try
+            var result = await DeviceApiService.GetDeviceTimeAsync(deviceId);
+            if (result.Success && result.Data != null)
             {
-                var timeDto = await Http.GetFromJsonAsync<dynamic>($"{apiBaseUrl}/api/Device/{deviceId}/time");
-                var deviceTime = DateTime.Parse(timeDto?.DeviceTime.ToString());
-                var diff = timeDto?.TimeDifferenceSeconds;
-                await JS.InvokeVoidAsync("alert", $"🕐 Cihaz Saati:\n{deviceTime:dd.MM.yyyy HH:mm:ss}\n\nSunucu ile fark: {diff} saniye");
+                var timeDto = result.Data;
+                var message = $"🕐 Cihaz Saati:\n{timeDto.DeviceTime:dd.MM.yyyy HH:mm:ss}\n\nSunucu ile fark: {timeDto.TimeDifferenceSeconds} saniye";
+                await JS.InvokeVoidAsync("alert", message);
             }
-            catch
+            else
             {
-                await JS.InvokeVoidAsync("alert", "❌ Cihaz saati alınamadı!");
+                await ToastService.ShowErrorAsync(result.Message ?? "Cihaz saati alınamadı!");
             }
         }
 
@@ -148,35 +176,57 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         {
             if (await JS.InvokeAsync<bool>("confirm", "Cihaz saatini şu anki sunucu saatiyle senkronize etmek istediğinize emin misiniz?"))
             {
-                try
+                var result = await DeviceApiService.SynchronizeDeviceTimeAsync(deviceId);
+                if (result.Success && result.Data)
                 {
-                    await Http.PostAsync($"{apiBaseUrl}/api/Device/{deviceId}/time/sync", null);
-                    await JS.InvokeVoidAsync("alert", "✅ Cihaz saati senkronize edildi!");
+                    await ToastService.ShowSuccessAsync("Cihaz saati senkronize edildi!");
                 }
-                catch
+                else
                 {
-                    await JS.InvokeVoidAsync("alert", "❌ Cihaz saati senkronize edilemedi!");
+                    await ToastService.ShowErrorAsync(result.Message ?? "Cihaz saati senkronize edilemedi!");
                 }
             }
         }
 
         private async Task ShowDeviceUsers(int deviceId)
         {
-            try
+            var result = await DeviceApiService.GetDeviceUsersAsync(deviceId);
+            if (result.Success && result.Data != null && result.Data.Any())
             {
-                var users = await Http.GetFromJsonAsync<List<dynamic>>($"{apiBaseUrl}/api/ZKTecoUser/device/{deviceId}/from-device");
-                if (users != null && users.Any())
+                await JS.InvokeVoidAsync("alert", $"👥 Cihazdaki Personel Sayısı: {result.Data.Count}\n\nDetaylı liste için 'Kullanıcı Yönetimi' sayfasını ziyaret edin.");
+            }
+            else
+            {
+                await ToastService.ShowInfoAsync("Cihazda kayıtlı personel bulunamadı.");
+            }
+        }
+
+        private async Task EnableDevice(int deviceId)
+        {
+            var result = await DeviceApiService.EnableDeviceAsync(deviceId);
+            if (result.Success && result.Data)
+            {
+                await ToastService.ShowSuccessAsync("Cihaz etkinleştirildi!");
+            }
+            else
+            {
+                await ToastService.ShowErrorAsync(result.Message ?? "Cihaz etkinleştirilemedi!");
+            }
+        }
+
+        private async Task DisableDevice(int deviceId)
+        {
+            if (await JS.InvokeAsync<bool>("confirm", "⚠️ Cihazı devre dışı bırakmak istediğinize emin misiniz?\n\nKullanıcılar parmak izi okutamaz veya kart geçemez."))
+            {
+                var result = await DeviceApiService.DisableDeviceAsync(deviceId);
+                if (result.Success && result.Data)
                 {
-                    await JS.InvokeVoidAsync("alert", $"👥 Cihazdaki Personel Sayısı: {users.Count}\n\nDetaylı liste için 'Kullanıcı Yönetimi' sayfasını ziyaret edin.");
+                    await ToastService.ShowSuccessAsync("Cihaz devre dışı bırakıldı!");
                 }
                 else
                 {
-                    await JS.InvokeVoidAsync("alert", "ℹ️ Cihazda kayıtlı personel bulunamadı.");
+                    await ToastService.ShowErrorAsync(result.Message ?? "Cihaz devre dışı bırakılamadı!");
                 }
-            }
-            catch
-            {
-                await JS.InvokeVoidAsync("alert", "❌ Personel listesi alınamadı!");
             }
         }
 
@@ -184,14 +234,30 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         {
             if (await JS.InvokeAsync<bool>("confirm", "⚠️ Cihazı yeniden başlatmak istediğinize emin misiniz?\n\nCihaz yaklaşık 30 saniye offline olacak."))
             {
-                try
+                var result = await DeviceApiService.RestartDeviceAsync(deviceId);
+                if (result.Success && result.Data)
                 {
-                    await Http.PostAsync($"{apiBaseUrl}/api/Device/{deviceId}/restart", null);
-                    await JS.InvokeVoidAsync("alert", "✅ Cihaz yeniden başlatılıyor...");
+                    await ToastService.ShowSuccessAsync("Cihaz yeniden başlatılıyor...");
                 }
-                catch
+                else
                 {
-                    await JS.InvokeVoidAsync("alert", "❌ Cihaz yeniden başlatılamadı!");
+                    await ToastService.ShowErrorAsync(result.Message ?? "Cihaz yeniden başlatılamadı!");
+                }
+            }
+        }
+
+        private async Task PowerOffDevice(int deviceId)
+        {
+            if (await JS.InvokeAsync<bool>("confirm", "🚨 DİKKAT! Cihazı kapatmak istediğinize emin misiniz?\n\nCihazı tekrar açmak için fiziksel müdahale gerekebilir!"))
+            {
+                var result = await DeviceApiService.PowerOffDeviceAsync(deviceId);
+                if (result.Success && result.Data)
+                {
+                    await ToastService.ShowSuccessAsync("Cihaz kapatılıyor...");
+                }
+                else
+                {
+                    await ToastService.ShowErrorAsync(result.Message ?? "Cihaz kapatılamadı!");
                 }
             }
         }
@@ -200,15 +266,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         {
             if (await JS.InvokeAsync<bool>("confirm", "⚠️ Cihazı silmek istediğinize emin misiniz?\n\nBu işlem geri alınamaz!"))
             {
-                try
+                var result = await DeviceApiService.DeleteAsync(deviceId);
+                if (result.Success && result.Data)
                 {
-                    await Http.DeleteAsync($"{apiBaseUrl}/api/Device/{deviceId}");
-                    await JS.InvokeVoidAsync("alert", "✅ Cihaz silindi!");
+                    await ToastService.ShowSuccessAsync("Cihaz silindi!");
                     await LoadDevices();
                 }
-                catch
+                else
                 {
-                    await JS.InvokeVoidAsync("alert", "❌ Cihaz silinemedi!");
+                    await ToastService.ShowErrorAsync(result.Message ?? "Cihaz silinemedi!");
                 }
             }
         }
@@ -219,7 +285,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
 
         private async Task OpenSendPersonelModal(int deviceId)
         {
-            var device = devices?.FirstOrDefault(d => d.Id == deviceId);
+            var device = devices?.FirstOrDefault(d => d.DeviceId == deviceId);
             if (device == null) return;
 
             selectedDeviceId = deviceId;
@@ -229,14 +295,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
 
             try
             {
-                // Personelleri yükle
-                var result = await Http.GetFromJsonAsync<List<PersonelDto>>($"{apiBaseUrl}/api/Personel");
-                personelList = result ?? new List<PersonelDto>();
+                // TODO: Personel listesi için PersonelApiService kullanılmalı
+                // Şimdilik boş liste
+                personelList = new List<PersonelDto>();
                 filteredPersonelList = personelList;
+                await ToastService.ShowInfoAsync("Personel listesi yükleme özelliği henüz aktif değil");
             }
             catch
             {
-                await JS.InvokeVoidAsync("alert", "❌ Personeller yüklenemedi!");
+                await ToastService.ShowErrorAsync("Personeller yüklenemedi!");
                 personelList = new List<PersonelDto>();
                 filteredPersonelList = new List<PersonelDto>();
             }
@@ -338,23 +405,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 {
                     try
                     {
-                        var personel = personelList.FirstOrDefault(p => p.TcKimlikNo == tcKimlikNo);
-                        if (personel != null)
-                        {
-                            // POST /api/ZKTecoUser/{userId}/sync-to-device/{deviceId} endpoint'ini kullan
-                            var response = await Http.PostAsync(
-                                $"{apiBaseUrl}/api/ZKTecoUser/{personel.PersonelKayitNo}/sync-to-device/{selectedDeviceId}",
-                                null);
-
-                            if (response.IsSuccessStatusCode)
-                            {
-                                successCount++;
-                            }
-                            else
-                            {
-                                failCount++;
-                            }
-                        }
+                        // TODO: ZKTeco User API Service kullanılmalı
+                        // Şimdilik başarısız say
+                        failCount++;
                     }
                     catch
                     {

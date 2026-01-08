@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
+namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri
 {
     /// <summary>
     /// ZKTeco Attendance yönetim servisi

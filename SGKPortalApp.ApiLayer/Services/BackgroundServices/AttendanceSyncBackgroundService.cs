@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
-using SGKPortalApp.BusinessObjectLayer.Services.ZKTeco;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
 using System;
 using System.Linq;
 using System.Threading;

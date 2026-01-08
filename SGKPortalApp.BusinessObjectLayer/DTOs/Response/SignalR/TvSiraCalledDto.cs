@@ -1,53 +1,8 @@
+using System;
+using System.Collections.Generic;
+
 namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SignalR
 {
-    /// <summary>
-    /// Banko Panel Sıra Güncellemesi için DTO
-    /// Kiosk'tan sıra alındığında veya yönlendirme sonrası personele bildirim için kullanılır
-    /// </summary>
-    public class BankoPanelSiraGuncellemesiDto
-    {
-        /// <summary>
-        /// Güncellenen sıra ID
-        /// </summary>
-        public int SiraId { get; set; }
-
-        /// <summary>
-        /// Personel TC Kimlik No
-        /// </summary>
-        public string PersonelTc { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Güncellenen sıra bilgisi
-        /// </summary>
-        public object? Sira { get; set; }
-
-        /// <summary>
-        /// Sıranın personelin listesindeki pozisyonu (0-indexed)
-        /// </summary>
-        public int Pozisyon { get; set; }
-
-        /// <summary>
-        /// Personelin toplam sıra sayısı
-        /// </summary>
-        public int ToplamSiraSayisi { get; set; }
-
-        /// <summary>
-        /// İşlem zamanı
-        /// </summary>
-        public DateTime Timestamp { get; set; } = DateTime.Now;
-    }
-
-    /// <summary>
-    /// TV ekranına basit sıra bildirimi (eski yapı için - receiveSiraUpdate)
-    /// </summary>
-    public class TvSiraUpdateDto
-    {
-        public int SiraNo { get; set; }
-        public string BankoNo { get; set; } = string.Empty;
-        public string KanalAltAdi { get; set; } = string.Empty;
-        public DateTime Timestamp { get; set; } = DateTime.Now;
-    }
-
     /// <summary>
     /// TV ekranına sıra çağırma bildirimi için kullanılan DTO
     /// Request/Command Pattern ile clean architecture
@@ -103,16 +58,5 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SignalR
         /// İşlem zamanı
         /// </summary>
         public DateTime Timestamp { get; set; } = DateTime.Now;
-    }
-
-    /// <summary>
-    /// TV ekranındaki sıra listesi için item DTO
-    /// </summary>
-    public class TvSiraItemDto
-    {
-        public int BankoId { get; set; }
-        public int BankoNo { get; set; }
-        public string KatTipi { get; set; } = string.Empty;
-        public int SiraNo { get; set; }
     }
 }

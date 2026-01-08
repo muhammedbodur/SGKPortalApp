@@ -1,12 +1,12 @@
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
-namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
+namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 {
     public class ZKTecoAttendanceService : IZKTecoAttendanceService
     {
@@ -28,17 +28,17 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
 
         public Task<List<CekilenData>> GetAttendanceRecordsAsync(AttendanceFilterDto? filter = null)
         {
-            throw new NotImplementedException("This method should be implemented in BusinessLogicLayer with repository access");
+            throw new NotImplementedException("This method should be implemented with repository access");
         }
 
         public Task<int> GetAttendanceCountAsync()
         {
-            throw new NotImplementedException("This method should be implemented in BusinessLogicLayer with repository access");
+            throw new NotImplementedException("This method should be implemented with repository access");
         }
 
         public Task<AttendanceStatisticsDto> GetStatisticsAsync(DateTime? startDate = null, DateTime? endDate = null)
         {
-            throw new NotImplementedException("This method should be implemented in BusinessLogicLayer with repository access");
+            throw new NotImplementedException("This method should be implemented with repository access");
         }
 
         // ========== Device Sync Operations ==========
@@ -54,8 +54,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
 
         public Task<bool> SyncRecordsFromDeviceToDbAsync(int deviceId)
         {
-            // This method needs to be implemented in BusinessLogicLayer with repository access
-            throw new NotImplementedException("Database operations should be in BusinessLogicLayer");
+            throw new NotImplementedException("Database operations should be implemented with repository access");
         }
 
         public async Task<bool> ClearRecordsFromDeviceAsync(int deviceId)

@@ -1,0 +1,161 @@
+@page "/pdks/zkteco/realtime"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco
+@using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>Gerçek Zamanlı İzleme - ZKTeco</PageTitle>
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-3">
+        <div class="col">
+            <h3>📡 Gerçek Zamanlı Cihaz İzleme</h3>
+            <p class="text-muted">Cihazlardan gelen anlık olayları izleyin (SignalR)</p>
+        </div>
+        <div class="col-auto">
+            @if (isMonitoring)
+            {
+                <button class="btn btn-danger" @onclick="StopMonitoring">
+                    <i class="bx bx-stop-circle"></i> İzlemeyi Durdur
+                </button>
+            }
+            else
+            {
+                <button class="btn btn-success" @onclick="StartMonitoring" disabled="@(selectedDeviceId == 0)">
+                    <i class="bx bx-play-circle"></i> İzlemeyi Başlat
+                </button>
+            }
+            <button class="btn btn-outline-secondary" @onclick="ClearEvents">
+                <i class="bx bx-trash"></i> Temizle
+            </button>
+        </div>
+    </div>
+
+    <!-- Device Selection -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label">Cihaz Seçin *</label>
+                    <select class="form-select" @bind="selectedDeviceId" disabled="@isMonitoring">
+                        <option value="0">-- Cihaz Seçin --</option>
+                        @foreach (var device in devices)
+                        {
+                            <option value="@device.DeviceId">
+                                @device.DeviceName (@device.IpAddress)
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label">Durum</label>
+                    <div class="d-flex gap-3 align-items-center">
+                        @if (isMonitoring)
+                        {
+                            <div class="badge bg-success p-2">
+                                <i class="bx bx-broadcast bx-fade-left"></i> İzleme Aktif
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="badge bg-secondary p-2">
+                                <i class="bx bx-stop-circle"></i> İzleme Pasif
+                            </div>
+                        }
+                        <div class="badge bg-label-primary p-2">
+                            Toplam Event: <strong>@events.Count</strong>
+                        </div>
+                        @if (isConnected)
+                        {
+                            <div class="badge bg-label-success p-2">
+                                <i class="bx bx-wifi"></i> SignalR Bağlı
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="badge bg-label-danger p-2">
+                                <i class="bx bx-wifi-off"></i> SignalR Bağlantısız
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events List -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">📋 Gerçek Zamanlı Olaylar</h5>
+        </div>
+        <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+            @if (!events.Any())
+            {
+                <div class="text-center text-muted py-5">
+                    <i class="bx bx-time bx-lg"></i>
+                    <p class="mt-2">Henüz event alınmadı. İzlemeyi başlatın.</p>
+                </div>
+            }
+            else
+            {
+                <div class="list-group">
+                    @foreach (var evt in events.OrderByDescending(e => e.EventTime))
+                    {
+                        <div class="list-group-item list-group-item-action @GetEventClass(evt)">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">
+                                    <i class="bx bx-user-circle me-1"></i>
+                                    @if (!string.IsNullOrEmpty(evt.PersonelAdSoyad))
+                                    {
+                                        <strong>@evt.PersonelAdSoyad</strong>
+                                        <small class="text-muted">(@evt.EnrollNumber)</small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Kayıt No: @evt.EnrollNumber</span>
+                                    }
+                                </h6>
+                                <small class="text-muted">@evt.EventTime.ToString("HH:mm:ss")</small>
+                            </div>
+                            <div class="d-flex gap-2 mt-2">
+                                <span class="badge @evt.InOutMode.ToBadgeClass()">
+                                    @evt.InOutMode.ToDisplayText()
+                                </span>
+                                <span class="badge @evt.VerifyMethod.ToBadgeClass()">
+                                    @evt.VerifyMethod.ToDisplayText()
+                                </span>
+                                <span class="badge bg-label-secondary">
+                                    <i class="bx bx-devices"></i> @evt.DeviceIp
+                                </span>
+                                @if (!string.IsNullOrEmpty(evt.PersonelDepartman))
+                                {
+                                    <span class="badge bg-label-info">
+                                        @evt.PersonelDepartman
+                                    </span>
+                                }
+                            </div>
+                            @if (!string.IsNullOrEmpty(evt.PersonelSicilNo))
+                            {
+                                <small class="text-muted mt-1 d-block">
+                                    Sicil: @evt.PersonelSicilNo
+                                </small>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string GetEventClass(RealtimeEventDto evt)
+    {
+        return evt.InOutMode switch
+        {
+            InOutMode.CheckIn => "border-start border-success border-4",
+            InOutMode.CheckOut => "border-start border-danger border-4",
+            _ => "border-start border-secondary border-4"
+        };
+    }
+}

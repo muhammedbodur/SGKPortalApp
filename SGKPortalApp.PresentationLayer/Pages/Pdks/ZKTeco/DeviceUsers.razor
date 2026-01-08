@@ -1,0 +1,220 @@
+@page "/pdks/zkteco/device/{DeviceId:int}/users"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>Cihaz Kullanıcıları - ZKTeco</PageTitle>
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-3">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/pdks/zkteco/devices">Cihazlar</a></li>
+                    <li class="breadcrumb-item active">@deviceName - Kullanıcılar</li>
+                </ol>
+            </nav>
+            <h3>👥 Cihaz Kullanıcıları</h3>
+            <p class="text-muted">@deviceName (@deviceIp)</p>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" @onclick="RefreshUsers">
+                <i class="bx bx-refresh"></i> Yenile
+            </button>
+            <button class="btn btn-success" @onclick="OpenAddUserModal">
+                <i class="bx bx-user-plus"></i> Kullanıcı Ekle
+            </button>
+            <button class="btn btn-danger" @onclick="ClearAllUsers">
+                <i class="bx bx-trash"></i> Tümünü Sil
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted">Toplam Kullanıcı</h6>
+                    <h3>@userCount</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted">Kart Tanımlı</h6>
+                    <h3>@usersWithCard</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bx bx-search"></i></span>
+                        <input type="text" class="form-control" placeholder="Kayıt No, Ad veya Kart No ile ara..."
+                               @bind="searchTerm" @bind:event="oninput" @onkeyup="FilterUsers" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <select class="form-select" @bind="privilegeFilter" @bind:after="FilterUsers">
+                        <option value="-1">Tüm Yetkiler</option>
+                        <option value="0">Normal Kullanıcı</option>
+                        <option value="2">Yönetici</option>
+                        <option value="14">Süper Admin</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="mt-2">Kullanıcılar yükleniyor...</p>
+        </div>
+    }
+    else
+    {
+        <!-- Users Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm">
+                        <thead>
+                            <tr>
+                                <th>Kayıt No</th>
+                                <th>Ad Soyad</th>
+                                <th>Kart No</th>
+                                <th>Yetki</th>
+                                <th>Durum</th>
+                                <th style="min-width: 200px;">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!filteredUsers.Any())
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">
+                                        <i class="bx bx-user-x bx-lg"></i>
+                                        <p class="mb-0 mt-2">Kullanıcı bulunamadı</p>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var user in filteredUsers)
+                                {
+                                    <tr>
+                                        <td><strong>@user.EnrollNumber</strong></td>
+                                        <td>@user.Name</td>
+                                        <td>
+                                            @if (user.CardNumber.HasValue && user.CardNumber.Value > 0)
+                                            {
+                                                <span class="badge bg-label-primary">@user.CardNumber</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge @GetPrivilegeBadgeClass(user.Privilege)">
+                                                @GetPrivilegeText(user.Privilege)
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge @(user.Enabled ? "bg-success" : "bg-secondary")">
+                                                @(user.Enabled ? "Aktif" : "Pasif")
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" @onclick="() => OpenEditUserModal(user)" title="Düzenle">
+                                                    <i class="bx bx-edit"></i>
+                                                </button>
+                                                <button class="btn btn-outline-warning" @onclick="() => RemoveCard(user.EnrollNumber)" title="Kartı Kaldır">
+                                                    <i class="bx bx-credit-card-alt"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" @onclick="() => DeleteUser(user.EnrollNumber)" title="Sil">
+                                                    <i class="bx bx-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Add/Edit User Modal -->
+@if (showUserModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white">
+                        <i class="bx @(isEditMode ? "bx-edit" : "bx-user-plus") me-2"></i>
+                        @(isEditMode ? "Kullanıcı Düzenle" : "Yeni Kullanıcı Ekle")
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseUserModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Kayıt Numarası *</label>
+                        <input type="text" class="form-control" @bind="userForm.EnrollNumber" disabled="@isEditMode" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ad Soyad *</label>
+                        <input type="text" class="form-control" @bind="userForm.Name" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Kart Numarası *</label>
+                        <input type="number" class="form-control" @bind="userForm.CardNumber" placeholder="Kart numarası" required />
+                        <small class="text-muted">Cihazlar sadece kart okuma yapabilmektedir</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Yetki Seviyesi</label>
+                        <select class="form-select" @bind="userForm.Privilege">
+                            <option value="0">Normal Kullanıcı</option>
+                            <option value="2">Yönetici</option>
+                            <option value="14">Süper Admin</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" @bind="userForm.Enabled" id="enabled">
+                            <label class="form-check-label" for="enabled">Aktif</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" @onclick="CloseUserModal" disabled="@isSaving">
+                        İptal
+                    </button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveUser" disabled="@isSaving">
+                        @if (isSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        <i class="bx bx-save me-1"></i>Kaydet
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -766,7 +766,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 return;
             }
 
-            var device = ZKTecoDevices.FirstOrDefault(d => d.Id == filterZKTecoDeviceId);
+            var device = ZKTecoDevices.FirstOrDefault(d => d.DeviceId == filterZKTecoDeviceId);
             if (device == null)
             {
                 await _toastService.ShowErrorAsync("Cihaz bulunamadı!");
@@ -807,7 +807,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 return;
             }
 
-            var device = ZKTecoDevices.FirstOrDefault(d => d.Id == filterZKTecoDeviceId);
+            var device = ZKTecoDevices.FirstOrDefault(d => d.DeviceId == filterZKTecoDeviceId);
             if (device == null)
             {
                 await _toastService.ShowErrorAsync("Cihaz bulunamadı!");
@@ -894,7 +894,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 return;
             }
 
-            var device = ZKTecoDevices.FirstOrDefault(d => d.Id == filterZKTecoDeviceId);
+            var device = ZKTecoDevices.FirstOrDefault(d => d.DeviceId == filterZKTecoDeviceId);
             if (device == null)
             {
                 await _toastService.ShowErrorAsync("Cihaz bulunamadı!");

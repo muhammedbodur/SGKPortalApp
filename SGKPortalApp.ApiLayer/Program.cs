@@ -161,12 +161,12 @@ namespace SGKPortalApp.ApiLayer
             });
 
             // ZKTecoApiClient servis kaydı
-            builder.Services.AddTransient<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IZKTecoApiClient>(serviceProvider =>
+            builder.Services.AddTransient<SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri.IZKTecoApiClient>(serviceProvider =>
             {
                 var httpClientFactory = serviceProvider.GetRequiredService<System.Net.Http.IHttpClientFactory>();
                 var httpClient = httpClientFactory.CreateClient("ZKTecoApiClient");
-                var logger = serviceProvider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoApiClient>>();
-                return new SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoApiClient(httpClient, logger, zkTecoApiBaseUrl);
+                var logger = serviceProvider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoApiClient>>();
+                return new SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoApiClient(httpClient, logger, zkTecoApiBaseUrl);
             });
 
             Console.WriteLine($"🔌 ZKTeco API Client yapılandırıldı: {zkTecoApiBaseUrl}");
@@ -175,10 +175,10 @@ namespace SGKPortalApp.ApiLayer
             // 🔄 ZKTeco REALTIME SERVICE (SignalR Client)
             // ═══════════════════════════════════════════════════════
             var zkTecoSignalRUrl = $"{zkTecoApiBaseUrl}/signalr";
-            builder.Services.AddSingleton<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IZKTecoRealtimeService>(serviceProvider =>
+            builder.Services.AddSingleton<SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri.IZKTecoRealtimeService>(serviceProvider =>
             {
-                var logger = serviceProvider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoRealtimeService>>();
-                return new SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoRealtimeService(logger, zkTecoSignalRUrl);
+                var logger = serviceProvider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService>>();
+                return new SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService(logger, zkTecoSignalRUrl);
             });
 
             Console.WriteLine($"🔄 ZKTeco Realtime Service yapılandırıldı: {zkTecoSignalRUrl}");
@@ -187,7 +187,8 @@ namespace SGKPortalApp.ApiLayer
             // 🎯 ZKTeco BUSINESS SERVICES
             // ═══════════════════════════════════════════════════════
             builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri.IDeviceBusinessService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.DeviceBusinessService>();
-            builder.Services.AddScoped<SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.IZKTecoAttendanceService, SGKPortalApp.BusinessObjectLayer.Services.ZKTeco.ZKTecoAttendanceService>();
+            builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri.IDeviceService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.DeviceService>();
+            builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri.IZKTecoAttendanceService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoAttendanceService>();
 
             Console.WriteLine("🎯 ZKTeco Business Services yapılandırıldı");
 

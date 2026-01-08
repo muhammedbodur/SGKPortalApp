@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
+namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 {
     /// <summary>
     /// ZKTecoApi HTTP client implementation
@@ -288,6 +289,29 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Get user by card error: {deviceIp}:{port} - Card: {cardNumber}");
+                return null;
+            }
+        }
+
+        public async Task<ApiUserDto?> GetUserByEnrollNumberAsync(string deviceIp, string enrollNumber, int port = 4370)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync(
+                    $"{_baseUrl}/api/users/{deviceIp}/{enrollNumber}?port={port}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning($"Get user by enroll number failed: {deviceIp}:{port} - EnrollNumber: {enrollNumber} - {response.StatusCode}");
+                    return null;
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse<ApiUserDto>>();
+                return result?.Data;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Get user by enroll number error: {deviceIp}:{port} - EnrollNumber: {enrollNumber}");
                 return null;
             }
         }

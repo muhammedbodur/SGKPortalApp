@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
 {
@@ -9,14 +10,12 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
     /// PDKS.Net4.8 tbSgmInfos ile uyumlu
     /// Tablo adı: ZKTeco_Device (Configuration'da tanımlı)
     /// </summary>
-    public class Device
+    public class Device : AuditableEntity
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int DeviceId { get; set; }
 
         /// <summary>
-        /// Cihaz adı (örn: "Ana Giriş", "Yemekhane")
         /// PDKS.Net4.8: sgmAdi
         /// </summary>
         [StringLength(250)]
@@ -62,12 +61,6 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         /// Cihazın hangi hizmet binasında olduğu
         /// </summary>
         public int? HizmetBinasiId { get; set; }
-
-        /// <summary>
-        /// Navigation property - İlişkili hizmet binası
-        /// </summary>
-        [ForeignKey("HizmetBinasiId")]
-        public virtual Common.HizmetBinasi? HizmetBinasi { get; set; }
 
         // ========== Son İşlem Bilgileri (Attendance çekme) ==========
 
@@ -120,10 +113,5 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         /// PDKS.Net4.8: kontrolDurum
         /// </summary>
         public string? LastHealthCheckStatus { get; set; }
-
-        // ========== Audit ==========
-
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 
 namespace SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco
 {
@@ -21,15 +22,13 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco
 
         /// <summary>
         /// Doğrulama yöntemi
-        /// 0 = Password, 1 = Fingerprint, 15 = Card, 3 = Face
         /// </summary>
-        public int VerifyMethod { get; set; }
+        public VerifyMethod VerifyMethod { get; set; }
 
         /// <summary>
         /// Giriş/Çıkış durumu
-        /// 0 = CheckIn, 1 = CheckOut, 2 = BreakOut, 3 = BreakIn, 4 = OTIn, 5 = OTOut
         /// </summary>
-        public int InOutMode { get; set; }
+        public InOutMode InOutMode { get; set; }
 
         /// <summary>
         /// İş kodu (Work code)
@@ -50,5 +49,29 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco
         /// Kart numarası (varsa)
         /// </summary>
         public long? CardNumber { get; set; }
+        
+        // ═══════════════════════════════════════════════════════
+        // PERSONEL BİLGİLERİ (Business katmanı tarafından eklenir)
+        // ═══════════════════════════════════════════════════════
+        
+        /// <summary>
+        /// Personel ad soyad (DB'den eşleştirme sonucu)
+        /// </summary>
+        public string? PersonelAdSoyad { get; set; }
+        
+        /// <summary>
+        /// Personel sicil numarası (DB'den eşleştirme sonucu)
+        /// </summary>
+        public string? PersonelSicilNo { get; set; }
+        
+        /// <summary>
+        /// Personel departman adı (DB'den eşleştirme sonucu)
+        /// </summary>
+        public string? PersonelDepartman { get; set; }
+        
+        /// <summary>
+        /// Personel TC kimlik numarası (DB'den eşleştirme sonucu)
+        /// </summary>
+        public string? PersonelTcKimlikNo { get; set; }
     }
 }

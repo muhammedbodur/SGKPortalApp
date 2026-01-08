@@ -1,4 +1,5 @@
 using System;
+using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 
 namespace SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco
 {
@@ -10,9 +11,15 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco
     {
         public string EnrollNumber { get; set; } = string.Empty;
         public DateTime DateTime { get; set; }
-        public int VerifyMethod { get; set; } // 0=Password, 1=Fingerprint, 15=Card
-        public int InOutMode { get; set; } // 0=Check-In, 1=Check-Out
+        public VerifyMethod VerifyMethod { get; set; }
+        public InOutMode InOutMode { get; set; }
         public int WorkCode { get; set; }
         public string DeviceIp { get; set; } = string.Empty;
+        
+        // Personel bilgileri (opsiyonel - eşleştirme yapıldıysa dolu)
+        public string? PersonelAdSoyad { get; set; }
+        public string? PersonelSicilNo { get; set; }
+        public string? PersonelDepartman { get; set; }
+        public string? PersonelTcKimlikNo { get; set; }
     }
 }

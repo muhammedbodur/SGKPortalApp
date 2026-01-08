@@ -1,5 +1,6 @@
 @page "/pdks/zkteco/devices"
 @using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 
 <PageTitle>ZKTeco Cihaz Yönetimi</PageTitle>
 
@@ -87,28 +88,37 @@
                             <td><small>@device.LastHealthCheckTime?.ToString("dd.MM HH:mm")</small></td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <button class="btn btn-outline-info" @onclick="() => TestConnection(device.Id)" title="Bağlantı Testi">
+                                    <button class="btn btn-outline-info" @onclick="() => TestConnection(device.DeviceId)" title="Bağlantı Testi">
                                         <i class="bx bx-wifi"></i>
                                     </button>
-                                    <button class="btn btn-outline-warning" @onclick="() => GetStatus(device.Id)" title="Durum">
+                                    <button class="btn btn-outline-warning" @onclick="() => GetStatus(device.DeviceId)" title="Durum">
                                         <i class="bx bx-info-circle"></i>
                                     </button>
-                                    <button class="btn btn-outline-secondary" @onclick="() => GetDeviceTime(device.Id)" title="Cihaz Saati">
+                                    <button class="btn btn-outline-secondary" @onclick="() => GetDeviceTime(device.DeviceId)" title="Cihaz Saati">
                                         <i class="bx bx-time"></i>
                                     </button>
-                                    <button class="btn btn-outline-primary" @onclick="() => SyncDeviceTime(device.Id)" title="Saati Senkronize Et">
+                                    <button class="btn btn-outline-primary" @onclick="() => SyncDeviceTime(device.DeviceId)" title="Saati Senkronize Et">
                                         <i class="bx bx-sync"></i>
                                     </button>
-                                    <button class="btn btn-outline-success" @onclick="() => ShowDeviceUsers(device.Id)" title="Cihazdaki Personeller">
+                                    <button class="btn btn-outline-success" @onclick="() => EnableDevice(device.DeviceId)" title="Etkinleştir">
+                                        <i class="bx bx-check-circle"></i>
+                                    </button>
+                                    <button class="btn btn-outline-warning" @onclick="() => DisableDevice(device.DeviceId)" title="Devre Dışı Bırak">
+                                        <i class="bx bx-x-circle"></i>
+                                    </button>
+                                    <button class="btn btn-outline-success" @onclick="() => ShowDeviceUsers(device.DeviceId)" title="Cihazdaki Personeller">
                                         <i class="bx bx-group"></i>
                                     </button>
-                                    <button class="btn btn-outline-primary" @onclick="() => OpenSendPersonelModal(device.Id)" title="Personel Gönder">
+                                    <button class="btn btn-outline-primary" @onclick="() => OpenSendPersonelModal(device.DeviceId)" title="Personel Gönder">
                                         <i class="bx bx-user-plus"></i>
                                     </button>
-                                    <button class="btn btn-outline-dark" @onclick="() => RestartDevice(device.Id)" title="Yeniden Başlat">
+                                    <button class="btn btn-outline-dark" @onclick="() => RestartDevice(device.DeviceId)" title="Yeniden Başlat">
                                         <i class="bx bx-revision"></i>
                                     </button>
-                                    <button class="btn btn-outline-danger" @onclick="() => Delete(device.Id)" title="Sil">
+                                    <button class="btn btn-outline-danger" @onclick="() => PowerOffDevice(device.DeviceId)" title="Kapat">
+                                        <i class="bx bx-power-off"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger" @onclick="() => Delete(device.DeviceId)" title="Sil">
                                         <i class="bx bx-trash"></i>
                                     </button>
                                 </div>

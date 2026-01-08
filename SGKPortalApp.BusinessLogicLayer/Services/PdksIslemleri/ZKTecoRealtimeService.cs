@@ -1,48 +1,12 @@
 using Microsoft.AspNet.SignalR.Client;
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 using System;
 using System.Threading.Tasks;
 
-namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
+namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 {
-    /// <summary>
-    /// ZKTecoApi SignalR Hub client interface
-    /// Realtime event'leri dinler
-    /// </summary>
-    public interface IZKTecoRealtimeService
-    {
-        /// <summary>
-        /// SignalR bağlantısını başlat
-        /// </summary>
-        Task StartAsync();
-
-        /// <summary>
-        /// SignalR bağlantısını durdur
-        /// </summary>
-        Task StopAsync();
-
-        /// <summary>
-        /// Belirli bir cihaza abone ol (SignalR hub üzerinden)
-        /// </summary>
-        Task SubscribeToDeviceAsync(string deviceIp);
-
-        /// <summary>
-        /// Cihaz aboneliğinden çık
-        /// </summary>
-        Task UnsubscribeFromDeviceAsync(string deviceIp);
-
-        /// <summary>
-        /// Realtime event geldiğinde tetiklenir
-        /// </summary>
-        event EventHandler<RealtimeEventDto>? OnRealtimeEvent;
-
-        /// <summary>
-        /// Bağlantı durumu
-        /// </summary>
-        bool IsConnected { get; }
-    }
-
     /// <summary>
     /// ZKTecoApi SignalR Hub client implementation
     /// ZKTecoApi'nin RealtimeEventHub'ına bağlanır ve event'leri dinler

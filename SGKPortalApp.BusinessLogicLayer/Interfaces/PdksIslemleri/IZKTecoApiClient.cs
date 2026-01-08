@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
+namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri
 {
     /// <summary>
     /// ZKTecoApi client interface
@@ -76,10 +76,16 @@ namespace SGKPortalApp.BusinessObjectLayer.Services.ZKTeco
         Task<ApiUserDto?> GetUserFromDeviceAsync(string deviceIp, string enrollNumber, int port = 4370);
 
         /// <summary>
-        /// Kart numarasıyla kullanıcıyı bul
+        /// Kart numarasıyla kullanıcıyı bul (ZKTecoApi endpoint)
         /// GET /api/users/{ip}/card/{cardNumber}
         /// </summary>
         Task<ApiUserDto?> GetUserByCardNumberAsync(string deviceIp, long cardNumber, int port = 4370);
+
+        /// <summary>
+        /// EnrollNumber ile kullanıcıyı bul (ZKTecoApi endpoint)
+        /// GET /api/users/{ip}/{enrollNumber}
+        /// </summary>
+        Task<ApiUserDto?> GetUserByEnrollNumberAsync(string deviceIp, string enrollNumber, int port = 4370);
 
         /// <summary>
         /// Cihaza kullanıcı ekle

@@ -15,10 +15,10 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
             builder.ToTable($"{TablePrefix}Device");
 
             // Primary Key
-            builder.HasKey(d => d.Id);
+            builder.HasKey(d => d.DeviceId);
 
             // Properties
-            builder.Property(d => d.Id)
+            builder.Property(d => d.DeviceId)
                    .ValueGeneratedOnAdd();
 
             builder.Property(d => d.DeviceName)
@@ -41,11 +41,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
             builder.Property(d => d.IsActive)
                    .HasDefaultValue(true);
 
-            // Relationships
-            builder.HasOne(d => d.HizmetBinasi)
-                   .WithMany()
-                   .HasForeignKey(d => d.HizmetBinasiId)
-                   .OnDelete(DeleteBehavior.SetNull);
+            // Foreign Key (HizmetBinasiId) - Navigation property yok, sadece FK
 
             // Indexes
             builder.HasIndex(d => d.IpAddress)

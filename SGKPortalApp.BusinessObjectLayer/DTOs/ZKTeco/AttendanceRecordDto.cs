@@ -54,35 +54,4 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco
         /// </summary>
         public string EventTimeText => EventTime.ToString("HH:mm:ss");
     }
-
-    /// <summary>
-    /// Attendance istatistik DTO
-    /// </summary>
-    public class AttendanceStatisticsDto
-    {
-        public int TotalRecords { get; set; }
-        public DateTime? FirstRecord { get; set; }
-        public DateTime? LastRecord { get; set; }
-        public int UniqueUserCount { get; set; }
-        public int CheckInCount { get; set; }
-        public int CheckOutCount { get; set; }
-        public int BreakCount { get; set; }
-        public Dictionary<int, int> VerifyMethodCounts { get; set; } = new();
-        public Dictionary<string, int> DeviceRecordCounts { get; set; } = new();
-    }
-
-    /// <summary>
-    /// Attendance filtreleme parametreleri DTO
-    /// </summary>
-    public class AttendanceFilterDto
-    {
-        public string? EnrollNumber { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-        public int? VerifyMethod { get; set; }
-        public int? InOutMode { get; set; }
-        public string? DeviceIp { get; set; }
-        public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 50;
-    }
 }
