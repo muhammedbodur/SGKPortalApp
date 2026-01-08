@@ -17,6 +17,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Extensions
             // ═══════════════════════════════════════════════════════
             // 1️⃣ AUTOMAPPER PROFİLLERİ
             // ═══════════════════════════════════════════════════════
+            // NOT: BusinessLogicLayer'da SignalR Client var (ZKTecoRealtimeService için)
+            // Ama AutoMapper Profile'lar sadece mapping işlemi için kullanılır
+            // SignalR Client assembly'si bu scan'de dahil olmaz (sadece Profile'lar aranır)
             try
             {
                 services.AddAutoMapper(businessAssembly);
