@@ -63,7 +63,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         /// </summary>
         public int HizmetBinasiId { get; set; }
         [ForeignKey(nameof(HizmetBinasiId))]
-        [InverseProperty("HizmetBinasi")]
+        [InverseProperty("Devices")]
         public HizmetBinasi? HizmetBinasi { get; set; }
         // ========== Son İşlem Bilgileri (Attendance çekme) ==========
 
