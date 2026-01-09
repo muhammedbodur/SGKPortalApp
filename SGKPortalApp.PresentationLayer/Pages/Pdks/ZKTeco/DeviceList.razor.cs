@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
-using SGKPortalApp.PresentationLayer.Components.Base;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
@@ -15,7 +14,7 @@ using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
 {
-    public partial class DeviceList : FieldPermissionPageBase
+    public partial class DeviceList
     {
         // ═══════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
