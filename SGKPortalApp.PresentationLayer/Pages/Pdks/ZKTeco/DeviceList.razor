@@ -94,6 +94,8 @@
                 <thead>
                     <tr>
                         <th>Cihaz Adı</th>
+                        <th>Departman</th>
+                        <th>Hizmet Binası</th>
                         <th>IP:Port</th>
                         <th>Durum</th>
                         <th>Son Kontrol</th>
@@ -105,6 +107,26 @@
                     {
                         <tr>
                             <td><strong>@device.DeviceName</strong></td>
+                            <td>
+                                @if (device.HizmetBinasi?.Departman != null)
+                                {
+                                    <span class="badge bg-label-info">@device.HizmetBinasi.Departman.DepartmanAdi</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (device.HizmetBinasi != null)
+                                {
+                                    <span class="badge bg-label-primary">@device.HizmetBinasi.HizmetBinasiAdi</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
                             <td><code>@device.IpAddress:@device.Port</code></td>
                             <td>
                                 <span class="badge @(device.IsActive ? "bg-success" : "bg-secondary")">
