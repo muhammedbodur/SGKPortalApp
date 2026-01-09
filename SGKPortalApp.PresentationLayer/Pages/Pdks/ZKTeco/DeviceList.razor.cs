@@ -392,7 +392,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
             finally
             {
                 isLoadingPersonel = false;
-                InvokeAsync(StateHasChanged);
+                StateHasChanged();
             }
         }
 
@@ -424,7 +424,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                     .ToList();
             }
 
-            InvokeAsync(StateHasChanged);
+            StateHasChanged();
         }
 
         private void TogglePersonelSelection(string tcKimlikNo)
@@ -438,7 +438,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 selectedPersonelIds.Add(tcKimlikNo);
             }
 
-            InvokeAsync(StateHasChanged);
+            StateHasChanged();
         }
 
         private void ToggleSelectAllPersonel()
@@ -452,7 +452,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 selectedPersonelIds = filteredPersonelList.Select(p => p.TcKimlikNo).ToList();
             }
 
-            InvokeAsync(StateHasChanged);
+            StateHasChanged();
         }
 
         private bool IsAllPersonelSelected()
@@ -515,7 +515,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
             finally
             {
                 isSendingPersonel = false;
-                InvokeAsync(StateHasChanged);
+                StateHasChanged();
             }
         }
 
