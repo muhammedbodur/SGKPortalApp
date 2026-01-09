@@ -15,7 +15,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PdksIslemleri
         {
         }
 
-        public override async Task<List<Device>> GetAllAsync()
+        public override async Task<IEnumerable<Device>> GetAllAsync()
         {
             // HizmetBinasi ve Departman navigation property'lerini yükle
             return await _context.Devices
