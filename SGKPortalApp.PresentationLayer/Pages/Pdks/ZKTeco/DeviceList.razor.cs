@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
 {
