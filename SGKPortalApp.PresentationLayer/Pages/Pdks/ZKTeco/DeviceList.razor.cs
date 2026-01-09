@@ -71,15 +71,25 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 var result = await DeviceApiService.GetAllAsync();
                 if (result.Success && result.Data != null)
                 {
-                    devices = result.Data.Select(d => new Device 
-                    { 
+                    devices = result.Data.Select(d => new Device
+                    {
                         Id = d.DeviceId,
                         DeviceName = d.DeviceName,
                         IpAddress = d.IpAddress,
                         Port = d.Port,
                         IsActive = d.IsActive,
+                        HizmetBinasiId = d.HizmetBinasiId,
                         LastHealthCheckTime = d.LastHealthCheckTime,
-                        LastHealthCheckSuccess = d.LastHealthCheckSuccess
+                        LastHealthCheckSuccess = d.LastHealthCheckSuccess,
+                        // Navigation property'leri DTO'dan entity'ye aktarıyoruz (gösterim için)
+                        HizmetBinasi = d.HizmetBinasiAdi != null ? new SGKPortalApp.BusinessObjectLayer.Entities.Common.HizmetBinasi
+                        {
+                            HizmetBinasiAdi = d.HizmetBinasiAdi,
+                            Departman = d.DepartmanAdi != null ? new SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Departman
+                            {
+                                DepartmanAdi = d.DepartmanAdi
+                            } : null
+                        } : null
                     }).ToList();
                 }
                 else
