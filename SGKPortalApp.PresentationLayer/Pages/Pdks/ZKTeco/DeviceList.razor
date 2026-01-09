@@ -22,7 +22,31 @@
             <div class="card-body">
                 <h5 class="card-title">Yeni Cihaz Ekle</h5>
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <label class="form-label">Departman *</label>
+                        <select class="form-select" @onchange="OnDepartmanChanged" value="@selectedDepartmanId">
+                            <option value="0">Departman Seçin...</option>
+                            @foreach (var departman in departmanlar)
+                            {
+                                <option value="@departman.DepartmanId">@departman.DepartmanAdi</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Hizmet Binası *</label>
+                        <select class="form-select" @bind="newDevice.HizmetBinasiId" disabled="@(selectedDepartmanId == 0)">
+                            <option value="0">Hizmet Binası Seçin...</option>
+                            @foreach (var hizmetBinasi in hizmetBinalari)
+                            {
+                                <option value="@hizmetBinasi.HizmetBinasiId">@hizmetBinasi.HizmetBinasiAdi</option>
+                            }
+                        </select>
+                        @if (selectedDepartmanId == 0)
+                        {
+                            <small class="text-muted">Önce departman seçin</small>
+                        }
+                    </div>
+                    <div class="col-md-3">
                         <label class="form-label">Cihaz Adı *</label>
                         <input type="text" class="form-control" @bind="newDevice.DeviceName" placeholder="Ana Giriş Kapısı" />
                     </div>
@@ -30,6 +54,8 @@
                         <label class="form-label">IP Adresi *</label>
                         <input type="text" class="form-control" @bind="newDevice.IpAddress" placeholder="192.168.1.100" />
                     </div>
+                </div>
+                <div class="row mt-3">
                     <div class="col-md-2">
                         <label class="form-label">Port</label>
                         <input type="text" class="form-control" @bind="newDevice.Port" placeholder="4370" />
@@ -68,6 +94,8 @@
                 <thead>
                     <tr>
                         <th>Cihaz Adı</th>
+                        <th>Departman</th>
+                        <th>Hizmet Binası</th>
                         <th>IP:Port</th>
                         <th>Durum</th>
                         <th>Son Kontrol</th>
@@ -79,6 +107,26 @@
                     {
                         <tr>
                             <td><strong>@device.DeviceName</strong></td>
+                            <td>
+                                @if (device.HizmetBinasi?.Departman != null)
+                                {
+                                    <span class="badge bg-label-info">@device.HizmetBinasi.Departman.DepartmanAdi</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (device.HizmetBinasi != null)
+                                {
+                                    <span class="badge bg-label-primary">@device.HizmetBinasi.HizmetBinasiAdi</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
                             <td><code>@device.IpAddress:@device.Port</code></td>
                             <td>
                                 <span class="badge @(device.IsActive ? "bg-success" : "bg-secondary")">

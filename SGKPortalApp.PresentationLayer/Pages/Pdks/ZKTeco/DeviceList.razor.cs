@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.PresentationLayer.Components.Base;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -18,6 +20,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         // ═══════════════════════════════════════════════════════
 
         [Inject] private IZKTecoDeviceApiService DeviceApiService { get; set; } = default!;
+        [Inject] private IDepartmanApiService DepartmanApiService { get; set; } = default!;
+        [Inject] private IHizmetBinasiApiService HizmetBinasiApiService { get; set; } = default!;
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IToastService ToastService { get; set; } = default!;
 
@@ -28,6 +32,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         private List<Device>? devices;
         private bool showAddForm = false;
         private Device newDevice = new Device { Port = "4370", IsActive = true };
+
+        // Departman ve Hizmet Binası dropdown için
+        private List<DepartmanResponseDto> departmanlar = new();
+        private List<HizmetBinasiResponseDto> hizmetBinalari = new();
+        private int selectedDepartmanId = 0;
 
         // Personel Gönderme Modal
         private bool showSendPersonelModal = false;
@@ -47,6 +56,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
+            await LoadDepartmanlar();
             await LoadDevices();
         }
 
@@ -61,15 +71,25 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 var result = await DeviceApiService.GetAllAsync();
                 if (result.Success && result.Data != null)
                 {
-                    devices = result.Data.Select(d => new Device 
-                    { 
+                    devices = result.Data.Select(d => new Device
+                    {
                         Id = d.DeviceId,
                         DeviceName = d.DeviceName,
                         IpAddress = d.IpAddress,
                         Port = d.Port,
                         IsActive = d.IsActive,
+                        HizmetBinasiId = d.HizmetBinasiId,
                         LastHealthCheckTime = d.LastHealthCheckTime,
-                        LastHealthCheckSuccess = d.LastHealthCheckSuccess
+                        LastHealthCheckSuccess = d.LastHealthCheckSuccess,
+                        // Navigation property'leri DTO'dan entity'ye aktarıyoruz (gösterim için)
+                        HizmetBinasi = d.HizmetBinasiAdi != null ? new SGKPortalApp.BusinessObjectLayer.Entities.Common.HizmetBinasi
+                        {
+                            HizmetBinasiAdi = d.HizmetBinasiAdi,
+                            Departman = d.DepartmanAdi != null ? new SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Departman
+                            {
+                                DepartmanAdi = d.DepartmanAdi
+                            } : null
+                        } : null
                     }).ToList();
                 }
                 else
@@ -85,20 +105,82 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
             }
         }
 
+        private async Task LoadDepartmanlar()
+        {
+            try
+            {
+                var result = await DepartmanApiService.GetActiveAsync();
+                if (result.Success && result.Data != null)
+                {
+                    departmanlar = result.Data;
+                }
+            }
+            catch (Exception ex)
+            {
+                await ToastService.ShowErrorAsync($"Departmanlar yüklenemedi: {ex.Message}");
+            }
+        }
+
+        private async Task OnDepartmanChanged(ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out var departmanId))
+            {
+                selectedDepartmanId = departmanId;
+                await LoadHizmetBinalari(departmanId);
+                newDevice.HizmetBinasiId = 0; // Hizmet binası seçimini sıfırla
+            }
+        }
+
+        private async Task LoadHizmetBinalari(int departmanId)
+        {
+            try
+            {
+                var result = await HizmetBinasiApiService.GetByDepartmanAsync(departmanId);
+                if (result.Success && result.Data != null)
+                {
+                    hizmetBinalari = result.Data;
+                }
+                else
+                {
+                    hizmetBinalari = new();
+                }
+            }
+            catch (Exception ex)
+            {
+                await ToastService.ShowErrorAsync($"Hizmet binaları yüklenemedi: {ex.Message}");
+                hizmetBinalari = new();
+            }
+        }
+
         private void ToggleAddForm()
         {
             showAddForm = !showAddForm;
             if (showAddForm)
             {
                 newDevice = new Device { Port = "4370", IsActive = true };
+                selectedDepartmanId = 0;
+                hizmetBinalari = new();
             }
         }
 
         private async Task SaveDevice()
         {
-            if (string.IsNullOrWhiteSpace(newDevice.DeviceName) || string.IsNullOrWhiteSpace(newDevice.IpAddress))
+            // Validation
+            if (string.IsNullOrWhiteSpace(newDevice.DeviceName))
             {
-                await ToastService.ShowWarningAsync("Cihaz adı ve IP adresi zorunludur!");
+                await ToastService.ShowWarningAsync("Cihaz adı zorunludur!");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(newDevice.IpAddress))
+            {
+                await ToastService.ShowWarningAsync("IP adresi zorunludur!");
+                return;
+            }
+
+            if (newDevice.HizmetBinasiId == 0)
+            {
+                await ToastService.ShowWarningAsync("Hizmet binası seçimi zorunludur!");
                 return;
             }
 
