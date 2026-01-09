@@ -1,7 +1,8 @@
+using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
 {
@@ -60,8 +61,10 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         /// Hizmet Binası ID (FK)
         /// Cihazın hangi hizmet binasında olduğu
         /// </summary>
-        public int? HizmetBinasiId { get; set; }
-
+        public int HizmetBinasiId { get; set; }
+        [ForeignKey(nameof(HizmetBinasiId))]
+        [InverseProperty("HizmetBinasi")]
+        public HizmetBinasi? HizmetBinasi { get; set; }
         // ========== Son İşlem Bilgileri (Attendance çekme) ==========
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using System;
 using System.Collections.Generic;
@@ -34,5 +35,6 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
 
         [InverseProperty("HizmetBinasi")]
         public ICollection<Personel>? Personeller { get; set; } = new List<Personel>();
+        public ICollection<Device> Devices { get; set; } = new List<Device>();
     }
 }
