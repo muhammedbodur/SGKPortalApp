@@ -47,9 +47,10 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
 
             // Relationships
             builder.HasOne(c => c.Device)
-                   .WithMany()
+                   .WithMany(d => d.CekilenData)
                    .HasForeignKey(c => c.DeviceId)
-                   .OnDelete(DeleteBehavior.SetNull);
+                   .OnDelete(DeleteBehavior.Restrict)
+                   .IsRequired();
 
             // Indexes
             builder.HasIndex(c => c.KayitNo)

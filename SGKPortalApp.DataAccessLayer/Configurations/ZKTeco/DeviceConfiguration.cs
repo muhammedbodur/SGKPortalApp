@@ -41,7 +41,12 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
             builder.Property(d => d.IsActive)
                    .HasDefaultValue(true);
 
-            // Foreign Key (HizmetBinasiId) - Navigation property yok, sadece FK
+            // Relationships
+            builder.HasOne(d => d.HizmetBinasi)
+                   .WithMany(hb => hb.Devices)
+                   .HasForeignKey(d => d.HizmetBinasiId)
+                   .OnDelete(DeleteBehavior.Restrict)
+                   .IsRequired();
 
             // Indexes
             builder.HasIndex(d => d.IpAddress)
