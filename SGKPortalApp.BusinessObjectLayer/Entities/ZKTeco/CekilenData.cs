@@ -88,6 +88,15 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         /// </summary>
         public int? DeviceId { get; set; }
 
+        // ========== Navigation ==========
+
+        /// <summary>
+        /// İlişkili cihaz
+        /// </summary>
+        [ForeignKey(nameof(DeviceId))]
+        [InverseProperty("CekilenDatalar")]
+        public virtual Device? Device { get; set; }
+
         // ========== Ek Modern Field'lar (PDKS.Net4.8'de yok) ==========
 
         /// <summary>
@@ -115,12 +124,5 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         /// Ham data (JSON - debugging için)
         /// </summary>
         public string? RawData { get; set; }
-
-        // ========== Navigation ==========
-
-        /// <summary>
-        /// İlişkili cihaz
-        /// </summary>
-        public virtual Device? Device { get; set; }
     }
 }

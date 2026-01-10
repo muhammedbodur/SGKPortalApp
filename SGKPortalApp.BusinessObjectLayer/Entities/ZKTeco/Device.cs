@@ -1,6 +1,7 @@
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -116,5 +117,13 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         /// PDKS.Net4.8: kontrolDurum
         /// </summary>
         public string? LastHealthCheckStatus { get; set; }
+
+        // ========== Navigation Properties ==========
+
+        /// <summary>
+        /// Bu cihazdan çekilen attendance dataları
+        /// </summary>
+        [InverseProperty("Device")]
+        public virtual ICollection<CekilenData>? CekilenDatalar { get; set; }
     }
 }
