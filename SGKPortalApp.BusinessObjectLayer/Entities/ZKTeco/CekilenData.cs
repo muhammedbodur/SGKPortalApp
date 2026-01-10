@@ -61,9 +61,15 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         /// Cihaz ID (Device foreign key)
         /// </summary>
         public int DeviceId { get; set; }
+
+        /// <summary>
+        /// İlişkili cihaz
+        /// </summary>
         [ForeignKey(nameof(DeviceId))]
         [InverseProperty("CekilenData")]
         public Device? Device { get; set; }
+
+        // ========== Ek Modern Field'lar (PDKS.Net4.8'de yok) ==========
 
         /// <summary>
         /// Cihaz IP adresi (lookup için)

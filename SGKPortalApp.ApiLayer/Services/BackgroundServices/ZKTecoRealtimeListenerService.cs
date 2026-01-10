@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -8,9 +7,9 @@ using SGKPortalApp.ApiLayer.Services.Hubs;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
-using SGKPortalApp.DataAccessLayer.Context;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PdksIslemleri;
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -91,12 +90,11 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
             try
             {
                 using var scope = _serviceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<SGKDbContext>();
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                 var apiClient = scope.ServiceProvider.GetRequiredService<IZKTecoApiClient>();
 
-                var activeDevices = await dbContext.Devices
-                    .Where(d => d.IsActive)
-                    .ToListAsync();
+                var deviceRepository = unitOfWork.Repository<IDeviceRepository>();
+                var activeDevices = await deviceRepository.GetActiveDevicesAsync();
 
                 _logger.LogInformation($"Found {activeDevices.Count} active ZKTeco devices");
 
@@ -203,7 +201,9 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
             try
             {
                 using var scope = _serviceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<SGKDbContext>();
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+                var cekilenDataRepository = unitOfWork.Repository<ICekilenDataRepository>();
 
                 // CekilenData tablosuna kaydet
                 var record = new CekilenData
@@ -218,8 +218,8 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                     IsProcessed = false
                 };
 
-                await dbContext.CekilenDatalar.AddAsync(record);
-                await dbContext.SaveChangesAsync();
+                await cekilenDataRepository.AddAsync(record);
+                await unitOfWork.SaveChangesAsync();
 
                 _logger.LogInformation(
                     $"Realtime event saved to database: {evt.EnrollNumber} - {evt.EventTime}");
@@ -238,12 +238,11 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
             {
                 // Tüm cihazlardan aboneliği kaldır
                 using var scope = _serviceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<SGKDbContext>();
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                 var apiClient = scope.ServiceProvider.GetRequiredService<IZKTecoApiClient>();
 
-                var activeDevices = await dbContext.Devices
-                    .Where(d => d.IsActive)
-                    .ToListAsync(cancellationToken);
+                var deviceRepository = unitOfWork.Repository<IDeviceRepository>();
+                var activeDevices = await deviceRepository.GetActiveDevicesAsync(cancellationToken);
 
                 foreach (var device in activeDevices)
                 {

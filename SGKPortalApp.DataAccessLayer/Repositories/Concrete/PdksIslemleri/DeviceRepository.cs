@@ -5,6 +5,7 @@ using SGKPortalApp.DataAccessLayer.Repositories.Generic;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PdksIslemleri;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PdksIslemleri
@@ -30,6 +31,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PdksIslemleri
                 .Include(d => d.HizmetBinasi)
                     .ThenInclude(hb => hb!.Departman)
                 .FirstOrDefaultAsync(d => d.IpAddress == ipAddress);
+        }
+
+        public async Task<List<Device>> GetActiveDevicesAsync(CancellationToken cancellationToken = default)
+        {
+            return await _context.Devices
+                .Where(d => d.IsActive)
+                .ToListAsync(cancellationToken);
         }
     }
 }
