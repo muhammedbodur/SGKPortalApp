@@ -22,7 +22,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("api/SignalREventLog/filter", filter);
+                var response = await _httpClient.PostAsJsonAsync("signalr/eventlog/filter", filter);
                 if (response.IsSuccessStatusCode)
                 {
                     return await response.Content.ReadFromJsonAsync<PagedResultDto<SignalREventLogResponseDto>>();
@@ -40,7 +40,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/SignalREventLog/recent/{minutes}");
+                var response = await _httpClient.GetAsync($"signalr/eventlog/recent/{minutes}");
                 if (response.IsSuccessStatusCode)
                 {
                     return await response.Content.ReadFromJsonAsync<List<SignalREventLogResponseDto>>() ?? new();
@@ -58,7 +58,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/SignalREventLog/by-sira/{siraId}");
+                var response = await _httpClient.GetAsync($"signalr/eventlog/by-sira/{siraId}");
                 if (response.IsSuccessStatusCode)
                 {
                     return await response.Content.ReadFromJsonAsync<List<SignalREventLogResponseDto>>() ?? new();
@@ -76,7 +76,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
         {
             try
             {
-                var url = "api/SignalREventLog/stats";
+                var url = "signalr/eventlog/stats";
                 var queryParams = new List<string>();
                 
                 if (startDate.HasValue)
