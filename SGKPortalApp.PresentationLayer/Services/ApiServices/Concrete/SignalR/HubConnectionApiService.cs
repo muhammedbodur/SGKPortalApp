@@ -31,7 +31,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
                     TcKimlikNo = tcKimlikNo
                 };
 
-                var response = await _httpClient.PostAsJsonAsync("api/hub-connections/connect", request);
+                var response = await _httpClient.PostAsJsonAsync("hub-connections/connect", request);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
@@ -45,7 +45,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"api/hub-connections/{connectionId}");
+                var response = await _httpClient.DeleteAsync($"hub-connections/{connectionId}");
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
@@ -60,7 +60,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
             try
             {
                 var response = await _httpClient.GetFromJsonAsync<List<HubConnectionResponseDto>>(
-                    $"api/hub-connections/active/{tcKimlikNo}");
+                    $"hub-connections/active/{tcKimlikNo}");
                 
                 return response ?? new List<HubConnectionResponseDto>();
             }
@@ -82,7 +82,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
                     TcKimlikNo = tcKimlikNo
                 };
 
-                var response = await _httpClient.PostAsJsonAsync("api/hub-connections/banko/register", request);
+                var response = await _httpClient.PostAsJsonAsync("hub-connections/banko/register", request);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
@@ -96,7 +96,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("api/hub-connections/banko/deactivate", tcKimlikNo);
+                var response = await _httpClient.PostAsJsonAsync("hub-connections/banko/deactivate", tcKimlikNo);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
@@ -117,7 +117,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
                     TcKimlikNo = tcKimlikNo
                 };
 
-                var response = await _httpClient.PostAsJsonAsync("api/hub-connections/tv/register", request);
+                var response = await _httpClient.PostAsJsonAsync("hub-connections/tv/register", request);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
@@ -132,7 +132,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
             try
             {
                 var response = await _httpClient.GetFromJsonAsync<bool>(
-                    $"api/hub-connections/banko/{bankoId}/is-in-use");
+                    $"hub-connections/banko/{bankoId}/is-in-use");
                 return response;
             }
             catch (Exception ex)
@@ -146,7 +146,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/hub-connections/personel/{tcKimlikNo}/active-banko");
+                var response = await _httpClient.GetAsync($"hub-connections/personel/{tcKimlikNo}/active-banko");
 
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
@@ -168,7 +168,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
             try
             {
                 var response = await _httpClient.GetFromJsonAsync<bool>(
-                    $"api/hub-connections/tv/{tvId}/in-use");
+                    $"hub-connections/tv/{tvId}/in-use");
                 return response;
             }
             catch (Exception ex)
@@ -184,7 +184,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
             {
                 var request = new { ConnectionType = connectionType };
                 var response = await _httpClient.PutAsJsonAsync(
-                    $"api/hub-connections/{connectionId}/type", 
+                    $"hub-connections/{connectionId}/type", 
                     request);
                 return response.IsSuccessStatusCode;
             }
@@ -200,7 +200,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
             try
             {
                 var response = await _httpClient.PutAsJsonAsync(
-                    $"api/hub-connections/{connectionId}/status", 
+                    $"hub-connections/{connectionId}/status", 
                     status);
                 return response.IsSuccessStatusCode;
             }
@@ -216,7 +216,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
             try
             {
                 var response = await _httpClient.GetFromJsonAsync<HubConnectionResponseDto>(
-                    $"api/hub-connections/{connectionId}");
+                    $"hub-connections/{connectionId}");
                 return response;
             }
             catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
@@ -243,7 +243,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
                     TcKimlikNo = tcKimlikNo
                 };
 
-                var response = await _httpClient.PostAsJsonAsync("api/hub-connections/banko", request);
+                var response = await _httpClient.PostAsJsonAsync("hub-connections/banko", request);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
@@ -257,7 +257,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"api/hub-connections/banko/{hubConnectionId}");
+                var response = await _httpClient.DeleteAsync($"hub-connections/banko/{hubConnectionId}");
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
@@ -272,7 +272,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
             try
             {
                 var response = await _httpClient.GetFromJsonAsync<List<HubConnectionResponseDto>>(
-                    $"api/hub-connections/non-banko/{tcKimlikNo}");
+                    $"hub-connections/non-banko/{tcKimlikNo}");
                 return response ?? new List<HubConnectionResponseDto>();
             }
             catch (Exception ex)
@@ -287,7 +287,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
             try
             {
                 var response = await _httpClient.GetFromJsonAsync<HubBankoConnectionResponseDto>(
-                    $"api/hub-connections/banko-connection/{hubConnectionId}");
+                    $"hub-connections/banko-connection/{hubConnectionId}");
                 return response;
             }
             catch (Exception ex)
@@ -302,7 +302,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
             try
             {
                 var response = await _httpClient.GetFromJsonAsync<HubTvConnectionResponseDto>(
-                    $"api/hub-connections/tv-connection/{hubConnectionId}");
+                    $"hub-connections/tv-connection/{hubConnectionId}");
                 return response;
             }
             catch (Exception ex)
@@ -316,7 +316,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/hub-connections/banko/{bankoId}/active-personel");
+                var response = await _httpClient.GetAsync($"hub-connections/banko/{bankoId}/active-personel");
 
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
@@ -343,7 +343,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
                     ConnectionId = connectionId
                 };
 
-                var response = await _httpClient.PostAsJsonAsync("api/hub-connections/banko/transfer", request);
+                var response = await _httpClient.PostAsJsonAsync("hub-connections/banko/transfer", request);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
@@ -368,7 +368,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
                     TcKimlikNo = tcKimlikNo
                 };
 
-                var response = await _httpClient.PostAsJsonAsync("api/hub-connections/tv", request);
+                var response = await _httpClient.PostAsJsonAsync("hub-connections/tv", request);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
@@ -382,7 +382,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"api/hub-connections/tv/{hubConnectionId}");
+                var response = await _httpClient.DeleteAsync($"hub-connections/tv/{hubConnectionId}");
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
@@ -397,7 +397,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
             try
             {
                 var response = await _httpClient.GetFromJsonAsync<List<HubConnectionResponseDto>>(
-                    $"api/hub-connections/non-tv/{tcKimlikNo}");
+                    $"hub-connections/non-tv/{tcKimlikNo}");
                 return response ?? new List<HubConnectionResponseDto>();
             }
             catch (Exception ex)
@@ -411,7 +411,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/hub-connections/personel/{tcKimlikNo}/active-tv");
+                var response = await _httpClient.GetAsync($"hub-connections/personel/{tcKimlikNo}/active-tv");
 
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
@@ -432,7 +432,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/hub-connections/tv/{tvId}/active-user");
+                var response = await _httpClient.GetAsync($"hub-connections/tv/{tvId}/active-user");
 
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
@@ -459,7 +459,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
                     ConnectionId = connectionId
                 };
 
-                var response = await _httpClient.PostAsJsonAsync("api/hub-connections/tv/transfer", request);
+                var response = await _httpClient.PostAsJsonAsync("hub-connections/tv/transfer", request);
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
@@ -473,7 +473,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.SignalR
         {
             try
             {
-                var response = await _httpClient.GetAsync($"api/hub-connections/tv/{tvId}/is-in-use-by-other/{currentTcKimlikNo}");
+                var response = await _httpClient.GetAsync($"hub-connections/tv/{tvId}/is-in-use-by-other/{currentTcKimlikNo}");
                 if (response.IsSuccessStatusCode)
                 {
                     return await response.Content.ReadFromJsonAsync<bool>();
