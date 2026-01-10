@@ -85,7 +85,6 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
 
         /// <summary>
         /// Cihaz ID (Device foreign key)
-        /// PDKS.Net4.8: sgm_id
         /// </summary>
         public int DeviceId { get; set; }
         [ForeignKey(nameof(DeviceId))]
@@ -119,12 +118,5 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         /// Ham data (JSON - debugging için)
         /// </summary>
         public string? RawData { get; set; }
-
-        // ========== Navigation ==========
-
-        /// <summary>
-        /// İlişkili cihaz
-        /// </summary>
-        public virtual Device? Device { get; set; }
     }
 }

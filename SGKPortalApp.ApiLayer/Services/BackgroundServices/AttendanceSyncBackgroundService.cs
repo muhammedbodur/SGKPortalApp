@@ -97,7 +97,7 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                     {
                         _logger.LogInformation($"🔄 Syncing device: {device.DeviceName} ({device.IpAddress})");
 
-                        var success = await attendanceService.SyncRecordsFromDeviceToDbAsync(device.Id);
+                        var success = await attendanceService.SyncRecordsFromDeviceToDbAsync(device.DeviceId);
 
                         if (success)
                         {
