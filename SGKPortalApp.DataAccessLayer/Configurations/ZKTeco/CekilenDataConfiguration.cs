@@ -15,10 +15,10 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
             builder.ToTable($"{TablePrefix}CekilenData");
 
             // Primary Key
-            builder.HasKey(c => c.Id);
+            builder.HasKey(c => c.CekilenDataId);
 
             // Properties
-            builder.Property(c => c.Id)
+            builder.Property(c => c.CekilenDataId)
                    .ValueGeneratedOnAdd();
 
             builder.Property(c => c.KayitNo)
@@ -34,9 +34,6 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
                    .HasMaxLength(50);
 
             builder.Property(c => c.Reserved)
-                   .HasMaxLength(50);
-
-            builder.Property(c => c.CihazAdi)
                    .HasMaxLength(50);
 
             builder.Property(c => c.CihazIp)
@@ -67,7 +64,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
             builder.HasIndex(c => c.IsProcessed)
                    .HasDatabaseName($"{IndexPrefix}CekilenData_IsProcessed");
 
-            builder.HasIndex(c => new { c.KayitNo, c.Tarih, c.Saat })
+            builder.HasIndex(c => new { c.KayitNo, c.Tarih })
                    .HasDatabaseName($"{IndexPrefix}CekilenData_Lookup");
         }
     }

@@ -209,8 +209,7 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                 var record = new CekilenData
                 {
                     KayitNo = evt.EnrollNumber,
-                    Tarih = evt.EventTime.Date,
-                    Saat = evt.EventTime.TimeOfDay,
+                    Tarih = evt.EventTime,
                     Dogrulama = evt.VerifyMethod.ToString(),
                     GirisCikisModu = evt.InOutMode.ToString(),
                     WorkCode = evt.WorkCode.ToString(),
