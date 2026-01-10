@@ -1,4 +1,5 @@
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -13,14 +14,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
     public class CekilenData : BaseEntity
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
-
-        /// <summary>
-        /// Sıra numarası (opsiyonel)
-        /// PDKS.Net4.8: sirano
-        /// </summary>
-        public int? SiraNo { get; set; }
+        public int CekilenDataId { get; set; }
 
         /// <summary>
         /// Personel kayıt numarası (ZKTeco EnrollNumber)
@@ -50,12 +44,6 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         public DateTime? Tarih { get; set; }
 
         /// <summary>
-        /// Attendance saati
-        /// PDKS.Net4.8: saat
-        /// </summary>
-        public TimeSpan? Saat { get; set; }
-
-        /// <summary>
         /// İş kodu
         /// PDKS.Net4.8: workCode
         /// </summary>
@@ -70,32 +58,16 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         public string? Reserved { get; set; }
 
         /// <summary>
-        /// Boş başlık (legacy field)
-        /// PDKS.Net4.8: bosbaslik
-        /// </summary>
-        public string? BosBaslik { get; set; }
-
-        /// <summary>
-        /// Cihaz adı (sgm = Sayaç/Giriş Merkezi)
-        /// PDKS.Net4.8: sgm
-        /// </summary>
-        [StringLength(50)]
-        public string? CihazAdi { get; set; }
-
-        /// <summary>
         /// Cihaz ID (Device foreign key)
-        /// PDKS.Net4.8: sgm_id
         /// </summary>
-        public int? DeviceId { get; set; }
-
-        // ========== Navigation ==========
+        public int DeviceId { get; set; }
 
         /// <summary>
         /// İlişkili cihaz
         /// </summary>
         [ForeignKey(nameof(DeviceId))]
-        [InverseProperty("CekilenDatalar")]
-        public virtual Device? Device { get; set; }
+        [InverseProperty("CekilenData")]
+        public Device? Device { get; set; }
 
         // ========== Ek Modern Field'lar (PDKS.Net4.8'de yok) ==========
 

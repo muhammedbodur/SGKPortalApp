@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
 {
@@ -72,7 +74,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 {
                     devices = result.Data.Select(d => new Device
                     {
-                        Id = d.DeviceId,
+                        DeviceId = d.DeviceId,
                         DeviceName = d.DeviceName,
                         IpAddress = d.IpAddress,
                         Port = d.Port,

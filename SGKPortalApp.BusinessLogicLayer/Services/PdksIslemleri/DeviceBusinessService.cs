@@ -77,17 +77,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
 
-            var existing = await deviceRepo.GetByIdAsync(device.Id);
+            var existing = await deviceRepo.GetByIdAsync(device.DeviceId);
             if (existing == null || existing.SilindiMi)
             {
-                throw new InvalidOperationException($"Device with ID {device.Id} not found.");
+                throw new InvalidOperationException($"Device with ID {device.DeviceId} not found.");
             }
 
             // Check if IP address is changing to an already used IP
             if (existing.IpAddress != device.IpAddress)
             {
                 var deviceWithSameIp = await deviceRepo.GetDeviceByIpAsync(device.IpAddress);
-                if (deviceWithSameIp != null && deviceWithSameIp.Id != device.Id && !deviceWithSameIp.SilindiMi)
+                if (deviceWithSameIp != null && deviceWithSameIp.DeviceId != device.DeviceId && !deviceWithSameIp.SilindiMi)
                 {
                     throw new InvalidOperationException($"Bu IP adresine ({device.IpAddress}) sahip başka bir cihaz mevcut.");
                 }
@@ -361,7 +361,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 
                 match.Device = new DeviceResponseDto
                 {
-                    DeviceId = device.Id,
+                    DeviceId = device.DeviceId,
                     DeviceName = device.DeviceName,
                     IpAddress = device.IpAddress,
                     Port = device.Port,
@@ -439,7 +439,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 
                 match.Device = new DeviceResponseDto
                 {
-                    DeviceId = device.Id,
+                    DeviceId = device.DeviceId,
                     DeviceName = device.DeviceName,
                     IpAddress = device.IpAddress,
                     Port = device.Port,
@@ -566,7 +566,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     {
                         Device = new DeviceResponseDto
                         {
-                            DeviceId = searchDevice.Id,
+                            DeviceId = searchDevice.DeviceId,
                             DeviceName = searchDevice.DeviceName,
                             IpAddress = searchDevice.IpAddress,
                             Port = searchDevice.Port,

@@ -112,7 +112,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
                 
                 var dto = new DeviceResponseDto
                 {
-                    DeviceId = result.Id,
+                    DeviceId = result.DeviceId,
                     DeviceName = result.DeviceName,
                     IpAddress = result.IpAddress,
                     Port = result.Port ?? "4370",
@@ -143,7 +143,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
         {
             try
             {
-                var response = await _httpClient.PutAsJsonAsync($"api/Device/{device.Id}", device);
+                var response = await _httpClient.PutAsJsonAsync($"api/Device/{device.DeviceId}", device);
                 if (!response.IsSuccessStatusCode)
                 {
                     return ServiceResult<DeviceResponseDto>.Fail("Cihaz güncellenemedi");
@@ -156,7 +156,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
                 
                 var dto = new DeviceResponseDto
                 {
-                    DeviceId = result.Id,
+                    DeviceId = result.DeviceId,
                     DeviceName = result.DeviceName,
                     IpAddress = result.IpAddress,
                     Port = result.Port ?? "4370",

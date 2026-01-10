@@ -21,7 +21,6 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PdksIslemleri
             return await _context.CekilenDatalar
                 .Where(c => c.KayitNo == enrollNumber)
                 .OrderByDescending(c => c.Tarih)
-                .ThenByDescending(c => c.Saat)
                 .ToListAsync();
         }
 
@@ -30,7 +29,6 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PdksIslemleri
             return await _context.CekilenDatalar
                 .Where(c => c.Tarih >= startDate && c.Tarih <= endDate)
                 .OrderByDescending(c => c.Tarih)
-                .ThenByDescending(c => c.Saat)
                 .ToListAsync();
         }
 
@@ -39,14 +37,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PdksIslemleri
             return await _context.CekilenDatalar
                 .Where(c => c.CihazIp == deviceIp)
                 .OrderByDescending(c => c.Tarih)
-                .ThenByDescending(c => c.Saat)
                 .ToListAsync();
         }
 
-        public async Task<bool> ExistsAsync(string enrollNumber, DateTime date, TimeSpan time)
+        public async Task<bool> ExistsAsync(string enrollNumber, DateTime date)
         {
             return await _context.CekilenDatalar
-                .AnyAsync(c => c.KayitNo == enrollNumber && c.Tarih == date && c.Saat == time);
+                .AnyAsync(c => c.KayitNo == enrollNumber && c.Tarih == date);
         }
     }
 }

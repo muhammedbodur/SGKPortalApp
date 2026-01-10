@@ -43,13 +43,13 @@ namespace SGKPortalApp.ApiLayer.Controllers
         public async Task<IActionResult> Create([FromBody] Device device)
         {
             var created = await _deviceService.CreateDeviceAsync(device);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            return CreatedAtAction(nameof(GetById), new { id = created.DeviceId }, created);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] Device device)
         {
-            device.Id = id;
+            device.DeviceId = id;
             var updated = await _deviceService.UpdateDeviceAsync(device);
             return Ok(updated);
         }
