@@ -3,12 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SignalR;
 
-namespace SGKPortalApp.ApiLayer.Controllers
+namespace SGKPortalApp.ApiLayer.Controllers.SignalR
 {
     /// <summary>
     /// SignalR Event Log API Controller
     /// </summary>
-    [Route("api/[controller]")]
+    [Route("api/signalr/eventlog")]
     [ApiController]
     [AllowAnonymous]
     public class SignalREventLogController : ControllerBase

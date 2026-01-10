@@ -4,15 +4,15 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using System.Threading.Tasks;
 
-namespace SGKPortalApp.ApiLayer.Controllers
+namespace SGKPortalApp.ApiLayer.Controllers.PdksIslemleri
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class DeviceController : ControllerBase
+    [Route("api/pdks/device")]
+    public class ZKTecoDeviceController : ControllerBase
     {
         private readonly IDeviceBusinessService _deviceService;
 
-        public DeviceController(IDeviceBusinessService deviceService)
+        public ZKTecoDeviceController(IDeviceBusinessService deviceService)
         {
             _deviceService = deviceService;
         }

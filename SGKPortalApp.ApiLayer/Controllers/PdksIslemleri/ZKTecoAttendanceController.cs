@@ -4,10 +4,10 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 using System;
 using System.Threading.Tasks;
 
-namespace SGKPortalApp.ApiLayer.Controllers
+namespace SGKPortalApp.ApiLayer.Controllers.PdksIslemleri
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/pdks/attendance")]
     public class ZKTecoAttendanceController : ControllerBase
     {
         private readonly IZKTecoAttendanceService _attendanceService;
