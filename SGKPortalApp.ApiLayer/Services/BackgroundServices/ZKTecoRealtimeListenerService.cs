@@ -93,7 +93,7 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                 var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                 var apiClient = scope.ServiceProvider.GetRequiredService<IZKTecoApiClient>();
 
-                var deviceRepository = unitOfWork.Repository<IDeviceRepository>();
+                var deviceRepository = unitOfWork.GetRepository<IDeviceRepository>();
                 var activeDevices = await deviceRepository.GetActiveDevicesAsync();
 
                 _logger.LogInformation($"Found {activeDevices.Count} active ZKTeco devices");
@@ -203,11 +203,21 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                 using var scope = _serviceProvider.CreateScope();
                 var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                var cekilenDataRepository = unitOfWork.Repository<ICekilenDataRepository>();
+                var deviceRepository = unitOfWork.GetRepository<IDeviceRepository>();
+                var cekilenDataRepository = unitOfWork.GetRepository<ICekilenDataRepository>();
+
+                // Device'ı IP'den bul
+                var device = await deviceRepository.GetDeviceByIpAsync(evt.DeviceIp);
+                if (device == null)
+                {
+                    _logger.LogWarning($"Device not found for IP: {evt.DeviceIp}. Event will not be saved.");
+                    return;
+                }
 
                 // CekilenData tablosuna kaydet
                 var record = new CekilenData
                 {
+                    DeviceId = device.DeviceId,
                     KayitNo = evt.EnrollNumber,
                     Tarih = evt.EventTime,
                     Dogrulama = evt.VerifyMethod.ToString(),
@@ -241,7 +251,7 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                 var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
                 var apiClient = scope.ServiceProvider.GetRequiredService<IZKTecoApiClient>();
 
-                var deviceRepository = unitOfWork.Repository<IDeviceRepository>();
+                var deviceRepository = unitOfWork.GetRepository<IDeviceRepository>();
                 var activeDevices = await deviceRepository.GetActiveDevicesAsync(cancellationToken);
 
                 foreach (var device in activeDevices)
