@@ -1,4 +1,5 @@
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -86,7 +87,10 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         /// Cihaz ID (Device foreign key)
         /// PDKS.Net4.8: sgm_id
         /// </summary>
-        public int? DeviceId { get; set; }
+        public int DeviceId { get; set; }
+        [ForeignKey(nameof(DeviceId))]
+        [InverseProperty("CekilenData")]
+        public Device? Device { get; set; }
 
         // ========== Ek Modern Field'lar (PDKS.Net4.8'de yok) ==========
 

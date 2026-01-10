@@ -116,5 +116,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         /// PDKS.Net4.8: kontrolDurum
         /// </summary>
         public string? LastHealthCheckStatus { get; set; }
+
+        public ICollection<CekilenData> CekilenDatas { get; set; } = new List<CekilenData>();
     }
 }

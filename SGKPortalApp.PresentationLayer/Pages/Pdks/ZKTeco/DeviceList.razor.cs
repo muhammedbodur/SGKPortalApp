@@ -74,7 +74,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 {
                     devices = result.Data.Select(d => new Device
                     {
-                        Id = d.DeviceId,
+                        DeviceId = d.DeviceId,
                         DeviceName = d.DeviceName,
                         IpAddress = d.IpAddress,
                         Port = d.Port,
