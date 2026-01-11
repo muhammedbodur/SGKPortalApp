@@ -23,17 +23,39 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.GirisCikis
         {
             if (firstRender)
             {
+                // JavaScript kütüphanelerinin yüklenmesi için kısa gecikme
+                await Task.Delay(300);
                 await InitializeSignalRAsync();
             }
         }
 
         private async Task InitializeSignalRAsync()
         {
-            var apiUrl = Configuration["AppSettings:ApiUrl"] ?? "https://localhost:9080";
-            var hubUrl = $"{apiUrl}/hubs/pdks";
+            try
+            {
+                var apiUrl = Configuration["AppSettings:ApiUrl"] ?? "https://localhost:9080";
+                var hubUrl = $"{apiUrl}/hubs/pdks";
 
-            await JS.InvokeVoidAsync("PdksRealtimeMonitor.initialize", hubUrl,
-                DotNetObjectReference.Create(this));
+                await JS.InvokeVoidAsync("PdksRealtimeMonitor.initialize", hubUrl,
+                    DotNetObjectReference.Create(this));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"SignalR initialization error: {ex.Message}");
+                // Tekrar dene (JavaScript dosyası henüz yüklenmemiş olabilir)
+                await Task.Delay(1000);
+                try
+                {
+                    var apiUrl = Configuration["AppSettings:ApiUrl"] ?? "https://localhost:9080";
+                    var hubUrl = $"{apiUrl}/hubs/pdks";
+                    await JS.InvokeVoidAsync("PdksRealtimeMonitor.initialize", hubUrl,
+                        DotNetObjectReference.Create(this));
+                }
+                catch
+                {
+                    Console.WriteLine("SignalR initialization failed after retry. Check browser console.");
+                }
+            }
         }
 
         [JSInvokable]
