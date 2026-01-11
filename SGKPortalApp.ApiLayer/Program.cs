@@ -201,6 +201,7 @@ namespace SGKPortalApp.ApiLayer
                 options.AddFilter<ActivityTrackingHubFilter>();
             });
             builder.Services.AddSingleton<BankoModeStateService>();
+            builder.Services.AddSingleton<DeviceMonitoringStateService>();
             builder.Services.AddScoped<IHubConnectionService, HubConnectionService>();
             builder.Services.AddScoped<IBankoModeService, BankoModeService>();
             // ⭐ Audit destekli SignalR Broadcaster (Decorator Pattern)

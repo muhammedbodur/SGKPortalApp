@@ -508,23 +508,25 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         private async Task StartRealtimeMonitoring(int deviceId)
         {
             if (IsDeviceLoading(deviceId)) return;
-            
+
             SetDeviceLoading(deviceId, true);
             try
             {
                 var result = await DeviceApiService.StartRealtimeMonitoringAsync(deviceId);
                 if (result.Success && result.Data)
                 {
-                    await ToastService.ShowSuccessAsync(result.Message ?? "Realtime izleme başlatıldı!");
+                    await ToastService.ShowSuccessAsync(result.Message ?? "Canlı izleme başlatıldı!");
+                    // Cihaz listesini yenile (monitoring durumunu güncellemek için)
+                    await LoadDevices();
                 }
                 else
                 {
-                    await ToastService.ShowErrorAsync(result.Message ?? "Realtime izleme başlatılamadı!");
+                    await ToastService.ShowErrorAsync(result.Message ?? "Canlı izleme başlatılamadı!");
                 }
             }
             catch (Exception ex)
             {
-                await ToastService.ShowErrorAsync($"Realtime izleme hatası: {ex.Message}");
+                await ToastService.ShowErrorAsync($"Canlı izleme hatası: {ex.Message}");
             }
             finally
             {
@@ -535,23 +537,25 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         private async Task StopRealtimeMonitoring(int deviceId)
         {
             if (IsDeviceLoading(deviceId)) return;
-            
+
             SetDeviceLoading(deviceId, true);
             try
             {
                 var result = await DeviceApiService.StopRealtimeMonitoringAsync(deviceId);
                 if (result.Success && result.Data)
                 {
-                    await ToastService.ShowSuccessAsync(result.Message ?? "Realtime izleme durduruldu!");
+                    await ToastService.ShowSuccessAsync(result.Message ?? "Canlı izleme durduruldu!");
+                    // Cihaz listesini yenile (monitoring durumunu güncellemek için)
+                    await LoadDevices();
                 }
                 else
                 {
-                    await ToastService.ShowErrorAsync(result.Message ?? "Realtime izleme durdurulamadı!");
+                    await ToastService.ShowErrorAsync(result.Message ?? "Canlı izleme durdurulamadı!");
                 }
             }
             catch (Exception ex)
             {
-                await ToastService.ShowErrorAsync($"Realtime izleme hatası: {ex.Message}");
+                await ToastService.ShowErrorAsync($"Canlı izleme hatası: {ex.Message}");
             }
             finally
             {

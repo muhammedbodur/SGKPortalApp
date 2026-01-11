@@ -14,6 +14,12 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco
         public string? DeviceCode { get; set; }
         public string? DeviceInfo { get; set; }
         public bool IsActive { get; set; }
+
+        /// <summary>
+        /// Cihaz realtime monitoring durumunda mı?
+        /// </summary>
+        public bool IsMonitoring { get; set; }
+
         public int HizmetBinasiId { get; set; }
         public string? HizmetBinasiAdi { get; set; }
         public string? DepartmanAdi { get; set; }

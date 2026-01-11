@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using SGKPortalApp.ApiLayer.Services.State;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
@@ -13,16 +14,30 @@ namespace SGKPortalApp.ApiLayer.Controllers.PdksIslemleri
     public class ZKTecoDeviceController : ControllerBase
     {
         private readonly IDeviceBusinessService _deviceService;
+        private readonly DeviceMonitoringStateService _monitoringState;
 
-        public ZKTecoDeviceController(IDeviceBusinessService deviceService)
+        public ZKTecoDeviceController(
+            IDeviceBusinessService deviceService,
+            DeviceMonitoringStateService monitoringState)
         {
             _deviceService = deviceService;
+            _monitoringState = monitoringState;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var result = await _deviceService.GetAllDevicesAsync();
+
+            // Monitoring durumunu set et
+            if (result.Success && result.Data != null)
+            {
+                foreach (var device in result.Data)
+                {
+                    device.IsMonitoring = _monitoringState.IsMonitoring(device.DeviceId);
+                }
+            }
+
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -277,6 +292,13 @@ namespace SGKPortalApp.ApiLayer.Controllers.PdksIslemleri
         public async Task<IActionResult> StartMonitoring(int id)
         {
             var success = await _deviceService.StartRealtimeMonitoringAsync(id);
+
+            // State'i güncelle
+            if (success)
+            {
+                _monitoringState.StartMonitoring(id);
+            }
+
             var result = ApiResponseDto<bool>.SuccessResult(success, success ? "Canlı izleme başlatıldı" : "Canlı izleme başlatılamadı");
             return success ? Ok(result) : BadRequest(result);
         }
@@ -285,6 +307,13 @@ namespace SGKPortalApp.ApiLayer.Controllers.PdksIslemleri
         public async Task<IActionResult> StopMonitoring(int id)
         {
             var success = await _deviceService.StopRealtimeMonitoringAsync(id);
+
+            // State'i güncelle
+            if (success)
+            {
+                _monitoringState.StopMonitoring(id);
+            }
+
             var result = ApiResponseDto<bool>.SuccessResult(success, success ? "Canlı izleme durduruldu" : "Canlı izleme durdurulamadı");
             return success ? Ok(result) : BadRequest(result);
         }

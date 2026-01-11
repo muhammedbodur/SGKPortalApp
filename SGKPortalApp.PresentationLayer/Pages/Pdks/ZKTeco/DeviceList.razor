@@ -10,6 +10,14 @@
     <div class="row mb-3">
         <div class="col">
             <h3>📱 ZKTeco Cihaz Yönetimi</h3>
+            @if (devices != null)
+            {
+                var monitoringCount = devices.Count(d => d.IsMonitoring);
+                <small class="text-muted">
+                    Toplam: <strong>@devices.Count</strong> cihaz |
+                    Canlı İzleme: <strong class="text-success">@monitoringCount</strong> cihaz
+                </small>
+            }
         </div>
         <div class="col-auto">
             <button class="btn btn-primary" @onclick="ToggleAddForm">
@@ -100,6 +108,7 @@
                         <th>Hizmet Binası</th>
                         <th>IP:Port</th>
                         <th>Durum</th>
+                        <th>Canlı İzleme</th>
                         <th>Son Kontrol</th>
                         <th style="min-width: 400px;">İşlemler</th>
                     </tr>
@@ -135,6 +144,20 @@
                                     @(device.IsActive ? "Aktif" : "Pasif")
                                 </span>
                             </td>
+                            <td>
+                                @if (device.IsMonitoring)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="bx bx-broadcast"></i> İzleniyor
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        <i class="bx bx-pause-circle"></i> Durduruldu
+                                    </span>
+                                }
+                            </td>
                             <td><small>@device.LastHealthCheckTime?.ToString("dd.MM HH:mm")</small></td>
                             <td>
                                 @{
@@ -165,12 +188,18 @@
                                     <button class="btn btn-outline-primary" @onclick="() => OpenSendPersonelModal(device.DeviceId)" disabled="@isLoading" title="Personel Gönder">
                                         @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-user-plus"></i> }
                                     </button>
-                                    <button class="btn btn-outline-success" @onclick="() => StartRealtimeMonitoring(device.DeviceId)" disabled="@isLoading" title="Realtime İzleme Başlat">
-                                        @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-broadcast"></i> }
-                                    </button>
-                                    <button class="btn btn-outline-warning" @onclick="() => StopRealtimeMonitoring(device.DeviceId)" disabled="@isLoading" title="Realtime İzleme Durdur">
-                                        @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-broadcast bx-burst"></i> }
-                                    </button>
+                                    @if (device.IsMonitoring)
+                                    {
+                                        <button class="btn btn-outline-warning" @onclick="() => StopRealtimeMonitoring(device.DeviceId)" disabled="@isLoading" title="Canlı İzlemeyi Durdur">
+                                            @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-stop-circle"></i> }
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-outline-success" @onclick="() => StartRealtimeMonitoring(device.DeviceId)" disabled="@isLoading" title="Canlı İzlemeyi Başlat">
+                                            @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-play-circle"></i> }
+                                        </button>
+                                    }
                                     <button class="btn btn-outline-dark" @onclick="() => RestartDevice(device.DeviceId)" disabled="@isLoading" title="Yeniden Başlat">
                                         @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-revision"></i> }
                                     </button>
