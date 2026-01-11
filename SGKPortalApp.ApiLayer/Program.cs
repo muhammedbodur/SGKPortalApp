@@ -201,6 +201,7 @@ namespace SGKPortalApp.ApiLayer
                 options.AddFilter<ActivityTrackingHubFilter>();
             });
             builder.Services.AddSingleton<BankoModeStateService>();
+            builder.Services.AddSingleton<DeviceMonitoringStateService>();
             builder.Services.AddScoped<IHubConnectionService, HubConnectionService>();
             builder.Services.AddScoped<IBankoModeService, BankoModeService>();
             // ⭐ Audit destekli SignalR Broadcaster (Decorator Pattern)
@@ -214,10 +215,9 @@ namespace SGKPortalApp.ApiLayer
             builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.SessionCleanupService>();
             builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.IdleSessionCleanupService>(); // 30 dakika idle timeout
 
-            // ZKTeco background services - Geçici olarak devre dışı (ZKTeco API servisi çalışmıyor)
-            // TODO: ZKTeco API servisi çalıştığında aktif et
-            // builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService>(); // ZKTeco realtime event listener
-            // builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.AttendanceSyncBackgroundService>(); // ZKTeco attendance periodic sync
+            // ZKTeco background services
+            builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService>(); // ZKTeco realtime event listener
+            // builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.AttendanceSyncBackgroundService>(); // ZKTeco attendance periodic sync (şimdilik kapalı)
 
             // ═══════════════════════════════════════════════════════
             // 🔧 AUTOMAPPER
