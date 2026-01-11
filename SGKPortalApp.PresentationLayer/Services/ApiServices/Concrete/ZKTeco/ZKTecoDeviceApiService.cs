@@ -339,7 +339,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
                 var apiResult = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<DeviceUserMatch>>>();
                 if (apiResult == null || !apiResult.Success)
                     return ApiResponseDto<List<DeviceUserMatch>>.ErrorResult(apiResult?.Message ?? "Veri okunamadı");
-                return ApiResponseDto<List<DeviceUserMatch>>.Ok(apiResult.Data!, apiResult.Message ?? "");
+                return ApiResponseDto<List<DeviceUserMatch>>.SuccessResult(apiResult.Data!, apiResult.Message ?? "");
             }
             catch (Exception ex)
             {
