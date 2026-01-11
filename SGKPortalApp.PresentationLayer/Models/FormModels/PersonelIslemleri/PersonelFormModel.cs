@@ -76,6 +76,7 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels.PersonelIslemleri
         public int UlasimServis1 { get; set; } = 0;
         public int UlasimServis2 { get; set; } = 0;
         public int Tabldot { get; set; } = 0;
+        public int PersonelKayitNo { get; set; } = 0;
         public int KartNo { get; set; } = 0;
         public DateTime? KartNoAktiflikTarihi { get; set; }
         public DateTime? KartNoDuzenlenmeTarihi { get; set; }

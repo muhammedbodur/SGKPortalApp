@@ -1,3 +1,4 @@
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using System;
@@ -13,24 +14,24 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri
     public interface IDeviceBusinessService
     {
         // ========== Database Operations (CRUD) ==========
-        Task<List<Device>> GetAllDevicesAsync();
-        Task<Device?> GetDeviceByIdAsync(int id);
-        Task<Device?> GetDeviceByIpAsync(string ipAddress);
-        Task<Device> CreateDeviceAsync(Device device);
-        Task<Device> UpdateDeviceAsync(Device device);
-        Task<bool> DeleteDeviceAsync(int id);
-        Task<List<Device>> GetActiveDevicesAsync();
+        Task<ApiResponseDto<List<DeviceResponseDto>>> GetAllDevicesAsync();
+        Task<ApiResponseDto<DeviceResponseDto>> GetDeviceByIdAsync(int id);
+        Task<ApiResponseDto<Device>> GetDeviceByIpAsync(string ipAddress);
+        Task<ApiResponseDto<DeviceResponseDto>> CreateDeviceAsync(Device device);
+        Task<ApiResponseDto<DeviceResponseDto>> UpdateDeviceAsync(Device device);
+        Task<ApiResponseDto<bool>> DeleteDeviceAsync(int id);
+        Task<ApiResponseDto<List<DeviceResponseDto>>> GetActiveDevicesAsync();
 
         // ========== Device Control Operations ==========
-        Task<DeviceStatusDto?> GetDeviceStatusAsync(int deviceId);
-        Task<bool> TestConnectionAsync(int deviceId);
-        Task<bool> RestartDeviceAsync(int deviceId);
-        Task<bool> PowerOffDeviceAsync(int deviceId);
-        Task<bool> EnableDeviceAsync(int deviceId);
-        Task<bool> DisableDeviceAsync(int deviceId);
-        Task<DeviceTimeDto?> GetDeviceTimeAsync(int deviceId);
-        Task<bool> SetDeviceTimeAsync(int deviceId, DateTime? dateTime = null);
-        Task<bool> SynchronizeDeviceTimeAsync(int deviceId);
+        Task<ApiResponseDto<DeviceStatusDto>> GetDeviceStatusAsync(int deviceId);
+        Task<ApiResponseDto<bool>> TestConnectionAsync(int deviceId);
+        Task<ApiResponseDto<bool>> RestartDeviceAsync(int deviceId);
+        Task<ApiResponseDto<bool>> PowerOffDeviceAsync(int deviceId);
+        Task<ApiResponseDto<bool>> EnableDeviceAsync(int deviceId);
+        Task<ApiResponseDto<bool>> DisableDeviceAsync(int deviceId);
+        Task<ApiResponseDto<DeviceTimeDto>> GetDeviceTimeAsync(int deviceId);
+        Task<ApiResponseDto<bool>> SetDeviceTimeAsync(int deviceId, DateTime? dateTime = null);
+        Task<ApiResponseDto<bool>> SynchronizeDeviceTimeAsync(int deviceId);
 
         // ========== User Management (Device Users) ==========
         Task<List<ApiUserDto>> GetDeviceUsersAsync(int deviceId);
@@ -38,6 +39,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri
         Task<ApiUserDto?> GetDeviceUserByCardAsync(int deviceId, long cardNumber);
         Task<DeviceUserMatch> GetDeviceUserWithMismatchInfoAsync(int deviceId, string enrollNumber);
         Task<DeviceUserMatch> GetDeviceUserByCardWithMismatchInfoAsync(int deviceId, long cardNumber);
+        Task<List<DeviceUserMatch>> GetAllDeviceUsersWithMismatchInfoAsync(int deviceId);
         Task<CardSearchResponse> SearchUserByCardAsync(CardSearchRequest request);
         Task<CardSearchResponse> SearchUserByCardOnAllDevicesAsync(long cardNumber);
         Task<bool> CreateDeviceUserAsync(int deviceId, UserCreateUpdateDto request, bool force = false);

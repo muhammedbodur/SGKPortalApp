@@ -43,6 +43,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private bool IsLoading { get; set; } = true;
         private bool NotFound { get; set; } = false;
         private string ActiveTab { get; set; } = "personel";
+        private bool IsSendingToDevices { get; set; } = false;
 
         // ═══════════════════════════════════════════════════════
         // LIFECYCLE METHODS
@@ -140,6 +141,95 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private void NavigateToEdit()
         {
             _navigationManager.NavigateTo($"/personel/manage/{TcKimlikNo}");
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // PDKS OPERATIONS
+        // ═══════════════════════════════════════════════════════
+
+        private async Task SendCardToAllDevices()
+        {
+            if (Personel == null || string.IsNullOrEmpty(TcKimlikNo)) return;
+
+            IsSendingToDevices = true;
+            StateHasChanged();
+
+            try
+            {
+                var result = await _personelApiService.SendCardToAllDevicesAsync(TcKimlikNo);
+
+                if (result.Success && result.Data != null)
+                {
+                    var data = result.Data;
+                    if (data.SuccessCount > 0)
+                    {
+                        await _toastService.ShowSuccessAsync(result.Message ?? 
+                            $"Kart bilgisi {data.SuccessCount} cihaza başarıyla gönderildi!" + 
+                            (data.FailCount > 0 ? $" ({data.FailCount} cihaza gönderilemedi)" : ""));
+                        
+                        // Personel bilgilerini yenile
+                        await LoadPersonelDetail();
+                    }
+                    else
+                    {
+                        await _toastService.ShowErrorAsync("Kart bilgisi hiçbir cihaza gönderilemedi!");
+                    }
+                }
+                else
+                {
+                    await _toastService.ShowErrorAsync(result.Message ?? "Kart gönderilirken bir hata oluştu");
+                }
+            }
+            catch (Exception ex)
+            {
+                await _toastService.ShowErrorAsync($"Kart gönderilirken hata oluştu: {ex.Message}");
+            }
+            finally
+            {
+                IsSendingToDevices = false;
+                StateHasChanged();
+            }
+        }
+
+        private async Task DeleteCardFromAllDevices()
+        {
+            if (Personel == null || string.IsNullOrEmpty(TcKimlikNo)) return;
+
+            IsSendingToDevices = true;
+            StateHasChanged();
+
+            try
+            {
+                var result = await _personelApiService.DeleteCardFromAllDevicesAsync(TcKimlikNo);
+
+                if (result.Success && result.Data != null)
+                {
+                    var data = result.Data;
+                    if (data.SuccessCount > 0)
+                    {
+                        await _toastService.ShowSuccessAsync(result.Message ?? 
+                            $"Kart bilgisi {data.SuccessCount} cihazdan başarıyla silindi!" + 
+                            (data.FailCount > 0 ? $" ({data.FailCount} cihazdan silinemedi)" : ""));
+                    }
+                    else
+                    {
+                        await _toastService.ShowErrorAsync("Kart bilgisi hiçbir cihazdan silinemedi!");
+                    }
+                }
+                else
+                {
+                    await _toastService.ShowErrorAsync(result.Message ?? "Kart silinirken bir hata oluştu");
+                }
+            }
+            catch (Exception ex)
+            {
+                await _toastService.ShowErrorAsync($"Kart silinirken hata oluştu: {ex.Message}");
+            }
+            finally
+            {
+                IsSendingToDevices = false;
+                StateHasChanged();
+            }
         }
     }
 }

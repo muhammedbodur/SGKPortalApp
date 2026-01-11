@@ -158,8 +158,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.SilindiMi, opt => opt.MapFrom(src => false))
 
                 // Otomatik oluşturulan alanlar
-                .ForMember(dest => dest.PersonelKayitNo, opt => opt.Ignore())
-                .ForMember(dest => dest.KartNo, opt => opt.Ignore())
+                .ForMember(dest => dest.PersonelKayitNo, opt => opt.MapFrom(src => src.PersonelKayitNo))
+                .ForMember(dest => dest.KartNo, opt => opt.MapFrom(src => src.KartNo))
                 .ForMember(dest => dest.KartNoAktiflikTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.KartNoDuzenlenmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.KartNoGonderimTarihi, opt => opt.Ignore())
@@ -204,9 +204,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.TcKimlikNo, opt => opt.Ignore())
                 .ForMember(dest => dest.SicilNo, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
-                .ForMember(dest => dest.PersonelKayitNo, opt => opt.Ignore())
-                .ForMember(dest => dest.KartNo, opt => opt.Ignore())
-                .ForMember(dest => dest.KartNoAktiflikTarihi, opt => opt.Ignore())
+                // PersonelKayitNo, KartNo, KartNoAktiflikTarihi artık güncellenebilir
                 .ForMember(dest => dest.KartNoDuzenlenmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.KartNoGonderimTarihi, opt => opt.Ignore())
 

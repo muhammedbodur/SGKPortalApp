@@ -1,11 +1,14 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Exceptions;
@@ -28,19 +31,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
         private readonly ILogger<PersonelService> _logger;
         private readonly IFieldPermissionValidationService _fieldPermissionService;
         private readonly IPermissionKeyResolverService _permissionKeyResolver;
+        private readonly IZKTecoApiClient _zktecoApiClient;
 
         public PersonelService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger<PersonelService> logger,
             IFieldPermissionValidationService fieldPermissionService,
-            IPermissionKeyResolverService permissionKeyResolver)
+            IPermissionKeyResolverService permissionKeyResolver,
+            IZKTecoApiClient zktecoApiClient)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
             _fieldPermissionService = fieldPermissionService;
             _permissionKeyResolver = permissionKeyResolver;
+            _zktecoApiClient = zktecoApiClient;
         }
 
         private async Task<(bool Ok, string? ErrorMessage)> ValidateRequestorAsync(string? requestorTcKimlikNo, string? requestorSessionId)
@@ -805,6 +811,244 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         .ErrorResult("Personel güncellenirken bir hata oluştu. Tüm işlemler geri alındı.", ex.Message);
                 }
             });
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // PDKS CİHAZ İŞLEMLERİ
+        // ═══════════════════════════════════════════════════════
+
+        public async Task<ApiResponseDto<PdksCardSendResultDto>> SendCardToAllDevicesAsync(string tcKimlikNo)
+        {
+            try
+            {
+                // Personel bilgilerini getir
+                var personel = await _unitOfWork.Repository<Personel>().GetByIdAsync(tcKimlikNo);
+                if (personel == null)
+                    return ApiResponseDto<PdksCardSendResultDto>.ErrorResult("Personel bulunamadı");
+
+                // Personel Kayıt No ve Kart No kontrolü
+                if (personel.PersonelKayitNo == 0 || personel.KartNo == 0)
+                    return ApiResponseDto<PdksCardSendResultDto>.ErrorResult("Personel Kayıt No ve Kart No bilgileri eksik!");
+
+                // Aktif cihazları getir
+                var devices = await _unitOfWork.Repository<Device>()
+                    .FindAsync(d => d.IsActive);
+
+                _logger.LogInformation("SendCardToAllDevicesAsync: {DeviceCount} aktif cihaz bulundu. TC: {TcKimlikNo}", 
+                    devices.Count(), tcKimlikNo);
+
+                if (!devices.Any())
+                {
+                    _logger.LogWarning("SendCardToAllDevicesAsync: Aktif cihaz bulunamadı. TC: {TcKimlikNo}", tcKimlikNo);
+                    return ApiResponseDto<PdksCardSendResultDto>.ErrorResult("Aktif PDKS cihazı bulunamadı!");
+                }
+
+                var userDto = new UserCreateUpdateDto
+                {
+                    EnrollNumber = personel.PersonelKayitNo.ToString(),
+                    Name = personel.AdSoyad,
+                    CardNumber = personel.KartNo,
+                    Privilege = 0,
+                    Password = "",
+                    Enabled = personel.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif
+                };
+
+                // Tüm cihazlara PARALEL olarak gönder
+                var sendTasks = devices.Select(async device =>
+                {
+                    try
+                    {
+                        _logger.LogInformation("Cihaza kart gönderiliyor: {DeviceName} ({DeviceIP}:{Port})", 
+                            device.DeviceName, device.IpAddress, device.Port);
+
+                        var apiUser = new ApiUserDto
+                        {
+                            EnrollNumber = userDto.EnrollNumber,
+                            Name = userDto.Name,
+                            CardNumber = userDto.CardNumber,
+                            Privilege = userDto.Privilege,
+                            Password = userDto.Password,
+                            Enabled = userDto.Enabled
+                        };
+
+                        var port = int.TryParse(device.Port, out var p) ? p : 4370;
+                        
+                        // Önce kullanıcının cihazda olup olmadığını kontrol et
+                        var existingUser = await _zktecoApiClient.GetUserFromDeviceAsync(
+                            device.IpAddress, 
+                            userDto.EnrollNumber, 
+                            port);
+
+                        bool result;
+                        if (existingUser != null)
+                        {
+                            // Kullanıcı var, güncelle
+                            _logger.LogInformation("Kullanıcı cihazda mevcut, güncelleniyor: {DeviceName} - {EnrollNumber}", 
+                                device.DeviceName, userDto.EnrollNumber);
+                            result = await _zktecoApiClient.UpdateUserOnDeviceAsync(
+                                device.IpAddress,
+                                userDto.EnrollNumber,
+                                apiUser,
+                                port);
+                        }
+                        else
+                        {
+                            // Kullanıcı yok, ekle (force=true ile kart çakışmalarını otomatik çöz)
+                            _logger.LogInformation("Kullanıcı cihazda yok, ekleniyor: {DeviceName} - {EnrollNumber}", 
+                                device.DeviceName, userDto.EnrollNumber);
+                            result = await _zktecoApiClient.AddUserToDeviceAsync(
+                                device.IpAddress,
+                                apiUser,
+                                port,
+                                force: true);
+                        }
+
+                        _logger.LogInformation("Cihaz sonucu: {DeviceName} - {Success}", 
+                            device.DeviceName ?? device.IpAddress, result);
+
+                        return new DeviceOperationResult
+                        {
+                            DeviceId = device.DeviceId,
+                            DeviceName = device.DeviceName ?? $"{device.IpAddress}:{device.Port}",
+                            Success = result,
+                            ErrorMessage = result ? null : "Cihaza eklenemedi"
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Cihaza kart gönderilirken hata: {DeviceIP}", device.IpAddress);
+                        return new DeviceOperationResult
+                        {
+                            DeviceId = device.DeviceId,
+                            DeviceName = device.DeviceName ?? $"{device.IpAddress}:{device.Port}",
+                            Success = false,
+                            ErrorMessage = ex.Message
+                        };
+                    }
+                }).ToList();
+
+                var results = await Task.WhenAll(sendTasks);
+
+                var resultDto = new PdksCardSendResultDto
+                {
+                    TotalDevices = devices.Count(),
+                    SuccessCount = results.Count(r => r.Success),
+                    FailCount = results.Count(r => !r.Success),
+                    DeviceResults = results.ToList()
+                };
+
+                if (resultDto.SuccessCount > 0)
+                {
+                    _logger.LogInformation(
+                        "Kart bilgisi {SuccessCount}/{TotalDevices} cihaza gönderildi. TC: {TcKimlikNo}",
+                        resultDto.SuccessCount, resultDto.TotalDevices, tcKimlikNo);
+
+                    return ApiResponseDto<PdksCardSendResultDto>.SuccessResult(
+                        resultDto,
+                        $"Kart bilgisi {resultDto.SuccessCount} cihaza başarıyla gönderildi!" +
+                        (resultDto.FailCount > 0 ? $" ({resultDto.FailCount} cihaza gönderilemedi)" : ""));
+                }
+                else
+                {
+                    return ApiResponseDto<PdksCardSendResultDto>.ErrorResult(
+                        "Kart bilgisi hiçbir cihaza gönderilemedi!");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Kart gönderilirken hata oluştu. TC: {TcKimlikNo}", tcKimlikNo);
+                return ApiResponseDto<PdksCardSendResultDto>.ErrorResult(
+                    "Kart gönderilirken bir hata oluştu",
+                    ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<PdksCardSendResultDto>> DeleteCardFromAllDevicesAsync(string tcKimlikNo)
+        {
+            try
+            {
+                // Personel bilgilerini getir
+                var personel = await _unitOfWork.Repository<Personel>().GetByIdAsync(tcKimlikNo);
+                if (personel == null)
+                    return ApiResponseDto<PdksCardSendResultDto>.ErrorResult("Personel bulunamadı");
+
+                // Personel Kayıt No kontrolü
+                if (personel.PersonelKayitNo == 0)
+                    return ApiResponseDto<PdksCardSendResultDto>.ErrorResult("Personel Kayıt No bilgisi eksik!");
+
+                // Aktif cihazları getir
+                var devices = await _unitOfWork.Repository<Device>()
+                    .FindAsync(d => d.IsActive);
+
+                if (!devices.Any())
+                    return ApiResponseDto<PdksCardSendResultDto>.ErrorResult("Aktif PDKS cihazı bulunamadı!");
+
+                // Tüm cihazlardan PARALEL olarak sil
+                var deleteTasks = devices.Select(async device =>
+                {
+                    try
+                    {
+                        var port = int.TryParse(device.Port, out var p) ? p : 4370;
+                        var result = await _zktecoApiClient.DeleteUserFromDeviceAsync(
+                            device.IpAddress,
+                            personel.PersonelKayitNo.ToString(),
+                            port);
+
+                        return new DeviceOperationResult
+                        {
+                            DeviceId = device.DeviceId,
+                            DeviceName = device.DeviceName ?? $"{device.IpAddress}:{device.Port}",
+                            Success = result,
+                            ErrorMessage = result ? null : "Cihazdan silinemedi"
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Cihazdan kart silinirken hata: {DeviceIP}", device.IpAddress);
+                        return new DeviceOperationResult
+                        {
+                            DeviceId = device.DeviceId,
+                            DeviceName = device.DeviceName ?? $"{device.IpAddress}:{device.Port}",
+                            Success = false,
+                            ErrorMessage = ex.Message
+                        };
+                    }
+                }).ToList();
+
+                var results = await Task.WhenAll(deleteTasks);
+
+                var resultDto = new PdksCardSendResultDto
+                {
+                    TotalDevices = devices.Count(),
+                    SuccessCount = results.Count(r => r.Success),
+                    FailCount = results.Count(r => !r.Success),
+                    DeviceResults = results.ToList()
+                };
+
+                if (resultDto.SuccessCount > 0)
+                {
+                    _logger.LogInformation(
+                        "Kart bilgisi {SuccessCount}/{TotalDevices} cihazdan silindi. TC: {TcKimlikNo}",
+                        resultDto.SuccessCount, resultDto.TotalDevices, tcKimlikNo);
+
+                    return ApiResponseDto<PdksCardSendResultDto>.SuccessResult(
+                        resultDto,
+                        $"Kart bilgisi {resultDto.SuccessCount} cihazdan başarıyla silindi!" +
+                        (resultDto.FailCount > 0 ? $" ({resultDto.FailCount} cihazdan silinemedi)" : ""));
+                }
+                else
+                {
+                    return ApiResponseDto<PdksCardSendResultDto>.ErrorResult(
+                        "Kart bilgisi hiçbir cihazdan silinemedi!");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Kart silinirken hata oluştu. TC: {TcKimlikNo}", tcKimlikNo);
+                return ApiResponseDto<PdksCardSendResultDto>.ErrorResult(
+                    "Kart silinirken bir hata oluştu",
+                    ex.Message);
+            }
         }
     }
 }

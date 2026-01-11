@@ -316,12 +316,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             }
         }
 
-        public async Task<bool> AddUserToDeviceAsync(string deviceIp, ApiUserDto user, int port = 4370)
+        public async Task<bool> AddUserToDeviceAsync(string deviceIp, ApiUserDto user, int port = 4370, bool force = false)
         {
             try
             {
                 var response = await _httpClient.PostAsJsonAsync(
-                    $"{_baseUrl}/api/users/{deviceIp}?port={port}",
+                    $"{_baseUrl}/api/users/{deviceIp}?port={port}&force={force.ToString().ToLower()}",
                     user);
 
                 if (!response.IsSuccessStatusCode)
@@ -332,6 +332,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 }
 
                 var result = await response.Content.ReadFromJsonAsync<ApiResponse>();
+                
+                if (result?.Success == false)
+                {
+                    _logger.LogWarning("Add user returned success=false: {DeviceIp}:{Port} - {EnrollNumber} - Message: {Message}", 
+                        deviceIp, port, user.EnrollNumber, result.Message);
+                }
+                else
+                {
+                    _logger.LogInformation("Add user success: {DeviceIp}:{Port} - {EnrollNumber}", 
+                        deviceIp, port, user.EnrollNumber);
+                }
+                
                 return result?.Success ?? false;
             }
             catch (Exception ex)

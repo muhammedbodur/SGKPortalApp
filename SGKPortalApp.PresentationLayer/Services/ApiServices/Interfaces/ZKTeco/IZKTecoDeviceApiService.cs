@@ -1,6 +1,5 @@
 using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
-using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco
 {
@@ -10,8 +9,8 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco
         Task<ServiceResult<List<DeviceResponseDto>>> GetAllAsync();
         Task<ServiceResult<List<DeviceResponseDto>>> GetActiveAsync();
         Task<ServiceResult<DeviceResponseDto>> GetByIdAsync(int id);
-        Task<ServiceResult<DeviceResponseDto>> CreateAsync(Device device);
-        Task<ServiceResult<DeviceResponseDto>> UpdateAsync(Device device);
+        Task<ServiceResult<DeviceResponseDto>> CreateAsync(DeviceResponseDto device);
+        Task<ServiceResult<DeviceResponseDto>> UpdateAsync(int id, DeviceResponseDto device);
         Task<ServiceResult<bool>> DeleteAsync(int id);
 
         // ========== Device Control ==========
@@ -27,6 +26,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco
 
         // ========== User Management ==========
         Task<ServiceResult<List<ApiUserDto>>> GetDeviceUsersAsync(int deviceId);
+        Task<ServiceResult<List<DeviceUserMatch>>> GetDeviceUsersWithMismatchesAsync(int deviceId);
         Task<ServiceResult<ApiUserDto>> GetDeviceUserAsync(int deviceId, string enrollNumber);
         Task<ServiceResult<ApiUserDto>> GetDeviceUserByCardAsync(int deviceId, long cardNumber);
         Task<ServiceResult<bool>> CreateDeviceUserAsync(int deviceId, UserCreateUpdateDto request, bool force = false);

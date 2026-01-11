@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SGKPortalApp.ApiLayer.Controllers.PdksIslemleri
@@ -20,111 +22,107 @@ namespace SGKPortalApp.ApiLayer.Controllers.PdksIslemleri
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var devices = await _deviceService.GetAllDevicesAsync();
-            return Ok(devices);
+            var result = await _deviceService.GetAllDevicesAsync();
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var device = await _deviceService.GetDeviceByIdAsync(id);
-            if (device == null) return NotFound();
-            return Ok(device);
+            var result = await _deviceService.GetDeviceByIdAsync(id);
+            return result.Success ? Ok(result) : NotFound(result);
         }
 
         [HttpGet("active")]
         public async Task<IActionResult> GetActive()
         {
-            var devices = await _deviceService.GetActiveDevicesAsync();
-            return Ok(devices);
+            var result = await _deviceService.GetActiveDevicesAsync();
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Device device)
         {
-            var created = await _deviceService.CreateDeviceAsync(device);
-            return CreatedAtAction(nameof(GetById), new { id = created.DeviceId }, created);
+            var result = await _deviceService.CreateDeviceAsync(device);
+            return result.Success ? CreatedAtAction(nameof(GetById), new { id = result.Data?.DeviceId }, result) : BadRequest(result);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] Device device)
         {
             device.DeviceId = id;
-            var updated = await _deviceService.UpdateDeviceAsync(device);
-            return Ok(updated);
+            var result = await _deviceService.UpdateDeviceAsync(device);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var success = await _deviceService.DeleteDeviceAsync(id);
-            if (!success) return NotFound();
-            return NoContent();
+            var result = await _deviceService.DeleteDeviceAsync(id);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         [HttpGet("{id}/status")]
         public async Task<IActionResult> GetStatus(int id)
         {
-            var status = await _deviceService.GetDeviceStatusAsync(id);
-            if (status == null) return NotFound();
-            return Ok(status);
+            var result = await _deviceService.GetDeviceStatusAsync(id);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         [HttpPost("{id}/test")]
         public async Task<IActionResult> TestConnection(int id)
         {
-            var success = await _deviceService.TestConnectionAsync(id);
-            return Ok(new { Success = success });
+            var result = await _deviceService.TestConnectionAsync(id);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         [HttpGet("{id}/time")]
         public async Task<IActionResult> GetTime(int id)
         {
-            var time = await _deviceService.GetDeviceTimeAsync(id);
-            if (time == null) return NotFound();
-            return Ok(time);
+            var result = await _deviceService.GetDeviceTimeAsync(id);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         [HttpPost("{id}/time/sync")]
         public async Task<IActionResult> SyncTime(int id)
         {
-            var success = await _deviceService.SynchronizeDeviceTimeAsync(id);
-            return Ok(new { Success = success });
+            var result = await _deviceService.SynchronizeDeviceTimeAsync(id);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         [HttpPost("{id}/enable")]
         public async Task<IActionResult> Enable(int id)
         {
-            var success = await _deviceService.EnableDeviceAsync(id);
-            return Ok(new { Success = success });
+            var result = await _deviceService.EnableDeviceAsync(id);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         [HttpPost("{id}/disable")]
         public async Task<IActionResult> Disable(int id)
         {
-            var success = await _deviceService.DisableDeviceAsync(id);
-            return Ok(new { Success = success });
+            var result = await _deviceService.DisableDeviceAsync(id);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         [HttpPost("{id}/restart")]
         public async Task<IActionResult> Restart(int id)
         {
-            var success = await _deviceService.RestartDeviceAsync(id);
-            return Ok(new { Success = success });
+            var result = await _deviceService.RestartDeviceAsync(id);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         [HttpPost("{id}/poweroff")]
         public async Task<IActionResult> PowerOff(int id)
         {
-            var success = await _deviceService.PowerOffDeviceAsync(id);
-            return Ok(new { Success = success });
+            var result = await _deviceService.PowerOffDeviceAsync(id);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         [HttpPost("{id}/time")]
         public async Task<IActionResult> SetTime(int id, [FromBody] DateTime? dateTime = null)
         {
-            var success = await _deviceService.SetDeviceTimeAsync(id, dateTime);
-            return Ok(new { Success = success });
+            var result = await _deviceService.SetDeviceTimeAsync(id, dateTime);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         // ========== User Management ==========
@@ -133,93 +131,118 @@ namespace SGKPortalApp.ApiLayer.Controllers.PdksIslemleri
         public async Task<IActionResult> GetDeviceUsers(int id)
         {
             var users = await _deviceService.GetDeviceUsersAsync(id);
-            return Ok(users);
+            var result = ApiResponseDto<List<ApiUserDto>>.SuccessResult(users, "Cihaz kullanıcıları başarıyla getirildi");
+            return Ok(result);
+        }
+
+        [HttpGet("{id}/users/with-mismatches")]
+        public async Task<IActionResult> GetDeviceUsersWithMismatches(int id)
+        {
+            var matches = await _deviceService.GetAllDeviceUsersWithMismatchInfoAsync(id);
+            var result = ApiResponseDto<List<DeviceUserMatch>>.SuccessResult(matches, "Cihaz kullanıcıları uyumsuzluk bilgisiyle getirildi");
+            return Ok(result);
         }
 
         [HttpGet("{id}/users/{enrollNumber}")]
         public async Task<IActionResult> GetDeviceUser(int id, string enrollNumber)
         {
             var user = await _deviceService.GetDeviceUserAsync(id, enrollNumber);
-            if (user == null) return NotFound();
-            return Ok(user);
+            if (user == null)
+                return NotFound(ApiResponseDto<ApiUserDto>.ErrorResult("Kullanıcı bulunamadı"));
+            
+            var result = ApiResponseDto<ApiUserDto>.SuccessResult(user, "Kullanıcı başarıyla getirildi");
+            return Ok(result);
         }
 
         [HttpGet("{id}/users/card/{cardNumber}")]
         public async Task<IActionResult> GetDeviceUserByCard(int id, long cardNumber)
         {
             var user = await _deviceService.GetDeviceUserByCardAsync(id, cardNumber);
-            if (user == null) return NotFound();
-            return Ok(user);
+            if (user == null)
+                return NotFound(ApiResponseDto<ApiUserDto>.ErrorResult("Kullanıcı bulunamadı"));
+            
+            var result = ApiResponseDto<ApiUserDto>.SuccessResult(user, "Kullanıcı başarıyla getirildi");
+            return Ok(result);
         }
 
         [HttpGet("{id}/users/{enrollNumber}/with-mismatch")]
         public async Task<IActionResult> GetDeviceUserWithMismatchInfo(int id, string enrollNumber)
         {
-            var result = await _deviceService.GetDeviceUserWithMismatchInfoAsync(id, enrollNumber);
+            var match = await _deviceService.GetDeviceUserWithMismatchInfoAsync(id, enrollNumber);
+            var result = ApiResponseDto<DeviceUserMatch>.SuccessResult(match, "Kullanıcı eşleşme bilgisi getirildi");
             return Ok(result);
         }
 
         [HttpGet("{id}/users/card/{cardNumber}/with-mismatch")]
         public async Task<IActionResult> GetDeviceUserByCardWithMismatchInfo(int id, long cardNumber)
         {
-            var result = await _deviceService.GetDeviceUserByCardWithMismatchInfoAsync(id, cardNumber);
+            var match = await _deviceService.GetDeviceUserByCardWithMismatchInfoAsync(id, cardNumber);
+            var result = ApiResponseDto<DeviceUserMatch>.SuccessResult(match, "Kullanıcı eşleşme bilgisi getirildi");
             return Ok(result);
         }
 
         [HttpPost("users/card/search")]
         public async Task<IActionResult> SearchUserByCard([FromBody] CardSearchRequest request)
         {
-            var result = await _deviceService.SearchUserByCardAsync(request);
-            return Ok(result);
+            var searchResult = await _deviceService.SearchUserByCardAsync(request);
+            var result = ApiResponseDto<CardSearchResponse>.SuccessResult(searchResult, searchResult.Message);
+            return searchResult.Success ? Ok(result) : BadRequest(result);
         }
 
         [HttpPost("users/card/{cardNumber}/search-all")]
         public async Task<IActionResult> SearchUserByCardOnAllDevices(long cardNumber)
         {
-            var result = await _deviceService.SearchUserByCardOnAllDevicesAsync(cardNumber);
-            return Ok(result);
+            var searchResult = await _deviceService.SearchUserByCardOnAllDevicesAsync(cardNumber);
+            var result = ApiResponseDto<CardSearchResponse>.SuccessResult(searchResult, searchResult.Message);
+            return searchResult.Success ? Ok(result) : BadRequest(result);
         }
 
         [HttpPost("{id}/users")]
         public async Task<IActionResult> CreateDeviceUser(int id, [FromBody] SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco.UserCreateUpdateDto request, [FromQuery] bool force = false)
         {
             var success = await _deviceService.CreateDeviceUserAsync(id, request, force);
-            return Ok(new { Success = success });
+            var result = ApiResponseDto<bool>.SuccessResult(success, success ? "Kullanıcı başarıyla oluşturuldu" : "Kullanıcı oluşturulamadı");
+            return success ? Ok(result) : BadRequest(result);
         }
 
         [HttpPut("{id}/users/{enrollNumber}")]
         public async Task<IActionResult> UpdateDeviceUser(int id, string enrollNumber, [FromBody] SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco.UserCreateUpdateDto request, [FromQuery] bool force = false)
         {
             var success = await _deviceService.UpdateDeviceUserAsync(id, enrollNumber, request, force);
-            return Ok(new { Success = success });
+            var result = ApiResponseDto<bool>.SuccessResult(success, success ? "Kullanıcı başarıyla güncellendi" : "Kullanıcı güncellenemedi");
+            return success ? Ok(result) : BadRequest(result);
         }
 
         [HttpDelete("{id}/users/{enrollNumber}")]
         public async Task<IActionResult> DeleteDeviceUser(int id, string enrollNumber)
         {
             var success = await _deviceService.DeleteDeviceUserAsync(id, enrollNumber);
-            return Ok(new { Success = success });
+            var result = ApiResponseDto<bool>.SuccessResult(success, success ? "Kullanıcı başarıyla silindi" : "Kullanıcı silinemedi");
+            return success ? Ok(result) : BadRequest(result);
         }
 
         [HttpDelete("{id}/users")]
         public async Task<IActionResult> ClearAllDeviceUsers(int id)
         {
             var success = await _deviceService.ClearAllDeviceUsersAsync(id);
-            return Ok(new { Success = success });
+            var result = ApiResponseDto<bool>.SuccessResult(success, success ? "Tüm kullanıcılar başarıyla silindi" : "Kullanıcılar silinemedi");
+            return success ? Ok(result) : BadRequest(result);
         }
 
         [HttpGet("{id}/users/count")]
         public async Task<IActionResult> GetDeviceUserCount(int id)
         {
             var count = await _deviceService.GetDeviceUserCountAsync(id);
-            return Ok(new { Count = count });
+            var result = ApiResponseDto<int>.SuccessResult(count, "Kullanıcı sayısı başarıyla getirildi");
+            return Ok(result);
         }
 
         [HttpDelete("{id}/users/{enrollNumber}/card")]
         public async Task<IActionResult> RemoveCardFromUser(int id, string enrollNumber)
         {
             var success = await _deviceService.RemoveCardFromUserAsync(id, enrollNumber);
-            return Ok(new { Success = success });
+            var result = ApiResponseDto<bool>.SuccessResult(success, success ? "Kart başarıyla kaldırıldı" : "Kart kaldırılamadı");
+            return success ? Ok(result) : BadRequest(result);
         }
 
         // ========== Attendance Management ==========
@@ -228,21 +251,24 @@ namespace SGKPortalApp.ApiLayer.Controllers.PdksIslemleri
         public async Task<IActionResult> GetAttendanceLogs(int id)
         {
             var logs = await _deviceService.GetAttendanceLogsAsync(id);
-            return Ok(logs);
+            var result = ApiResponseDto<List<AttendanceLogDto>>.SuccessResult(logs, "Devam kayıtları başarıyla getirildi");
+            return Ok(result);
         }
 
         [HttpDelete("{id}/attendance")]
         public async Task<IActionResult> ClearAttendanceLogs(int id)
         {
             var success = await _deviceService.ClearAttendanceLogsAsync(id);
-            return Ok(new { Success = success });
+            var result = ApiResponseDto<bool>.SuccessResult(success, success ? "Devam kayıtları başarıyla temizlendi" : "Devam kayıtları temizlenemedi");
+            return success ? Ok(result) : BadRequest(result);
         }
 
         [HttpGet("{id}/attendance/count")]
         public async Task<IActionResult> GetAttendanceLogCount(int id)
         {
             var count = await _deviceService.GetAttendanceLogCountAsync(id);
-            return Ok(new { Count = count });
+            var result = ApiResponseDto<int>.SuccessResult(count, "Devam kayıt sayısı başarıyla getirildi");
+            return Ok(result);
         }
 
         // ========== Realtime Monitoring ==========
@@ -251,14 +277,16 @@ namespace SGKPortalApp.ApiLayer.Controllers.PdksIslemleri
         public async Task<IActionResult> StartMonitoring(int id)
         {
             var success = await _deviceService.StartRealtimeMonitoringAsync(id);
-            return Ok(new { Success = success });
+            var result = ApiResponseDto<bool>.SuccessResult(success, success ? "Canlı izleme başlatıldı" : "Canlı izleme başlatılamadı");
+            return success ? Ok(result) : BadRequest(result);
         }
 
         [HttpPost("{id}/monitoring/stop")]
         public async Task<IActionResult> StopMonitoring(int id)
         {
             var success = await _deviceService.StopRealtimeMonitoringAsync(id);
-            return Ok(new { Success = success });
+            var result = ApiResponseDto<bool>.SuccessResult(success, success ? "Canlı izleme durduruldu" : "Canlı izleme durdurulamadı");
+            return success ? Ok(result) : BadRequest(result);
         }
     }
 }

@@ -92,7 +92,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri
         /// POST /api/users/{ip}
         /// NOT: Database değil, direkt cihaza
         /// </summary>
-        Task<bool> AddUserToDeviceAsync(string deviceIp, ApiUserDto user, int port = 4370);
+        /// <param name="force">Kart çakışması varsa otomatik temizle (varsayılan: false)</param>
+        Task<bool> AddUserToDeviceAsync(string deviceIp, ApiUserDto user, int port = 4370, bool force = false);
 
         /// <summary>
         /// Cihazdaki kullanıcıyı güncelle

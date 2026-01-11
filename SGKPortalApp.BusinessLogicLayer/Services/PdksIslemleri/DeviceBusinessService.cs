@@ -1,9 +1,13 @@
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PdksIslemleri;
 using System;
@@ -17,146 +21,257 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IZKTecoApiClient _apiClient;
+        private readonly IMapper _mapper;
         private readonly ILogger<DeviceBusinessService> _logger;
 
         public DeviceBusinessService(
             IUnitOfWork unitOfWork,
             IZKTecoApiClient apiClient,
+            IMapper mapper,
             ILogger<DeviceBusinessService> logger)
         {
             _unitOfWork = unitOfWork;
             _apiClient = apiClient;
+            _mapper = mapper;
             _logger = logger;
         }
 
         // ========== Database Operations ==========
 
-        public async Task<List<Device>> GetAllDevicesAsync()
+        public async Task<ApiResponseDto<List<DeviceResponseDto>>> GetAllDevicesAsync()
         {
-            var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
-            var devices = await deviceRepo.GetAllAsync();
-            return devices.Where(d => !d.SilindiMi).OrderBy(d => d.DeviceName).ToList();
-        }
-
-        public async Task<Device?> GetDeviceByIdAsync(int id)
-        {
-            var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
-            var device = await deviceRepo.GetByIdAsync(id);
-            return device?.SilindiMi == false ? device : null;
-        }
-
-        public async Task<Device?> GetDeviceByIpAsync(string ipAddress)
-        {
-            var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
-            var device = await deviceRepo.GetDeviceByIpAsync(ipAddress);
-            return device?.SilindiMi == false ? device : null;
-        }
-
-        public async Task<Device> CreateDeviceAsync(Device device)
-        {
-            var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
-
-            // Check if device with same IP already exists
-            var existing = await deviceRepo.GetDeviceByIpAsync(device.IpAddress);
-            if (existing != null && !existing.SilindiMi)
+            try
             {
-                throw new InvalidOperationException($"Bu IP adresine ({device.IpAddress}) sahip bir cihaz zaten mevcut.");
+                var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
+                var devices = await deviceRepo.GetAllWithRelationsAsync();
+                var deviceDtos = _mapper.Map<List<DeviceResponseDto>>(devices);
+
+                return ApiResponseDto<List<DeviceResponseDto>>
+                    .SuccessResult(deviceDtos, "Cihazlar başarıyla getirildi");
             }
-
-            device.EklenmeTarihi = DateTime.Now;
-            device.SilindiMi = false;
-
-            await deviceRepo.AddAsync(device);
-            await _unitOfWork.SaveChangesAsync();
-
-            _logger.LogInformation("Device created: {DeviceName} ({IpAddress})", device.DeviceName, device.IpAddress);
-            return device;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Cihazlar getirilirken hata oluştu");
+                return ApiResponseDto<List<DeviceResponseDto>>
+                    .ErrorResult("Cihazlar getirilirken bir hata oluştu", ex.Message);
+            }
         }
 
-        public async Task<Device> UpdateDeviceAsync(Device device)
+        public async Task<ApiResponseDto<DeviceResponseDto>> GetDeviceByIdAsync(int id)
         {
-            var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
-
-            var existing = await deviceRepo.GetByIdAsync(device.DeviceId);
-            if (existing == null || existing.SilindiMi)
+            try
             {
-                throw new InvalidOperationException($"Device with ID {device.DeviceId} not found.");
+                if (id <= 0)
+                    return ApiResponseDto<DeviceResponseDto>.ErrorResult("Geçersiz cihaz ID");
+
+                var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
+                var device = await deviceRepo.GetByIdWithRelationsAsync(id);
+
+                if (device == null)
+                    return ApiResponseDto<DeviceResponseDto>.ErrorResult("Cihaz bulunamadı");
+
+                var deviceDto = _mapper.Map<DeviceResponseDto>(device);
+                return ApiResponseDto<DeviceResponseDto>
+                    .SuccessResult(deviceDto, "Cihaz başarıyla getirildi");
             }
-
-            // Check if IP address is changing to an already used IP
-            if (existing.IpAddress != device.IpAddress)
+            catch (Exception ex)
             {
-                var deviceWithSameIp = await deviceRepo.GetDeviceByIpAsync(device.IpAddress);
-                if (deviceWithSameIp != null && deviceWithSameIp.DeviceId != device.DeviceId && !deviceWithSameIp.SilindiMi)
+                _logger.LogError(ex, "Cihaz getirilirken hata oluştu. ID: {Id}", id);
+                return ApiResponseDto<DeviceResponseDto>
+                    .ErrorResult("Cihaz getirilirken bir hata oluştu", ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<Device>> GetDeviceByIpAsync(string ipAddress)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(ipAddress))
+                    return ApiResponseDto<Device>.ErrorResult("IP adresi boş olamaz");
+
+                var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
+                var device = await deviceRepo.GetDeviceByIpAsync(ipAddress);
+
+                if (device == null)
+                    return ApiResponseDto<Device>.ErrorResult("Cihaz bulunamadı");
+
+                return ApiResponseDto<Device>
+                    .SuccessResult(device, "Cihaz başarıyla getirildi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Cihaz IP ile getirilirken hata oluştu. IP: {IpAddress}", ipAddress);
+                return ApiResponseDto<Device>
+                    .ErrorResult("Cihaz getirilirken bir hata oluştu", ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<DeviceResponseDto>> CreateDeviceAsync(Device device)
+        {
+            try
+            {
+                var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
+
+                var existing = await deviceRepo.GetDeviceByIpAsync(device.IpAddress);
+                if (existing != null && !existing.SilindiMi)
+                    return ApiResponseDto<DeviceResponseDto>
+                        .ErrorResult($"Bu IP adresine ({device.IpAddress}) sahip bir cihaz zaten mevcut");
+
+                device.SilindiMi = false;
+
+                await deviceRepo.AddAsync(device);
+                await _unitOfWork.SaveChangesAsync();
+
+                var createdDevice = await deviceRepo.GetByIdWithRelationsAsync(device.DeviceId);
+                var deviceDto = _mapper.Map<DeviceResponseDto>(createdDevice);
+
+                _logger.LogInformation("Cihaz oluşturuldu: {DeviceName} ({IpAddress})", device.DeviceName, device.IpAddress);
+                return ApiResponseDto<DeviceResponseDto>
+                    .SuccessResult(deviceDto, "Cihaz başarıyla oluşturuldu");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Cihaz oluşturulurken hata oluştu");
+                return ApiResponseDto<DeviceResponseDto>
+                    .ErrorResult("Cihaz oluşturulurken bir hata oluştu", ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<DeviceResponseDto>> UpdateDeviceAsync(Device device)
+        {
+            try
+            {
+                var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
+
+                var existing = await deviceRepo.GetByIdAsync(device.DeviceId);
+                if (existing == null || existing.SilindiMi)
+                    return ApiResponseDto<DeviceResponseDto>
+                        .ErrorResult("Cihaz bulunamadı");
+
+                if (existing.IpAddress != device.IpAddress)
                 {
-                    throw new InvalidOperationException($"Bu IP adresine ({device.IpAddress}) sahip başka bir cihaz mevcut.");
+                    var deviceWithSameIp = await deviceRepo.GetDeviceByIpAsync(device.IpAddress);
+                    if (deviceWithSameIp != null && deviceWithSameIp.DeviceId != device.DeviceId && !deviceWithSameIp.SilindiMi)
+                        return ApiResponseDto<DeviceResponseDto>
+                            .ErrorResult($"Bu IP adresine ({device.IpAddress}) sahip başka bir cihaz mevcut");
                 }
+
+                deviceRepo.Update(device);
+                await _unitOfWork.SaveChangesAsync();
+
+                var updatedDevice = await deviceRepo.GetByIdWithRelationsAsync(device.DeviceId);
+                var deviceDto = _mapper.Map<DeviceResponseDto>(updatedDevice);
+
+                _logger.LogInformation("Cihaz güncellendi: {DeviceName} ({IpAddress})", device.DeviceName, device.IpAddress);
+                return ApiResponseDto<DeviceResponseDto>
+                    .SuccessResult(deviceDto, "Cihaz başarıyla güncellendi");
             }
-
-            deviceRepo.Update(device);
-            await _unitOfWork.SaveChangesAsync();
-
-            _logger.LogInformation("Device updated: {DeviceName} ({IpAddress})", device.DeviceName, device.IpAddress);
-            return device;
-        }
-
-        public async Task<bool> DeleteDeviceAsync(int id)
-        {
-            var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
-
-            var device = await deviceRepo.GetByIdAsync(id);
-            if (device == null || device.SilindiMi)
+            catch (Exception ex)
             {
-                return false;
+                _logger.LogError(ex, "Cihaz güncellenirken hata oluştu. ID: {Id}", device.DeviceId);
+                return ApiResponseDto<DeviceResponseDto>
+                    .ErrorResult("Cihaz güncellenirken bir hata oluştu", ex.Message);
             }
-
-            device.SilindiMi = true;
-            device.SilinmeTarihi = DateTime.Now;
-
-            deviceRepo.Update(device);
-            await _unitOfWork.SaveChangesAsync();
-
-            _logger.LogInformation("Device soft-deleted: {DeviceName} ({IpAddress})", device.DeviceName, device.IpAddress);
-            return true;
         }
 
-        public async Task<List<Device>> GetActiveDevicesAsync()
+        public async Task<ApiResponseDto<bool>> DeleteDeviceAsync(int id)
         {
-            var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
-            var devices = await deviceRepo.GetAllAsync();
-            return devices.Where(d => !d.SilindiMi && d.IsActive).OrderBy(d => d.DeviceName).ToList();
+            try
+            {
+                var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
+
+                var device = await deviceRepo.GetByIdAsync(id);
+                if (device == null || device.SilindiMi)
+                    return ApiResponseDto<bool>.ErrorResult("Cihaz bulunamadı");
+
+                device.SilindiMi = true;
+                device.SilinmeTarihi = DateTime.Now;
+
+                deviceRepo.Update(device);
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("Cihaz silindi: {DeviceName} ({IpAddress})", device.DeviceName, device.IpAddress);
+                return ApiResponseDto<bool>
+                    .SuccessResult(true, "Cihaz başarıyla silindi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Cihaz silinirken hata oluştu. ID: {Id}", id);
+                return ApiResponseDto<bool>
+                    .ErrorResult("Cihaz silinirken bir hata oluştu", ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<List<DeviceResponseDto>>> GetActiveDevicesAsync()
+        {
+            try
+            {
+                var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
+                var devices = await deviceRepo.GetAllWithRelationsAsync();
+                var activeDevices = devices.Where(d => d.IsActive).ToList();
+                var deviceDtos = _mapper.Map<List<DeviceResponseDto>>(activeDevices);
+
+                return ApiResponseDto<List<DeviceResponseDto>>
+                    .SuccessResult(deviceDtos, "Aktif cihazlar başarıyla getirildi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Aktif cihazlar getirilirken hata oluştu");
+                return ApiResponseDto<List<DeviceResponseDto>>
+                    .ErrorResult("Aktif cihazlar getirilirken bir hata oluştu", ex.Message);
+            }
         }
 
         // ========== Device Operations (API Calls) ==========
 
-        public async Task<DeviceStatusDto?> GetDeviceStatusAsync(int deviceId)
+        // Helper method for internal use - returns Device entity directly
+        private async Task<Device?> GetDeviceEntityByIdAsync(int deviceId)
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
-                if (device == null) return null;
-
-                var port = int.TryParse(device.Port, out var p) ? p : 4370;
-                return await _apiClient.GetDeviceStatusAsync(device.IpAddress, port);
+                var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
+                return await deviceRepo.GetByIdAsync(deviceId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting device status for device {DeviceId}", deviceId);
+                _logger.LogError(ex, "Error getting device entity. ID: {Id}", deviceId);
                 return null;
             }
         }
 
-        public async Task<bool> TestConnectionAsync(int deviceId)
+        public async Task<ApiResponseDto<DeviceStatusDto>> GetDeviceStatusAsync(int deviceId)
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
-                if (device == null) return false;
+                var device = await GetDeviceEntityByIdAsync(deviceId);
+                if (device == null)
+                    return ApiResponseDto<DeviceStatusDto>.ErrorResult("Cihaz bulunamadı");
+
+                var port = int.TryParse(device.Port, out var p) ? p : 4370;
+                var status = await _apiClient.GetDeviceStatusAsync(device.IpAddress, port);
+                
+                return ApiResponseDto<DeviceStatusDto>
+                    .SuccessResult(status, "Cihaz durumu başarıyla getirildi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Cihaz durumu getirilirken hata oluştu. DeviceId: {DeviceId}", deviceId);
+                return ApiResponseDto<DeviceStatusDto>
+                    .ErrorResult("Cihaz durumu getirilirken bir hata oluştu", ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<bool>> TestConnectionAsync(int deviceId)
+        {
+            try
+            {
+                var device = await GetDeviceEntityByIdAsync(deviceId);
+                if (device == null)
+                    return ApiResponseDto<bool>.ErrorResult("Cihaz bulunamadı");
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
                 var success = await _apiClient.TestConnectionAsync(device.IpAddress, port);
 
-                // Update health check information
                 device.LastHealthCheckTime = DateTime.Now;
                 device.LastHealthCheckSuccess = success;
                 device.HealthCheckCount++;
@@ -164,132 +279,169 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 
                 await UpdateDeviceAsync(device);
 
-                return success;
+                return ApiResponseDto<bool>
+                    .SuccessResult(success, success ? "Bağlantı başarılı" : "Bağlantı başarısız");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error testing connection for device {DeviceId}", deviceId);
-                return false;
+                _logger.LogError(ex, "Bağlantı testi sırasında hata oluştu. DeviceId: {DeviceId}", deviceId);
+                return ApiResponseDto<bool>
+                    .ErrorResult("Bağlantı testi sırasında bir hata oluştu", ex.Message);
             }
         }
 
-        public async Task<bool> RestartDeviceAsync(int deviceId)
+        public async Task<ApiResponseDto<bool>> RestartDeviceAsync(int deviceId)
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
-                if (device == null) return false;
+                var device = await GetDeviceEntityByIdAsync(deviceId);
+                if (device == null)
+                    return ApiResponseDto<bool>.ErrorResult("Cihaz bulunamadı");
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
-                return await _apiClient.RestartDeviceAsync(device.IpAddress, port);
+                var success = await _apiClient.RestartDeviceAsync(device.IpAddress, port);
+                
+                return ApiResponseDto<bool>
+                    .SuccessResult(success, success ? "Cihaz yeniden başlatıldı" : "Cihaz yeniden başlatılamadı");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error restarting device {DeviceId}", deviceId);
-                return false;
+                _logger.LogError(ex, "Cihaz yeniden başlatılırken hata oluştu. DeviceId: {DeviceId}", deviceId);
+                return ApiResponseDto<bool>
+                    .ErrorResult("Cihaz yeniden başlatılırken bir hata oluştu", ex.Message);
             }
         }
 
-        public async Task<bool> EnableDeviceAsync(int deviceId)
+        public async Task<ApiResponseDto<bool>> EnableDeviceAsync(int deviceId)
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
-                if (device == null) return false;
+                var device = await GetDeviceEntityByIdAsync(deviceId);
+                if (device == null)
+                    return ApiResponseDto<bool>.ErrorResult("Cihaz bulunamadı");
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
-                return await _apiClient.EnableDeviceAsync(device.IpAddress, port);
+                var success = await _apiClient.EnableDeviceAsync(device.IpAddress, port);
+                
+                return ApiResponseDto<bool>
+                    .SuccessResult(success, success ? "Cihaz etkinleştirildi" : "Cihaz etkinleştirilemedi");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error enabling device {DeviceId}", deviceId);
-                return false;
+                _logger.LogError(ex, "Cihaz etkinleştirilirken hata oluştu. DeviceId: {DeviceId}", deviceId);
+                return ApiResponseDto<bool>
+                    .ErrorResult("Cihaz etkinleştirilirken bir hata oluştu", ex.Message);
             }
         }
 
-        public async Task<bool> DisableDeviceAsync(int deviceId)
+        public async Task<ApiResponseDto<bool>> DisableDeviceAsync(int deviceId)
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
-                if (device == null) return false;
+                var device = await GetDeviceEntityByIdAsync(deviceId);
+                if (device == null)
+                    return ApiResponseDto<bool>.ErrorResult("Cihaz bulunamadı");
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
-                return await _apiClient.DisableDeviceAsync(device.IpAddress, port);
+                var success = await _apiClient.DisableDeviceAsync(device.IpAddress, port);
+                
+                return ApiResponseDto<bool>
+                    .SuccessResult(success, success ? "Cihaz devre dışı bırakıldı" : "Cihaz devre dışı bırakılamadı");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error disabling device {DeviceId}", deviceId);
-                return false;
+                _logger.LogError(ex, "Cihaz devre dışı bırakılırken hata oluştu. DeviceId: {DeviceId}", deviceId);
+                return ApiResponseDto<bool>
+                    .ErrorResult("Cihaz devre dışı bırakılırken bir hata oluştu", ex.Message);
             }
         }
 
-        public async Task<DeviceTimeDto?> GetDeviceTimeAsync(int deviceId)
+        public async Task<ApiResponseDto<DeviceTimeDto>> GetDeviceTimeAsync(int deviceId)
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
-                if (device == null) return null;
+                var device = await GetDeviceEntityByIdAsync(deviceId);
+                if (device == null)
+                    return ApiResponseDto<DeviceTimeDto>.ErrorResult("Cihaz bulunamadı");
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
-                return await _apiClient.GetDeviceTimeAsync(device.IpAddress, port);
+                var time = await _apiClient.GetDeviceTimeAsync(device.IpAddress, port);
+                
+                return ApiResponseDto<DeviceTimeDto>
+                    .SuccessResult(time, "Cihaz saati başarıyla getirildi");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting device time for device {DeviceId}", deviceId);
-                return null;
+                _logger.LogError(ex, "Cihaz saati getirilirken hata oluştu. DeviceId: {DeviceId}", deviceId);
+                return ApiResponseDto<DeviceTimeDto>
+                    .ErrorResult("Cihaz saati getirilirken bir hata oluştu", ex.Message);
             }
         }
 
-        public async Task<bool> PowerOffDeviceAsync(int deviceId)
+        public async Task<ApiResponseDto<bool>> PowerOffDeviceAsync(int deviceId)
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
-                if (device == null) return false;
+                var device = await GetDeviceEntityByIdAsync(deviceId);
+                if (device == null)
+                    return ApiResponseDto<bool>.ErrorResult("Cihaz bulunamadı");
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
-                return await _apiClient.PowerOffDeviceAsync(device.IpAddress, port);
+                var success = await _apiClient.PowerOffDeviceAsync(device.IpAddress, port);
+                
+                return ApiResponseDto<bool>
+                    .SuccessResult(success, success ? "Cihaz kapatıldı" : "Cihaz kapatılamadı");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error powering off device {DeviceId}", deviceId);
-                return false;
+                _logger.LogError(ex, "Cihaz kapatılırken hata oluştu. DeviceId: {DeviceId}", deviceId);
+                return ApiResponseDto<bool>
+                    .ErrorResult("Cihaz kapatılırken bir hata oluştu", ex.Message);
             }
         }
 
-        public async Task<bool> SetDeviceTimeAsync(int deviceId, DateTime? dateTime = null)
+        public async Task<ApiResponseDto<bool>> SetDeviceTimeAsync(int deviceId, DateTime? dateTime = null)
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
-                if (device == null) return false;
+                var device = await GetDeviceEntityByIdAsync(deviceId);
+                if (device == null)
+                    return ApiResponseDto<bool>.ErrorResult("Cihaz bulunamadı");
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
                 var timeToSet = dateTime ?? DateTime.Now;
-                return await _apiClient.SetDeviceTimeAsync(device.IpAddress, timeToSet, port);
+                var success = await _apiClient.SetDeviceTimeAsync(device.IpAddress, timeToSet, port);
+                
+                return ApiResponseDto<bool>
+                    .SuccessResult(success, success ? "Cihaz saati ayarlandı" : "Cihaz saati ayarlanamadı");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error setting device time for device {DeviceId}", deviceId);
-                return false;
+                _logger.LogError(ex, "Cihaz saati ayarlanırken hata oluştu. DeviceId: {DeviceId}", deviceId);
+                return ApiResponseDto<bool>
+                    .ErrorResult("Cihaz saati ayarlanırken bir hata oluştu", ex.Message);
             }
         }
 
-        public async Task<bool> SynchronizeDeviceTimeAsync(int deviceId)
+        public async Task<ApiResponseDto<bool>> SynchronizeDeviceTimeAsync(int deviceId)
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
-                if (device == null) return false;
+                var device = await GetDeviceEntityByIdAsync(deviceId);
+                if (device == null)
+                    return ApiResponseDto<bool>.ErrorResult("Cihaz bulunamadı");
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
-                return await _apiClient.SetDeviceTimeAsync(device.IpAddress, DateTime.Now, port);
+                var success = await _apiClient.SetDeviceTimeAsync(device.IpAddress, DateTime.Now, port);
+                
+                return ApiResponseDto<bool>
+                    .SuccessResult(success, success ? "Cihaz saati senkronize edildi" : "Cihaz saati senkronize edilemedi");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error synchronizing device time for device {DeviceId}", deviceId);
-                return false;
+                _logger.LogError(ex, "Cihaz saati senkronize edilirken hata oluştu. DeviceId: {DeviceId}", deviceId);
+                return ApiResponseDto<bool>
+                    .ErrorResult("Cihaz saati senkronize edilirken bir hata oluştu", ex.Message);
             }
         }
 
@@ -299,7 +451,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null) return new List<ApiUserDto>();
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
@@ -316,7 +468,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null) return null;
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
@@ -333,7 +485,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null) return null;
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
@@ -352,7 +504,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null)
                 {
                     match.Status = MatchStatus.NotFound;
@@ -424,13 +576,80 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             return match;
         }
 
+        public async Task<List<DeviceUserMatch>> GetAllDeviceUsersWithMismatchInfoAsync(int deviceId)
+        {
+            var matches = new List<DeviceUserMatch>();
+
+            try
+            {
+                var device = await GetDeviceEntityByIdAsync(deviceId);
+                if (device == null)
+                {
+                    _logger.LogWarning("Device {DeviceId} not found", deviceId);
+                    return matches;
+                }
+
+                // Cihazdan tüm kullanıcıları getir
+                var port = int.TryParse(device.Port, out var p) ? p : 4370;
+                var deviceUsers = await _apiClient.GetAllUsersFromDeviceAsync(device.IpAddress, port);
+
+                if (deviceUsers == null || !deviceUsers.Any())
+                {
+                    return matches;
+                }
+
+                // Veritabanından tüm personelleri getir (cache için)
+                var allPersonel = await _unitOfWork.Repository<Personel>().GetAllAsync();
+                // PersonelKayitNo 0 olanları ve duplicate'leri filtrele
+                var personelDict = allPersonel
+                    .Where(p => p.PersonelKayitNo > 0)
+                    .GroupBy(p => p.PersonelKayitNo.ToString())
+                    .ToDictionary(g => g.Key, g => _mapper.Map<PersonelResponseDto>(g.First()));
+
+                // Her cihaz kullanıcısı için uyumsuzluk kontrolü yap
+                foreach (var deviceUser in deviceUsers)
+                {
+                    var match = new DeviceUserMatch
+                    {
+                        Device = new DeviceResponseDto
+                        {
+                            DeviceId = device.DeviceId,
+                            DeviceName = device.DeviceName,
+                            IpAddress = device.IpAddress,
+                            Port = device.Port,
+                            IsActive = device.IsActive
+                        },
+                        DeviceUser = deviceUser
+                    };
+
+                    // Personel bilgisini bul
+                    if (personelDict.TryGetValue(deviceUser.EnrollNumber, out var personelInfo))
+                    {
+                        match.PersonelInfo = personelInfo;
+                    }
+
+                    // Uyumsuzlukları kontrol et
+                    match.Mismatches = await CheckMismatches(match, personelDict);
+                    match.Status = DetermineMatchStatus(match);
+
+                    matches.Add(match);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all device users with mismatch info for device {DeviceId}", deviceId);
+            }
+
+            return matches;
+        }
+
         public async Task<DeviceUserMatch> GetDeviceUserByCardWithMismatchInfoAsync(int deviceId, long cardNumber)
         {
             var match = new DeviceUserMatch();
 
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null)
                 {
                     match.Status = MatchStatus.NotFound;
@@ -518,7 +737,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 if (request.DeviceId.HasValue)
                 {
                     // Tek cihazda ara
-                    device = await GetDeviceByIdAsync(request.DeviceId.Value);
+                    device = await GetDeviceEntityByIdAsync(request.DeviceId.Value);
                     if (device == null)
                     {
                         response.Success = false;
@@ -530,7 +749,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 else
                 {
                     // Aktif tüm cihazlarda ara
-                    devicesToSearch = await GetActiveDevicesAsync();
+                    var deviceRepo = _unitOfWork.GetRepository<IDeviceRepository>();
+                    var allDevices = await deviceRepo.GetActiveDevicesAsync();
+                    devicesToSearch = allDevices;
                 }
 
                 response.SearchedDeviceCount = devicesToSearch.Count;
@@ -746,7 +967,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null) return false;
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
@@ -772,7 +993,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null) return false;
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
@@ -798,7 +1019,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null) return false;
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
@@ -815,7 +1036,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null) return false;
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
@@ -832,7 +1053,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null) return 0;
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
@@ -849,7 +1070,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null) return false;
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
@@ -872,7 +1093,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null) return new List<AttendanceLogDto>();
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
@@ -922,7 +1143,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null) return false;
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
@@ -939,7 +1160,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null) return 0;
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
@@ -958,7 +1179,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null) return false;
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
@@ -975,7 +1196,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null) return false;
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
@@ -992,7 +1213,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                var device = await GetDeviceByIdAsync(deviceId);
+                var device = await GetDeviceEntityByIdAsync(deviceId);
                 if (device == null) return false;
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;

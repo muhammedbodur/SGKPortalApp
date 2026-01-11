@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
@@ -11,6 +10,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
+using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.Enums;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
 {
@@ -23,6 +24,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         [Inject] private IZKTecoDeviceApiService DeviceApiService { get; set; } = default!;
         [Inject] private IDepartmanApiService DepartmanApiService { get; set; } = default!;
         [Inject] private IHizmetBinasiApiService HizmetBinasiApiService { get; set; } = default!;
+        [Inject] private IPersonelApiService PersonelApiService { get; set; } = default!;
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IToastService ToastService { get; set; } = default!;
 
@@ -30,9 +32,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         // PROPERTIES
         // ═══════════════════════════════════════════════════════
 
-        private List<Device>? devices;
+        private List<DeviceResponseDto>? devices;
         private bool showAddForm = false;
-        private Device newDevice = new Device { Port = "4370", IsActive = true };
+        private DeviceResponseDto newDevice = new DeviceResponseDto { Port = "4370", IsActive = true };
+        
+        // Loading states for operations
+        private Dictionary<int, bool> loadingStates = new Dictionary<int, bool>();
 
         // Departman ve Hizmet Binası dropdown için
         private List<DepartmanResponseDto> departmanlar = new();
@@ -48,7 +53,39 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         private List<PersonelDto> personelList = new List<PersonelDto>();
         private List<PersonelDto> filteredPersonelList = new List<PersonelDto>();
         private List<string> selectedPersonelIds = new List<string>();
-        private string personelSearchTerm = "";
+        
+        private string _personelSearchTerm = "";
+        private string personelSearchTerm
+        {
+            get => _personelSearchTerm;
+            set
+            {
+                _personelSearchTerm = value;
+                FilterPersonel();
+            }
+        }
+        
+        // Cihaz Personel Listesi Modal
+        private bool showDevicePersonelModal = false;
+        private List<DeviceUserMatch> devicePersonelList = new List<DeviceUserMatch>();
+        private List<DeviceUserMatch> filteredDevicePersonelList = new List<DeviceUserMatch>();
+        
+        private string _devicePersonelSearchTerm = "";
+        private string devicePersonelSearchTerm
+        {
+            get => _devicePersonelSearchTerm;
+            set
+            {
+                _devicePersonelSearchTerm = value;
+                FilterDevicePersonel();
+            }
+        }
+        
+        private bool isLoadingDevicePersonel = false;
+        
+        // Cihaz Saati Modal
+        private bool showDeviceTimeModal = false;
+        private DeviceTimeDto? selectedDeviceTimeInfo = null;
 
         // ═══════════════════════════════════════════════════════
         // LIFECYCLE
@@ -72,37 +109,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 var result = await DeviceApiService.GetAllAsync();
                 if (result.Success && result.Data != null)
                 {
-                    devices = result.Data.Select(d => new Device
-                    {
-                        DeviceId = d.DeviceId,
-                        DeviceName = d.DeviceName,
-                        IpAddress = d.IpAddress,
-                        Port = d.Port,
-                        IsActive = d.IsActive,
-                        HizmetBinasiId = d.HizmetBinasiId,
-                        LastHealthCheckTime = d.LastHealthCheckTime,
-                        LastHealthCheckSuccess = d.LastHealthCheckSuccess,
-                        // Navigation property'leri DTO'dan entity'ye aktarıyoruz (gösterim için)
-                        HizmetBinasi = d.HizmetBinasiAdi != null ? new SGKPortalApp.BusinessObjectLayer.Entities.Common.HizmetBinasi
-                        {
-                            HizmetBinasiAdi = d.HizmetBinasiAdi,
-                            Departman = d.DepartmanAdi != null ? new SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Departman
-                            {
-                                DepartmanAdi = d.DepartmanAdi
-                            } : null
-                        } : null
-                    }).ToList();
+                    devices = result.Data;
                 }
                 else
                 {
                     await ToastService.ShowErrorAsync(result.Message ?? "Cihazlar yüklenemedi");
-                    devices = new List<Device>();
+                    devices = new List<DeviceResponseDto>();
                 }
             }
             catch (Exception ex)
             {
                 await ToastService.ShowErrorAsync($"Hata: {ex.Message}");
-                devices = new List<Device>();
+                devices = new List<DeviceResponseDto>();
             }
         }
 
@@ -158,7 +176,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
             showAddForm = !showAddForm;
             if (showAddForm)
             {
-                newDevice = new Device { Port = "4370", IsActive = true };
+                newDevice = new DeviceResponseDto { Port = "4370", IsActive = true };
                 selectedDepartmanId = 0;
                 hizmetBinalari = new();
             }
@@ -207,141 +225,337 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
 
         private async Task TestConnection(int deviceId)
         {
-            var result = await DeviceApiService.TestConnectionAsync(deviceId);
-            if (result.Success && result.Data)
+            if (IsDeviceLoading(deviceId)) return;
+            
+            SetDeviceLoading(deviceId, true);
+            try
             {
-                await ToastService.ShowSuccessAsync("Bağlantı başarılı!");
+                var result = await DeviceApiService.TestConnectionAsync(deviceId);
+                if (result.Success && result.Data)
+                {
+                    await ToastService.ShowSuccessAsync(result.Message ?? "Bağlantı başarılı!");
+                }
+                else
+                {
+                    await ToastService.ShowErrorAsync(result.Message ?? "Bağlantı başarısız! Cihaza erişilemiyor.");
+                }
+                await LoadDevices();
             }
-            else
+            catch (Exception ex)
             {
-                await ToastService.ShowErrorAsync("Bağlantı başarısız!");
+                await ToastService.ShowErrorAsync($"Bağlantı testi hatası: {ex.Message}");
             }
-            await LoadDevices();
+            finally
+            {
+                SetDeviceLoading(deviceId, false);
+            }
         }
 
         private async Task GetStatus(int deviceId)
         {
-            var result = await DeviceApiService.GetStatusAsync(deviceId);
-            if (result.Success && result.Data != null)
+            if (IsDeviceLoading(deviceId)) return;
+            
+            SetDeviceLoading(deviceId, true);
+            try
             {
-                var status = result.Data;
-                var message = $"📊 Cihaz Durum Bilgisi:\n\n" +
-                             $"Firmware: {status.FirmwareVersion}\n" +
-                             $"Seri No: {status.SerialNumber}\n" +
-                             $"Platform: {status.Platform}\n" +
-                             $"Kullanıcı: {status.UserCount} / {status.UserCapacity}\n" +
-                             $"Kayıt: {status.AttendanceLogCount} / {status.AttLogCapacity}\n" +
-                             $"Parmak İzi: {status.FingerPrintCount} / {status.FingerPrintCapacity}";
-                await JS.InvokeVoidAsync("alert", message);
+                var result = await DeviceApiService.GetStatusAsync(deviceId);
+                if (result.Success && result.Data != null)
+                {
+                    var status = result.Data;
+                    var message = $"📊 Cihaz Durum Bilgisi:\n\n" +
+                                 $"Firmware: {status.FirmwareVersion}\n" +
+                                 $"Seri No: {status.SerialNumber}\n" +
+                                 $"Platform: {status.Platform}\n" +
+                                 $"Kullanıcı: {status.UserCount} / {status.UserCapacity}\n" +
+                                 $"Kayıt: {status.AttendanceLogCount} / {status.AttLogCapacity}\n" +
+                                 $"Parmak İzi: {status.FingerPrintCount} / {status.FingerPrintCapacity}";
+                    await JS.InvokeVoidAsync("alert", message);
+                }
+                else
+                {
+                    await ToastService.ShowErrorAsync(result.Message ?? "Cihaz durumu alınamadı! Cihaza erişilemiyor.");
+                }
             }
-            else
+            finally
             {
-                await ToastService.ShowErrorAsync(result.Message ?? "Cihaz durumu alınamadı!");
+                SetDeviceLoading(deviceId, false);
             }
         }
 
         private async Task GetDeviceTime(int deviceId)
         {
-            var result = await DeviceApiService.GetDeviceTimeAsync(deviceId);
-            if (result.Success && result.Data != null)
+            if (IsDeviceLoading(deviceId)) return;
+            
+            SetDeviceLoading(deviceId, true);
+            try
             {
-                var timeDto = result.Data;
-                var message = $"🕐 Cihaz Saati:\n{timeDto.DeviceTime:dd.MM.yyyy HH:mm:ss}\n\nSunucu ile fark: {timeDto.TimeDifferenceSeconds} saniye";
-                await JS.InvokeVoidAsync("alert", message);
+                var result = await DeviceApiService.GetDeviceTimeAsync(deviceId);
+                if (result.Success && result.Data != null)
+                {
+                    selectedDeviceTimeInfo = result.Data;
+                    var device = devices?.FirstOrDefault(d => d.DeviceId == deviceId);
+                    selectedDeviceName = device?.DeviceName ?? "Cihaz";
+                    showDeviceTimeModal = true;
+                }
+                else
+                {
+                    await ToastService.ShowErrorAsync(result.Message ?? "Cihaz saati alınamadı! Cihaza erişilemiyor.");
+                }
             }
-            else
+            finally
             {
-                await ToastService.ShowErrorAsync(result.Message ?? "Cihaz saati alınamadı!");
+                SetDeviceLoading(deviceId, false);
+                StateHasChanged();
             }
         }
 
         private async Task SyncDeviceTime(int deviceId)
         {
+            if (IsDeviceLoading(deviceId)) return;
+            
             if (await JS.InvokeAsync<bool>("confirm", "Cihaz saatini şu anki sunucu saatiyle senkronize etmek istediğinize emin misiniz?"))
             {
-                var result = await DeviceApiService.SynchronizeDeviceTimeAsync(deviceId);
-                if (result.Success && result.Data)
+                SetDeviceLoading(deviceId, true);
+                try
                 {
-                    await ToastService.ShowSuccessAsync("Cihaz saati senkronize edildi!");
+                    var result = await DeviceApiService.SynchronizeDeviceTimeAsync(deviceId);
+                    if (result.Success && result.Data)
+                    {
+                        await ToastService.ShowSuccessAsync(result.Message ?? "Cihaz saati senkronize edildi!");
+                    }
+                    else
+                    {
+                        await ToastService.ShowErrorAsync(result.Message ?? "Cihaz saati senkronize edilemedi! Cihaza erişilemiyor.");
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    await ToastService.ShowErrorAsync(result.Message ?? "Cihaz saati senkronize edilemedi!");
+                    await ToastService.ShowErrorAsync($"Saat senkronizasyon hatası: {ex.Message}");
+                }
+                finally
+                {
+                    SetDeviceLoading(deviceId, false);
                 }
             }
         }
 
         private async Task ShowDeviceUsers(int deviceId)
         {
-            var result = await DeviceApiService.GetDeviceUsersAsync(deviceId);
-            if (result.Success && result.Data != null && result.Data.Any())
+            if (IsDeviceLoading(deviceId)) return;
+            
+            var device = devices?.FirstOrDefault(d => d.DeviceId == deviceId);
+            if (device == null) return;
+
+            selectedDeviceId = deviceId;
+            selectedDeviceName = device.DeviceName ?? "";
+            showDevicePersonelModal = true;
+            isLoadingDevicePersonel = true;
+            StateHasChanged();
+            
+            SetDeviceLoading(deviceId, true);
+            try
             {
-                await JS.InvokeVoidAsync("alert", $"👥 Cihazdaki Personel Sayısı: {result.Data.Count}\n\nDetaylı liste için 'Kullanıcı Yönetimi' sayfasını ziyaret edin.");
+                // Business layer'daki profesyonel uyumsuzluk tespit sistemini kullan
+                var result = await DeviceApiService.GetDeviceUsersWithMismatchesAsync(deviceId);
+                if (result.Success && result.Data != null)
+                {
+                    devicePersonelList = result.Data;
+                    filteredDevicePersonelList = result.Data;
+                    
+                    if (!result.Data.Any())
+                    {
+                        await ToastService.ShowInfoAsync("Cihazda kayıtlı personel bulunamadı.");
+                    }
+                }
+                else
+                {
+                    await ToastService.ShowErrorAsync(result.Message ?? "Cihaza erişilemiyor! Personel listesi alınamadı.");
+                    devicePersonelList = new List<DeviceUserMatch>();
+                    filteredDevicePersonelList = new List<DeviceUserMatch>();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await ToastService.ShowInfoAsync("Cihazda kayıtlı personel bulunamadı.");
+                await ToastService.ShowErrorAsync($"Personel listesi alınamadı: {ex.Message}");
+                devicePersonelList = new List<DeviceUserMatch>();
+                filteredDevicePersonelList = new List<DeviceUserMatch>();
+            }
+            finally
+            {
+                isLoadingDevicePersonel = false;
+                SetDeviceLoading(deviceId, false);
+                StateHasChanged();
             }
         }
 
         private async Task EnableDevice(int deviceId)
         {
-            var result = await DeviceApiService.EnableDeviceAsync(deviceId);
-            if (result.Success && result.Data)
+            if (IsDeviceLoading(deviceId)) return;
+            
+            SetDeviceLoading(deviceId, true);
+            try
             {
-                await ToastService.ShowSuccessAsync("Cihaz etkinleştirildi!");
+                var result = await DeviceApiService.EnableDeviceAsync(deviceId);
+                if (result.Success && result.Data)
+                {
+                    await ToastService.ShowSuccessAsync(result.Message ?? "Cihaz etkinleştirildi!");
+                }
+                else
+                {
+                    await ToastService.ShowErrorAsync(result.Message ?? "Cihaz etkinleştirilemedi! Cihaza erişilemiyor.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await ToastService.ShowErrorAsync(result.Message ?? "Cihaz etkinleştirilemedi!");
+                await ToastService.ShowErrorAsync($"Cihaz etkinleştirme hatası: {ex.Message}");
+            }
+            finally
+            {
+                SetDeviceLoading(deviceId, false);
             }
         }
 
         private async Task DisableDevice(int deviceId)
         {
-            if (await JS.InvokeAsync<bool>("confirm", "⚠️ Cihazı devre dışı bırakmak istediğinize emin misiniz?\n\nKullanıcılar parmak izi okutamaz veya kart geçemez."))
+            if (IsDeviceLoading(deviceId)) return;
+            
+            if (await JS.InvokeAsync<bool>("confirm", "⚠️ Cihazı devre dışı bırakmak istediğinize emin misiniz?\n\nKullanıcılar kart geçemez."))
             {
-                var result = await DeviceApiService.DisableDeviceAsync(deviceId);
-                if (result.Success && result.Data)
+                SetDeviceLoading(deviceId, true);
+                try
                 {
-                    await ToastService.ShowSuccessAsync("Cihaz devre dışı bırakıldı!");
+                    var result = await DeviceApiService.DisableDeviceAsync(deviceId);
+                    if (result.Success && result.Data)
+                    {
+                        await ToastService.ShowSuccessAsync(result.Message ?? "Cihaz devre dışı bırakıldı!");
+                    }
+                    else
+                    {
+                        await ToastService.ShowErrorAsync(result.Message ?? "Cihaz devre dışı bırakılamadı! Cihaza erişilemiyor.");
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    await ToastService.ShowErrorAsync(result.Message ?? "Cihaz devre dışı bırakılamadı!");
+                    await ToastService.ShowErrorAsync($"Cihaz devre dışı bırakma hatası: {ex.Message}");
+                }
+                finally
+                {
+                    SetDeviceLoading(deviceId, false);
                 }
             }
         }
 
         private async Task RestartDevice(int deviceId)
         {
+            if (IsDeviceLoading(deviceId)) return;
+            
             if (await JS.InvokeAsync<bool>("confirm", "⚠️ Cihazı yeniden başlatmak istediğinize emin misiniz?\n\nCihaz yaklaşık 30 saniye offline olacak."))
             {
-                var result = await DeviceApiService.RestartDeviceAsync(deviceId);
-                if (result.Success && result.Data)
+                SetDeviceLoading(deviceId, true);
+                try
                 {
-                    await ToastService.ShowSuccessAsync("Cihaz yeniden başlatılıyor...");
+                    var result = await DeviceApiService.RestartDeviceAsync(deviceId);
+                    if (result.Success && result.Data)
+                    {
+                        await ToastService.ShowSuccessAsync(result.Message ?? "Cihaz yeniden başlatılıyor...");
+                    }
+                    else
+                    {
+                        await ToastService.ShowErrorAsync(result.Message ?? "Cihaz yeniden başlatılamadı! Cihaza erişilemiyor.");
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    await ToastService.ShowErrorAsync(result.Message ?? "Cihaz yeniden başlatılamadı!");
+                    await ToastService.ShowErrorAsync($"Cihaz yeniden başlatma hatası: {ex.Message}");
+                }
+                finally
+                {
+                    SetDeviceLoading(deviceId, false);
                 }
             }
         }
 
         private async Task PowerOffDevice(int deviceId)
         {
+            if (IsDeviceLoading(deviceId)) return;
+            
             if (await JS.InvokeAsync<bool>("confirm", "🚨 DİKKAT! Cihazı kapatmak istediğinize emin misiniz?\n\nCihazı tekrar açmak için fiziksel müdahale gerekebilir!"))
             {
-                var result = await DeviceApiService.PowerOffDeviceAsync(deviceId);
+                SetDeviceLoading(deviceId, true);
+                try
+                {
+                    var result = await DeviceApiService.PowerOffDeviceAsync(deviceId);
+                    if (result.Success && result.Data)
+                    {
+                        await ToastService.ShowSuccessAsync(result.Message ?? "Cihaz kapatılıyor...");
+                    }
+                    else
+                    {
+                        await ToastService.ShowErrorAsync(result.Message ?? "Cihaz kapatılamadı! Cihaza erişilemiyor.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await ToastService.ShowErrorAsync($"Cihaz kapatma hatası: {ex.Message}");
+                }
+                finally
+                {
+                    SetDeviceLoading(deviceId, false);
+                }
+            }
+        }
+
+        private async Task StartRealtimeMonitoring(int deviceId)
+        {
+            if (IsDeviceLoading(deviceId)) return;
+            
+            SetDeviceLoading(deviceId, true);
+            try
+            {
+                var result = await DeviceApiService.StartRealtimeMonitoringAsync(deviceId);
                 if (result.Success && result.Data)
                 {
-                    await ToastService.ShowSuccessAsync("Cihaz kapatılıyor...");
+                    await ToastService.ShowSuccessAsync(result.Message ?? "Realtime izleme başlatıldı!");
                 }
                 else
                 {
-                    await ToastService.ShowErrorAsync(result.Message ?? "Cihaz kapatılamadı!");
+                    await ToastService.ShowErrorAsync(result.Message ?? "Realtime izleme başlatılamadı!");
                 }
+            }
+            catch (Exception ex)
+            {
+                await ToastService.ShowErrorAsync($"Realtime izleme hatası: {ex.Message}");
+            }
+            finally
+            {
+                SetDeviceLoading(deviceId, false);
+            }
+        }
+
+        private async Task StopRealtimeMonitoring(int deviceId)
+        {
+            if (IsDeviceLoading(deviceId)) return;
+            
+            SetDeviceLoading(deviceId, true);
+            try
+            {
+                var result = await DeviceApiService.StopRealtimeMonitoringAsync(deviceId);
+                if (result.Success && result.Data)
+                {
+                    await ToastService.ShowSuccessAsync(result.Message ?? "Realtime izleme durduruldu!");
+                }
+                else
+                {
+                    await ToastService.ShowErrorAsync(result.Message ?? "Realtime izleme durdurulamadı!");
+                }
+            }
+            catch (Exception ex)
+            {
+                await ToastService.ShowErrorAsync($"Realtime izleme hatası: {ex.Message}");
+            }
+            finally
+            {
+                SetDeviceLoading(deviceId, false);
             }
         }
 
@@ -375,18 +589,34 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
             selectedDeviceName = device.DeviceName ?? "";
             showSendPersonelModal = true;
             isLoadingPersonel = true;
+            StateHasChanged();
 
             try
             {
-                // TODO: Personel listesi için PersonelApiService kullanılmalı
-                // Şimdilik boş liste
-                personelList = new List<PersonelDto>();
-                filteredPersonelList = personelList;
-                await ToastService.ShowInfoAsync("Personel listesi yükleme özelliği henüz aktif değil");
+                var result = await PersonelApiService.GetActiveAsync();
+                if (result.Success && result.Data != null)
+                {
+                    personelList = result.Data.Select(p => new PersonelDto
+                    {
+                        TcKimlikNo = p.TcKimlikNo,
+                        SicilNo = p.SicilNo,
+                        AdSoyad = p.AdSoyad,
+                        DepartmanAdi = p.DepartmanAdi ?? "-",
+                        PersonelKayitNo = p.PersonelKayitNo,
+                        KartNo = p.KartNo
+                    }).ToList();
+                    filteredPersonelList = personelList;
+                }
+                else
+                {
+                    await ToastService.ShowErrorAsync(result.Message ?? "Personeller yüklenemedi!");
+                    personelList = new List<PersonelDto>();
+                    filteredPersonelList = new List<PersonelDto>();
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                await ToastService.ShowErrorAsync("Personeller yüklenemedi!");
+                await ToastService.ShowErrorAsync($"Personel yükleme hatası: {ex.Message}");
                 personelList = new List<PersonelDto>();
                 filteredPersonelList = new List<PersonelDto>();
             }
@@ -461,6 +691,37 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
             return filteredPersonelList.Any() &&
                    filteredPersonelList.All(p => selectedPersonelIds.Contains(p.TcKimlikNo));
         }
+        
+        private void CloseDevicePersonelModal()
+        {
+            showDevicePersonelModal = false;
+            selectedDeviceId = 0;
+            selectedDeviceName = "";
+            devicePersonelList.Clear();
+            filteredDevicePersonelList.Clear();
+            devicePersonelSearchTerm = "";
+        }
+        
+        private void FilterDevicePersonel()
+        {
+            if (string.IsNullOrWhiteSpace(devicePersonelSearchTerm))
+            {
+                filteredDevicePersonelList = devicePersonelList;
+            }
+            else
+            {
+                var searchLower = devicePersonelSearchTerm.ToLower();
+                filteredDevicePersonelList = devicePersonelList
+                    .Where(p =>
+                        (p.DeviceUser?.Name?.ToLower().Contains(searchLower) ?? false) ||
+                        (p.DeviceUser?.EnrollNumber?.ToLower().Contains(searchLower) ?? false) ||
+                        (p.DeviceUser?.CardNumber?.ToString().Contains(searchLower) ?? false) ||
+                        (p.PersonelInfo?.AdSoyad?.ToLower().Contains(searchLower) ?? false))
+                    .ToList();
+            }
+
+            StateHasChanged();
+        }
 
         private async Task SendSelectedPersonelToDevice()
         {
@@ -518,6 +779,21 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 isSendingPersonel = false;
                 StateHasChanged();
             }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // LOADING STATE HELPERS
+        // ═══════════════════════════════════════════════════════
+
+        private bool IsDeviceLoading(int deviceId)
+        {
+            return loadingStates.ContainsKey(deviceId) && loadingStates[deviceId];
+        }
+
+        private void SetDeviceLoading(int deviceId, bool isLoading)
+        {
+            loadingStates[deviceId] = isLoading;
+            StateHasChanged();
         }
 
         // ═══════════════════════════════════════════════════════

@@ -1,5 +1,7 @@
 @page "/pdks/zkteco/devices"
-@using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
+@using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco
+@using SGKPortalApp.BusinessObjectLayer.Enums
 @inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 
 <PageTitle>ZKTeco Cihaz Yönetimi</PageTitle>
@@ -108,9 +110,9 @@
                         <tr>
                             <td><strong>@device.DeviceName</strong></td>
                             <td>
-                                @if (device.HizmetBinasi?.Departman != null)
+                                @if (!string.IsNullOrEmpty(device.DepartmanAdi))
                                 {
-                                    <span class="badge bg-label-info">@device.HizmetBinasi.Departman.DepartmanAdi</span>
+                                    <span class="badge bg-label-info">@device.DepartmanAdi</span>
                                 }
                                 else
                                 {
@@ -118,9 +120,9 @@
                                 }
                             </td>
                             <td>
-                                @if (device.HizmetBinasi != null)
+                                @if (!string.IsNullOrEmpty(device.HizmetBinasiAdi))
                                 {
-                                    <span class="badge bg-label-primary">@device.HizmetBinasi.HizmetBinasiAdi</span>
+                                    <span class="badge bg-label-primary">@device.HizmetBinasiAdi</span>
                                 }
                                 else
                                 {
@@ -135,39 +137,48 @@
                             </td>
                             <td><small>@device.LastHealthCheckTime?.ToString("dd.MM HH:mm")</small></td>
                             <td>
+                                @{
+                                    var isLoading = loadingStates.ContainsKey(device.DeviceId) && loadingStates[device.DeviceId];
+                                }
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <button class="btn btn-outline-info" @onclick="() => TestConnection(device.DeviceId)" title="Bağlantı Testi">
-                                        <i class="bx bx-wifi"></i>
+                                    <button class="btn btn-outline-info" @onclick="() => TestConnection(device.DeviceId)" disabled="@isLoading" title="Bağlantı Testi">
+                                        @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-wifi"></i> }
                                     </button>
-                                    <button class="btn btn-outline-warning" @onclick="() => GetStatus(device.DeviceId)" title="Durum">
-                                        <i class="bx bx-info-circle"></i>
+                                    <button class="btn btn-outline-warning" @onclick="() => GetStatus(device.DeviceId)" disabled="@isLoading" title="Durum">
+                                        @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-info-circle"></i> }
                                     </button>
-                                    <button class="btn btn-outline-secondary" @onclick="() => GetDeviceTime(device.DeviceId)" title="Cihaz Saati">
-                                        <i class="bx bx-time"></i>
+                                    <button class="btn btn-outline-secondary" @onclick="() => GetDeviceTime(device.DeviceId)" disabled="@isLoading" title="Cihaz Saati">
+                                        @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-time"></i> }
                                     </button>
-                                    <button class="btn btn-outline-primary" @onclick="() => SyncDeviceTime(device.DeviceId)" title="Saati Senkronize Et">
-                                        <i class="bx bx-sync"></i>
+                                    <button class="btn btn-outline-primary" @onclick="() => SyncDeviceTime(device.DeviceId)" disabled="@isLoading" title="Saati Senkronize Et">
+                                        @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-sync"></i> }
                                     </button>
-                                    <button class="btn btn-outline-success" @onclick="() => EnableDevice(device.DeviceId)" title="Etkinleştir">
-                                        <i class="bx bx-check-circle"></i>
+                                    <button class="btn btn-outline-success" @onclick="() => EnableDevice(device.DeviceId)" disabled="@isLoading" title="Etkinleştir">
+                                        @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-check-circle"></i> }
                                     </button>
-                                    <button class="btn btn-outline-warning" @onclick="() => DisableDevice(device.DeviceId)" title="Devre Dışı Bırak">
-                                        <i class="bx bx-x-circle"></i>
+                                    <button class="btn btn-outline-warning" @onclick="() => DisableDevice(device.DeviceId)" disabled="@isLoading" title="Devre Dışı Bırak">
+                                        @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-x-circle"></i> }
                                     </button>
-                                    <button class="btn btn-outline-success" @onclick="() => ShowDeviceUsers(device.DeviceId)" title="Cihazdaki Personeller">
-                                        <i class="bx bx-group"></i>
+                                    <button class="btn btn-outline-success" @onclick="() => ShowDeviceUsers(device.DeviceId)" disabled="@isLoading" title="Cihazdaki Personeller">
+                                        @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-group"></i> }
                                     </button>
-                                    <button class="btn btn-outline-primary" @onclick="() => OpenSendPersonelModal(device.DeviceId)" title="Personel Gönder">
-                                        <i class="bx bx-user-plus"></i>
+                                    <button class="btn btn-outline-primary" @onclick="() => OpenSendPersonelModal(device.DeviceId)" disabled="@isLoading" title="Personel Gönder">
+                                        @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-user-plus"></i> }
                                     </button>
-                                    <button class="btn btn-outline-dark" @onclick="() => RestartDevice(device.DeviceId)" title="Yeniden Başlat">
-                                        <i class="bx bx-revision"></i>
+                                    <button class="btn btn-outline-success" @onclick="() => StartRealtimeMonitoring(device.DeviceId)" disabled="@isLoading" title="Realtime İzleme Başlat">
+                                        @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-broadcast"></i> }
                                     </button>
-                                    <button class="btn btn-outline-danger" @onclick="() => PowerOffDevice(device.DeviceId)" title="Kapat">
-                                        <i class="bx bx-power-off"></i>
+                                    <button class="btn btn-outline-warning" @onclick="() => StopRealtimeMonitoring(device.DeviceId)" disabled="@isLoading" title="Realtime İzleme Durdur">
+                                        @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-broadcast bx-burst"></i> }
                                     </button>
-                                    <button class="btn btn-outline-danger" @onclick="() => Delete(device.DeviceId)" title="Sil">
-                                        <i class="bx bx-trash"></i>
+                                    <button class="btn btn-outline-dark" @onclick="() => RestartDevice(device.DeviceId)" disabled="@isLoading" title="Yeniden Başlat">
+                                        @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-revision"></i> }
+                                    </button>
+                                    <button class="btn btn-outline-danger" @onclick="() => PowerOffDevice(device.DeviceId)" disabled="@isLoading" title="Kapat">
+                                        @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-power-off"></i> }
+                                    </button>
+                                    <button class="btn btn-outline-danger" @onclick="() => Delete(device.DeviceId)" disabled="@isLoading" title="Sil">
+                                        @if (isLoading) { <span class="spinner-border spinner-border-sm"></span> } else { <i class="bx bx-trash"></i> }
                                     </button>
                                 </div>
                             </td>
@@ -216,8 +227,7 @@
                                            class="form-control"
                                            placeholder="Ad, Sicil veya TC ile ara..."
                                            @bind="personelSearchTerm"
-                                           @bind:event="oninput"
-                                           @onkeyup="FilterPersonel" />
+                                           @bind:event="oninput" />
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -317,6 +327,303 @@
                             <span class="spinner-border spinner-border-sm me-1"></span>
                         }
                         <i class="bx bx-send me-1"></i>Seçili Personelleri Gönder (@selectedPersonelIds.Count)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- DEVICE PERSONEL MODAL -->
+<!-- ═══════════════════════════════════════════════════════ -->
+@if (showDevicePersonelModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-success">
+                    <h5 class="modal-title text-white">
+                        <i class="bx bx-group me-2"></i>Cihazdaki Personeller - @selectedDeviceName
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseDevicePersonelModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (isLoadingDevicePersonel)
+                    {
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">Yükleniyor...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Cihazdan personel listesi alınıyor...</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Arama -->
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bx bx-search"></i>
+                                    </span>
+                                    <input type="text"
+                                           class="form-control"
+                                           placeholder="Ad, Kayıt No veya Kart No ile ara..."
+                                           @bind="devicePersonelSearchTerm"
+                                           @bind:event="oninput" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-info mb-0 py-2">
+                                    <i class="bx bx-info-circle me-2"></i>
+                                    <strong>@filteredDevicePersonelList.Count</strong> / @devicePersonelList.Count personel
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Personel Listesi -->
+                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                            <table class="table table-sm table-hover">
+                                <thead style="position: sticky; top: 0; background: white; z-index: 10;">
+                                    <tr>
+                                        <th style="width: 50px;">Durum</th>
+                                        <th style="width: 100px;">Kayıt No</th>
+                                        <th>Cihaz Adı</th>
+                                        <th>DB Adı (NickName)</th>
+                                        <th style="width: 120px;">Kart No</th>
+                                        <th style="width: 100px;">DB Kart No</th>
+                                        <th style="width: 100px;">Privilege</th>
+                                        <th style="width: 100px;">Enabled</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (!filteredDevicePersonelList.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="8" class="text-center text-muted py-4">
+                                                <i class="bx bx-search-alt bx-lg"></i>
+                                                <p class="mb-0 mt-2">
+                                                    @if (!devicePersonelList.Any())
+                                                    {
+                                                        <text>Cihazda kayıtlı personel bulunamadı</text>
+                                                    }
+                                                    else
+                                                    {
+                                                        <text>Arama sonucu bulunamadı</text>
+                                                    }
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var match in filteredDevicePersonelList)
+                                        {
+                                            var hasMismatch = match.Mismatches.Any();
+                                            var rowClass = hasMismatch ? "table-warning" : "";
+                                            var enrollMismatch = match.Mismatches.FirstOrDefault(m => m.Type == MismatchType.EnrollNumberMismatch);
+                                            var nameMismatch = match.Mismatches.FirstOrDefault(m => m.Type == MismatchType.NameMismatch);
+                                            var cardMismatch = match.Mismatches.FirstOrDefault(m => m.Type == MismatchType.CardNumberMismatch);
+                                            var notInDb = match.Status == MatchStatus.DeviceOnly;
+                                            
+                                            <tr class="@rowClass">
+                                                <td class="text-center">
+                                                    @if (notInDb)
+                                                    {
+                                                        <span class="badge bg-danger" title="Veritabanında bulunamadı">
+                                                            <i class="bx bx-error"></i>
+                                                        </span>
+                                                    }
+                                                    else if (hasMismatch)
+                                                    {
+                                                        <span class="badge bg-warning" title="@string.Join(", ", match.Mismatches.Select(m => m.Description))">
+                                                            <i class="bx bx-error-circle"></i>
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-success" title="Uyumlu">
+                                                            <i class="bx bx-check"></i>
+                                                        </span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <span class="badge @(enrollMismatch != null ? "bg-danger" : "bg-label-secondary")">
+                                                        @match.DeviceUser?.EnrollNumber
+                                                    </span>
+                                                    @if (enrollMismatch != null)
+                                                    {
+                                                        <br/><small class="text-danger">DB: @enrollMismatch.PersonelValue</small>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <strong class="@(nameMismatch != null ? "text-danger" : "")">
+                                                        @match.DeviceUser?.Name
+                                                    </strong>
+                                                </td>
+                                                <td>
+                                                    @if (match.PersonelInfo != null)
+                                                    {
+                                                        <small class="@(nameMismatch != null ? "text-danger" : "text-muted")">
+                                                            @(match.PersonelInfo.NickName ?? "-")
+                                                        </small>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-danger">Yok</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (match.DeviceUser?.CardNumber.HasValue == true && match.DeviceUser.CardNumber.Value > 0)
+                                                    {
+                                                        <span class="badge @(cardMismatch != null ? "bg-danger" : "bg-primary")">
+                                                            @match.DeviceUser.CardNumber.Value
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">-</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (match.PersonelInfo != null)
+                                                    {
+                                                        @if (match.PersonelInfo.KartNo > 0)
+                                                        {
+                                                            <span class="badge @(cardMismatch != null ? "bg-danger" : "bg-label-info")">
+                                                                @match.PersonelInfo.KartNo
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">-</span>
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">-</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (match.DeviceUser != null)
+                                                    {
+                                                        @switch (match.DeviceUser.Privilege)
+                                                        {
+                                                            case 0:
+                                                                <span class="badge bg-label-secondary">User</span>
+                                                                break;
+                                                            case 14:
+                                                                <span class="badge bg-label-warning">Admin</span>
+                                                                break;
+                                                            default:
+                                                                <span class="badge bg-label-info">@match.DeviceUser.Privilege</span>
+                                                                break;
+                                                        }
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (match.DeviceUser?.Enabled == true)
+                                                    {
+                                                        <span class="badge bg-success">
+                                                            <i class="bx bx-check"></i> Aktif
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">
+                                                            <i class="bx bx-x"></i> Pasif
+                                                        </span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDevicePersonelModal">
+                        <i class="bx bx-x me-1"></i>Kapat
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- DEVICE TIME MODAL -->
+<!-- ═══════════════════════════════════════════════════════ -->
+@if (showDeviceTimeModal && selectedDeviceTimeInfo != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-info">
+                    <h5 class="modal-title text-white">
+                        <i class="bx bx-time me-2"></i>Cihaz Saati - @selectedDeviceName
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="() => showDeviceTimeModal = false"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="card border-primary">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary">
+                                        <i class="bx bx-devices me-1"></i>Cihaz Saati
+                                    </h6>
+                                    <h4 class="mb-0">@selectedDeviceTimeInfo.DeviceTime.ToString("dd.MM.yyyy HH:mm:ss")</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="card border-success">
+                                <div class="card-body">
+                                    <h6 class="card-title text-success">
+                                        <i class="bx bx-server me-1"></i>Sunucu Saati
+                                    </h6>
+                                    <h4 class="mb-0">@selectedDeviceTimeInfo.ServerTime.ToString("dd.MM.yyyy HH:mm:ss")</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="alert @(Math.Abs(selectedDeviceTimeInfo.TimeDifferenceSeconds) > 60 ? "alert-danger" : Math.Abs(selectedDeviceTimeInfo.TimeDifferenceSeconds) > 10 ? "alert-warning" : "alert-success") mb-0">
+                                <h6 class="alert-heading">
+                                    <i class="bx @(Math.Abs(selectedDeviceTimeInfo.TimeDifferenceSeconds) > 60 ? "bx-error-circle" : Math.Abs(selectedDeviceTimeInfo.TimeDifferenceSeconds) > 10 ? "bx-info-circle" : "bx-check-circle") me-1"></i>
+                                    Zaman Farkı
+                                </h6>
+                                <p class="mb-0">
+                                    <strong>@selectedDeviceTimeInfo.TimeDifferenceSeconds saniye</strong>
+                                    @if (Math.Abs(selectedDeviceTimeInfo.TimeDifferenceSeconds) > 60)
+                                    {
+                                        <span class="d-block mt-2">
+                                            <i class="bx bx-error me-1"></i>Cihaz saati ile sunucu saati arasında büyük fark var! Senkronizasyon önerilir.
+                                        </span>
+                                    }
+                                    else if (Math.Abs(selectedDeviceTimeInfo.TimeDifferenceSeconds) > 10)
+                                    {
+                                        <span class="d-block mt-2">
+                                            <i class="bx bx-info-circle me-1"></i>Cihaz saati ile sunucu saati arasında küçük bir fark var.
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="d-block mt-2">
+                                            <i class="bx bx-check me-1"></i>Cihaz saati sunucu saati ile senkron.
+                                        </span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => showDeviceTimeModal = false">
+                        <i class="bx bx-x me-1"></i>Kapat
                     </button>
                 </div>
             </div>

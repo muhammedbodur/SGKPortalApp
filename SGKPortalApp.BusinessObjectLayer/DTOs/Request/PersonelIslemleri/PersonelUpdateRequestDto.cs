@@ -48,5 +48,13 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
 
         [StringLength(255)]
         public string? Resim { get; set; }
+
+        // PDKS Alanları
+        public int UlasimServis1 { get; set; }
+        public int UlasimServis2 { get; set; }
+        public int Tabldot { get; set; }
+        public int PersonelKayitNo { get; set; }
+        public int KartNo { get; set; }
+        public DateTime? KartNoAktiflikTarihi { get; set; }
     }
 }

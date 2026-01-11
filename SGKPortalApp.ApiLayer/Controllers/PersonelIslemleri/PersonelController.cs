@@ -149,5 +149,23 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
 
             return Ok(suggestions);
         }
+
+        // ═══════════════════════════════════════════════════════
+        // PDKS CİHAZ İŞLEMLERİ
+        // ═══════════════════════════════════════════════════════
+
+        [HttpPost("{tcKimlikNo}/pdks/send-to-all-devices")]
+        public async Task<IActionResult> SendCardToAllDevices(string tcKimlikNo)
+        {
+            var result = await _personelService.SendCardToAllDevicesAsync(tcKimlikNo);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpDelete("{tcKimlikNo}/pdks/delete-from-all-devices")]
+        public async Task<IActionResult> DeleteCardFromAllDevices(string tcKimlikNo)
+        {
+            var result = await _personelService.DeleteCardFromAllDevicesAsync(tcKimlikNo);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
     }
 }

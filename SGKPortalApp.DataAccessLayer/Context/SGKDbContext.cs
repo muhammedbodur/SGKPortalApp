@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
@@ -14,8 +15,11 @@ namespace SGKPortalApp.DataAccessLayer.Context
 {
     public class SGKDbContext : DbContext
     {
-        public SGKDbContext(DbContextOptions<SGKDbContext> options) : base(options)
+        private readonly IHttpContextAccessor? _httpContextAccessor;
+
+        public SGKDbContext(DbContextOptions<SGKDbContext> options, IHttpContextAccessor? httpContextAccessor = null) : base(options)
         {
+            _httpContextAccessor = httpContextAccessor;
         }
 
         #region Common Tables
@@ -187,6 +191,52 @@ namespace SGKPortalApp.DataAccessLayer.Context
                       .HasForeignKey(s => s.TcKimlikNo)
                       .OnDelete(DeleteBehavior.SetNull);
             });
+        }
+        #endregion
+
+        #region Automatic Audit Tracking
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            var entries = ChangeTracker.Entries<AuditableEntity>();
+            var currentUser = _httpContextAccessor?.HttpContext?.User?.Identity?.Name ?? "System";
+
+            foreach (var entry in entries)
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.EkleyenKullanici = currentUser;
+                    entry.Entity.EklenmeTarihi = DateTime.Now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    entry.Entity.DuzenleyenKullanici = currentUser;
+                    entry.Entity.DuzenlenmeTarihi = DateTime.Now;
+                }
+            }
+
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+
+        public override int SaveChanges()
+        {
+            var entries = ChangeTracker.Entries<AuditableEntity>();
+            var currentUser = _httpContextAccessor?.HttpContext?.User?.Identity?.Name ?? "System";
+
+            foreach (var entry in entries)
+            {
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.EkleyenKullanici = currentUser;
+                    entry.Entity.EklenmeTarihi = DateTime.Now;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    entry.Entity.DuzenleyenKullanici = currentUser;
+                    entry.Entity.DuzenlenmeTarihi = DateTime.Now;
+                }
+            }
+
+            return base.SaveChanges();
         }
         #endregion
     }

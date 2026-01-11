@@ -10,5 +10,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PdksIslemleri
     {
         Task<Device?> GetDeviceByIpAsync(string ipAddress);
         Task<List<Device>> GetActiveDevicesAsync(CancellationToken cancellationToken = default);
+        Task<List<Device>> GetAllWithRelationsAsync();
+        Task<Device?> GetByIdWithRelationsAsync(int id);
     }
 }

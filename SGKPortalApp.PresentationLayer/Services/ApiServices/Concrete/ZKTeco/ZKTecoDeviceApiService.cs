@@ -1,6 +1,6 @@
 using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
-using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco;
 using System.Net.Http.Json;
 
@@ -85,8 +85,8 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
                 {
                     return ServiceResult<DeviceStatusDto>.Fail("Cihaz durumu alınamadı");
                 }
-                var result = await response.Content.ReadFromJsonAsync<DeviceStatusDto>();
-                return ServiceResult<DeviceStatusDto>.Ok(result);
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<DeviceStatusDto>>();
+                return result ?? ServiceResult<DeviceStatusDto>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -95,7 +95,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             }
         }
 
-        public async Task<ServiceResult<DeviceResponseDto>> CreateAsync(Device device)
+        public async Task<ServiceResult<DeviceResponseDto>> CreateAsync(DeviceResponseDto device)
         {
             try
             {
@@ -104,33 +104,8 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
                 {
                     return ServiceResult<DeviceResponseDto>.Fail("Cihaz oluşturulamadı");
                 }
-                var result = await response.Content.ReadFromJsonAsync<Device>();
-                if (result == null)
-                {
-                    return ServiceResult<DeviceResponseDto>.Fail("Cihaz oluşturuldu ancak veri okunamadı");
-                }
-
-                var dto = new DeviceResponseDto
-                {
-                    DeviceId = result.DeviceId,
-                    DeviceName = result.DeviceName,
-                    IpAddress = result.IpAddress,
-                    Port = result.Port ?? "4370",
-                    DeviceCode = result.DeviceCode,
-                    DeviceInfo = result.DeviceInfo,
-                    IsActive = result.IsActive,
-                    HizmetBinasiId = result.HizmetBinasiId,
-                    LastSyncTime = result.LastSyncTime,
-                    SyncCount = result.SyncCount,
-                    LastSyncSuccess = result.LastSyncSuccess,
-                    LastSyncStatus = result.LastSyncStatus,
-                    LastHealthCheckTime = result.LastHealthCheckTime,
-                    HealthCheckCount = result.HealthCheckCount,
-                    LastHealthCheckSuccess = result.LastHealthCheckSuccess,
-                    LastHealthCheckStatus = result.LastHealthCheckStatus
-                };
-
-                return ServiceResult<DeviceResponseDto>.Ok(dto);
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<DeviceResponseDto>>();
+                return result ?? ServiceResult<DeviceResponseDto>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -139,7 +114,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             }
         }
 
-        public async Task<ServiceResult<DeviceResponseDto>> UpdateAsync(Device device)
+        public async Task<ServiceResult<DeviceResponseDto>> UpdateAsync(int id, DeviceResponseDto device)
         {
             try
             {
@@ -148,33 +123,8 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
                 {
                     return ServiceResult<DeviceResponseDto>.Fail("Cihaz güncellenemedi");
                 }
-                var result = await response.Content.ReadFromJsonAsync<Device>();
-                if (result == null)
-                {
-                    return ServiceResult<DeviceResponseDto>.Fail("Cihaz güncellendi ancak veri okunamadı");
-                }
-
-                var dto = new DeviceResponseDto
-                {
-                    DeviceId = result.DeviceId,
-                    DeviceName = result.DeviceName,
-                    IpAddress = result.IpAddress,
-                    Port = result.Port ?? "4370",
-                    DeviceCode = result.DeviceCode,
-                    DeviceInfo = result.DeviceInfo,
-                    IsActive = result.IsActive,
-                    HizmetBinasiId = result.HizmetBinasiId,
-                    LastSyncTime = result.LastSyncTime,
-                    SyncCount = result.SyncCount,
-                    LastSyncSuccess = result.LastSyncSuccess,
-                    LastSyncStatus = result.LastSyncStatus,
-                    LastHealthCheckTime = result.LastHealthCheckTime,
-                    HealthCheckCount = result.HealthCheckCount,
-                    LastHealthCheckSuccess = result.LastHealthCheckSuccess,
-                    LastHealthCheckStatus = result.LastHealthCheckStatus
-                };
-
-                return ServiceResult<DeviceResponseDto>.Ok(dto);
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<DeviceResponseDto>>();
+                return result ?? ServiceResult<DeviceResponseDto>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -188,7 +138,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.DeleteAsync($"pdks/device/{id}");
-                return ServiceResult<bool>.Ok(response.IsSuccessStatusCode);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Fail("Cihaz silinemedi");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+                return result ?? ServiceResult<bool>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -204,8 +159,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.PostAsync($"pdks/device/{deviceId}/test", null);
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<bool>.Ok(result?.Success == true);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Fail("Bağlantı testi başarısız");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+                return result ?? ServiceResult<bool>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -223,8 +182,8 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
                 {
                     return ServiceResult<DeviceTimeDto>.Fail("Cihaz zamanı alınamadı");
                 }
-                var result = await response.Content.ReadFromJsonAsync<DeviceTimeDto>();
-                return ServiceResult<DeviceTimeDto>.Ok(result);
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<DeviceTimeDto>>();
+                return result ?? ServiceResult<DeviceTimeDto>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -238,8 +197,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.PostAsJsonAsync($"pdks/device/{deviceId}/time", dateTime);
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<bool>.Ok(result?.Success == true);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Fail("Cihaz saati ayarlanamadı");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+                return result ?? ServiceResult<bool>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -253,8 +216,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.PostAsync($"pdks/device/{deviceId}/time/sync", null);
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<bool>.Ok(result?.Success == true);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Fail("Cihaz saati senkronize edilemedi");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+                return result ?? ServiceResult<bool>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -268,8 +235,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.PostAsync($"pdks/device/{deviceId}/enable", null);
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<bool>.Ok(result?.Success == true);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Fail("Cihaz etkinleştirilemedi");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+                return result ?? ServiceResult<bool>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -283,8 +254,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.PostAsync($"pdks/device/{deviceId}/disable", null);
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<bool>.Ok(result?.Success == true);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Fail("Cihaz devre dışı bırakılamadı");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+                return result ?? ServiceResult<bool>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -298,8 +273,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.PostAsync($"pdks/device/{deviceId}/restart", null);
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<bool>.Ok(result?.Success == true);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Fail("Cihaz yeniden başlatılamadı");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+                return result ?? ServiceResult<bool>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -313,8 +292,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.PostAsync($"pdks/device/{deviceId}/poweroff", null);
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<bool>.Ok(result?.Success == true);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Fail("Cihaz kapatılamadı");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+                return result ?? ServiceResult<bool>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -334,13 +317,34 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
                 {
                     return ServiceResult<List<ApiUserDto>>.Fail("Kullanıcılar alınamadı");
                 }
-                var result = await response.Content.ReadFromJsonAsync<List<ApiUserDto>>();
-                return ServiceResult<List<ApiUserDto>>.Ok(result ?? new List<ApiUserDto>());
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<List<ApiUserDto>>>();
+                return result ?? ServiceResult<List<ApiUserDto>>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "GetDeviceUsersAsync failed");
                 return ServiceResult<List<ApiUserDto>>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<List<DeviceUserMatch>>> GetDeviceUsersWithMismatchesAsync(int deviceId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"pdks/device/{deviceId}/users/with-mismatches");
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<List<DeviceUserMatch>>.Fail("Uyumsuzluk bilgisi alınamadı");
+                }
+                var apiResult = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<DeviceUserMatch>>>();
+                if (apiResult == null || !apiResult.Success)
+                    return ServiceResult<List<DeviceUserMatch>>.Fail(apiResult?.Message ?? "Veri okunamadı");
+                return ServiceResult<List<DeviceUserMatch>>.Ok(apiResult.Data!, apiResult.Message ?? "");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetDeviceUsersWithMismatchesAsync failed");
+                return ServiceResult<List<DeviceUserMatch>>.Fail($"Hata: {ex.Message}");
             }
         }
 
@@ -353,8 +357,8 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
                 {
                     return ServiceResult<ApiUserDto>.Fail("Kullanıcı bulunamadı");
                 }
-                var result = await response.Content.ReadFromJsonAsync<ApiUserDto>();
-                return ServiceResult<ApiUserDto>.Ok(result);
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<ApiUserDto>>();
+                return result ?? ServiceResult<ApiUserDto>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -372,8 +376,8 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
                 {
                     return ServiceResult<ApiUserDto>.Fail("Kullanıcı bulunamadı");
                 }
-                var result = await response.Content.ReadFromJsonAsync<ApiUserDto>();
-                return ServiceResult<ApiUserDto>.Ok(result);
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<ApiUserDto>>();
+                return result ?? ServiceResult<ApiUserDto>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -387,8 +391,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.PostAsJsonAsync($"pdks/device/{deviceId}/users?force={force}", request);
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<bool>.Ok(result?.Success == true);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Fail("Kullanıcı oluşturulamadı");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+                return result ?? ServiceResult<bool>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -402,8 +410,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.PutAsJsonAsync($"pdks/device/{deviceId}/users/{enrollNumber}?force={force}", request);
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<bool>.Ok(result?.Success == true);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Fail("Kullanıcı güncellenemedi");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+                return result ?? ServiceResult<bool>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -417,8 +429,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.DeleteAsync($"pdks/device/{deviceId}/users/{enrollNumber}");
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<bool>.Ok(result?.Success == true);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Fail("Kullanıcı silinemedi");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+                return result ?? ServiceResult<bool>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -432,8 +448,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.DeleteAsync($"pdks/device/{deviceId}/users");
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<bool>.Ok(result?.Success == true);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Fail("Kullanıcılar temizlenemedi");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+                return result ?? ServiceResult<bool>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -447,8 +467,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.GetAsync($"pdks/device/{deviceId}/users/count");
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<int>.Ok((int)(result?.Count ?? 0));
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<int>.Fail("Kullanıcı sayısı alınamadı");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<int>>();
+                return result ?? ServiceResult<int>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -462,8 +486,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.DeleteAsync($"pdks/device/{deviceId}/users/{enrollNumber}/card");
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<bool>.Ok(result?.Success == true);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Fail("Kart kaldırılamadı");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+                return result ?? ServiceResult<bool>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -483,8 +511,8 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
                 {
                     return ServiceResult<List<AttendanceLogDto>>.Fail("Kayıtlar alınamadı");
                 }
-                var result = await response.Content.ReadFromJsonAsync<List<AttendanceLogDto>>();
-                return ServiceResult<List<AttendanceLogDto>>.Ok(result ?? new List<AttendanceLogDto>());
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<List<AttendanceLogDto>>>();
+                return result ?? ServiceResult<List<AttendanceLogDto>>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -498,8 +526,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.DeleteAsync($"pdks/device/{deviceId}/attendance");
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<bool>.Ok(result?.Success == true);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Fail("Kayıtlar temizlenemedi");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+                return result ?? ServiceResult<bool>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -513,8 +545,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.GetAsync($"pdks/device/{deviceId}/attendance/count");
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<int>.Ok((int)(result?.Count ?? 0));
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<int>.Fail("Kayıt sayısı alınamadı");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<int>>();
+                return result ?? ServiceResult<int>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -530,8 +566,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.PostAsync($"pdks/device/{deviceId}/monitoring/start", null);
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<bool>.Ok(result?.Success == true);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Fail("Canlı izleme başlatılamadı");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+                return result ?? ServiceResult<bool>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {
@@ -545,8 +585,12 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.ZKTeco
             try
             {
                 var response = await _httpClient.PostAsync($"pdks/device/{deviceId}/monitoring/stop", null);
-                var result = await response.Content.ReadFromJsonAsync<dynamic>();
-                return ServiceResult<bool>.Ok(result?.Success == true);
+                if (!response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Fail("Canlı izleme durdurulamadı");
+                }
+                var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+                return result ?? ServiceResult<bool>.Fail("Veri okunamadı");
             }
             catch (Exception ex)
             {

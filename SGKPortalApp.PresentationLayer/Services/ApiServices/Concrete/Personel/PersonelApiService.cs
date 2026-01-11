@@ -396,5 +396,73 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
                 return ServiceResult<List<PersonelResponseDto>>.Fail($"Hata: {ex.Message}");
             }
         }
+
+        public async Task<ServiceResult<PdksCardSendResultDto>> SendCardToAllDevicesAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsync($"personel/{tcKimlikNo}/pdks/send-to-all-devices", null);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("SendCardToAllDevicesAsync failed: {Error}", errorContent);
+                    return ServiceResult<PdksCardSendResultDto>.Fail("Kart bilgisi gönderilemedi.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<PdksCardSendResultDto>>();
+
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return ServiceResult<PdksCardSendResultDto>.Ok(
+                        apiResponse.Data,
+                        apiResponse.Message ?? "İşlem başarılı"
+                    );
+                }
+
+                return ServiceResult<PdksCardSendResultDto>.Fail(
+                    apiResponse?.Message ?? "Kart bilgisi gönderilemedi"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "SendCardToAllDevicesAsync Exception");
+                return ServiceResult<PdksCardSendResultDto>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<PdksCardSendResultDto>> DeleteCardFromAllDevicesAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"personel/{tcKimlikNo}/pdks/delete-from-all-devices");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("DeleteCardFromAllDevicesAsync failed: {Error}", errorContent);
+                    return ServiceResult<PdksCardSendResultDto>.Fail("Kart bilgisi silinemedi.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<PdksCardSendResultDto>>();
+
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return ServiceResult<PdksCardSendResultDto>.Ok(
+                        apiResponse.Data,
+                        apiResponse.Message ?? "İşlem başarılı"
+                    );
+                }
+
+                return ServiceResult<PdksCardSendResultDto>.Fail(
+                    apiResponse?.Message ?? "Kart bilgisi silinemedi"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DeleteCardFromAllDevicesAsync Exception");
+                return ServiceResult<PdksCardSendResultDto>.Fail($"Hata: {ex.Message}");
+            }
+        }
     }
 }

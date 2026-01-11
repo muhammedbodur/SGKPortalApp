@@ -336,6 +336,10 @@ else
                                             <p class="fw-medium">@(Personel?.Tabldot == 0 ? "-" : Personel?.Tabldot.ToString())</p>
                                         </div>
                                         <div class="col-md-6 mb-3">
+                                            <label class="form-label text-muted small">PDKS Personel Kayıt No</label>
+                                            <p class="fw-medium">@(Personel?.PersonelKayitNo == 0 ? "-" : Personel?.PersonelKayitNo.ToString())</p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label text-muted small">PDKS Kart No</label>
                                             <p class="fw-medium">@(Personel?.KartNo == 0 ? "-" : Personel?.KartNo.ToString())</p>
                                         </div>
@@ -367,6 +371,57 @@ else
                                                     <span class="badge bg-secondary">Beklemede</span>
                                                 }
                                             </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- PDKS Cihaz İşlemleri -->
+                                    <div class="row mt-4">
+                                        <div class="col-12">
+                                            <div class="alert alert-info">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <i class="bx bx-info-circle me-2"></i>
+                                                    <strong>PDKS Cihaz İşlemleri</strong>
+                                                </div>
+                                                <p class="mb-3 small">
+                                                    Personel kart bilgilerini tüm aktif PDKS cihazlarına paralel olarak gönderebilir veya silebilirsiniz.
+                                                </p>
+                                                <div class="d-flex gap-2">
+                                                    <button type="button" 
+                                                            class="btn btn-success btn-sm" 
+                                                            @onclick="SendCardToAllDevices"
+                                                            disabled="@IsSendingToDevices">
+                                                        @if (IsSendingToDevices)
+                                                        {
+                                                            <span class="spinner-border spinner-border-sm me-1"></span>
+                                                            <span>Gönderiliyor...</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="bx bx-send me-1"></i>
+                                                            <span>Tüm Cihazlara Gönder</span>
+                                                        }
+                                                    </button>
+                                                    <button type="button" 
+                                                            class="btn btn-danger btn-sm" 
+                                                            @onclick="DeleteCardFromAllDevices"
+                                                            disabled="@IsSendingToDevices">
+                                                        @if (IsSendingToDevices)
+                                                        {
+                                                            <span class="spinner-border spinner-border-sm me-1"></span>
+                                                            <span>Siliniyor...</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="bx bx-trash me-1"></i>
+                                                            <span>Tüm Cihazlardan Sil</span>
+                                                        }
+                                                    </button>
+                                                </div>
+                                                <small class="text-muted d-block mt-2">
+                                                    <i class="bx bx-info-circle me-1"></i>
+                                                    İşlem tüm aktif cihazlara aynı anda (paralel) gönderilir. Eksik bilgiler varsa sistem otomatik uyarı verecektir.
+                                                </small>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

@@ -84,6 +84,20 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         [Required]
         public KanGrubu KanGrubu { get; set; }
 
+        public EvDurumu EvDurumu { get; set; }
+
+        public int UlasimServis1 { get; set; }
+
+        public int UlasimServis2 { get; set; }
+
+        public int Tabldot { get; set; }
+
+        public int PersonelKayitNo { get; set; }
+
+        public int KartNo { get; set; }
+
+        public DateTime? KartNoAktiflikTarihi { get; set; }
+
         [Required]
         public PersonelTipi PersonelTipi { get; set; }
 

@@ -22,5 +22,9 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Persone
         Task<ServiceResult<List<PersonelResponseDto>>> GetByDepartmanAsync(int departmanId);
         Task<ServiceResult<List<PersonelResponseDto>>> GetByServisAsync(int servisId);
         Task<ServiceResult<List<PersonelResponseDto>>> GetPersonellerByHizmetBinasiIdAsync(int hizmetBinasiId);
+
+        // PDKS Cihaz İşlemleri
+        Task<ServiceResult<PdksCardSendResultDto>> SendCardToAllDevicesAsync(string tcKimlikNo);
+        Task<ServiceResult<PdksCardSendResultDto>> DeleteCardFromAllDevicesAsync(string tcKimlikNo);
     }
 }

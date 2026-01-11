@@ -39,5 +39,23 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PdksIslemleri
                 .Where(d => d.IsActive)
                 .ToListAsync(cancellationToken);
         }
+
+        public async Task<List<Device>> GetAllWithRelationsAsync()
+        {
+            return await _context.Devices
+                .Include(d => d.HizmetBinasi)
+                    .ThenInclude(hb => hb!.Departman)
+                .Where(d => !d.SilindiMi)
+                .OrderBy(d => d.DeviceName)
+                .ToListAsync();
+        }
+
+        public async Task<Device?> GetByIdWithRelationsAsync(int id)
+        {
+            return await _context.Devices
+                .Include(d => d.HizmetBinasi)
+                    .ThenInclude(hb => hb!.Departman)
+                .FirstOrDefaultAsync(d => d.DeviceId == id && !d.SilindiMi);
+        }
     }
 }

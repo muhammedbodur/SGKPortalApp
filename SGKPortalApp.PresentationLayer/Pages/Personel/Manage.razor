@@ -662,12 +662,20 @@ else
                                                 <small class="form-text text-muted">Servis numarası (0 = Yok)</small>
                                             </div>
                                             <div class="col-md-6 mb-3">
+                                                <label class="form-label">PDKS Personel Kayıt No</label>
+                                                <InputNumber @bind-Value="FormModel.PersonelKayitNo"
+                                                             class="form-control"
+                                                             min="0"
+                                                             placeholder="PDKS personel kayıt numarası" />
+                                                <small class="form-text text-muted">ZKTeco cihazındaki EnrollNumber</small>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
                                                 <label class="form-label">PDKS Kart No</label>
                                                 <InputNumber @bind-Value="FormModel.KartNo"
                                                              class="form-control"
                                                              min="0"
                                                              placeholder="PDKS kart numarası" />
-                                                <small class="form-text text-muted">0 = Kart yok</small>
+                                                <small class="form-text text-muted">ZKTeco cihazındaki CardNumber</small>
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Kart Aktiflik Tarihi</label>

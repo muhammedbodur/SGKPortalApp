@@ -19,5 +19,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri
         // Toplu kayıt işlemleri (Transaction)
         Task<ApiResponseDto<PersonelResponseDto>> CreateCompleteAsync(PersonelCompleteRequestDto request);
         Task<ApiResponseDto<PersonelResponseDto>> UpdateCompleteAsync(string tcKimlikNo, PersonelCompleteRequestDto request);
+
+        // PDKS Cihaz İşlemleri
+        Task<ApiResponseDto<PdksCardSendResultDto>> SendCardToAllDevicesAsync(string tcKimlikNo);
+        Task<ApiResponseDto<PdksCardSendResultDto>> DeleteCardFromAllDevicesAsync(string tcKimlikNo);
     }
 }
