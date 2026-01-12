@@ -34,7 +34,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
 
         private List<DeviceResponseDto>? devices;
         private bool showAddForm = false;
+        private bool showEditForm = false;
         private DeviceResponseDto newDevice = new DeviceResponseDto { Port = "4370", IsActive = true };
+        private DeviceResponseDto editDevice = new DeviceResponseDto();
         
         // Loading states for operations
         private bool isLoading = true; // Sayfa yüklenirken
@@ -173,7 +175,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         }
         
         /// <summary>
-        /// Tek bir cihazın bağlantı durumunu kontrol et
+        /// Tek bir cihazın bağlantı durumunu kontrol et (timeout: 5 saniye)
         /// </summary>
         private async Task CheckSingleDeviceConnectionAsync(int deviceId)
         {
@@ -181,10 +183,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
             {
                 connectionStatus[deviceId] = null; // Checking
                 StateHasChanged();
-                
+
+                // 5 saniyelik timeout ekle
+                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(5));
+
                 var result = await DeviceApiService.TestConnectionAsync(deviceId);
                 connectionStatus[deviceId] = result.Success && result.Data;
-                
+
+                StateHasChanged();
+            }
+            catch (TaskCanceledException)
+            {
+                Console.WriteLine($"Cihaz {deviceId} bağlantı kontrolü timeout (5 saniye)");
+                connectionStatus[deviceId] = false;
                 StateHasChanged();
             }
             catch (Exception ex)
@@ -250,6 +261,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 newDevice = new DeviceResponseDto { Port = "4370", IsActive = true };
                 selectedDepartmanId = 0;
                 hizmetBinalari = new();
+                // Close edit form if open
+                showEditForm = false;
             }
         }
 
@@ -286,6 +299,91 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 else
                 {
                     await ToastService.ShowErrorAsync(result.Message ?? "Cihaz eklenemedi!");
+                }
+            }
+            catch (Exception ex)
+            {
+                await ToastService.ShowErrorAsync($"Hata: {ex.Message}");
+            }
+        }
+
+        private void ToggleEditForm(int deviceId)
+        {
+            var device = devices?.FirstOrDefault(d => d.DeviceId == deviceId);
+            if (device == null) return;
+
+            showEditForm = !showEditForm;
+            if (showEditForm)
+            {
+                // Clone the device for editing
+                editDevice = new DeviceResponseDto
+                {
+                    DeviceId = device.DeviceId,
+                    DeviceName = device.DeviceName,
+                    IpAddress = device.IpAddress,
+                    Port = device.Port,
+                    DeviceCode = device.DeviceCode,
+                    HizmetBinasiId = device.HizmetBinasiId,
+                    IsActive = device.IsActive
+                };
+
+                // Set departman and load hizmet binaları
+                if (device.HizmetBinasiId > 0)
+                {
+                    var hizmetBinasi = device.HizmetBinasiAdi;
+                    var departman = departmanlar.FirstOrDefault(d =>
+                        d.HizmetBinalari?.Any(h => h.HizmetBinasiId == device.HizmetBinasiId) == true);
+
+                    if (departman != null)
+                    {
+                        selectedDepartmanId = departman.DepartmanId;
+                        _ = LoadHizmetBinalari(departman.DepartmanId);
+                    }
+                }
+
+                // Close add form if open
+                showAddForm = false;
+            }
+            else
+            {
+                selectedDepartmanId = 0;
+                hizmetBinalari = new();
+            }
+        }
+
+        private async Task UpdateDevice()
+        {
+            // Validation
+            if (string.IsNullOrWhiteSpace(editDevice.DeviceName))
+            {
+                await ToastService.ShowWarningAsync("Cihaz adı zorunludur!");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(editDevice.IpAddress))
+            {
+                await ToastService.ShowWarningAsync("IP adresi zorunludur!");
+                return;
+            }
+
+            if (editDevice.HizmetBinasiId == 0)
+            {
+                await ToastService.ShowWarningAsync("Hizmet binası seçimi zorunludur!");
+                return;
+            }
+
+            try
+            {
+                var result = await DeviceApiService.UpdateAsync(editDevice.DeviceId, editDevice);
+                if (result.Success)
+                {
+                    await ToastService.ShowSuccessAsync("Cihaz başarıyla güncellendi!");
+                    showEditForm = false;
+                    await LoadDevices();
+                }
+                else
+                {
+                    await ToastService.ShowErrorAsync(result.Message ?? "Cihaz güncellenemedi!");
                 }
             }
             catch (Exception ex)
@@ -802,7 +900,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         {
             if (!selectedPersonelIds.Any())
             {
-                await JS.InvokeVoidAsync("alert", "⚠️ Lütfen en az bir personel seçin!");
+                await ToastService.ShowWarningAsync("⚠️ Lütfen en az bir personel seçin!");
                 return;
             }
 
@@ -812,42 +910,95 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
             }
 
             isSendingPersonel = true;
+            StateHasChanged();
 
             try
             {
-                // TODO: Toplu personel gönderme API endpoint'i kullanılacak
-                // Şimdilik tek tek gönderelim
                 int successCount = 0;
                 int failCount = 0;
+                var errors = new List<string>();
 
                 foreach (var tcKimlikNo in selectedPersonelIds)
                 {
                     try
                     {
-                        // TODO: ZKTeco User API Service kullanılmalı
-                        // Şimdilik başarısız say
-                        failCount++;
+                        // TC kimlik numarasıyla personel bilgisini bul
+                        var personel = personelList.FirstOrDefault(p => p.TcKimlikNo == tcKimlikNo);
+                        if (personel == null)
+                        {
+                            failCount++;
+                            errors.Add($"Personel bulunamadı: {tcKimlikNo}");
+                            continue;
+                        }
+
+                        // UserCreateUpdateDto oluştur
+                        var userDto = new UserCreateUpdateDto
+                        {
+                            EnrollNumber = personel.PersonelKayitNo.ToString(),
+                            Name = personel.AdSoyad,
+                            CardNumber = personel.KartNo > 0 ? personel.KartNo : null,
+                            Privilege = 0, // Normal user
+                            Password = "", // ZKTeco cihazlarda şifre genellikle kullanılmaz
+                            Enabled = true
+                        };
+
+                        // Cihaza gönder (force=true: varsa güncelle, yoksa ekle)
+                        var result = await DeviceApiService.CreateDeviceUserAsync(selectedDeviceId, userDto, force: true);
+
+                        if (result.Success && result.Data)
+                        {
+                            successCount++;
+                        }
+                        else
+                        {
+                            failCount++;
+                            errors.Add($"{personel.AdSoyad}: {result.Message ?? "Bilinmeyen hata"}");
+                        }
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         failCount++;
+                        var personel = personelList.FirstOrDefault(p => p.TcKimlikNo == tcKimlikNo);
+                        errors.Add($"{personel?.AdSoyad ?? tcKimlikNo}: {ex.Message}");
+                    }
+
+                    // UI'ı güncelle
+                    StateHasChanged();
+                }
+
+                // Sonuç mesajı
+                var resultMessage = $"✅ İşlem tamamlandı!\n\n" +
+                                   $"Başarılı: {successCount}\n" +
+                                   $"Başarısız: {failCount}";
+
+                if (errors.Any())
+                {
+                    resultMessage += "\n\n❌ Hatalar:\n" + string.Join("\n", errors.Take(5));
+                    if (errors.Count > 5)
+                    {
+                        resultMessage += $"\n... ve {errors.Count - 5} hata daha";
                     }
                 }
 
-                var message = $"✅ İşlem tamamlandı!\n\n" +
-                             $"Başarılı: {successCount}\n" +
-                             $"Başarısız: {failCount}";
-
-                await JS.InvokeVoidAsync("alert", message);
+                await JS.InvokeVoidAsync("alert", resultMessage);
 
                 if (successCount > 0)
                 {
-                    CloseSendPersonelModal();
+                    await ToastService.ShowSuccessAsync($"{successCount} personel başarıyla gönderildi!");
+
+                    if (failCount == 0)
+                    {
+                        CloseSendPersonelModal();
+                    }
+                }
+                else if (failCount > 0)
+                {
+                    await ToastService.ShowErrorAsync("Hiçbir personel gönderilemedi!");
                 }
             }
             catch (Exception ex)
             {
-                await JS.InvokeVoidAsync("alert", $"❌ Hata: {ex.Message}");
+                await ToastService.ShowErrorAsync($"❌ Kritik hata: {ex.Message}");
             }
             finally
             {
