@@ -9,7 +9,6 @@
   <ItemGroup>
     <Folder Include="Models\FormModels\Common\" />
     <Folder Include="Models\FormModels\EshotIslemleri\" />
-    <Folder Include="Models\FormModels\PdksIslemleri\" />
     <Folder Include="Pages\Common\Ilce\" />
     <Folder Include="Pages\Common\Il\" />
     <Folder Include="Pages\Yetki\" />

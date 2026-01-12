@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
+using SGKPortalApp.PresentationLayer.Models.FormModels.PdksIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Pdks.GirisCikis
@@ -165,29 +166,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.GirisCikis
                 5 => "<span class='badge bg-secondary'>Mesai Bitiş</span>",
                 _ => $"<span class='badge bg-dark'>{inOutMode}</span>"
             };
-        }
-
-        public class RealtimeEventModel
-        {
-            public string EnrollNumber { get; set; } = string.Empty;
-            public DateTime EventTime { get; set; }
-            public int VerifyMethod { get; set; }
-            public int InOutMode { get; set; }
-            public int WorkCode { get; set; }
-            public string DeviceIp { get; set; } = string.Empty;
-            public bool IsValid { get; set; }
-            public long? CardNumber { get; set; }
-
-            // Personel bilgileri
-            public string? PersonelAdSoyad { get; set; }
-            public string? PersonelSicilNo { get; set; }
-            public string? PersonelDepartman { get; set; }
-            public string? PersonelTcKimlikNo { get; set; }
-
-            // Cihaz bilgileri
-            public string? DeviceName { get; set; }
-            public int? HizmetBinasiId { get; set; }
-            public string? HizmetBinasiAdi { get; set; }
         }
     }
 }
