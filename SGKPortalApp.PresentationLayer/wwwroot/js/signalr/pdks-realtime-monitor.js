@@ -54,6 +54,10 @@ window.PdksRealtimeMonitor = {
      * Event handler'ları ayarla
      */
     setupEventHandlers: function () {
+        // Önceki event handler'ları temizle (duplicate event önleme)
+        this.connection.off('OnRealtimeEvent');
+        this.connection.off('OnConnected');
+
         // Realtime event geldiğinde
         this.connection.on('OnRealtimeEvent', (eventData) => {
             console.log('📥 Realtime event alındı:', eventData);

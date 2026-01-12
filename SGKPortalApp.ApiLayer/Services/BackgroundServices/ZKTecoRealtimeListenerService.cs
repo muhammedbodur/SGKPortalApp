@@ -151,10 +151,13 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                 // 1. Personel bilgilerini ekle (EnrollNumber ile Personel tablosundan sorgula)
                 await EnrichEventWithPersonelDataAsync(evt);
 
-                // 2. PdksHub'a broadcast et (tüm bağlı client'lara gönder)
+                // 2. Cihaz bilgilerini ekle (DeviceIp ile Device tablosundan sorgula)
+                await EnrichEventWithDeviceDataAsync(evt);
+
+                // 3. PdksHub'a broadcast et (tüm bağlı client'lara gönder)
                 await BroadcastToPdksHubAsync(evt);
 
-                // 3. Opsiyonel: Veritabanına kaydet
+                // 4. Opsiyonel: Veritabanına kaydet
                 if (_saveToDatabase)
                 {
                     await SaveToDatabaseAsync(evt);
@@ -215,6 +218,40 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Personel bilgisi eklenirken hata: EnrollNumber={evt.EnrollNumber}");
+                // Hata olsa bile event'i gönder
+            }
+        }
+
+        /// <summary>
+        /// Event'e cihaz bilgilerini ekle (DeviceIp ile eşleştirme)
+        /// </summary>
+        private async Task EnrichEventWithDeviceDataAsync(RealtimeEventDto evt)
+        {
+            try
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                var deviceRepository = unitOfWork.GetRepository<IDeviceRepository>();
+
+                // DeviceIp ile cihazı ara
+                var device = await deviceRepository.GetDeviceByIpAsync(evt.DeviceIp);
+
+                if (device != null)
+                {
+                    evt.DeviceName = device.DeviceName ?? string.Empty;
+                    evt.HizmetBinasiId = device.HizmetBinasiId;
+                    evt.HizmetBinasiAdi = device.HizmetBinasi?.HizmetBinasiAdi ?? string.Empty;
+
+                    _logger.LogDebug($"Cihaz bilgisi eklendi: {evt.DeviceName} (IP: {evt.DeviceIp}, Hizmet Binası: {evt.HizmetBinasiAdi})");
+                }
+                else
+                {
+                    _logger.LogWarning($"Cihaz bulunamadı: DeviceIp={evt.DeviceIp}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Cihaz bilgisi eklenirken hata: DeviceIp={evt.DeviceIp}");
                 // Hata olsa bile event'i gönder
             }
         }
