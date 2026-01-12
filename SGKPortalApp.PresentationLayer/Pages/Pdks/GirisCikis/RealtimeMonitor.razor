@@ -136,10 +136,11 @@
                                     <th>Zaman</th>
                                     <th>Sicil No</th>
                                     <th>Ad Soyad</th>
+                                    <th>TC Kimlik No</th>
                                     <th>Departman</th>
                                     <th>Doğrulama</th>
                                     <th>Tip</th>
-                                    <th>Cihaz IP</th>
+                                    <th>Cihaz / Hizmet Binası</th>
                                     <th>Kart No</th>
                                 </tr>
                             </thead>
@@ -155,7 +156,14 @@
                                                 <small class="text-muted">@evt.EventTime.ToString("dd.MM.yyyy")</small>
                                             </td>
                                             <td>
-                                                <span class="badge bg-secondary">@evt.EnrollNumber</span>
+                                                @if (!string.IsNullOrEmpty(evt.PersonelSicilNo))
+                                                {
+                                                    <span class="badge bg-secondary">@evt.PersonelSicilNo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning">@evt.EnrollNumber</span>
+                                                }
                                             </td>
                                             <td>
                                                 @if (!string.IsNullOrEmpty(evt.PersonelAdSoyad))
@@ -165,6 +173,16 @@
                                                 else
                                                 {
                                                     <span class="text-muted">Bilinmiyor</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(evt.PersonelTcKimlikNo))
+                                                {
+                                                    <span class="text-monospace">@evt.PersonelTcKimlikNo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
                                                 }
                                             </td>
                                             <td>
@@ -184,7 +202,19 @@
                                                 @((MarkupString)GetInOutModeBadge(evt.InOutMode))
                                             </td>
                                             <td>
-                                                <span class="text-monospace">@evt.DeviceIp</span>
+                                                @if (!string.IsNullOrEmpty(evt.DeviceName))
+                                                {
+                                                    <strong>@evt.DeviceName</strong>
+                                                    @if (!string.IsNullOrEmpty(evt.HizmetBinasiAdi))
+                                                    {
+                                                        <br />
+                                                        <small class="badge bg-label-secondary">@evt.HizmetBinasiAdi</small>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-monospace text-muted">@evt.DeviceIp</span>
+                                                }
                                             </td>
                                             <td>
                                                 @if (evt.CardNumber.HasValue)
@@ -202,7 +232,7 @@
                                 else
                                 {
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted py-4">
+                                        <td colspan="9" class="text-center text-muted py-4">
                                             <i class="bi bi-inbox" style="font-size: 3rem;"></i>
                                             <p class="mt-2">Henüz event alınmadı. Cihazlarda kart okutmayı bekliyor...</p>
                                         </td>
