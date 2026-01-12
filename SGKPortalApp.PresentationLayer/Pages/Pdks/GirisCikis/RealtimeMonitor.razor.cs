@@ -177,12 +177,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.GirisCikis
             public string DeviceIp { get; set; } = string.Empty;
             public bool IsValid { get; set; }
             public long? CardNumber { get; set; }
-            
+
             // Personel bilgileri
             public string? PersonelAdSoyad { get; set; }
             public string? PersonelSicilNo { get; set; }
             public string? PersonelDepartman { get; set; }
             public string? PersonelTcKimlikNo { get; set; }
+
+            // Cihaz bilgileri
+            public string? DeviceName { get; set; }
+            public int? HizmetBinasiId { get; set; }
+            public string? HizmetBinasiAdi { get; set; }
         }
     }
 }
