@@ -942,8 +942,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                             Enabled = true
                         };
 
-                        // Cihaza gönder
-                        var result = await DeviceApiService.CreateDeviceUserAsync(selectedDeviceId, userDto, force: false);
+                        // Cihaza gönder (force=true: varsa güncelle, yoksa ekle)
+                        var result = await DeviceApiService.CreateDeviceUserAsync(selectedDeviceId, userDto, force: true);
 
                         if (result.Success && result.Data)
                         {
