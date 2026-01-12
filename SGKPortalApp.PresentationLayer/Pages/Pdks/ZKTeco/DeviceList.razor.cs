@@ -34,7 +34,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
 
         private List<DeviceResponseDto>? devices;
         private bool showAddForm = false;
+        private bool showEditForm = false;
         private DeviceResponseDto newDevice = new DeviceResponseDto { Port = "4370", IsActive = true };
+        private DeviceResponseDto editDevice = new DeviceResponseDto();
         
         // Loading states for operations
         private bool isLoading = true; // Sayfa yüklenirken
@@ -173,7 +175,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         }
         
         /// <summary>
-        /// Tek bir cihazın bağlantı durumunu kontrol et
+        /// Tek bir cihazın bağlantı durumunu kontrol et (timeout: 5 saniye)
         /// </summary>
         private async Task CheckSingleDeviceConnectionAsync(int deviceId)
         {
@@ -181,10 +183,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
             {
                 connectionStatus[deviceId] = null; // Checking
                 StateHasChanged();
-                
+
+                // 5 saniyelik timeout ekle
+                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(5));
+
                 var result = await DeviceApiService.TestConnectionAsync(deviceId);
                 connectionStatus[deviceId] = result.Success && result.Data;
-                
+
+                StateHasChanged();
+            }
+            catch (TaskCanceledException)
+            {
+                Console.WriteLine($"Cihaz {deviceId} bağlantı kontrolü timeout (5 saniye)");
+                connectionStatus[deviceId] = false;
                 StateHasChanged();
             }
             catch (Exception ex)
@@ -250,6 +261,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 newDevice = new DeviceResponseDto { Port = "4370", IsActive = true };
                 selectedDepartmanId = 0;
                 hizmetBinalari = new();
+                // Close edit form if open
+                showEditForm = false;
             }
         }
 
@@ -286,6 +299,91 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 else
                 {
                     await ToastService.ShowErrorAsync(result.Message ?? "Cihaz eklenemedi!");
+                }
+            }
+            catch (Exception ex)
+            {
+                await ToastService.ShowErrorAsync($"Hata: {ex.Message}");
+            }
+        }
+
+        private void ToggleEditForm(int deviceId)
+        {
+            var device = devices?.FirstOrDefault(d => d.DeviceId == deviceId);
+            if (device == null) return;
+
+            showEditForm = !showEditForm;
+            if (showEditForm)
+            {
+                // Clone the device for editing
+                editDevice = new DeviceResponseDto
+                {
+                    DeviceId = device.DeviceId,
+                    DeviceName = device.DeviceName,
+                    IpAddress = device.IpAddress,
+                    Port = device.Port,
+                    DeviceCode = device.DeviceCode,
+                    HizmetBinasiId = device.HizmetBinasiId,
+                    IsActive = device.IsActive
+                };
+
+                // Set departman and load hizmet binaları
+                if (device.HizmetBinasiId > 0)
+                {
+                    var hizmetBinasi = device.HizmetBinasiAdi;
+                    var departman = departmanlar.FirstOrDefault(d =>
+                        d.HizmetBinalari?.Any(h => h.HizmetBinasiId == device.HizmetBinasiId) == true);
+
+                    if (departman != null)
+                    {
+                        selectedDepartmanId = departman.DepartmanId;
+                        _ = LoadHizmetBinalari(departman.DepartmanId);
+                    }
+                }
+
+                // Close add form if open
+                showAddForm = false;
+            }
+            else
+            {
+                selectedDepartmanId = 0;
+                hizmetBinalari = new();
+            }
+        }
+
+        private async Task UpdateDevice()
+        {
+            // Validation
+            if (string.IsNullOrWhiteSpace(editDevice.DeviceName))
+            {
+                await ToastService.ShowWarningAsync("Cihaz adı zorunludur!");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(editDevice.IpAddress))
+            {
+                await ToastService.ShowWarningAsync("IP adresi zorunludur!");
+                return;
+            }
+
+            if (editDevice.HizmetBinasiId == 0)
+            {
+                await ToastService.ShowWarningAsync("Hizmet binası seçimi zorunludur!");
+                return;
+            }
+
+            try
+            {
+                var result = await DeviceApiService.UpdateAsync(editDevice.DeviceId, editDevice);
+                if (result.Success)
+                {
+                    await ToastService.ShowSuccessAsync("Cihaz başarıyla güncellendi!");
+                    showEditForm = false;
+                    await LoadDevices();
+                }
+                else
+                {
+                    await ToastService.ShowErrorAsync(result.Message ?? "Cihaz güncellenemedi!");
                 }
             }
             catch (Exception ex)
