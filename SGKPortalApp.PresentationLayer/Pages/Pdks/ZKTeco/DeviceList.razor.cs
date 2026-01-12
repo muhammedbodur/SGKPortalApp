@@ -37,7 +37,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         private DeviceResponseDto newDevice = new DeviceResponseDto { Port = "4370", IsActive = true };
         
         // Loading states for operations
+        private bool isLoading = true; // Sayfa yüklenirken
         private Dictionary<int, bool> loadingStates = new Dictionary<int, bool>();
+        
+        // Connection status tracking
+        private Dictionary<int, bool?> connectionStatus = new Dictionary<int, bool?>(); // null = checking, true = online, false = offline
+        private bool isCheckingConnections = false;
 
         // Departman ve Hizmet Binası dropdown için
         private List<DepartmanResponseDto> departmanlar = new();
@@ -94,8 +99,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
+            
+            isLoading = true;
+            
             await LoadDepartmanlar();
             await LoadDevices();
+            
+            // Cihazların bağlantı durumunu kontrol et ve tamamlanmasını bekle
+            await CheckAllDeviceConnectionsAsync();
+            
+            isLoading = false;
+            StateHasChanged();
         }
 
         // ═══════════════════════════════════════════════════════
@@ -110,6 +124,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 if (result.Success && result.Data != null)
                 {
                     devices = result.Data;
+                    
+                    // Her cihaz için connection status'ü null olarak başlat (checking)
+                    foreach (var device in devices)
+                    {
+                        connectionStatus[device.DeviceId] = null;
+                    }
                 }
                 else
                 {
@@ -121,6 +141,57 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
             {
                 await ToastService.ShowErrorAsync($"Hata: {ex.Message}");
                 devices = new List<DeviceResponseDto>();
+            }
+        }
+        
+        /// <summary>
+        /// Tüm cihazların bağlantı durumunu paralel olarak kontrol et
+        /// </summary>
+        private async Task CheckAllDeviceConnectionsAsync()
+        {
+            if (devices == null || !devices.Any() || isCheckingConnections)
+                return;
+                
+            isCheckingConnections = true;
+            StateHasChanged();
+            
+            try
+            {
+                // Tüm cihazları paralel olarak kontrol et
+                var tasks = devices.Select(device => CheckSingleDeviceConnectionAsync(device.DeviceId));
+                await Task.WhenAll(tasks);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Bağlantı kontrolü hatası: {ex.Message}");
+            }
+            finally
+            {
+                isCheckingConnections = false;
+                StateHasChanged();
+            }
+        }
+        
+        /// <summary>
+        /// Tek bir cihazın bağlantı durumunu kontrol et
+        /// </summary>
+        private async Task CheckSingleDeviceConnectionAsync(int deviceId)
+        {
+            try
+            {
+                connectionStatus[deviceId] = null; // Checking
+                StateHasChanged();
+                
+                var result = await DeviceApiService.TestConnectionAsync(deviceId);
+                connectionStatus[deviceId] = result.Success && result.Data;
+                
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Cihaz {deviceId} bağlantı kontrolü hatası: {ex.Message}");
+                connectionStatus[deviceId] = false;
+                StateHasChanged();
             }
         }
 

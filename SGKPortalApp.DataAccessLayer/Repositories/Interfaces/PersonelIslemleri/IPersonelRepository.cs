@@ -14,6 +14,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri
         // Temel arama methodları
         Task<Personel?> GetByTcKimlikNoAsync(string tcKimlikNo);
         Task<Personel?> GetBySicilNoAsync(int sicilNo);
+        Task<Personel?> GetByPersonelKayitNoAsync(int personelKayitNo);
         Task<Personel?> GetByTcKimlikNoWithDetailsAsync(string tcKimlikNo);
 
         // Listeleme.methodları

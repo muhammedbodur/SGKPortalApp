@@ -37,6 +37,14 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                 .FirstOrDefaultAsync(p => p.SicilNo == sicilNo && !p.SilindiMi);
         }
 
+        public async Task<Personel?> GetByPersonelKayitNoAsync(int personelKayitNo)
+        {
+            return await _dbSet
+                .Include(p => p.Departman)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.PersonelKayitNo == personelKayitNo && !p.SilindiMi);
+        }
+
         public async Task<IEnumerable<Personel>> GetByDepartmanAsync(int departmanId)
         {
             return await _dbSet

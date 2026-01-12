@@ -13,17 +13,23 @@
                     </h3>
                     <small class="text-muted">ZKTeco cihazlarından gelen giriş/çıkış kayıtlarını canlı izleyin</small>
                 </div>
-                <div>
+                <div class="d-flex align-items-center gap-2">
                     @if (IsConnected)
                     {
                         <span class="badge bg-success pulse">
-                            <i class="bi bi-wifi"></i> Bağlı
+                            <i class="bi bi-wifi"></i> SignalR Bağlı
                         </span>
                     }
                     else
                     {
                         <span class="badge bg-danger">
-                            <i class="bi bi-wifi-off"></i> Bağlantı Yok
+                            <i class="bi bi-wifi-off"></i> SignalR Bağlantı Yok
+                        </span>
+                    }
+                    @if (!IsLoadingDevices)
+                    {
+                        <span class="badge bg-info">
+                            <i class="bi bi-broadcast"></i> @MonitoringDevices.Count Cihaz İzleniyor
                         </span>
                     }
                 </div>
@@ -67,6 +73,48 @@
         </div>
     </div>
 
+    <!-- İzlenen Cihazlar -->
+    @if (MonitoringDevices.Any())
+    {
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <i class="bi bi-broadcast"></i> İzlenen Cihazlar (@MonitoringDevices.Count)
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach (var device in MonitoringDevices)
+                            {
+                                <div class="badge bg-label-info" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+                                    <i class="bx bx-broadcast"></i>
+                                    <strong>@device.DeviceName</strong>
+                                    <span class="text-muted ms-1">(@device.IpAddress)</span>
+                                    @if (!string.IsNullOrEmpty(device.DepartmanAdi))
+                                    {
+                                        <span class="ms-1">- @device.DepartmanAdi</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (!IsLoadingDevices)
+    {
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Uyarı:</strong> Şu anda izlenen cihaz yok. 
+                    <a href="/pdks/zkteco/devices" class="alert-link">Cihaz Yönetimi</a> sayfasından cihazların "Canlı İzleme" özelliğini aktif edin.
+                </div>
+            </div>
+        </div>
+    }
+
     <!-- Realtime Event Tablosu -->
     <div class="row">
         <div class="col-12">
@@ -87,6 +135,8 @@
                                 <tr>
                                     <th>Zaman</th>
                                     <th>Sicil No</th>
+                                    <th>Ad Soyad</th>
+                                    <th>Departman</th>
                                     <th>Doğrulama</th>
                                     <th>Tip</th>
                                     <th>Cihaz IP</th>
@@ -106,6 +156,26 @@
                                             </td>
                                             <td>
                                                 <span class="badge bg-secondary">@evt.EnrollNumber</span>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(evt.PersonelAdSoyad))
+                                                {
+                                                    <strong>@evt.PersonelAdSoyad</strong>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Bilinmiyor</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(evt.PersonelDepartman))
+                                                {
+                                                    <span class="badge bg-label-info">@evt.PersonelDepartman</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
                                             </td>
                                             <td>
                                                 @((MarkupString)GetVerifyMethodBadge(evt.VerifyMethod))

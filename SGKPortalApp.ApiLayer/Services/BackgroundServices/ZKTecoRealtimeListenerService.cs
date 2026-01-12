@@ -9,6 +9,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PdksIslemleri;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -147,10 +148,13 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                     $"EventTime={evt.EventTime}, Device={evt.DeviceIp}, " +
                     $"VerifyMethod={evt.VerifyMethod}, InOutMode={evt.InOutMode}");
 
-                // 1. PdksHub'a broadcast et (tüm bağlı client'lara gönder)
+                // 1. Personel bilgilerini ekle (EnrollNumber ile Personel tablosundan sorgula)
+                await EnrichEventWithPersonelDataAsync(evt);
+
+                // 2. PdksHub'a broadcast et (tüm bağlı client'lara gönder)
                 await BroadcastToPdksHubAsync(evt);
 
-                // 2. Opsiyonel: Veritabanına kaydet
+                // 3. Opsiyonel: Veritabanına kaydet
                 if (_saveToDatabase)
                 {
                     await SaveToDatabaseAsync(evt);
@@ -161,7 +165,6 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                 }
 
                 // TODO: İlerisi için iş kuralları eklenebilir:
-                // - Personel kontrolü (EnrollNumber ile Personel tablosundan sorgula)
                 // - Mesai dışı giriş kontrolü
                 // - E-posta/SMS bildirimi
                 // - Geç kalma, erken çıkış hesaplamaları
@@ -171,6 +174,48 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                 _logger.LogError(ex,
                     $"Failed to process realtime event: EnrollNumber={evt.EnrollNumber}, " +
                     $"EventTime={evt.EventTime}");
+            }
+        }
+        
+        /// <summary>
+        /// Event'e personel bilgilerini ekle (EnrollNumber ile eşleştirme)
+        /// </summary>
+        private async Task EnrichEventWithPersonelDataAsync(RealtimeEventDto evt)
+        {
+            try
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                var personelRepository = unitOfWork.GetRepository<IPersonelRepository>();
+
+                // EnrollNumber'ı int'e çevir ve PersonelKayitNo ile eşleştir
+                if (!int.TryParse(evt.EnrollNumber, out int personelKayitNo))
+                {
+                    _logger.LogWarning($"EnrollNumber int'e çevrilemedi: {evt.EnrollNumber}");
+                    return;
+                }
+
+                // EnrollNumber ile personel ara (PersonelKayitNo eşleşmesi)
+                var personel = await personelRepository.GetByPersonelKayitNoAsync(personelKayitNo);
+                
+                if (personel != null)
+                {
+                    evt.PersonelAdSoyad = $"{personel.AdSoyad}";
+                    evt.PersonelSicilNo = personel.SicilNo.ToString();
+                    evt.PersonelTcKimlikNo = personel.TcKimlikNo;
+                    evt.PersonelDepartman = personel.Departman?.DepartmanAdi;
+
+                    _logger.LogDebug($"Personel bilgisi eklendi: {evt.PersonelAdSoyad} (SicilNo: {evt.PersonelSicilNo}, PersonelKayitNo: {personelKayitNo})");
+                }
+                else
+                {
+                    _logger.LogWarning($"Personel bulunamadı: PersonelKayitNo={personelKayitNo} (EnrollNumber={evt.EnrollNumber})");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Personel bilgisi eklenirken hata: EnrollNumber={evt.EnrollNumber}");
+                // Hata olsa bile event'i gönder
             }
         }
 

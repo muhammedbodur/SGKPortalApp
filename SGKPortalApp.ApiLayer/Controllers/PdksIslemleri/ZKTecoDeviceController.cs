@@ -52,6 +52,16 @@ namespace SGKPortalApp.ApiLayer.Controllers.PdksIslemleri
         public async Task<IActionResult> GetActive()
         {
             var result = await _deviceService.GetActiveDevicesAsync();
+            
+            // Monitoring durumunu set et
+            if (result.Success && result.Data != null)
+            {
+                foreach (var device in result.Data)
+                {
+                    device.IsMonitoring = _monitoringState.IsMonitoring(device.DeviceId);
+                }
+            }
+            
             return result.Success ? Ok(result) : BadRequest(result);
         }
 

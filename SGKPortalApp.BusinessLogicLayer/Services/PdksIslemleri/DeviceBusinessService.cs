@@ -23,17 +23,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         private readonly IZKTecoApiClient _apiClient;
         private readonly IMapper _mapper;
         private readonly ILogger<DeviceBusinessService> _logger;
+        private readonly IZKTecoRealtimeService _realtimeService;
 
         public DeviceBusinessService(
             IUnitOfWork unitOfWork,
             IZKTecoApiClient apiClient,
             IMapper mapper,
-            ILogger<DeviceBusinessService> logger)
+            ILogger<DeviceBusinessService> logger,
+            IZKTecoRealtimeService realtimeService)
         {
             _unitOfWork = unitOfWork;
             _apiClient = apiClient;
             _mapper = mapper;
             _logger = logger;
+            _realtimeService = realtimeService;
         }
 
         // ========== Database Operations ==========
@@ -1183,7 +1186,27 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 if (device == null) return false;
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
-                return await _apiClient.StartRealtimeMonitoringAsync(device.IpAddress, port);
+                var started = await _apiClient.StartRealtimeMonitoringAsync(device.IpAddress, port);
+
+                if (started)
+                {
+                    // ✅ ZKTecoApi'de monitoring başladı
+                    // ✅ Şimdi Background Service'e de haber ver - SignalR'da cihaza abone ol
+                    try
+                    {
+                        await _realtimeService.SubscribeToDeviceAsync(device.IpAddress);
+                        _logger.LogInformation(
+                            $"✅ Device subscribed to realtime service: {device.DeviceName} ({device.IpAddress})");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, 
+                            $"⚠️ Device monitoring started but failed to subscribe to realtime service: {device.IpAddress}");
+                        // Monitoring başladı ama SignalR subscription başarısız - yine de true dön
+                    }
+                }
+
+                return started;
             }
             catch (Exception ex)
             {
@@ -1200,7 +1223,27 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 if (device == null) return false;
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
-                return await _apiClient.StopRealtimeMonitoringAsync(device.IpAddress, port);
+                var stopped = await _apiClient.StopRealtimeMonitoringAsync(device.IpAddress, port);
+
+                if (stopped)
+                {
+                    // ✅ ZKTecoApi'de monitoring durduruldu
+                    // ✅ Şimdi Background Service'den de çıkar - SignalR'da cihaz aboneliğini iptal et
+                    try
+                    {
+                        await _realtimeService.UnsubscribeFromDeviceAsync(device.IpAddress);
+                        _logger.LogInformation(
+                            $"✅ Device unsubscribed from realtime service: {device.DeviceName} ({device.IpAddress})");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, 
+                            $"⚠️ Device monitoring stopped but failed to unsubscribe from realtime service: {device.IpAddress}");
+                        // Monitoring durduruldu ama SignalR unsubscription başarısız - yine de true dön
+                    }
+                }
+
+                return stopped;
             }
             catch (Exception ex)
             {

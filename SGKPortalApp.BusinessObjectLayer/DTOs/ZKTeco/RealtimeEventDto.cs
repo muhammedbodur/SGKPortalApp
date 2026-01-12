@@ -35,10 +35,15 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco
         /// </summary>
         public int WorkCode { get; set; }
 
+        public string DeviceName { get; set; } = string.Empty;
+
         /// <summary>
         /// Event'in geldiği cihaz IP adresi
         /// </summary>
         public string DeviceIp { get; set; } = string.Empty;
+
+        public int HizmetBinasiId { get; set; }
+        public string HizmetBinasiAdi { get; set; } = string.Empty;
 
         /// <summary>
         /// Event geçerli mi? (SDK'dan gelen flag)

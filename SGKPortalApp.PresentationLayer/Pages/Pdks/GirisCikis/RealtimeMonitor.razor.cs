@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Pdks.GirisCikis
 {
@@ -8,10 +10,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.GirisCikis
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private NavigationManager NavigationManager { get; set; } = default!;
         [Inject] private IConfiguration Configuration { get; set; } = default!;
+        [Inject] private IZKTecoDeviceApiService DeviceApiService { get; set; } = default!;
 
         private List<RealtimeEventModel> Events = new();
         private bool IsConnected = false;
         private int MaxEvents = 100;
+        private List<DeviceResponseDto> MonitoringDevices = new();
+        private bool IsLoadingDevices = true;
 
         // İstatistikler
         private int TotalEvents => Events.Count;
@@ -19,41 +24,92 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.GirisCikis
         private int CheckOutCount => Events.Count(e => e.InOutMode == 1);
         private string LastEventTime => Events.Any() ? Events.Max(e => e.EventTime).ToString("HH:mm:ss") : "-";
 
+        protected override async Task OnInitializedAsync()
+        {
+            await LoadMonitoringDevicesAsync();
+        }
+
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
             if (firstRender)
             {
-                // JavaScript kütüphanelerinin yüklenmesi için kısa gecikme
-                await Task.Delay(300);
+                Console.WriteLine("🔵 RealtimeMonitor: OnAfterRenderAsync - firstRender = true");
+                
+                // JavaScript kütüphanelerinin yüklenmesi için gecikme (Blazor framework yüklendikten sonra)
+                await Task.Delay(500);
+                
+                Console.WriteLine("🔵 RealtimeMonitor: Calling InitializeSignalRAsync...");
                 await InitializeSignalRAsync();
+                Console.WriteLine("🔵 RealtimeMonitor: InitializeSignalRAsync completed");
+            }
+        }
+
+        private async Task LoadMonitoringDevicesAsync()
+        {
+            try
+            {
+                IsLoadingDevices = true;
+                var result = await DeviceApiService.GetActiveAsync();
+                if (result.Success && result.Data != null)
+                {
+                    MonitoringDevices = result.Data.Where(d => d.IsMonitoring).ToList();
+                }
+                else
+                {
+                    MonitoringDevices = new List<DeviceResponseDto>();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Monitoring devices yüklenirken hata: {ex.Message}");
+                MonitoringDevices = new List<DeviceResponseDto>();
+            }
+            finally
+            {
+                IsLoadingDevices = false;
+                StateHasChanged();
             }
         }
 
         private async Task InitializeSignalRAsync()
         {
-            try
-            {
-                var apiUrl = Configuration["AppSettings:ApiUrl"] ?? "https://localhost:9080";
-                var hubUrl = $"{apiUrl}/hubs/pdks";
+            int maxRetries = 3;
+            int retryCount = 0;
+            int delayMs = 1000;
 
-                await JS.InvokeVoidAsync("PdksRealtimeMonitor.initialize", hubUrl,
-                    DotNetObjectReference.Create(this));
-            }
-            catch (Exception ex)
+            while (retryCount < maxRetries)
             {
-                Console.WriteLine($"SignalR initialization error: {ex.Message}");
-                // Tekrar dene (JavaScript dosyası henüz yüklenmemiş olabilir)
-                await Task.Delay(1000);
                 try
                 {
                     var apiUrl = Configuration["AppSettings:ApiUrl"] ?? "https://localhost:9080";
                     var hubUrl = $"{apiUrl}/hubs/pdks";
+
+                    Console.WriteLine($"SignalR initialization attempt {retryCount + 1}/{maxRetries}: {hubUrl}");
+
                     await JS.InvokeVoidAsync("PdksRealtimeMonitor.initialize", hubUrl,
                         DotNetObjectReference.Create(this));
+
+                    Console.WriteLine("✅ SignalR initialized successfully");
+                    return; // Başarılı, çık
                 }
-                catch
+                catch (Exception ex)
                 {
-                    Console.WriteLine("SignalR initialization failed after retry. Check browser console.");
+                    retryCount++;
+                    Console.WriteLine($"❌ SignalR initialization error (attempt {retryCount}/{maxRetries}): {ex.Message}");
+
+                    if (retryCount < maxRetries)
+                    {
+                        Console.WriteLine($"Retrying in {delayMs}ms...");
+                        await Task.Delay(delayMs);
+                        delayMs *= 2; // Exponential backoff
+                    }
+                    else
+                    {
+                        Console.WriteLine("❌ SignalR initialization failed after all retries. Check:");
+                        Console.WriteLine("  1. pdks-realtime-monitor.js dosyası yüklendi mi?");
+                        Console.WriteLine("  2. SignalR library yüklendi mi?");
+                        Console.WriteLine("  3. PdksHub API'si çalışıyor mu?");
+                    }
                 }
             }
         }
@@ -121,6 +177,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.GirisCikis
             public string DeviceIp { get; set; } = string.Empty;
             public bool IsValid { get; set; }
             public long? CardNumber { get; set; }
+            
+            // Personel bilgileri
+            public string? PersonelAdSoyad { get; set; }
+            public string? PersonelSicilNo { get; set; }
+            public string? PersonelDepartman { get; set; }
+            public string? PersonelTcKimlikNo { get; set; }
         }
     }
 }

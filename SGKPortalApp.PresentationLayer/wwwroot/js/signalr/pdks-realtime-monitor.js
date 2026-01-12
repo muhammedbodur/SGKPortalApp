@@ -117,10 +117,10 @@ window.PdksRealtimeMonitor = {
             if (this.dotNetRef) {
                 this.dotNetRef.invokeMethodAsync('OnRealtimeEvent', eventData)
                     .then(() => {
-                        console.log('✅ Event Blazor'a gönderildi');
+                        console.log('Event Blazor component\'e gonderildi');
                     })
                     .catch((error) => {
-                        console.error('❌ Blazor invoke hatası:', error);
+                        console.error('Blazor invoke hatasi:', error);
                     });
             }
 
