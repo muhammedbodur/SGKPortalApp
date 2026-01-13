@@ -852,10 +852,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     return ApiResponseDto<PdksCardSendResultDto>.ErrorResult("Aktif PDKS cihazı bulunamadı!");
                 }
 
+                // NickName boşsa AdSoyad'dan generate et
+                var nickName = !string.IsNullOrWhiteSpace(personel.NickName)
+                    ? personel.NickName
+                    : Common.Helpers.StringHelper.GenerateNickName(personel.AdSoyad, 12);
+
                 var userDto = new UserCreateUpdateDto
                 {
                     EnrollNumber = personel.PersonelKayitNo.ToString(),
-                    Name = personel.NickName, // NickName kullan (max 12 char, uppercase, no Turkish)
+                    Name = nickName, // NickName kullan (max 12 char, uppercase, no Turkish)
                     CardNumber = personel.KartNo,
                     Privilege = 0,
                     Password = "",
