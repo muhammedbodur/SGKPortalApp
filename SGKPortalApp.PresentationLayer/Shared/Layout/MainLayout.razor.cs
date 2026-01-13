@@ -130,10 +130,34 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                 try
                 {
                     // ⭐ JS initialization - SignalR event handler'ları kur
-                    await JS.InvokeVoidAsync("initSneatMenu");
+                    // Her bir çağrı için ayrı try-catch (bazı JS dosyaları yüklenmemiş olabilir)
 
-                    dotNetHelper = DotNetObjectReference.Create(this);
-                    await JS.InvokeVoidAsync("bankoMode.setupEventHandlers", dotNetHelper);
+                    try
+                    {
+                        await JS.InvokeVoidAsync("initSneatMenu");
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        Logger.LogWarning("⚠️ initSneatMenu JS fonksiyonu bulunamadı veya timeout oluştu");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogWarning(ex, "⚠️ initSneatMenu hatası");
+                    }
+
+                    try
+                    {
+                        dotNetHelper = DotNetObjectReference.Create(this);
+                        await JS.InvokeVoidAsync("bankoMode.setupEventHandlers", dotNetHelper);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        Logger.LogWarning("⚠️ bankoMode.setupEventHandlers JS fonksiyonu bulunamadı veya timeout oluştu");
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogWarning(ex, "⚠️ bankoMode.setupEventHandlers hatası");
+                    }
 
                     // NOT: ForceLogout handler'ı signalr-app-initializer.js içinde zaten kuruluyor
 
@@ -141,8 +165,19 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                     // Her 5 dakikada bir server'a ping at, son aktivite zamanını güncelle
                     if (!string.IsNullOrEmpty(_tcKimlikNo))
                     {
-                        await JS.InvokeVoidAsync("startActivityHeartbeat", 5); // 5 dakika interval
-                        Logger.LogInformation("✅ Aktivite heartbeat başlatıldı (5 dakika interval)");
+                        try
+                        {
+                            await JS.InvokeVoidAsync("startActivityHeartbeat", 5); // 5 dakika interval
+                            Logger.LogInformation("✅ Aktivite heartbeat başlatıldı (5 dakika interval)");
+                        }
+                        catch (TaskCanceledException)
+                        {
+                            Logger.LogWarning("⚠️ startActivityHeartbeat JS fonksiyonu bulunamadı veya timeout oluştu");
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.LogWarning(ex, "⚠️ startActivityHeartbeat hatası");
+                        }
                     }
 
                     Logger.LogInformation("✅ MainLayout JS initialization tamamlandı (OnAfterRenderAsync)");
