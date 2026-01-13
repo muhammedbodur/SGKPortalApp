@@ -150,30 +150,5 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
             var attribute = field?.GetCustomAttribute<DisplayAttribute>();
             return attribute?.Name ?? value.ToString();
         }
-
-        /// <summary>
-        /// Ad Soyad'dan nickname oluşturur.
-        /// Örnek: "Muhammed Bodur" → "M.BODUR"
-        /// </summary>
-        /// <param name="adSoyad">Ad Soyad</param>
-        /// <returns>Nickname (M.BODUR formatında)</returns>
-        protected string GenerateNickName(string adSoyad)
-        {
-            if (string.IsNullOrWhiteSpace(adSoyad))
-                return string.Empty;
-
-            var parts = adSoyad.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length == 0)
-                return string.Empty;
-
-            if (parts.Length == 1)
-                return parts[0].ToUpper();
-
-            // Son kelime soyad, diğerleri ad
-            var soyad = parts[^1].ToUpper();
-            var adIlkHarfler = string.Join(".", parts.Take(parts.Length - 1).Select(p => p[0].ToString().ToUpper()));
-
-            return $"{adIlkHarfler}.{soyad}";
-        }
     }
 }
