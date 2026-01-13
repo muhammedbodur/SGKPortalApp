@@ -1101,35 +1101,75 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
                 var rawLogs = await _apiClient.GetAttendanceLogsFromDeviceAsync(device.IpAddress, port);
+
+                if (rawLogs == null || !rawLogs.Any())
+                    return new List<AttendanceLogDto>();
+
                 var logs = rawLogs.Select(r => new AttendanceLogDto
                 {
                     EnrollNumber = r.EnrollNumber,
-                    DateTime = r.EventTime,
+                    DateTime = r.EventTime == DateTime.MinValue ? DateTime.Now : r.EventTime, // Tarih kontrolü
                     VerifyMethod = (BusinessObjectLayer.Enums.PdksIslemleri.VerifyMethod)r.VerifyMethod,
-                    InOutMode = (BusinessObjectLayer.Enums.PdksIslemleri.InOutMode)r.InOutMode
+                    InOutMode = (BusinessObjectLayer.Enums.PdksIslemleri.InOutMode)r.InOutMode,
+                    DeviceIp = r.DeviceIp
                 }).ToList();
 
                 // ZKTecoApi'den gelen loglar sadece EnrollNumber içerir
                 // Business katmanında DB ile eşleştirme yapıyoruz
-                if (logs != null && logs.Any())
-                {
-                    // Tüm personelleri bir kerede çek (performans için)
-                    var personelRepo = _unitOfWork.GetRepository<DataAccessLayer.Repositories.Interfaces.PersonelIslemleri.IPersonelRepository>();
-                    var allPersonel = await personelRepo.GetAllAsync();
-                    var personelDict = allPersonel
-                        .Where(p => !p.SilindiMi)
-                        .ToDictionary(p => p.PersonelKayitNo.ToString(), p => p);
 
-                    // Her log için personel bilgilerini eşleştir
-                    foreach (var log in logs)
+                // 1. Tüm personelleri bir kerede çek (performans için)
+                var personelRepo = _unitOfWork.GetRepository<DataAccessLayer.Repositories.Interfaces.PersonelIslemleri.IPersonelRepository>();
+                var allPersonel = await personelRepo.GetAllAsync();
+
+                // 2. SpecialCard kayıtlarını da çek
+                var specialCardRepo = _unitOfWork.GetRepository<DataAccessLayer.Repositories.Interfaces.PdksIslemleri.ISpecialCardRepository>();
+                var allSpecialCards = await specialCardRepo.GetActiveCardsAsync();
+
+                // EnrollNumber ile eşleştirme sözlükleri oluştur
+                // Önce KartNo ile, bulunamazsa PersonelKayitNo ile eşleştirilecek
+                var personelByKartNo = allPersonel
+                    .Where(p => !p.SilindiMi && p.KartNo.HasValue && p.KartNo > 0)
+                    .ToDictionary(p => p.KartNo.ToString()!, p => p);
+
+                var personelByEnrollNo = allPersonel
+                    .Where(p => !p.SilindiMi && p.PersonelKayitNo > 0)
+                    .ToDictionary(p => p.PersonelKayitNo.ToString(), p => p);
+
+                var specialCardByEnrollNo = allSpecialCards
+                    .ToDictionary(sc => sc.EnrollNumber, sc => sc);
+
+                // Her log için personel/kart bilgilerini eşleştir
+                foreach (var log in logs)
+                {
+                    var enrollNumber = log.EnrollNumber;
+
+                    // 1. Önce SpecialCard ile eşleştir
+                    if (specialCardByEnrollNo.TryGetValue(enrollNumber, out var specialCard))
                     {
-                        if (personelDict.TryGetValue(log.EnrollNumber, out var personel))
-                        {
-                            log.PersonelAdSoyad = personel.AdSoyad;
-                            log.PersonelSicilNo = personel.SicilNo.ToString();
-                            log.PersonelTcKimlikNo = personel.TcKimlikNo;
-                            log.PersonelDepartman = personel.Departman?.DepartmanAdi;
-                        }
+                        log.PersonelAdSoyad = $"{specialCard.CardName} (Özel Kart)";
+                        log.PersonelSicilNo = specialCard.CardType.ToString();
+                        log.PersonelDepartman = "-";
+                        log.PersonelTcKimlikNo = null;
+                        continue;
+                    }
+
+                    // 2. KartNo ile eşleştir (öncelikli)
+                    if (personelByKartNo.TryGetValue(enrollNumber, out var personelByKart))
+                    {
+                        log.PersonelAdSoyad = personelByKart.AdSoyad;
+                        log.PersonelSicilNo = personelByKart.SicilNo.ToString();
+                        log.PersonelTcKimlikNo = personelByKart.TcKimlikNo;
+                        log.PersonelDepartman = personelByKart.Departman?.DepartmanAdi;
+                        continue;
+                    }
+
+                    // 3. PersonelKayitNo ile eşleştir (fallback)
+                    if (personelByEnrollNo.TryGetValue(enrollNumber, out var personelByEnroll))
+                    {
+                        log.PersonelAdSoyad = personelByEnroll.AdSoyad;
+                        log.PersonelSicilNo = personelByEnroll.SicilNo.ToString();
+                        log.PersonelTcKimlikNo = personelByEnroll.TcKimlikNo;
+                        log.PersonelDepartman = personelByEnroll.Departman?.DepartmanAdi;
                     }
                 }
 
