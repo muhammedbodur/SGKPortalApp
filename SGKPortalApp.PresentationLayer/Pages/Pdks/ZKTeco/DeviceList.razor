@@ -532,7 +532,7 @@
                     {
                         <!-- Arama -->
                         <div class="row mb-3">
-                            <div class="col-md-8">
+                            <div class="col-md-6">
                                 <div class="input-group">
                                     <span class="input-group-text">
                                         <i class="bx bx-search"></i>
@@ -544,7 +544,22 @@
                                            @bind:event="oninput" />
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <button class="btn btn-danger w-100"
+                                        @onclick="DeleteSelectedUsers"
+                                        disabled="@(!selectedUserEnrollNumbers.Any() || isLoadingDevicePersonel)">
+                                    @if (isLoadingDevicePersonel)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1"></span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bx bx-trash me-1"></i>
+                                    }
+                                    Seçilileri Sil (@selectedUserEnrollNumbers.Count)
+                                </button>
+                            </div>
+                            <div class="col-md-3">
                                 <div class="alert alert-info mb-0 py-2">
                                     <i class="bx bx-info-circle me-2"></i>
                                     <strong>@filteredDevicePersonelList.Count</strong> / @devicePersonelList.Count personel
@@ -557,6 +572,12 @@
                             <table class="table table-sm table-hover">
                                 <thead style="position: sticky; top: 0; background: white; z-index: 10;">
                                     <tr>
+                                        <th style="width: 40px;">
+                                            <input type="checkbox"
+                                                   class="form-check-input"
+                                                   @bind="selectAllUsers"
+                                                   @onclick="ToggleSelectAll" />
+                                        </th>
                                         <th style="width: 50px;">Durum</th>
                                         <th style="width: 100px;">Kayıt No</th>
                                         <th>Cihaz Adı</th>
@@ -571,7 +592,7 @@
                                     @if (!filteredDevicePersonelList.Any())
                                     {
                                         <tr>
-                                            <td colspan="8" class="text-center text-muted py-4">
+                                            <td colspan="9" class="text-center text-muted py-4">
                                                 <i class="bx bx-search-alt bx-lg"></i>
                                                 <p class="mb-0 mt-2">
                                                     @if (!devicePersonelList.Any())
@@ -596,8 +617,18 @@
                                             var nameMismatch = match.Mismatches.FirstOrDefault(m => m.Type == MismatchType.NameMismatch);
                                             var cardMismatch = match.Mismatches.FirstOrDefault(m => m.Type == MismatchType.CardNumberMismatch);
                                             var notInDb = match.Status == MatchStatus.DeviceOnly;
-                                            
+                                            var enrollNumber = match.DeviceUser?.EnrollNumber ?? "";
+
                                             <tr class="@rowClass">
+                                                <td class="text-center">
+                                                    @if (!string.IsNullOrEmpty(enrollNumber))
+                                                    {
+                                                        <input type="checkbox"
+                                                               class="form-check-input"
+                                                               checked="@selectedUserEnrollNumbers.Contains(enrollNumber)"
+                                                               @onclick="() => ToggleUserSelection(enrollNumber)" />
+                                                    }
+                                                </td>
                                                 <td class="text-center">
                                                     @if (notInDb)
                                                     {
