@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco;
@@ -29,6 +30,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         [Inject] private IPersonelApiService PersonelApiService { get; set; } = default!;
         [Inject] private IJSRuntime JS { get; set; } = default!;
         [Inject] private IToastService ToastService { get; set; } = default!;
+        [Inject] private ILogger<DeviceList> Logger { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════
         // PROPERTIES
@@ -944,28 +946,26 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
 
             try
             {
-                int successCount = 0;
-                int failCount = 0;
-
-                foreach (var enrollNumber in selectedUserEnrollNumbers.ToList())
+                // PARALEL SİLME: Tüm silme işlemleri aynı anda başlar (çok daha hızlı!)
+                var deleteTasks = selectedUserEnrollNumbers.ToList().Select(async enrollNumber =>
                 {
                     try
                     {
                         var result = await DeviceApiService.DeleteDeviceUserAsync(selectedDeviceId, enrollNumber);
-                        if (result.Success && result.Data)
-                        {
-                            successCount++;
-                        }
-                        else
-                        {
-                            failCount++;
-                        }
+                        return new { EnrollNumber = enrollNumber, Success = result.Success && result.Data };
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        failCount++;
+                        Logger.LogError(ex, "Kullanıcı silinemedi: {EnrollNumber}", enrollNumber);
+                        return new { EnrollNumber = enrollNumber, Success = false };
                     }
-                }
+                });
+
+                // Tüm işlemler bitene kadar bekle
+                var results = await Task.WhenAll(deleteTasks);
+
+                var successCount = results.Count(r => r.Success);
+                var failCount = results.Count(r => !r.Success);
 
                 if (successCount > 0)
                 {

@@ -412,11 +412,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 
                 try
                 {
+                    // NickName boşsa CardName'den generate et
+                    var nickName = !string.IsNullOrWhiteSpace(card.NickName)
+                        ? card.NickName
+                        : Common.Helpers.StringHelper.GenerateNickName(card.CardName, 12);
+
                     // SpecialCard -> ApiUserDto dönüşümü
                     var apiUser = new ApiUserDto
                     {
                         EnrollNumber = card.EnrollNumber,
-                        Name = card.NickName, // NickName kullan (max 12 char, uppercase, no Turkish)
+                        Name = nickName, // NickName kullan (max 12 char, uppercase, no Turkish)
                         CardNumber = card.CardNumber,
                         Privilege = 0, // Normal user
                         Password = string.Empty, // Boş password (bazı cihazlar zorunlu tutar)
@@ -512,11 +517,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     TotalDevices = devices.Count
                 };
 
+                // NickName boşsa CardName'den generate et
+                var nickName = !string.IsNullOrWhiteSpace(card.NickName)
+                    ? card.NickName
+                    : Common.Helpers.StringHelper.GenerateNickName(card.CardName, 12);
+
                 // SpecialCard -> ApiUserDto dönüşümü
                 var apiUser = new ApiUserDto
                 {
                     EnrollNumber = card.EnrollNumber,
-                    Name = card.NickName, // NickName kullan (max 12 char, uppercase, no Turkish)
+                    Name = nickName, // NickName kullan (max 12 char, uppercase, no Turkish)
                     CardNumber = card.CardNumber,
                     Privilege = 0, // Normal user
                     Password = string.Empty, // Boş password (bazı cihazlar zorunlu tutar)
