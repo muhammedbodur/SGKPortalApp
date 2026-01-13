@@ -152,7 +152,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
         {
             if (!string.IsNullOrWhiteSpace(newCard.CardName))
             {
-                newCard.NickName = SGKPortalApp.BusinessLogicLayer.Helpers.StringHelper.GenerateNickName(newCard.CardName, 12);
+                newCard.NickName = SGKPortalApp.Common.Helpers.StringHelper.GenerateNickName(newCard.CardName, 12);
             }
         }
 
@@ -160,7 +160,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
         {
             if (!string.IsNullOrWhiteSpace(editCard.CardName))
             {
-                editCard.NickName = SGKPortalApp.BusinessLogicLayer.Helpers.StringHelper.GenerateNickName(editCard.CardName, 12);
+                editCard.NickName = SGKPortalApp.Common.Helpers.StringHelper.GenerateNickName(editCard.CardName, 12);
             }
         }
 

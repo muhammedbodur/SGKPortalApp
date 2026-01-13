@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-namespace SGKPortalApp.BusinessLogicLayer.Helpers
+namespace SGKPortalApp.Common.Helpers
 {
     /// <summary>
     /// String işlemleri için yardımcı metodlar
@@ -26,13 +26,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Helpers
 
             // Türkçe karakterleri temizle ve büyük harfe çevir
             var cleaned = RemoveTurkishCharacters(input).ToUpperInvariant();
-            
+
             // Kelimelere ayır (boşluk, tire, alt çizgi ile)
             var words = cleaned.Split(new[] { ' ', '-', '_' }, StringSplitOptions.RemoveEmptyEntries);
-            
+
             if (words.Length == 0)
                 return string.Empty;
-            
+
             if (words.Length == 1)
             {
                 // Tek kelime varsa direkt kullan (max 12 char)
@@ -42,7 +42,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Helpers
 
             // Çok kelimeli: İlk kelimelerin baş harfleri + son kelime
             var parts = new List<string>();
-            
+
             // İlk n-1 kelimenin baş harflerini al
             for (int i = 0; i < words.Length - 1; i++)
             {
@@ -61,23 +61,23 @@ namespace SGKPortalApp.BusinessLogicLayer.Helpers
                     }
                 }
             }
-            
+
             // Son kelimeyi ekle (tam veya kısaltılmış)
             var lastWord = words[words.Length - 1];
             parts.Add(GetAbbreviation(lastWord));
-            
+
             // Nokta ile birleştir
             var result = string.Join(".", parts);
-            
+
             // Max uzunlukta kes (gerekirse son kelimeyi kısalt)
             if (result.Length > maxLength)
             {
                 // Son kelimeyi kısaltarak tekrar dene
-                parts[parts.Count - 1] = lastWord.Length > 4 
+                parts[parts.Count - 1] = lastWord.Length > 4
                     ? lastWord.Substring(0, Math.Min(4, lastWord.Length))
                     : lastWord.Substring(0, 1);
                 result = string.Join(".", parts);
-                
+
                 // Hala uzunsa, sert kes
                 if (result.Length > maxLength)
                 {
@@ -96,10 +96,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Helpers
         {
             if (word.Length <= 3)
                 return word; // Kısa kelimeler tam (IL, A, vb.)
-            
+
             if (word.Length <= 5)
                 return word.Substring(0, Math.Min(3, word.Length)); // Orta kelimeler 3 harf (MDR, GOR)
-            
+
             // Uzun kelimeler için ilk 4 harf veya baş harf
             return word.Substring(0, Math.Min(4, word.Length));
         }
@@ -114,7 +114,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Helpers
 
             var turkishChars = "ığüşöçİĞÜŞÖÇ";
             var englishChars = "igusocIGUSOC";
-            
+
             var sb = new StringBuilder(input);
             for (int i = 0; i < turkishChars.Length; i++)
             {

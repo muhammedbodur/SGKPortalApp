@@ -18,6 +18,7 @@ using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Models.FormModels.PersonelIslemleri;
 using SGKPortalApp.PresentationLayer.Services.StateServices;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel
 {
@@ -133,7 +134,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                     // Index'ten geldi, direkt Adım 2'ye geç
                     FormModel.TcKimlikNo = tc.ToString();
                     FormModel.AdSoyad = adSoyad.ToString();
-                    FormModel.NickName = GenerateNickName(adSoyad.ToString());
+                    FormModel.NickName = StringHelper.GenerateNickName(adSoyad.ToString(), 12);
                     CurrentStep = 2;
                 }
                 else
@@ -506,7 +507,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 // Adım 1'den Adım 2'ye geç
                 FormModel.TcKimlikNo = Step1Model.TcKimlikNo;
                 FormModel.AdSoyad = Step1Model.AdSoyad;
-                FormModel.NickName = GenerateNickName(Step1Model.AdSoyad);
+                FormModel.NickName = StringHelper.GenerateNickName(Step1Model.AdSoyad, 12);
 
                 CurrentStep = 2;
                 await _toastService.ShowSuccessAsync("Temel bilgiler kaydedildi. Diğer bilgileri girebilirsiniz.");
