@@ -139,11 +139,28 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
                 {
                     CardType = card.CardType,
                     CardName = card.CardName,
+                    NickName = card.NickName,
                     CardNumber = card.CardNumber,
                     EnrollNumber = card.EnrollNumber,
                     Notes = card.Notes
                 };
                 showAddForm = false;
+            }
+        }
+
+        private void OnNewCardNameChanged()
+        {
+            if (!string.IsNullOrWhiteSpace(newCard.CardName))
+            {
+                newCard.NickName = SGKPortalApp.BusinessLogicLayer.Helpers.StringHelper.GenerateNickName(newCard.CardName, 12);
+            }
+        }
+
+        private void OnEditCardNameChanged()
+        {
+            if (!string.IsNullOrWhiteSpace(editCard.CardName))
+            {
+                editCard.NickName = SGKPortalApp.BusinessLogicLayer.Helpers.StringHelper.GenerateNickName(editCard.CardName, 12);
             }
         }
 
@@ -173,6 +190,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
                 {
                     CardType = newCard.CardType.Value,
                     CardName = newCard.CardName,
+                    NickName = newCard.NickName,
                     CardNumber = newCard.CardNumber,
                     EnrollNumber = newCard.EnrollNumber,
                     Notes = newCard.Notes
@@ -223,6 +241,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
                 {
                     CardType = editCard.CardType.Value,
                     CardName = editCard.CardName,
+                    NickName = editCard.NickName,
                     CardNumber = editCard.CardNumber,
                     EnrollNumber = editCard.EnrollNumber,
                     Notes = editCard.Notes
@@ -321,6 +340,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
         {
             public CardType? CardType { get; set; }
             public string CardName { get; set; } = string.Empty;
+            public string NickName { get; set; } = string.Empty;
             public long CardNumber { get; set; }
             public string EnrollNumber { get; set; } = string.Empty;
             public string? Notes { get; set; }

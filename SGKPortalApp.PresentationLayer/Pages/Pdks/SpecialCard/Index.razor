@@ -36,7 +36,15 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Kart Adı *</label>
-                        <input type="text" class="form-control" @bind="editCard.CardName" placeholder="Görev Kartı #1" />
+                        <input type="text" class="form-control" @bind="editCard.CardName" @bind:after="OnEditCardNameChanged" placeholder="Görev Kartı #1" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            NickName (Cihaz) *
+                            <small class="text-muted">(Max 12 karakter)</small>
+                        </label>
+                        <input type="text" class="form-control" @bind="editCard.NickName" maxlength="12" placeholder="GOR.KART" />
+                        <small class="text-info">💡 Kart adından otomatik oluşturulur, düzenleyebilirsiniz</small>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Kart Numarası *</label>
@@ -84,7 +92,15 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Kart Adı *</label>
-                        <input type="text" class="form-control" @bind="newCard.CardName" placeholder="Görev Kartı #1" />
+                        <input type="text" class="form-control" @bind="newCard.CardName" @bind:after="OnNewCardNameChanged" placeholder="Görev Kartı #1" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            NickName (Cihaz) *
+                            <small class="text-muted">(Max 12 karakter)</small>
+                        </label>
+                        <input type="text" class="form-control" @bind="newCard.NickName" maxlength="12" placeholder="GOR.KART" />
+                        <small class="text-info">💡 Kart adından otomatik oluşturulur, düzenleyebilirsiniz</small>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Kart Numarası *</label>
