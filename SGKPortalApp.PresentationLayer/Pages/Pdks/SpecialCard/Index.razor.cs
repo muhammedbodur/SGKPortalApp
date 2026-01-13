@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
@@ -14,19 +15,24 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
     public partial class Index
     {
         [Inject] private ISpecialCardApiService SpecialCardApiService { get; set; } = default!;
+        [Inject] private IZKTecoDeviceApiService DeviceApiService { get; set; } = default!;
         [Inject] private IToastService ToastService { get; set; } = default!;
 
         private List<SpecialCardResponseDto> specialCards = new();
         private List<SpecialCardResponseDto> filteredCards = new();
         private List<SpecialCardResponseDto> pagedCards = new();
-        
+        private List<DeviceResponseDto> devices = new();
+
         private bool isLoading = true;
         private bool showAddForm = false;
         private bool showEditForm = false;
-        
+        private bool showDeviceSelectModal = false;
+
         private CardModel newCard = new() { CardType = CardType.ViziteKarti };
         private CardModel editCard = new();
         private int editingCardId = 0;
+        private int selectedCardForSending = 0;
+        private int selectedDeviceId = 0;
 
         // Filtering
         private string searchTerm = string.Empty;
@@ -40,6 +46,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
         protected override async Task OnInitializedAsync()
         {
             await LoadCards();
+            await LoadDevices();
         }
 
         private async Task LoadCards()
@@ -65,6 +72,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
             finally
             {
                 isLoading = false;
+            }
+        }
+
+        private async Task LoadDevices()
+        {
+            try
+            {
+                var result = await DeviceApiService.GetActiveAsync();
+                if (result.Success && result.Data != null)
+                {
+                    devices = result.Data;
+                }
+            }
+            catch (Exception ex)
+            {
+                await ToastService.ShowErrorAsync($"Cihazlar yüklenemedi: {ex.Message}");
             }
         }
 
@@ -290,17 +313,40 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
             }
         }
 
-        private async Task SendCardToAllDevices(int cardId)
+        private void OpenDeviceSelectModal(int cardId)
         {
-            var card = specialCards.FirstOrDefault(c => c.Id == cardId);
+            selectedCardForSending = cardId;
+            selectedDeviceId = 0;
+            showDeviceSelectModal = true;
+        }
+
+        private void CloseDeviceSelectModal()
+        {
+            showDeviceSelectModal = false;
+            selectedCardForSending = 0;
+            selectedDeviceId = 0;
+        }
+
+        private async Task SendCardToDevice()
+        {
+            if (selectedDeviceId == 0)
+            {
+                await ToastService.ShowWarningAsync("Lütfen bir cihaz seçin");
+                return;
+            }
+
+            var card = specialCards.FirstOrDefault(c => c.Id == selectedCardForSending);
             if (card == null) return;
+
+            var device = devices.FirstOrDefault(d => d.DeviceId == selectedDeviceId);
+            if (device == null) return;
 
             try
             {
-                await ToastService.ShowInfoAsync($"Kart tüm cihazlara gönderiliyor: {card.CardName}");
-                
-                var result = await SpecialCardApiService.SendCardToAllDevicesAsync(cardId);
-                
+                await ToastService.ShowInfoAsync($"Kart cihaza gönderiliyor: {card.CardName} → {device.DeviceName}");
+
+                var result = await SpecialCardApiService.SendCardToDeviceAsync(selectedCardForSending, selectedDeviceId);
+
                 if (result.Success && result.Data != null)
                 {
                     var syncResult = result.Data;
@@ -310,13 +356,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
                     }
                     else
                     {
-                        await ToastService.ShowWarningAsync($"⚠️ Kısmi başarı: {syncResult.SuccessCount}/{syncResult.TotalDevices} cihaza gönderildi");
+                        await ToastService.ShowWarningAsync($"⚠️ Kart gönderilemedi: {syncResult.Details.FirstOrDefault()?.ErrorMessage ?? "Bilinmeyen hata"}");
                     }
                 }
                 else
                 {
-                    await ToastService.ShowErrorAsync(result.Message ?? "Kart cihazlara gönderilemedi");
+                    await ToastService.ShowErrorAsync(result.Message ?? "Kart cihaza gönderilemedi");
                 }
+
+                CloseDeviceSelectModal();
             }
             catch (Exception ex)
             {

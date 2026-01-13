@@ -944,6 +944,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     DeviceResults = results.ToList()
                 };
 
+                // Personel entity'sini güncelle
+                personel.KartNoGonderimTarihi = DateTime.Now;
+                personel.KartGonderimIslemBasari = resultDto.SuccessCount == resultDto.TotalDevices
+                    ? IslemBasari.Basarili
+                    : resultDto.SuccessCount > 0
+                        ? IslemBasari.KismenBasarili
+                        : IslemBasari.Basarisiz;
+
+                _unitOfWork.Repository<Personel>().Update(personel);
+                await _unitOfWork.SaveChangesAsync();
+
                 if (resultDto.SuccessCount > 0)
                 {
                     _logger.LogInformation(
