@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.AuditLog;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.AuditLog;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.DataAccessLayer.Context;

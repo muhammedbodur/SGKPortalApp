@@ -31,5 +31,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri
 
         // Basit dropdown için
         Task<IEnumerable<(int Id, string AdSoyad)>> GetPersonelDropdownAsync();
+
+        // EnrollNumber yönetimi
+        Task<string> GetNextAvailableEnrollNumberAsync();
     }
 }

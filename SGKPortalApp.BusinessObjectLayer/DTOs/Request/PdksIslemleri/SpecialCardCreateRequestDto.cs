@@ -8,6 +8,8 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri
         [Required(ErrorMessage = "Kart tipi zorunludur")]
         public CardType CardType { get; set; }
 
+        public int? HizmetBinasiId { get; set; }
+
         [Required(ErrorMessage = "Kart numarası zorunludur")]
         [Range(1, long.MaxValue, ErrorMessage = "Kart numarası geçerli bir değer olmalıdır")]
         public long CardNumber { get; set; }

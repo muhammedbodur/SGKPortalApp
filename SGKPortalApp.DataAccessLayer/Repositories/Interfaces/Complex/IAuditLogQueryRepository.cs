@@ -1,4 +1,5 @@
-using SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.AuditLog;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.AuditLog;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using System.Collections.Generic;
 using System.Threading.Tasks;

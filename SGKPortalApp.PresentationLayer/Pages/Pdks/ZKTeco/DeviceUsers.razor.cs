@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
 using SGKPortalApp.PresentationLayer.Components.Base;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;

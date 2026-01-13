@@ -12,9 +12,6 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri
         {
             return method switch
             {
-                VerifyMethod.Password => "Şifre",
-                VerifyMethod.Fingerprint => "Parmak İzi",
-                VerifyMethod.Face => "Yüz Tanıma",
                 VerifyMethod.Card => "Kart",
                 _ => "Bilinmiyor"
             };
@@ -28,9 +25,6 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri
             return method switch
             {
                 VerifyMethod.Card => "bg-label-primary",
-                VerifyMethod.Fingerprint => "bg-label-success",
-                VerifyMethod.Face => "bg-label-info",
-                VerifyMethod.Password => "bg-label-warning",
                 _ => "bg-label-secondary"
             };
         }

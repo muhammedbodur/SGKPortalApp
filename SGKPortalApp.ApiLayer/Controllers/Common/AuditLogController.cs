@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
-using SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.AuditLog;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.AuditLog;
 
 namespace SGKPortalApp.ApiLayer.Controllers.Common
 {

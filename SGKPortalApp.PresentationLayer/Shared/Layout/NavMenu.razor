@@ -385,19 +385,16 @@
                             <div>Realtime İzleme</div>
                         </a>
                     </li>
-
-                    <li class="menu-header small text-uppercase"><span class="menu-header-text">ZKTeco PDKS</span></li>
-
                     <li class="menu-item @(IsActive("/pdks/zkteco/devices") ? "active" : "")">
                         <a href="/pdks/zkteco/devices" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-devices"></i>
                             <div>Cihaz Yönetimi</div>
                         </a>
                     </li>
-                    <li class="menu-item @(IsActive("/pdks/zkteco/attendance") ? "active" : "")">
-                        <a href="/pdks/zkteco/attendance" class="menu-link">
+                    <li class="menu-item @(IsActive("/pdks/zkteco/instant-attendance") ? "active" : "")">
+                        <a href="/pdks/zkteco/instant-attendance" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-list-check"></i>
-                            <div>Attendance Kayıtları</div>
+                            <div>Anlık Attendance Kayıtları</div>
                         </a>
                     </li>
                     <li class="menu-item @(IsActive("/pdks/zkteco/device-sync") ? "active" : "")">
@@ -410,6 +407,12 @@
                         <a href="/pdks/special-cards" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-credit-card"></i>
                             <div>Özel Kartlar</div>
+                        </a>
+                    </li>
+                    <li class="menu-item @(IsActive("/pdks/card-sync-comparison") ? "active" : "")">
+                        <a href="/pdks/card-sync-comparison" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-arrow-from-left"></i>
+                            <div>Kart Senkronizasyon Karşılaştırma</div>
                         </a>
                     </li>
 

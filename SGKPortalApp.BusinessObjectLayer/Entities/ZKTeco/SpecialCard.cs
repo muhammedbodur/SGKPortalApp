@@ -1,6 +1,8 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
@@ -49,6 +51,15 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         [Required]
         [StringLength(12)]
         public string NickName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Hizmet Binası ID (FK)
+        /// Özel kartın hangi hizmet binasına ait olduğu
+        /// </summary>
+        public int? HizmetBinasiId { get; set; }
+        [ForeignKey(nameof(HizmetBinasiId))]
+        [InverseProperty("SpecialCards")]
+        public HizmetBinasi? HizmetBinasi { get; set; }
 
         /// <summary>
         /// Notlar (kart hakkında ek bilgiler)

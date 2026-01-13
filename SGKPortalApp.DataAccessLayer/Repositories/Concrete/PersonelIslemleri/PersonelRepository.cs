@@ -279,5 +279,24 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                 PageSize = filter.PageSize
             };
         }
+
+        public async Task<string> GetNextAvailableEnrollNumberAsync()
+        {
+            // Personeller için EnrollNumber aralığı: 1-59999
+            var maxEnrollNumber = await _dbSet
+                .Where(p => !p.SilindiMi)
+                .Select(p => p.PersonelKayitNo)
+                .OrderByDescending(p => p)
+                .FirstOrDefaultAsync();
+
+            // Eğer hiç personel yoksa 1'den başla, varsa max+1
+            var nextNumber = maxEnrollNumber == 0 ? 1 : maxEnrollNumber + 1;
+
+            // 59999'u geçmemeli
+            if (nextNumber > 59999)
+                throw new InvalidOperationException("Personel EnrollNumber kapasitesi doldu (max: 59999)");
+
+            return nextNumber.ToString();
+        }
     }
 }

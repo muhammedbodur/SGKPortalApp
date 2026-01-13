@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
-using SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.AuditLog;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.AuditLog;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using System.Net.Http.Json;
 

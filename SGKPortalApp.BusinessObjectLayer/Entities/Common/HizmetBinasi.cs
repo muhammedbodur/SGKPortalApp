@@ -36,5 +36,8 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
         [InverseProperty("HizmetBinasi")]
         public ICollection<Personel>? Personeller { get; set; } = new List<Personel>();
         public ICollection<Device> Devices { get; set; } = new List<Device>();
+        
+        [InverseProperty("HizmetBinasi")]
+        public ICollection<SpecialCard> SpecialCards { get; set; } = new List<SpecialCard>();
     }
 }

@@ -1,4 +1,5 @@
-using SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.AuditLog;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.AuditLog;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
 {

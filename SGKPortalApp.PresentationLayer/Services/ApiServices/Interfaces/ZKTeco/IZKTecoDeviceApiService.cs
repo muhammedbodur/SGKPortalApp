@@ -1,5 +1,7 @@
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
-using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco
 {

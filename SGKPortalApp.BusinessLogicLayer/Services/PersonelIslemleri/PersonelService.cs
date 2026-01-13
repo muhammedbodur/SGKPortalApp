@@ -5,7 +5,9 @@ using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
-using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
@@ -946,11 +948,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
                 // Personel entity'sini güncelle
                 personel.KartNoGonderimTarihi = DateTime.Now;
-                personel.KartGonderimIslemBasari = resultDto.SuccessCount == resultDto.TotalDevices
+                personel.KartGonderimIslemBasari = resultDto.SuccessCount > 0
                     ? IslemBasari.Basarili
-                    : resultDto.SuccessCount > 0
-                        ? IslemBasari.KismenBasarili
-                        : IslemBasari.Basarisiz;
+                    : IslemBasari.Basarisiz;
 
                 _unitOfWork.Repository<Personel>().Update(personel);
                 await _unitOfWork.SaveChangesAsync();

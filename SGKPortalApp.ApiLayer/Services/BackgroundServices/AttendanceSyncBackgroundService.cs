@@ -72,29 +72,35 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
             _logger.LogInformation($"🔄 Attendance Sync Background Service started");
             _logger.LogInformation($"📅 Scheduled sync times: {string.Join(", ", _syncTimes.Select(t => t.ToString(@"hh\:mm")))}");
             _logger.LogInformation($"⏱️ Device sync interval: {_deviceSyncInterval.TotalMinutes} minutes");
+            _logger.LogInformation($"🕐 Hourly check enabled: Will check every hour if today's sync is needed");
 
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-                    // Bir sonraki sync zamanını hesapla
-                    var nextSyncTime = GetNextSyncTime();
                     var now = DateTime.Now;
-                    var delay = nextSyncTime - now;
+                    
+                    // Her saat başı kontrol et (örn: 13:00, 14:00, 15:00)
+                    var nextHour = now.Date.AddHours(now.Hour + 1);
+                    var delayUntilNextHour = nextHour - now;
 
-                    if (delay.TotalSeconds > 0)
-                    {
-                        _logger.LogInformation($"⏰ Next sync scheduled at: {nextSyncTime:yyyy-MM-dd HH:mm:ss} (in {delay.TotalHours:F1} hours)");
-                        await Task.Delay(delay, stoppingToken);
-                    }
+                    _logger.LogInformation($"⏰ Next check at: {nextHour:HH:mm} (in {delayUntilNextHour.TotalMinutes:F0} minutes)");
+                    await Task.Delay(delayUntilNextHour, stoppingToken);
 
                     if (stoppingToken.IsCancellationRequested)
                         break;
 
-                    // Sync işlemini başlat
-                    _logger.LogInformation($"🚀 Starting scheduled attendance sync at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-                    await SyncAllDevicesSequentiallyAsync(stoppingToken);
-                    _logger.LogInformation($"✅ Scheduled attendance sync completed at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                    // Bugün için sync gerekli mi kontrol et
+                    if (await IsSyncNeededTodayAsync())
+                    {
+                        _logger.LogInformation($"🚀 Sync needed! Starting attendance sync at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                        await SyncAllDevicesSequentiallyAsync(stoppingToken);
+                        _logger.LogInformation($"✅ Attendance sync completed at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                    }
+                    else
+                    {
+                        _logger.LogInformation($"✅ Today's sync already completed. Waiting for next check...");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -108,27 +114,60 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
         }
 
         /// <summary>
-        /// Bir sonraki sync zamanını hesapla
+        /// Bugün için sync gerekli mi kontrol et
+        /// Mantık: Bugünün sync zamanlarından herhangi biri geçmişse ve o zamandan sonra sync yapılmamışsa true döner
         /// </summary>
-        private DateTime GetNextSyncTime()
+        private async Task<bool> IsSyncNeededTodayAsync()
         {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var deviceService = scope.ServiceProvider.GetRequiredService<IDeviceService>();
+
             var now = DateTime.Now;
             var today = now.Date;
 
-            // Bugünün sync zamanlarını kontrol et
-            foreach (var syncTime in _syncTimes.OrderBy(t => t))
+            // Bugünün geçmiş sync zamanlarını bul
+            var passedSyncTimes = _syncTimes
+                .Where(t => today.Add(t) <= now)
+                .OrderByDescending(t => t)
+                .ToList();
+
+            if (!passedSyncTimes.Any())
             {
-                var scheduledTime = today.Add(syncTime);
-                if (scheduledTime > now)
+                // Bugün henüz hiçbir sync zamanı gelmedi
+                return false;
+            }
+
+            // En son geçen sync zamanı
+            var lastScheduledSyncTime = today.Add(passedSyncTimes.First());
+
+            // Tüm aktif cihazları al
+            var activeDevices = await deviceService.GetActiveDevicesAsync();
+            if (!activeDevices.Any())
+            {
+                _logger.LogInformation("ℹ️ No active devices found");
+                return false;
+            }
+
+            // Herhangi bir cihaz bugün sync edilmemiş mi kontrol et
+            foreach (var device in activeDevices)
+            {
+                // Cihaz hiç sync edilmemiş veya son sync bugünden önce
+                if (device.LastSyncTime == null || device.LastSyncTime.Value.Date < today)
                 {
-                    return scheduledTime;
+                    _logger.LogInformation($"📌 Device needs sync: {device.DeviceName} (Last sync: {device.LastSyncTime?.ToString("yyyy-MM-dd HH:mm") ?? "Never"})");
+                    return true;
+                }
+
+                // Cihazın son sync'i, en son geçen sync zamanından önce
+                if (device.LastSyncTime.Value < lastScheduledSyncTime)
+                {
+                    _logger.LogInformation($"📌 Device needs sync: {device.DeviceName} (Last sync: {device.LastSyncTime.Value:yyyy-MM-dd HH:mm}, Scheduled: {lastScheduledSyncTime:HH:mm})");
+                    return true;
                 }
             }
 
-            // Bugün için tüm sync zamanları geçmişse, yarının ilk sync zamanını al
-            var tomorrow = today.AddDays(1);
-            var firstSyncTime = _syncTimes.OrderBy(t => t).First();
-            return tomorrow.Add(firstSyncTime);
+            // Tüm cihazlar bugün sync edilmiş
+            return false;
         }
 
         /// <summary>
@@ -173,17 +212,43 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                     {
                         _logger.LogInformation($"🔄 [{deviceIndex}/{activeDevices.Count}] Syncing device: {device.DeviceName} ({device.IpAddress})");
 
-                        var success = await attendanceService.SyncRecordsFromDeviceToDbAsync(device.DeviceId);
+                        // Retry mekanizması: Başarısız olursa 3 kez daha dene
+                        bool success = false;
+                        int maxRetries = 3;
+                        int retryCount = 0;
+
+                        while (!success && retryCount <= maxRetries)
+                        {
+                            if (retryCount > 0)
+                            {
+                                _logger.LogInformation($"🔁 Retry {retryCount}/{maxRetries} for device: {device.DeviceName}");
+                                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken); // 30 saniye bekle
+                            }
+
+                            success = await attendanceService.SyncRecordsFromDeviceToDbAsync(device.DeviceId);
+                            
+                            if (!success)
+                            {
+                                retryCount++;
+                            }
+                        }
 
                         if (success)
                         {
                             successCount++;
-                            _logger.LogInformation($"✅ [{deviceIndex}/{activeDevices.Count}] Device synced successfully: {device.DeviceName}");
+                            if (retryCount > 0)
+                            {
+                                _logger.LogInformation($"✅ [{deviceIndex}/{activeDevices.Count}] Device synced successfully after {retryCount} retries: {device.DeviceName}");
+                            }
+                            else
+                            {
+                                _logger.LogInformation($"✅ [{deviceIndex}/{activeDevices.Count}] Device synced successfully: {device.DeviceName}");
+                            }
                         }
                         else
                         {
                             failCount++;
-                            _logger.LogWarning($"⚠️ [{deviceIndex}/{activeDevices.Count}] Device sync failed: {device.DeviceName}");
+                            _logger.LogWarning($"⚠️ [{deviceIndex}/{activeDevices.Count}] Device sync failed after {maxRetries} retries: {device.DeviceName}");
                         }
 
                         // Son cihaz değilse, bir sonraki cihaza geçmeden önce bekle

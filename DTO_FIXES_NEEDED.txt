@@ -1,0 +1,41 @@
+DTO REORGANIZATION - MANUAL FIXES REQUIRED
+==========================================
+
+The following Razor files are blocked by .gitignore and need manual namespace updates:
+
+1. SGKPortalApp.PresentationLayer\Pages\Audit\Log\Detail.razor
+   - Add these using statements at the top:
+     @using SGKPortalApp.BusinessObjectLayer.DTOs.Request.AuditLog
+     @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.AuditLog
+
+2. SGKPortalApp.PresentationLayer\Pages\Audit\Log\Detail.razor.cs
+   - Add these using statements:
+     using SGKPortalApp.BusinessObjectLayer.DTOs.Request.AuditLog;
+     using SGKPortalApp.BusinessObjectLayer.DTOs.Response.AuditLog;
+
+3. SGKPortalApp.PresentationLayer\Pages\Audit\Log\Index.razor
+   - Add these using statements at the top:
+     @using SGKPortalApp.BusinessObjectLayer.DTOs.Request.AuditLog
+     @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.AuditLog
+
+4. SGKPortalApp.PresentationLayer\Pages\Audit\Log\Index.razor.cs
+   - Add these using statements:
+     using SGKPortalApp.BusinessObjectLayer.DTOs.Request.AuditLog;
+     using SGKPortalApp.BusinessObjectLayer.DTOs.Response.AuditLog;
+
+COMPLETED FIXES:
+================
+✅ All ZKTeco Razor files updated (DeviceList, DeviceUsers, DeviceSync, AttendanceRecords)
+✅ All .cs files in BusinessLogicLayer, ApiLayer, DataAccessLayer updated
+✅ IDtoDiscoveryApiService namespace fixed
+✅ DtoDiscoveryApiService namespace already correct
+
+SUMMARY OF REORGANIZATION:
+==========================
+- AuditLog DTOs: Moved to Request/Response folders (1 Request, 3 Response)
+- ZKTeco DTOs: Moved to Request/Response/Shared folders (3 Request, 11 Response, 3 Shared)
+- Common DTOs: FieldAnalysisInfo and FieldAnalysisResult moved to Response/Common
+- All namespace references updated in 32+ files across all layers
+- Empty folders cleaned up
+
+After manually updating the 4 Audit/Log files above, rebuild the solution.

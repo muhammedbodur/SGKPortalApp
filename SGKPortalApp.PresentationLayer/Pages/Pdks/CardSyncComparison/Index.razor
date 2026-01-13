@@ -1,0 +1,352 @@
+@page "/pdks/card-sync-comparison"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
+@attribute [Authorize]
+
+<PageTitle>Kart Senkronizasyon Karşılaştırma</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">
+                    <i class="bi bi-arrow-left-right me-2"></i>
+                    Kart Senkronizasyon Karşılaştırma
+                </h3>
+                <div>
+                    @if (report != null && report.Mismatches.Any())
+                    {
+                        <button class="btn btn-success me-2" @onclick="ExportToExcel" disabled="@(isLoading || isExporting)">
+                            @if (isExporting)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                <span>Dışa Aktarılıyor...</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-file-earmark-excel me-1"></i>
+                                <span>Excel'e Aktar</span>
+                            }
+                        </button>
+                    }
+                    <button class="btn btn-primary" @onclick="GenerateReport" disabled="@isLoading">
+                        <i class="bi bi-arrow-repeat me-1"></i>
+                        @(isLoading ? "Kontrol Ediliyor..." : "Kontrol Et")
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="card mb-4">
+            <div class="card-body text-center py-5">
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Yükleniyor...</span>
+                </div>
+                <h5 class="mb-2">Cihazlardan Kart Bilgileri Çekiliyor...</h5>
+                <p class="text-muted mb-0">Bu işlem birkaç dakika sürebilir. Lütfen bekleyin.</p>
+                @if (report != null && report.DeviceStatuses.Any())
+                {
+                    <div class="mt-4">
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" 
+                                 style="width: @(ProgressPercentage)%">
+                                @report.DeviceStatuses.Count / @report.TotalDevicesChecked cihaz
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (report != null && !isLoading)
+    {
+        <!-- İstatistik Kartları -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card border-primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Toplam Cihaz</h6>
+                                <h3 class="mb-0">@report.TotalDevicesChecked</h3>
+                            </div>
+                            <i class="bi bi-hdd-network fs-1 text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-info">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Cihazlardaki Kartlar</h6>
+                                <h3 class="mb-0">@report.TotalCardsInDevices</h3>
+                            </div>
+                            <i class="bi bi-credit-card fs-1 text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Veritabanındaki Kartlar</h6>
+                                <h3 class="mb-0">@report.TotalCardsInDatabase</h3>
+                            </div>
+                            <i class="bi bi-database fs-1 text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-danger">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-1">Toplam Uyumsuzluk</h6>
+                                <h3 class="mb-0 text-danger">@report.TotalMismatches</h3>
+                            </div>
+                            <i class="bi bi-exclamation-triangle fs-1 text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Uyumsuzluk Detayları -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="text-danger">
+                            <i class="bi bi-x-circle me-1"></i>
+                            Sadece Cihazda
+                        </h6>
+                        <h4 class="mb-0">@report.OnlyInDeviceCount</h4>
+                        <small class="text-muted">Veritabanında yok</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="text-warning">
+                            <i class="bi bi-exclamation-circle me-1"></i>
+                            Sadece Veritabanında
+                        </h6>
+                        <h4 class="mb-0">@report.OnlyInDatabaseCount</h4>
+                        <small class="text-muted">Cihazda yok</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="text-info">
+                            <i class="bi bi-arrow-left-right me-1"></i>
+                            Bilgi Uyumsuzluğu
+                        </h6>
+                        <h4 class="mb-0">@report.DataMismatchCount</h4>
+                        <small class="text-muted">İsim/Kart No farklı</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtreler -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Uyumsuzluk Tipi</label>
+                        <select class="form-select" @bind="filterMismatchType">
+                            <option value="">Tümü</option>
+                            <option value="OnlyInDevice">Sadece Cihazda</option>
+                            <option value="OnlyInDatabase">Sadece Veritabanında</option>
+                            <option value="DataMismatch">Bilgi Uyumsuzluğu</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Cihaz</label>
+                        <select class="form-select" @bind="filterDeviceId">
+                            <option value="0">Tüm Cihazlar</option>
+                            @foreach (var device in report.DeviceStatuses.Where(d => d.Success))
+                            {
+                                <option value="@device.DeviceId">@device.DeviceName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Kullanıcı Tipi</label>
+                        <select class="form-select" @bind="filterUserType">
+                            <option value="">Tümü</option>
+                            <option value="Personel">Personel</option>
+                            <option value="SpecialCard">Özel Kart</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Arama</label>
+                        <input type="text" class="form-control" placeholder="EnrollNumber, İsim..." @bind="searchTerm" @bind:event="oninput" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Uyumsuzluk Listesi -->
+        @if (FilteredMismatches.Any())
+        {
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        Uyumsuzluk Detayları
+                        <span class="badge bg-danger ms-2">@FilteredMismatches.Count</span>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>EnrollNumber</th>
+                                    <th>İsim</th>
+                                    <th>Kart No</th>
+                                    <th>Uyumsuzluk Tipi</th>
+                                    <th>Cihaz</th>
+                                    <th>Tip</th>
+                                    <th>Detay</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var mismatch in FilteredMismatches.Take(pageSize))
+                                {
+                                    <tr>
+                                        <td><code>@mismatch.EnrollNumber</code></td>
+                                        <td>
+                                            @if (mismatch.MismatchType == "DataMismatch")
+                                            {
+                                                <div>
+                                                    <div><strong>Cihaz:</strong> @mismatch.DeviceUserName</div>
+                                                    <div><strong>DB:</strong> @mismatch.DatabaseUserName</div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                @mismatch.Name
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (mismatch.MismatchType == "DataMismatch")
+                                            {
+                                                <div>
+                                                    <div><strong>Cihaz:</strong> @mismatch.DeviceCardNumber</div>
+                                                    <div><strong>DB:</strong> @mismatch.DatabaseCardNumber</div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                @mismatch.CardNumber
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (mismatch.MismatchType == "OnlyInDevice")
+                                            {
+                                                <span class="badge bg-danger">Sadece Cihazda</span>
+                                            }
+                                            else if (mismatch.MismatchType == "OnlyInDatabase")
+                                            {
+                                                <span class="badge bg-warning text-dark">Sadece DB'de</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-info">Bilgi Uyumsuz</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div>@mismatch.DeviceName</div>
+                                            <small class="text-muted">@mismatch.DeviceIp</small>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(mismatch.UserType))
+                                            {
+                                                <span class="badge bg-secondary">@mismatch.UserType</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">@mismatch.Details</small>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                @if (FilteredMismatches.Count > pageSize)
+                {
+                    <div class="card-footer bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">
+                                    Gösterilen: @pageSize / @FilteredMismatches.Count
+                                </small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-primary" @onclick="LoadMore">
+                                Daha Fazla Göster
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-success">
+                <i class="bi bi-check-circle me-2"></i>
+                Filtrelere uygun uyumsuzluk bulunamadı.
+            </div>
+        }
+
+        <!-- Rapor Bilgisi -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>
+                            Rapor Tarihi: @report.ReportGeneratedAt.ToString("dd.MM.yyyy HH:mm:ss")
+                        </small>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <small class="text-muted">
+                            <i class="bi bi-stopwatch me-1"></i>
+                            İşlem Süresi: @report.TotalProcessingTime.TotalSeconds.ToString("F2") saniye
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else if (!isLoading)
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-arrow-left-right fs-1 text-muted mb-3"></i>
+                <h5 class="mb-2">Kart Senkronizasyon Karşılaştırması</h5>
+                <p class="text-muted mb-4">
+                    Tüm aktif cihazlardan kart bilgilerini çekerek veritabanı ile karşılaştırın.<br/>
+                    Uyumsuz kayıtları tespit edin ve rapor alın.
+                </p>
+                <button class="btn btn-primary" @onclick="GenerateReport">
+                    <i class="bi bi-arrow-repeat me-1"></i>
+                    Kontrol Başlat
+                </button>
+            </div>
+        </div>
+    }
+</div>

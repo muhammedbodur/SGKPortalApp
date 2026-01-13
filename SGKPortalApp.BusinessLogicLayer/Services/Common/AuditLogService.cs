@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
-using SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.AuditLog;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.AuditLog;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Options;
 using SGKPortalApp.Common.Interfaces;

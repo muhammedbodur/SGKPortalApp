@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using SGKPortalApp.ApiLayer.Services.State;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
-using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -223,7 +225,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.PdksIslemleri
         }
 
         [HttpPost("{id}/users")]
-        public async Task<IActionResult> CreateDeviceUser(int id, [FromBody] SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco.UserCreateUpdateDto request, [FromQuery] bool force = false)
+        public async Task<IActionResult> CreateDeviceUser(int id, [FromBody] UserCreateUpdateDto request, [FromQuery] bool force = false)
         {
             var success = await _deviceService.CreateDeviceUserAsync(id, request, force);
             var result = ApiResponseDto<bool>.SuccessResult(success, success ? "Kullanıcı başarıyla oluşturuldu" : "Kullanıcı oluşturulamadı");
@@ -231,7 +233,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.PdksIslemleri
         }
 
         [HttpPut("{id}/users/{enrollNumber}")]
-        public async Task<IActionResult> UpdateDeviceUser(int id, string enrollNumber, [FromBody] SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco.UserCreateUpdateDto request, [FromQuery] bool force = false)
+        public async Task<IActionResult> UpdateDeviceUser(int id, string enrollNumber, [FromBody] UserCreateUpdateDto request, [FromQuery] bool force = false)
         {
             var success = await _deviceService.UpdateDeviceUserAsync(id, enrollNumber, request, force);
             var result = ApiResponseDto<bool>.SuccessResult(success, success ? "Kullanıcı başarıyla güncellendi" : "Kullanıcı güncellenemedi");

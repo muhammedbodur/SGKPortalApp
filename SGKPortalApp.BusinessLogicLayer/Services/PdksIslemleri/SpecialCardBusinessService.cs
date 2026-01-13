@@ -4,7 +4,9 @@ using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
-using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
@@ -55,6 +57,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     CardName = c.CardName,
                     EnrollNumber = c.EnrollNumber,
                     NickName = c.NickName,
+                    HizmetBinasiId = c.HizmetBinasiId,
+                    HizmetBinasiAdi = c.HizmetBinasi?.HizmetBinasiAdi,
                     Notes = c.Notes,
                     EklenmeTarihi = c.EklenmeTarihi,
                     DuzenlenmeTarihi = c.DuzenlenmeTarihi
@@ -87,6 +91,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     CardNumber = card.CardNumber,
                     CardName = card.CardName,
                     EnrollNumber = card.EnrollNumber,
+                    NickName = card.NickName,
+                    HizmetBinasiId = card.HizmetBinasiId,
+                    HizmetBinasiAdi = card.HizmetBinasi?.HizmetBinasiAdi,
                     Notes = card.Notes,
                     EklenmeTarihi = card.EklenmeTarihi,
                     DuzenlenmeTarihi = card.DuzenlenmeTarihi
@@ -205,20 +212,45 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 if (existingByCardNumber != null)
                     return ApiResponseDto<SpecialCardResponseDto>.ErrorResult("Bu kart numarası zaten kullanılıyor");
 
-                // EnrollNumber kontrolü
-                var existingByEnrollNumber = await repository.GetByEnrollNumberAsync(request.EnrollNumber);
-                if (existingByEnrollNumber != null)
-                    return ApiResponseDto<SpecialCardResponseDto>.ErrorResult("Bu EnrollNumber zaten kullanılıyor");
+                // EnrollNumber otomatik atama veya kontrol
+                string enrollNumber;
+                if (string.IsNullOrWhiteSpace(request.EnrollNumber))
+                {
+                    // EnrollNumber boşsa otomatik ata (60000-65534 aralığı)
+                    enrollNumber = await repository.GetNextAvailableEnrollNumberAsync();
+                    _logger.LogInformation("Özel kart için otomatik EnrollNumber atandı: {EnrollNumber}", enrollNumber);
+                }
+                else
+                {
+                    // EnrollNumber verilmişse kontrol et
+                    enrollNumber = request.EnrollNumber;
+                    
+                    // Aralık kontrolü (60000-65534)
+                    if (int.TryParse(enrollNumber, out var enrollNum))
+                    {
+                        if (enrollNum < 60000 || enrollNum > 65534)
+                        {
+                            return ApiResponseDto<SpecialCardResponseDto>.ErrorResult(
+                                $"Özel kartlar için EnrollNumber 60000-65534 aralığında olmalıdır. Girilen: {enrollNum}");
+                        }
+                    }
+                    
+                    // Duplicate kontrolü
+                    var existingByEnrollNumber = await repository.GetByEnrollNumberAsync(enrollNumber);
+                    if (existingByEnrollNumber != null)
+                        return ApiResponseDto<SpecialCardResponseDto>.ErrorResult("Bu EnrollNumber zaten kullanılıyor");
+                }
 
                 var card = new SpecialCard
                 {
                     CardType = request.CardType,
                     CardNumber = request.CardNumber,
                     CardName = request.CardName,
-                    EnrollNumber = request.EnrollNumber,
+                    EnrollNumber = enrollNumber,
                     NickName = string.IsNullOrWhiteSpace(request.NickName) 
                         ? StringHelper.GenerateNickName(request.CardName, 12) 
                         : request.NickName,
+                    HizmetBinasiId = request.HizmetBinasiId,
                     Notes = request.Notes
                 };
 
@@ -235,6 +267,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     CardNumber = card.CardNumber,
                     CardName = card.CardName,
                     EnrollNumber = card.EnrollNumber,
+                    NickName = card.NickName,
+                    HizmetBinasiId = card.HizmetBinasiId,
+                    HizmetBinasiAdi = card.HizmetBinasi?.HizmetBinasiAdi,
                     Notes = card.Notes,
                     EklenmeTarihi = card.EklenmeTarihi,
                     DuzenlenmeTarihi = card.DuzenlenmeTarihi
@@ -264,10 +299,24 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 if (existingByCardNumber != null && existingByCardNumber.Id != id)
                     return ApiResponseDto<SpecialCardResponseDto>.ErrorResult("Bu kart numarası zaten kullanılıyor");
 
-                // EnrollNumber kontrolü (kendisi hariç)
-                var existingByEnrollNumber = await repository.GetByEnrollNumberAsync(request.EnrollNumber);
-                if (existingByEnrollNumber != null && existingByEnrollNumber.Id != id)
-                    return ApiResponseDto<SpecialCardResponseDto>.ErrorResult("Bu EnrollNumber zaten kullanılıyor");
+                // EnrollNumber kontrolü ve validasyon
+                if (!string.IsNullOrWhiteSpace(request.EnrollNumber))
+                {
+                    // Aralık kontrolü (60000-65534)
+                    if (int.TryParse(request.EnrollNumber, out var enrollNum))
+                    {
+                        if (enrollNum < 60000 || enrollNum > 65534)
+                        {
+                            return ApiResponseDto<SpecialCardResponseDto>.ErrorResult(
+                                $"Özel kartlar için EnrollNumber 60000-65534 aralığında olmalıdır. Girilen: {enrollNum}");
+                        }
+                    }
+                    
+                    // Duplicate kontrolü (kendisi hariç)
+                    var existingByEnrollNumber = await repository.GetByEnrollNumberAsync(request.EnrollNumber);
+                    if (existingByEnrollNumber != null && existingByEnrollNumber.Id != id)
+                        return ApiResponseDto<SpecialCardResponseDto>.ErrorResult("Bu EnrollNumber zaten kullanılıyor");
+                }
 
                 card.CardType = request.CardType;
                 card.CardNumber = request.CardNumber;
@@ -276,6 +325,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 card.NickName = string.IsNullOrWhiteSpace(request.NickName)
                     ? StringHelper.GenerateNickName(request.CardName, 12)
                     : request.NickName;
+                card.HizmetBinasiId = request.HizmetBinasiId;
                 card.Notes = request.Notes;
 
                 repository.Update(card);
@@ -292,6 +342,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     CardName = card.CardName,
                     EnrollNumber = card.EnrollNumber,
                     NickName = card.NickName,
+                    HizmetBinasiId = card.HizmetBinasiId,
+                    HizmetBinasiAdi = card.HizmetBinasi?.HizmetBinasiAdi,
                     Notes = card.Notes,
                     EklenmeTarihi = card.EklenmeTarihi,
                     DuzenlenmeTarihi = card.DuzenlenmeTarihi
@@ -367,24 +419,53 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                         Name = card.NickName, // NickName kullan (max 12 char, uppercase, no Turkish)
                         CardNumber = card.CardNumber,
                         Privilege = 0, // Normal user
+                        Password = string.Empty, // Boş password (bazı cihazlar zorunlu tutar)
                         Enabled = true
                     };
 
                     var port = int.TryParse(device.Port, out var p) ? p : 4370;
-                    var success = await _zktecoApiClient.AddUserToDeviceAsync(device.IpAddress, apiUser, port, force: true);
+                    
+                    // Önce kullanıcının cihazda olup olmadığını kontrol et
+                    var existingUser = await _zktecoApiClient.GetUserFromDeviceAsync(
+                        device.IpAddress, 
+                        card.EnrollNumber, 
+                        port);
+
+                    bool success;
+                    if (existingUser != null)
+                    {
+                        // Kullanıcı var, önce sil sonra ekle (güncelleme yerine)
+                        _logger.LogInformation("Özel kart cihazda mevcut, siliniyor ve yeniden ekleniyor: {DeviceName} - {EnrollNumber}", 
+                            device.DeviceName, card.EnrollNumber);
+                        
+                        await _zktecoApiClient.DeleteUserFromDeviceAsync(device.IpAddress, card.EnrollNumber, port);
+                        await Task.Delay(500); // Cihazın işlemi tamamlaması için kısa bekleme
+                        
+                        success = await _zktecoApiClient.AddUserToDeviceAsync(device.IpAddress, apiUser, port, force: true);
+                    }
+                    else
+                    {
+                        // Kullanıcı yok, ekle
+                        _logger.LogInformation("Özel kart cihazda yok, ekleniyor: {DeviceName} - {EnrollNumber}", 
+                            device.DeviceName, card.EnrollNumber);
+                        success = await _zktecoApiClient.AddUserToDeviceAsync(device.IpAddress, apiUser, port, force: true);
+                    }
 
                     if (success)
                     {
                         detail.Success = true;
                         result.SuccessCount++;
-                        _logger.LogInformation("Özel kart cihaza gönderildi: {CardName} -> {DeviceName}", card.CardName, device.DeviceName);
+                        _logger.LogInformation("Özel kart cihaza gönderildi: {CardName} (EnrollNumber: {EnrollNumber}) -> {DeviceName}", 
+                            card.CardName, card.EnrollNumber, device.DeviceName);
                     }
                     else
                     {
                         detail.Success = false;
-                        detail.ErrorMessage = "Cihaza gönderilemedi";
+                        detail.ErrorMessage = $"Cihaza gönderilemedi (EnrollNumber: {card.EnrollNumber})";
                         result.FailCount++;
-                        _logger.LogWarning("Özel kart cihaza gönderilemedi: {CardName} -> {DeviceName}", card.CardName, device.DeviceName);
+                        _logger.LogWarning("Özel kart cihaza gönderilemedi: {CardName} (EnrollNumber: {EnrollNumber}) -> {DeviceName}. " +
+                            "Muhtemel sebepler: EnrollNumber çakışması, cihaz kapasitesi dolu, cihaz bağlantı hatası", 
+                            card.CardName, card.EnrollNumber, device.DeviceName);
                     }
                 }
                 catch (Exception ex)
@@ -415,9 +496,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 if (card == null)
                     return ApiResponseDto<CardSyncResultDto>.ErrorResult("Özel kart bulunamadı");
 
-                var devices = await _deviceService.GetActiveDevicesAsync();
+                // Sadece kartın hizmet binasındaki cihazları al
+                var allDevices = await _deviceService.GetActiveDevicesAsync();
+                
+                if (!card.HizmetBinasiId.HasValue)
+                    return ApiResponseDto<CardSyncResultDto>.ErrorResult("Kartın hizmet binası tanımlı değil");
+                
+                var devices = allDevices.Where(d => d.HizmetBinasiId == card.HizmetBinasiId.Value).ToList();
+                
                 if (!devices.Any())
-                    return ApiResponseDto<CardSyncResultDto>.ErrorResult("Aktif cihaz bulunamadı");
+                    return ApiResponseDto<CardSyncResultDto>.ErrorResult($"Kartın hizmet binasında ({card.HizmetBinasiId.Value}) aktif cihaz bulunamadı");
 
                 var result = new CardSyncResultDto
                 {
@@ -431,6 +519,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     Name = card.NickName, // NickName kullan (max 12 char, uppercase, no Turkish)
                     CardNumber = card.CardNumber,
                     Privilege = 0, // Normal user
+                    Password = string.Empty, // Boş password (bazı cihazlar zorunlu tutar)
                     Enabled = true
                 };
 
@@ -446,7 +535,32 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     try
                     {
                         var port = int.TryParse(device.Port, out var p) ? p : 4370;
-                        var success = await _zktecoApiClient.AddUserToDeviceAsync(device.IpAddress, apiUser, port, force: true);
+                        
+                        // Önce kullanıcının cihazda olup olmadığını kontrol et
+                        var existingUser = await _zktecoApiClient.GetUserFromDeviceAsync(
+                            device.IpAddress, 
+                            card.EnrollNumber, 
+                            port);
+
+                        bool success;
+                        if (existingUser != null)
+                        {
+                            // Kullanıcı var, önce sil sonra ekle (güncelleme yerine)
+                            _logger.LogInformation("Özel kart cihazda mevcut, siliniyor ve yeniden ekleniyor: {DeviceName} - {EnrollNumber}", 
+                                device.DeviceName, card.EnrollNumber);
+                            
+                            await _zktecoApiClient.DeleteUserFromDeviceAsync(device.IpAddress, card.EnrollNumber, port);
+                            await Task.Delay(500); // Cihazın işlemi tamamlaması için kısa bekleme
+                            
+                            success = await _zktecoApiClient.AddUserToDeviceAsync(device.IpAddress, apiUser, port, force: true);
+                        }
+                        else
+                        {
+                            // Kullanıcı yok, ekle
+                            _logger.LogInformation("Özel kart cihazda yok, ekleniyor: {DeviceName} - {EnrollNumber}", 
+                                device.DeviceName, card.EnrollNumber);
+                            success = await _zktecoApiClient.AddUserToDeviceAsync(device.IpAddress, apiUser, port, force: true);
+                        }
 
                         if (success)
                         {

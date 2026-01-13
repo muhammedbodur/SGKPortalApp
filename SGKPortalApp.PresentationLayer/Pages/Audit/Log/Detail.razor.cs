@@ -1,5 +1,6 @@
-using Microsoft.AspNetCore.Components;
-using SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog;
+﻿using Microsoft.AspNetCore.Components;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.AuditLog;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.AuditLog;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using System.Collections.Generic;
@@ -51,23 +52,23 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
         }
 
         /// <summary>
-        /// Alan adını Türkçe/okunabilir hale getirir
+        /// Alan adÄ±nÄ± TÃ¼rkÃ§e/okunabilir hale getirir
         /// </summary>
         private string GetFriendlyFieldName(string fieldName)
         {
-            // Yaygın alan adları için mapping
+            // YaygÄ±n alan adlarÄ± iÃ§in mapping
             var fieldMappings = new Dictionary<string, string>
             {
-                // Yetki alanları
+                // Yetki alanlarÄ±
                 ["YetkiSeviyesi"] = "Yetki Seviyesi",
-                ["ModulControllerIslemId"] = "İşlem/Sayfa",
-                ["UstIslemId"] = "Üst İşlem",
+                ["ModulControllerIslemId"] = "Ä°ÅŸlem/Sayfa",
+                ["UstIslemId"] = "Ãœst Ä°ÅŸlem",
 
-                // Kişisel bilgiler
+                // KiÅŸisel bilgiler
                 ["AdSoyad"] = "Ad Soyad",
                 ["TcKimlikNo"] = "TC Kimlik No",
                 ["SicilNo"] = "Sicil No",
-                ["DogumTarihi"] = "Doğum Tarihi",
+                ["DogumTarihi"] = "DoÄŸum Tarihi",
                 ["Cinsiyet"] = "Cinsiyet",
                 ["MedeniDurumu"] = "Medeni Durum",
                 ["KanGrubu"] = "Kan Grubu",
@@ -75,77 +76,77 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
                 // Organizasyon
                 ["DepartmanId"] = "Departman",
                 ["ServisId"] = "Servis",
-                ["UnvanId"] = "Ünvan",
+                ["UnvanId"] = "Ãœnvan",
                 ["SendikaId"] = "Sendika",
                 ["AtanmaNedeniId"] = "Atanma Nedeni",
-                ["HizmetBinasiId"] = "Hizmet Binası",
+                ["HizmetBinasiId"] = "Hizmet BinasÄ±",
 
                 // Lokasyon
-                ["IlId"] = "İl",
-                ["IlceId"] = "İlçe",
-                ["EsininIsIlId"] = "Eşinin İş İli",
-                ["EsininIsIlceId"] = "Eşinin İş İlçesi",
+                ["IlId"] = "Ä°l",
+                ["IlceId"] = "Ä°lÃ§e",
+                ["EsininIsIlId"] = "EÅŸinin Ä°ÅŸ Ä°li",
+                ["EsininIsIlceId"] = "EÅŸinin Ä°ÅŸ Ä°lÃ§esi",
 
-                // Modül/Yetki Sistemi
-                ["ModulId"] = "Modül",
+                // ModÃ¼l/Yetki Sistemi
+                ["ModulId"] = "ModÃ¼l",
                 ["ModulControllerId"] = "Controller",
-                ["UstModulControllerId"] = "Üst Controller",
+                ["UstModulControllerId"] = "Ãœst Controller",
 
-                // Sıramatik - Banko
+                // SÄ±ramatik - Banko
                 ["BankoId"] = "Banko",
-                ["YonlendirenBankoId"] = "Yönlendiren Banko",
+                ["YonlendirenBankoId"] = "YÃ¶nlendiren Banko",
                 ["HedefBankoId"] = "Hedef Banko",
                 ["AktifBankoId"] = "Aktif Banko",
                 ["BankoNo"] = "Banko No",
 
-                // Sıramatik - Diğer
+                // SÄ±ramatik - DiÄŸer
                 ["TvId"] = "TV",
-                ["TvAdi"] = "TV Adı",
+                ["TvAdi"] = "TV AdÄ±",
                 ["KioskId"] = "Kiosk",
-                ["KioskAdi"] = "Kiosk Adı",
-                ["SiraId"] = "Sıra",
-                ["SiraNo"] = "Sıra No",
+                ["KioskAdi"] = "Kiosk AdÄ±",
+                ["SiraId"] = "SÄ±ra",
+                ["SiraNo"] = "SÄ±ra No",
                 ["KanalId"] = "Kanal",
-                ["KanalAdi"] = "Kanal Adı",
+                ["KanalAdi"] = "Kanal AdÄ±",
                 ["KanalAltId"] = "Kanal Alt",
-                ["KanalAltAdi"] = "Kanal Alt Adı",
-                ["KanalIslemId"] = "Kanal İşlem",
-                ["KanalIslemAdi"] = "Kanal İşlem Adı",
-                ["KanalAltIslemId"] = "Kanal Alt İşlem",
-                ["KanalAltIslemAdi"] = "Kanal Alt İşlem Adı",
+                ["KanalAltAdi"] = "Kanal Alt AdÄ±",
+                ["KanalIslemId"] = "Kanal Ä°ÅŸlem",
+                ["KanalIslemAdi"] = "Kanal Ä°ÅŸlem AdÄ±",
+                ["KanalAltIslemId"] = "Kanal Alt Ä°ÅŸlem",
+                ["KanalAltIslemAdi"] = "Kanal Alt Ä°ÅŸlem AdÄ±",
 
                 // PDKS
-                ["PdksCihazId"] = "PDKS Cihazı",
+                ["PdksCihazId"] = "PDKS CihazÄ±",
                 ["CihazIP"] = "Cihaz IP",
                 ["CihazPort"] = "Cihaz Port",
 
-                // İletişim
+                // Ä°letiÅŸim
                 ["Email"] = "E-posta",
                 ["CepTelefonu"] = "Cep Telefonu",
                 ["EvTelefonu"] = "Ev Telefonu",
                 ["Adres"] = "Adres",
 
-                // Tarih alanları
+                // Tarih alanlarÄ±
                 ["EklenmeTarihi"] = "Eklenme Tarihi",
-                ["DuzenlenmeTarihi"] = "Düzenlenme Tarihi",
+                ["DuzenlenmeTarihi"] = "DÃ¼zenlenme Tarihi",
                 ["SilinmeTarihi"] = "Silinme Tarihi",
-                ["IslemZamani"] = "İşlem Zamanı",
-                ["KontrolZamani"] = "Kontrol Zamanı",
+                ["IslemZamani"] = "Ä°ÅŸlem ZamanÄ±",
+                ["KontrolZamani"] = "Kontrol ZamanÄ±",
 
-                // Kullanıcı alanları
-                ["EkleyenKullanici"] = "Ekleyen Kullanıcı",
-                ["DuzenleyenKullanici"] = "Düzenleyen Kullanıcı",
-                ["SilenKullanici"] = "Silen Kullanıcı",
+                // KullanÄ±cÄ± alanlarÄ±
+                ["EkleyenKullanici"] = "Ekleyen KullanÄ±cÄ±",
+                ["DuzenleyenKullanici"] = "DÃ¼zenleyen KullanÄ±cÄ±",
+                ["SilenKullanici"] = "Silen KullanÄ±cÄ±",
 
-                // Diğer yaygın alanlar
+                // DiÄŸer yaygÄ±n alanlar
                 ["Aktiflik"] = "Aktiflik",
                 ["Durum"] = "Durum",
-                ["Aciklama"] = "Açıklama",
-                ["IslemSayisi"] = "İşlem Sayısı",
-                ["IslemBasari"] = "İşlem Başarı",
-                ["IslemDurum"] = "İşlem Durum",
-                ["KontrolSayisi"] = "Kontrol Sayısı",
-                ["KontrolBasari"] = "Kontrol Başarı",
+                ["Aciklama"] = "AÃ§Ä±klama",
+                ["IslemSayisi"] = "Ä°ÅŸlem SayÄ±sÄ±",
+                ["IslemBasari"] = "Ä°ÅŸlem BaÅŸarÄ±",
+                ["IslemDurum"] = "Ä°ÅŸlem Durum",
+                ["KontrolSayisi"] = "Kontrol SayÄ±sÄ±",
+                ["KontrolBasari"] = "Kontrol BaÅŸarÄ±",
                 ["KontrolDurum"] = "Kontrol Durum"
             };
 
@@ -155,7 +156,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
         }
 
         /// <summary>
-        /// Değeri açıklayıcı hale getirir (enum mapping, vb)
+        /// DeÄŸeri aÃ§Ä±klayÄ±cÄ± hale getirir (enum mapping, vb)
         /// </summary>
         private string GetFriendlyValue(string fieldName, string? value)
         {
@@ -168,8 +169,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
                 return value switch
                 {
                     "0" => "0 (Yetki Yok)",
-                    "1" => "1 (Görüntüleme)",
-                    "2" => "2 (Düzenleme)",
+                    "1" => "1 (GÃ¶rÃ¼ntÃ¼leme)",
+                    "2" => "2 (DÃ¼zenleme)",
                     _ => value
                 };
             }
@@ -179,9 +180,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
             {
                 return value switch
                 {
-                    "0" => "0 (Belirtilmemiş)",
+                    "0" => "0 (BelirtilmemiÅŸ)",
                     "1" => "1 (Erkek)",
-                    "2" => "2 (Kadın)",
+                    "2" => "2 (KadÄ±n)",
                     _ => value
                 };
             }
@@ -191,7 +192,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
             {
                 return value switch
                 {
-                    "0" => "0 (Belirtilmemiş)",
+                    "0" => "0 (BelirtilmemiÅŸ)",
                     "1" => "1 (Bekar)",
                     "2" => "2 (Evli)",
                     _ => value
@@ -216,13 +217,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
                 };
             }
 
-            // Boolean değerler
+            // Boolean deÄŸerler
             if (fieldName.Contains("Mi") || fieldName.Contains("Aktif"))
             {
                 return value switch
                 {
                     "True" or "true" => "Evet",
-                    "False" or "false" => "Hayır",
+                    "False" or "false" => "HayÄ±r",
                     _ => value
                 };
             }

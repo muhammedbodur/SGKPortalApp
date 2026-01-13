@@ -7,7 +7,9 @@ using QuestPDF.Infrastructure;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
-using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
@@ -137,7 +139,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 Servisler = (await servisTask)?.Data ?? new List<ServisResponseDto>();
                 Unvanlar = (await unvanTask)?.Data ?? new List<UnvanResponseDto>();
                 HizmetBinalari = (await hizmetBinasiTask)?.Data ?? new List<HizmetBinasiResponseDto>();
-                ZKTecoDevices = (await zktecoDeviceTask)?.Data ?? new List<SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco.DeviceResponseDto>();
+                ZKTecoDevices = (await zktecoDeviceTask)?.Data ?? new List<DeviceResponseDto>();
 
                 // Personelleri server-side pagination ile yükle
                 await LoadPersonelWithPagination();

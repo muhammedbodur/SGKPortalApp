@@ -189,6 +189,7 @@ namespace SGKPortalApp.ApiLayer
             builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri.IDeviceBusinessService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.DeviceBusinessService>();
             builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri.IDeviceService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.DeviceService>();
             builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri.IZKTecoAttendanceService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoAttendanceService>();
+            builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.Interfaces.ICardSyncComparisonService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.CardSyncComparisonService>();
 
             Console.WriteLine("🎯 ZKTeco Business Services yapılandırıldı");
 
@@ -217,7 +218,7 @@ namespace SGKPortalApp.ApiLayer
 
             // ZKTeco background services
             builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService>(); // ZKTeco realtime event listener
-            // builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.AttendanceSyncBackgroundService>(); // ZKTeco attendance periodic sync (şimdilik kapalı)
+            builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.AttendanceSyncBackgroundService>(); // ZKTeco attendance periodic sync (00:00 ve 12:00)
 
             // ═══════════════════════════════════════════════════════
             // 🔧 AUTOMAPPER

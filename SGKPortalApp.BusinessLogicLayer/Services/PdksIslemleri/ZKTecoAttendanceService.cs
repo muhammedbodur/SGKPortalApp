@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
-using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
@@ -132,11 +134,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     _logger.LogInformation($"ℹ️ No new records to insert from device: {device.DeviceName} (All {duplicateCount} records already exist)");
                 }
 
+                // Cihazın sync bilgilerini güncelle
+                await UpdateDeviceSyncInfoAsync(deviceId, true, $"Synced {newRecords.Count} new records (Duplicates: {duplicateCount})");
+
                 return true;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error syncing records from device {deviceId}");
+                
+                // Hata durumunda da sync bilgilerini güncelle
+                await UpdateDeviceSyncInfoAsync(deviceId, false, $"Error: {ex.Message}");
+                
                 return false;
             }
         }
@@ -157,6 +166,33 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 
             var port = int.TryParse(device.Port, out var p) ? p : 4370;
             return await _apiClient.GetAttendanceLogCountFromDeviceAsync(device.IpAddress, port);
+        }
+
+        /// <summary>
+        /// Cihazın sync bilgilerini güncelle (LastSyncTime, SyncCount, LastSyncSuccess, LastSyncStatus)
+        /// </summary>
+        private async Task UpdateDeviceSyncInfoAsync(int deviceId, bool success, string status)
+        {
+            try
+            {
+                var deviceRepository = _unitOfWork.Repository<Device>();
+                var device = await deviceRepository.GetByIdAsync(deviceId);
+                
+                if (device != null)
+                {
+                    device.LastSyncTime = DateTime.Now;
+                    device.LastSyncSuccess = success;
+                    device.LastSyncStatus = status;
+                    device.SyncCount++;
+                    
+                    deviceRepository.Update(device);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating device sync info for device {deviceId}");
+            }
         }
     }
 }

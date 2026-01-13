@@ -1,5 +1,6 @@
-using Microsoft.AspNetCore.Components;
-using SGKPortalApp.BusinessObjectLayer.DTOs.AuditLog;
+﻿using Microsoft.AspNetCore.Components;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.AuditLog;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.AuditLog;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Components.Base;
@@ -15,9 +16,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
 {
     public partial class Index : FieldPermissionPageBase
     {
-        // ═══════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // DEPENDENCY INJECTION
-        // ═══════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
         [Inject] private IAuditLogApiService _auditLogApiService { get; set; } = default!;
         [Inject] private IDepartmanApiService _departmanApiService { get; set; } = default!;
@@ -25,9 +26,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
         [Inject] private IToastService _toastService { get; set; } = default!;
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
 
-        // ═══════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // STATE
-        // ═══════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
         private AuditLogFilterDto Filter = new()
         {
@@ -50,16 +51,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
         private int selectedDepartmanId = 0;
         private int selectedServisId = 0;
 
-        // ═══════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // LIFECYCLE
-        // ═══════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
             await LoadDropdownData();
 
-            // Kullanıcının kendi departmanını default olarak seç
+            // KullanÄ±cÄ±nÄ±n kendi departmanÄ±nÄ± default olarak seÃ§
             var userDepartmanId = GetCurrentUserDepartmanId();
             if (userDepartmanId > 0 && Departmanlar.Any(d => d.DepartmanId == userDepartmanId))
             {
@@ -71,22 +72,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
             await SearchAsync();
         }
 
-        // ═══════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // DATA LOADING
-        // ═══════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
         private async Task LoadDropdownData()
         {
             try
             {
-                // Departmanları yükle
+                // DepartmanlarÄ± yÃ¼kle
                 var deptResult = await _departmanApiService.GetActiveAsync();
                 if (deptResult.Success && deptResult.Data != null)
                 {
                     Departmanlar = deptResult.Data;
                 }
 
-                // Tüm servisleri yükle
+                // TÃ¼m servisleri yÃ¼kle
                 var servisResult = await _servisApiService.GetActiveAsync();
                 if (servisResult.Success && servisResult.Data != null)
                 {
@@ -95,29 +96,29 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
             }
             catch (Exception ex)
             {
-                await _toastService.ShowErrorAsync("Dropdown verileri yüklenirken hata oluştu");
+                await _toastService.ShowErrorAsync("Dropdown verileri yÃ¼klenirken hata oluÅŸtu");
             }
         }
 
-        // ═══════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // FILTER EVENT HANDLERS
-        // ═══════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
         private async Task OnDepartmanChangedEvent(ChangeEventArgs e)
         {
-            // ✅ YETKİ KONTROLÜ: Kullanıcı departman filtresini değiştirebilir mi?
+            // âœ… YETKÄ° KONTROLÃœ: KullanÄ±cÄ± departman filtresini deÄŸiÅŸtirebilir mi?
             if (!CanEditFieldInList("DEPARTMANID"))
             {
-                await _toastService.ShowWarningAsync("Bu filtreyi değiştirme yetkiniz yok!");
+                await _toastService.ShowWarningAsync("Bu filtreyi deÄŸiÅŸtirme yetkiniz yok!");
                 return;
             }
 
             if (int.TryParse(e.Value?.ToString(), out int deptId))
             {
-                // ✅ ERİŞİM KONTROLÜ: Bu departmana erişim var mı?
+                // âœ… ERÄ°ÅÄ°M KONTROLÃœ: Bu departmana eriÅŸim var mÄ±?
                 if (deptId > 0 && !CanEditFieldInList("DEPARTMANID") && !CanAccessDepartman(deptId))
                 {
-                    await _toastService.ShowWarningAsync("Bu departmanı görüntüleme yetkiniz yok!");
+                    await _toastService.ShowWarningAsync("Bu departmanÄ± gÃ¶rÃ¼ntÃ¼leme yetkiniz yok!");
                     return;
                 }
 
@@ -132,10 +133,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
             {
                 Filter.DepartmanId = deptId;
 
-                // Servisler global - tüm servisleri göster
+                // Servisler global - tÃ¼m servisleri gÃ¶ster
                 FiltreliServisler = TumServisler.ToList();
 
-                // Servis seçimini sıfırla
+                // Servis seÃ§imini sÄ±fÄ±rla
                 selectedServisId = 0;
                 Filter.ServisId = null;
             }
@@ -152,10 +153,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
 
         private async Task OnServisChangedEvent(ChangeEventArgs e)
         {
-            // ✅ YETKİ KONTROLÜ: Kullanıcı servis filtresini değiştirebilir mi?
+            // âœ… YETKÄ° KONTROLÃœ: KullanÄ±cÄ± servis filtresini deÄŸiÅŸtirebilir mi?
             if (!CanEditFieldInList("SERVISID"))
             {
-                await _toastService.ShowWarningAsync("Bu filtreyi değiştirme yetkiniz yok!");
+                await _toastService.ShowWarningAsync("Bu filtreyi deÄŸiÅŸtirme yetkiniz yok!");
                 return;
             }
 
@@ -172,14 +173,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
             if (int.TryParse(e.Value?.ToString(), out int pageSize))
             {
                 Filter.PageSize = pageSize;
-                Filter.PageNumber = 1; // Sayfa boyutu değiştiğinde ilk sayfaya dön
+                Filter.PageNumber = 1; // Sayfa boyutu deÄŸiÅŸtiÄŸinde ilk sayfaya dÃ¶n
                 await SearchAsync();
             }
         }
 
-        // ═══════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // SEARCH & PAGINATION
-        // ═══════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
         private async Task SearchAsync()
         {
@@ -200,7 +201,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
             }
             catch (Exception ex)
             {
-                await _toastService.ShowErrorAsync("Log'lar yüklenirken hata oluştu");
+                await _toastService.ShowErrorAsync("Log'lar yÃ¼klenirken hata oluÅŸtu");
             }
             finally
             {
@@ -234,9 +235,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
             await SearchAsync();
         }
 
-        // ═══════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // HELPER METHODS
-        // ═══════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
         private List<TransactionGroup> GetTransactionGroups()
         {
@@ -266,7 +267,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
         }
 
         /// <summary>
-        /// Kullanıcının belirtilen departmanı görüntüleme yetkisi var mı?
+        /// KullanÄ±cÄ±nÄ±n belirtilen departmanÄ± gÃ¶rÃ¼ntÃ¼leme yetkisi var mÄ±?
         /// </summary>
         private bool CanAccessDepartman(int departmanId)
         {
@@ -275,7 +276,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
         }
 
         /// <summary>
-        /// Kullanıcının departman ID'sini döndürür
+        /// KullanÄ±cÄ±nÄ±n departman ID'sini dÃ¶ndÃ¼rÃ¼r
         /// </summary>
         private int GetCurrentUserDepartmanId()
         {
@@ -284,9 +285,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Audit.Log
             return claim != null && int.TryParse(claim.Value, out var id) ? id : 0;
         }
 
-        // ═══════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
         // INNER CLASSES
-        // ═══════════════════════════════════════════════════════
+        // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
         private class TransactionGroup
         {

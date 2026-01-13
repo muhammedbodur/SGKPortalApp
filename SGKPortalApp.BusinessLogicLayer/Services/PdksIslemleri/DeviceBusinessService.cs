@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
-using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums;
@@ -14,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SGKPortalApp.BusinessObjectLayer.Enums.ZKTeco;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 {
@@ -1118,8 +1121,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 // Business katmanında DB ile eşleştirme yapıyoruz
 
                 // 1. Tüm personelleri bir kerede çek (performans için)
+                // ✅ GetActiveAsync() kullan - Departman, Servis, Unvan navigation property'lerini Include eder
                 var personelRepo = _unitOfWork.GetRepository<DataAccessLayer.Repositories.Interfaces.PersonelIslemleri.IPersonelRepository>();
-                var allPersonel = await personelRepo.GetAllAsync();
+                var allPersonel = await personelRepo.GetActiveAsync();
 
                 // 2. SpecialCard kayıtlarını da çek
                 var specialCardRepo = _unitOfWork.GetRepository<DataAccessLayer.Repositories.Interfaces.PdksIslemleri.ISpecialCardRepository>();
@@ -1149,6 +1153,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                         log.PersonelAdSoyad = $"{specialCard.CardName} (Özel Kart)";
                         log.PersonelSicilNo = specialCard.CardType.ToString();
                         log.PersonelDepartman = "-";
+                        log.PersonelServis = "-";
                         log.PersonelTcKimlikNo = null;
                         continue;
                     }
@@ -1160,6 +1165,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                         log.PersonelSicilNo = personelByKart.SicilNo.ToString();
                         log.PersonelTcKimlikNo = personelByKart.TcKimlikNo;
                         log.PersonelDepartman = personelByKart.Departman?.DepartmanAdi;
+                        log.PersonelServis = personelByKart.Servis?.ServisAdi;
                         continue;
                     }
 
@@ -1170,6 +1176,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                         log.PersonelSicilNo = personelByEnroll.SicilNo.ToString();
                         log.PersonelTcKimlikNo = personelByEnroll.TcKimlikNo;
                         log.PersonelDepartman = personelByEnroll.Departman?.DepartmanAdi;
+                        log.PersonelServis = personelByEnroll.Servis?.ServisAdi;
                     }
                 }
 

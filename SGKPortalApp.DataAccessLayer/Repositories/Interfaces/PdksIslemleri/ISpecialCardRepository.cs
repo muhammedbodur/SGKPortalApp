@@ -13,5 +13,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PdksIslemleri
         Task<List<SpecialCard>> GetByCardTypeAsync(CardType cardType);
         Task<List<SpecialCard>> GetActiveCardsAsync();
         Task<List<SpecialCard>> GetAvailableCardsAsync();
+        
+        // EnrollNumber yönetimi
+        Task<string> GetNextAvailableEnrollNumberAsync();
     }
 }

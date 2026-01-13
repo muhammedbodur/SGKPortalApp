@@ -10,7 +10,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
-using SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Enums;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco

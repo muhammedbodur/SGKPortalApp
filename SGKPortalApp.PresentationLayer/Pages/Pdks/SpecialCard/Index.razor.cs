@@ -2,8 +2,10 @@ using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -16,12 +18,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
     {
         [Inject] private ISpecialCardApiService SpecialCardApiService { get; set; } = default!;
         [Inject] private IZKTecoDeviceApiService DeviceApiService { get; set; } = default!;
+        [Inject] private IHizmetBinasiApiService HizmetBinasiApiService { get; set; } = default!;
         [Inject] private IToastService ToastService { get; set; } = default!;
 
         private List<SpecialCardResponseDto> specialCards = new();
         private List<SpecialCardResponseDto> filteredCards = new();
         private List<SpecialCardResponseDto> pagedCards = new();
         private List<DeviceResponseDto> devices = new();
+        private List<HizmetBinasiResponseDto> hizmetBinalari = new();
 
         private bool isLoading = true;
         private bool showAddForm = false;
@@ -45,8 +49,25 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
 
         protected override async Task OnInitializedAsync()
         {
+            await LoadHizmetBinalari();
             await LoadCards();
             await LoadDevices();
+        }
+
+        private async Task LoadHizmetBinalari()
+        {
+            try
+            {
+                var result = await HizmetBinasiApiService.GetAllAsync();
+                if (result.Success && result.Data != null)
+                {
+                    hizmetBinalari = result.Data;
+                }
+            }
+            catch (Exception ex)
+            {
+                await ToastService.ShowErrorAsync($"Hizmet binaları yüklenemedi: {ex.Message}");
+            }
         }
 
         private async Task LoadCards()
@@ -163,6 +184,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
                     CardType = card.CardType,
                     CardName = card.CardName,
                     NickName = card.NickName,
+                    HizmetBinasiId = card.HizmetBinasiId,
                     CardNumber = card.CardNumber,
                     EnrollNumber = card.EnrollNumber,
                     Notes = card.Notes
@@ -214,6 +236,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
                     CardType = newCard.CardType.Value,
                     CardName = newCard.CardName,
                     NickName = newCard.NickName,
+                    HizmetBinasiId = newCard.HizmetBinasiId,
                     CardNumber = newCard.CardNumber,
                     EnrollNumber = newCard.EnrollNumber,
                     Notes = newCard.Notes
@@ -265,6 +288,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
                     CardType = editCard.CardType.Value,
                     CardName = editCard.CardName,
                     NickName = editCard.NickName,
+                    HizmetBinasiId = editCard.HizmetBinasiId,
                     CardNumber = editCard.CardNumber,
                     EnrollNumber = editCard.EnrollNumber,
                     Notes = editCard.Notes
@@ -389,6 +413,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
             public CardType? CardType { get; set; }
             public string CardName { get; set; } = string.Empty;
             public string NickName { get; set; } = string.Empty;
+            public int? HizmetBinasiId { get; set; }
             public long CardNumber { get; set; }
             public string EnrollNumber { get; set; } = string.Empty;
             public string? Notes { get; set; }

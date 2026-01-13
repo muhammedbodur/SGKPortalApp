@@ -9,10 +9,12 @@
   <ItemGroup>
     <Folder Include="DTOs\Request\Auth\" />
     <Folder Include="DTOs\Request\EshotIslemleri\" />
+    <Folder Include="DTOs\Request\ZKTeco\" />
     <Folder Include="DTOs\Request\PdksIslemleri\" />
     <Folder Include="DTOs\Request\SiramatikIslemleri\" />
     <Folder Include="DTOs\Response\Auth\" />
     <Folder Include="DTOs\Response\EshotIslemleri\" />
+    <Folder Include="DTOs\Response\ZKTeco\" />
     <Folder Include="DTOs\Response\PdksIslemleri\" />
     <Folder Include="DTOs\Shared\Common\" />
     <Folder Include="DTOs\Shared\Enums\" />

@@ -12,6 +12,8 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
         public string CardName { get; set; } = string.Empty;
         public string EnrollNumber { get; set; } = string.Empty;
         public string NickName { get; set; } = string.Empty;
+        public int? HizmetBinasiId { get; set; }
+        public string? HizmetBinasiAdi { get; set; }
         public string? Notes { get; set; }
         public DateTime EklenmeTarihi { get; set; }
         public DateTime DuzenlenmeTarihi { get; set; }

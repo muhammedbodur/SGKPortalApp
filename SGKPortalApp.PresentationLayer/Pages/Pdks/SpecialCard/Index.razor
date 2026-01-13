@@ -47,6 +47,16 @@
                         <small class="text-info">💡 Kart adından otomatik oluşturulur, düzenleyebilirsiniz</small>
                     </div>
                     <div class="col-md-3">
+                        <label class="form-label">Hizmet Binası *</label>
+                        <select class="form-select" @bind="editCard.HizmetBinasiId">
+                            <option value="">Seçiniz...</option>
+                            @foreach (var bina in hizmetBinalari)
+                            {
+                                <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
                         <label class="form-label">Kart Numarası *</label>
                         <input type="number" class="form-control" @bind="editCard.CardNumber" placeholder="1234567890" />
                     </div>
@@ -101,6 +111,16 @@
                         </label>
                         <input type="text" class="form-control" @bind="newCard.NickName" maxlength="12" placeholder="GOR.KART" />
                         <small class="text-info">💡 Kart adından otomatik oluşturulur, düzenleyebilirsiniz</small>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Hizmet Binası *</label>
+                        <select class="form-select" @bind="newCard.HizmetBinasiId">
+                            <option value="">Seçiniz...</option>
+                            @foreach (var bina in hizmetBinalari)
+                            {
+                                <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                            }
+                        </select>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Kart Numarası *</label>
@@ -178,6 +198,7 @@
                             <tr>
                                 <th>Kart Tipi</th>
                                 <th>Kart Adı</th>
+                                <th>Hizmet Binası</th>
                                 <th>NickName (Cihaz)</th>
                                 <th>Kart Numarası</th>
                                 <th>EnrollNumber</th>
@@ -196,6 +217,16 @@
                                         </span>
                                     </td>
                                     <td><strong>@card.CardName</strong></td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(card.HizmetBinasiAdi))
+                                        {
+                                            <span class="badge bg-info">@card.HizmetBinasiAdi</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-warning">⚠️ Tanımsız</span>
+                                        }
+                                    </td>
                                     <td><span class="badge bg-success">@card.NickName</span></td>
                                     <td><span class="badge bg-secondary">@card.CardNumber</span></td>
                                     <td><span class="text-monospace">@card.EnrollNumber</span></td>
