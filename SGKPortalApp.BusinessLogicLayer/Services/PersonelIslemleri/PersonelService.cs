@@ -18,6 +18,7 @@ using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.Common.Interfaces.Permission;
+using SGKPortalApp.Common.Helpers;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using System.Text;
 using System.Text.Json;
@@ -462,7 +463,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     }
 
                     // NickName otomatik oluştur
-                    personel.NickName = Helpers.StringHelper.GenerateNickName(personel.AdSoyad, 12);
+                    personel.NickName = StringHelper.GenerateNickName(personel.AdSoyad, 12);
 
                     await _unitOfWork.Repository<Personel>().AddAsync(personel);
                     await _unitOfWork.SaveChangesAsync();
@@ -629,7 +630,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     _mapper.Map(request.Personel, personel);
 
                     // NickName otomatik oluştur (AdSoyad değiştiyse)
-                    personel.NickName = Helpers.StringHelper.GenerateNickName(personel.AdSoyad, 12);
+                    personel.NickName = StringHelper.GenerateNickName(personel.AdSoyad, 12);
 
                     _unitOfWork.Repository<Personel>().Update(personel);
                     await _unitOfWork.SaveChangesAsync();
