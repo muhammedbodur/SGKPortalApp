@@ -116,5 +116,26 @@ namespace SGKPortalApp.Common.Extensions
                 .Aggregate(new StringBuilder(), (sb, c) => sb.Append(c))
                 .ToString();
         }
+
+        /// <summary>
+        /// Türkçe karakterleri İngilizce karşılıklarına çevirir (büyük/küçük harf korunur)
+        /// Hızlı ve basit replace yöntemi kullanır
+        /// </summary>
+        public static string RemoveTurkishCharacters(this string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return string.Empty;
+
+            var turkishChars = "ığüşöçİĞÜŞÖÇ";
+            var englishChars = "igusocIGUSOC";
+
+            var sb = new StringBuilder(input);
+            for (int i = 0; i < turkishChars.Length; i++)
+            {
+                sb.Replace(turkishChars[i], englishChars[i]);
+            }
+
+            return sb.ToString();
+        }
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using SGKPortalApp.Common.Extensions;
 
 namespace SGKPortalApp.Common.Helpers
 {
@@ -25,7 +26,7 @@ namespace SGKPortalApp.Common.Helpers
                 return string.Empty;
 
             // Türkçe karakterleri temizle ve büyük harfe çevir
-            var cleaned = RemoveTurkishCharacters(input).ToUpperInvariant();
+            var cleaned = input.RemoveTurkishCharacters().ToUpperInvariant();
 
             // Kelimelere ayır (boşluk, tire, alt çizgi ile)
             var words = cleaned.Split(new[] { ' ', '-', '_' }, StringSplitOptions.RemoveEmptyEntries);
@@ -102,26 +103,6 @@ namespace SGKPortalApp.Common.Helpers
 
             // Uzun kelimeler için ilk 4 harf veya baş harf
             return word.Substring(0, Math.Min(4, word.Length));
-        }
-
-        /// <summary>
-        /// Türkçe karakterleri İngilizce karşılıklarına çevirir (büyük/küçük harf korunur)
-        /// </summary>
-        public static string RemoveTurkishCharacters(string input)
-        {
-            if (string.IsNullOrWhiteSpace(input))
-                return string.Empty;
-
-            var turkishChars = "ığüşöçİĞÜŞÖÇ";
-            var englishChars = "igusocIGUSOC";
-
-            var sb = new StringBuilder(input);
-            for (int i = 0; i < turkishChars.Length; i++)
-            {
-                sb.Replace(turkishChars[i], englishChars[i]);
-            }
-
-            return sb.ToString();
         }
     }
 }
