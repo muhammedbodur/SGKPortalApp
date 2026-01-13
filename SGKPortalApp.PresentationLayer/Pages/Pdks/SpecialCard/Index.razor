@@ -1,0 +1,263 @@
+@page "/pdks/special-cards"
+@using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri
+@attribute [Authorize]
+
+<PageTitle>Özel Kartlar</PageTitle>
+
+<div class="container-fluid">
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bx bx-credit-card"></i> Özel Kartlar
+            </h5>
+            <button class="btn btn-primary" @onclick="ToggleAddForm">
+                <i class="bx bx-plus"></i> @(showAddForm ? "Formu Kapat" : "Yeni Özel Kart")
+            </button>
+        </div>
+    </div>
+
+    @if (showEditForm)
+    {
+        <div class="card mb-3 border-warning">
+            <div class="card-body">
+                <h5 class="card-title text-warning">
+                    <i class="bx bx-edit"></i> Özel Kart Düzenle
+                </h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">Kart Tipi *</label>
+                        <select class="form-select" @bind="editCard.CardType">
+                            <option value="">Seçiniz...</option>
+                            <option value="@CardType.ViziteKarti">Vizite Kartı</option>
+                            <option value="@CardType.SaatlikIzinKarti">Saatlik İzin Kartı</option>
+                            <option value="@CardType.GorevKarti">Görev Kartı</option>
+                            <option value="@CardType.MisafirKarti">Misafir Kartı</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Kart Adı *</label>
+                        <input type="text" class="form-control" @bind="editCard.CardName" placeholder="Görev Kartı #1" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Kart Numarası *</label>
+                        <input type="number" class="form-control" @bind="editCard.CardNumber" placeholder="1234567890" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">EnrollNumber *</label>
+                        <input type="text" class="form-control" @bind="editCard.EnrollNumber" placeholder="10000...." />
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <label class="form-label">Notlar</label>
+                        <textarea class="form-control" rows="2" @bind="editCard.Notes" placeholder="Kart hakkında notlar..."></textarea>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col">
+                        <button class="btn btn-warning" @onclick="UpdateCard">
+                            <i class="bx bx-save"></i> Güncelle
+                        </button>
+                        <button class="btn btn-secondary ms-2" @onclick="() => showEditForm = false">İptal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (showAddForm)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bx bx-plus"></i> Yeni Özel Kart Ekle
+                </h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">Kart Tipi *</label>
+                        <select class="form-select" @bind="newCard.CardType">
+                            <option value="@CardType.ViziteKarti">Vizite Kartı</option>
+                            <option value="@CardType.SaatlikIzinKarti">Saatlik İzin Kartı</option>
+                            <option value="@CardType.GorevKarti">Görev Kartı</option>
+                            <option value="@CardType.MisafirKarti">Misafir Kartı</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Kart Adı *</label>
+                        <input type="text" class="form-control" @bind="newCard.CardName" placeholder="Görev Kartı #1" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Kart Numarası *</label>
+                        <input type="number" class="form-control" @bind="newCard.CardNumber" placeholder="1234567890" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">EnrollNumber *</label>
+                        <input type="text" class="form-control" @bind="newCard.EnrollNumber" placeholder="SPECIAL001" />
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <label class="form-label">Notlar</label>
+                        <textarea class="form-control" rows="2" @bind="newCard.Notes" placeholder="Kart hakkında notlar..."></textarea>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col">
+                        <button class="btn btn-primary" @onclick="CreateCard">
+                            <i class="bx bx-save"></i> Kaydet
+                        </button>
+                        <button class="btn btn-secondary ms-2" @onclick="() => showAddForm = false">İptal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">Kart Tipi Filtresi</label>
+                    <select class="form-select" @bind="selectedCardType" @bind:after="ApplyFilter">
+                        <option value="">Tümü</option>
+                        <option value="@CardType.ViziteKarti">Vizite Kartı</option>
+                        <option value="@CardType.SaatlikIzinKarti">Saatlik İzin Kartı</option>
+                        <option value="@CardType.GorevKarti">Görev Kartı</option>
+                        <option value="@CardType.MisafirKarti">Misafir Kartı</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Arama</label>
+                    <input type="text" class="form-control" @bind="searchTerm" @bind:after="ApplyFilter" placeholder="Kart adı veya EnrollNumber..." />
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button class="btn btn-secondary" @onclick="ClearFilters">
+                        <i class="bx bx-x"></i> Filtreleri Temizle
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            @if (isLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="mt-2">Özel kartlar yükleniyor...</p>
+                </div>
+            }
+            else if (pagedCards == null || !pagedCards.Any())
+            {
+                <div class="alert alert-info">
+                    <i class="bx bx-info-circle"></i> @(string.IsNullOrEmpty(searchTerm) && string.IsNullOrEmpty(selectedCardType) ? "Henüz özel kart kaydı bulunmamaktadır." : "Filtreye uygun kart bulunamadı.")
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Kart Tipi</th>
+                                <th>Kart Adı</th>
+                                <th>NickName (Cihaz)</th>
+                                <th>Kart Numarası</th>
+                                <th>EnrollNumber</th>
+                                <th>Notlar</th>
+                                <th>Eklenme Tarihi</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var card in pagedCards)
+                            {
+                                <tr>
+                                    <td>
+                                        <span class="badge @GetCardTypeBadgeClass(card.CardType)">
+                                            @card.CardTypeName
+                                        </span>
+                                    </td>
+                                    <td><strong>@card.CardName</strong></td>
+                                    <td><span class="badge bg-success">@card.NickName</span></td>
+                                    <td><span class="badge bg-secondary">@card.CardNumber</span></td>
+                                    <td><span class="text-monospace">@card.EnrollNumber</span></td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(card.Notes))
+                                        {
+                                            <small class="text-muted">@card.Notes</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <small>@card.EklenmeTarihi.ToString("dd.MM.yyyy HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" @onclick="() => SendCardToAllDevices(card.Id)" title="Tüm Cihazlara Gönder">
+                                                <i class="bx bx-send"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning" @onclick="() => ToggleEditForm(card.Id)" title="Düzenle">
+                                                <i class="bx bx-edit"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" @onclick="() => DeleteCard(card.Id)" title="Sil">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                @* Pagination *@
+                @if (totalPages > 1)
+                {
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <span class="text-muted">Toplam @filteredCards.Count kayıt - Sayfa @currentPage / @totalPages</span>
+                        </div>
+                        <nav>
+                            <ul class="pagination mb-0">
+                                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                    <button class="page-link" @onclick="() => GoToPage(1)">İlk</button>
+                                </li>
+                                <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                    <button class="page-link" @onclick="() => GoToPage(currentPage - 1)">Önceki</button>
+                                </li>
+                                
+                                @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                                {
+                                    var pageNum = i;
+                                    <li class="page-item @(currentPage == pageNum ? "active" : "")">
+                                        <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
+                                    </li>
+                                }
+
+                                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                    <button class="page-link" @onclick="() => GoToPage(currentPage + 1)">Sonraki</button>
+                                </li>
+                                <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                                    <button class="page-link" @onclick="() => GoToPage(totalPages)">Son</button>
+                                </li>
+                            </ul>
+                        </nav>
+                        <div>
+                            <select class="form-select form-select-sm" style="width: auto;" @bind="pageSize" @bind:after="ApplyFilter">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

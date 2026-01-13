@@ -43,6 +43,14 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         public string EnrollNumber { get; set; } = string.Empty;
 
         /// <summary>
+        /// NickName - Cihazda görünecek kısa isim
+        /// Otomatik oluşturulur: Max 12 karakter, büyük harf, Türkçe karakter yok
+        /// </summary>
+        [Required]
+        [StringLength(12)]
+        public string NickName { get; set; } = string.Empty;
+
+        /// <summary>
         /// Notlar (kart hakkında ek bilgiler)
         /// </summary>
         [StringLength(500)]

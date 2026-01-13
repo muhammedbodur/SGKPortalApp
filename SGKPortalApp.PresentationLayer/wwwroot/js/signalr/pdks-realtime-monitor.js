@@ -191,10 +191,11 @@ window.PdksRealtimeMonitor = {
      */
     playNotificationSound: function () {
         try {
-            const audio = new Audio('/sounds/notification.mp3');
+            const audio = new Audio('/Sounds/dingdong.mp3');
             audio.volume = 0.3;
             audio.play().catch((error) => {
-                console.log('Ses çalma hatası (kullanıcı interaction gerekebilir):', error);
+                // Ses çalma hatası - kullanıcı interaction gerekiyor (browser autoplay policy)
+                // İlk tıklamadan sonra çalacak
             });
         } catch (error) {
             console.error('Ses çalma hatası:', error);

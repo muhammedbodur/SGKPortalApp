@@ -12,5 +12,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PdksIslemleri
         Task<List<CekilenData>> GetByDateRangeAsync(DateTime startDate, DateTime endDate);
         Task<List<CekilenData>> GetByDeviceIpAsync(string deviceIp);
         Task<bool> ExistsAsync(string enrollNumber, DateTime date);
+        Task<bool> ExistsByKayitNoAndTarihAsync(string kayitNo, DateTime tarih);
+        Task<int> BulkInsertAsync(List<CekilenData> records);
     }
 }

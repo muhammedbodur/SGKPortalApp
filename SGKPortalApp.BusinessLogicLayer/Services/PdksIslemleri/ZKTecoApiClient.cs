@@ -36,9 +36,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                var response = await _httpClient.PostAsync(
-                    $"{_baseUrl}/api/device/{deviceIp}/connect?port={port}",
-                    null);
+                // /time endpoint'ini kullanarak hızlı bağlantı testi yap
+                var response = await _httpClient.GetAsync(
+                    $"{_baseUrl}/api/device/{deviceIp}/time?port={port}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -524,18 +524,27 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
+                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(10));
+                
                 var response = await _httpClient.PostAsync(
                     $"{_baseUrl}/api/realtime/{deviceIp}/start?port={port}",
-                    null);
+                    null,
+                    cts.Token);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    _logger.LogWarning($"Start realtime monitoring failed: {deviceIp}:{port} - {response.StatusCode}");
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogWarning($"Start realtime monitoring failed: {deviceIp}:{port} - {response.StatusCode} - {errorContent}");
                     return false;
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<ApiResponse>();
+                var result = await response.Content.ReadFromJsonAsync<ApiResponse>(cancellationToken: cts.Token);
                 return result?.Success ?? false;
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning($"Start realtime monitoring timeout (10s): {deviceIp}:{port}");
+                return false;
             }
             catch (Exception ex)
             {

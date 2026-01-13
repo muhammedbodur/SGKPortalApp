@@ -40,7 +40,9 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         /// <summary>
         /// Attendance tarihi
         /// PDKS.Net4.8: tarih
+        /// Format: yyyy-MM-dd HH:mm:ss.fff (millisecond precision)
         /// </summary>
+        [Column(TypeName = "datetime2(3)")]
         public DateTime? Tarih { get; set; }
 
         /// <summary>

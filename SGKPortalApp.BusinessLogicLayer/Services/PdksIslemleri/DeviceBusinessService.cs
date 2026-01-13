@@ -983,7 +983,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     Password = request.Password,
                     Enabled = request.Enabled
                 };
-                return await _apiClient.AddUserToDeviceAsync(device.IpAddress, user, port);
+                return await _apiClient.AddUserToDeviceAsync(device.IpAddress, user, port, force);
             }
             catch (Exception ex)
             {

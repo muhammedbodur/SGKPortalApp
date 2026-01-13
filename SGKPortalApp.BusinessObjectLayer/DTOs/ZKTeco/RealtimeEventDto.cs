@@ -78,5 +78,10 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.ZKTeco
         /// Personel TC kimlik numarası (DB'den eşleştirme sonucu)
         /// </summary>
         public string? PersonelTcKimlikNo { get; set; }
+        
+        /// <summary>
+        /// Personel kayıt numarası (DB'den eşleştirme sonucu)
+        /// </summary>
+        public long? PersonelKayitNo { get; set; }
     }
 }
