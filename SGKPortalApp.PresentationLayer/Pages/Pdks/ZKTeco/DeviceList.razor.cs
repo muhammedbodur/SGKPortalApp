@@ -73,12 +73,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 FilterPersonel();
             }
         }
-        
+
         // Cihaz Personel Listesi Modal
         private bool showDevicePersonelModal = false;
         private List<DeviceUserMatch> devicePersonelList = new List<DeviceUserMatch>();
         private List<DeviceUserMatch> filteredDevicePersonelList = new List<DeviceUserMatch>();
-        
+        private HashSet<string> selectedUserEnrollNumbers = new HashSet<string>(); // Seçili kullanıcılar
+        private bool selectAllUsers = false; // Tümünü seç checkbox'ı
+
         private string _devicePersonelSearchTerm = "";
         private string devicePersonelSearchTerm
         {
@@ -89,7 +91,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 FilterDevicePersonel();
             }
         }
-        
+
         private bool isLoadingDevicePersonel = false;
         
         // Cihaz Saati Modal
@@ -877,8 +879,122 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
             devicePersonelList.Clear();
             filteredDevicePersonelList.Clear();
             devicePersonelSearchTerm = "";
+            selectedUserEnrollNumbers.Clear();
+            selectAllUsers = false;
         }
-        
+
+        private void ToggleSelectAll()
+        {
+            if (selectAllUsers)
+            {
+                // Tümünü seç
+                selectedUserEnrollNumbers.Clear();
+                foreach (var user in filteredDevicePersonelList)
+                {
+                    if (user.DeviceUser?.EnrollNumber != null)
+                    {
+                        selectedUserEnrollNumbers.Add(user.DeviceUser.EnrollNumber);
+                    }
+                }
+            }
+            else
+            {
+                // Tümünü kaldır
+                selectedUserEnrollNumbers.Clear();
+            }
+            StateHasChanged();
+        }
+
+        private void ToggleUserSelection(string enrollNumber)
+        {
+            if (selectedUserEnrollNumbers.Contains(enrollNumber))
+            {
+                selectedUserEnrollNumbers.Remove(enrollNumber);
+            }
+            else
+            {
+                selectedUserEnrollNumbers.Add(enrollNumber);
+            }
+
+            // Tümünü seç checkbox'ını güncelle
+            selectAllUsers = filteredDevicePersonelList
+                .Where(u => u.DeviceUser?.EnrollNumber != null)
+                .All(u => selectedUserEnrollNumbers.Contains(u.DeviceUser!.EnrollNumber));
+
+            StateHasChanged();
+        }
+
+        private async Task DeleteSelectedUsers()
+        {
+            if (!selectedUserEnrollNumbers.Any())
+            {
+                await ToastService.ShowWarningAsync("Lütfen silmek istediğiniz kullanıcıları seçin!");
+                return;
+            }
+
+            var count = selectedUserEnrollNumbers.Count;
+            if (!await JS.InvokeAsync<bool>("confirm",
+                $"⚠️ DİKKAT! Seçili {count} kullanıcıyı cihazdan silmek istediğinize emin misiniz?\n\nBu işlem geri alınamaz!"))
+            {
+                return;
+            }
+
+            isLoadingDevicePersonel = true;
+            StateHasChanged();
+
+            try
+            {
+                int successCount = 0;
+                int failCount = 0;
+
+                foreach (var enrollNumber in selectedUserEnrollNumbers.ToList())
+                {
+                    try
+                    {
+                        var result = await DeviceApiService.DeleteDeviceUserAsync(selectedDeviceId, enrollNumber);
+                        if (result.Success && result.Data)
+                        {
+                            successCount++;
+                        }
+                        else
+                        {
+                            failCount++;
+                        }
+                    }
+                    catch
+                    {
+                        failCount++;
+                    }
+                }
+
+                if (successCount > 0)
+                {
+                    await ToastService.ShowSuccessAsync(
+                        $"✅ {successCount} kullanıcı silindi!" +
+                        (failCount > 0 ? $" ({failCount} kullanıcı silinemedi)" : ""));
+
+                    // Listeyi yenile
+                    await ShowDeviceUsers(selectedDeviceId);
+                }
+                else
+                {
+                    await ToastService.ShowErrorAsync("Hiçbir kullanıcı silinemedi!");
+                }
+
+                selectedUserEnrollNumbers.Clear();
+                selectAllUsers = false;
+            }
+            catch (Exception ex)
+            {
+                await ToastService.ShowErrorAsync($"Hata: {ex.Message}");
+            }
+            finally
+            {
+                isLoadingDevicePersonel = false;
+                StateHasChanged();
+            }
+        }
+
         private void FilterDevicePersonel()
         {
             if (string.IsNullOrWhiteSpace(devicePersonelSearchTerm))
