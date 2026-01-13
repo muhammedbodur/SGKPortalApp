@@ -1128,7 +1128,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 // EnrollNumber ile eşleştirme sözlükleri oluştur
                 // Önce KartNo ile, bulunamazsa PersonelKayitNo ile eşleştirilecek
                 var personelByKartNo = allPersonel
-                    .Where(p => !p.SilindiMi && p.KartNo.HasValue && p.KartNo > 0)
+                    .Where(p => !p.SilindiMi && p.KartNo > 0)
                     .ToDictionary(p => p.KartNo.ToString()!, p => p);
 
                 var personelByEnrollNo = allPersonel
