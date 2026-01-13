@@ -307,7 +307,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
             }
         }
 
-        private void ToggleEditForm(int deviceId)
+        private async void ToggleEditForm(int deviceId)
         {
             var device = devices?.FirstOrDefault(d => d.DeviceId == deviceId);
             if (device == null) return;
@@ -327,17 +327,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                     IsActive = device.IsActive
                 };
 
-                // Set departman and load hizmet binaları
+                // Hizmet binası varsa, departmanını bul ve yükle
                 if (device.HizmetBinasiId > 0)
                 {
-                    var hizmetBinasi = device.HizmetBinasiAdi;
-                    var departman = departmanlar.FirstOrDefault(d =>
-                        d.HizmetBinalari?.Any(h => h.HizmetBinasiId == device.HizmetBinasiId) == true);
-
-                    if (departman != null)
+                    // Tüm departmanları dola ve hizmet binalarını yükleyerek kontrol et
+                    foreach (var departman in departmanlar)
                     {
-                        selectedDepartmanId = departman.DepartmanId;
-                        _ = LoadHizmetBinalari(departman.DepartmanId);
+                        await LoadHizmetBinalari(departman.DepartmanId);
+                        
+                        if (hizmetBinalari.Any(h => h.HizmetBinasiId == device.HizmetBinasiId))
+                        {
+                            selectedDepartmanId = departman.DepartmanId;
+                            break;
+                        }
                     }
                 }
 

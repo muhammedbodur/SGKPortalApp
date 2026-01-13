@@ -39,6 +39,9 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.ZKTeco
             builder.Property(c => c.CihazIp)
                    .HasMaxLength(50);
 
+            builder.Property(c => c.Tarih)
+                   .HasColumnType("datetime2(3)");
+
             builder.Property(c => c.IsProcessed)
                    .HasDefaultValue(false);
 

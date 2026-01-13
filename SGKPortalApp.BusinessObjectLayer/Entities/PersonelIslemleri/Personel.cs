@@ -37,8 +37,13 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         [StringLength(200)]
         public string AdSoyad { get; set; } = string.Empty;
 
-        [StringLength(50)]
-        public string? NickName { get; set; }
+        /// <summary>
+        /// NickName - Cihazda görünecek kısa isim
+        /// Otomatik oluşturulur: Max 12 karakter, büyük harf, Türkçe karakter yok
+        /// </summary>
+        [Required]
+        [StringLength(12)]
+        public string NickName { get; set; } = string.Empty;
 
         public int PersonelKayitNo { get; set; }
         public int KartNo { get; set; }

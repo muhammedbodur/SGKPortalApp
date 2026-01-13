@@ -16,6 +16,7 @@
         public string? PersonelSicilNo { get; set; }
         public string? PersonelDepartman { get; set; }
         public string? PersonelTcKimlikNo { get; set; }
+        public long? PersonelKayitNo { get; set; }
 
         // Cihaz bilgileri
         public string? DeviceName { get; set; }

@@ -207,6 +207,7 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                     evt.PersonelSicilNo = personel.SicilNo.ToString();
                     evt.PersonelTcKimlikNo = personel.TcKimlikNo;
                     evt.PersonelDepartman = personel.Departman?.DepartmanAdi;
+                    evt.PersonelKayitNo = personel.PersonelKayitNo;
 
                     _logger.LogDebug($"Personel bilgisi eklendi: {evt.PersonelAdSoyad} (SicilNo: {evt.PersonelSicilNo}, PersonelKayitNo: {personelKayitNo})");
                 }

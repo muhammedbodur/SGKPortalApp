@@ -45,5 +45,20 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PdksIslemleri
             return await _context.CekilenDatalar
                 .AnyAsync(c => c.KayitNo == enrollNumber && c.Tarih == date);
         }
+
+        public async Task<bool> ExistsByKayitNoAndTarihAsync(string kayitNo, DateTime tarih)
+        {
+            return await _context.CekilenDatalar
+                .AnyAsync(c => c.KayitNo == kayitNo && c.Tarih == tarih);
+        }
+
+        public async Task<int> BulkInsertAsync(List<CekilenData> records)
+        {
+            if (records == null || !records.Any())
+                return 0;
+
+            await _context.CekilenDatalar.AddRangeAsync(records);
+            return await _context.SaveChangesAsync();
+        }
     }
 }

@@ -461,6 +461,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                             personel.PersonelKayitNo, personel.TcKimlikNo);
                     }
 
+                    // NickName otomatik oluştur
+                    personel.NickName = Helpers.StringHelper.GenerateNickName(personel.AdSoyad, 12);
+
                     await _unitOfWork.Repository<Personel>().AddAsync(personel);
                     await _unitOfWork.SaveChangesAsync();
 
@@ -624,6 +627,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     var eskiDepartmanId = personel.DepartmanId;
 
                     _mapper.Map(request.Personel, personel);
+
+                    // NickName otomatik oluştur (AdSoyad değiştiyse)
+                    personel.NickName = Helpers.StringHelper.GenerateNickName(personel.AdSoyad, 12);
 
                     _unitOfWork.Repository<Personel>().Update(personel);
                     await _unitOfWork.SaveChangesAsync();
@@ -846,7 +852,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 var userDto = new UserCreateUpdateDto
                 {
                     EnrollNumber = personel.PersonelKayitNo.ToString(),
-                    Name = personel.AdSoyad,
+                    Name = personel.NickName, // NickName kullan (max 12 char, uppercase, no Turkish)
                     CardNumber = personel.KartNo,
                     Privilege = 0,
                     Password = "",

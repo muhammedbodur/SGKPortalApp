@@ -114,6 +114,16 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
                 .IsUnique()
                 .HasDatabaseName("IX_PER_Personeller_SicilNo");
 
+            builder.HasIndex(p => p.PersonelKayitNo)
+                .IsUnique()
+                .HasDatabaseName("IX_PER_Personeller_PersonelKayitNo")
+                .HasFilter("[PersonelKayitNo] > 0 AND [SilindiMi] = 0");
+
+            builder.HasIndex(p => p.KartNo)
+                .IsUnique()
+                .HasDatabaseName("IX_PER_Personeller_KartNo")
+                .HasFilter("[KartNo] > 0 AND [SilindiMi] = 0");
+
             builder.HasIndex(p => p.Email)
                 .IsUnique()
                 .HasDatabaseName("IX_PER_Personeller_Email")
