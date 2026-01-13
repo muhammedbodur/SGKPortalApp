@@ -273,7 +273,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 card.CardNumber = request.CardNumber;
                 card.CardName = request.CardName;
                 card.EnrollNumber = request.EnrollNumber;
-                card.NickName = StringHelper.GenerateNickName(request.CardName, 12);
+                card.NickName = string.IsNullOrWhiteSpace(request.NickName)
+                    ? StringHelper.GenerateNickName(request.CardName, 12)
+                    : request.NickName;
                 card.Notes = request.Notes;
 
                 repository.Update(card);
