@@ -213,7 +213,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 if (talep == null)
                     return ApiResponseDto<bool>.ErrorResult("Talep bulunamadı");
 
-                _unitOfWork.Repository<IzinMazeretTalep>().SoftDelete(talep);
+                _unitOfWork.Repository<IzinMazeretTalep>().Delete(talep);
                 await _unitOfWork.SaveChangesAsync();
 
                 return ApiResponseDto<bool>.SuccessResult(true, "Talep başarıyla silindi");
@@ -633,7 +633,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 DepartmanAdi = talep.Personel?.Departman?.DepartmanAdi,
                 ServisAdi = talep.Personel?.Servis?.ServisAdi,
                 Turu = talep.Turu,
-                TuruAdi = talep.Turu.GetDescription(),
+                TuruAdi = talep.Turu.GetDisplayDescription(),
                 Aciklama = talep.Aciklama,
                 TalepTarihi = talep.TalepTarihi,
                 IsActive = talep.IsActive,
@@ -644,12 +644,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 SaatDilimi = talep.SaatDilimi,
                 BirinciOnayciTcKimlikNo = talep.BirinciOnayciTcKimlikNo,
                 BirinciOnayDurumu = talep.BirinciOnayDurumu,
-                BirinciOnayDurumuAdi = talep.BirinciOnayDurumu.GetDescription(),
+                BirinciOnayDurumuAdi = talep.BirinciOnayDurumu.GetDisplayDescription(),
                 BirinciOnayTarihi = talep.BirinciOnayTarihi,
                 BirinciOnayAciklama = talep.BirinciOnayAciklama,
                 IkinciOnayciTcKimlikNo = talep.IkinciOnayciTcKimlikNo,
                 IkinciOnayDurumu = talep.IkinciOnayDurumu,
-                IkinciOnayDurumuAdi = talep.IkinciOnayDurumu.GetDescription(),
+                IkinciOnayDurumuAdi = talep.IkinciOnayDurumu.GetDisplayDescription(),
                 IkinciOnayTarihi = talep.IkinciOnayTarihi,
                 IkinciOnayAciklama = talep.IkinciOnayAciklama,
                 BelgeEki = talep.BelgeEki,
@@ -671,7 +671,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 DepartmanAdi = t.Personel?.Departman?.DepartmanAdi,
                 ServisAdi = t.Personel?.Servis?.ServisAdi,
                 Turu = t.Turu,
-                TuruAdi = t.Turu.GetDescription(),
+                TuruAdi = t.Turu.GetDisplayDescription(),
                 TalepTarihi = t.TalepTarihi,
                 BaslangicTarihi = t.BaslangicTarihi,
                 BitisTarihi = t.BitisTarihi,
@@ -679,9 +679,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 SaatDilimi = t.SaatDilimi,
                 ToplamGun = t.ToplamGun,
                 BirinciOnayDurumu = t.BirinciOnayDurumu,
-                BirinciOnayDurumuAdi = t.BirinciOnayDurumu.GetDescription(),
+                BirinciOnayDurumuAdi = t.BirinciOnayDurumu.GetDisplayDescription(),
                 IkinciOnayDurumu = t.IkinciOnayDurumu,
-                IkinciOnayDurumuAdi = t.IkinciOnayDurumu.GetDescription(),
+                IkinciOnayDurumuAdi = t.IkinciOnayDurumu.GetDisplayDescription(),
                 GenelDurum = GetGenelDurum(t),
                 IsActive = t.IsActive
             }).ToList();
