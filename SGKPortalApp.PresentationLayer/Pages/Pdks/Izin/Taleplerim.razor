@@ -1,1 +1,178 @@
-﻿<h3>Taleplerim</h3>
+@page "/pdks/izin/taleplerim"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>İzin/Mazeret Taleplerim</PageTitle>
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-3">
+        <div class="col">
+            <h3>📋 İzin/Mazeret Taleplerim</h3>
+            <p class="text-muted">Kendi izin ve mazeret taleplerinizi görüntüleyebilir ve yeni talep oluşturabilirsiniz</p>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" @onclick="LoadTalepler">
+                <i class="bx bx-refresh"></i> Yenile
+            </button>
+            <a href="/pdks/izin/yeni-talep" class="btn btn-success">
+                <i class="bx bx-plus"></i> Yeni Talep
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted">Toplam Talep</h6>
+                    <h3>@talepler.Count</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted">Bekleyen</h6>
+                    <h3 class="text-warning">@talepler.Count(t => t.GenelDurum.Contains("Bekl"))</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted">Onaylanan</h6>
+                    <h3 class="text-success">@talepler.Count(t => t.GenelDurum == "Onaylandı")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted">Reddedilen</h6>
+                    <h3 class="text-danger">@talepler.Count(t => t.GenelDurum == "Reddedildi")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bx bx-search"></i></span>
+                        <input type="text" class="form-control" placeholder="Ara..."
+                               @bind="searchTerm" @bind:event="oninput" @onkeyup="FilterTalepler" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" @bind="durumFilter" @bind:after="FilterTalepler">
+                        <option value="">Tüm Durumlar</option>
+                        <option value="Beklemede">Beklemede</option>
+                        <option value="Onaylandı">Onaylandı</option>
+                        <option value="Reddedildi">Reddedildi</option>
+                        <option value="İptal">İptal</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" @bind="showInactive" @bind:after="LoadTalepler" id="showInactive">
+                        <label class="form-check-label" for="showInactive">
+                            İptal Edilenleri Göster
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="mt-2">Talepler yükleniyor...</p>
+        </div>
+    }
+    else
+    {
+        <!-- Talepler Table -->
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Tür</th>
+                                <th>Tarih</th>
+                                <th>Toplam Gün</th>
+                                <th>Talep Tarihi</th>
+                                <th>1. Onay</th>
+                                <th>2. Onay</th>
+                                <th>Durum</th>
+                                <th style="min-width: 150px;">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!filteredTalepler.Any())
+                            {
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted py-4">
+                                        <i class="bx bx-file bx-lg"></i>
+                                        <p class="mb-0 mt-2">Talep bulunamadı</p>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                @foreach (var talep in filteredTalepler)
+                                {
+                                    <tr>
+                                        <td><strong>#@talep.IzinMazeretTalepId</strong></td>
+                                        <td><span class="badge bg-label-info">@talep.TuruAdi</span></td>
+                                        <td>
+                                            @if (talep.BaslangicTarihi.HasValue && talep.BitisTarihi.HasValue)
+                                            {
+                                                <span>@talep.BaslangicTarihi.Value.ToString("dd.MM.yyyy") - @talep.BitisTarihi.Value.ToString("dd.MM.yyyy")</span>
+                                            }
+                                            else if (talep.MazeretTarihi.HasValue)
+                                            {
+                                                <span>@talep.MazeretTarihi.Value.ToString("dd.MM.yyyy") (@talep.SaatDilimi)</span>
+                                            }
+                                        </td>
+                                        <td>@(talep.ToplamGun.HasValue ? talep.ToplamGun.Value + " gün" : "-")</td>
+                                        <td>@talep.TalepTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                                        <td><span class="badge @GetOnayBadgeClass(talep.BirinciOnayDurumuAdi)">@talep.BirinciOnayDurumuAdi</span></td>
+                                        <td><span class="badge @GetOnayBadgeClass(talep.IkinciOnayDurumuAdi)">@talep.IkinciOnayDurumuAdi</span></td>
+                                        <td><span class="badge @GetDurumBadgeClass(talep.GenelDurum)">@talep.GenelDurum</span></td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" @onclick="() => ViewDetails(talep.IzinMazeretTalepId)" title="Detay">
+                                                    <i class="bx bx-show"></i>
+                                                </button>
+                                                @if (talep.BirinciOnayDurumuAdi == "Beklemede")
+                                                {
+                                                    <button class="btn btn-outline-warning" @onclick="() => EditTalep(talep.IzinMazeretTalepId)" title="Düzenle">
+                                                        <i class="bx bx-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-danger" @onclick="() => CancelTalep(talep.IzinMazeretTalepId)" title="İptal Et">
+                                                        <i class="bx bx-x"></i>
+                                                    </button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

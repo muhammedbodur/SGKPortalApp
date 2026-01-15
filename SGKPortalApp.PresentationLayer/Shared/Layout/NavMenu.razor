@@ -418,26 +418,31 @@
 
                     <li class="menu-item @(IsSectionActive("/pdks/izin") ? "active open" : "")">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <div>İzin Yönetimi</div>
+                            <i class="menu-icon tf-icons bx bx-calendar-check"></i>
+                            <div>İzin/Mazeret Yönetimi</div>
                         </a>
                         <ul class="menu-sub">
                             <li class="menu-item @(IsActive("/pdks/izin/taleplerim") ? "active" : "")">
                                 <a href="/pdks/izin/taleplerim" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-list-ul"></i>
                                     <div>Taleplerim</div>
                                 </a>
                             </li>
                             <li class="menu-item @(IsActive("/pdks/izin/yeni-talep") ? "active" : "")">
                                 <a href="/pdks/izin/yeni-talep" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-plus-circle"></i>
                                     <div>Yeni Talep</div>
                                 </a>
                             </li>
                             <li class="menu-item @(IsActive("/pdks/izin/onay-bekleyenler") ? "active" : "")">
                                 <a href="/pdks/izin/onay-bekleyenler" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-check-circle"></i>
                                     <div>Onay Bekleyenler</div>
                                 </a>
                             </li>
                             <li class="menu-item @(IsActive("/pdks/izin/sorumlu-atama") ? "active" : "")">
                                 <a href="/pdks/izin/sorumlu-atama" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-user-check"></i>
                                     <div>Sorumlu Atama</div>
                                 </a>
                             </li>
