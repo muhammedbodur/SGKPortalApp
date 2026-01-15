@@ -229,5 +229,8 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
 
         [InverseProperty("Personel")]
         public ICollection<PersonelEngel>? PersonelEngelleri { get; set; } = new List<PersonelEngel>();
+
+        [InverseProperty("Personel")]
+        public ICollection<IzinMazeretTalep>? IzinMazeretTalepleri { get; set; } = new List<IzinMazeretTalep>();
     }
 }
