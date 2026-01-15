@@ -7,7 +7,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco
     public class UserCreateUpdateDto
     {
         public string EnrollNumber { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
+        public string NickName { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public long? CardNumber { get; set; }
         public int Privilege { get; set; } = 0; // Default: Normal user

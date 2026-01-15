@@ -144,7 +144,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 var searchLower = searchTerm.ToLower();
                 filteredUsers = filteredUsers.Where(u =>
                     u.EnrollNumber.ToLower().Contains(searchLower) ||
-                    u.Name.ToLower().Contains(searchLower) ||
+                    u.NickName.ToLower().Contains(searchLower) ||
                     (u.CardNumber.HasValue && u.CardNumber.Value.ToString().Contains(searchTerm))
                 ).ToList();
             }
@@ -181,7 +181,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
             userForm = new UserCreateUpdateDto
             {
                 EnrollNumber = user.EnrollNumber,
-                Name = user.Name,
+                NickName = user.NickName,
                 Password = user.Password ?? "",
                 CardNumber = user.CardNumber,
                 Privilege = user.Privilege,
@@ -200,9 +200,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
 
         private async Task SaveUser()
         {
-            if (string.IsNullOrWhiteSpace(userForm.EnrollNumber) || string.IsNullOrWhiteSpace(userForm.Name))
+            if (string.IsNullOrWhiteSpace(userForm.EnrollNumber) || string.IsNullOrWhiteSpace(userForm.NickName))
             {
-                await ToastService.ShowWarningAsync("Kayıt numarası ve ad soyad zorunludur!");
+                await ToastService.ShowWarningAsync("Kayıt numarası ve NickName zorunludur!");
                 return;
             }
 

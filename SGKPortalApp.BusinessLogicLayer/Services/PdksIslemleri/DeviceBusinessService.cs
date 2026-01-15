@@ -461,7 +461,38 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 if (device == null) return new List<ApiUserDto>();
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
-                return await _apiClient.GetAllUsersFromDeviceAsync(device.IpAddress, port);
+                var users = await _apiClient.GetAllUsersFromDeviceAsync(device.IpAddress, port);
+
+                // Name alanını Personel veya ÖzelKart entity'lerinden doldur
+                foreach (var user in users)
+                {
+                    // EnrollNumber'a göre Personel veya ÖzelKart ara
+                    if (int.TryParse(user.EnrollNumber, out var enrollNum))
+                    {
+                        if (enrollNum < 60000)
+                        {
+                            // Personel (0-59999)
+                            var personel = await _unitOfWork.Repository<Personel>()
+                                .FirstOrDefaultAsync(p => p.PersonelKayitNo == enrollNum && !p.SilindiMi);
+                            if (personel != null)
+                            {
+                                user.Name = personel.AdSoyad;
+                            }
+                        }
+                        else
+                        {
+                            // ÖzelKart (60000-65534)
+                            var ozelKart = await _unitOfWork.Repository<SpecialCard>()
+                                .FirstOrDefaultAsync(k => k.EnrollNumber == user.EnrollNumber && !k.SilindiMi);
+                            if (ozelKart != null)
+                            {
+                                user.Name = ozelKart.CardName;
+                            }
+                        }
+                    }
+                }
+
+                return users;
             }
             catch (Exception ex)
             {
@@ -908,14 +939,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             }
 
             // İsim uyuşmazlığı (Name vs NickName)
-            var deviceName = match.DeviceUser.Name?.Trim().ToUpper();
+            var deviceName = match.DeviceUser.NickName?.Trim().ToUpper();
             var personelNickName = match.PersonelInfo.NickName?.Trim().ToUpper();
             if (!string.IsNullOrEmpty(deviceName) && !string.IsNullOrEmpty(personelNickName) && deviceName != personelNickName)
             {
                 mismatches.Add(new MismatchDetail
                 {
                     Field = "Name/NickName",
-                    DeviceValue = match.DeviceUser.Name,
+                    DeviceValue = match.DeviceUser.NickName,
                     PersonelValue = match.PersonelInfo.NickName,
                     Type = MismatchType.NameMismatch,
                     Description = "Cihazdaki Name ile DB'deki NickName uyuşmuyor"
@@ -980,7 +1011,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 var user = new ApiUserDto
                 {
                     EnrollNumber = request.EnrollNumber,
-                    Name = request.Name,
+                    NickName = request.NickName,
                     CardNumber = request.CardNumber,
                     Privilege = request.Privilege,
                     Password = request.Password,
@@ -1006,7 +1037,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 var user = new ApiUserDto
                 {
                     EnrollNumber = request.EnrollNumber,
-                    Name = request.Name,
+                    NickName = request.NickName,
                     CardNumber = request.CardNumber,
                     Privilege = request.Privilege,
                     Password = request.Password,

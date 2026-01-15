@@ -95,6 +95,7 @@
                             <tr>
                                 <th>Kayıt No</th>
                                 <th>Ad Soyad</th>
+                                <th>NickName</th>
                                 <th>Kart No</th>
                                 <th>Yetki</th>
                                 <th>Durum</th>
@@ -118,6 +119,7 @@
                                     <tr>
                                         <td><strong>@user.EnrollNumber</strong></td>
                                         <td>@user.Name</td>
+                                        <td>@user.NickName</td>
                                         <td>
                                             @if (user.CardNumber.HasValue && user.CardNumber.Value > 0)
                                             {
@@ -181,8 +183,9 @@
                         <input type="text" class="form-control" @bind="userForm.EnrollNumber" disabled="@isEditMode" />
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Ad Soyad *</label>
-                        <input type="text" class="form-control" @bind="userForm.Name" />
+                        <label class="form-label">NickName *</label>
+                        <input type="text" class="form-control" @bind="userForm.NickName" />
+                        <small class="text-muted">Cihaza gönderilecek kullanıcı adı (Personel/ÖzelKart NickName)</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Kart Numarası *</label>

@@ -322,9 +322,21 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
+                // ApiUserDto'yu ZKTecoApi'nin beklediği formata map et
+                // ZKTecoApi'de Name field'ı var, biz NickName kullanıyoruz
+                var requestBody = new
+                {
+                    enrollNumber = user.EnrollNumber,
+                    name = user.NickName, // NickName → ZKTecoApi Name field'ına
+                    password = user.Password ?? string.Empty,
+                    cardNumber = user.CardNumber,
+                    privilege = user.Privilege,
+                    enabled = user.Enabled
+                };
+
                 var response = await _httpClient.PostAsJsonAsync(
                     $"{_baseUrl}/api/users/{deviceIp}?port={port}&force={force.ToString().ToLower()}",
-                    user);
+                    requestBody);
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -359,9 +371,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
+                // ApiUserDto'yu ZKTecoApi'nin beklediği formata map et
+                // ZKTecoApi'de Name field'ı var, biz NickName kullanıyoruz
+                var requestBody = new
+                {
+                    name = user.NickName, // NickName → ZKTecoApi Name field'ına
+                    password = user.Password,
+                    cardNumber = user.CardNumber,
+                    privilege = user.Privilege,
+                    enabled = user.Enabled
+                };
+
                 var response = await _httpClient.PutAsJsonAsync(
                     $"{_baseUrl}/api/users/{deviceIp}/{enrollNumber}?port={port}",
-                    user);
+                    requestBody);
 
                 if (!response.IsSuccessStatusCode)
                 {

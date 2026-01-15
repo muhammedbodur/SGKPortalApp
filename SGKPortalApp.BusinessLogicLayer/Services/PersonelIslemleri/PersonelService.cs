@@ -855,12 +855,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 // NickName boşsa AdSoyad'dan generate et
                 var nickName = !string.IsNullOrWhiteSpace(personel.NickName)
                     ? personel.NickName
-                    : Common.Helpers.StringHelper.GenerateNickName(personel.AdSoyad, 12);
+                    : StringHelper.GenerateNickName(personel.AdSoyad, 12);
 
                 var userDto = new UserCreateUpdateDto
                 {
                     EnrollNumber = personel.PersonelKayitNo.ToString(),
-                    Name = nickName, // NickName kullan (max 12 char, uppercase, no Turkish)
+                    NickName = nickName, // NickName kullan (max 12 char, uppercase, no Turkish)
                     CardNumber = personel.KartNo,
                     Privilege = 0,
                     Password = "",
@@ -878,7 +878,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         var apiUser = new ApiUserDto
                         {
                             EnrollNumber = userDto.EnrollNumber,
-                            Name = userDto.Name,
+                            NickName = userDto.NickName,
                             CardNumber = userDto.CardNumber,
                             Privilege = userDto.Privilege,
                             Password = userDto.Password,

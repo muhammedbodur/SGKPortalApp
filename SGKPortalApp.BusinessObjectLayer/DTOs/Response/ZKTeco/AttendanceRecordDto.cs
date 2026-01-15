@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 
 namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco
 {
@@ -9,7 +10,13 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco
     public class AttendanceRecordDto
     {
         public string EnrollNumber { get; set; } = string.Empty;
+        
+        /// <summary>
+        /// ZKTecoApi'de "DateTime" olarak geliyor, biz "EventTime" kullanıyoruz
+        /// </summary>
+        [JsonPropertyName("dateTime")]
         public DateTime EventTime { get; set; }
+        
         public int VerifyMethod { get; set; }
         public int InOutMode { get; set; }
         public int WorkCode { get; set; }

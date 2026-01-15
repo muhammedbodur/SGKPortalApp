@@ -782,6 +782,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                         TcKimlikNo = p.TcKimlikNo,
                         SicilNo = p.SicilNo,
                         AdSoyad = p.AdSoyad,
+                        NickName = p.NickName,
                         DepartmanAdi = p.DepartmanAdi ?? "-",
                         PersonelKayitNo = p.PersonelKayitNo,
                         KartNo = p.KartNo
@@ -1055,7 +1056,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                         var userDto = new UserCreateUpdateDto
                         {
                             EnrollNumber = personel.PersonelKayitNo.ToString(),
-                            Name = personel.AdSoyad,
+                            NickName = personel.NickName,
                             CardNumber = personel.KartNo > 0 ? personel.KartNo : null,
                             Privilege = 0, // Normal user
                             Password = "", // ZKTeco cihazlarda şifre genellikle kullanılmaz
@@ -1151,6 +1152,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
             public string TcKimlikNo { get; set; } = "";
             public int SicilNo { get; set; }
             public string AdSoyad { get; set; } = "";
+            public string NickName { get; set; } = "";
             public string DepartmanAdi { get; set; } = "";
             public int PersonelKayitNo { get; set; }
             public int KartNo { get; set; }

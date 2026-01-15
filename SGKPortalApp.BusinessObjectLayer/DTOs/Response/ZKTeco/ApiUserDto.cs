@@ -15,9 +15,14 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco
         public string EnrollNumber { get; set; } = string.Empty;
 
         /// <summary>
-        /// Kullanıcı adı
+        /// Ad Soyad (görüntüleme için)
         /// </summary>
         public string Name { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Kullanıcı adı (cihaza gönderilen NickName)
+        /// </summary>
+        public string NickName { get; set; } = string.Empty;
 
         /// <summary>
         /// Şifre (opsiyonel)

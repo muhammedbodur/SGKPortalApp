@@ -7,7 +7,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco
     public class UserInfoDto
     {
         public string EnrollNumber { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
+        public string NickName { get; set; } = string.Empty;
         public string? Password { get; set; }
         public long? CardNumber { get; set; }
         public int Privilege { get; set; } // 0=User, 1=Enroller, 2=Manager, 3=SuperAdmin

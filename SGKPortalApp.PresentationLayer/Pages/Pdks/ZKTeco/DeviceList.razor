@@ -580,8 +580,9 @@
                                         </th>
                                         <th style="width: 50px;">Durum</th>
                                         <th style="width: 100px;">Kayıt No</th>
-                                        <th>Cihaz Adı</th>
-                                        <th>DB Adı (NickName)</th>
+                                        <th>Ad Soyad</th>
+                                        <th>Cihazdaki NickName</th>
+                                        <th>DB deki (NickName)</th>
                                         <th style="width: 120px;">Kart No</th>
                                         <th style="width: 100px;">DB Kart No</th>
                                         <th style="width: 100px;">Privilege</th>
@@ -656,6 +657,18 @@
                                                     @if (enrollMismatch != null)
                                                     {
                                                         <br/><small class="text-danger">DB: @enrollMismatch.PersonelValue</small>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (match.PersonelInfo != null)
+                                                    {
+                                                        <strong class="@(nameMismatch != null ? "text-danger" : "text-muted")">
+                                                            @(match.PersonelInfo.AdSoyad ?? "-")
+                                                        </strong>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-danger">Yok</span>
                                                     }
                                                 </td>
                                                 <td>
