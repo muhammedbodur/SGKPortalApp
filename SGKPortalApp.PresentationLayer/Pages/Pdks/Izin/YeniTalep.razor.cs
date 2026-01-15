@@ -30,11 +30,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             request.TcKimlikNo = "12345678901"; // TODO: User claim'den al
         }
 
-        private void OnTuruChanged()
+        private void OnTuruChanged(ChangeEventArgs e)
         {
-            if (selectedTuru.HasValue)
+            if (int.TryParse(e.Value?.ToString(), out var turValue))
             {
-                request.Turu = (IzinMazeretTuru)selectedTuru.Value;
+                selectedTuru = turValue;
+                request.Turu = (IzinMazeretTuru)turValue;
                 showTurError = false;
                 overlapWarning = string.Empty;
 
@@ -44,6 +45,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                 request.MazeretTarihi = null;
                 request.SaatDilimi = null;
                 toplamGun = 0;
+            }
+            else
+            {
+                selectedTuru = null;
             }
         }
 
