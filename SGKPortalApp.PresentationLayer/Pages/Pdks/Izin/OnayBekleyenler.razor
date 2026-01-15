@@ -71,7 +71,7 @@
                             </div>
                             <div>
                                 <h6 class="text-muted mb-1">1. Onay Bekleyenler</h6>
-                                <h3 class="mb-0">@talepler.Count(t => t.OnayDurumu == OnayDurumu.Beklemede)</h3>
+                                <h3 class="mb-0">@talepler.Count(t => t.BirinciOnayDurumu == OnayDurumu.Beklemede)</h3>
                             </div>
                         </div>
                     </div>
@@ -88,7 +88,7 @@
                             </div>
                             <div>
                                 <h6 class="text-muted mb-1">2. Onay Bekleyenler</h6>
-                                <h3 class="mb-0">@talepler.Count(t => t.OnayDurumu == OnayDurumu.BirinciOnay)</h3>
+                                <h3 class="mb-0">@talepler.Count(t => t.BirinciOnayDurumu == OnayDurumu.Onaylandi && t.IkinciOnayDurumu == OnayDurumu.Beklemede)</h3>
                             </div>
                         </div>
                     </div>
@@ -123,7 +123,7 @@
                                 <td><strong>#@talep.IzinMazeretTalepId</strong></td>
                                 <td>
                                     <div>
-                                        <div class="fw-bold">@talep.PersonelAdiSoyadi</div>
+                                        <div class="fw-bold">@talep.AdSoyad</div>
                                         <small class="text-muted">@talep.TcKimlikNo</small>
                                     </div>
                                 </td>
@@ -148,9 +148,9 @@
                                     }
                                 </td>
                                 <td>
-                                    @if (talep.ToplamGunSayisi.HasValue)
+                                    @if (talep.ToplamGun.HasValue)
                                     {
-                                        <span class="badge bg-label-primary">@talep.ToplamGunSayisi gün</span>
+                                        <span class="badge bg-label-primary">@talep.ToplamGun gün</span>
                                     }
                                     else
                                     {
@@ -161,11 +161,11 @@
                                     <small>@talep.TalepTarihi.ToString("dd.MM.yyyy HH:mm")</small>
                                 </td>
                                 <td>
-                                    @if (talep.OnayDurumu == OnayDurumu.Beklemede)
+                                    @if (talep.BirinciOnayDurumu == OnayDurumu.Beklemede)
                                     {
                                         <span class="badge bg-label-warning">1. Onay Bekliyor</span>
                                     }
-                                    else if (talep.OnayDurumu == OnayDurumu.BirinciOnay)
+                                    else if (talep.BirinciOnayDurumu == OnayDurumu.Onaylandi && talep.IkinciOnayDurumu == OnayDurumu.Beklemede)
                                     {
                                         <span class="badge bg-label-info">2. Onay Bekliyor</span>
                                     }
@@ -220,7 +220,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <strong>Talep Sahibi:</strong> @selectedTalep.PersonelAdiSoyadi<br />
+                            <strong>Talep Sahibi:</strong> @selectedTalep.AdSoyad<br />
                             <strong>Tür:</strong> @selectedTalep.TuruAdi<br />
                             @if (selectedTalep.Turu == IzinMazeretTuru.Mazeret)
                             {
@@ -233,13 +233,6 @@
                                 <text>@selectedTalep.BaslangicTarihi?.ToString("dd.MM.yyyy") - @selectedTalep.BitisTarihi?.ToString("dd.MM.yyyy")</text>
                             }
                         </div>
-                        @if (!string.IsNullOrWhiteSpace(selectedTalep.Aciklama))
-                        {
-                            <div class="alert alert-info">
-                                <strong>Açıklama:</strong><br />
-                                @selectedTalep.Aciklama
-                            </div>
-                        }
                         <div class="mb-3">
                             <label class="form-label">Onay Notu @(isApproving ? "(Opsiyonel)" : "(Zorunlu)")</label>
                             <textarea class="form-control" rows="3" @bind="onayNotu"
@@ -285,7 +278,7 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <strong>Personel:</strong><br />
-                                @selectedTalep.PersonelAdiSoyadi<br />
+                                @selectedTalep.AdSoyad<br />
                                 <small class="text-muted">@selectedTalep.TcKimlikNo</small>
                             </div>
                             <div class="col-md-6 mb-3">
@@ -298,8 +291,8 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <strong>Durum:</strong><br />
-                                <span class="badge @GetDurumBadgeClass(selectedTalep.OnayDurumu)">
-                                    @selectedTalep.OnayDurumu.GetDescription()
+                                <span class="badge bg-label-secondary">
+                                    @selectedTalep.GenelDurum
                                 </span>
                             </div>
                             @if (selectedTalep.Turu == IzinMazeretTuru.Mazeret)
@@ -325,30 +318,25 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <strong>Toplam Gün:</strong><br />
-                                    <span class="badge bg-label-primary">@selectedTalep.ToplamGunSayisi gün</span>
+                                    <span class="badge bg-label-primary">@selectedTalep.ToplamGun gün</span>
                                 </div>
                             }
-                            @if (!string.IsNullOrWhiteSpace(selectedTalep.Aciklama))
-                            {
-                                <div class="col-12 mb-3">
-                                    <strong>Açıklama:</strong><br />
-                                    <div class="alert alert-info">@selectedTalep.Aciklama</div>
+                            <div class="col-12 mb-3">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>1. Onay Durumu:</strong><br />
+                                        <span class="badge @GetDurumBadgeClass(selectedTalep.BirinciOnayDurumu)">
+                                            @selectedTalep.BirinciOnayDurumuAdi
+                                        </span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>2. Onay Durumu:</strong><br />
+                                        <span class="badge @GetDurumBadgeClass(selectedTalep.IkinciOnayDurumu)">
+                                            @selectedTalep.IkinciOnayDurumuAdi
+                                        </span>
+                                    </div>
                                 </div>
-                            }
-                            @if (!string.IsNullOrWhiteSpace(selectedTalep.BirinciOnayciNotu))
-                            {
-                                <div class="col-12 mb-3">
-                                    <strong>1. Onayci Notu:</strong><br />
-                                    <div class="alert alert-secondary">@selectedTalep.BirinciOnayciNotu</div>
-                                </div>
-                            }
-                            @if (!string.IsNullOrWhiteSpace(selectedTalep.IkinciOnayciNotu))
-                            {
-                                <div class="col-12 mb-3">
-                                    <strong>2. Onayci Notu:</strong><br />
-                                    <div class="alert alert-secondary">@selectedTalep.IkinciOnayciNotu</div>
-                                </div>
-                            }
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -368,7 +356,7 @@
             IzinMazeretTuru.YillikIzin => "bg-label-success",
             IzinMazeretTuru.HastalikIzni => "bg-label-danger",
             IzinMazeretTuru.BabalikIzni => "bg-label-primary",
-            IzinMazeretTuru.DoğumIzni => "bg-label-info",
+            IzinMazeretTuru.DogumIzni => "bg-label-info",
             IzinMazeretTuru.EvlilikIzni => "bg-label-warning",
             IzinMazeretTuru.OlumIzni => "bg-label-dark",
             IzinMazeretTuru.UcretsizIzin => "bg-label-secondary",
@@ -382,7 +370,6 @@
         return durum switch
         {
             OnayDurumu.Beklemede => "bg-label-warning",
-            OnayDurumu.BirinciOnay => "bg-label-info",
             OnayDurumu.Onaylandi => "bg-label-success",
             OnayDurumu.Reddedildi => "bg-label-danger",
             OnayDurumu.IptalEdildi => "bg-label-secondary",

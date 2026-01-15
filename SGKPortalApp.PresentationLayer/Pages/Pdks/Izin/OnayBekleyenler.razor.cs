@@ -109,10 +109,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
 
             try
             {
+                // Hangi onay seviyesinde olduğunu belirle
+                var onayciSeviyesi = selectedTalep.BirinciOnayDurumu == SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri.OnayDurumu.Beklemede ? 1 : 2;
+
                 var request = new IzinMazeretTalepOnayRequestDto
                 {
-                    Onaylandi = isApproving,
-                    OnayNotu = onayNotu
+                    OnayDurumu = isApproving
+                        ? SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri.OnayDurumu.Onaylandi
+                        : SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri.OnayDurumu.Reddedildi,
+                    Aciklama = onayNotu,
+                    OnayciSeviyesi = onayciSeviyesi
                 };
 
                 var response = await HttpClient.PostAsJsonAsync(

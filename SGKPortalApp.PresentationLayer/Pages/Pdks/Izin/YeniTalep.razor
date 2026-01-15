@@ -31,7 +31,7 @@
                         <div class="mb-3">
                             <label class="form-label">İzin/Mazeret Türü <span class="text-danger">*</span></label>
                             <select class="form-select @(showTurError ? "is-invalid" : "")"
-                                    @bind="selectedTuru" @bind:after="OnTuruChanged">
+                                    value="@selectedTuru" @onchange="OnTuruChanged">
                                 <option value="">Seçiniz...</option>
                                 @foreach (IzinMazeretTuru tur in Enum.GetValues(typeof(IzinMazeretTuru)))
                                 {
@@ -71,14 +71,16 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Başlangıç Tarihi <span class="text-danger">*</span></label>
-                                        <input type="date" class="form-control" @bind="request.BaslangicTarihi"
-                                               @bind:after="CalculateDays" />
+                                        <input type="date" class="form-control"
+                                               value="@(request.BaslangicTarihi?.ToString("yyyy-MM-dd"))"
+                                               @onchange="@(e => { request.BaslangicTarihi = DateTime.TryParse(e.Value?.ToString(), out var d) ? d : (DateTime?)null; CalculateDays(); })" />
                                         <ValidationMessage For="@(() => request.BaslangicTarihi)" />
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Bitiş Tarihi <span class="text-danger">*</span></label>
-                                        <input type="date" class="form-control" @bind="request.BitisTarihi"
-                                               @bind:after="CalculateDays" />
+                                        <input type="date" class="form-control"
+                                               value="@(request.BitisTarihi?.ToString("yyyy-MM-dd"))"
+                                               @onchange="@(e => { request.BitisTarihi = DateTime.TryParse(e.Value?.ToString(), out var d) ? d : (DateTime?)null; CalculateDays(); })" />
                                         <ValidationMessage For="@(() => request.BitisTarihi)" />
                                     </div>
                                 </div>

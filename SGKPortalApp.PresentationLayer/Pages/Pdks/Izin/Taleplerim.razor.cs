@@ -61,24 +61,24 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
 
         private void FilterTalepler()
         {
-            filteredTalepler = talepler.AsEnumerable();
+            var query = talepler.AsEnumerable();
 
             // Arama filtresi
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                filteredTalepler = filteredTalepler.Where(t =>
+                query = query.Where(t =>
                     t.TuruAdi.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
                     t.AdSoyad.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    t.IzinMazeretTalepId.ToString().Contains(searchTerm)).ToList();
+                    t.IzinMazeretTalepId.ToString().Contains(searchTerm));
             }
 
             // Durum filtresi
             if (!string.IsNullOrWhiteSpace(durumFilter))
             {
-                filteredTalepler = filteredTalepler.Where(t => t.GenelDurum == durumFilter).ToList();
+                query = query.Where(t => t.GenelDurum == durumFilter);
             }
 
-            filteredTalepler = filteredTalepler.ToList();
+            filteredTalepler = query.ToList();
         }
 
         private void ViewDetails(int id)
