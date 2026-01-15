@@ -1,1 +1,392 @@
-﻿<h3>OnayBekleyenler</h3>
+@page "/pdks/izin/onay-bekleyenler"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
+@using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri
+@using SGKPortalApp.Common.Extensions
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>Onay Bekleyen Talepler - SGK Portal</PageTitle>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Başlık -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">
+                <i class="bx bx-check-circle me-2"></i>Onay Bekleyen Talepler
+            </h4>
+            <p class="text-muted mb-0">Tarafınıza gelen izin/mazeret talepleri</p>
+        </div>
+        <button class="btn btn-outline-primary" @onclick="LoadTalepler" disabled="@isLoading">
+            <i class="bx bx-refresh"></i> Yenile
+        </button>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+            <p class="mt-3 text-muted">Talepler yükleniyor...</p>
+        </div>
+    }
+    else if (!talepler.Any())
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bx bx-check-circle display-1 text-success"></i>
+                <h5 class="mt-3">Bekleyen Talep Yok</h5>
+                <p class="text-muted">Şu anda onayınızı bekleyen bir talep bulunmuyor.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- İstatistik Kartları -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar flex-shrink-0 me-3">
+                                <span class="avatar-initial rounded bg-label-warning">
+                                    <i class="bx bx-time-five"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-1">Bekleyen Talepler</h6>
+                                <h3 class="mb-0">@talepler.Count</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar flex-shrink-0 me-3">
+                                <span class="avatar-initial rounded bg-label-info">
+                                    <i class="bx bx-user"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-1">1. Onay Bekleyenler</h6>
+                                <h3 class="mb-0">@talepler.Count(t => t.OnayDurumu == OnayDurumu.Beklemede)</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar flex-shrink-0 me-3">
+                                <span class="avatar-initial rounded bg-label-primary">
+                                    <i class="bx bx-user-check"></i>
+                                </span>
+                            </div>
+                            <div>
+                                <h6 class="text-muted mb-1">2. Onay Bekleyenler</h6>
+                                <h3 class="mb-0">@talepler.Count(t => t.OnayDurumu == OnayDurumu.BirinciOnay)</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Talepler Tablosu -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Onay Bekleyen Talepler</h5>
+                <span class="badge bg-label-warning">@talepler.Count talep</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Personel</th>
+                            <th>Tür</th>
+                            <th>Tarih Aralığı</th>
+                            <th>Toplam Gün</th>
+                            <th>Talep Tarihi</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var talep in talepler)
+                        {
+                            <tr>
+                                <td><strong>#@talep.IzinMazeretTalepId</strong></td>
+                                <td>
+                                    <div>
+                                        <div class="fw-bold">@talep.PersonelAdiSoyadi</div>
+                                        <small class="text-muted">@talep.TcKimlikNo</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge @GetTurBadgeClass(talep.Turu)">
+                                        @talep.TuruAdi
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (talep.Turu == IzinMazeretTuru.Mazeret)
+                                    {
+                                        <div>
+                                            <strong>@talep.MazeretTarihi?.ToString("dd.MM.yyyy")</strong><br />
+                                            <small class="text-muted">@talep.SaatDilimi</small>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div>
+                                            @talep.BaslangicTarihi?.ToString("dd.MM.yyyy") - @talep.BitisTarihi?.ToString("dd.MM.yyyy")
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    @if (talep.ToplamGunSayisi.HasValue)
+                                    {
+                                        <span class="badge bg-label-primary">@talep.ToplamGunSayisi gün</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    <small>@talep.TalepTarihi.ToString("dd.MM.yyyy HH:mm")</small>
+                                </td>
+                                <td>
+                                    @if (talep.OnayDurumu == OnayDurumu.Beklemede)
+                                    {
+                                        <span class="badge bg-label-warning">1. Onay Bekliyor</span>
+                                    }
+                                    else if (talep.OnayDurumu == OnayDurumu.BirinciOnay)
+                                    {
+                                        <span class="badge bg-label-info">2. Onay Bekliyor</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button type="button" class="btn btn-sm btn-icon btn-outline-primary dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="javascript:void(0);" @onclick="() => ShowApprovalModal(talep, true)">
+                                                <i class="bx bx-check me-1"></i> Onayla
+                                            </a>
+                                            <a class="dropdown-item" href="javascript:void(0);" @onclick="() => ShowApprovalModal(talep, false)">
+                                                <i class="bx bx-x me-1"></i> Reddet
+                                            </a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="javascript:void(0);" @onclick="() => ShowDetailModal(talep)">
+                                                <i class="bx bx-detail me-1"></i> Detay Görüntüle
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <!-- Onay/Red Modal -->
+    @if (showApprovalModal && selectedTalep != null)
+    {
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            @if (isApproving)
+                            {
+                                <i class="bx bx-check-circle text-success me-2"></i>
+                                <text>Talebi Onayla</text>
+                            }
+                            else
+                            {
+                                <i class="bx bx-x-circle text-danger me-2"></i>
+                                <text>Talebi Reddet</text>
+                            }
+                        </h5>
+                        <button type="button" class="btn-close" @onclick="CloseApprovalModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <strong>Talep Sahibi:</strong> @selectedTalep.PersonelAdiSoyadi<br />
+                            <strong>Tür:</strong> @selectedTalep.TuruAdi<br />
+                            @if (selectedTalep.Turu == IzinMazeretTuru.Mazeret)
+                            {
+                                <strong>Tarih:</strong>
+                                <text>@selectedTalep.MazeretTarihi?.ToString("dd.MM.yyyy") (@selectedTalep.SaatDilimi)</text>
+                            }
+                            else
+                            {
+                                <strong>Tarih:</strong>
+                                <text>@selectedTalep.BaslangicTarihi?.ToString("dd.MM.yyyy") - @selectedTalep.BitisTarihi?.ToString("dd.MM.yyyy")</text>
+                            }
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(selectedTalep.Aciklama))
+                        {
+                            <div class="alert alert-info">
+                                <strong>Açıklama:</strong><br />
+                                @selectedTalep.Aciklama
+                            </div>
+                        }
+                        <div class="mb-3">
+                            <label class="form-label">Onay Notu @(isApproving ? "(Opsiyonel)" : "(Zorunlu)")</label>
+                            <textarea class="form-control" rows="3" @bind="onayNotu"
+                                      placeholder="@(isApproving ? "Onay notunuzu girebilirsiniz..." : "Red nedenini açıklayınız...")"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" @onclick="CloseApprovalModal">İptal</button>
+                        <button type="button"
+                                class="btn @(isApproving ? "btn-success" : "btn-danger")"
+                                @onclick="SubmitApproval"
+                                disabled="@(!isApproving && string.IsNullOrWhiteSpace(onayNotu))">
+                            @if (isApproving)
+                            {
+                                <i class="bx bx-check"></i>
+                                <text> Onayla</text>
+                            }
+                            else
+                            {
+                                <i class="bx bx-x"></i>
+                                <text> Reddet</text>
+                            }
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Detay Modal -->
+    @if (showDetailModal && selectedTalep != null)
+    {
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="bx bx-detail me-2"></i>Talep Detayı - #@selectedTalep.IzinMazeretTalepId
+                        </h5>
+                        <button type="button" class="btn-close" @onclick="CloseDetailModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <strong>Personel:</strong><br />
+                                @selectedTalep.PersonelAdiSoyadi<br />
+                                <small class="text-muted">@selectedTalep.TcKimlikNo</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Tür:</strong><br />
+                                <span class="badge @GetTurBadgeClass(selectedTalep.Turu)">@selectedTalep.TuruAdi</span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Talep Tarihi:</strong><br />
+                                @selectedTalep.TalepTarihi.ToString("dd.MM.yyyy HH:mm")
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <strong>Durum:</strong><br />
+                                <span class="badge @GetDurumBadgeClass(selectedTalep.OnayDurumu)">
+                                    @selectedTalep.OnayDurumu.GetDescription()
+                                </span>
+                            </div>
+                            @if (selectedTalep.Turu == IzinMazeretTuru.Mazeret)
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <strong>Mazeret Tarihi:</strong><br />
+                                    @selectedTalep.MazeretTarihi?.ToString("dd.MM.yyyy")
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <strong>Saat Dilimi:</strong><br />
+                                    @selectedTalep.SaatDilimi
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <strong>Başlangıç Tarihi:</strong><br />
+                                    @selectedTalep.BaslangicTarihi?.ToString("dd.MM.yyyy")
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <strong>Bitiş Tarihi:</strong><br />
+                                    @selectedTalep.BitisTarihi?.ToString("dd.MM.yyyy")
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <strong>Toplam Gün:</strong><br />
+                                    <span class="badge bg-label-primary">@selectedTalep.ToplamGunSayisi gün</span>
+                                </div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(selectedTalep.Aciklama))
+                            {
+                                <div class="col-12 mb-3">
+                                    <strong>Açıklama:</strong><br />
+                                    <div class="alert alert-info">@selectedTalep.Aciklama</div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(selectedTalep.BirinciOnayciNotu))
+                            {
+                                <div class="col-12 mb-3">
+                                    <strong>1. Onayci Notu:</strong><br />
+                                    <div class="alert alert-secondary">@selectedTalep.BirinciOnayciNotu</div>
+                                </div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(selectedTalep.IkinciOnayciNotu))
+                            {
+                                <div class="col-12 mb-3">
+                                    <strong>2. Onayci Notu:</strong><br />
+                                    <div class="alert alert-secondary">@selectedTalep.IkinciOnayciNotu</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" @onclick="CloseDetailModal">Kapat</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string GetTurBadgeClass(IzinMazeretTuru tur)
+    {
+        return tur switch
+        {
+            IzinMazeretTuru.YillikIzin => "bg-label-success",
+            IzinMazeretTuru.HastalikIzni => "bg-label-danger",
+            IzinMazeretTuru.BabalikIzni => "bg-label-primary",
+            IzinMazeretTuru.DoğumIzni => "bg-label-info",
+            IzinMazeretTuru.EvlilikIzni => "bg-label-warning",
+            IzinMazeretTuru.OlumIzni => "bg-label-dark",
+            IzinMazeretTuru.UcretsizIzin => "bg-label-secondary",
+            IzinMazeretTuru.Mazeret => "bg-label-warning",
+            _ => "bg-label-secondary"
+        };
+    }
+
+    private string GetDurumBadgeClass(OnayDurumu durum)
+    {
+        return durum switch
+        {
+            OnayDurumu.Beklemede => "bg-label-warning",
+            OnayDurumu.BirinciOnay => "bg-label-info",
+            OnayDurumu.Onaylandi => "bg-label-success",
+            OnayDurumu.Reddedildi => "bg-label-danger",
+            OnayDurumu.IptalEdildi => "bg-label-secondary",
+            _ => "bg-label-secondary"
+        };
+    }
+}
