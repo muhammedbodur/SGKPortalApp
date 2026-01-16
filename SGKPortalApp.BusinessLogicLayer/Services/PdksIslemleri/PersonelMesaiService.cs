@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using SGKPortalApp.BusinessLogicLayer.Services.Base;
+
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
-using SGKPortalApp.Common.Results;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.DataAccessLayer.Context;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 {
-    public class PersonelMesaiService : BaseService, IPersonelMesaiService
+    public class PersonelMesaiService : IPersonelMesaiService
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<PersonelMesaiService> _logger;
@@ -25,7 +25,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             _logger = logger;
         }
 
-        public async Task<IResult<List<PersonelMesaiListResponseDto>>> GetPersonelMesaiListAsync(PersonelMesaiFilterRequestDto request)
+        public async Task<ApiResponseDto<List<PersonelMesaiListResponseDto>>> GetPersonelMesaiListAsync(PersonelMesaiFilterRequestDto request)
         {
             try
             {
@@ -36,7 +36,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     .FirstOrDefaultAsync(p => p.TcKimlikNo == request.TcKimlikNo);
 
                 if (personel == null)
-                    return Result<List<PersonelMesaiListResponseDto>>.Failure("Personel bulunamadı");
+                    return ApiResponseDto<List<PersonelMesaiListResponseDto>>.ErrorResult("Personel bulunamadı");
 
                 // CekilenData'dan mesai kayıtlarını çek
                 var mesaiKayitlari = await _context.CekilenDatalar
@@ -138,16 +138,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     });
                 }
 
-                return Result<List<PersonelMesaiListResponseDto>>.Success(result);
+                return ApiResponseDto<List<PersonelMesaiListResponseDto>>.SuccessResult(result);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Personel mesai listesi alınırken hata: {TcKimlikNo}", request.TcKimlikNo);
-                return Result<List<PersonelMesaiListResponseDto>>.Failure($"Bir hata oluştu: {ex.Message}");
+                return ApiResponseDto<List<PersonelMesaiListResponseDto>>.ErrorResult($"Bir hata oluştu: {ex.Message}");
             }
         }
 
-        public async Task<IResult<PersonelMesaiBaslikDto>> GetPersonelBaslikBilgiAsync(string tcKimlikNo)
+        public async Task<ApiResponseDto<PersonelMesaiBaslikDto>> GetPersonelBaslikBilgiAsync(string tcKimlikNo)
         {
             try
             {
@@ -156,7 +156,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     .FirstOrDefaultAsync(p => p.TcKimlikNo == tcKimlikNo);
 
                 if (personel == null)
-                    return Result<PersonelMesaiBaslikDto>.Failure("Personel bulunamadı");
+                    return ApiResponseDto<PersonelMesaiBaslikDto>.ErrorResult("Personel bulunamadı");
 
                 var dto = new PersonelMesaiBaslikDto
                 {
@@ -166,12 +166,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     SicilNo = personel.SicilNo
                 };
 
-                return Result<PersonelMesaiBaslikDto>.Success(dto);
+                return ApiResponseDto<PersonelMesaiBaslikDto>.SuccessResult(dto);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Personel başlık bilgisi alınırken hata: {TcKimlikNo}", tcKimlikNo);
-                return Result<PersonelMesaiBaslikDto>.Failure($"Bir hata oluştu: {ex.Message}");
+                return ApiResponseDto<PersonelMesaiBaslikDto>.ErrorResult($"Bir hata oluştu: {ex.Message}");
             }
         }
     }

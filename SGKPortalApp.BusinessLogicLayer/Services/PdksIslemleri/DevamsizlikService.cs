@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using SGKPortalApp.BusinessLogicLayer.Services.Base;
+
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
-using SGKPortalApp.Common.Results;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.DataAccessLayer.Context;
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 {
-    public class DevamsizlikService : BaseService, IDevamsizlikService
+    public class DevamsizlikService : IDevamsizlikService
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<DevamsizlikService> _logger;
@@ -27,7 +27,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             _logger = logger;
         }
 
-        public async Task<IResult<List<DevamsizlikListDto>>> GetDevamsizlikListAsync(DevamsizlikFilterDto filter)
+        public async Task<ApiResponseDto<List<DevamsizlikListDto>>> GetDevamsizlikListAsync(DevamsizlikFilterDto filter)
         {
             try
             {
@@ -89,16 +89,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     OlusturmaTarihi = i.CreatedAt
                 }).ToList();
 
-                return Result<List<DevamsizlikListDto>>.Success(result);
+                return ApiResponseDto<List<DevamsizlikListDto>>.SuccessResult(result);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Devamsızlık listesi alınırken hata");
-                return Result<List<DevamsizlikListDto>>.Failure($"Bir hata oluştu: {ex.Message}");
+                return ApiResponseDto<List<DevamsizlikListDto>>.ErrorResult($"Bir hata oluştu: {ex.Message}");
             }
         }
 
-        public async Task<IResult<int>> CreateDevamsizlikAsync(DevamsizlikCreateDto request)
+        public async Task<ApiResponseDto<int>> CreateDevamsizlikAsync(DevamsizlikCreateDto request)
         {
             try
             {
@@ -107,21 +107,21 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     .AnyAsync(p => p.TcKimlikNo == request.TcKimlikNo);
 
                 if (!personelExists)
-                    return Result<int>.Failure("Personel bulunamadı");
+                    return ApiResponseDto<int>.ErrorResult("Personel bulunamadı");
 
                 // Validate date logic based on type
                 if (request.Turu == IzinMazeretTuru.Mazeret)
                 {
                     if (!request.MazeretTarihi.HasValue)
-                        return Result<int>.Failure("Mazeret için tarih girilmelidir");
+                        return ApiResponseDto<int>.ErrorResult("Mazeret için tarih girilmelidir");
                 }
                 else
                 {
                     if (!request.BaslangicTarihi.HasValue || !request.BitisTarihi.HasValue)
-                        return Result<int>.Failure("İzin için başlangıç ve bitiş tarihleri girilmelidir");
+                        return ApiResponseDto<int>.ErrorResult("İzin için başlangıç ve bitiş tarihleri girilmelidir");
 
                     if (request.BaslangicTarihi > request.BitisTarihi)
-                        return Result<int>.Failure("Başlangıç tarihi bitiş tarihinden büyük olamaz");
+                        return ApiResponseDto<int>.ErrorResult("Başlangıç tarihi bitiş tarihinden büyük olamaz");
                 }
 
                 var entity = new IzinMazeretTalep
@@ -145,16 +145,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 _logger.LogInformation("Devamsızlık kaydı oluşturuldu: {TcKimlikNo} - {Turu}",
                     request.TcKimlikNo, request.Turu);
 
-                return Result<int>.Success(entity.IzinMazeretTalepId);
+                return ApiResponseDto<int>.SuccessResult(entity.IzinMazeretTalepId);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Devamsızlık oluştururken hata: {TcKimlikNo}", request.TcKimlikNo);
-                return Result<int>.Failure($"Bir hata oluştu: {ex.Message}");
+                return ApiResponseDto<int>.ErrorResult($"Bir hata oluştu: {ex.Message}");
             }
         }
 
-        public async Task<IResult<bool>> OnaylaDevamsizlikAsync(int id, int onaylayanSicilNo)
+        public async Task<ApiResponseDto<bool>> OnaylaDevamsizlikAsync(int id, int onaylayanSicilNo)
         {
             try
             {
@@ -162,7 +162,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     .FirstOrDefaultAsync(i => i.IzinMazeretTalepId == id && i.IsActive);
 
                 if (entity == null)
-                    return Result<bool>.Failure("Kayıt bulunamadı");
+                    return ApiResponseDto<bool>.ErrorResult("Kayıt bulunamadı");
 
                 // Basitleştirilmiş onay - her ikisini de onayla
                 entity.BirinciOnayDurumu = OnayDurumu.Onaylandi;
@@ -175,16 +175,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 _logger.LogInformation("Devamsızlık onaylandı: {Id} - Onaylayan Sicil: {SicilNo}",
                     id, onaylayanSicilNo);
 
-                return Result<bool>.Success(true);
+                return ApiResponseDto<bool>.SuccessResult(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Devamsızlık onaylanırken hata: {Id}", id);
-                return Result<bool>.Failure($"Bir hata oluştu: {ex.Message}");
+                return ApiResponseDto<bool>.ErrorResult($"Bir hata oluştu: {ex.Message}");
             }
         }
 
-        public async Task<IResult<bool>> DeleteDevamsizlikAsync(int id)
+        public async Task<ApiResponseDto<bool>> DeleteDevamsizlikAsync(int id)
         {
             try
             {
@@ -192,7 +192,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     .FirstOrDefaultAsync(i => i.IzinMazeretTalepId == id && i.IsActive);
 
                 if (entity == null)
-                    return Result<bool>.Failure("Kayıt bulunamadı");
+                    return ApiResponseDto<bool>.ErrorResult("Kayıt bulunamadı");
 
                 // Soft delete
                 entity.IsActive = false;
@@ -200,12 +200,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 
                 _logger.LogInformation("Devamsızlık silindi (soft delete): {Id}", id);
 
-                return Result<bool>.Success(true);
+                return ApiResponseDto<bool>.SuccessResult(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Devamsızlık silinirken hata: {Id}", id);
-                return Result<bool>.Failure($"Bir hata oluştu: {ex.Message}");
+                return ApiResponseDto<bool>.ErrorResult($"Bir hata oluştu: {ex.Message}");
             }
         }
 

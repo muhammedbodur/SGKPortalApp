@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using SGKPortalApp.BusinessLogicLayer.Services.Base;
+
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
-using SGKPortalApp.Common.Results;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.DataAccessLayer.Context;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 {
-    public class SgmMesaiService : BaseService, ISgmMesaiService
+    public class SgmMesaiService : ISgmMesaiService
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<SgmMesaiService> _logger;
@@ -25,7 +25,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             _logger = logger;
         }
 
-        public async Task<IResult<SgmMesaiReportDto>> GetSgmMesaiReportAsync(SgmMesaiFilterRequestDto request)
+        public async Task<ApiResponseDto<SgmMesaiReportDto>> GetSgmMesaiReportAsync(SgmMesaiFilterRequestDto request)
         {
             try
             {
@@ -34,7 +34,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     .FirstOrDefaultAsync(s => s.SgmId == request.SgmId);
 
                 if (sgm == null)
-                    return Result<SgmMesaiReportDto>.Failure("SGM bulunamadı");
+                    return ApiResponseDto<SgmMesaiReportDto>.ErrorResult("SGM bulunamadı");
 
                 // Get Servis info if provided
                 string? servisAdi = null;
@@ -64,7 +64,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     .ToListAsync();
 
                 if (!personnelList.Any())
-                    return Result<SgmMesaiReportDto>.Failure("Bu SGM/Servis için personel bulunamadı");
+                    return ApiResponseDto<SgmMesaiReportDto>.ErrorResult("Bu SGM/Servis için personel bulunamadı");
 
                 // Calculate total days in date range
                 var totalDays = (request.BitisTarihi.Date - request.BaslangicTarihi.Date).Days + 1;
@@ -92,12 +92,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     Personeller = personelOzetleri
                 };
 
-                return Result<SgmMesaiReportDto>.Success(report);
+                return ApiResponseDto<SgmMesaiReportDto>.SuccessResult(report);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "SGM mesai raporu alınırken hata: {SgmId}", request.SgmId);
-                return Result<SgmMesaiReportDto>.Failure($"Bir hata oluştu: {ex.Message}");
+                return ApiResponseDto<SgmMesaiReportDto>.ErrorResult($"Bir hata oluştu: {ex.Message}");
             }
         }
 

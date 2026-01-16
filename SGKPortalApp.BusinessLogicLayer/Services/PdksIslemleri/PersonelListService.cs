@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using SGKPortalApp.BusinessLogicLayer.Services.Base;
+
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
-using SGKPortalApp.Common.Results;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.DataAccessLayer.Context;
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 {
-    public class PersonelListService : BaseService, IPersonelListService
+    public class PersonelListService : IPersonelListService
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<PersonelListService> _logger;
@@ -40,7 +40,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             _logger = logger;
         }
 
-        public async Task<IResult<List<PersonelListResponseDto>>> GetPersonelListAsync(
+        public async Task<ApiResponseDto<List<PersonelListResponseDto>>> GetPersonelListAsync(
             PersonelListFilterRequestDto request,
             string currentUserTcKimlikNo)
         {
@@ -56,7 +56,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     .FirstOrDefaultAsync(p => p.TcKimlikNo == currentUserTcKimlikNo);
 
                 if (currentUser == null)
-                    return Result<List<PersonelListResponseDto>>.Failure("Kullanıcı bulunamadı");
+                    return ApiResponseDto<List<PersonelListResponseDto>>.ErrorResult("Kullanıcı bulunamadı");
 
                 // Check authorization level
                 bool hasFullAccess = await CheckFullAccessAsync(currentUserTcKimlikNo, currentUser);
@@ -125,16 +125,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     })
                     .ToListAsync();
 
-                return Result<List<PersonelListResponseDto>>.Success(personeller);
+                return ApiResponseDto<List<PersonelListResponseDto>>.SuccessResult(personeller);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Personel listesi alınırken hata: {TcKimlikNo}", currentUserTcKimlikNo);
-                return Result<List<PersonelListResponseDto>>.Failure($"Bir hata oluştu: {ex.Message}");
+                return ApiResponseDto<List<PersonelListResponseDto>>.ErrorResult($"Bir hata oluştu: {ex.Message}");
             }
         }
 
-        public async Task<IResult<bool>> UpdatePersonelAktifDurumAsync(
+        public async Task<ApiResponseDto<bool>> UpdatePersonelAktifDurumAsync(
             PersonelAktifDurumUpdateDto request,
             string currentUserTcKimlikNo)
         {
@@ -146,19 +146,19 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     .FirstOrDefaultAsync(p => p.TcKimlikNo == currentUserTcKimlikNo);
 
                 if (currentUser == null)
-                    return Result<bool>.Failure("Kullanıcı bulunamadı");
+                    return ApiResponseDto<bool>.ErrorResult("Kullanıcı bulunamadı");
 
                 // Check authorization
                 bool hasFullAccess = await CheckFullAccessAsync(currentUserTcKimlikNo, currentUser);
                 if (!hasFullAccess)
-                    return Result<bool>.Failure("Bu işlem için yetkiniz yok");
+                    return ApiResponseDto<bool>.ErrorResult("Bu işlem için yetkiniz yok");
 
                 // Get target personel
                 var personel = await _context.Personeller
                     .FirstOrDefaultAsync(p => p.TcKimlikNo == request.TcKimlikNo);
 
                 if (personel == null)
-                    return Result<bool>.Failure("Personel bulunamadı");
+                    return ApiResponseDto<bool>.ErrorResult("Personel bulunamadı");
 
                 // Update aktif durum
                 personel.PersonelAktiflikDurum = request.Aktif
@@ -170,12 +170,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 _logger.LogInformation("Personel aktiflik durumu güncellendi: {TcKimlikNo} -> {Durum}",
                     request.TcKimlikNo, personel.PersonelAktiflikDurum);
 
-                return Result<bool>.Success(true);
+                return ApiResponseDto<bool>.SuccessResult(true);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Personel aktiflik durumu güncellenirken hata: {TcKimlikNo}", request.TcKimlikNo);
-                return Result<bool>.Failure($"Bir hata oluştu: {ex.Message}");
+                return ApiResponseDto<bool>.ErrorResult($"Bir hata oluştu: {ex.Message}");
             }
         }
 
