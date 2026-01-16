@@ -448,10 +448,19 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="menu-item @(IsSectionActive("/pdks/mesai") ? "active" : "")">
-                        <a href="/pdks/mesai/calisma-gunleri" class="menu-link">
+                    <li class="menu-item @(IsSectionActive("/pdks/mesai") ? "active open" : "")">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                            <i class="menu-icon tf-icons bx bx-time-five"></i>
                             <div>Mesai Yönetimi</div>
                         </a>
+                        <ul class="menu-sub">
+                            <li class="menu-item @(IsActive("/pdks/mesai/listele") ? "active" : "")">
+                                <a href="/pdks/mesai/listele" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-list-ul"></i>
+                                    <div>Mesai Listeleme</div>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <li class="menu-item @(IsSectionActive("/pdks/raporlar") ? "active" : "")">
                         <a href="/pdks/raporlar/personel-mesai" class="menu-link">
