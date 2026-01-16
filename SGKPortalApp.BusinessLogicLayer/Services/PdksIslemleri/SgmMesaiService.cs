@@ -4,6 +4,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PdksIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
@@ -45,7 +46,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 var tumPersoneller = await personelRepo.GetAllWithDetailsAsync();
 
                 var personeller = tumPersoneller
-                    .Where(p => p.IsActive &&
+                    .Where(p => p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif &&
                                p.Departman != null &&
                                p.Departman.SgmId == request.SgmId &&
                                (!request.ServisId.HasValue || p.ServisId == request.ServisId.Value))
@@ -78,7 +79,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                         .ToList();
 
                     var personelIzinMazeretler = tumIzinMazeretler
-                        .Where(im => im.PersonelTcKimlikNo == personel.TcKimlikNo)
+                        .Where(im => im.TcKimlikNo == personel.TcKimlikNo)
                         .ToList();
 
                     var ozet = ProcessPersonelMesai(
@@ -154,10 +155,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 // İzin/Mazeret kontrolü
                 if (izinMazeret != null)
                 {
-                    gunlukDto.Durum = izinMazeret.IzinMazeretTuru.ToString();
+                    gunlukDto.Durum = izinMazeret.Turu.ToString();
                     gunlukDto.MesaiSuresi = "-";
 
-                    if (izinMazeret.IzinMazeretTuru.ToString().Contains("İzin"))
+                    if (izinMazeret.Turu.ToString().Contains("İzin"))
                         izinliGun++;
                     else
                         mazeretliGun++;
