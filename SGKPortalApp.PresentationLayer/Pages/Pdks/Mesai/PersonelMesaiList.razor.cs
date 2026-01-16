@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +17,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
         private List<PersonelListResponseDto> personelList = new();
-        private List<SgmDto> sgmList = new();
         private List<DepartmanDto> departmanList = new();
 
         private bool isLoading = false;
-        private int? filterSgmId = null;
         private int? filterDepartmanId = null;
         private bool sadeceAktifler = true;
         private string? aramaMetni = null;
@@ -36,15 +35,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         {
             try
             {
-                // Load SGM list
-                var sgmResponse = await HttpClient.GetFromJsonAsync<ApiResponse<List<SgmDto>>>("/api/sgm/liste");
-                if (sgmResponse?.Success == true && sgmResponse.Data != null)
-                {
-                    sgmList = sgmResponse.Data;
-                }
-
                 // Load Departman list
-                var deptResponse = await HttpClient.GetFromJsonAsync<ApiResponse<List<DepartmanDto>>>("/api/departman/liste");
+                var deptResponse = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<DepartmanDto>>>("/api/departman/liste");
                 if (deptResponse?.Success == true && deptResponse.Data != null)
                 {
                     departmanList = deptResponse.Data;
@@ -65,7 +57,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
 
                 var request = new PersonelListFilterRequestDto
                 {
-                    SgmId = filterSgmId,
                     DepartmanId = filterDepartmanId,
                     SadeceAktifler = sadeceAktifler,
                     AramaMetni = aramaMetni
@@ -75,7 +66,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<PersonelListResponseDto>>>();
+                    var result = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<PersonelListResponseDto>>>();
 
                     if (result?.Success == true && result.Data != null)
                     {
@@ -107,7 +98,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var result = await response.Content.ReadFromJsonAsync<ApiResponse<bool>>();
+                    var result = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                     if (result?.Success == true)
                     {
@@ -126,24 +117,5 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             }
         }
 
-        // Helper DTOs for filter dropdowns
-        private class SgmDto
-        {
-            public int SgmId { get; set; }
-            public string SgmAdi { get; set; } = string.Empty;
-        }
-
-        private class DepartmanDto
-        {
-            public int DepartmanId { get; set; }
-            public string DepartmanAdi { get; set; } = string.Empty;
-        }
-
-        private class ApiResponse<T>
-        {
-            public bool Success { get; set; }
-            public T? Data { get; set; }
-            public string? Message { get; set; }
-        }
     }
 }

@@ -1,30 +1,41 @@
-@page "/pdks/mesai/sgm-rapor"
+@page "/pdks/mesai/departman-rapor"
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
+@using SGKPortalApp.PresentationLayer.Components.Permission
 @inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 
-<PageTitle>SGM Mesai Raporu - SGK Portal</PageTitle>
+<PageTitle>Departman Mesai Raporu - SGK Portal</PageTitle>
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Başlık -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">
-                <i class="bx bx-building"></i> SGM Bazlı Mesai Raporu
-            </h5>
-        </div>
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
     </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <!-- Başlık -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bx bx-building"></i> Departman Bazlı Mesai Raporu
+                    </h5>
+                </div>
+            </div>
 
     <!-- Filtre -->
     <div class="card mb-4">
         <div class="card-body">
             <div class="row">
                 <div class="col-md-3">
-                    <label class="form-label">SGM *</label>
-                    <select class="form-select" @bind="filterSgmId" required>
+                    <label class="form-label">Departman *</label>
+                    <select class="form-select" @bind="filterDepartmanId" required>
                         <option value="">Seçiniz...</option>
-                        @foreach (var sgm in sgmList)
+                        @foreach (var departman in departmanList)
                         {
-                            <option value="@sgm.SgmId">@sgm.SgmAdi</option>
+                            <option value="@departman.DepartmanId">@departman.DepartmanAdi</option>
                         }
                     </select>
                 </div>
@@ -73,7 +84,7 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h5 class="mb-0">@report.SgmAdi @(report.ServisAdi != null ? $" - {report.ServisAdi}" : "")</h5>
+                    <h5 class="mb-0">@report.DepartmanAdi @(report.ServisAdi != null ? $" - {report.ServisAdi}" : "")</h5>
                     <small class="text-muted">
                         @report.BaslangicTarihi.ToString("dd.MM.yyyy") - @report.BitisTarihi.ToString("dd.MM.yyyy")
                     </small>
@@ -235,7 +246,9 @@
             </div>
         </div>
     }
-</div>
+        </div>
+    </FieldPermissionScope>
+}
 
 @code {
     private string GetGunAdi(DayOfWeek gun)

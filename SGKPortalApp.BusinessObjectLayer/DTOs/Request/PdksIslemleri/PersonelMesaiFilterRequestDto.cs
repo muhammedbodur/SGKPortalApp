@@ -18,7 +18,6 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri
         [Required]
         public DateTime BitisTarihi { get; set; }
 
-        public int? SgmId { get; set; }
         public int? ServisId { get; set; }
     }
 }

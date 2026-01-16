@@ -15,46 +15,45 @@ using System.Threading.Tasks;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 {
-    public class SgmMesaiService : ISgmMesaiService
+    public class DepartmanMesaiService : IDepartmanMesaiService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<SgmMesaiService> _logger;
+        private readonly ILogger<DepartmanMesaiService> _logger;
 
-        public SgmMesaiService(
+        public DepartmanMesaiService(
             IUnitOfWork unitOfWork,
-            ILogger<SgmMesaiService> logger)
+            ILogger<DepartmanMesaiService> logger)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
 
-        public async Task<ApiResponseDto<SgmMesaiReportDto>> GetSgmMesaiReportAsync(SgmMesaiFilterRequestDto request)
+        public async Task<ApiResponseDto<DepartmanMesaiReportDto>> GetDepartmanMesaiReportAsync(DepartmanMesaiFilterRequestDto request)
         {
             try
             {
-                // 1. SGM bilgisini al
-                var sgmRepo = _unitOfWork.Repository<Sgm>();
-                var sgm = await sgmRepo.GetByIdAsync(request.SgmId);
+                // 1. Departman bilgisini al
+                var departmanRepo = _unitOfWork.Repository<Departman>();
+                var departman = await departmanRepo.GetByIdAsync(request.DepartmanId);
 
-                if (sgm == null)
+                if (departman == null)
                 {
-                    return ApiResponseDto<SgmMesaiReportDto>.ErrorResult($"SGM bulunamadı: {request.SgmId}");
+                    return ApiResponseDto<DepartmanMesaiReportDto>.ErrorResult($"Departman bulunamadı: {request.DepartmanId}");
                 }
 
-                // 2. SGM'ye bağlı personelleri al
+                // 2. Departmana bağlı personelleri al
                 var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
                 var tumPersoneller = await personelRepo.GetAllWithDetailsAsync();
 
                 var personeller = tumPersoneller
                     .Where(p => p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif &&
-                               p.Departman != null &&
-                               p.Departman.SgmId == request.SgmId &&
+                               p.DepartmanId == request.DepartmanId &&
                                (!request.ServisId.HasValue || p.ServisId == request.ServisId.Value))
                     .ToList();
 
                 if (!personeller.Any())
                 {
-                    return ApiResponseDto<SgmMesaiReportDto>.ErrorResult("Belirtilen kriterlerde personel bulunamadı");
+                    return ApiResponseDto<DepartmanMesaiReportDto>.ErrorResult("Belirtilen kriterlerde personel bulunamadı");
                 }
 
                 // 3. Tüm personeller için CekilenData kayıtlarını çek
@@ -97,9 +96,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     ? personeller.FirstOrDefault()?.Servis?.ServisAdi
                     : null;
 
-                var report = new SgmMesaiReportDto
+                var report = new DepartmanMesaiReportDto
                 {
-                    SgmAdi = sgm.SgmAdi,
+                    DepartmanAdi = departman.DepartmanAdi,
                     ServisAdi = servisAdi,
                     BaslangicTarihi = request.BaslangicTarihi,
                     BitisTarihi = request.BitisTarihi,
@@ -107,16 +106,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 };
 
                 _logger.LogInformation(
-                    "SGM mesai raporu oluşturuldu: {SgmAdi}, {PersonelSayisi} personel",
-                    sgm.SgmAdi,
+                    "Departman mesai raporu oluşturuldu: {DepartmanAdi}, {PersonelSayisi} personel",
+                    departman.DepartmanAdi,
                     personelOzetleri.Count);
 
-                return ApiResponseDto<SgmMesaiReportDto>.SuccessResult(report);
+                return ApiResponseDto<DepartmanMesaiReportDto>.SuccessResult(report);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "SGM mesai raporu oluşturulurken hata oluştu: SgmId={SgmId}", request.SgmId);
-                return ApiResponseDto<SgmMesaiReportDto>.ErrorResult($"Hata: {ex.Message}");
+                _logger.LogError(ex, "Departman mesai raporu oluşturulurken hata oluştu: DepartmanId={DepartmanId}", request.DepartmanId);
+                return ApiResponseDto<DepartmanMesaiReportDto>.ErrorResult($"Hata: {ex.Message}");
             }
         }
 

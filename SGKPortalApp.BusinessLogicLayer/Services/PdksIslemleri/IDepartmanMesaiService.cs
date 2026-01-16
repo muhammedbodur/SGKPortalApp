@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 {
-    public interface ISgmMesaiService
+    public interface IDepartmanMesaiService
     {
-        Task<ApiResponseDto<SgmMesaiReportDto>> GetSgmMesaiReportAsync(SgmMesaiFilterRequestDto request);
+        Task<ApiResponseDto<DepartmanMesaiReportDto>> GetDepartmanMesaiReportAsync(DepartmanMesaiFilterRequestDto request);
     }
 }

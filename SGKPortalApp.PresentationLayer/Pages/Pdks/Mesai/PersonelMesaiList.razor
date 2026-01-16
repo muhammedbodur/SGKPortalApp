@@ -1,33 +1,34 @@
 @page "/pdks/mesai/personel-listesi"
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
+@using SGKPortalApp.PresentationLayer.Components.Permission
 @inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 
 <PageTitle>Personel Mesai Listesi - SGK Portal</PageTitle>
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Başlık -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">
-                <i class="bx bx-user-check"></i> Personel Mesai Listesi
-            </h5>
-        </div>
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
     </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <!-- Başlık -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bx bx-user-check"></i> Personel Mesai Listesi
+                    </h5>
+                </div>
+            </div>
 
     <!-- Filtre -->
     <div class="card mb-4">
         <div class="card-body">
             <div class="row">
-                <div class="col-md-3">
-                    <label class="form-label">SGM</label>
-                    <select class="form-select" @bind="filterSgmId">
-                        <option value="">Tümü</option>
-                        @foreach (var sgm in sgmList)
-                        {
-                            <option value="@sgm.SgmId">@sgm.SgmAdi</option>
-                        }
-                    </select>
-                </div>
                 <div class="col-md-3">
                     <label class="form-label">Departman</label>
                     <select class="form-select" @bind="filterDepartmanId">
@@ -89,7 +90,6 @@
                             <th>Ad Soyad</th>
                             <th>Departman</th>
                             <th>Servis</th>
-                            <th>SGM</th>
                             <th>Email</th>
                             <th>Cep Telefonu</th>
                             <th>Durum</th>
@@ -104,7 +104,6 @@
                                 <td>@personel.AdSoyad</td>
                                 <td>@personel.DepartmanAdi</td>
                                 <td>@personel.ServisAdi</td>
-                                <td>@personel.SgmAdi</td>
                                 <td><small>@personel.Email</small></td>
                                 <td>@personel.CepTelefonu</td>
                                 <td>
@@ -146,4 +145,6 @@
             </div>
         </div>
     }
-</div>
+        </div>
+    </FieldPermissionScope>
+}

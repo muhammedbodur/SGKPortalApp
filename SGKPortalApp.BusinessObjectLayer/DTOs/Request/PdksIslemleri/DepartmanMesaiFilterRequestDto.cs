@@ -4,12 +4,13 @@ using System.ComponentModel.DataAnnotations;
 namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri
 {
     /// <summary>
-    /// SGM Mesai Raporu Filtre Request DTO
+    /// Departman Mesai Raporu Filtre Request DTO
+    /// Departman seviyesinde toplu mesai raporu
     /// </summary>
-    public class SgmMesaiFilterRequestDto
+    public class DepartmanMesaiFilterRequestDto
     {
         [Required]
-        public int SgmId { get; set; }
+        public int DepartmanId { get; set; }
 
         public int? ServisId { get; set; }
 

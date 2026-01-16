@@ -5,7 +5,6 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri
     /// </summary>
     public class PersonelListFilterRequestDto
     {
-        public int? SgmId { get; set; }
         public int? DepartmanId { get; set; }
         public int? ServisId { get; set; }
         public bool? SadeceAktifler { get; set; } = true;

@@ -11,7 +11,6 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
         public int PersonelKayitNo { get; set; }
         public string DepartmanAdi { get; set; } = string.Empty;
         public string? ServisAdi { get; set; }
-        public string? SgmAdi { get; set; }
         public bool Aktif { get; set; }
         public string? Email { get; set; }
         public string? CepTelefonu { get; set; }
