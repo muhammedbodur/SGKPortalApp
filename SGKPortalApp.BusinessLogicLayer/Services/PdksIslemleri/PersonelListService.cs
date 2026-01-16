@@ -3,6 +3,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 using System;
@@ -39,7 +40,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 // Aktif durum filtresi
                 if (request.SadeceAktifler.HasValue && request.SadeceAktifler.Value)
                 {
-                    query = query.Where(p => p.IsActive);
+                    query = query.Where(p => p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif);
                 }
 
                 // SGM filtresi
@@ -79,7 +80,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     DepartmanAdi = p.Departman?.DepartmanAdi ?? "",
                     ServisAdi = p.Servis?.ServisAdi,
                     SgmAdi = p.Departman?.Sgm?.SgmAdi,
-                    Aktif = p.IsActive,
+                    Aktif = p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif,
                     Email = p.Email,
                     CepTelefonu = p.CepTelefonu
                 })
@@ -111,9 +112,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 }
 
                 // 2. Aktif durumu güncelle
-                personel.IsActive = request.Aktif;
-                personel.UpdatedAt = DateTime.Now;
-                personel.UpdatedBy = currentUserTcKimlikNo;
+                personel.PersonelAktiflikDurum = request.Aktif ? PersonelAktiflikDurum.Aktif : PersonelAktiflikDurum.Pasif;
+                personel.DuzenlenmeTarihi = DateTime.Now;
+                personel.DuzenleyenKullanici = currentUserTcKimlikNo;
 
                 // 3. Repository'ye güncelle
                 var genericRepo = _unitOfWork.Repository<Personel>();
