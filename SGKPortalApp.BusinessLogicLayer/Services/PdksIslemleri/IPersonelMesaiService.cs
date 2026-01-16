@@ -1,6 +1,6 @@
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
-using SGKPortalApp.Common.Results;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -14,11 +14,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         /// <summary>
         /// Personel mesai kayıtlarını filtrele
         /// </summary>
-        Task<IResult<List<PersonelMesaiListResponseDto>>> GetPersonelMesaiListAsync(PersonelMesaiFilterRequestDto request);
+        Task<ApiResponseDto<List<PersonelMesaiListResponseDto>>> GetPersonelMesaiListAsync(PersonelMesaiFilterRequestDto request);
 
         /// <summary>
         /// Personel bilgilerini getir
         /// </summary>
-        Task<IResult<PersonelMesaiBaslikDto>> GetPersonelBaslikBilgiAsync(string tcKimlikNo);
+        Task<ApiResponseDto<PersonelMesaiBaslikDto>> GetPersonelBaslikBilgiAsync(string tcKimlikNo);
     }
 }

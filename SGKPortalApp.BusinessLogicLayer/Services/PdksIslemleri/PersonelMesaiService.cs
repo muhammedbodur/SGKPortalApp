@@ -1,178 +1,208 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using SGKPortalApp.BusinessLogicLayer.Services.Base;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
-using SGKPortalApp.Common.Results;
-using SGKPortalApp.DataAccessLayer.Context;
+using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PdksIslemleri;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 {
-    public class PersonelMesaiService : BaseService, IPersonelMesaiService
+    public class PersonelMesaiService : IPersonelMesaiService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<PersonelMesaiService> _logger;
 
         public PersonelMesaiService(
-            ApplicationDbContext context,
+            IUnitOfWork unitOfWork,
             ILogger<PersonelMesaiService> logger)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
             _logger = logger;
         }
 
-        public async Task<IResult<List<PersonelMesaiListResponseDto>>> GetPersonelMesaiListAsync(PersonelMesaiFilterRequestDto request)
+        public async Task<ApiResponseDto<List<PersonelMesaiListResponseDto>>> GetPersonelMesaiListAsync(PersonelMesaiFilterRequestDto request)
         {
             try
             {
-                // Personel bilgisini al
-                var personel = await _context.Personeller
-                    .Include(p => p.Departman)
-                    .Include(p => p.Servis)
-                    .FirstOrDefaultAsync(p => p.TcKimlikNo == request.TcKimlikNo);
+                // 1. Personel bilgisini al (KayitNo için)
+                var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
+                var personel = await personelRepo.GetByTcKimlikNoWithDetailsAsync(request.TcKimlikNo);
 
                 if (personel == null)
-                    return Result<List<PersonelMesaiListResponseDto>>.Failure("Personel bulunamadı");
-
-                // CekilenData'dan mesai kayıtlarını çek
-                var mesaiKayitlari = await _context.CekilenDatalar
-                    .Where(c => c.KayitNo == personel.PersonelKayitNo.ToString() &&
-                               c.Tarih >= request.BaslangicTarihi &&
-                               c.Tarih <= request.BitisTarihi)
-                    .OrderBy(c => c.Tarih)
-                    .ToListAsync();
-
-                // Günlük bazda grupla (giriş/çıkış eşleştir)
-                var gunlukKayitlar = mesaiKayitlari
-                    .GroupBy(m => m.Tarih!.Value.Date)
-                    .Select(g => new
-                    {
-                        Tarih = g.Key,
-                        Girisler = g.Where(x => x.GirisCikisModu == "0" || x.GirisCikisModu == "I/O").OrderBy(x => x.Tarih).ToList(),
-                        Cikislar = g.Where(x => x.GirisCikisModu == "1" || x.GirisCikisModu == "I/O").OrderByDescending(x => x.Tarih).ToList()
-                    })
-                    .ToList();
-
-                // İzin ve mazeret kayıtlarını çek
-                var izinKayitlari = await _context.IzinMazeretTalepleri
-                    .Where(i => i.TcKimlikNo == request.TcKimlikNo &&
-                               i.BaslangicTarihi >= request.BaslangicTarihi &&
-                               i.BitisTarihi <= request.BitisTarihi &&
-                               i.Turu != BusinessObjectLayer.Enums.PdksIslemleri.IzinMazeretTuru.Mazeret)
-                    .ToListAsync();
-
-                var mazeretKayitlari = await _context.IzinMazeretTalepleri
-                    .Where(m => m.TcKimlikNo == request.TcKimlikNo &&
-                               m.MazeretTarihi >= request.BaslangicTarihi &&
-                               m.MazeretTarihi <= request.BitisTarihi &&
-                               m.Turu == BusinessObjectLayer.Enums.PdksIslemleri.IzinMazeretTuru.Mazeret)
-                    .ToListAsync();
-
-                // Response DTO'ları oluştur
-                var result = new List<PersonelMesaiListResponseDto>();
-
-                foreach (var gunluk in gunlukKayitlar)
                 {
-                    var girisSaati = gunluk.Girisler.FirstOrDefault()?.Tarih;
-                    var cikisSaati = gunluk.Cikislar.FirstOrDefault()?.Tarih;
-
-                    // Mesai süresi hesapla
-                    string mesaiSuresi = "-";
-                    int? mesaiDakika = null;
-                    if (girisSaati.HasValue && cikisSaati.HasValue)
-                    {
-                        var fark = cikisSaati.Value - girisSaati.Value;
-                        mesaiDakika = (int)fark.TotalMinutes;
-                        int saat = mesaiDakika.Value / 60;
-                        int dakika = mesaiDakika.Value % 60;
-                        mesaiSuresi = $"{saat:00}:{dakika:00}";
-                    }
-
-                    // Hafta sonu kontrolü
-                    bool haftaSonu = gunluk.Tarih.DayOfWeek == DayOfWeek.Saturday ||
-                                    gunluk.Tarih.DayOfWeek == DayOfWeek.Sunday;
-
-                    // Geç kalma kontrolü (08:30'dan sonra)
-                    bool gecKalma = false;
-                    if (girisSaati.HasValue && !haftaSonu)
-                    {
-                        var toleransSaati = new TimeSpan(8, 30, 59);
-                        gecKalma = girisSaati.Value.TimeOfDay > toleransSaati;
-                    }
-
-                    // İzin/Mazeret kontrolü
-                    string? detay = null;
-                    var izin = izinKayitlari.FirstOrDefault(i =>
-                        i.BaslangicTarihi <= gunluk.Tarih && i.BitisTarihi >= gunluk.Tarih);
-                    var mazeret = mazeretKayitlari.FirstOrDefault(m =>
-                        m.MazeretTarihi == gunluk.Tarih);
-
-                    if (mazeret != null)
-                        detay = $"{mazeret.Turu} ({mazeret.SaatDilimi})";
-                    else if (izin != null)
-                        detay = izin.Turu.ToString();
-                    else if (haftaSonu)
-                        detay = "Hafta Sonu";
-
-                    result.Add(new PersonelMesaiListResponseDto
-                    {
-                        Tarih = gunluk.Tarih,
-                        TcKimlikNo = personel.TcKimlikNo,
-                        AdSoyad = personel.AdSoyad,
-                        SicilNo = personel.SicilNo,
-                        DepartmanAdi = personel.Departman?.DepartmanAdi ?? "",
-                        ServisAdi = personel.Servis?.ServisAdi,
-                        GirisSaati = girisSaati?.TimeOfDay,
-                        CikisSaati = cikisSaati?.TimeOfDay,
-                        MesaiSuresi = mesaiSuresi,
-                        MesaiSuresiDakika = mesaiDakika,
-                        Detay = detay,
-                        HaftaSonu = haftaSonu,
-                        GecKalma = gecKalma,
-                        IzinTipi = izin?.Turu.ToString(),
-                        MazeretTipi = mazeret?.Turu.ToString()
-                    });
+                    return ApiResponseDto<List<PersonelMesaiListResponseDto>>.ErrorResult($"Personel bulunamadı: {request.TcKimlikNo}");
                 }
 
-                return Result<List<PersonelMesaiListResponseDto>>.Success(result);
+                var kayitNo = personel.PersonelKayitNo.ToString();
+
+                // 2. CekilenData kayıtlarını çek
+                var cekilenDataRepo = _unitOfWork.GetRepository<ICekilenDataRepository>();
+                var cekilenData = await cekilenDataRepo.GetByDateRangeAsync(request.BaslangicTarihi, request.BitisTarihi);
+
+                // KayitNo'ya göre filtrele
+                var personelData = cekilenData
+                    .Where(x => x.KayitNo == kayitNo && x.Tarih.HasValue)
+                    .OrderBy(x => x.Tarih)
+                    .ToList();
+
+                // 3. İzin/Mazeret kayıtlarını al
+                var izinMazeretRepo = _unitOfWork.GetRepository<IIzinMazeretTalepRepository>();
+                var izinMazeretler = await izinMazeretRepo.GetApprovedByPersonelTcAsync(
+                    request.TcKimlikNo,
+                    request.BaslangicTarihi,
+                    request.BitisTarihi);
+
+                // 4. Günlük mesai kayıtlarını oluştur
+                var result = new List<PersonelMesaiListResponseDto>();
+
+                for (var date = request.BaslangicTarihi.Date; date <= request.BitisTarihi.Date; date = date.AddDays(1))
+                {
+                    var gunlukKayitlar = personelData.Where(x => x.Tarih.Value.Date == date).ToList();
+                    var izinMazeret = izinMazeretler.FirstOrDefault(im =>
+                        (im.BaslangicTarihi.HasValue && im.BitisTarihi.HasValue &&
+                         date >= im.BaslangicTarihi.Value.Date && date <= im.BitisTarihi.Value.Date) ||
+                        (im.MazeretTarihi.HasValue && date == im.MazeretTarihi.Value.Date));
+
+                    var mesaiDto = ProcessGunlukMesai(date, gunlukKayitlar, izinMazeret, personel);
+                    result.Add(mesaiDto);
+                }
+
+                return ApiResponseDto<List<PersonelMesaiListResponseDto>>.SuccessResult(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Personel mesai listesi alınırken hata: {TcKimlikNo}", request.TcKimlikNo);
-                return Result<List<PersonelMesaiListResponseDto>>.Failure($"Bir hata oluştu: {ex.Message}");
+                _logger.LogError(ex, "Personel mesai listesi alınırken hata oluştu: {TcKimlikNo}", request.TcKimlikNo);
+                return ApiResponseDto<List<PersonelMesaiListResponseDto>>.ErrorResult($"Hata: {ex.Message}");
             }
         }
 
-        public async Task<IResult<PersonelMesaiBaslikDto>> GetPersonelBaslikBilgiAsync(string tcKimlikNo)
+        public async Task<ApiResponseDto<PersonelMesaiBaslikDto>> GetPersonelBaslikBilgiAsync(string tcKimlikNo)
         {
             try
             {
-                var personel = await _context.Personeller
-                    .Include(p => p.Departman)
-                    .FirstOrDefaultAsync(p => p.TcKimlikNo == tcKimlikNo);
+                var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
+                var personel = await personelRepo.GetByTcKimlikNoWithDetailsAsync(tcKimlikNo);
 
                 if (personel == null)
-                    return Result<PersonelMesaiBaslikDto>.Failure("Personel bulunamadı");
+                {
+                    return ApiResponseDto<PersonelMesaiBaslikDto>.ErrorResult($"Personel bulunamadı: {tcKimlikNo}");
+                }
 
-                var dto = new PersonelMesaiBaslikDto
+                var baslik = new PersonelMesaiBaslikDto
                 {
                     AdSoyad = personel.AdSoyad,
                     DepartmanAdi = personel.Departman?.DepartmanAdi ?? "",
-                    BirimAdi = personel.Departman?.DepartmanAdi,
+                    BirimAdi = personel.Servis?.ServisAdi,
                     SicilNo = personel.SicilNo
                 };
 
-                return Result<PersonelMesaiBaslikDto>.Success(dto);
+                return ApiResponseDto<PersonelMesaiBaslikDto>.SuccessResult(baslik);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Personel başlık bilgisi alınırken hata: {TcKimlikNo}", tcKimlikNo);
-                return Result<PersonelMesaiBaslikDto>.Failure($"Bir hata oluştu: {ex.Message}");
+                _logger.LogError(ex, "Personel başlık bilgisi alınırken hata oluştu: {TcKimlikNo}", tcKimlikNo);
+                return ApiResponseDto<PersonelMesaiBaslikDto>.ErrorResult($"Hata: {ex.Message}");
             }
+        }
+
+        private PersonelMesaiListResponseDto ProcessGunlukMesai(
+            DateTime tarih,
+            List<CekilenData> gunlukKayitlar,
+            IzinMazeretTalep? izinMazeret,
+            Personel personel)
+        {
+            var dto = new PersonelMesaiListResponseDto
+            {
+                Tarih = tarih,
+                TcKimlikNo = personel.TcKimlikNo,
+                AdSoyad = personel.AdSoyad,
+                SicilNo = personel.SicilNo,
+                DepartmanAdi = personel.Departman?.DepartmanAdi ?? "",
+                ServisAdi = personel.Servis?.ServisAdi,
+                HaftaSonu = IsWeekend(tarih)
+            };
+
+            // İzin/Mazeret kontrolü
+            if (izinMazeret != null)
+            {
+                dto.Detay = izinMazeret.IzinMazeretTuru.ToString();
+                dto.IzinTipi = izinMazeret.IzinTipi?.ToString();
+                dto.MazeretTipi = izinMazeret.MazeretTipi?.ToString();
+                dto.MesaiSuresi = "00:00";
+                dto.MesaiSuresiDakika = 0;
+                return dto;
+            }
+
+            // Kayıt yoksa
+            if (!gunlukKayitlar.Any())
+            {
+                dto.Detay = dto.HaftaSonu ? "Hafta Sonu" : "Kayıt Yok";
+                dto.MesaiSuresi = "00:00";
+                dto.MesaiSuresiDakika = 0;
+                return dto;
+            }
+
+            // Giriş/Çıkış eşleştirme
+            var girisKayit = gunlukKayitlar
+                .Where(x => x.GirisCikisModu == "0") // In
+                .OrderBy(x => x.Tarih)
+                .FirstOrDefault();
+
+            var cikisKayit = gunlukKayitlar
+                .Where(x => x.GirisCikisModu == "1") // Out
+                .OrderByDescending(x => x.Tarih)
+                .FirstOrDefault();
+
+            if (girisKayit?.Tarih != null)
+            {
+                dto.GirisSaati = girisKayit.Tarih.Value.TimeOfDay;
+
+                // Geç kalma kontrolü (08:15'ten sonra giriş)
+                var normalGirisSaati = new TimeSpan(8, 15, 0);
+                dto.GecKalma = dto.GirisSaati > normalGirisSaati;
+            }
+
+            if (cikisKayit?.Tarih != null)
+            {
+                dto.CikisSaati = cikisKayit.Tarih.Value.TimeOfDay;
+            }
+
+            // Mesai süresi hesaplama
+            if (dto.GirisSaati.HasValue && dto.CikisSaati.HasValue)
+            {
+                var sure = dto.CikisSaati.Value - dto.GirisSaati.Value;
+                if (sure.TotalMinutes > 0)
+                {
+                    dto.MesaiSuresiDakika = (int)sure.TotalMinutes;
+                    dto.MesaiSuresi = $"{(int)sure.TotalHours:D2}:{sure.Minutes:D2}";
+                }
+                else
+                {
+                    dto.MesaiSuresi = "00:00";
+                    dto.MesaiSuresiDakika = 0;
+                }
+            }
+            else
+            {
+                dto.MesaiSuresi = "00:00";
+                dto.MesaiSuresiDakika = 0;
+                dto.Detay = dto.GirisSaati.HasValue ? "Çıkış Kaydı Yok" : "Eksik Kayıt";
+            }
+
+            return dto;
+        }
+
+        private bool IsWeekend(DateTime date)
+        {
+            return date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday;
         }
     }
 }

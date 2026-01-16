@@ -1,6 +1,6 @@
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
-using SGKPortalApp.Common.Results;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,7 +8,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 {
     public interface IPersonelListService
     {
-        Task<IResult<List<PersonelListResponseDto>>> GetPersonelListAsync(PersonelListFilterRequestDto request, string currentUserTcKimlikNo);
-        Task<IResult<bool>> UpdatePersonelAktifDurumAsync(PersonelAktifDurumUpdateDto request, string currentUserTcKimlikNo);
+        Task<ApiResponseDto<List<PersonelListResponseDto>>> GetPersonelListAsync(PersonelListFilterRequestDto request, string currentUserTcKimlikNo);
+        Task<ApiResponseDto<bool>> UpdatePersonelAktifDurumAsync(PersonelAktifDurumUpdateDto request, string currentUserTcKimlikNo);
     }
 }

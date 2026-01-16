@@ -17,6 +17,12 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
 
         public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
 
+        // SGM İlişkisi
+        public int? SgmId { get; set; }
+        [ForeignKey(nameof(SgmId))]
+        [InverseProperty("Servisler")]
+        public Sgm? Sgm { get; set; }
+
         [InverseProperty("Servis")]
         public ICollection<Personel>? Personeller { get; set; } = new List<Personel>();
     }
