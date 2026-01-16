@@ -1,0 +1,149 @@
+@page "/pdks/mesai/personel-listesi"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>Personel Mesai Listesi - SGK Portal</PageTitle>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Başlık -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bx bx-user-check"></i> Personel Mesai Listesi
+            </h5>
+        </div>
+    </div>
+
+    <!-- Filtre -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">SGM</label>
+                    <select class="form-select" @bind="filterSgmId">
+                        <option value="">Tümü</option>
+                        @foreach (var sgm in sgmList)
+                        {
+                            <option value="@sgm.SgmId">@sgm.SgmAdi</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Departman</label>
+                    <select class="form-select" @bind="filterDepartmanId">
+                        <option value="">Tümü</option>
+                        @foreach (var dept in departmanList)
+                        {
+                            <option value="@dept.DepartmanId">@dept.DepartmanAdi</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Arama (Ad/Sicil)</label>
+                    <input type="text" class="form-control" @bind="aramaMetni" placeholder="Ad soyad veya sicil no" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label d-block">&nbsp;</label>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" @bind="sadeceAktifler" />
+                        <label class="form-check-label">Sadece Aktifler</label>
+                    </div>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" @onclick="LoadPersonelList" disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm"></span>
+                        }
+                        else
+                        {
+                            <i class="bx bx-search"></i>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Personel Listesi -->
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+        </div>
+    }
+    else if (personelList.Any())
+    {
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h5 class="mb-0">Personeller</h5>
+                <span class="badge bg-label-primary">@personelList.Count kayıt</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>Sicil No</th>
+                            <th>Ad Soyad</th>
+                            <th>Departman</th>
+                            <th>Servis</th>
+                            <th>SGM</th>
+                            <th>Email</th>
+                            <th>Cep Telefonu</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var personel in personelList)
+                        {
+                            <tr class="@(personel.Aktif ? "" : "table-secondary")">
+                                <td>@personel.SicilNo</td>
+                                <td>@personel.AdSoyad</td>
+                                <td>@personel.DepartmanAdi</td>
+                                <td>@personel.ServisAdi</td>
+                                <td>@personel.SgmAdi</td>
+                                <td><small>@personel.Email</small></td>
+                                <td>@personel.CepTelefonu</td>
+                                <td>
+                                    @if (personel.Aktif)
+                                    {
+                                        <span class="badge bg-label-success">Aktif</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-label-secondary">Pasif</span>
+                                    }
+                                </td>
+                                <td>
+                                    <a href="/pdks/mesai/listele?tc=@personel.TcKimlikNo"
+                                       class="btn btn-sm btn-outline-primary me-1"
+                                       title="Mesai Detayı">
+                                        <i class="bx bx-calendar"></i>
+                                    </a>
+                                    <button class="btn btn-sm @(personel.Aktif ? "btn-outline-warning" : "btn-outline-success")"
+                                            @onclick="() => ToggleAktifDurum(personel)"
+                                            title="@(personel.Aktif ? "Pasif Yap" : "Aktif Yap")">
+                                        <i class="bx @(personel.Aktif ? "bx-x" : "bx-check")"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else if (!isLoading)
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bx bx-user-x display-1 text-muted"></i>
+                <h5 class="mt-3">Kayıt Bulunamadı</h5>
+                <p class="text-muted">Seçilen kriterlere uygun personel bulunamadı.</p>
+            </div>
+        </div>
+    }
+</div>

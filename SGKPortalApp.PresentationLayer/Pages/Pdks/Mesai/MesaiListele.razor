@@ -1,0 +1,126 @@
+@page "/pdks/mesai/listele"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
+@using SGKPortalApp.Common.Extensions
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>Mesai Listeleme - SGK Portal</PageTitle>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Başlık Bilgileri -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bx bx-user"></i> Personel Bilgileri
+            </h5>
+        </div>
+        <div class="card-body">
+            @if (baslikBilgi != null)
+            {
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>Adı Soyadı:</strong> @baslikBilgi.AdSoyad
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Sicil No:</strong> @baslikBilgi.SicilNo
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Departman:</strong> @baslikBilgi.DepartmanAdi
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Filtre -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-5">
+                    <label class="form-label">Başlangıç Tarihi</label>
+                    <input type="date" class="form-control" @bind="baslangicTarihi" />
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">Bitiş Tarihi</label>
+                    <input type="date" class="form-control" @bind="bitisTarihi" />
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" @onclick="LoadMesaiList" disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        <i class="bx bx-search"></i> Listele
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mesai Listesi -->
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+        </div>
+    }
+    else if (mesaiList.Any())
+    {
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h5 class="mb-0">Mesai Kayıtları</h5>
+                <span class="badge bg-label-primary">@mesaiList.Count kayıt</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Sicil No</th>
+                            <th>Departman</th>
+                            <th>Servis</th>
+                            <th>Giriş S.</th>
+                            <th>Çıkış S.</th>
+                            <th>Mesai Süresi</th>
+                            <th>Detay</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var kayit in mesaiList)
+                        {
+                            var satirClass = kayit.HaftaSonu ? "table-info" :
+                                           kayit.GecKalma ? "table-danger" : "";
+
+                            <tr class="@satirClass">
+                                <td>@kayit.Tarih.ToString("dd.MM.yyyy")</td>
+                                <td>@kayit.SicilNo</td>
+                                <td>@kayit.DepartmanAdi</td>
+                                <td>@kayit.ServisAdi</td>
+                                <td>@(kayit.GirisSaati?.ToString(@"hh\:mm") ?? "-")</td>
+                                <td>@(kayit.CikisSaati?.ToString(@"hh\:mm") ?? "-")</td>
+                                <td>@kayit.MesaiSuresi</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(kayit.Detay))
+                                    {
+                                        <span class="badge bg-label-warning">@kayit.Detay</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else if (!isLoading)
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bx bx-calendar-x display-1 text-muted"></i>
+                <h5 class="mt-3">Kayıt Bulunamadı</h5>
+                <p class="text-muted">Seçilen tarih aralığında mesai kaydı bulunamadı.</p>
+            </div>
+        </div>
+    }
+</div>
