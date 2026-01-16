@@ -32,23 +32,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                // 1. SGM bilgisini al
-                var sgmRepo = _unitOfWork.Repository<Sgm>();
-                var sgm = await sgmRepo.GetByIdAsync(request.SgmId);
+                // 1. Departman bilgisini al
+                var departmanRepo = _unitOfWork.Repository<Departman>();
+                var departman = await departmanRepo.GetByIdAsync(request.DepartmanId);
 
-                if (sgm == null)
+                if (departman == null)
                 {
-                    return ApiResponseDto<SgmMesaiReportDto>.ErrorResult($"SGM bulunamadı: {request.SgmId}");
+                    return ApiResponseDto<SgmMesaiReportDto>.ErrorResult($"Departman bulunamadı: {request.DepartmanId}");
                 }
 
-                // 2. SGM'ye bağlı personelleri al
+                // 2. Departmana bağlı personelleri al
                 var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
                 var tumPersoneller = await personelRepo.GetAllWithDetailsAsync();
 
                 var personeller = tumPersoneller
                     .Where(p => p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif &&
-                               p.Departman != null &&
-                               p.Departman.SgmId == request.SgmId &&
+                               p.DepartmanId == request.DepartmanId &&
                                (!request.ServisId.HasValue || p.ServisId == request.ServisId.Value))
                     .ToList();
 
@@ -99,7 +98,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 
                 var report = new SgmMesaiReportDto
                 {
-                    SgmAdi = sgm.SgmAdi,
+                    DepartmanAdi = departman.DepartmanAdi,
                     ServisAdi = servisAdi,
                     BaslangicTarihi = request.BaslangicTarihi,
                     BitisTarihi = request.BitisTarihi,
@@ -107,15 +106,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 };
 
                 _logger.LogInformation(
-                    "SGM mesai raporu oluşturuldu: {SgmAdi}, {PersonelSayisi} personel",
-                    sgm.SgmAdi,
+                    "Departman mesai raporu oluşturuldu: {DepartmanAdi}, {PersonelSayisi} personel",
+                    departman.DepartmanAdi,
                     personelOzetleri.Count);
 
                 return ApiResponseDto<SgmMesaiReportDto>.SuccessResult(report);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "SGM mesai raporu oluşturulurken hata oluştu: SgmId={SgmId}", request.SgmId);
+                _logger.LogError(ex, "Departman mesai raporu oluşturulurken hata oluştu: DepartmanId={DepartmanId}", request.DepartmanId);
                 return ApiResponseDto<SgmMesaiReportDto>.ErrorResult($"Hata: {ex.Message}");
             }
         }

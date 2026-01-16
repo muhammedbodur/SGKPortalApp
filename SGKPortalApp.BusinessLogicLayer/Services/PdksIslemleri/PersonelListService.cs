@@ -43,11 +43,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     query = query.Where(p => p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif);
                 }
 
-                // SGM filtresi
-                if (request.SgmId.HasValue)
-                {
-                    query = query.Where(p => p.Departman != null && p.Departman.SgmId == request.SgmId.Value);
-                }
 
                 // Departman filtresi
                 if (request.DepartmanId.HasValue)
@@ -79,7 +74,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     PersonelKayitNo = p.PersonelKayitNo,
                     DepartmanAdi = p.Departman != null ? p.Departman.DepartmanAdi : "",
                     ServisAdi = p.Servis != null ? p.Servis.ServisAdi : null,
-                    SgmAdi = p.Departman != null && p.Departman.Sgm != null ? p.Departman.Sgm.SgmAdi : null,
                     Aktif = p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif,
                     Email = p.Email,
                     CepTelefonu = p.CepTelefonu

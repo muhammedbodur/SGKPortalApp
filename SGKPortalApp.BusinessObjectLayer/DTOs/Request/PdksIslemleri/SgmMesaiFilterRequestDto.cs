@@ -5,11 +5,12 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri
 {
     /// <summary>
     /// SGM Mesai Raporu Filtre Request DTO
+    /// SGM = Departman seviyesinde toplu mesai raporu
     /// </summary>
     public class SgmMesaiFilterRequestDto
     {
         [Required]
-        public int SgmId { get; set; }
+        public int DepartmanId { get; set; }
 
         public int? ServisId { get; set; }
 
