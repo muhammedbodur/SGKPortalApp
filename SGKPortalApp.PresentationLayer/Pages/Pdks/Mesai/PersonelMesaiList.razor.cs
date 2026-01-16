@@ -16,11 +16,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
         private List<PersonelListResponseDto> personelList = new();
-        private List<SgmDto> sgmList = new();
         private List<DepartmanDto> departmanList = new();
 
         private bool isLoading = false;
-        private int? filterSgmId = null;
         private int? filterDepartmanId = null;
         private bool sadeceAktifler = true;
         private string? aramaMetni = null;
@@ -36,13 +34,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         {
             try
             {
-                // Load SGM list
-                var sgmResponse = await HttpClient.GetFromJsonAsync<ApiResponse<List<SgmDto>>>("/api/sgm/liste");
-                if (sgmResponse?.Success == true && sgmResponse.Data != null)
-                {
-                    sgmList = sgmResponse.Data;
-                }
-
                 // Load Departman list
                 var deptResponse = await HttpClient.GetFromJsonAsync<ApiResponse<List<DepartmanDto>>>("/api/departman/liste");
                 if (deptResponse?.Success == true && deptResponse.Data != null)
@@ -65,7 +56,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
 
                 var request = new PersonelListFilterRequestDto
                 {
-                    SgmId = filterSgmId,
                     DepartmanId = filterDepartmanId,
                     SadeceAktifler = sadeceAktifler,
                     AramaMetni = aramaMetni
@@ -127,12 +117,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         }
 
         // Helper DTOs for filter dropdowns
-        private class SgmDto
-        {
-            public int SgmId { get; set; }
-            public string SgmAdi { get; set; } = string.Empty;
-        }
-
         private class DepartmanDto
         {
             public int DepartmanId { get; set; }

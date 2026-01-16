@@ -19,16 +19,6 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md-3">
-                    <label class="form-label">SGM</label>
-                    <select class="form-select" @bind="filterSgmId">
-                        <option value="">Tümü</option>
-                        @foreach (var sgm in sgmList)
-                        {
-                            <option value="@sgm.SgmId">@sgm.SgmAdi</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-3">
                     <label class="form-label">Departman</label>
                     <select class="form-select" @bind="filterDepartmanId">
                         <option value="">Tümü</option>
@@ -89,7 +79,6 @@
                             <th>Ad Soyad</th>
                             <th>Departman</th>
                             <th>Servis</th>
-                            <th>SGM</th>
                             <th>Email</th>
                             <th>Cep Telefonu</th>
                             <th>Durum</th>
@@ -104,7 +93,6 @@
                                 <td>@personel.AdSoyad</td>
                                 <td>@personel.DepartmanAdi</td>
                                 <td>@personel.ServisAdi</td>
-                                <td>@personel.SgmAdi</td>
                                 <td><small>@personel.Email</small></td>
                                 <td>@personel.CepTelefonu</td>
                                 <td>
