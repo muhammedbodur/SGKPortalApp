@@ -232,5 +232,11 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
 
         [InverseProperty("Personel")]
         public ICollection<IzinMazeretTalep>? IzinMazeretTalepleri { get; set; } = new List<IzinMazeretTalep>();
+
+        /// <summary>
+        /// Bu personelin sorumlusu olduğu izin onay yetkileri
+        /// </summary>
+        [InverseProperty("SorumluPersonel")]
+        public ICollection<PdksIslemleri.IzinSorumlu>? IzinSorumluluklar { get; set; } = new List<PdksIslemleri.IzinSorumlu>();
     }
 }
