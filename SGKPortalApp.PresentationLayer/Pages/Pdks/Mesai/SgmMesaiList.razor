@@ -1,0 +1,255 @@
+@page "/pdks/mesai/sgm-rapor"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>SGM Mesai Raporu - SGK Portal</PageTitle>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Başlık -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bx bx-building"></i> SGM Bazlı Mesai Raporu
+            </h5>
+        </div>
+    </div>
+
+    <!-- Filtre -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">SGM *</label>
+                    <select class="form-select" @bind="filterSgmId" required>
+                        <option value="">Seçiniz...</option>
+                        @foreach (var sgm in sgmList)
+                        {
+                            <option value="@sgm.SgmId">@sgm.SgmAdi</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Servis</label>
+                    <select class="form-select" @bind="filterServisId">
+                        <option value="">Tümü</option>
+                        @foreach (var servis in servisList)
+                        {
+                            <option value="@servis.ServisId">@servis.ServisAdi</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Başlangıç Tarihi</label>
+                    <input type="date" class="form-control" @bind="baslangicTarihi" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Bitiş Tarihi</label>
+                    <input type="date" class="form-control" @bind="bitisTarihi" />
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" @onclick="LoadReport" disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        <i class="bx bx-bar-chart"></i> Rapor Oluştur
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rapor -->
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+        </div>
+    }
+    else if (report != null && report.Personeller.Any())
+    {
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">@report.SgmAdi @(report.ServisAdi != null ? $" - {report.ServisAdi}" : "")</h5>
+                    <small class="text-muted">
+                        @report.BaslangicTarihi.ToString("dd.MM.yyyy") - @report.BitisTarihi.ToString("dd.MM.yyyy")
+                    </small>
+                </div>
+                <span class="badge bg-label-primary">@report.Personeller.Count personel</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th style="width: 30px;"></th>
+                            <th>Sicil</th>
+                            <th>Ad Soyad</th>
+                            <th>Departman</th>
+                            <th>Servis</th>
+                            <th class="text-center">Toplam Gün</th>
+                            <th class="text-center">Çalışılan</th>
+                            <th class="text-center">İzinli</th>
+                            <th class="text-center">Mazeretli</th>
+                            <th class="text-center">Devamsız</th>
+                            <th class="text-center">H.Sonu</th>
+                            <th class="text-center">Geç</th>
+                            <th class="text-end">Toplam Süre</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var personel in report.Personeller)
+                        {
+                            var detayAcik = expandedRows.Contains(personel.TcKimlikNo);
+
+                            <tr class="@(detayAcik ? "table-active" : "")">
+                                <td>
+                                    <button class="btn btn-sm btn-link p-0"
+                                            @onclick="() => ToggleRow(personel.TcKimlikNo)">
+                                        <i class="bx @(detayAcik ? "bx-chevron-down" : "bx-chevron-right")"></i>
+                                    </button>
+                                </td>
+                                <td>@personel.SicilNo</td>
+                                <td>@personel.AdSoyad</td>
+                                <td><small>@personel.DepartmanAdi</small></td>
+                                <td><small>@personel.ServisAdi</small></td>
+                                <td class="text-center">@personel.ToplamGun</td>
+                                <td class="text-center">
+                                    <span class="badge bg-label-success">@personel.CalistigiGun</span>
+                                </td>
+                                <td class="text-center">
+                                    @if (personel.IzinliGun > 0)
+                                    {
+                                        <span class="badge bg-label-info">@personel.IzinliGun</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (personel.MazeretliGun > 0)
+                                    {
+                                        <span class="badge bg-label-warning">@personel.MazeretliGun</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (personel.DevamsizGun > 0)
+                                    {
+                                        <span class="badge bg-label-danger">@personel.DevamsizGun</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (personel.HaftaSonuCalisma > 0)
+                                    {
+                                        <span class="badge bg-label-primary">@personel.HaftaSonuCalisma</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (personel.GecKalma > 0)
+                                    {
+                                        <span class="badge bg-label-danger">@personel.GecKalma</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <strong>@personel.ToplamMesaiSuresi</strong>
+                                </td>
+                            </tr>
+
+                            @if (detayAcik)
+                            {
+                                <tr>
+                                    <td colspan="13" class="p-0">
+                                        <div class="p-3 bg-light">
+                                            <h6 class="mb-3">Günlük Detay - @personel.AdSoyad</h6>
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-bordered mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Tarih</th>
+                                                            <th>Gün</th>
+                                                            <th>Giriş</th>
+                                                            <th>Çıkış</th>
+                                                            <th>Süre</th>
+                                                            <th>Durum</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var gun in personel.GunlukDetay)
+                                                        {
+                                                            var satirClass = gun.HaftaSonu ? "table-info" :
+                                                                           gun.GecKalma ? "table-danger" : "";
+
+                                                            <tr class="@satirClass">
+                                                                <td>@gun.Tarih.ToString("dd.MM.yyyy")</td>
+                                                                <td>@GetGunAdi(gun.Tarih.DayOfWeek)</td>
+                                                                <td>@(gun.GirisSaati?.ToString(@"hh\:mm") ?? "-")</td>
+                                                                <td>@(gun.CikisSaati?.ToString(@"hh\:mm") ?? "-")</td>
+                                                                <td>@gun.MesaiSuresi</td>
+                                                                <td>
+                                                                    @if (!string.IsNullOrEmpty(gun.Durum))
+                                                                    {
+                                                                        <span class="badge bg-label-warning">@gun.Durum</span>
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else if (!isLoading)
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bx bx-bar-chart-alt-2 display-1 text-muted"></i>
+                <h5 class="mt-3">Rapor Bulunamadı</h5>
+                <p class="text-muted">Lütfen filtre kriterlerini seçip "Rapor Oluştur" butonuna tıklayın.</p>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string GetGunAdi(DayOfWeek gun)
+    {
+        return gun switch
+        {
+            DayOfWeek.Monday => "Pzt",
+            DayOfWeek.Tuesday => "Sal",
+            DayOfWeek.Wednesday => "Çar",
+            DayOfWeek.Thursday => "Per",
+            DayOfWeek.Friday => "Cum",
+            DayOfWeek.Saturday => "Cmt",
+            DayOfWeek.Sunday => "Paz",
+            _ => ""
+        };
+    }
+}
