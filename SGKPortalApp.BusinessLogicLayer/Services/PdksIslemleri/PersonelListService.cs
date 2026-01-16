@@ -1,11 +1,10 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
-using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
-using SGKPortalApp.DataAccessLayer.Context;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,193 +14,124 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 {
     public class PersonelListService : IPersonelListService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<PersonelListService> _logger;
 
-        // Upper management titles that have full access
-        private readonly string[] _upperManagementTitles = new[]
-        {
-            "SUPER USER",
-            "SG İL MÜDÜRÜ",
-            "İL MÜDÜRÜ",
-            "İL MÜDÜR YARDIMCISI",
-            "İL MÜDÜR BAŞYARDIMCISI",
-            "SG İL MÜDÜR YARDIMCISI"
-        };
-
-        // Special sicil numbers that have full access
-        private readonly int[] _specialSicilNumbers = new[] { 418434, 412613, 208032 };
-
         public PersonelListService(
-            ApplicationDbContext context,
+            IUnitOfWork unitOfWork,
             ILogger<PersonelListService> logger)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
             _logger = logger;
         }
 
-        public async Task<ApiResponseDto<List<PersonelListResponseDto>>> GetPersonelListAsync(
-            PersonelListFilterRequestDto request,
-            string currentUserTcKimlikNo)
+        public async Task<ApiResponseDto<List<PersonelListResponseDto>>> GetPersonelListAsync(PersonelListFilterRequestDto request, string currentUserTcKimlikNo)
         {
             try
             {
-                // Get current user with department and title info
-                var currentUser = await _context.Personeller
-                    .Include(p => p.Departman)
-                        .ThenInclude(d => d!.Sgm)
-                    .Include(p => p.Servis)
-                        .ThenInclude(s => s!.Sgm)
-                    .Include(p => p.Unvan)
-                    .FirstOrDefaultAsync(p => p.TcKimlikNo == currentUserTcKimlikNo);
+                // 1. Tüm personelleri çek (detaylarla birlikte)
+                var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
+                var personeller = await personelRepo.GetAllWithDetailsAsync();
 
-                if (currentUser == null)
-                    return ApiResponseDto<List<PersonelListResponseDto>>.ErrorResult("Kullanıcı bulunamadı");
+                // 2. Filtreleme uygula
+                var query = personeller.AsQueryable();
 
-                // Check authorization level
-                bool hasFullAccess = await CheckFullAccessAsync(currentUserTcKimlikNo, currentUser);
-
-                // Build query
-                var query = _context.Personeller
-                    .Include(p => p.Departman)
-                        .ThenInclude(d => d!.Sgm)
-                    .Include(p => p.Servis)
-                        .ThenInclude(s => s!.Sgm)
-                    .AsQueryable();
-
-                // Apply authorization filter
-                if (!hasFullAccess)
+                // Aktif durum filtresi
+                if (request.SadeceAktifler.HasValue && request.SadeceAktifler.Value)
                 {
-                    // Normal users can only see their department
-                    query = query.Where(p => p.DepartmanId == currentUser.DepartmanId);
+                    query = query.Where(p => p.IsActive);
                 }
 
-                // Apply filters
+                // SGM filtresi
                 if (request.SgmId.HasValue)
                 {
-                    query = query.Where(p =>
-                        p.Departman!.SgmId == request.SgmId.Value ||
-                        p.Servis!.SgmId == request.SgmId.Value);
+                    query = query.Where(p => p.Departman != null && p.Departman.SgmId == request.SgmId.Value);
                 }
 
+                // Departman filtresi
                 if (request.DepartmanId.HasValue)
                 {
                     query = query.Where(p => p.DepartmanId == request.DepartmanId.Value);
                 }
 
+                // Servis filtresi
                 if (request.ServisId.HasValue)
                 {
                     query = query.Where(p => p.ServisId == request.ServisId.Value);
                 }
 
-                if (request.SadeceAktifler == true)
-                {
-                    query = query.Where(p => p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif);
-                }
-
+                // Arama metni filtresi (Ad Soyad veya Sicil No)
                 if (!string.IsNullOrWhiteSpace(request.AramaMetni))
                 {
-                    var searchText = request.AramaMetni.ToLower();
+                    var aramaMetni = request.AramaMetni.ToLower();
                     query = query.Where(p =>
-                        p.AdSoyad.ToLower().Contains(searchText) ||
-                        p.SicilNo.ToString().Contains(searchText));
+                        p.AdSoyad.ToLower().Contains(aramaMetni) ||
+                        p.SicilNo.ToString().Contains(aramaMetni));
                 }
 
-                // Execute query and map to DTO
-                var personeller = await query
-                    .OrderBy(p => p.AdSoyad)
-                    .Select(p => new PersonelListResponseDto
-                    {
-                        TcKimlikNo = p.TcKimlikNo,
-                        AdSoyad = p.AdSoyad,
-                        SicilNo = p.SicilNo,
-                        PersonelKayitNo = p.PersonelKayitNo,
-                        DepartmanAdi = p.Departman!.DepartmanAdi,
-                        ServisAdi = p.Servis!.ServisAdi,
-                        SgmAdi = p.Departman!.Sgm!.SgmAdi ?? p.Servis!.Sgm!.SgmAdi,
-                        Aktif = p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif,
-                        Email = p.Email,
-                        CepTelefonu = p.CepTelefonu
-                    })
-                    .ToListAsync();
+                // 3. DTO'ya dönüştür
+                var result = query.Select(p => new PersonelListResponseDto
+                {
+                    TcKimlikNo = p.TcKimlikNo,
+                    AdSoyad = p.AdSoyad,
+                    SicilNo = p.SicilNo,
+                    PersonelKayitNo = p.PersonelKayitNo,
+                    DepartmanAdi = p.Departman?.DepartmanAdi ?? "",
+                    ServisAdi = p.Servis?.ServisAdi,
+                    SgmAdi = p.Departman?.Sgm?.SgmAdi,
+                    Aktif = p.IsActive,
+                    Email = p.Email,
+                    CepTelefonu = p.CepTelefonu
+                })
+                .OrderBy(p => p.AdSoyad)
+                .ToList();
 
-                return ApiResponseDto<List<PersonelListResponseDto>>.SuccessResult(personeller);
+                _logger.LogInformation("Personel listesi alındı: {Count} kayıt", result.Count);
+
+                return ApiResponseDto<List<PersonelListResponseDto>>.SuccessResult(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Personel listesi alınırken hata: {TcKimlikNo}", currentUserTcKimlikNo);
-                return ApiResponseDto<List<PersonelListResponseDto>>.ErrorResult($"Bir hata oluştu: {ex.Message}");
+                _logger.LogError(ex, "Personel listesi alınırken hata oluştu");
+                return ApiResponseDto<List<PersonelListResponseDto>>.ErrorResult($"Hata: {ex.Message}");
             }
         }
 
-        public async Task<ApiResponseDto<bool>> UpdatePersonelAktifDurumAsync(
-            PersonelAktifDurumUpdateDto request,
-            string currentUserTcKimlikNo)
+        public async Task<ApiResponseDto<bool>> UpdatePersonelAktifDurumAsync(PersonelAktifDurumUpdateDto request, string currentUserTcKimlikNo)
         {
             try
             {
-                // Get current user
-                var currentUser = await _context.Personeller
-                    .Include(p => p.Unvan)
-                    .FirstOrDefaultAsync(p => p.TcKimlikNo == currentUserTcKimlikNo);
-
-                if (currentUser == null)
-                    return ApiResponseDto<bool>.ErrorResult("Kullanıcı bulunamadı");
-
-                // Check authorization
-                bool hasFullAccess = await CheckFullAccessAsync(currentUserTcKimlikNo, currentUser);
-                if (!hasFullAccess)
-                    return ApiResponseDto<bool>.ErrorResult("Bu işlem için yetkiniz yok");
-
-                // Get target personel
-                var personel = await _context.Personeller
-                    .FirstOrDefaultAsync(p => p.TcKimlikNo == request.TcKimlikNo);
+                // 1. Personeli bul
+                var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
+                var personel = await personelRepo.GetByTcKimlikNoAsync(request.TcKimlikNo);
 
                 if (personel == null)
-                    return ApiResponseDto<bool>.ErrorResult("Personel bulunamadı");
+                {
+                    return ApiResponseDto<bool>.ErrorResult($"Personel bulunamadı: {request.TcKimlikNo}");
+                }
 
-                // Update aktif durum
-                personel.PersonelAktiflikDurum = request.Aktif
-                    ? PersonelAktiflikDurum.Aktif
-                    : PersonelAktiflikDurum.Pasif;
+                // 2. Aktif durumu güncelle
+                personel.IsActive = request.Aktif;
+                personel.UpdatedAt = DateTime.Now;
+                personel.UpdatedBy = currentUserTcKimlikNo;
 
-                await _context.SaveChangesAsync();
+                // 3. Repository'ye güncelle
+                var genericRepo = _unitOfWork.Repository<Personel>();
+                genericRepo.Update(personel);
+                await _unitOfWork.SaveChangesAsync();
 
-                _logger.LogInformation("Personel aktiflik durumu güncellendi: {TcKimlikNo} -> {Durum}",
-                    request.TcKimlikNo, personel.PersonelAktiflikDurum);
+                _logger.LogInformation(
+                    "Personel aktif durum güncellendi: {TcKimlikNo} -> {Aktif}",
+                    request.TcKimlikNo,
+                    request.Aktif);
 
                 return ApiResponseDto<bool>.SuccessResult(true);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Personel aktiflik durumu güncellenirken hata: {TcKimlikNo}", request.TcKimlikNo);
-                return ApiResponseDto<bool>.ErrorResult($"Bir hata oluştu: {ex.Message}");
+                _logger.LogError(ex, "Personel aktif durum güncellenirken hata oluştu: {TcKimlikNo}", request.TcKimlikNo);
+                return ApiResponseDto<bool>.ErrorResult($"Hata: {ex.Message}");
             }
-        }
-
-        private async Task<bool> CheckFullAccessAsync(string tcKimlikNo,
-            SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Personel personel)
-        {
-            // Layer 1: Check if user is social facilities authority (st)
-            var hasStAuthority = await _context.EpostaYetkilisi
-                .AnyAsync(e => e.SicilNo == personel.SicilNo &&
-                              e.Tip == "st" &&
-                              e.Aktif);
-
-            if (hasStAuthority)
-                return true;
-
-            // Layer 2: Check if user has upper management title
-            if (personel.Unvan != null &&
-                _upperManagementTitles.Contains(personel.Unvan.UnvanAdi.ToUpper()))
-                return true;
-
-            // Layer 3: Check if user has special sicil number
-            if (_specialSicilNumbers.Contains(personel.SicilNo))
-                return true;
-
-            // Layer 4: Normal user - no full access
-            return false;
         }
     }
 }

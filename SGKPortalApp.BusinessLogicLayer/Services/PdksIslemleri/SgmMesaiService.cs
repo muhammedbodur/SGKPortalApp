@@ -1,10 +1,12 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
-using SGKPortalApp.DataAccessLayer.Context;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PdksIslemleri;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,14 +16,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 {
     public class SgmMesaiService : ISgmMesaiService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<SgmMesaiService> _logger;
 
         public SgmMesaiService(
-            ApplicationDbContext context,
+            IUnitOfWork unitOfWork,
             ILogger<SgmMesaiService> logger)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
             _logger = logger;
         }
 
@@ -29,59 +31,70 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         {
             try
             {
-                // Get SGM info
-                var sgm = await _context.Sgm
-                    .FirstOrDefaultAsync(s => s.SgmId == request.SgmId);
+                // 1. SGM bilgisini al
+                var sgmRepo = _unitOfWork.Repository<Sgm>();
+                var sgm = await sgmRepo.GetByIdAsync(request.SgmId);
 
                 if (sgm == null)
-                    return ApiResponseDto<SgmMesaiReportDto>.ErrorResult("SGM bulunamadı");
-
-                // Get Servis info if provided
-                string? servisAdi = null;
-                if (request.ServisId.HasValue)
                 {
-                    var servis = await _context.Servis
-                        .FirstOrDefaultAsync(s => s.ServisId == request.ServisId.Value);
-                    servisAdi = servis?.ServisAdi;
+                    return ApiResponseDto<SgmMesaiReportDto>.ErrorResult($"SGM bulunamadı: {request.SgmId}");
                 }
 
-                // Get personnel list based on SGM and optional Servis filter
-                var personnelQuery = _context.Personeller
-                    .Include(p => p.Departman)
-                        .ThenInclude(d => d!.Sgm)
-                    .Include(p => p.Servis)
-                        .ThenInclude(s => s!.Sgm)
-                    .Where(p => p.Departman!.SgmId == request.SgmId ||
-                               p.Servis!.SgmId == request.SgmId);
+                // 2. SGM'ye bağlı personelleri al
+                var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
+                var tumPersoneller = await personelRepo.GetAllWithDetailsAsync();
 
-                if (request.ServisId.HasValue)
+                var personeller = tumPersoneller
+                    .Where(p => p.IsActive &&
+                               p.Departman != null &&
+                               p.Departman.SgmId == request.SgmId &&
+                               (!request.ServisId.HasValue || p.ServisId == request.ServisId.Value))
+                    .ToList();
+
+                if (!personeller.Any())
                 {
-                    personnelQuery = personnelQuery.Where(p => p.ServisId == request.ServisId.Value);
+                    return ApiResponseDto<SgmMesaiReportDto>.ErrorResult("Belirtilen kriterlerde personel bulunamadı");
                 }
 
-                var personnelList = await personnelQuery
-                    .OrderBy(p => p.AdSoyad)
-                    .ToListAsync();
+                // 3. Tüm personeller için CekilenData kayıtlarını çek
+                var cekilenDataRepo = _unitOfWork.GetRepository<ICekilenDataRepository>();
+                var tumCekilenData = await cekilenDataRepo.GetByDateRangeAsync(request.BaslangicTarihi, request.BitisTarihi);
 
-                if (!personnelList.Any())
-                    return ApiResponseDto<SgmMesaiReportDto>.ErrorResult("Bu SGM/Servis için personel bulunamadı");
+                // 4. İzin/Mazeret kayıtlarını çek
+                var izinMazeretRepo = _unitOfWork.GetRepository<IIzinMazeretTalepRepository>();
+                var tumIzinMazeretler = await izinMazeretRepo.GetByDateRangeAsync(
+                    request.BaslangicTarihi,
+                    request.BitisTarihi);
 
-                // Calculate total days in date range
-                var totalDays = (request.BitisTarihi.Date - request.BaslangicTarihi.Date).Days + 1;
-
-                // Process each personnel's attendance
+                // 5. Her personel için özet oluştur
                 var personelOzetleri = new List<PersonelMesaiOzetDto>();
 
-                foreach (var personel in personnelList)
+                foreach (var personel in personeller)
                 {
-                    var ozet = await CalculatePersonelMesaiOzetAsync(
+                    var kayitNo = personel.PersonelKayitNo.ToString();
+                    var personelCekilenData = tumCekilenData
+                        .Where(x => x.KayitNo == kayitNo && x.Tarih.HasValue)
+                        .OrderBy(x => x.Tarih)
+                        .ToList();
+
+                    var personelIzinMazeretler = tumIzinMazeretler
+                        .Where(im => im.PersonelTcKimlikNo == personel.TcKimlikNo)
+                        .ToList();
+
+                    var ozet = ProcessPersonelMesai(
                         personel,
+                        personelCekilenData,
+                        personelIzinMazeretler,
                         request.BaslangicTarihi,
-                        request.BitisTarihi,
-                        totalDays);
+                        request.BitisTarihi);
 
                     personelOzetleri.Add(ozet);
                 }
+
+                // 6. Raporu oluştur
+                var servisAdi = request.ServisId.HasValue
+                    ? personeller.FirstOrDefault()?.Servis?.ServisAdi
+                    : null;
 
                 var report = new SgmMesaiReportDto
                 {
@@ -89,157 +102,141 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     ServisAdi = servisAdi,
                     BaslangicTarihi = request.BaslangicTarihi,
                     BitisTarihi = request.BitisTarihi,
-                    Personeller = personelOzetleri
+                    Personeller = personelOzetleri.OrderBy(p => p.AdSoyad).ToList()
                 };
+
+                _logger.LogInformation(
+                    "SGM mesai raporu oluşturuldu: {SgmAdi}, {PersonelSayisi} personel",
+                    sgm.SgmAdi,
+                    personelOzetleri.Count);
 
                 return ApiResponseDto<SgmMesaiReportDto>.SuccessResult(report);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "SGM mesai raporu alınırken hata: {SgmId}", request.SgmId);
-                return ApiResponseDto<SgmMesaiReportDto>.ErrorResult($"Bir hata oluştu: {ex.Message}");
+                _logger.LogError(ex, "SGM mesai raporu oluşturulurken hata oluştu: SgmId={SgmId}", request.SgmId);
+                return ApiResponseDto<SgmMesaiReportDto>.ErrorResult($"Hata: {ex.Message}");
             }
         }
 
-        private async Task<PersonelMesaiOzetDto> CalculatePersonelMesaiOzetAsync(
-            SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri.Personel personel,
+        private PersonelMesaiOzetDto ProcessPersonelMesai(
+            Personel personel,
+            List<CekilenData> cekilenDataList,
+            List<IzinMazeretTalep> izinMazeretList,
             DateTime baslangicTarihi,
-            DateTime bitisTarihi,
-            int toplamGun)
+            DateTime bitisTarihi)
         {
-            // Get attendance records
-            var mesaiKayitlari = await _context.CekilenDatalar
-                .Where(c => c.KayitNo == personel.PersonelKayitNo.ToString() &&
-                           c.Tarih >= baslangicTarihi &&
-                           c.Tarih <= bitisTarihi)
-                .OrderBy(c => c.Tarih)
-                .ToListAsync();
+            var gunlukDetaylar = new List<PersonelMesaiGunlukDto>();
+            var toplamGun = 0;
+            var calistigiGun = 0;
+            var izinliGun = 0;
+            var mazeretliGun = 0;
+            var devamsizGun = 0;
+            var haftaSonuCalisma = 0;
+            var gecKalma = 0;
+            var toplamMesaiDakika = 0;
 
-            // Group by day and match entry/exit
-            var gunlukKayitlar = mesaiKayitlari
-                .GroupBy(m => m.Tarih!.Value.Date)
-                .Select(g => new
-                {
-                    Tarih = g.Key,
-                    Girisler = g.Where(x => x.GirisCikisModu == "0" || x.GirisCikisModu == "I/O").OrderBy(x => x.Tarih).ToList(),
-                    Cikislar = g.Where(x => x.GirisCikisModu == "1" || x.GirisCikisModu == "I/O").OrderByDescending(x => x.Tarih).ToList()
-                })
-                .ToList();
-
-            // Get leave/excuse records
-            var izinKayitlari = await _context.IzinMazeretTalepleri
-                .Where(i => i.TcKimlikNo == personel.TcKimlikNo &&
-                           i.BaslangicTarihi >= baslangicTarihi &&
-                           i.BitisTarihi <= bitisTarihi &&
-                           i.Turu != BusinessObjectLayer.Enums.PdksIslemleri.IzinMazeretTuru.Mazeret)
-                .ToListAsync();
-
-            var mazeretKayitlari = await _context.IzinMazeretTalepleri
-                .Where(m => m.TcKimlikNo == personel.TcKimlikNo &&
-                           m.MazeretTarihi >= baslangicTarihi &&
-                           m.MazeretTarihi <= bitisTarihi &&
-                           m.Turu == BusinessObjectLayer.Enums.PdksIslemleri.IzinMazeretTuru.Mazeret)
-                .ToListAsync();
-
-            // Calculate statistics
-            int calistigiGun = 0;
-            int izinliGun = 0;
-            int mazeretliGun = 0;
-            int haftaSonuCalisma = 0;
-            int gecKalma = 0;
-            int toplamMesaiDakika = 0;
-
-            var gunlukDetay = new List<PersonelMesaiGunlukDto>();
-
-            // Create a set of all dates in range for checking attendance
-            var tumGunler = new HashSet<DateTime>();
             for (var date = baslangicTarihi.Date; date <= bitisTarihi.Date; date = date.AddDays(1))
             {
-                tumGunler.Add(date);
-            }
+                toplamGun++;
+                var gunlukKayitlar = cekilenDataList.Where(x => x.Tarih.Value.Date == date).ToList();
+                var izinMazeret = izinMazeretList.FirstOrDefault(im =>
+                    (im.BaslangicTarihi.HasValue && im.BitisTarihi.HasValue &&
+                     date >= im.BaslangicTarihi.Value.Date && date <= im.BitisTarihi.Value.Date) ||
+                    (im.MazeretTarihi.HasValue && date == im.MazeretTarihi.Value.Date));
 
-            foreach (var gunluk in gunlukKayitlar)
-            {
-                var girisSaati = gunluk.Girisler.FirstOrDefault()?.Tarih;
-                var cikisSaati = gunluk.Cikislar.FirstOrDefault()?.Tarih;
-
-                // Calculate duration
-                string mesaiSuresi = "-";
-                int? mesaiDakika = null;
-                if (girisSaati.HasValue && cikisSaati.HasValue)
+                var gunlukDto = new PersonelMesaiGunlukDto
                 {
-                    var fark = cikisSaati.Value - girisSaati.Value;
-                    mesaiDakika = (int)fark.TotalMinutes;
-                    int saat = mesaiDakika.Value / 60;
-                    int dakika = mesaiDakika.Value % 60;
-                    mesaiSuresi = $"{saat:00}:{dakika:00}";
-                    toplamMesaiDakika += mesaiDakika.Value;
-                }
+                    Tarih = date,
+                    HaftaSonu = IsWeekend(date)
+                };
 
-                // Weekend check
-                bool haftaSonu = gunluk.Tarih.DayOfWeek == DayOfWeek.Saturday ||
-                                gunluk.Tarih.DayOfWeek == DayOfWeek.Sunday;
+                // İzin/Mazeret kontrolü
+                if (izinMazeret != null)
+                {
+                    gunlukDto.Durum = izinMazeret.IzinMazeretTuru.ToString();
+                    gunlukDto.MesaiSuresi = "-";
 
-                // Late arrival check (08:30)
-                bool gecKalmaDurum = false;
-                if (girisSaati.HasValue && !haftaSonu)
-                {
-                    var toleransSaati = new TimeSpan(8, 30, 59);
-                    gecKalmaDurum = girisSaati.Value.TimeOfDay > toleransSaati;
-                    if (gecKalmaDurum) gecKalma++;
+                    if (izinMazeret.IzinMazeretTuru.ToString().Contains("İzin"))
+                        izinliGun++;
+                    else
+                        mazeretliGun++;
                 }
+                // Kayıt yoksa
+                else if (!gunlukKayitlar.Any())
+                {
+                    gunlukDto.Durum = gunlukDto.HaftaSonu ? "Hafta Sonu" : "Devamsız";
+                    gunlukDto.MesaiSuresi = "-";
 
-                // Leave/Excuse check
-                string? durum = null;
-                var izin = izinKayitlari.FirstOrDefault(i =>
-                    i.BaslangicTarihi <= gunluk.Tarih && i.BitisTarihi >= gunluk.Tarih);
-                var mazeret = mazeretKayitlari.FirstOrDefault(m =>
-                    m.MazeretTarihi == gunluk.Tarih);
-
-                if (mazeret != null)
-                {
-                    durum = $"{mazeret.Turu} ({mazeret.SaatDilimi})";
-                    mazeretliGun++;
+                    if (!gunlukDto.HaftaSonu)
+                        devamsizGun++;
                 }
-                else if (izin != null)
-                {
-                    durum = izin.Turu.ToString();
-                    izinliGun++;
-                }
-                else if (haftaSonu)
-                {
-                    durum = "Hafta Sonu";
-                    haftaSonuCalisma++;
-                }
+                // Giriş/Çıkış var
                 else
                 {
-                    calistigiGun++;
+                    var girisKayit = gunlukKayitlar
+                        .Where(x => x.GirisCikisModu == "0")
+                        .OrderBy(x => x.Tarih)
+                        .FirstOrDefault();
+
+                    var cikisKayit = gunlukKayitlar
+                        .Where(x => x.GirisCikisModu == "1")
+                        .OrderByDescending(x => x.Tarih)
+                        .FirstOrDefault();
+
+                    if (girisKayit?.Tarih != null)
+                    {
+                        gunlukDto.GirisSaati = girisKayit.Tarih.Value.TimeOfDay;
+
+                        // Geç kalma kontrolü
+                        var normalGirisSaati = new TimeSpan(8, 15, 0);
+                        if (gunlukDto.GirisSaati > normalGirisSaati)
+                        {
+                            gunlukDto.GecKalma = true;
+                            gecKalma++;
+                        }
+                    }
+
+                    if (cikisKayit?.Tarih != null)
+                    {
+                        gunlukDto.CikisSaati = cikisKayit.Tarih.Value.TimeOfDay;
+                    }
+
+                    // Mesai süresi hesaplama
+                    if (gunlukDto.GirisSaati.HasValue && gunlukDto.CikisSaati.HasValue)
+                    {
+                        var sure = gunlukDto.CikisSaati.Value - gunlukDto.GirisSaati.Value;
+                        if (sure.TotalMinutes > 0)
+                        {
+                            toplamMesaiDakika += (int)sure.TotalMinutes;
+                            gunlukDto.MesaiSuresi = $"{(int)sure.TotalHours:D2}:{sure.Minutes:D2}";
+                            calistigiGun++;
+                        }
+                        else
+                        {
+                            gunlukDto.MesaiSuresi = "00:00";
+                        }
+                    }
+                    else
+                    {
+                        gunlukDto.MesaiSuresi = "-";
+                    }
+
+                    gunlukDto.Durum = gunlukDto.HaftaSonu ? "Hafta Sonu Çalışma" : "Çalıştı";
+
+                    if (gunlukDto.HaftaSonu && gunlukKayitlar.Any())
+                    {
+                        haftaSonuCalisma++;
+                    }
                 }
 
-                gunlukDetay.Add(new PersonelMesaiGunlukDto
-                {
-                    Tarih = gunluk.Tarih,
-                    GirisSaati = girisSaati?.TimeOfDay,
-                    CikisSaati = cikisSaati?.TimeOfDay,
-                    MesaiSuresi = mesaiSuresi,
-                    Durum = durum,
-                    HaftaSonu = haftaSonu,
-                    GecKalma = gecKalmaDurum
-                });
-
-                tumGunler.Remove(gunluk.Tarih);
+                gunlukDetaylar.Add(gunlukDto);
             }
 
-            // Calculate devamsizlik (absence) - days without any record
-            int devamsizGun = tumGunler.Count(d =>
-                d.DayOfWeek != DayOfWeek.Saturday &&
-                d.DayOfWeek != DayOfWeek.Sunday &&
-                !izinKayitlari.Any(i => i.BaslangicTarihi <= d && i.BitisTarihi >= d));
-
-            // Format total mesai duration
-            int toplamSaat = toplamMesaiDakika / 60;
-            int toplamDakika = toplamMesaiDakika % 60;
-            string toplamMesaiSuresi = $"{toplamSaat:00}:{toplamDakika:00}";
+            // Toplam mesai süresini formatla
+            var toplamSaat = toplamMesaiDakika / 60;
+            var toplamDakika = toplamMesaiDakika % 60;
+            var toplamMesaiSuresi = $"{toplamSaat:D2}:{toplamDakika:D2}";
 
             return new PersonelMesaiOzetDto
             {
@@ -257,8 +254,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 GecKalma = gecKalma,
                 ToplamMesaiSuresi = toplamMesaiSuresi,
                 ToplamMesaiDakika = toplamMesaiDakika,
-                GunlukDetay = gunlukDetay.OrderBy(g => g.Tarih).ToList()
+                GunlukDetay = gunlukDetaylar
             };
+        }
+
+        private bool IsWeekend(DateTime date)
+        {
+            return date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday;
         }
     }
 }
