@@ -4,10 +4,10 @@ using System.Collections.Generic;
 namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
 {
     /// <summary>
-    /// SGM Mesai Raporu Response DTO
-    /// SGM = Departman seviyesinde toplu mesai raporu
+    /// Departman Mesai Raporu Response DTO
+    /// Departman seviyesinde toplu mesai raporu
     /// </summary>
-    public class SgmMesaiReportDto
+    public class DepartmanMesaiReportDto
     {
         public string DepartmanAdi { get; set; } = string.Empty;
         public string? ServisAdi { get; set; }
@@ -17,7 +17,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
     }
 
     /// <summary>
-    /// Personel Mesai Özet DTO - SGM raporunda kullanılır
+    /// Personel Mesai Özet DTO - Departman raporunda kullanılır
     /// </summary>
     public class PersonelMesaiOzetDto
     {

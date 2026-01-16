@@ -9,18 +9,18 @@ using System.Threading.Tasks;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
 {
-    public partial class SgmMesaiList
+    public partial class DepartmanMesaiList
     {
         [Inject] private HttpClient HttpClient { get; set; } = default!;
-        [Inject] private ILogger<SgmMesaiList> Logger { get; set; } = default!;
+        [Inject] private ILogger<DepartmanMesaiList> Logger { get; set; } = default!;
 
-        private SgmMesaiReportDto? report;
-        private List<SgmDto> sgmList = new();
+        private DepartmanMesaiReportDto? report;
+        private List<DepartmanDto> departmanList = new();
         private List<ServisDto> servisList = new();
         private HashSet<string> expandedRows = new();
 
         private bool isLoading = false;
-        private int? filterSgmId = null;
+        private int? filterDepartmanId = null;
         private int? filterServisId = null;
         private DateTime baslangicTarihi = DateTime.Now.AddDays(-30);
         private DateTime bitisTarihi = DateTime.Now;
@@ -35,11 +35,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         {
             try
             {
-                // Load SGM list
-                var sgmResponse = await HttpClient.GetFromJsonAsync<ApiResponse<List<SgmDto>>>("/api/sgm/liste");
-                if (sgmResponse?.Success == true && sgmResponse.Data != null)
+                // Load Departman list
+                var departmanResponse = await HttpClient.GetFromJsonAsync<ApiResponse<List<DepartmanDto>>>("/api/departman/liste");
+                if (departmanResponse?.Success == true && departmanResponse.Data != null)
                 {
-                    sgmList = sgmResponse.Data;
+                    departmanList = departmanResponse.Data;
                 }
 
                 // Load Servis list
@@ -59,9 +59,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         {
             try
             {
-                if (!filterSgmId.HasValue)
+                if (!filterDepartmanId.HasValue)
                 {
-                    Logger.LogWarning("SGM seçilmeden rapor oluşturulamaz");
+                    Logger.LogWarning("Departman seçilmeden rapor oluşturulamaz");
                     return;
                 }
 
@@ -69,19 +69,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
                 report = null;
                 expandedRows.Clear();
 
-                var request = new SgmMesaiFilterRequestDto
+                var request = new DepartmanMesaiFilterRequestDto
                 {
-                    SgmId = filterSgmId.Value,
+                    DepartmanId = filterDepartmanId.Value,
                     ServisId = filterServisId,
                     BaslangicTarihi = baslangicTarihi,
                     BitisTarihi = bitisTarihi
                 };
 
-                var response = await HttpClient.PostAsJsonAsync("/api/sgm-mesai/rapor", request);
+                var response = await HttpClient.PostAsJsonAsync("/api/departman-mesai/rapor", request);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var result = await response.Content.ReadFromJsonAsync<ApiResponse<SgmMesaiReportDto>>();
+                    var result = await response.Content.ReadFromJsonAsync<ApiResponse<DepartmanMesaiReportDto>>();
 
                     if (result?.Success == true && result.Data != null)
                     {
@@ -91,7 +91,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "SGM mesai raporu yüklenirken hata");
+                Logger.LogError(ex, "Departman mesai raporu yüklenirken hata");
             }
             finally
             {
@@ -112,10 +112,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         }
 
         // Helper DTOs for filter dropdowns
-        private class SgmDto
+        private class DepartmanDto
         {
-            public int SgmId { get; set; }
-            public string SgmAdi { get; set; } = string.Empty;
+            public int DepartmanId { get; set; }
+            public string DepartmanAdi { get; set; } = string.Empty;
         }
 
         private class ServisDto

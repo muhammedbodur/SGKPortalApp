@@ -15,20 +15,20 @@ using System.Threading.Tasks;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 {
-    public class SgmMesaiService : ISgmMesaiService
+    public class DepartmanMesaiService : IDepartmanMesaiService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<SgmMesaiService> _logger;
+        private readonly ILogger<DepartmanMesaiService> _logger;
 
-        public SgmMesaiService(
+        public DepartmanMesaiService(
             IUnitOfWork unitOfWork,
-            ILogger<SgmMesaiService> logger)
+            ILogger<DepartmanMesaiService> logger)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
 
-        public async Task<ApiResponseDto<SgmMesaiReportDto>> GetSgmMesaiReportAsync(SgmMesaiFilterRequestDto request)
+        public async Task<ApiResponseDto<DepartmanMesaiReportDto>> GetDepartmanMesaiReportAsync(DepartmanMesaiFilterRequestDto request)
         {
             try
             {
@@ -38,7 +38,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 
                 if (departman == null)
                 {
-                    return ApiResponseDto<SgmMesaiReportDto>.ErrorResult($"Departman bulunamadı: {request.DepartmanId}");
+                    return ApiResponseDto<DepartmanMesaiReportDto>.ErrorResult($"Departman bulunamadı: {request.DepartmanId}");
                 }
 
                 // 2. Departmana bağlı personelleri al
@@ -53,7 +53,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 
                 if (!personeller.Any())
                 {
-                    return ApiResponseDto<SgmMesaiReportDto>.ErrorResult("Belirtilen kriterlerde personel bulunamadı");
+                    return ApiResponseDto<DepartmanMesaiReportDto>.ErrorResult("Belirtilen kriterlerde personel bulunamadı");
                 }
 
                 // 3. Tüm personeller için CekilenData kayıtlarını çek
@@ -96,7 +96,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     ? personeller.FirstOrDefault()?.Servis?.ServisAdi
                     : null;
 
-                var report = new SgmMesaiReportDto
+                var report = new DepartmanMesaiReportDto
                 {
                     DepartmanAdi = departman.DepartmanAdi,
                     ServisAdi = servisAdi,
@@ -110,12 +110,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     departman.DepartmanAdi,
                     personelOzetleri.Count);
 
-                return ApiResponseDto<SgmMesaiReportDto>.SuccessResult(report);
+                return ApiResponseDto<DepartmanMesaiReportDto>.SuccessResult(report);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Departman mesai raporu oluşturulurken hata oluştu: DepartmanId={DepartmanId}", request.DepartmanId);
-                return ApiResponseDto<SgmMesaiReportDto>.ErrorResult($"Hata: {ex.Message}");
+                return ApiResponseDto<DepartmanMesaiReportDto>.ErrorResult($"Hata: {ex.Message}");
             }
         }
 
