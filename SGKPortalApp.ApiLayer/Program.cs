@@ -190,6 +190,8 @@ namespace SGKPortalApp.ApiLayer
             builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri.IDeviceService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.DeviceService>();
             builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri.IZKTecoAttendanceService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoAttendanceService>();
             builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.Interfaces.ICardSyncComparisonService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.CardSyncComparisonService>();
+            builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.IPersonelMesaiService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelMesaiService>();
+            builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.IPersonelListService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelListService>();
 
             Console.WriteLine("🎯 ZKTeco Business Services yapılandırıldı");
 
