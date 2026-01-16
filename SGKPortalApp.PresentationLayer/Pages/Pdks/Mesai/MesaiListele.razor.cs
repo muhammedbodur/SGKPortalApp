@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +43,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         {
             try
             {
-                var response = await HttpClient.GetFromJsonAsync<ApiResponse<PersonelMesaiBaslikDto>>(
+                var response = await HttpClient.GetFromJsonAsync<ApiResponseDto<PersonelMesaiBaslikDto>>(
                     $"/api/personel-mesai/baslik/{TcKimlikNo}");
 
                 if (response?.Success == true && response.Data != null)
@@ -74,7 +75,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<PersonelMesaiListResponseDto>>>();
+                    var result = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<PersonelMesaiListResponseDto>>>();
 
                     if (result?.Success == true && result.Data != null)
                     {
@@ -90,13 +91,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             {
                 isLoading = false;
             }
-        }
-
-        private class ApiResponse<T>
-        {
-            public bool Success { get; set; }
-            public T? Data { get; set; }
-            public string? Message { get; set; }
         }
     }
 }
