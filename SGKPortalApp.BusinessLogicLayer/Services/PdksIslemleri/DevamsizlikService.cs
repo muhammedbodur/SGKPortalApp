@@ -3,7 +3,8 @@ using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Services.Base;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
-using SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 using SGKPortalApp.Common.Results;
 using SGKPortalApp.DataAccessLayer.Context;
 using System;
@@ -32,6 +33,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             {
                 var query = _context.IzinMazeretTalepleri
                     .Include(i => i.Personel)
+                    .Where(i => i.IsActive)
                     .AsQueryable();
 
                 // Apply filters
@@ -56,34 +58,38 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 
                 if (filter.SadeceOnayBekleyenler == true)
                 {
-                    query = query.Where(i => !i.OnayDurumu);
+                    query = query.Where(i =>
+                        i.BirinciOnayDurumu == OnayDurumu.Beklemede ||
+                        i.IkinciOnayDurumu == OnayDurumu.Beklemede);
                 }
 
                 var list = await query
                     .OrderByDescending(i => i.CreatedAt)
-                    .Select(i => new DevamsizlikListDto
-                    {
-                        Id = i.IzinMazeretTalepId,
-                        TcKimlikNo = i.TcKimlikNo,
-                        AdSoyad = i.Personel != null ? i.Personel.AdSoyad : "",
-                        SicilNo = i.Personel != null ? i.Personel.SicilNo : 0,
-                        Turu = i.Turu,
-                        TuruAdi = i.Turu.ToString(),
-                        BaslangicTarihi = i.BaslangicTarihi,
-                        BitisTarihi = i.BitisTarihi,
-                        MazeretTarihi = i.MazeretTarihi,
-                        SaatDilimi = i.SaatDilimi,
-                        SaatDilimiAdi = i.SaatDilimi.HasValue ? i.SaatDilimi.Value.ToString() : null,
-                        Aciklama = i.Aciklama,
-                        OnayDurumu = i.OnayDurumu,
-                        OnaylayanSicilNo = i.OnaylayanSicilNo,
-                        OnaylayanAdSoyad = null, // TODO: Join with Personel for approver name
-                        OnayTarihi = i.OnayTarihi,
-                        OlusturmaTarihi = i.CreatedAt
-                    })
                     .ToListAsync();
 
-                return Result<List<DevamsizlikListDto>>.Success(list);
+                var result = list.Select(i => new DevamsizlikListDto
+                {
+                    Id = i.IzinMazeretTalepId,
+                    TcKimlikNo = i.TcKimlikNo,
+                    AdSoyad = i.Personel != null ? i.Personel.AdSoyad : "",
+                    SicilNo = i.Personel != null ? i.Personel.SicilNo : 0,
+                    Turu = i.Turu,
+                    TuruAdi = i.Turu.ToString(),
+                    BaslangicTarihi = i.BaslangicTarihi,
+                    BitisTarihi = i.BitisTarihi,
+                    MazeretTarihi = i.MazeretTarihi,
+                    SaatDilimi = ParseSaatDilimi(i.SaatDilimi),
+                    SaatDilimiAdi = i.SaatDilimi,
+                    Aciklama = i.Aciklama,
+                    OnayDurumu = i.BirinciOnayDurumu == OnayDurumu.Onaylandi &&
+                                i.IkinciOnayDurumu == OnayDurumu.Onaylandi,
+                    OnaylayanSicilNo = null, // TODO: Parse from TC
+                    OnaylayanAdSoyad = null,
+                    OnayTarihi = i.BirinciOnayTarihi ?? i.IkinciOnayTarihi,
+                    OlusturmaTarihi = i.CreatedAt
+                }).ToList();
+
+                return Result<List<DevamsizlikListDto>>.Success(result);
             }
             catch (Exception ex)
             {
@@ -104,7 +110,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     return Result<int>.Failure("Personel bulunamadı");
 
                 // Validate date logic based on type
-                if (request.Turu == BusinessObjectLayer.Enums.PdksIslemleri.IzinMazeretTuru.Mazeret)
+                if (request.Turu == IzinMazeretTuru.Mazeret)
                 {
                     if (!request.MazeretTarihi.HasValue)
                         return Result<int>.Failure("Mazeret için tarih girilmelidir");
@@ -125,10 +131,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     BaslangicTarihi = request.BaslangicTarihi,
                     BitisTarihi = request.BitisTarihi,
                     MazeretTarihi = request.MazeretTarihi,
-                    SaatDilimi = request.SaatDilimi,
+                    SaatDilimi = request.SaatDilimi?.ToString(),
                     Aciklama = request.Aciklama,
-                    OnayDurumu = false,
-                    OnaylayanSicilNo = request.OnaylayanSicilNo
+                    BirinciOnayDurumu = OnayDurumu.Beklemede,
+                    IkinciOnayDurumu = OnayDurumu.Beklemede,
+                    TalepTarihi = DateTime.Now,
+                    IsActive = true
                 };
 
                 _context.IzinMazeretTalepleri.Add(entity);
@@ -151,18 +159,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             try
             {
                 var entity = await _context.IzinMazeretTalepleri
-                    .FirstOrDefaultAsync(i => i.IzinMazeretTalepId == id);
+                    .FirstOrDefaultAsync(i => i.IzinMazeretTalepId == id && i.IsActive);
 
                 if (entity == null)
                     return Result<bool>.Failure("Kayıt bulunamadı");
 
-                entity.OnayDurumu = true;
-                entity.OnaylayanSicilNo = onaylayanSicilNo;
-                entity.OnayTarihi = DateTime.Now;
+                // Basitleştirilmiş onay - her ikisini de onayla
+                entity.BirinciOnayDurumu = OnayDurumu.Onaylandi;
+                entity.BirinciOnayTarihi = DateTime.Now;
+                entity.IkinciOnayDurumu = OnayDurumu.Onaylandi;
+                entity.IkinciOnayTarihi = DateTime.Now;
 
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Devamsızlık onaylandı: {Id} - Onaylayan: {SicilNo}",
+                _logger.LogInformation("Devamsızlık onaylandı: {Id} - Onaylayan Sicil: {SicilNo}",
                     id, onaylayanSicilNo);
 
                 return Result<bool>.Success(true);
@@ -179,15 +189,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             try
             {
                 var entity = await _context.IzinMazeretTalepleri
-                    .FirstOrDefaultAsync(i => i.IzinMazeretTalepId == id);
+                    .FirstOrDefaultAsync(i => i.IzinMazeretTalepId == id && i.IsActive);
 
                 if (entity == null)
                     return Result<bool>.Failure("Kayıt bulunamadı");
 
-                _context.IzinMazeretTalepleri.Remove(entity);
+                // Soft delete
+                entity.IsActive = false;
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Devamsızlık silindi: {Id}", id);
+                _logger.LogInformation("Devamsızlık silindi (soft delete): {Id}", id);
 
                 return Result<bool>.Success(true);
             }
@@ -196,6 +207,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 _logger.LogError(ex, "Devamsızlık silinirken hata: {Id}", id);
                 return Result<bool>.Failure($"Bir hata oluştu: {ex.Message}");
             }
+        }
+
+        private SaatDilimi? ParseSaatDilimi(string? saatDilimiStr)
+        {
+            if (string.IsNullOrEmpty(saatDilimiStr))
+                return null;
+
+            if (Enum.TryParse<SaatDilimi>(saatDilimiStr, true, out var result))
+                return result;
+
+            return null;
         }
     }
 }
