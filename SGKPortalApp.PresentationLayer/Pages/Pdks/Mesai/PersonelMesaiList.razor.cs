@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +36,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             try
             {
                 // Load Departman list
-                var deptResponse = await HttpClient.GetFromJsonAsync<ApiResponse<List<DepartmanDto>>>("/api/departman/liste");
+                var deptResponse = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<DepartmanDto>>>("/api/departman/liste");
                 if (deptResponse?.Success == true && deptResponse.Data != null)
                 {
                     departmanList = deptResponse.Data;
@@ -65,7 +66,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var result = await response.Content.ReadFromJsonAsync<ApiResponse<List<PersonelListResponseDto>>>();
+                    var result = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<PersonelListResponseDto>>>();
 
                     if (result?.Success == true && result.Data != null)
                     {
@@ -97,7 +98,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var result = await response.Content.ReadFromJsonAsync<ApiResponse<bool>>();
+                    var result = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
 
                     if (result?.Success == true)
                     {
@@ -116,18 +117,5 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             }
         }
 
-        // Helper DTOs for filter dropdowns
-        private class DepartmanDto
-        {
-            public int DepartmanId { get; set; }
-            public string DepartmanAdi { get; set; } = string.Empty;
-        }
-
-        private class ApiResponse<T>
-        {
-            public bool Success { get; set; }
-            public T? Data { get; set; }
-            public string? Message { get; set; }
-        }
     }
 }

@@ -1,18 +1,29 @@
 @page "/pdks/mesai/personel-listesi"
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
+@using SGKPortalApp.PresentationLayer.Components.Permission
 @inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 
 <PageTitle>Personel Mesai Listesi - SGK Portal</PageTitle>
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Başlık -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">
-                <i class="bx bx-user-check"></i> Personel Mesai Listesi
-            </h5>
-        </div>
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
     </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <!-- Başlık -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bx bx-user-check"></i> Personel Mesai Listesi
+                    </h5>
+                </div>
+            </div>
 
     <!-- Filtre -->
     <div class="card mb-4">
@@ -134,4 +145,6 @@
             </div>
         </div>
     }
-</div>
+        </div>
+    </FieldPermissionScope>
+}

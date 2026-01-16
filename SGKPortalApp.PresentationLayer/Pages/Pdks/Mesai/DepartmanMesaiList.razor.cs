@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,14 +37,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             try
             {
                 // Load Departman list
-                var departmanResponse = await HttpClient.GetFromJsonAsync<ApiResponse<List<DepartmanDto>>>("/api/departman/liste");
+                var departmanResponse = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<DepartmanDto>>>("/api/departman/liste");
                 if (departmanResponse?.Success == true && departmanResponse.Data != null)
                 {
                     departmanList = departmanResponse.Data;
                 }
 
                 // Load Servis list
-                var servisResponse = await HttpClient.GetFromJsonAsync<ApiResponse<List<ServisDto>>>("/api/servis/liste");
+                var servisResponse = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<ServisDto>>>("/api/servis/liste");
                 if (servisResponse?.Success == true && servisResponse.Data != null)
                 {
                     servisList = servisResponse.Data;
@@ -81,7 +82,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var result = await response.Content.ReadFromJsonAsync<ApiResponse<DepartmanMesaiReportDto>>();
+                    var result = await response.Content.ReadFromJsonAsync<ApiResponseDto<DepartmanMesaiReportDto>>();
 
                     if (result?.Success == true && result.Data != null)
                     {
@@ -111,24 +112,5 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             }
         }
 
-        // Helper DTOs for filter dropdowns
-        private class DepartmanDto
-        {
-            public int DepartmanId { get; set; }
-            public string DepartmanAdi { get; set; } = string.Empty;
-        }
-
-        private class ServisDto
-        {
-            public int ServisId { get; set; }
-            public string ServisAdi { get; set; } = string.Empty;
-        }
-
-        private class ApiResponse<T>
-        {
-            public bool Success { get; set; }
-            public T? Data { get; set; }
-            public string? Message { get; set; }
-        }
     }
 }
