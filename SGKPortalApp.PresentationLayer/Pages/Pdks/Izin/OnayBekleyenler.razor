@@ -27,19 +27,19 @@ else
             <p class="text-muted mb-0">Tarafınıza gelen izin/mazeret Talepleri</p>
         </div>
         <div>
-            <div class="btn-group me-2">
-                <button class="btn btn-success btn-sm" @onclick="ExportToExcel" disabled="@IsExporting">
+            <div class="d-flex gap-2">
+                <button class="btn btn-success" @onclick="ExportToExcel" disabled="@IsExporting">
                     @if (IsExporting && ExportType == "excel")
                     {
                         <span class="spinner-border spinner-border-sm me-1"></span>
                     }
                     else
                     {
-                        <i class="bx bx-file me-1"></i>
+                        <i class="bx bx-download me-1"></i>
                     }
                     Excel
                 </button>
-                <button class="btn btn-danger btn-sm" @onclick="ExportToPdf" disabled="@IsExporting">
+                <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@IsExporting">
                     @if (IsExporting && ExportType == "pdf")
                     {
                         <span class="spinner-border spinner-border-sm me-1"></span>
@@ -50,10 +50,10 @@ else
                     }
                     PDF
                 </button>
+                <button class="btn btn-outline-primary" @onclick="LoadTalepler" disabled="@IsLoading">
+                    <i class="bx bx-refresh"></i> Yenile
+                </button>
             </div>
-            <button class="btn btn-outline-primary" @onclick="LoadTalepler" disabled="@IsLoading">
-                <i class="bx bx-refresh"></i> Yenile
-            </button>
         </div>
     </div>
 
