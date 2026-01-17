@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.PresentationLayer.Models.FormModels.PdksIslemleri;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Pdks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,25 +15,51 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
 {
     public partial class IzinSorumluAtama
     {
-        [Inject] private HttpClient HttpClient { get; set; } = default!;
-        [Inject] private ILogger<IzinSorumluAtama> Logger { get; set; } = default!;
+        // ═══════════════════════════════════════════════════════
+        // DEPENDENCY INJECTION
+        // ═══════════════════════════════════════════════════════
 
-        private List<IzinSorumluResponseDto> sorumlular = new();
-        private List<DepartmanDto> departmanList = new();
-        private List<ServisDto> servisList = new();
-        private List<PersonelDto> personelList = new();
+        [Inject] private HttpClient _httpClient { get; set; } = default!;
+        [Inject] private IPersonelListApiService _personelListApiService { get; set; } = default!;
+        [Inject] private IJSRuntime _js { get; set; } = default!;
+        [Inject] private ILogger<IzinSorumluAtama> _logger { get; set; } = default!;
 
-        private int? filterDepartmanId = null;
-        private int? filterServisId = null;
-        private string? filterAktif = "";
+        // ═══════════════════════════════════════════════════════
+        // DATA PROPERTIES
+        // ═══════════════════════════════════════════════════════
 
-        private bool isLoading = false;
-        private bool showModal = false;
-        private bool isEditMode = false;
-        private bool isSaving = false;
-        private string? errorMessage = null;
+        private List<IzinSorumluResponseDto> Sorumlular { get; set; } = new();
+        private List<DepartmanDto> DepartmanList { get; set; } = new();
+        private List<ServisDto> ServisList { get; set; } = new();
+        private List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri.PersonelListResponseDto> PersonelList { get; set; } = new();
 
-        private EditModel editModel = new();
+        // ═══════════════════════════════════════════════════════
+        // FILTER PROPERTIES
+        // ═══════════════════════════════════════════════════════
+
+        private int? FilterDepartmanId { get; set; } = null;
+        private int? FilterServisId { get; set; } = null;
+        private string? FilterAktif { get; set; } = "";
+
+        // ═══════════════════════════════════════════════════════
+        // UI STATE
+        // ═══════════════════════════════════════════════════════
+
+        private bool IsLoading { get; set; } = false;
+        private bool ShowModal { get; set; } = false;
+        private bool IsEditMode { get; set; } = false;
+        private bool IsSaving { get; set; } = false;
+        private string? ErrorMessage { get; set; } = null;
+
+        // ═══════════════════════════════════════════════════════
+        // FORM MODEL
+        // ═══════════════════════════════════════════════════════
+
+        private IzinSorumluFormModel EditModel { get; set; } = new();
+
+        // ═══════════════════════════════════════════════════════
+        // LIFECYCLE METHODS
+        // ═══════════════════════════════════════════════════════
 
         protected override async Task OnInitializedAsync()
         {
@@ -39,44 +68,41 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             await LoadSorumlular();
         }
 
+        // ═══════════════════════════════════════════════════════
+        // DATA LOADING METHODS
+        // ═══════════════════════════════════════════════════════
+
         private async Task LoadFilterData()
         {
             try
             {
                 // Departman listesi
-                var depResponse = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<DepartmanDto>>>("/api/departman/liste");
-                if (depResponse?.Success == true && depResponse.Data != null)
+                var deptResult = await _personelListApiService.GetDepartmanListeAsync();
+                if (deptResult.Success && deptResult.Data != null)
                 {
-                    departmanList = depResponse.Data;
+                    DepartmanList = deptResult.Data;
                 }
 
-                // Servis listesi
-                var srvResponse = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<ServisDto>>>("/api/servis/liste");
-                if (srvResponse?.Success == true && srvResponse.Data != null)
+                var servResult = await _personelListApiService.GetServisListeAsync();
+                if (servResult.Success && servResult.Data != null)
                 {
-                    servisList = srvResponse.Data;
+                    ServisList = servResult.Data;
                 }
 
-                // Personel listesi (aktif personeller)
                 var perRequest = new { SadeceAktifler = true };
-                var perResponse = await HttpClient.PostAsJsonAsync("/api/personel-list/liste", perRequest);
-                if (perResponse.IsSuccessStatusCode)
+                var perResult = await _personelListApiService.GetPersonelListeAsync(perRequest);
+                if (perResult.Success && perResult.Data != null)
                 {
-                    var result = await perResponse.Content.ReadFromJsonAsync<ApiResponseDto<List<PersonelListResponseDto>>>();
-                    if (result?.Success == true && result.Data != null)
+                    PersonelList = perResult.Data.Select(p => new SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri.PersonelListResponseDto
                     {
-                        personelList = result.Data.Select(p => new PersonelDto
-                        {
-                            TcKimlikNo = p.TcKimlikNo,
-                            AdSoyad = p.AdSoyad,
-                            SicilNo = p.SicilNo
-                        }).ToList();
-                    }
+                        TcKimlikNo = p.TcKimlikNo,
+                        AdSoyad = p.AdSoyad,
+                        SicilNo = p.SicilNo
+                    }).ToList();
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                Logger.LogError(ex, "Filtre verileri yüklenirken hata");
             }
         }
 
@@ -84,60 +110,62 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         {
             try
             {
-                isLoading = true;
-                sorumlular.Clear();
+                IsLoading = true;
+                Sorumlular.Clear();
 
                 var url = "/api/izin-sorumlu";
-                if (!string.IsNullOrEmpty(filterAktif))
+                if (!string.IsNullOrEmpty(FilterAktif))
                 {
-                    url = filterAktif == "true" ? "/api/izin-sorumlu/aktif" : "/api/izin-sorumlu";
+                    url = FilterAktif == "true" ? "/api/izin-sorumlu/aktif" : "/api/izin-sorumlu";
                 }
 
-                var response = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<IzinSorumluResponseDto>>>(url);
+                var response = await _httpClient.GetFromJsonAsync<ApiResponseDto<List<IzinSorumluResponseDto>>>(url);
                 if (response?.Success == true && response.Data != null)
                 {
-                    sorumlular = response.Data;
+                    Sorumlular = response.Data;
 
-                    // Filtrele
-                    if (filterDepartmanId.HasValue)
+                    if (FilterDepartmanId.HasValue)
                     {
-                        sorumlular = sorumlular.Where(s => s.DepartmanId == filterDepartmanId.Value || !s.DepartmanId.HasValue).ToList();
+                        Sorumlular = Sorumlular.Where(s => s.DepartmanId == FilterDepartmanId.Value || !s.DepartmanId.HasValue).ToList();
                     }
 
-                    if (filterServisId.HasValue)
+                    if (FilterServisId.HasValue)
                     {
-                        sorumlular = sorumlular.Where(s => s.ServisId == filterServisId.Value || !s.ServisId.HasValue).ToList();
+                        Sorumlular = Sorumlular.Where(s => s.ServisId == FilterServisId.Value || !s.ServisId.HasValue).ToList();
                     }
 
-                    if (!string.IsNullOrEmpty(filterAktif))
+                    if (!string.IsNullOrEmpty(FilterAktif))
                     {
-                        var aktif = filterAktif == "true";
-                        sorumlular = sorumlular.Where(s => s.Aktif == aktif).ToList();
+                        var aktif = FilterAktif == "true";
+                        Sorumlular = Sorumlular.Where(s => s.Aktif == aktif).ToList();
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                Logger.LogError(ex, "Sorumlu listesi yüklenirken hata");
             }
             finally
             {
-                isLoading = false;
+                IsLoading = false;
             }
         }
 
+        // ═══════════════════════════════════════════════════════
+        // EVENT HANDLERS
+        // ═══════════════════════════════════════════════════════
+
         private void OpenCreateModal()
         {
-            isEditMode = false;
-            editModel = new EditModel { OnaySeviyes = 1, Aktif = true };
-            errorMessage = null;
-            showModal = true;
+            IsEditMode = false;
+            EditModel = new IzinSorumluFormModel { OnaySeviyes = 1, Aktif = true };
+            ErrorMessage = null;
+            ShowModal = true;
         }
 
         private void OpenEditModal(IzinSorumluResponseDto item)
         {
-            isEditMode = true;
-            editModel = new EditModel
+            IsEditMode = true;
+            EditModel = new IzinSorumluFormModel
             {
                 IzinSorumluId = item.IzinSorumluId,
                 DepartmanId = item.DepartmanId,
@@ -147,46 +175,45 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                 Aktif = item.Aktif,
                 Aciklama = item.Aciklama
             };
-            errorMessage = null;
-            showModal = true;
+            ErrorMessage = null;
+            ShowModal = true;
         }
 
         private void CloseModal()
         {
-            showModal = false;
-            editModel = new();
-            errorMessage = null;
+            ShowModal = false;
+            EditModel = new();
+            ErrorMessage = null;
         }
 
         private async Task SaveSorumlu()
         {
             try
             {
-                isSaving = true;
-                errorMessage = null;
+                IsSaving = true;
+                ErrorMessage = null;
 
-                // Validasyon
-                if (string.IsNullOrEmpty(editModel.SorumluPersonelTcKimlikNo))
+                if (string.IsNullOrEmpty(EditModel.SorumluPersonelTcKimlikNo))
                 {
-                    errorMessage = "Sorumlu personel seçilmelidir";
+                    ErrorMessage = "Sorumlu personel seçilmelidir";
                     return;
                 }
 
-                if (isEditMode)
+                if (IsEditMode)
                 {
                     // Güncelleme
                     var updateDto = new IzinSorumluUpdateDto
                     {
-                        IzinSorumluId = editModel.IzinSorumluId,
-                        DepartmanId = editModel.DepartmanId,
-                        ServisId = editModel.ServisId,
-                        SorumluPersonelTcKimlikNo = editModel.SorumluPersonelTcKimlikNo,
-                        OnaySeviyes = editModel.OnaySeviyes,
-                        Aktif = editModel.Aktif,
-                        Aciklama = editModel.Aciklama
+                        IzinSorumluId = EditModel.IzinSorumluId,
+                        DepartmanId = EditModel.DepartmanId,
+                        ServisId = EditModel.ServisId,
+                        SorumluPersonelTcKimlikNo = EditModel.SorumluPersonelTcKimlikNo,
+                        OnaySeviyes = EditModel.OnaySeviyes,
+                        Aktif = EditModel.Aktif,
+                        Aciklama = EditModel.Aciklama
                     };
 
-                    var response = await HttpClient.PutAsJsonAsync($"/api/izin-sorumlu/{editModel.IzinSorumluId}", updateDto);
+                    var response = await _httpClient.PutAsJsonAsync($"/api/izin-sorumlu/{EditModel.IzinSorumluId}", updateDto);
                     if (response.IsSuccessStatusCode)
                     {
                         var result = await response.Content.ReadFromJsonAsync<ApiResponseDto<IzinSorumluResponseDto>>();
@@ -197,12 +224,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                         }
                         else
                         {
-                            errorMessage = result?.Message ?? "Güncelleme başarısız";
+                            ErrorMessage = result?.Message ?? "Güncelleme başarısız";
                         }
                     }
                     else
                     {
-                        errorMessage = "Güncelleme sırasında hata oluştu";
+                        ErrorMessage = "Güncelleme sırasında hata oluştu";
                     }
                 }
                 else
@@ -210,14 +237,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                     // Yeni oluşturma
                     var createDto = new IzinSorumluCreateDto
                     {
-                        DepartmanId = editModel.DepartmanId,
-                        ServisId = editModel.ServisId,
-                        SorumluPersonelTcKimlikNo = editModel.SorumluPersonelTcKimlikNo,
-                        OnaySeviyes = editModel.OnaySeviyes,
-                        Aciklama = editModel.Aciklama
+                        DepartmanId = EditModel.DepartmanId,
+                        ServisId = EditModel.ServisId,
+                        SorumluPersonelTcKimlikNo = EditModel.SorumluPersonelTcKimlikNo,
+                        OnaySeviyes = EditModel.OnaySeviyes,
+                        Aciklama = EditModel.Aciklama
                     };
 
-                    var response = await HttpClient.PostAsJsonAsync("/api/izin-sorumlu", createDto);
+                    var response = await _httpClient.PostAsJsonAsync("/api/izin-sorumlu", createDto);
                     if (response.IsSuccessStatusCode)
                     {
                         var result = await response.Content.ReadFromJsonAsync<ApiResponseDto<IzinSorumluResponseDto>>();
@@ -228,87 +255,61 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                         }
                         else
                         {
-                            errorMessage = result?.Message ?? "Kayıt başarısız";
+                            ErrorMessage = result?.Message ?? "Kayıt başarısız";
                         }
                     }
                     else
                     {
-                        errorMessage = "Kayıt sırasında hata oluştu";
+                        ErrorMessage = "Kayıt sırasında hata oluştu";
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                Logger.LogError(ex, "Sorumlu kaydetme sırasında hata");
-                errorMessage = "İşlem sırasında hata oluştu";
+                ErrorMessage = "İşlem sırasında hata oluştu";
             }
             finally
             {
-                isSaving = false;
+                IsSaving = false;
             }
         }
 
         private async Task DeactivateSorumlu(int id)
         {
-            if (!confirm("Bu sorumlu atamasını pasif yapmak istediğinizden emin misiniz?"))
+            var confirmed = await _js.InvokeAsync<bool>("confirm", "Bu sorumlu atamasını pasif yapmak istediğinizden emin misiniz?");
+            if (!confirmed)
                 return;
 
             try
             {
-                var response = await HttpClient.PatchAsync($"/api/izin-sorumlu/{id}/pasif", null);
+                var response = await _httpClient.PatchAsync($"/api/izin-sorumlu/{id}/pasif", null);
                 if (response.IsSuccessStatusCode)
                 {
                     await LoadSorumlular();
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                Logger.LogError(ex, "Sorumlu pasif yapma sırasında hata: {Id}", id);
             }
         }
 
         private async Task DeleteSorumlu(int id)
         {
-            if (!confirm("Bu sorumlu atamasını silmek istediğinizden emin misiniz?"))
+            var confirmed = await _js.InvokeAsync<bool>("confirm", "Bu sorumlu atamasını silmek istediğinizden emin misiniz?");
+            if (!confirmed)
                 return;
 
             try
             {
-                var response = await HttpClient.DeleteAsync($"/api/izin-sorumlu/{id}");
+                var response = await _httpClient.DeleteAsync($"/api/izin-sorumlu/{id}");
                 if (response.IsSuccessStatusCode)
                 {
                     await LoadSorumlular();
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                Logger.LogError(ex, "Sorumlu silme sırasında hata: {Id}", id);
             }
-        }
-
-        private bool confirm(string message)
-        {
-            // TODO: Replace with proper modal confirmation
-            return true;
-        }
-
-        // Helper classes
-        private class EditModel
-        {
-            public int IzinSorumluId { get; set; }
-            public int? DepartmanId { get; set; }
-            public int? ServisId { get; set; }
-            public string SorumluPersonelTcKimlikNo { get; set; } = string.Empty;
-            public int OnaySeviyes { get; set; } = 1;
-            public bool Aktif { get; set; } = true;
-            public string? Aciklama { get; set; }
-        }
-
-        private class PersonelDto
-        {
-            public string TcKimlikNo { get; set; } = string.Empty;
-            public string AdSoyad { get; set; } = string.Empty;
-            public int SicilNo { get; set; }
         }
     }
 }

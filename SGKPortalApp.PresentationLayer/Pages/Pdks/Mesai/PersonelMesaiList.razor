@@ -18,10 +18,34 @@ else
         <div class="container-xxl flex-grow-1 container-p-y">
             <!-- Başlık -->
             <div class="card mb-4">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
                         <i class="bx bx-user-check"></i> Personel Mesai Listesi
                     </h5>
+                    <div class="btn-group">
+                        <button class="btn btn-success btn-sm" @onclick="ExportToExcel" disabled="@IsExporting">
+                            @if (IsExporting && ExportType == "excel")
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            else
+                            {
+                                <i class="bx bx-file me-1"></i>
+                            }
+                            Excel
+                        </button>
+                        <button class="btn btn-danger btn-sm" @onclick="ExportToPdf" disabled="@IsExporting">
+                            @if (IsExporting && ExportType == "pdf")
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            else
+                            {
+                                <i class="bx bxs-file-pdf me-1"></i>
+                            }
+                            PDF
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -33,7 +57,7 @@ else
                     <label class="form-label">Departman</label>
                     <select class="form-select" value="@filterDepartmanId" @onchange="OnDepartmanChangedEvent">
                         <option value="">Tümü</option>
-                        @foreach (var dept in departmanList)
+                        @foreach (var dept in Departmanlar)
                         {
                             <option value="@dept.DepartmanId">@dept.DepartmanAdi</option>
                         }
@@ -41,18 +65,11 @@ else
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Arama (Ad/Sicil)</label>
-                    <input type="text" class="form-control" @bind="aramaMetni" placeholder="Ad soyad veya sicil no" />
+                    <input type="text" class="form-control" @bind="searchTerm" placeholder="Ad soyad veya sicil no" />
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label d-block">&nbsp;</label>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" @bind="sadeceAktifler" />
-                        <label class="form-check-label">Sadece Aktifler</label>
-                    </div>
-                </div>
-                <div class="col-md-1 d-flex align-items-end">
-                    <button class="btn btn-primary w-100" @onclick="LoadPersonelList" disabled="@isLoading">
-                        @if (isLoading)
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" @onclick="LoadPersonelList" disabled="@IsLoading">
+                        @if (IsLoading)
                         {
                             <span class="spinner-border spinner-border-sm"></span>
                         }
@@ -67,7 +84,7 @@ else
     </div>
 
     <!-- Personel Listesi -->
-    @if (isLoading)
+    @if (IsLoading)
     {
         <div class="text-center py-5">
             <div class="spinner-border text-primary" role="status">
@@ -75,12 +92,12 @@ else
             </div>
         </div>
     }
-    else if (personelList.Any())
+    else if (Personeller.Any())
     {
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <h5 class="mb-0">Personeller</h5>
-                <span class="badge bg-label-primary">@personelList.Count kayıt</span>
+                <span class="badge bg-label-primary">@Personeller.Count kayıt</span>
             </div>
             <div class="table-responsive">
                 <table class="table table-sm table-hover">
@@ -92,14 +109,13 @@ else
                             <th>Servis</th>
                             <th>Email</th>
                             <th>Cep Telefonu</th>
-                            <th>Durum</th>
                             <th>İşlemler</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var personel in personelList)
+                        @foreach (var personel in Personeller)
                         {
-                            <tr class="@(personel.Aktif ? "" : "table-secondary")">
+                            <tr class="@(personel.PersonelAktiflikDurum == SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri.PersonelAktiflikDurum.Aktif ? "" : "table-secondary")">
                                 <td>@personel.SicilNo</td>
                                 <td>@personel.AdSoyad</td>
                                 <td>@personel.DepartmanAdi</td>
@@ -107,26 +123,11 @@ else
                                 <td><small>@personel.Email</small></td>
                                 <td>@personel.CepTelefonu</td>
                                 <td>
-                                    @if (personel.Aktif)
-                                    {
-                                        <span class="badge bg-label-success">Aktif</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-label-secondary">Pasif</span>
-                                    }
-                                </td>
-                                <td>
                                     <a href="/pdks/mesai/listele?tc=@personel.TcKimlikNo"
-                                       class="btn btn-sm btn-outline-primary me-1"
+                                       class="btn btn-sm btn-outline-primary"
                                        title="Mesai Detayı">
                                         <i class="bx bx-calendar"></i>
                                     </a>
-                                    <button class="btn btn-sm @(personel.Aktif ? "btn-outline-warning" : "btn-outline-success")"
-                                            @onclick="() => ToggleAktifDurum(personel)"
-                                            title="@(personel.Aktif ? "Pasif Yap" : "Aktif Yap")">
-                                        <i class="bx @(personel.Aktif ? "bx-x" : "bx-check")"></i>
-                                    </button>
                                 </td>
                             </tr>
                         }
@@ -135,7 +136,7 @@ else
             </div>
         </div>
     }
-    else if (!isLoading)
+    else if (!IsLoading)
     {
         <div class="card">
             <div class="card-body text-center py-5">

@@ -24,7 +24,7 @@ else
                         <h5 class="mb-0">
                             <i class="bx bx-user-check"></i> İzin Sorumlu Atama
                         </h5>
-                        <small class="text-muted">Departman/Servis bazında izin onay sorumluları</small>
+                        <small class="text-muted">Departman/Servis bazında izin onay Sorumluları</small>
                     </div>
                     <div>
                         @if (CanAction("CREATE"))
@@ -43,9 +43,9 @@ else
                     <div class="row">
                         <div class="col-md-3">
                             <label class="form-label">Departman</label>
-                            <select class="form-select" @bind="filterDepartmanId">
+                            <select class="form-select" @bind="FilterDepartmanId">
                                 <option value="">Tümü</option>
-                                @foreach (var dep in departmanList)
+                                @foreach (var dep in DepartmanList)
                                 {
                                     <option value="@dep.DepartmanId">@dep.DepartmanAdi</option>
                                 }
@@ -53,9 +53,9 @@ else
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Servis</label>
-                            <select class="form-select" @bind="filterServisId">
+                            <select class="form-select" @bind="FilterServisId">
                                 <option value="">Tümü</option>
-                                @foreach (var srv in servisList)
+                                @foreach (var srv in ServisList)
                                 {
                                     <option value="@srv.ServisId">@srv.ServisAdi</option>
                                 }
@@ -63,14 +63,14 @@ else
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Durum</label>
-                            <select class="form-select" @bind="filterAktif">
+                            <select class="form-select" @bind="FilterAktif">
                                 <option value="">Tümü</option>
                                 <option value="true">Aktif</option>
                                 <option value="false">Pasif</option>
                             </select>
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
-                            <button class="btn btn-secondary w-100" @onclick="LoadSorumlular" disabled="@isLoading">
+                            <button class="btn btn-secondary w-100" @onclick="LoadSorumlular" disabled="@IsLoading">
                                 <i class="bx bx-search"></i> Filtrele
                             </button>
                         </div>
@@ -79,7 +79,7 @@ else
             </div>
 
             <!-- Liste -->
-            @if (isLoading)
+            @if (IsLoading)
             {
                 <div class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
@@ -87,11 +87,11 @@ else
                     </div>
                 </div>
             }
-            else if (sorumlular.Any())
+            else if (Sorumlular.Any())
             {
                 <div class="card">
                     <div class="card-header">
-                        <h6 class="mb-0">Sorumlu Atamaları (@sorumlular.Count kayıt)</h6>
+                        <h6 class="mb-0">Sorumlu Atamaları (@Sorumlular.Count kayıt)</h6>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-sm table-hover">
@@ -107,7 +107,7 @@ else
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var item in sorumlular)
+                                @foreach (var item in Sorumlular)
                                 {
                                     <tr class="@(!item.Aktif ? "table-secondary" : "")">
                                         <td>@item.DepartmanAdi</td>
@@ -151,7 +151,7 @@ else
                     </div>
                 </div>
             }
-            else if (!isLoading)
+            else if (!IsLoading)
             {
                 <div class="card">
                     <div class="card-body text-center py-5">
@@ -163,21 +163,21 @@ else
             }
 
             <!-- Modal: Yeni/Düzenle -->
-            @if (showModal)
+            @if (ShowModal)
             {
                 <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title">@(isEditMode ? "Sorumlu Düzenle" : "Yeni Sorumlu Ata")</h5>
+                                <h5 class="modal-title">@(IsEditMode ? "Sorumlu Düzenle" : "Yeni Sorumlu Ata")</h5>
                                 <button type="button" class="btn-close" @onclick="CloseModal"></button>
                             </div>
                             <div class="modal-body">
                                 <div class="mb-3">
                                     <label class="form-label">Departman</label>
-                                    <select class="form-select" @bind="editModel.DepartmanId">
+                                    <select class="form-select" @bind="EditModel.DepartmanId">
                                         <option value="">Tüm Departmanlar</option>
-                                        @foreach (var dep in departmanList)
+                                        @foreach (var dep in DepartmanList)
                                         {
                                             <option value="@dep.DepartmanId">@dep.DepartmanAdi</option>
                                         }
@@ -187,9 +187,9 @@ else
 
                                 <div class="mb-3">
                                     <label class="form-label">Servis</label>
-                                    <select class="form-select" @bind="editModel.ServisId">
+                                    <select class="form-select" @bind="EditModel.ServisId">
                                         <option value="">Tüm Servisler</option>
-                                        @foreach (var srv in servisList)
+                                        @foreach (var srv in ServisList)
                                         {
                                             <option value="@srv.ServisId">@srv.ServisAdi</option>
                                         }
@@ -199,9 +199,9 @@ else
 
                                 <div class="mb-3">
                                     <label class="form-label">Sorumlu Personel *</label>
-                                    <select class="form-select" @bind="editModel.SorumluPersonelTcKimlikNo">
+                                    <select class="form-select" @bind="EditModel.SorumluPersonelTcKimlikNo">
                                         <option value="">Seçiniz...</option>
-                                        @foreach (var per in personelList)
+                                        @foreach (var per in PersonelList)
                                         {
                                             <option value="@per.TcKimlikNo">@per.AdSoyad (@per.SicilNo)</option>
                                         }
@@ -210,18 +210,18 @@ else
 
                                 <div class="mb-3">
                                     <label class="form-label">Onay Seviyesi *</label>
-                                    <select class="form-select" @bind="editModel.OnaySeviyes">
+                                    <select class="form-select" @bind="EditModel.OnaySeviyes">
                                         <option value="1">Birinci Onayci (Yönetici/Müdür)</option>
                                         <option value="2">İkinci Onayci (Üst Yönetim)</option>
                                     </select>
                                 </div>
 
-                                @if (isEditMode)
+                                @if (IsEditMode)
                                 {
                                     <div class="mb-3">
                                         <label class="form-label">Durum</label>
                                         <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" @bind="editModel.Aktif">
+                                            <input class="form-check-input" type="checkbox" @bind="EditModel.Aktif">
                                             <label class="form-check-label">Aktif</label>
                                         </div>
                                     </div>
@@ -229,18 +229,18 @@ else
 
                                 <div class="mb-3">
                                     <label class="form-label">Açıklama</label>
-                                    <textarea class="form-control" rows="3" @bind="editModel.Aciklama" maxlength="500"></textarea>
+                                    <textarea class="form-control" rows="3" @bind="EditModel.Aciklama" maxlength="500"></textarea>
                                 </div>
 
-                                @if (!string.IsNullOrEmpty(errorMessage))
+                                @if (!string.IsNullOrEmpty(ErrorMessage))
                                 {
-                                    <div class="alert alert-danger">@errorMessage</div>
+                                    <div class="alert alert-danger">@ErrorMessage</div>
                                 }
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" @onclick="CloseModal">İptal</button>
-                                <button type="button" class="btn btn-primary" @onclick="SaveSorumlu" disabled="@isSaving">
-                                    @if (isSaving)
+                                <button type="button" class="btn btn-primary" @onclick="SaveSorumlu" disabled="@IsSaving">
+                                    @if (IsSaving)
                                     {
                                         <span class="spinner-border spinner-border-sm me-2"></span>
                                     }

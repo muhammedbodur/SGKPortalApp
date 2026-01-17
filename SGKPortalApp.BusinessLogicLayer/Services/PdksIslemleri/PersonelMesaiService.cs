@@ -47,11 +47,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 var cekilenDataRepo = _unitOfWork.GetRepository<ICekilenDataRepository>();
                 var cekilenData = await cekilenDataRepo.GetByDateRangeAsync(request.BaslangicTarihi, request.BitisTarihi);
 
-                // KayitNo'ya göre filtrele
+                // KayitNo'ya göre filtrele (string karşılaştırma)
                 var personelData = cekilenData
-                    .Where(x => x.KayitNo == kayitNo && x.Tarih.HasValue)
+                    .Where(x => !string.IsNullOrEmpty(x.KayitNo) && 
+                               x.KayitNo == kayitNo && 
+                               x.Tarih.HasValue)
                     .OrderBy(x => x.Tarih)
                     .ToList();
+
+                _logger.LogInformation(
+                    "Personel mesai verileri: TcKimlikNo={TcKimlikNo}, KayitNo={KayitNo}, Tarih={BaslangicTarihi}-{BitisTarihi}, Kayıt Sayısı={KayitSayisi}",
+                    request.TcKimlikNo, kayitNo, request.BaslangicTarihi, request.BitisTarihi, personelData.Count);
 
                 // 3. İzin/Mazeret kayıtlarını al
                 var izinMazeretRepo = _unitOfWork.GetRepository<IIzinMazeretTalepRepository>();
@@ -65,7 +71,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 
                 for (var date = request.BaslangicTarihi.Date; date <= request.BitisTarihi.Date; date = date.AddDays(1))
                 {
-                    var gunlukKayitlar = personelData.Where(x => x.Tarih.Value.Date == date).ToList();
+                    var gunlukKayitlar = personelData
+                        .Where(x => x.Tarih.HasValue && x.Tarih.Value.Date == date)
+                        .ToList();
                     var izinMazeret = izinMazeretler.FirstOrDefault(im =>
                         (im.BaslangicTarihi.HasValue && im.BitisTarihi.HasValue &&
                          date >= im.BaslangicTarihi.Value.Date && date <= im.BitisTarihi.Value.Date) ||

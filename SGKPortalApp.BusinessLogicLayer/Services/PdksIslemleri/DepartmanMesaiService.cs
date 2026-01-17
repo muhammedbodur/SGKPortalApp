@@ -73,7 +73,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 {
                     var kayitNo = personel.PersonelKayitNo.ToString();
                     var personelCekilenData = tumCekilenData
-                        .Where(x => x.KayitNo == kayitNo && x.Tarih.HasValue)
+                        .Where(x => !string.IsNullOrEmpty(x.KayitNo) && 
+                                   x.KayitNo == kayitNo && 
+                                   x.Tarih.HasValue)
                         .OrderBy(x => x.Tarih)
                         .ToList();
 
@@ -106,9 +108,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 };
 
                 _logger.LogInformation(
-                    "Departman mesai raporu oluşturuldu: {DepartmanAdi}, {PersonelSayisi} personel",
+                    "Departman mesai raporu oluşturuldu: DepartmanId={DepartmanId}, DepartmanAdi={DepartmanAdi}, PersonelSayisi={PersonelSayisi}, ToplamCekilenData={ToplamCekilenData}",
+                    request.DepartmanId,
                     departman.DepartmanAdi,
-                    personelOzetleri.Count);
+                    personelOzetleri.Count,
+                    tumCekilenData.Count);
 
                 return ApiResponseDto<DepartmanMesaiReportDto>.SuccessResult(report);
             }
@@ -139,7 +143,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             for (var date = baslangicTarihi.Date; date <= bitisTarihi.Date; date = date.AddDays(1))
             {
                 toplamGun++;
-                var gunlukKayitlar = cekilenDataList.Where(x => x.Tarih.Value.Date == date).ToList();
+                var gunlukKayitlar = cekilenDataList
+                    .Where(x => x.Tarih.HasValue && x.Tarih.Value.Date == date)
+                    .ToList();
                 var izinMazeret = izinMazeretList.FirstOrDefault(im =>
                     (im.BaslangicTarihi.HasValue && im.BitisTarihi.HasValue &&
                      date >= im.BaslangicTarihi.Value.Date && date <= im.BitisTarihi.Value.Date) ||

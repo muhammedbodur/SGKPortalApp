@@ -1,30 +1,49 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Pdks;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
+using ClosedXML.Excel;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
 {
     public partial class DepartmanMesaiList
     {
-        [Inject] private HttpClient HttpClient { get; set; } = default!;
-        [Inject] private ILogger<DepartmanMesaiList> Logger { get; set; } = default!;
-        [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
-        [Inject] private IToastService ToastService { get; set; } = default!;
+        // ═══════════════════════════════════════════════════════
+        // DEPENDENCY INJECTION
+        // ═══════════════════════════════════════════════════════
 
-        private DepartmanMesaiReportDto? report;
-        private List<DepartmanDto> departmanList = new();
-        private List<ServisDto> servisList = new();
-        private HashSet<string> expandedRows = new();
+        [Inject] private IPersonelListApiService _personelListService { get; set; } = default!;
+        [Inject] private IDepartmanMesaiApiService _departmanMesaiService { get; set; } = default!;
+        [Inject] private NavigationManager _navigationManager { get; set; } = default!;
+        [Inject] private AuthenticationStateProvider _authStateProvider { get; set; } = default!;
+        [Inject] private IToastService _toastService { get; set; } = default!;
+        [Inject] private IJSRuntime _jsRuntime { get; set; } = default!;
 
-        private bool isLoading = false;
+        // ═══════════════════════════════════════════════════════
+        // DATA PROPERTIES
+        // ═══════════════════════════════════════════════════════
+
+        private DepartmanMesaiReportDto? Report { get; set; }
+        private List<DepartmanDto> Departmanlar { get; set; } = new();
+        private List<ServisDto> Servisler { get; set; } = new();
+        private HashSet<string> ExpandedRows { get; set; } = new();
+
+        // ═══════════════════════════════════════════════════════
+        // FILTER PROPERTIES
+        // ═══════════════════════════════════════════════════════
+
         private int? filterDepartmanId = null;
         private int? filterServisId = null;
         private int? userDepartmanId = null;
@@ -32,18 +51,34 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         private DateTime baslangicTarihi = DateTime.Now.AddDays(-30);
         private DateTime bitisTarihi = DateTime.Now;
 
+        // ═══════════════════════════════════════════════════════
+        // UI STATE
+        // ═══════════════════════════════════════════════════════
+
+        private bool IsLoading { get; set; } = false;
+        private bool IsExporting { get; set; } = false;
+        private string ExportType { get; set; } = string.Empty;
+
+        // ═══════════════════════════════════════════════════════
+        // LIFECYCLE METHODS
+        // ═══════════════════════════════════════════════════════
+
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
             await LoadFilterData();
         }
 
+        // ═══════════════════════════════════════════════════════
+        // DATA LOADING METHODS
+        // ═══════════════════════════════════════════════════════
+
         private async Task LoadFilterData()
         {
             try
             {
                 // Get user's departman and servis from claims
-                var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+                var authState = await _authStateProvider.GetAuthenticationStateAsync();
                 var departmanIdClaim = authState.User.FindFirst("DepartmanId")?.Value;
                 var servisIdClaim = authState.User.FindFirst("ServisId")?.Value;
 
@@ -59,46 +94,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
                     filterServisId = servId; // Set user's servis as default filter
                 }
 
-                // Load departman list - only user's departman or all if user has permission
-                var departmanResponse = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<DepartmanDto>>>("/api/departman/yetkili-liste");
-                if (departmanResponse?.Success == true && departmanResponse.Data != null)
+                var departmanResult = await _personelListService.GetDepartmanListeAsync();
+                if (departmanResult.Success && departmanResult.Data != null)
                 {
-                    departmanList = departmanResponse.Data;
-
-                    // If user has specific departman but it's not in the list, add it
-                    if (userDepartmanId.HasValue && !departmanList.Any(d => d.DepartmanId == userDepartmanId.Value))
-                    {
-                        var fallbackResponse = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<DepartmanDto>>>("/api/departman/liste");
-                        if (fallbackResponse?.Success == true && fallbackResponse.Data != null)
-                        {
-                            var userDept = fallbackResponse.Data.FirstOrDefault(d => d.DepartmanId == userDepartmanId.Value);
-                            if (userDept != null)
-                            {
-                                departmanList = new List<DepartmanDto> { userDept };
-                            }
-                        }
-                    }
+                    Departmanlar = departmanResult.Data;
                 }
 
-                // Load servis list - only user's servis or all if user has permission
-                var servisResponse = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<ServisDto>>>("/api/servis/yetkili-liste");
-                if (servisResponse?.Success == true && servisResponse.Data != null)
+                var servisResult = await _personelListService.GetServisListeAsync();
+                if (servisResult.Success && servisResult.Data != null)
                 {
-                    servisList = servisResponse.Data;
-
-                    // If user has specific servis but it's not in the list, add it
-                    if (userServisId.HasValue && !servisList.Any(s => s.ServisId == userServisId.Value))
-                    {
-                        var fallbackResponse = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<ServisDto>>>("/api/servis/liste");
-                        if (fallbackResponse?.Success == true && fallbackResponse.Data != null)
-                        {
-                            var userServ = fallbackResponse.Data.FirstOrDefault(s => s.ServisId == userServisId.Value);
-                            if (userServ != null)
-                            {
-                                servisList = new List<ServisDto> { userServ };
-                            }
-                        }
-                    }
+                    Servisler = servisResult.Data;
                 }
             }
             catch (Exception ex)
@@ -117,9 +122,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
                     return;
                 }
 
-                isLoading = true;
-                report = null;
-                expandedRows.Clear();
+                IsLoading = true;
+                Report = null;
+                ExpandedRows.Clear();
 
                 var request = new DepartmanMesaiFilterRequestDto
                 {
@@ -129,16 +134,26 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
                     BitisTarihi = bitisTarihi
                 };
 
-                var response = await HttpClient.PostAsJsonAsync("/api/departman-mesai/rapor", request);
+                var result = await _departmanMesaiService.GetRaporAsync(request);
 
-                if (response.IsSuccessStatusCode)
+                if (result.Success && result.Data != null)
                 {
-                    var result = await response.Content.ReadFromJsonAsync<ApiResponseDto<DepartmanMesaiReportDto>>();
-
-                    if (result?.Success == true && result.Data != null)
+                    Report = result.Data;
+                    // Personel listesini tarihe göre sırala (günlük detaylar için)
+                    if (Report.Personeller != null && Report.Personeller.Any())
                     {
-                        report = result.Data;
+                        foreach (var personel in Report.Personeller)
+                        {
+                            if (personel.GunlukDetay != null && personel.GunlukDetay.Any())
+                            {
+                                personel.GunlukDetay = personel.GunlukDetay.OrderByDescending(g => g.Tarih).ToList();
+                            }
+                        }
                     }
+                }
+                else
+                {
+                    await _toastService.ShowErrorAsync(result.Message ?? "Rapor yüklenemedi");
                 }
             }
             catch (Exception ex)
@@ -147,25 +162,26 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             }
             finally
             {
-                isLoading = false;
+                IsLoading = false;
             }
         }
 
         private void ToggleRow(string tcKimlikNo)
         {
-            if (expandedRows.Contains(tcKimlikNo))
+            if (ExpandedRows.Contains(tcKimlikNo))
             {
-                expandedRows.Remove(tcKimlikNo);
+                ExpandedRows.Remove(tcKimlikNo);
             }
             else
             {
-                expandedRows.Add(tcKimlikNo);
+                ExpandedRows.Add(tcKimlikNo);
             }
         }
 
-        /// <summary>
-        /// Departman değişiklik event handler - Authorization kontrolü ile
-        /// </summary>
+        // ═══════════════════════════════════════════════════════
+        // EVENT HANDLERS
+        // ═══════════════════════════════════════════════════════
+
         private async Task OnDepartmanChangedEvent(ChangeEventArgs e)
         {
             if (int.TryParse(e.Value?.ToString(), out int deptId))
@@ -173,7 +189,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
                 // ✅ ERİŞİM KONTROLÜ: Kullanıcı bu departmanı görüntüleyebilir mi?
                 if (deptId > 0 && !CanAccessDepartman(deptId))
                 {
-                    await ToastService.ShowWarningAsync("Bu departmanı görüntüleme yetkiniz yok!");
+                    await _toastService.ShowWarningAsync("Bu departmanı görüntüleme yetkiniz yok!");
                     // Kullanıcının kendi departmanına geri dön
                     filterDepartmanId = userDepartmanId;
                     return;
@@ -185,9 +201,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             }
         }
 
-        /// <summary>
-        /// Servis değişiklik event handler - Authorization kontrolü ile
-        /// </summary>
         private async Task OnServisChangedEvent(ChangeEventArgs e)
         {
             if (int.TryParse(e.Value?.ToString(), out int servId))
@@ -195,7 +208,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
                 // ✅ ERİŞİM KONTROLÜ: Kullanıcı bu servisi görüntüleyebilir mi?
                 if (servId > 0 && !CanAccessServis(servId))
                 {
-                    await ToastService.ShowWarningAsync("Bu servisi görüntüleme yetkiniz yok!");
+                    await _toastService.ShowWarningAsync("Bu servisi görüntüleme yetkiniz yok!");
                     // Kullanıcının kendi servisine geri dön
                     filterServisId = userServisId;
                     return;
@@ -205,9 +218,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             }
         }
 
-        /// <summary>
-        /// Kullanıcının belirtilen departmanı görüntüleme yetkisi var mı?
-        /// </summary>
+        // ═══════════════════════════════════════════════════════
+        // HELPER METHODS
+        // ═══════════════════════════════════════════════════════
+
         private bool CanAccessDepartman(int departmanId)
         {
             var userDeptId = GetCurrentUserDepartmanId();
@@ -220,9 +234,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             return userDeptId == departmanId;
         }
 
-        /// <summary>
-        /// Kullanıcının belirtilen servisi görüntüleme yetkisi var mı?
-        /// </summary>
         private bool CanAccessServis(int servisId)
         {
             var userServId = GetCurrentUserServisId();
@@ -238,21 +249,164 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             return userServId == servisId;
         }
 
-        /// <summary>
-        /// Kullanıcının departman ID'sini döndürür
-        /// </summary>
         private int GetCurrentUserDepartmanId()
         {
             return userDepartmanId ?? 0;
         }
 
-        /// <summary>
-        /// Kullanıcının servis ID'sini döndürür
-        /// </summary>
         private int GetCurrentUserServisId()
         {
             return userServisId ?? 0;
         }
 
+        // ═══════════════════════════════════════════════════════
+        // EXPORT METHODS
+        // ═══════════════════════════════════════════════════════
+
+        private async Task ExportToExcel()
+        {
+            if (Report == null || Report.Personeller == null || !Report.Personeller.Any())
+            {
+                await _toastService.ShowWarningAsync("Dışa aktarılacak veri bulunamadı!");
+                return;
+            }
+
+            IsExporting = true;
+            ExportType = "excel";
+
+            try
+            {
+                using var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add("Departman Mesai Raporu");
+
+                // Header
+                worksheet.Cell(1, 1).Value = "Sicil No";
+                worksheet.Cell(1, 2).Value = "Ad Soyad";
+                worksheet.Cell(1, 3).Value = "Departman";
+                worksheet.Cell(1, 4).Value = "Servis";
+                worksheet.Cell(1, 5).Value = "Çalıştığı Gün";
+                worksheet.Cell(1, 6).Value = "Toplam Mesai";
+
+                // Style header
+                var headerRange = worksheet.Range(1, 1, 1, 6);
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.LightBlue;
+
+                // Data
+                int row = 2;
+                foreach (var personel in Report.Personeller)
+                {
+                    worksheet.Cell(row, 1).Value = personel.SicilNo;
+                    worksheet.Cell(row, 2).Value = personel.AdSoyad;
+                    worksheet.Cell(row, 3).Value = personel.DepartmanAdi;
+                    worksheet.Cell(row, 4).Value = personel.ServisAdi ?? "-";
+                    worksheet.Cell(row, 5).Value = personel.CalistigiGun;
+                    worksheet.Cell(row, 6).Value = personel.ToplamMesaiSuresi;
+                    row++;
+                }
+
+                worksheet.Columns().AdjustToContents();
+
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+                var fileName = $"DepartmanMesaiRaporu_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+                await _jsRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(content), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                await _toastService.ShowSuccessAsync("Excel dosyası başarıyla indirildi!");
+            }
+            catch (Exception ex)
+            {
+                await _toastService.ShowErrorAsync($"Excel oluşturulurken hata: {ex.Message}");
+            }
+            finally
+            {
+                IsExporting = false;
+                ExportType = string.Empty;
+            }
+        }
+
+        private async Task ExportToPdf()
+        {
+            if (Report == null || Report.Personeller == null || !Report.Personeller.Any())
+            {
+                await _toastService.ShowWarningAsync("Dışa aktarılacak veri bulunamadı!");
+                return;
+            }
+
+            IsExporting = true;
+            ExportType = "pdf";
+
+            try
+            {
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4.Landscape());
+                        page.Margin(2, Unit.Centimetre);
+                        page.DefaultTextStyle(x => x.FontSize(9));
+
+                        page.Header().Text($"Departman Mesai Raporu ({baslangicTarihi:dd.MM.yyyy} - {bitisTarihi:dd.MM.yyyy})").FontSize(14).Bold();
+
+                        page.Content().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(3);
+                                columns.RelativeColumn(3);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Sicil").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Ad Soyad").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Departman").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Servis").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Çalışma").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Mesai").Bold();
+                            });
+
+                            foreach (var personel in Report.Personeller)
+                            {
+                                table.Cell().Padding(5).Text(personel.SicilNo.ToString());
+                                table.Cell().Padding(5).Text(personel.AdSoyad);
+                                table.Cell().Padding(5).Text(personel.DepartmanAdi);
+                                table.Cell().Padding(5).Text(personel.ServisAdi ?? "-");
+                                table.Cell().Padding(5).Text(personel.CalistigiGun.ToString());
+                                table.Cell().Padding(5).Text(personel.ToplamMesaiSuresi);
+                            }
+                        });
+
+                        page.Footer().AlignCenter().Text(text =>
+                        {
+                            text.Span("Sayfa ");
+                            text.CurrentPageNumber();
+                            text.Span(" / ");
+                            text.TotalPages();
+                        });
+                    });
+                });
+
+                var pdfBytes = document.GeneratePdf();
+                var fileName = $"DepartmanMesaiRaporu_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+
+                await _jsRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pdfBytes), "application/pdf");
+                await _toastService.ShowSuccessAsync("PDF dosyası başarıyla indirildi!");
+            }
+            catch (Exception ex)
+            {
+                await _toastService.ShowErrorAsync($"PDF oluşturulurken hata: {ex.Message}");
+            }
+            finally
+            {
+                IsExporting = false;
+                ExportType = string.Empty;
+            }
+        }
     }
 }

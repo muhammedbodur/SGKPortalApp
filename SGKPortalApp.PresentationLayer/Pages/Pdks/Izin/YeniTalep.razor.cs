@@ -1,88 +1,112 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Pdks;
 using SGKPortalApp.Common.Extensions;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
 {
     public partial class YeniTalep
     {
-        [Inject] private HttpClient HttpClient { get; set; } = default!;
-        [Inject] private IJSRuntime JS { get; set; } = default!;
-        [Inject] private NavigationManager NavigationManager { get; set; } = default!;
-        [Inject] private ILogger<YeniTalep> Logger { get; set; } = default!;
+        // ═══════════════════════════════════════════════════════
+        // DEPENDENCY INJECTION
+        // ═══════════════════════════════════════════════════════
 
-        private IzinMazeretTalepCreateRequestDto request = new();
-        private int? selectedTuru = null;
-        private bool showTurError = false;
-        private bool isSaving = false;
-        private bool isChecking = false;
-        private int toplamGun = 0;
-        private string overlapWarning = string.Empty;
+        [Inject] private IIzinMazeretTalepApiService _izinMazeretTalepService { get; set; } = default!;
+        [Inject] private AuthenticationStateProvider _authStateProvider { get; set; } = default!;
+        [Inject] private IJSRuntime _js { get; set; } = default!;
+        [Inject] private NavigationManager _navigationManager { get; set; } = default!;
 
-        protected override void OnInitialized()
+        // ═══════════════════════════════════════════════════════
+        // DATA PROPERTIES
+        // ═══════════════════════════════════════════════════════
+
+        private IzinMazeretTalepCreateRequestDto Request { get; set; } = new();
+        private int? SelectedTuru { get; set; } = null;
+        private int ToplamGun { get; set; } = 0;
+        private string OverlapWarning { get; set; } = string.Empty;
+
+        // ═══════════════════════════════════════════════════════
+        // UI STATE
+        // ═══════════════════════════════════════════════════════
+
+        private bool ShowTurError { get; set; } = false;
+        private bool IsSaving { get; set; } = false;
+        private bool IsChecking { get; set; } = false;
+
+        // ═══════════════════════════════════════════════════════
+        // LIFECYCLE METHODS
+        // ═══════════════════════════════════════════════════════
+
+        protected override async Task OnInitializedAsync()
         {
-            base.OnInitialized();
+            await base.OnInitializedAsync();
 
-            // Kullanıcı TC'sini al (User claim'den gelecek)
-            request.TcKimlikNo = "12345678901"; // TODO: User claim'den al
+            var tcKimlikNo = await GetCurrentUserTcKimlikNoAsync();
+            Request.TcKimlikNo = tcKimlikNo ?? string.Empty;
         }
+
+        // ═══════════════════════════════════════════════════════
+        // EVENT HANDLERS
+        // ═══════════════════════════════════════════════════════
 
         private void OnTuruChanged(ChangeEventArgs e)
         {
             if (int.TryParse(e.Value?.ToString(), out var turValue))
             {
-                selectedTuru = turValue;
-                request.Turu = (IzinMazeretTuru)turValue;
-                showTurError = false;
-                overlapWarning = string.Empty;
+                SelectedTuru = turValue;
+                Request.Turu = (IzinMazeretTuru)turValue;
+                ShowTurError = false;
+                OverlapWarning = string.Empty;
 
-                // Alanları temizle
-                request.BaslangicTarihi = null;
-                request.BitisTarihi = null;
-                request.MazeretTarihi = null;
-                request.SaatDilimi = null;
-                toplamGun = 0;
+                Request.BaslangicTarihi = null;
+                Request.BitisTarihi = null;
+                Request.MazeretTarihi = null;
+                Request.SaatDilimi = null;
+                ToplamGun = 0;
             }
             else
             {
-                selectedTuru = null;
+                SelectedTuru = null;
             }
         }
 
         private void CalculateDays()
         {
-            if (request.BaslangicTarihi.HasValue && request.BitisTarihi.HasValue)
+            if (Request.BaslangicTarihi.HasValue && Request.BitisTarihi.HasValue)
             {
-                if (request.BitisTarihi.Value >= request.BaslangicTarihi.Value)
+                if (Request.BitisTarihi.Value >= Request.BaslangicTarihi.Value)
                 {
-                    toplamGun = (request.BitisTarihi.Value - request.BaslangicTarihi.Value).Days + 1;
+                    ToplamGun = (Request.BitisTarihi.Value - Request.BaslangicTarihi.Value).Days + 1;
                 }
                 else
                 {
-                    toplamGun = 0;
+                    ToplamGun = 0;
                 }
             }
             else
             {
-                toplamGun = 0;
+                ToplamGun = 0;
             }
         }
 
         private async Task CheckOverlap()
         {
-            if (!selectedTuru.HasValue)
+            if (!SelectedTuru.HasValue)
             {
-                showTurError = true;
+                ShowTurError = true;
                 return;
             }
 
             // Validasyon
-            if (request.Turu == IzinMazeretTuru.Mazeret)
+            if (Request.Turu == IzinMazeretTuru.Mazeret)
             {
-                if (!request.MazeretTarihi.HasValue || string.IsNullOrWhiteSpace(request.SaatDilimi))
+                if (!Request.MazeretTarihi.HasValue || string.IsNullOrWhiteSpace(Request.SaatDilimi))
                 {
                     await ShowToast("warning", "Mazeret tarihi ve saat dilimi zorunludur");
                     return;
@@ -90,7 +114,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             }
             else
             {
-                if (!request.BaslangicTarihi.HasValue || !request.BitisTarihi.HasValue)
+                if (!Request.BaslangicTarihi.HasValue || !Request.BitisTarihi.HasValue)
                 {
                     await ShowToast("warning", "Başlangıç ve bitiş tarihi zorunludur");
                     return;
@@ -99,24 +123,26 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
 
             try
             {
-                isChecking = true;
-                overlapWarning = string.Empty;
+                IsChecking = true;
+                OverlapWarning = string.Empty;
 
-                var response = await HttpClient.PostAsJsonAsync("/api/izin-mazeret-talep/check-overlap", request);
+                var result = await _izinMazeretTalepService.CheckOverlapAsync(Request);
 
-                if (response.IsSuccessStatusCode)
+                if (result.Success && result.Data != null)
                 {
-                    var result = await response.Content.ReadFromJsonAsync<OverlapCheckResponse>();
-
-                    if (result?.HasOverlap == true)
+                    if (result.Data.HasOverlap)
                     {
-                        overlapWarning = result.Message ?? "Bu tarih aralığında çakışma var!";
+                        OverlapWarning = result.Data.Message ?? "Bu tarih aralığında çakışma var!";
                         await ShowToast("warning", "⚠️ Çakışma tespit edildi");
                     }
                     else
                     {
                         await ShowToast("success", "✅ Çakışma yok, talep oluşturabilirsiniz");
                     }
+                }
+                else
+                {
+                    await ShowToast("error", result.Message ?? "Çakışma kontrolü yapılamadı");
                 }
             }
             catch (Exception ex)
@@ -126,54 +152,42 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             }
             finally
             {
-                isChecking = false;
+                IsChecking = false;
             }
         }
 
         private async Task HandleSubmit()
         {
-            if (!selectedTuru.HasValue)
+            if (!SelectedTuru.HasValue)
             {
-                showTurError = true;
+                ShowTurError = true;
                 return;
             }
 
             try
             {
-                isSaving = true;
+                IsSaving = true;
 
-                var response = await HttpClient.PostAsJsonAsync("/api/izin-mazeret-talep", request);
+                var result = await _izinMazeretTalepService.CreateAsync(Request);
 
-                if (response.IsSuccessStatusCode)
+                if (result.Success)
                 {
-                    var result = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();
-
-                    if (result?.Success == true)
-                    {
-                        await ShowToast("success", "✅ Talep başarıyla oluşturuldu");
-                        await Task.Delay(500);
-                        NavigationManager.NavigateTo("/pdks/izin/taleplerim");
-                    }
-                    else
-                    {
-                        await ShowToast("error", result?.Message ?? "Talep oluşturulamadı");
-                    }
+                    await ShowToast("success", "✅ Talep başarıyla oluşturuldu");
+                    await Task.Delay(500);
+                    _navigationManager.NavigateTo("/pdks/izin/taleplerim");
                 }
                 else
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    Logger.LogWarning("Talep oluşturulamadı: {Error}", errorContent);
-                    await ShowToast("error", "Talep oluşturulamadı");
+                    await ShowToast("error", result.Message ?? "Talep oluşturulamadı");
                 }
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Talep oluşturulurken hata oluştu");
                 await ShowToast("error", "Talep oluşturulurken bir hata oluştu");
             }
             finally
             {
-                isSaving = false;
+                IsSaving = false;
             }
         }
 
@@ -197,13 +211,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                 using var ms = new MemoryStream();
                 await stream.CopyToAsync(ms);
                 var base64 = Convert.ToBase64String(ms.ToArray());
-                request.BelgeEki = $"data:{file.ContentType};base64,{base64}";
+                Request.BelgeEki = $"data:{file.ContentType};base64,{base64}";
 
                 await ShowToast("success", "Belge yüklendi");
             }
-            catch (Exception ex)
+            catch
             {
-                Logger.LogError(ex, "Dosya yüklenirken hata oluştu");
                 await ShowToast("error", "Dosya yüklenemedi");
             }
         }
@@ -212,7 +225,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         {
             try
             {
-                await JS.InvokeVoidAsync("showToast", type, message);
+                await _js.InvokeVoidAsync("showToast", type, message);
             }
             catch
             {
@@ -220,18 +233,21 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             }
         }
 
-        // Helper classes
-        private class ApiResponse<T>
-        {
-            public bool Success { get; set; }
-            public T? Data { get; set; }
-            public string? Message { get; set; }
-        }
+        // ═══════════════════════════════════════════════════════
+        // HELPER METHODS
+        // ═══════════════════════════════════════════════════════
 
-        private class OverlapCheckResponse
+        private async Task<string?> GetCurrentUserTcKimlikNoAsync()
         {
-            public bool HasOverlap { get; set; }
-            public string? Message { get; set; }
+            try
+            {
+                var authState = await _authStateProvider.GetAuthenticationStateAsync();
+                return authState.User.FindFirst("TcKimlikNo")?.Value;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

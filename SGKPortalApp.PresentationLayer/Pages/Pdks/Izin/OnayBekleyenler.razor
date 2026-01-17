@@ -24,14 +24,40 @@ else
             <h4 class="fw-bold mb-1">
                 <i class="bx bx-check-circle me-2"></i>Onay Bekleyen Talepler
             </h4>
-            <p class="text-muted mb-0">Tarafınıza gelen izin/mazeret talepleri</p>
+            <p class="text-muted mb-0">Tarafınıza gelen izin/mazeret Talepleri</p>
         </div>
-        <button class="btn btn-outline-primary" @onclick="LoadTalepler" disabled="@isLoading">
-            <i class="bx bx-refresh"></i> Yenile
-        </button>
+        <div>
+            <div class="btn-group me-2">
+                <button class="btn btn-success btn-sm" @onclick="ExportToExcel" disabled="@IsExporting">
+                    @if (IsExporting && ExportType == "excel")
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    else
+                    {
+                        <i class="bx bx-file me-1"></i>
+                    }
+                    Excel
+                </button>
+                <button class="btn btn-danger btn-sm" @onclick="ExportToPdf" disabled="@IsExporting">
+                    @if (IsExporting && ExportType == "pdf")
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    else
+                    {
+                        <i class="bx bxs-file-pdf me-1"></i>
+                    }
+                    PDF
+                </button>
+            </div>
+            <button class="btn btn-outline-primary" @onclick="LoadTalepler" disabled="@IsLoading">
+                <i class="bx bx-refresh"></i> Yenile
+            </button>
+        </div>
     </div>
 
-    @if (isLoading)
+    @if (IsLoading)
     {
         <div class="text-center py-5">
             <div class="spinner-border text-primary" role="status">
@@ -40,7 +66,7 @@ else
             <p class="mt-3 text-muted">Talepler yükleniyor...</p>
         </div>
     }
-    else if (!talepler.Any())
+    else if (!Talepler.Any())
     {
         <div class="card">
             <div class="card-body text-center py-5">
@@ -65,7 +91,7 @@ else
                             </div>
                             <div>
                                 <h6 class="text-muted mb-1">Bekleyen Talepler</h6>
-                                <h3 class="mb-0">@talepler.Count</h3>
+                                <h3 class="mb-0">@Talepler.Count</h3>
                             </div>
                         </div>
                     </div>
@@ -81,8 +107,8 @@ else
                                 </span>
                             </div>
                             <div>
-                                <h6 class="text-muted mb-1">1. Onay Bekleyenler</h6>
-                                <h3 class="mb-0">@talepler.Count(t => t.BirinciOnayDurumu == OnayDurumu.Beklemede)</h3>
+                                <h6 class="text-muted mb-1">Kalan Talepler</h6>
+                                <h3 class="mb-0">@Talepler.Count(t => t.BirinciOnayDurumu == OnayDurumu.Beklemede)</h3>
                             </div>
                         </div>
                     </div>
@@ -99,7 +125,7 @@ else
                             </div>
                             <div>
                                 <h6 class="text-muted mb-1">2. Onay Bekleyenler</h6>
-                                <h3 class="mb-0">@talepler.Count(t => t.BirinciOnayDurumu == OnayDurumu.Onaylandi && t.IkinciOnayDurumu == OnayDurumu.Beklemede)</h3>
+                                <h3 class="mb-0">@Talepler.Count(t => t.BirinciOnayDurumu == OnayDurumu.Onaylandi && t.IkinciOnayDurumu == OnayDurumu.Beklemede)</h3>
                             </div>
                         </div>
                     </div>
@@ -111,7 +137,7 @@ else
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Onay Bekleyen Talepler</h5>
-                <span class="badge bg-label-warning">@talepler.Count talep</span>
+                <span class="badge bg-label-warning">@Talepler.Count talep</span>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover">
@@ -128,7 +154,7 @@ else
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var talep in talepler)
+                        @foreach (var talep in Talepler)
                         {
                             <tr>
                                 <td><strong>#@talep.IzinMazeretTalepId</strong></td>
@@ -187,14 +213,14 @@ else
                                             <i class="bx bx-dots-vertical-rounded"></i>
                                         </button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="javascript:void(0);" @onclick="() => ShowApprovalModal(talep, true)">
+                                            <a class="dropdown-item" href="javascript:void(0);" @onclick="() => OpenApprovalModal(talep, true)">
                                                 <i class="bx bx-check me-1"></i> Onayla
                                             </a>
-                                            <a class="dropdown-item" href="javascript:void(0);" @onclick="() => ShowApprovalModal(talep, false)">
+                                            <a class="dropdown-item" href="javascript:void(0);" @onclick="() => OpenApprovalModal(talep, false)">
                                                 <i class="bx bx-x me-1"></i> Reddet
                                             </a>
                                             <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="javascript:void(0);" @onclick="() => ShowDetailModal(talep)">
+                                            <a class="dropdown-item" href="javascript:void(0);" @onclick="() => OpenDetailModal(talep)">
                                                 <i class="bx bx-detail me-1"></i> Detay Görüntüle
                                             </a>
                                         </div>
@@ -209,14 +235,14 @@ else
     }
 
     <!-- Onay/Red Modal -->
-    @if (showApprovalModal && selectedTalep != null)
+    @if (ShowApprovalModal && SelectedTalep != null)
     {
         <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">
-                            @if (isApproving)
+                            @if (IsApproving)
                             {
                                 <i class="bx bx-check-circle text-success me-2"></i>
                                 <text>Talebi Onayla</text>
@@ -231,32 +257,32 @@ else
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <strong>Talep Sahibi:</strong> @selectedTalep.AdSoyad<br />
-                            <strong>Tür:</strong> @selectedTalep.TuruAdi<br />
-                            @if (selectedTalep.Turu == IzinMazeretTuru.Mazeret)
+                            <strong>Talep Sahibi:</strong> @SelectedTalep.AdSoyad<br />
+                            <strong>Tür:</strong> @SelectedTalep.TuruAdi<br />
+                            @if (SelectedTalep.Turu == IzinMazeretTuru.Mazeret)
                             {
                                 <strong>Tarih:</strong>
-                                <text>@selectedTalep.MazeretTarihi?.ToString("dd.MM.yyyy") (@selectedTalep.SaatDilimi)</text>
+                                <text>@SelectedTalep.MazeretTarihi?.ToString("dd.MM.yyyy") (@SelectedTalep.SaatDilimi)</text>
                             }
                             else
                             {
                                 <strong>Tarih:</strong>
-                                <text>@selectedTalep.BaslangicTarihi?.ToString("dd.MM.yyyy") - @selectedTalep.BitisTarihi?.ToString("dd.MM.yyyy")</text>
+                                <text>@SelectedTalep.BaslangicTarihi?.ToString("dd.MM.yyyy") - @SelectedTalep.BitisTarihi?.ToString("dd.MM.yyyy")</text>
                             }
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Onay Notu @(isApproving ? "(Opsiyonel)" : "(Zorunlu)")</label>
-                            <textarea class="form-control" rows="3" @bind="onayNotu"
-                                      placeholder="@(isApproving ? "Onay notunuzu girebilirsiniz..." : "Red nedenini açıklayınız...")"></textarea>
+                            <label class="form-label">@(IsApproving ? "Onay Notu (Opsiyonel)" : "Red Nedeni *")</label>
+                            <textarea class="form-control" rows="3" @bind="OnayNotu"
+                                      placeholder="@(IsApproving ? "Onay notunuzu yazın..." : "Red nedenini yazın...")"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" @onclick="CloseApprovalModal">İptal</button>
                         <button type="button"
-                                class="btn @(isApproving ? "btn-success" : "btn-danger")"
+                                class="btn @(IsApproving ? "btn-success" : "btn-danger")"
                                 @onclick="SubmitApproval"
-                                disabled="@(!isApproving && string.IsNullOrWhiteSpace(onayNotu))">
-                            @if (isApproving)
+                                disabled="@(!IsApproving && string.IsNullOrWhiteSpace(OnayNotu))">
+                            @if (IsApproving)
                             {
                                 <i class="bx bx-check"></i>
                                 <text> Onayla</text>
@@ -274,14 +300,14 @@ else
     }
 
     <!-- Detay Modal -->
-    @if (showDetailModal && selectedTalep != null)
+    @if (ShowDetailModal && SelectedTalep != null)
     {
         <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">
-                            <i class="bx bx-detail me-2"></i>Talep Detayı - #@selectedTalep.IzinMazeretTalepId
+                            <i class="bx bx-detail me-2"></i>Talep Detayı - #@SelectedTalep.IzinMazeretTalepId
                         </h5>
                         <button type="button" class="btn-close" @onclick="CloseDetailModal"></button>
                     </div>
@@ -289,61 +315,61 @@ else
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <strong>Personel:</strong><br />
-                                @selectedTalep.AdSoyad<br />
-                                <small class="text-muted">@selectedTalep.TcKimlikNo</small>
+                                @SelectedTalep.AdSoyad<br />
+                                <small class="text-muted">@SelectedTalep.TcKimlikNo</small>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <strong>Tür:</strong><br />
-                                <span class="badge @GetTurBadgeClass(selectedTalep.Turu)">@selectedTalep.TuruAdi</span>
+                                <span class="badge @GetTurBadgeClass(SelectedTalep.Turu)">@SelectedTalep.TuruAdi</span>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <strong>Talep Tarihi:</strong><br />
-                                @selectedTalep.TalepTarihi.ToString("dd.MM.yyyy HH:mm")
+                                @SelectedTalep.TalepTarihi.ToString("dd.MM.yyyy HH:mm")
                             </div>
                             <div class="col-md-6 mb-3">
                                 <strong>Durum:</strong><br />
                                 <span class="badge bg-label-secondary">
-                                    @selectedTalep.GenelDurum
+                                    @SelectedTalep.GenelDurum
                                 </span>
                             </div>
-                            @if (selectedTalep.Turu == IzinMazeretTuru.Mazeret)
+                            @if (SelectedTalep.Turu == IzinMazeretTuru.Mazeret)
                             {
                                 <div class="col-md-6 mb-3">
                                     <strong>Mazeret Tarihi:</strong><br />
-                                    @selectedTalep.MazeretTarihi?.ToString("dd.MM.yyyy")
+                                    @SelectedTalep.MazeretTarihi?.ToString("dd.MM.yyyy")
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <strong>Saat Dilimi:</strong><br />
-                                    @selectedTalep.SaatDilimi
+                                    @SelectedTalep.SaatDilimi
                                 </div>
                             }
                             else
                             {
                                 <div class="col-md-6 mb-3">
                                     <strong>Başlangıç Tarihi:</strong><br />
-                                    @selectedTalep.BaslangicTarihi?.ToString("dd.MM.yyyy")
+                                    @SelectedTalep.BaslangicTarihi?.ToString("dd.MM.yyyy")
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <strong>Bitiş Tarihi:</strong><br />
-                                    @selectedTalep.BitisTarihi?.ToString("dd.MM.yyyy")
+                                    @SelectedTalep.BitisTarihi?.ToString("dd.MM.yyyy")
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <strong>Toplam Gün:</strong><br />
-                                    <span class="badge bg-label-primary">@selectedTalep.ToplamGun gün</span>
+                                    <span class="badge bg-label-primary">@SelectedTalep.ToplamGun gün</span>
                                 </div>
                             }
                             <div class="col-12 mb-3">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <strong>1. Onay Durumu:</strong><br />
-                                        <span class="badge @GetDurumBadgeClass(selectedTalep.BirinciOnayDurumu)">
-                                            @selectedTalep.BirinciOnayDurumuAdi
+                                        <span class="badge @GetDurumBadgeClass(SelectedTalep.BirinciOnayDurumu)">
+                                            @SelectedTalep.BirinciOnayDurumuAdi
                                         </span>
                                     </div>
                                     <div class="col-md-6">
                                         <strong>2. Onay Durumu:</strong><br />
-                                        <span class="badge @GetDurumBadgeClass(selectedTalep.IkinciOnayDurumu)">
-                                            @selectedTalep.IkinciOnayDurumuAdi
+                                        <span class="badge @GetDurumBadgeClass(SelectedTalep.IkinciOnayDurumu)">
+                                            @SelectedTalep.IkinciOnayDurumuAdi
                                         </span>
                                     </div>
                                 </div>

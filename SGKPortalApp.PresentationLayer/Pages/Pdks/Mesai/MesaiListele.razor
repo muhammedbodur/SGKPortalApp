@@ -19,23 +19,47 @@ else
         <div class="container-xxl flex-grow-1 container-p-y">
             <!-- Başlık Bilgileri -->
             <div class="card mb-4">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
                         <i class="bx bx-user"></i> Personel Bilgileri
                     </h5>
+                    <div class="btn-group">
+                        <button class="btn btn-success btn-sm" @onclick="ExportToExcel" disabled="@IsExporting">
+                            @if (IsExporting && ExportType == "excel")
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            else
+                            {
+                                <i class="bx bx-file me-1"></i>
+                            }
+                            Excel
+                        </button>
+                        <button class="btn btn-danger btn-sm" @onclick="ExportToPdf" disabled="@IsExporting">
+                            @if (IsExporting && ExportType == "pdf")
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            else
+                            {
+                                <i class="bx bxs-file-pdf me-1"></i>
+                            }
+                            PDF
+                        </button>
+                    </div>
                 </div>
         <div class="card-body">
-            @if (baslikBilgi != null)
+            @if (BaslikBilgi != null)
             {
                 <div class="row">
                     <div class="col-md-4">
-                        <strong>Adı Soyadı:</strong> @baslikBilgi.AdSoyad
+                        <strong>Adı Soyadı:</strong> @BaslikBilgi.AdSoyad
                     </div>
                     <div class="col-md-4">
-                        <strong>Sicil No:</strong> @baslikBilgi.SicilNo
+                        <strong>Sicil No:</strong> @BaslikBilgi.SicilNo
                     </div>
                     <div class="col-md-4">
-                        <strong>Departman:</strong> @baslikBilgi.DepartmanAdi
+                        <strong>Departman:</strong> @BaslikBilgi.DepartmanAdi
                     </div>
                 </div>
             }
@@ -55,8 +79,8 @@ else
                     <input type="date" class="form-control" @bind="bitisTarihi" />
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
-                    <button class="btn btn-primary w-100" @onclick="LoadMesaiList" disabled="@isLoading">
-                        @if (isLoading)
+                    <button class="btn btn-primary w-100" @onclick="LoadMesaiList" disabled="@IsLoading">
+                        @if (IsLoading)
                         {
                             <span class="spinner-border spinner-border-sm me-2"></span>
                         }
@@ -68,7 +92,7 @@ else
     </div>
 
     <!-- Mesai Listesi -->
-    @if (isLoading)
+    @if (IsLoading)
     {
         <div class="text-center py-5">
             <div class="spinner-border text-primary" role="status">
@@ -76,12 +100,12 @@ else
             </div>
         </div>
     }
-    else if (mesaiList.Any())
+    else if (MesaiListesi.Any())
     {
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <h5 class="mb-0">Mesai Kayıtları</h5>
-                <span class="badge bg-label-primary">@mesaiList.Count kayıt</span>
+                <span class="badge bg-label-primary">@MesaiListesi.Count kayıt</span>
             </div>
             <div class="table-responsive">
                 <table class="table table-sm table-hover">
@@ -98,7 +122,7 @@ else
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var kayit in mesaiList)
+                        @foreach (var kayit in MesaiListesi)
                         {
                             var satirClass = kayit.HaftaSonu ? "table-info" :
                                            kayit.GecKalma ? "table-danger" : "";
@@ -124,7 +148,7 @@ else
             </div>
         </div>
     }
-    else if (!isLoading)
+    else if (!IsLoading)
     {
         <div class="card">
             <div class="card-body text-center py-5">

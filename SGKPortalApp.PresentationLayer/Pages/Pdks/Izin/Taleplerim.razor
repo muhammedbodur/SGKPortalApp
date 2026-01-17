@@ -23,6 +23,30 @@ else
             <p class="text-muted">Kendi izin ve mazeret taleplerinizi görüntüleyebilir ve yeni talep oluşturabilirsiniz</p>
         </div>
         <div class="col-auto">
+            <div class="btn-group me-2">
+                <button class="btn btn-success btn-sm" @onclick="ExportToExcel" disabled="@IsExporting">
+                    @if (IsExporting && ExportType == "excel")
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    else
+                    {
+                        <i class="bx bx-file me-1"></i>
+                    }
+                    Excel
+                </button>
+                <button class="btn btn-danger btn-sm" @onclick="ExportToPdf" disabled="@IsExporting">
+                    @if (IsExporting && ExportType == "pdf")
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    else
+                    {
+                        <i class="bx bxs-file-pdf me-1"></i>
+                    }
+                    PDF
+                </button>
+            </div>
             <button class="btn btn-primary" @onclick="LoadTalepler">
                 <i class="bx bx-refresh"></i> Yenile
             </button>
@@ -38,7 +62,7 @@ else
             <div class="card">
                 <div class="card-body">
                     <h6 class="text-muted">Toplam Talep</h6>
-                    <h3>@talepler.Count</h3>
+                    <h3>@Talepler.Count</h3>
                 </div>
             </div>
         </div>
@@ -46,7 +70,7 @@ else
             <div class="card">
                 <div class="card-body">
                     <h6 class="text-muted">Bekleyen</h6>
-                    <h3 class="text-warning">@talepler.Count(t => t.GenelDurum.Contains("Bekl"))</h3>
+                    <h3 class="text-warning">@Talepler.Count(t => t.GenelDurum.Contains("Bekl"))</h3>
                 </div>
             </div>
         </div>
@@ -54,7 +78,7 @@ else
             <div class="card">
                 <div class="card-body">
                     <h6 class="text-muted">Onaylanan</h6>
-                    <h3 class="text-success">@talepler.Count(t => t.GenelDurum == "Onaylandı")</h3>
+                    <h3 class="text-success">@Talepler.Count(t => t.GenelDurum == "Onaylandı")</h3>
                 </div>
             </div>
         </div>
@@ -62,7 +86,7 @@ else
             <div class="card">
                 <div class="card-body">
                     <h6 class="text-muted">Reddedilen</h6>
-                    <h3 class="text-danger">@talepler.Count(t => t.GenelDurum == "Reddedildi")</h3>
+                    <h3 class="text-danger">@Talepler.Count(t => t.GenelDurum == "Reddedildi")</h3>
                 </div>
             </div>
         </div>
@@ -76,11 +100,11 @@ else
                     <div class="input-group">
                         <span class="input-group-text"><i class="bx bx-search"></i></span>
                         <input type="text" class="form-control" placeholder="Ara..."
-                               @bind="searchTerm" @bind:event="oninput" @onkeyup="FilterTalepler" />
+                               @bind="SearchTerm" @bind:event="oninput" @onkeyup="FilterTalepler" />
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <select class="form-select" @bind="durumFilter" @bind:after="FilterTalepler">
+                    <select class="form-select" @bind="DurumFilter" @bind:after="FilterTalepler">
                         <option value="">Tüm Durumlar</option>
                         <option value="Beklemede">Beklemede</option>
                         <option value="Onaylandı">Onaylandı</option>
@@ -90,7 +114,7 @@ else
                 </div>
                 <div class="col-md-4">
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" @bind="showInactive" @bind:after="LoadTalepler" id="showInactive">
+                        <input class="form-check-input" type="checkbox" @bind="ShowInactive" @bind:after="LoadTalepler" id="showInactive">
                         <label class="form-check-label" for="showInactive">
                             İptal Edilenleri Göster
                         </label>
@@ -100,7 +124,7 @@ else
         </div>
     </div>
 
-    @if (isLoading)
+    @if (IsLoading)
     {
         <div class="text-center py-5">
             <div class="spinner-border text-primary" role="status">
@@ -130,7 +154,7 @@ else
                             </tr>
                         </thead>
                         <tbody>
-                            @if (!filteredTalepler.Any())
+                            @if (!FilteredTalepler.Any())
                             {
                                 <tr>
                                     <td colspan="9" class="text-center text-muted py-4">
@@ -141,7 +165,7 @@ else
                             }
                             else
                             {
-                                @foreach (var talep in filteredTalepler)
+                                @foreach (var talep in FilteredTalepler)
                                 {
                                     <tr>
                                         <td><strong>#@talep.IzinMazeretTalepId</strong></td>

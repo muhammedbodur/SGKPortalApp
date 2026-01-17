@@ -36,44 +36,44 @@ else
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-body">
-                    <EditForm Model="@request" OnValidSubmit="HandleSubmit">
+                    <EditForm Model="@Request" OnValidSubmit="HandleSubmit">
                         <DataAnnotationsValidator />
 
                         <!-- İzin/Mazeret Türü -->
                         <div class="mb-3">
                             <label class="form-label">İzin/Mazeret Türü <span class="text-danger">*</span></label>
-                            <select class="form-select @(showTurError ? "is-invalid" : "")"
-                                    value="@selectedTuru" @onchange="OnTuruChanged">
+                            <select class="form-select @(ShowTurError ? "is-invalid" : "")"
+                                    value="@SelectedTuru" @onchange="OnTuruChanged">
                                 <option value="">Seçiniz...</option>
                                 @foreach (IzinMazeretTuru tur in Enum.GetValues(typeof(IzinMazeretTuru)))
                                 {
                                     <option value="@((int)tur)">@tur.GetDescription()</option>
                                 }
                             </select>
-                            @if (showTurError)
+                            @if (ShowTurError)
                             {
                                 <div class="invalid-feedback">İzin/Mazeret türü seçmelisiniz</div>
                             }
                         </div>
 
-                        @if (selectedTuru.HasValue)
+                        @if (SelectedTuru.HasValue)
                         {
-                            var tur = (IzinMazeretTuru)selectedTuru.Value;
+                            var tur = (IzinMazeretTuru)SelectedTuru.Value;
 
                             @if (tur == IzinMazeretTuru.Mazeret)
                             {
                                 <!-- Mazeret için: Tarih + Saat Dilimi -->
                                 <div class="mb-3">
                                     <label class="form-label">Mazeret Tarihi <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" @bind="request.MazeretTarihi" />
-                                    <ValidationMessage For="@(() => request.MazeretTarihi)" />
+                                    <input type="date" class="form-control" @bind="Request.MazeretTarihi" />
+                                    <ValidationMessage For="@(() => Request.MazeretTarihi)" />
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Saat Dilimi <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" @bind="request.SaatDilimi"
+                                    <input type="text" class="form-control" @bind="Request.SaatDilimi"
                                            placeholder="Örn: 09:00-10:00" />
-                                    <ValidationMessage For="@(() => request.SaatDilimi)" />
+                                    <ValidationMessage For="@(() => Request.SaatDilimi)" />
                                     <small class="form-text text-muted">Mazeret gösterdiğiniz saat aralığını girin</small>
                                 </div>
                             }
@@ -84,23 +84,23 @@ else
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Başlangıç Tarihi <span class="text-danger">*</span></label>
                                         <input type="date" class="form-control"
-                                               value="@(request.BaslangicTarihi?.ToString("yyyy-MM-dd"))"
-                                               @onchange="@(e => { request.BaslangicTarihi = DateTime.TryParse(e.Value?.ToString(), out var d) ? d : (DateTime?)null; CalculateDays(); })" />
-                                        <ValidationMessage For="@(() => request.BaslangicTarihi)" />
+                                               value="@(Request.BaslangicTarihi?.ToString("yyyy-MM-dd"))"
+                                               @onchange="@(e => { Request.BaslangicTarihi = DateTime.TryParse(e.Value?.ToString(), out var d) ? d : (DateTime?)null; CalculateDays(); })" />
+                                        <ValidationMessage For="@(() => Request.BaslangicTarihi)" />
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Bitiş Tarihi <span class="text-danger">*</span></label>
                                         <input type="date" class="form-control"
-                                               value="@(request.BitisTarihi?.ToString("yyyy-MM-dd"))"
-                                               @onchange="@(e => { request.BitisTarihi = DateTime.TryParse(e.Value?.ToString(), out var d) ? d : (DateTime?)null; CalculateDays(); })" />
-                                        <ValidationMessage For="@(() => request.BitisTarihi)" />
+                                               value="@(Request.BitisTarihi?.ToString("yyyy-MM-dd"))"
+                                               @onchange="@(e => { Request.BitisTarihi = DateTime.TryParse(e.Value?.ToString(), out var d) ? d : (DateTime?)null; CalculateDays(); })" />
+                                        <ValidationMessage For="@(() => Request.BitisTarihi)" />
                                     </div>
                                 </div>
 
-                                @if (toplamGun > 0)
+                                @if (ToplamGun > 0)
                                 {
                                     <div class="alert alert-info">
-                                        <i class="bx bx-info-circle"></i> <strong>Toplam Gün:</strong> @toplamGun gün
+                                        <i class="bx bx-info-circle"></i> <strong>Toplam Gün:</strong> @ToplamGun gün
                                     </div>
                                 }
                             }
@@ -108,9 +108,9 @@ else
                             <!-- Açıklama -->
                             <div class="mb-3">
                                 <label class="form-label">Açıklama</label>
-                                <textarea class="form-control" rows="4" @bind="request.Aciklama"
+                                <textarea class="form-control" rows="4" @bind="Request.Aciklama"
                                           placeholder="İzin/Mazeret sebebinizi açıklayın..."></textarea>
-                                <ValidationMessage For="@(() => request.Aciklama)" />
+                                <ValidationMessage For="@(() => Request.Aciklama)" />
                             </div>
 
                             <!-- Belge Eki (Opsiyonel) -->
@@ -121,18 +121,18 @@ else
                             </div>
 
                             <!-- Çakışma Uyarısı -->
-                            @if (!string.IsNullOrEmpty(overlapWarning))
+                            @if (!string.IsNullOrEmpty(OverlapWarning))
                             {
                                 <div class="alert alert-warning">
-                                    <i class="bx bx-error"></i> @overlapWarning
+                                    <i class="bx bx-error"></i> @OverlapWarning
                                 </div>
                             }
 
                             <!-- Buttons -->
                             <div class="d-flex gap-2">
                                 <button type="button" class="btn btn-outline-secondary"
-                                        @onclick="CheckOverlap" disabled="@isChecking">
-                                    @if (isChecking)
+                                        @onclick="CheckOverlap" disabled="@IsChecking">
+                                    @if (IsChecking)
                                     {
                                         <span class="spinner-border spinner-border-sm me-2"></span>
                                     }
@@ -142,8 +142,8 @@ else
                                     }
                                     Çakışma Kontrolü
                                 </button>
-                                <button type="submit" class="btn btn-success" disabled="@isSaving">
-                                    @if (isSaving)
+                                <button type="submit" class="btn btn-success" disabled="@IsSaving">
+                                    @if (IsSaving)
                                     {
                                         <span class="spinner-border spinner-border-sm me-2"></span>
                                     }

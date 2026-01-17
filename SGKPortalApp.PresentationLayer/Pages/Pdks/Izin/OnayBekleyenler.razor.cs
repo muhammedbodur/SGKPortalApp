@@ -1,23 +1,54 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Pdks;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using ClosedXML.Excel;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
 {
     public partial class OnayBekleyenler
     {
-        [Inject] private HttpClient HttpClient { get; set; } = default!;
-        [Inject] private IJSRuntime JS { get; set; } = default!;
-        [Inject] private ILogger<OnayBekleyenler> Logger { get; set; } = default!;
+        // ═══════════════════════════════════════════════════════
+        // DEPENDENCY INJECTION
+        // ═══════════════════════════════════════════════════════
 
-        private List<IzinMazeretTalepListResponseDto> talepler = new();
-        private IzinMazeretTalepListResponseDto? selectedTalep;
-        private bool isLoading = false;
-        private bool showApprovalModal = false;
-        private bool showDetailModal = false;
-        private bool isApproving = false;
-        private string onayNotu = string.Empty;
+        [Inject] private IIzinMazeretTalepApiService _izinMazeretTalepService { get; set; } = default!;
+        [Inject] private AuthenticationStateProvider _authStateProvider { get; set; } = default!;
+        [Inject] private IJSRuntime _js { get; set; } = default!;
+
+        // ═══════════════════════════════════════════════════════
+        // DATA PROPERTIES
+        // ═══════════════════════════════════════════════════════
+
+        private List<IzinMazeretTalepListResponseDto> Talepler { get; set; } = new();
+        private IzinMazeretTalepListResponseDto? SelectedTalep { get; set; }
+        private string OnayNotu { get; set; } = string.Empty;
+
+        // ═══════════════════════════════════════════════════════
+        // UI STATE
+        // ═══════════════════════════════════════════════════════
+
+        private bool IsLoading { get; set; } = false;
+        private bool ShowApprovalModal { get; set; } = false;
+        private bool ShowDetailModal { get; set; } = false;
+        private bool IsApproving { get; set; } = false;
+        private bool IsExporting { get; set; } = false;
+        private string ExportType { get; set; } = string.Empty;
+
+        // ═══════════════════════════════════════════════════════
+        // LIFECYCLE METHODS
+        // ═══════════════════════════════════════════════════════
 
         protected override async Task OnInitializedAsync()
         {
@@ -25,83 +56,81 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             await LoadTalepler();
         }
 
+        // ═══════════════════════════════════════════════════════
+        // DATA LOADING METHODS
+        // ═══════════════════════════════════════════════════════
+
         private async Task LoadTalepler()
         {
             try
             {
-                isLoading = true;
-                talepler.Clear();
+                IsLoading = true;
+                Talepler.Clear();
 
-                // TODO: Kullanıcı TC'sini claim'den al
-                var onayciTcKimlikNo = "12345678901";
-
-                // Hem 1. onay hem 2. onay için bekleyen talepleri getir
-                var firstApproverResponse = await HttpClient.GetFromJsonAsync<ApiResponse<List<IzinMazeretTalepListResponseDto>>>(
-                    $"/api/izin-mazeret-talep/pending/first-approver/{onayciTcKimlikNo}");
-
-                var secondApproverResponse = await HttpClient.GetFromJsonAsync<ApiResponse<List<IzinMazeretTalepListResponseDto>>>(
-                    $"/api/izin-mazeret-talep/pending/second-approver/{onayciTcKimlikNo}");
-
-                // Her iki listeden gelen talepleri birleştir
-                var allTalepler = new List<IzinMazeretTalepListResponseDto>();
-
-                if (firstApproverResponse?.Success == true && firstApproverResponse.Data != null)
+                var onayciTcKimlikNo = await GetCurrentUserTcKimlikNoAsync();
+                if (string.IsNullOrEmpty(onayciTcKimlikNo))
                 {
-                    allTalepler.AddRange(firstApproverResponse.Data);
+                    await ShowToast("error", "Kullanıcı bilgisi alınamadı");
+                    return;
                 }
 
-                if (secondApproverResponse?.Success == true && secondApproverResponse.Data != null)
-                {
-                    allTalepler.AddRange(secondApproverResponse.Data);
-                }
+                var result = await _izinMazeretTalepService.GetPendingApprovalsAsync(onayciTcKimlikNo);
 
-                // Talep tarihine göre sırala (en yeniden en eskiye)
-                talepler = allTalepler.OrderByDescending(t => t.TalepTarihi).ToList();
+                if (result.Success && result.Data != null)
+                {
+                    Talepler = result.Data.OrderByDescending(t => t.TalepTarihi).ToList();
+                }
+                else
+                {
+                    await ShowToast("error", result.Message ?? "Talepler yüklenemedi");
+                }
             }
-            catch (Exception ex)
+            catch
             {
-                Logger.LogError(ex, "Talepler yüklenirken hata oluştu");
                 await ShowToast("error", "Talepler yüklenirken bir hata oluştu");
             }
             finally
             {
-                isLoading = false;
+                IsLoading = false;
             }
         }
 
-        private void ShowApprovalModal(IzinMazeretTalepListResponseDto talep, bool approve)
+        // ═══════════════════════════════════════════════════════
+        // EVENT HANDLERS
+        // ═══════════════════════════════════════════════════════
+
+        private void OpenApprovalModal(IzinMazeretTalepListResponseDto talep, bool approve)
         {
-            selectedTalep = talep;
-            isApproving = approve;
-            onayNotu = string.Empty;
-            showApprovalModal = true;
+            SelectedTalep = talep;
+            IsApproving = approve;
+            OnayNotu = string.Empty;
+            ShowApprovalModal = true;
         }
 
         private void CloseApprovalModal()
         {
-            showApprovalModal = false;
-            selectedTalep = null;
-            onayNotu = string.Empty;
+            ShowApprovalModal = false;
+            SelectedTalep = null;
+            OnayNotu = string.Empty;
         }
 
-        private void ShowDetailModal(IzinMazeretTalepListResponseDto talep)
+        private void OpenDetailModal(IzinMazeretTalepListResponseDto talep)
         {
-            selectedTalep = talep;
-            showDetailModal = true;
+            SelectedTalep = talep;
+            ShowDetailModal = true;
         }
 
         private void CloseDetailModal()
         {
-            showDetailModal = false;
-            selectedTalep = null;
+            ShowDetailModal = false;
+            SelectedTalep = null;
         }
 
         private async Task SubmitApproval()
         {
-            if (selectedTalep == null) return;
+            if (SelectedTalep == null) return;
 
-            // Red durumunda not zorunlu
-            if (!isApproving && string.IsNullOrWhiteSpace(onayNotu))
+            if (!IsApproving && string.IsNullOrWhiteSpace(OnayNotu))
             {
                 await ShowToast("warning", "Red nedeni belirtmeniz zorunludur");
                 return;
@@ -109,59 +138,48 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
 
             try
             {
-                // Hangi onay seviyesinde olduğunu belirle
-                var onayciSeviyesi = selectedTalep.BirinciOnayDurumu == SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri.OnayDurumu.Beklemede ? 1 : 2;
+                var onayciSeviyesi = SelectedTalep.BirinciOnayDurumu == SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri.OnayDurumu.Beklemede ? 1 : 2;
 
                 var request = new IzinMazeretTalepOnayRequestDto
                 {
-                    OnayDurumu = isApproving
+                    OnayDurumu = IsApproving
                         ? SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri.OnayDurumu.Onaylandi
                         : SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri.OnayDurumu.Reddedildi,
-                    Aciklama = onayNotu,
+                    Aciklama = OnayNotu,
                     OnayciSeviyesi = onayciSeviyesi
                 };
 
-                var response = await HttpClient.PostAsJsonAsync(
-                    $"/api/izin-mazeret-talep/{selectedTalep.IzinMazeretTalepId}/approve",
-                    request);
+                var result = await _izinMazeretTalepService.ApproveOrRejectAsync(SelectedTalep.IzinMazeretTalepId, request);
 
-                if (response.IsSuccessStatusCode)
+                if (result.Success)
                 {
-                    var result = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();
+                    await ShowToast("success", IsApproving
+                        ? "✅ Talep başarıyla onaylandı"
+                        : "❌ Talep reddedildi");
 
-                    if (result?.Success == true)
-                    {
-                        await ShowToast("success", isApproving
-                            ? "✅ Talep başarıyla onaylandı"
-                            : "❌ Talep reddedildi");
-
-                        CloseApprovalModal();
-                        await LoadTalepler();
-                    }
-                    else
-                    {
-                        await ShowToast("error", result?.Message ?? "İşlem başarısız");
-                    }
+                    CloseApprovalModal();
+                    await LoadTalepler();
                 }
                 else
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    Logger.LogWarning("Onay işlemi başarısız: {Error}", errorContent);
-                    await ShowToast("error", "İşlem başarısız oldu");
+                    await ShowToast("error", result.Message ?? "İşlem başarısız");
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                Logger.LogError(ex, "Onay işlemi sırasında hata oluştu");
                 await ShowToast("error", "İşlem sırasında bir hata oluştu");
             }
         }
+
+        // ═══════════════════════════════════════════════════════
+        // HELPER METHODS
+        // ═══════════════════════════════════════════════════════
 
         private async Task ShowToast(string type, string message)
         {
             try
             {
-                await JS.InvokeVoidAsync("showToast", type, message);
+                await _js.InvokeVoidAsync("showToast", type, message);
             }
             catch
             {
@@ -169,12 +187,182 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             }
         }
 
-        // Helper classes
-        private class ApiResponse<T>
+        private async Task<string?> GetCurrentUserTcKimlikNoAsync()
         {
-            public bool Success { get; set; }
-            public T? Data { get; set; }
-            public string? Message { get; set; }
+            try
+            {
+                var authState = await _authStateProvider.GetAuthenticationStateAsync();
+                return authState.User.FindFirst("TcKimlikNo")?.Value;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // EXPORT METHODS
+        // ═══════════════════════════════════════════════════════
+
+        private async Task ExportToExcel()
+        {
+            if (Talepler == null || !Talepler.Any())
+            {
+                await ShowToast("warning", "Dışa aktarılacak veri bulunamadı!");
+                return;
+            }
+
+            IsExporting = true;
+            ExportType = "excel";
+
+            try
+            {
+                using var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add("Onay Bekleyen Talepler");
+
+                // Header
+                worksheet.Cell(1, 1).Value = "Talep No";
+                worksheet.Cell(1, 2).Value = "Personel";
+                worksheet.Cell(1, 3).Value = "TC Kimlik";
+                worksheet.Cell(1, 4).Value = "Tür";
+                worksheet.Cell(1, 5).Value = "Başlangıç";
+                worksheet.Cell(1, 6).Value = "Bitiş";
+                worksheet.Cell(1, 7).Value = "Toplam Gün";
+                worksheet.Cell(1, 8).Value = "1. Onay";
+                worksheet.Cell(1, 9).Value = "2. Onay";
+
+                // Style header
+                var headerRange = worksheet.Range(1, 1, 1, 9);
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.LightBlue;
+
+                // Data
+                int row = 2;
+                foreach (var talep in Talepler)
+                {
+                    worksheet.Cell(row, 1).Value = talep.IzinMazeretTalepId;
+                    worksheet.Cell(row, 2).Value = talep.AdSoyad;
+                    worksheet.Cell(row, 3).Value = talep.TcKimlikNo;
+                    worksheet.Cell(row, 4).Value = talep.TuruAdi;
+                    worksheet.Cell(row, 5).Value = talep.BaslangicTarihi?.ToString("dd.MM.yyyy") ?? "-";
+                    worksheet.Cell(row, 6).Value = talep.BitisTarihi?.ToString("dd.MM.yyyy") ?? "-";
+                    worksheet.Cell(row, 7).Value = talep.ToplamGun?.ToString() ?? "-";
+                    worksheet.Cell(row, 8).Value = talep.BirinciOnayDurumuAdi;
+                    worksheet.Cell(row, 9).Value = talep.IkinciOnayDurumuAdi;
+                    row++;
+                }
+
+                worksheet.Columns().AdjustToContents();
+
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+                var fileName = $"OnayBekleyenTalepler_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+                await _js.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(content), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                await ShowToast("success", "Excel dosyası başarıyla indirildi!");
+            }
+            catch (Exception ex)
+            {
+                await ShowToast("error", $"Excel oluşturulurken hata: {ex.Message}");
+            }
+            finally
+            {
+                IsExporting = false;
+                ExportType = string.Empty;
+            }
+        }
+
+        private async Task ExportToPdf()
+        {
+            if (Talepler == null || !Talepler.Any())
+            {
+                await ShowToast("warning", "Dışa aktarılacak veri bulunamadı!");
+                return;
+            }
+
+            IsExporting = true;
+            ExportType = "pdf";
+
+            try
+            {
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4.Landscape());
+                        page.Margin(2, Unit.Centimetre);
+                        page.DefaultTextStyle(x => x.FontSize(8));
+
+                        page.Header().Text("Onay Bekleyen İzin/Mazeret Talepleri").FontSize(14).Bold();
+
+                        page.Content().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(1.5f);
+                                columns.RelativeColumn(1.5f);
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("No").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("Personel").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("TC").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("Tür").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("Başlangıç").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("Bitiş").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("Gün").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("1. Onay").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("2. Onay").Bold();
+                            });
+
+                            foreach (var talep in Talepler)
+                            {
+                                table.Cell().Padding(3).Text(talep.IzinMazeretTalepId.ToString());
+                                table.Cell().Padding(3).Text(talep.AdSoyad);
+                                table.Cell().Padding(3).Text(talep.TcKimlikNo);
+                                table.Cell().Padding(3).Text(talep.TuruAdi);
+                                table.Cell().Padding(3).Text(talep.BaslangicTarihi?.ToString("dd.MM.yy") ?? "-");
+                                table.Cell().Padding(3).Text(talep.BitisTarihi?.ToString("dd.MM.yy") ?? "-");
+                                table.Cell().Padding(3).Text(talep.ToplamGun?.ToString() ?? "-");
+                                table.Cell().Padding(3).Text(talep.BirinciOnayDurumuAdi);
+                                table.Cell().Padding(3).Text(talep.IkinciOnayDurumuAdi);
+                            }
+                        });
+
+                        page.Footer().AlignCenter().Text(text =>
+                        {
+                            text.Span("Sayfa ");
+                            text.CurrentPageNumber();
+                            text.Span(" / ");
+                            text.TotalPages();
+                        });
+                    });
+                });
+
+                var pdfBytes = document.GeneratePdf();
+                var fileName = $"OnayBekleyenTalepler_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+
+                await _js.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pdfBytes), "application/pdf");
+                await ShowToast("success", "PDF dosyası başarıyla indirildi!");
+            }
+            catch (Exception ex)
+            {
+                await ShowToast("error", $"PDF oluşturulurken hata: {ex.Message}");
+            }
+            finally
+            {
+                IsExporting = false;
+                ExportType = string.Empty;
+            }
         }
     }
 }
