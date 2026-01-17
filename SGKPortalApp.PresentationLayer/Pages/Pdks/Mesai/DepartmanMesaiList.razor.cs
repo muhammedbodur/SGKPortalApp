@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
@@ -14,6 +15,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
     {
         [Inject] private HttpClient HttpClient { get; set; } = default!;
         [Inject] private ILogger<DepartmanMesaiList> Logger { get; set; } = default!;
+        [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
         private DepartmanMesaiReportDto? report;
         private List<DepartmanDto> departmanList = new();
@@ -23,6 +25,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         private bool isLoading = false;
         private int? filterDepartmanId = null;
         private int? filterServisId = null;
+        private int? userDepartmanId = null;
+        private int? userServisId = null;
         private DateTime baslangicTarihi = DateTime.Now.AddDays(-30);
         private DateTime bitisTarihi = DateTime.Now;
 
@@ -36,18 +40,63 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         {
             try
             {
-                // Load Departman list
-                var departmanResponse = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<DepartmanDto>>>("/api/departman/liste");
+                // Get user's departman and servis from claims
+                var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+                var departmanIdClaim = authState.User.FindFirst("DepartmanId")?.Value;
+                var servisIdClaim = authState.User.FindFirst("ServisId")?.Value;
+
+                if (int.TryParse(departmanIdClaim, out var deptId))
+                {
+                    userDepartmanId = deptId;
+                    filterDepartmanId = deptId; // Set user's departman as default filter
+                }
+
+                if (int.TryParse(servisIdClaim, out var servId))
+                {
+                    userServisId = servId;
+                    filterServisId = servId; // Set user's servis as default filter
+                }
+
+                // Load departman list - only user's departman or all if user has permission
+                var departmanResponse = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<DepartmanDto>>>("/api/departman/yetkili-liste");
                 if (departmanResponse?.Success == true && departmanResponse.Data != null)
                 {
                     departmanList = departmanResponse.Data;
+
+                    // If user has specific departman but it's not in the list, add it
+                    if (userDepartmanId.HasValue && !departmanList.Any(d => d.DepartmanId == userDepartmanId.Value))
+                    {
+                        var fallbackResponse = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<DepartmanDto>>>("/api/departman/liste");
+                        if (fallbackResponse?.Success == true && fallbackResponse.Data != null)
+                        {
+                            var userDept = fallbackResponse.Data.FirstOrDefault(d => d.DepartmanId == userDepartmanId.Value);
+                            if (userDept != null)
+                            {
+                                departmanList = new List<DepartmanDto> { userDept };
+                            }
+                        }
+                    }
                 }
 
-                // Load Servis list
-                var servisResponse = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<ServisDto>>>("/api/servis/liste");
+                // Load servis list - only user's servis or all if user has permission
+                var servisResponse = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<ServisDto>>>("/api/servis/yetkili-liste");
                 if (servisResponse?.Success == true && servisResponse.Data != null)
                 {
                     servisList = servisResponse.Data;
+
+                    // If user has specific servis but it's not in the list, add it
+                    if (userServisId.HasValue && !servisList.Any(s => s.ServisId == userServisId.Value))
+                    {
+                        var fallbackResponse = await HttpClient.GetFromJsonAsync<ApiResponseDto<List<ServisDto>>>("/api/servis/liste");
+                        if (fallbackResponse?.Success == true && fallbackResponse.Data != null)
+                        {
+                            var userServ = fallbackResponse.Data.FirstOrDefault(s => s.ServisId == userServisId.Value);
+                            if (userServ != null)
+                            {
+                                servisList = new List<ServisDto> { userServ };
+                            }
+                        }
+                    }
                 }
             }
             catch (Exception ex)

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
@@ -6,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Json;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
@@ -15,6 +17,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         [Inject] private HttpClient HttpClient { get; set; } = default!;
         [Inject] private ILogger<MesaiListele> Logger { get; set; } = default!;
         [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+        [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
         [Parameter]
         [SupplyParameterFromQuery(Name = "tc")]
@@ -31,9 +34,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         {
             await base.OnInitializedAsync();
 
-            // TODO: User claim'den TC al
+            // Get TC from user claims
             if (string.IsNullOrEmpty(TcKimlikNo))
-                TcKimlikNo = "12345678901";
+            {
+                var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+                TcKimlikNo = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            }
+
+            if (string.IsNullOrEmpty(TcKimlikNo))
+            {
+                Logger.LogWarning("Kullanıcı TC kimlik no bulunamadı");
+                return;
+            }
 
             await LoadBaslikBilgi();
             await LoadMesaiList();
