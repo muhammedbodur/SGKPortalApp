@@ -26,6 +26,16 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        /// <summary>
+        /// Tüm servis listesi (dropdown/select için)
+        /// </summary>
+        [HttpGet("liste")]
+        public async Task<IActionResult> GetListe()
+        {
+            var result = await _servisService.GetAllAsync();
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {

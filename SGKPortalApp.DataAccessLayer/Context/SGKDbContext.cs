@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using SGKPortalApp.DataAccessLayer.Configurations.Common;
@@ -48,6 +49,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<Sendika> Sendikalar { get; set; }
         public DbSet<AtanmaNedenleri> AtanmaNedenleri { get; set; }
         public DbSet<IzinMazeretTalep> IzinMazeretTalepler { get; set; }
+        public DbSet<IzinSorumlu> IzinSorumlular { get; set; }
         public DbSet<Modul> Moduller { get; set; }
         public DbSet<ModulController> ModulControllers { get; set; }
         public DbSet<ModulControllerIslem> ModulControllerIslemleri { get; set; }
