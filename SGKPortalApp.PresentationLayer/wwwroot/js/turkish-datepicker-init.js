@@ -38,9 +38,12 @@
     };
 
     // Flatpickr varsa Türkçe dil ekle
-    if (typeof flatpickr !== 'undefined' && flatpickr.l10ns) {
-        flatpickr.l10ns.tr = Turkish;
-        flatpickr.localize(flatpickr.l10ns.tr);
+    if (typeof flatpickr !== 'undefined') {
+        if (flatpickr.l10ns) {
+            flatpickr.l10ns.tr = Turkish;
+        }
+        // Global olarak Türkçe'yi default yap
+        flatpickr.localize(Turkish);
     }
 
     // Date input'ları Flatpickr ile değiştir
@@ -53,9 +56,9 @@
 
             // Flatpickr ile değiştir
             const fp = flatpickr(input, {
-                locale: 'tr',
-                dateFormat: 'd.m.Y', // Görüntüleme formatı (dd.MM.yyyy)
-                altInput: false,
+                dateFormat: 'Y-m-d', // DB formatı (yyyy-MM-dd) - Blazor için
+                altInput: true, // Alternatif input göster
+                altFormat: 'd.m.Y', // Kullanıcıya gösterilen format (dd.MM.yyyy)
                 allowInput: true,
                 clickOpens: true,
                 disableMobile: true, // Mobilde native picker kullanma
@@ -65,9 +68,10 @@
                     input.dispatchEvent(event);
                 },
                 onReady: function (selectedDates, dateStr, instance) {
-                    // Input'a Sneat form-control class'ı ekle (eğer yoksa)
-                    if (!input.classList.contains('form-control')) {
-                        input.classList.add('form-control');
+                    // Alt input'a Sneat form-control class'ı ekle
+                    const altInput = instance.altInput;
+                    if (altInput && !altInput.classList.contains('form-control')) {
+                        altInput.classList.add('form-control');
                     }
                 }
             });
@@ -90,11 +94,11 @@
             const currentValue = input.value;
 
             const fp = flatpickr(input, {
-                locale: 'tr',
                 enableTime: true,
                 time_24hr: true,
-                dateFormat: 'd.m.Y H:i', // Görüntüleme formatı (dd.MM.yyyy HH:mm)
-                altInput: false,
+                dateFormat: 'Y-m-d H:i', // DB formatı (yyyy-MM-dd HH:mm) - Blazor için
+                altInput: true, // Alternatif input göster
+                altFormat: 'd.m.Y H:i', // Kullanıcıya gösterilen format (dd.MM.yyyy HH:mm)
                 allowInput: true,
                 clickOpens: true,
                 disableMobile: true,
@@ -103,8 +107,9 @@
                     input.dispatchEvent(event);
                 },
                 onReady: function (selectedDates, dateStr, instance) {
-                    if (!input.classList.contains('form-control')) {
-                        input.classList.add('form-control');
+                    const altInput = instance.altInput;
+                    if (altInput && !altInput.classList.contains('form-control')) {
+                        altInput.classList.add('form-control');
                     }
                 }
             });

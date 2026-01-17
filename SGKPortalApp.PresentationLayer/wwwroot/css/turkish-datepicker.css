@@ -8,7 +8,8 @@
    ============================================ */
 
 /* Flatpickr input'ları Sneat form-control gibi görünsün */
-.flatpickr-input {
+.flatpickr-input,
+.flatpickr-input.form-control {
     display: block;
     width: 100%;
     padding: 0.4375rem 0.875rem;
@@ -22,6 +23,11 @@
     appearance: none;
     border-radius: 0.375rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+/* Gizli olan asıl input */
+.flatpickr-input[type="hidden"] {
+    display: none;
 }
 
 .flatpickr-input:focus {
@@ -77,7 +83,7 @@
 .flatpickr-months {
     background: #696cff;
     border-radius: 0.5rem 0.5rem 0 0;
-    padding: 0.5rem;
+    padding: 0.75rem 0.5rem;
 }
 
 .flatpickr-month {
@@ -86,17 +92,15 @@
 }
 
 .flatpickr-current-month {
-    font-size: 1rem;
+    font-size: 1
     font-weight: 600;
-    color: #fff;
-}
-
-.flatpickr-current-month .flatpickr-monthDropdown-months {
+    color: #fff-month .flatpickr-monthDropdown-months {
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
     border: none;
     border-radius: 0.25rem;
-    padding: 0.25rem 0.5rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 1.125rem;
     font-weight: 600;
 }
 
@@ -109,7 +113,8 @@
     color: #fff;
     border: none;
     border-radius: 0.25rem;
-    padding: 0.25rem 0.5rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 1.125rem;
     font-weight: 600;
 }
 
@@ -122,20 +127,25 @@
 .flatpickr-next-month {
     color: #fff;
     fill: #fff;
-    padding: 0.5rem;
+    padding: 0.625rem;
     border-radius: 0.25rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .flatpickr-prev-month:hover,
 .flatpickr-next-month:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
     color: #fff;
 }
 
 .flatpickr-prev-month svg,
 .flatpickr-next-month svg {
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
 }
 
 /* Weekdays */
