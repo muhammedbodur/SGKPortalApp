@@ -1,10 +1,21 @@
 @page "/pdks/card-sync-comparison"
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
-@attribute [Authorize]
+@using SGKPortalApp.PresentationLayer.Components.Permission
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 
 <PageTitle>Kart Senkronizasyon Karşılaştırma</PageTitle>
 
-<div class="container-fluid">
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
+        <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
@@ -349,4 +360,6 @@
             </div>
         </div>
     }
-</div>
+        </div>
+    </FieldPermissionScope>
+}

@@ -1,1 +1,19 @@
-﻿<h3>Index</h3>
+@page "/pdks/giris-cikis"
+@using SGKPortalApp.PresentationLayer.Components.Permission
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>Giriş/Çıkış Kayıtları</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
+        <h3>Giriş/Çıkış Kayıtları</h3>
+    </FieldPermissionScope>
+}

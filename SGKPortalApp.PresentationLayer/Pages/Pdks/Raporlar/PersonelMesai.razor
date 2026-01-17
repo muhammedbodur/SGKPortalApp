@@ -1,1 +1,19 @@
-﻿<h3>PersonelMesai</h3>
+@page "/pdks/raporlar/personel-mesai"
+@using SGKPortalApp.PresentationLayer.Components.Permission
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>Personel Mesai Raporu</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
+        <h3>Personel Mesai Raporu</h3>
+    </FieldPermissionScope>
+}

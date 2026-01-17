@@ -5,11 +5,22 @@
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco
 @using SGKPortalApp.BusinessObjectLayer.Enums
 @using SGKPortalApp.BusinessObjectLayer.Enums.ZKTeco
+@using SGKPortalApp.PresentationLayer.Components.Permission
 @inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 
 <PageTitle>ZKTeco Cihaz Yönetimi</PageTitle>
 
-<div class="container-fluid">
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
+        <div class="container-fluid">
     <div class="row mb-3">
         <div class="col">
             <h3>📱 ZKTeco Cihaz Yönetimi</h3>
@@ -843,4 +854,7 @@
             </div>
         </div>
     </div>
+}
+        </div>
+    </FieldPermissionScope>
 }

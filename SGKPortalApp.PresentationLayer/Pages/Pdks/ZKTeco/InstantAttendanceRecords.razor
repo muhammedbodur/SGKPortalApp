@@ -3,11 +3,22 @@
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco
 @using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri
+@using SGKPortalApp.PresentationLayer.Components.Permission
 @inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 
 <PageTitle>PDKS Attendance Kayıtları</PageTitle>
 
-<div class="container-fluid">
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
+        <div class="container-fluid">
     <!-- Header -->
     <div class="row mb-3">
         <div class="col">
@@ -228,4 +239,6 @@
             </div>
         </div>
     }
-</div>
+        </div>
+    </FieldPermissionScope>
+}

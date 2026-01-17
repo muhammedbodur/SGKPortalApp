@@ -1,1 +1,19 @@
-﻿<h3>CalismaGunleri</h3>
+@page "/pdks/mesai/calisma-gunleri"
+@using SGKPortalApp.PresentationLayer.Components.Permission
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>Çalışma Günleri</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
+        <h3>Çalışma Günleri</h3>
+    </FieldPermissionScope>
+}
