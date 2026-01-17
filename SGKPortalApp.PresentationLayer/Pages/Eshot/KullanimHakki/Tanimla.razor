@@ -1,4 +1,22 @@
-﻿<h3>Tanimla</h3>
+@page "/eshot/kullanim-hakki/tanimla"
+@using SGKPortalApp.PresentationLayer.Components.Permission
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>Kullanım Hakkı Tanımla</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
+        <h3>Kullanım Hakkı Tanımla</h3>
+    </FieldPermissionScope>
+}
 
 @code {
 
