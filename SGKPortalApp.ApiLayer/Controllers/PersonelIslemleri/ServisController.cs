@@ -36,6 +36,37 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        /// <summary>
+        /// Kullanıcının yetkili olduğu servis listesi (authorization ile filtrelenmiş)
+        /// </summary>
+        [HttpGet("yetkili-liste")]
+        public async Task<IActionResult> GetYetkiliListe()
+        {
+            // Get user's departman and servis from claims
+            var departmanIdClaim = User.FindFirst("DepartmanId")?.Value;
+            var servisIdClaim = User.FindFirst("ServisId")?.Value;
+
+            var result = await _servisService.GetActiveAsync();
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            // If user has specific servis, filter to only that servis
+            if (!string.IsNullOrEmpty(servisIdClaim) && int.TryParse(servisIdClaim, out var userServisId))
+            {
+                var filteredData = result.Data?.Where(s => s.ServisId == userServisId).ToList();
+                result.Data = filteredData ?? new List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.ServisResponseDto>();
+            }
+            // If user has departman but not servis, filter to servises in that departman
+            else if (!string.IsNullOrEmpty(departmanIdClaim) && int.TryParse(departmanIdClaim, out var userDepartmanId))
+            {
+                var filteredData = result.Data?.Where(s => s.DepartmanId == userDepartmanId).ToList();
+                result.Data = filteredData ?? new List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.ServisResponseDto>();
+            }
+
+            return Ok(result);
+        }
+
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {

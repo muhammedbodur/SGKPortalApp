@@ -31,7 +31,7 @@ else
             <div class="row">
                 <div class="col-md-3">
                     <label class="form-label">Departman *</label>
-                    <select class="form-select" @bind="filterDepartmanId" required>
+                    <select class="form-select" value="@filterDepartmanId" @onchange="OnDepartmanChangedEvent" required>
                         <option value="">Seçiniz...</option>
                         @foreach (var departman in departmanList)
                         {
@@ -41,7 +41,7 @@ else
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Servis</label>
-                    <select class="form-select" @bind="filterServisId">
+                    <select class="form-select" value="@filterServisId" @onchange="OnServisChangedEvent">
                         <option value="">Tümü</option>
                         @foreach (var servis in servisList)
                         {

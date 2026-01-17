@@ -36,6 +36,30 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        /// <summary>
+        /// Kullanıcının yetkili olduğu departman listesi (authorization ile filtrelenmiş)
+        /// </summary>
+        [HttpGet("yetkili-liste")]
+        public async Task<IActionResult> GetYetkiliListe()
+        {
+            // Get user's departman from claims
+            var departmanIdClaim = User.FindFirst("DepartmanId")?.Value;
+
+            var result = await _departmanService.GetActiveAsync();
+
+            if (!result.Success)
+                return BadRequest(result);
+
+            // If user has specific departman, filter to only that departman
+            if (!string.IsNullOrEmpty(departmanIdClaim) && int.TryParse(departmanIdClaim, out var userDepartmanId))
+            {
+                var filteredData = result.Data?.Where(d => d.DepartmanId == userDepartmanId).ToList();
+                result.Data = filteredData ?? new List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.DepartmanResponseDto>();
+            }
+
+            return Ok(result);
+        }
+
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
