@@ -42,8 +42,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
         [HttpGet("yetkili-liste")]
         public async Task<IActionResult> GetYetkiliListe()
         {
-            // Get user's departman and servis from claims
-            var departmanIdClaim = User.FindFirst("DepartmanId")?.Value;
+            // Get user's servis from claims
             var servisIdClaim = User.FindFirst("ServisId")?.Value;
 
             var result = await _servisService.GetActiveAsync();
@@ -57,12 +56,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
                 var filteredData = result.Data?.Where(s => s.ServisId == userServisId).ToList();
                 result.Data = filteredData ?? new List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.ServisResponseDto>();
             }
-            // If user has departman but not servis, filter to servises in that departman
-            else if (!string.IsNullOrEmpty(departmanIdClaim) && int.TryParse(departmanIdClaim, out var userDepartmanId))
-            {
-                var filteredData = result.Data?.Where(s => s.DepartmanId == userDepartmanId).ToList();
-                result.Data = filteredData ?? new List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.ServisResponseDto>();
-            }
+            // If user has no specific servis, return all active servis (admin or no servis assigned)
 
             return Ok(result);
         }
