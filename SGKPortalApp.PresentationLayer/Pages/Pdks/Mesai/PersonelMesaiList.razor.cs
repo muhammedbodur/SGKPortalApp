@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         [Inject] private ILogger<PersonelMesaiList> Logger { get; set; } = default!;
         [Inject] private NavigationManager NavigationManager { get; set; } = default!;
         [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+        [Inject] private IToastService ToastService { get; set; } = default!;
 
         private List<PersonelListResponseDto> personelList = new();
         private List<DepartmanDto> departmanList = new();
@@ -142,6 +144,50 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             {
                 Logger.LogError(ex, "Aktif durum güncellenirken hata: {TcKimlikNo}", personel.TcKimlikNo);
             }
+        }
+
+        /// <summary>
+        /// Departman değişiklik event handler - Authorization kontrolü ile
+        /// </summary>
+        private async Task OnDepartmanChangedEvent(ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out int deptId))
+            {
+                // ✅ ERİŞİM KONTROLÜ: Kullanıcı bu departmanı görüntüleyebilir mi?
+                if (deptId > 0 && !CanAccessDepartman(deptId))
+                {
+                    await ToastService.ShowWarningAsync("Bu departmanı görüntüleme yetkiniz yok!");
+                    // Kullanıcının kendi departmanına geri dön
+                    filterDepartmanId = userDepartmanId;
+                    return;
+                }
+
+                filterDepartmanId = deptId > 0 ? deptId : null;
+                await LoadPersonelList();
+            }
+        }
+
+        /// <summary>
+        /// Kullanıcının belirtilen departmanı görüntüleme yetkisi var mı?
+        /// </summary>
+        private bool CanAccessDepartman(int departmanId)
+        {
+            var userDeptId = GetCurrentUserDepartmanId();
+
+            // Kullanıcının departmanı yoksa (admin vs) tüm departmanlara erişebilir
+            if (userDeptId == 0)
+                return true;
+
+            // Kullanıcı sadece kendi departmanını görebilir
+            return userDeptId == departmanId;
+        }
+
+        /// <summary>
+        /// Kullanıcının departman ID'sini döndürür
+        /// </summary>
+        private int GetCurrentUserDepartmanId()
+        {
+            return userDepartmanId ?? 0;
         }
 
     }

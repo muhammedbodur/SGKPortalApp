@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         [Inject] private HttpClient HttpClient { get; set; } = default!;
         [Inject] private ILogger<DepartmanMesaiList> Logger { get; set; } = default!;
         [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+        [Inject] private IToastService ToastService { get; set; } = default!;
 
         private DepartmanMesaiReportDto? report;
         private List<DepartmanDto> departmanList = new();
@@ -159,6 +161,97 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             {
                 expandedRows.Add(tcKimlikNo);
             }
+        }
+
+        /// <summary>
+        /// Departman değişiklik event handler - Authorization kontrolü ile
+        /// </summary>
+        private async Task OnDepartmanChangedEvent(ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out int deptId))
+            {
+                // ✅ ERİŞİM KONTROLÜ: Kullanıcı bu departmanı görüntüleyebilir mi?
+                if (deptId > 0 && !CanAccessDepartman(deptId))
+                {
+                    await ToastService.ShowWarningAsync("Bu departmanı görüntüleme yetkiniz yok!");
+                    // Kullanıcının kendi departmanına geri dön
+                    filterDepartmanId = userDepartmanId;
+                    return;
+                }
+
+                filterDepartmanId = deptId > 0 ? deptId : null;
+                // Departman değiştiğinde servis listesini temizle
+                filterServisId = null;
+            }
+        }
+
+        /// <summary>
+        /// Servis değişiklik event handler - Authorization kontrolü ile
+        /// </summary>
+        private async Task OnServisChangedEvent(ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out int servId))
+            {
+                // ✅ ERİŞİM KONTROLÜ: Kullanıcı bu servisi görüntüleyebilir mi?
+                if (servId > 0 && !CanAccessServis(servId))
+                {
+                    await ToastService.ShowWarningAsync("Bu servisi görüntüleme yetkiniz yok!");
+                    // Kullanıcının kendi servisine geri dön
+                    filterServisId = userServisId;
+                    return;
+                }
+
+                filterServisId = servId > 0 ? servId : null;
+            }
+        }
+
+        /// <summary>
+        /// Kullanıcının belirtilen departmanı görüntüleme yetkisi var mı?
+        /// </summary>
+        private bool CanAccessDepartman(int departmanId)
+        {
+            var userDeptId = GetCurrentUserDepartmanId();
+
+            // Kullanıcının departmanı yoksa (admin vs) tüm departmanlara erişebilir
+            if (userDeptId == 0)
+                return true;
+
+            // Kullanıcı sadece kendi departmanını görebilir
+            return userDeptId == departmanId;
+        }
+
+        /// <summary>
+        /// Kullanıcının belirtilen servisi görüntüleme yetkisi var mı?
+        /// </summary>
+        private bool CanAccessServis(int servisId)
+        {
+            var userServId = GetCurrentUserServisId();
+
+            // Kullanıcının servisi yoksa departman bazlı kontrol yap
+            if (userServId == 0)
+            {
+                // Kullanıcının departmanındaki tüm servislere erişebilir
+                return true;
+            }
+
+            // Kullanıcı sadece kendi servisini görebilir
+            return userServId == servisId;
+        }
+
+        /// <summary>
+        /// Kullanıcının departman ID'sini döndürür
+        /// </summary>
+        private int GetCurrentUserDepartmanId()
+        {
+            return userDepartmanId ?? 0;
+        }
+
+        /// <summary>
+        /// Kullanıcının servis ID'sini döndürür
+        /// </summary>
+        private int GetCurrentUserServisId()
+        {
+            return userServisId ?? 0;
         }
 
     }
