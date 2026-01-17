@@ -69,7 +69,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                         {
                             TcKimlikNo = p.TcKimlikNo,
                             AdSoyad = p.AdSoyad,
-                            SicilNo = int.TryParse(p.SicilNo?.ToString(), out var sicil) ? sicil : 0
+                            SicilNo = p.SicilNo
                         }).ToList();
                     }
                 }

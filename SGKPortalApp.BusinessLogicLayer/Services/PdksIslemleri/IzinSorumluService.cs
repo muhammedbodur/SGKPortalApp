@@ -31,10 +31,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             {
                 var repo = _unitOfWork.Repository<IzinSorumlu>();
                 var entities = await repo.GetAllAsync(
-                    include: query => query
-                        .Include(x => x.Departman)
-                        .Include(x => x.Servis)
-                        .Include(x => x.SorumluPersonel));
+                    x => x.Departman!,
+                    x => x.Servis!,
+                    x => x.SorumluPersonel!);
 
                 var dtos = entities.Select(MapToDto).ToList();
                 return ApiResponseDto<List<IzinSorumluResponseDto>>.SuccessResult(dtos);
@@ -51,12 +50,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             try
             {
                 var repo = _unitOfWork.Repository<IzinSorumlu>();
-                var entities = await repo.GetAllAsync(
-                    predicate: x => x.Aktif,
-                    include: query => query
-                        .Include(x => x.Departman)
-                        .Include(x => x.Servis)
-                        .Include(x => x.SorumluPersonel));
+                var entities = await repo.FindAsync(
+                    x => x.Aktif,
+                    x => x.Departman!,
+                    x => x.Servis!,
+                    x => x.SorumluPersonel!);
 
                 var dtos = entities.Select(MapToDto).ToList();
                 return ApiResponseDto<List<IzinSorumluResponseDto>>.SuccessResult(dtos);
@@ -73,11 +71,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             try
             {
                 var repo = _unitOfWork.Repository<IzinSorumlu>();
-                var entity = await repo.GetByIdAsync(id,
-                    include: query => query
-                        .Include(x => x.Departman)
-                        .Include(x => x.Servis)
-                        .Include(x => x.SorumluPersonel));
+                var entity = await repo.FirstOrDefaultAsync(
+                    x => x.IzinSorumluId == id,
+                    x => x.Departman!,
+                    x => x.Servis!,
+                    x => x.SorumluPersonel!);
 
                 if (entity == null)
                     return ApiResponseDto<IzinSorumluResponseDto>.ErrorResult("İzin sorumlusu bulunamadı");
@@ -97,14 +95,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             try
             {
                 var repo = _unitOfWork.Repository<IzinSorumlu>();
-                var entities = await repo.GetAllAsync(
-                    predicate: x => x.Aktif &&
+                var entities = await repo.FindAsync(
+                    x => x.Aktif &&
                         (departmanId == null || x.DepartmanId == departmanId) &&
                         (servisId == null || x.ServisId == servisId),
-                    include: query => query
-                        .Include(x => x.Departman)
-                        .Include(x => x.Servis)
-                        .Include(x => x.SorumluPersonel));
+                    x => x.Departman!,
+                    x => x.Servis!,
+                    x => x.SorumluPersonel!);
 
                 var dtos = entities.Select(MapToDto).ToList();
                 return ApiResponseDto<List<IzinSorumluResponseDto>>.SuccessResult(dtos);
@@ -129,17 +126,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 
                 // Personelin departman ve servisine göre sorumluları getir
                 var repo = _unitOfWork.Repository<IzinSorumlu>();
-                var entities = await repo.GetAllAsync(
-                    predicate: x => x.Aktif &&
+                var entities = await repo.FindAsync(
+                    x => x.Aktif &&
                         (x.DepartmanId == null || x.DepartmanId == personel.DepartmanId) &&
                         (x.ServisId == null || x.ServisId == personel.ServisId),
-                    include: query => query
-                        .Include(x => x.Departman)
-                        .Include(x => x.Servis)
-                        .Include(x => x.SorumluPersonel),
-                    orderBy: q => q.OrderBy(x => x.OnaySeviyes));
+                    x => x.Departman!,
+                    x => x.Servis!,
+                    x => x.SorumluPersonel!);
 
-                var dtos = entities.Select(MapToDto).ToList();
+                var dtos = entities.OrderBy(x => x.OnaySeviyes).Select(MapToDto).ToList();
                 return ApiResponseDto<List<IzinSorumluResponseDto>>.SuccessResult(dtos);
             }
             catch (Exception ex)
@@ -162,8 +157,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 
                 // Aynı atama var mı kontrol et
                 var repo = _unitOfWork.Repository<IzinSorumlu>();
-                var existing = await repo.GetAllAsync(
-                    predicate: x => x.Aktif &&
+                var existing = await repo.FindAsync(
+                    x => x.Aktif &&
                         x.DepartmanId == request.DepartmanId &&
                         x.ServisId == request.ServisId &&
                         x.OnaySeviyes == request.OnaySeviyes);
@@ -187,11 +182,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 await _unitOfWork.SaveChangesAsync();
 
                 // Detaylı entity'yi çek
-                var created = await repo.GetByIdAsync(entity.IzinSorumluId,
-                    include: query => query
-                        .Include(x => x.Departman)
-                        .Include(x => x.Servis)
-                        .Include(x => x.SorumluPersonel));
+                var created = await repo.FirstOrDefaultAsync(
+                    x => x.IzinSorumluId == entity.IzinSorumluId,
+                    x => x.Departman!,
+                    x => x.Servis!,
+                    x => x.SorumluPersonel!);
 
                 var dto = MapToDto(created!);
                 return ApiResponseDto<IzinSorumluResponseDto>.SuccessResult(dto, "İzin sorumlusu başarıyla atandı");
@@ -233,11 +228,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 await _unitOfWork.SaveChangesAsync();
 
                 // Detaylı entity'yi çek
-                var updated = await repo.GetByIdAsync(entity.IzinSorumluId,
-                    include: query => query
-                        .Include(x => x.Departman)
-                        .Include(x => x.Servis)
-                        .Include(x => x.SorumluPersonel));
+                var updated = await repo.FirstOrDefaultAsync(
+                    x => x.IzinSorumluId == entity.IzinSorumluId,
+                    x => x.Departman!,
+                    x => x.Servis!,
+                    x => x.SorumluPersonel!);
 
                 var dto = MapToDto(updated!);
                 return ApiResponseDto<IzinSorumluResponseDto>.SuccessResult(dto, "İzin sorumlusu başarıyla güncellendi");
