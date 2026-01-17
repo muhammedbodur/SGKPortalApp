@@ -1,11 +1,22 @@
 @page "/audit/login-logout"
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth
-@attribute [Authorize]
+@using SGKPortalApp.PresentationLayer.Components.Permission
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 
 <PageTitle>Login/Logout İşlemleri - SGK Portal</PageTitle>
 
-<div class="container-fluid">
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
+        <div class="container-fluid">
     <div class="row mb-3">
         <div class="col">
             <h3>🔐 Login/Logout İşlemleri</h3>
@@ -286,4 +297,6 @@
             <i class="bx bx-info-circle me-2"></i>Seçili filtrelere uygun kayıt bulunamadı.
         </div>
     }
-</div>
+        </div>
+    </FieldPermissionScope>
+}

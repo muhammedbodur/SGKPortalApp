@@ -1,11 +1,23 @@
-﻿@page "/audit/log/detail/{LogId:int}"
+@page "/audit/log/detail/{LogId:int}"
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Request.AuditLog
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.AuditLog
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
+@using SGKPortalApp.PresentationLayer.Components.Permission
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 
 <PageTitle>Log Detay - SGK Portal</PageTitle>
 
-<div class="container-fluid">
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
+        <div class="container-fluid">
     @if (isLoading)
     {
         <div class="text-center py-5">
@@ -275,4 +287,6 @@
             <a href="/audit/log" class="btn btn-secondary">â† Log Listesine DÃ¶n</a>
         </div>
     }
-</div>
+        </div>
+    </FieldPermissionScope>
+}
