@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.PresentationLayer.Models.FormModels.PdksIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Pdks;
 using System;

@@ -71,19 +71,6 @@ else
         <div class="card-body">
             <div class="row">
                 <div class="col-md-3">
-                    <label class="form-label">Son Kaç Gün</label>
-                    <select class="form-select" value="@gunSayisi" @onchange="OnGunSayisiChanged">
-                        <option value="7">Son 7 Gün</option>
-                        <option value="15">Son 15 Gün</option>
-                        <option value="30">Son 30 Gün</option>
-                        <option value="60">Son 60 Gün</option>
-                        <option value="90">Son 90 Gün</option>
-                        <option value="100" selected>Son 100 Gün</option>
-                        <option value="180">Son 180 Gün</option>
-                        <option value="365">Son 1 Yıl</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
                     <label class="form-label">Başlangıç Tarihi</label>
                     <input type="date" class="form-control" @bind="baslangicTarihi" />
                 </div>
