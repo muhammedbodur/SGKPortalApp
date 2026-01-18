@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
@@ -21,8 +22,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
 
         [Inject] private HttpClient _httpClient { get; set; } = default!;
         [Inject] private IPersonelListApiService _personelListApiService { get; set; } = default!;
+        [Inject] private AuthenticationStateProvider _authStateProvider { get; set; } = default!;
         [Inject] private IJSRuntime _js { get; set; } = default!;
-        [Inject] private ILogger<IzinSorumluAtama> _logger { get; set; } = default!;
+        [Inject] private ILogger<IzinSorumluAtama> _logger { get; set; } = default!
 
         // ═══════════════════════════════════════════════════════
         // DATA PROPERTIES
@@ -40,6 +42,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         private int? FilterDepartmanId { get; set; } = null;
         private int? FilterServisId { get; set; } = null;
         private string? FilterAktif { get; set; } = "";
+        private int? userDepartmanId = null;
+        private int? userServisId = null;
 
         // ═══════════════════════════════════════════════════════
         // UI STATE
@@ -76,20 +80,42 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         {
             try
             {
-                // Departman listesi
+                // Get user's departman and servis from claims
+                var authState = await _authStateProvider.GetAuthenticationStateAsync();
+                var departmanIdClaim = authState.User.FindFirst("DepartmanId")?.Value;
+                var servisIdClaim = authState.User.FindFirst("ServisId")?.Value;
+
+                if (int.TryParse(departmanIdClaim, out var deptId))
+                {
+                    userDepartmanId = deptId;
+                }
+
+                if (int.TryParse(servisIdClaim, out var servId))
+                {
+                    userServisId = servId;
+                }
+
+                // Departman listesi (yetkili endpoint kullanılıyor)
                 var deptResult = await _personelListApiService.GetDepartmanListeAsync();
                 if (deptResult.Success && deptResult.Data != null)
                 {
                     DepartmanList = deptResult.Data;
                 }
 
+                // Servis listesi (yetkili endpoint kullanılıyor)
                 var servResult = await _personelListApiService.GetServisListeAsync();
                 if (servResult.Success && servResult.Data != null)
                 {
                     ServisList = servResult.Data;
                 }
 
-                var perRequest = new { SadeceAktifler = true };
+                // Personel listesi - kullanıcının departmanına göre filtrelenir
+                var perRequest = new
+                {
+                    DepartmanId = userDepartmanId,
+                    ServisId = userServisId,
+                    SadeceAktifler = true
+                };
                 var perResult = await _personelListApiService.GetPersonelListeAsync(perRequest);
                 if (perResult.Success && perResult.Data != null)
                 {
@@ -101,8 +127,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                     }).ToList();
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Filtre verileri yüklenirken hata");
             }
         }
 
