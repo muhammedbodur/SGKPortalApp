@@ -24,7 +24,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         [Inject] private IPersonelListApiService _personelListApiService { get; set; } = default!;
         [Inject] private AuthenticationStateProvider _authStateProvider { get; set; } = default!;
         [Inject] private IJSRuntime _js { get; set; } = default!;
-        [Inject] private ILogger<IzinSorumluAtama> _logger { get; set; } = default!
+        [Inject] private ILogger<IzinSorumluAtama> _logger { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════
         // DATA PROPERTIES
