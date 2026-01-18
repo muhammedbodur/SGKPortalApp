@@ -22,7 +22,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         // DEPENDENCY INJECTION
         // ═══════════════════════════════════════════════════════
 
-        [Inject] private HttpClient _httpClient { get; set; } = default!;
+        [Inject] private IIzinSorumluApiService _izinSorumluApiService { get; set; } = default!;
         [Inject] private IPersonelListApiService _personelListApiService { get; set; } = default!;
         [Inject] private AuthenticationStateProvider _authStateProvider { get; set; } = default!;
         [Inject] private IJSRuntime _js { get; set; } = default!;
@@ -145,36 +145,49 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                 IsLoading = true;
                 Sorumlular.Clear();
 
-                var url = "/api/izin-sorumlu";
-                if (!string.IsNullOrEmpty(FilterAktif))
+                // API service kullanarak verileri al
+                ServiceResult<List<IzinSorumluResponseDto>> result;
+
+                if (FilterAktif == "true")
                 {
-                    url = FilterAktif == "true" ? "/api/izin-sorumlu/aktif" : "/api/izin-sorumlu";
+                    result = await _izinSorumluApiService.GetActiveAsync();
+                }
+                else
+                {
+                    result = await _izinSorumluApiService.GetAllAsync();
                 }
 
-                var response = await _httpClient.GetFromJsonAsync<ApiResponseDto<List<IzinSorumluResponseDto>>>(url);
-                if (response?.Success == true && response.Data != null)
+                if (result.Success && result.Data != null)
                 {
-                    Sorumlular = response.Data;
+                    Sorumlular = result.Data;
 
+                    // Client-side filtreleme (Departman)
                     if (FilterDepartmanId.HasValue)
                     {
                         Sorumlular = Sorumlular.Where(s => s.DepartmanId == FilterDepartmanId.Value || !s.DepartmanId.HasValue).ToList();
                     }
 
+                    // Client-side filtreleme (Servis)
                     if (FilterServisId.HasValue)
                     {
                         Sorumlular = Sorumlular.Where(s => s.ServisId == FilterServisId.Value || !s.ServisId.HasValue).ToList();
                     }
 
+                    // Client-side filtreleme (Aktif durum - tekrar kontrol)
                     if (!string.IsNullOrEmpty(FilterAktif))
                     {
                         var aktif = FilterAktif == "true";
                         Sorumlular = Sorumlular.Where(s => s.Aktif == aktif).ToList();
                     }
                 }
+                else
+                {
+                    _logger.LogWarning("İzin sorumlu listesi alınamadı: {Message}", result.Message);
+                }
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "LoadSorumlular exception");
             }
             finally
             {
@@ -271,6 +284,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                     return;
                 }
 
+                ServiceResult<IzinSorumluResponseDto> result;
+
                 if (IsEditMode)
                 {
                     // Güncelleme
@@ -285,24 +300,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                         Aciklama = EditModel.Aciklama
                     };
 
-                    var response = await _httpClient.PutAsJsonAsync($"/api/izin-sorumlu/{EditModel.IzinSorumluId}", updateDto);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var result = await response.Content.ReadFromJsonAsync<ApiResponseDto<IzinSorumluResponseDto>>();
-                        if (result?.Success == true)
-                        {
-                            CloseModal();
-                            await LoadSorumlular();
-                        }
-                        else
-                        {
-                            ErrorMessage = result?.Message ?? "Güncelleme başarısız";
-                        }
-                    }
-                    else
-                    {
-                        ErrorMessage = "Güncelleme sırasında hata oluştu";
-                    }
+                    result = await _izinSorumluApiService.UpdateAsync(EditModel.IzinSorumluId, updateDto);
                 }
                 else
                 {
@@ -316,42 +314,24 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                         Aciklama = EditModel.Aciklama
                     };
 
-                    var response = await _httpClient.PostAsJsonAsync("/api/izin-sorumlu", createDto);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var result = await response.Content.ReadFromJsonAsync<ApiResponseDto<IzinSorumluResponseDto>>();
-                        if (result?.Success == true)
-                        {
-                            CloseModal();
-                            await LoadSorumlular();
-                        }
-                        else
-                        {
-                            ErrorMessage = result?.Message ?? "Kayıt başarısız";
-                        }
-                    }
-                    else
-                    {
-                        ErrorMessage = "Kayıt sırasında hata oluştu";
-                    }
+                    result = await _izinSorumluApiService.CreateAsync(createDto);
                 }
-            }
-            catch (DbUpdateException dbEx)
-            {
-                _logger.LogError(dbEx, "Veritabanı güncelleme hatası");
-                ErrorMessage = "Veritabanı işlemi sırasında hata oluştu";
-            }
-            catch (SqlException sqlEx)
-            {
-                _logger.LogError(sqlEx, "SQL hatası: {ErrorCode}", sqlEx.Number);
-                ErrorMessage = "Veritabanı bağlantı hatası";
+
+                if (result.Success)
+                {
+                    CloseModal();
+                    await LoadSorumlular();
+                }
+                else
+                {
+                    ErrorMessage = result.Message ?? "İşlem başarısız";
+                    _logger.LogWarning("SaveSorumlu failed: {Message}", result.Message);
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Beklenmeyen hata oluştu");
-                ErrorMessage = "İşlem sırasında beklenmeyen bir hata oluştu";
-
-                ErrorMessage += $" - Detay: {ex.Message}";
+                ErrorMessage = "İşlem sırasında hata oluştu";
+                _logger.LogError(ex, "SaveSorumlu exception");
             }
             finally
             {
@@ -406,14 +386,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
 
             try
             {
-                var response = await _httpClient.PatchAsync($"/api/izin-sorumlu/{id}/pasif", null);
-                if (response.IsSuccessStatusCode)
+                var result = await _izinSorumluApiService.DeactivateAsync(id);
+                if (result.Success)
                 {
                     await LoadSorumlular();
                 }
+                else
+                {
+                    _logger.LogWarning("DeactivateSorumlu failed: {Message}", result.Message);
+                }
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "DeactivateSorumlu exception");
             }
         }
 
@@ -425,14 +410,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
 
             try
             {
-                var response = await _httpClient.DeleteAsync($"/api/izin-sorumlu/{id}");
-                if (response.IsSuccessStatusCode)
+                var result = await _izinSorumluApiService.DeleteAsync(id);
+                if (result.Success)
                 {
                     await LoadSorumlular();
                 }
+                else
+                {
+                    _logger.LogWarning("DeleteSorumlu failed: {Message}", result.Message);
+                }
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "DeleteSorumlu exception");
             }
         }
     }
