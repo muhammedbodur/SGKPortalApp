@@ -48,8 +48,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         // FILTER PROPERTIES
         // ═══════════════════════════════════════════════════════
 
-        private DateTime baslangicTarihi = DateTime.Now.AddDays(-30);
+        private DateTime baslangicTarihi = DateTime.Now.AddDays(-100);
         private DateTime bitisTarihi = DateTime.Now;
+        private int gunSayisi = 100; // Default 100 gün
 
         // ═══════════════════════════════════════════════════════
         // UI STATE
@@ -132,6 +133,20 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // EVENT HANDLERS
+        // ═══════════════════════════════════════════════════════
+
+        private async Task OnGunSayisiChanged(ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out int gun) && gun > 0)
+            {
+                gunSayisi = gun;
+                baslangicTarihi = DateTime.Now.AddDays(-gun);
+                await LoadMesaiList();
             }
         }
 
