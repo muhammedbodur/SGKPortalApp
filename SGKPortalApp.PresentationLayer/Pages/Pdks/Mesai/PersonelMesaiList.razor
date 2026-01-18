@@ -64,6 +64,16 @@ else
                     </select>
                 </div>
                 <div class="col-md-3">
+                    <label class="form-label">Servis</label>
+                    <select class="form-select" value="@filterServisId" @onchange="OnServisChangedEvent">
+                        <option value="">Tümü</option>
+                        @foreach (var servis in Servisler)
+                        {
+                            <option value="@servis.ServisId">@servis.ServisAdi</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
                     <label class="form-label">Arama (Ad/Sicil)</label>
                     <input type="text" class="form-control" @bind="searchTerm" placeholder="Ad soyad veya sicil no" />
                 </div>

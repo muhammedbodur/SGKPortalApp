@@ -35,13 +35,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
 
         private List<PersonelListResponseDto> Personeller { get; set; } = new();
         private List<DepartmanDto> Departmanlar { get; set; } = new();
+        private List<ServisDto> Servisler { get; set; } = new();
 
         // ═══════════════════════════════════════════════════════
         // FILTER PROPERTIES
         // ═══════════════════════════════════════════════════════
 
         private int? filterDepartmanId = null;
+        private int? filterServisId = null;
         private int? userDepartmanId = null;
+        private int? userServisId = null;
         private string searchTerm = string.Empty;
 
         // ═══════════════════════════════════════════════════════
@@ -71,18 +74,35 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
         {
             try
             {
+                // Get user's departman and servis from claims
                 var authState = await _authStateProvider.GetAuthenticationStateAsync();
                 var departmanIdClaim = authState.User.FindFirst("DepartmanId")?.Value;
+                var servisIdClaim = authState.User.FindFirst("ServisId")?.Value;
+
                 if (int.TryParse(departmanIdClaim, out var deptId))
                 {
                     userDepartmanId = deptId;
                     filterDepartmanId = deptId; // Set user's departman as default filter
                 }
 
+                if (int.TryParse(servisIdClaim, out var servId))
+                {
+                    userServisId = servId;
+                    filterServisId = servId; // Set user's servis as default filter
+                }
+
+                // Load departman list
                 var deptResult = await _personelListService.GetDepartmanListeAsync();
                 if (deptResult.Success && deptResult.Data != null)
                 {
                     Departmanlar = deptResult.Data;
+                }
+
+                // Load servis list
+                var servisResult = await _personelListService.GetServisListeAsync();
+                if (servisResult.Success && servisResult.Data != null)
+                {
+                    Servisler = servisResult.Data;
                 }
             }
             catch (Exception ex)
@@ -101,6 +121,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
                 var request = new
                 {
                     DepartmanId = filterDepartmanId,
+                    ServisId = filterServisId,
                     SadeceAktifler = true,
                     AramaMetni = searchTerm
                 };
@@ -133,18 +154,56 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
 
         private async Task OnDepartmanChangedEvent(ChangeEventArgs e)
         {
+            // ✅ 1. YETKİ KONTROLÜ: Kullanıcı bu filtreyi değiştirebilir mi?
+            if (!CanEditFieldInList("DEPARTMANID"))
+            {
+                await _toastService.ShowWarningAsync("Bu filtreyi değiştirme yetkiniz yok!");
+                Logger.LogWarning("Yetkisiz filtre değiştirme denemesi: DEPARTMANID");
+                return;
+            }
+
             if (int.TryParse(e.Value?.ToString(), out int deptId))
             {
-                // ✅ ERİŞİM KONTROLÜ: Kullanıcı bu departmanı görüntüleyebilir mi?
-                if (deptId > 0 && !CanAccessDepartman(deptId))
+                // ✅ 2. ERİŞİM KONTROLÜ: Edit yetkisi yoksa sadece kendi departmanını seçebilir
+                var hasEditPermission = CanEditFieldInList("DEPARTMANID");
+                if (deptId > 0 && !hasEditPermission && !CanAccessDepartman(deptId))
                 {
                     await _toastService.ShowWarningAsync("Bu departmanı görüntüleme yetkiniz yok!");
-                    // Kullanıcının kendi departmanına geri dön
+                    Logger.LogWarning("Yetkisiz departman erişim denemesi: {DeptId}", deptId);
                     filterDepartmanId = userDepartmanId;
                     return;
                 }
 
                 filterDepartmanId = deptId > 0 ? deptId : null;
+                // Departman değişince servis filtresini temizle
+                filterServisId = null;
+                await LoadPersonelList();
+            }
+        }
+
+        private async Task OnServisChangedEvent(ChangeEventArgs e)
+        {
+            // ✅ 1. YETKİ KONTROLÜ: Kullanıcı bu filtreyi değiştirebilir mi?
+            if (!CanEditFieldInList("SERVISID"))
+            {
+                await _toastService.ShowWarningAsync("Bu filtreyi değiştirme yetkiniz yok!");
+                Logger.LogWarning("Yetkisiz filtre değiştirme denemesi: SERVISID");
+                return;
+            }
+
+            if (int.TryParse(e.Value?.ToString(), out int servId))
+            {
+                // ✅ 2. ERİŞİM KONTROLÜ: Edit yetkisi yoksa sadece kendi servisini seçebilir
+                var hasEditPermission = CanEditFieldInList("SERVISID");
+                if (servId > 0 && !hasEditPermission && !CanAccessServis(servId))
+                {
+                    await _toastService.ShowWarningAsync("Bu servisi görüntüleme yetkiniz yok!");
+                    Logger.LogWarning("Yetkisiz servis erişim denemesi: {ServId}", servId);
+                    filterServisId = userServisId;
+                    return;
+                }
+
+                filterServisId = servId > 0 ? servId : null;
                 await LoadPersonelList();
             }
         }
@@ -165,9 +224,26 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             return userDeptId == departmanId;
         }
 
+        private bool CanAccessServis(int servisId)
+        {
+            var userServId = GetCurrentUserServisId();
+
+            // Kullanıcının servisi yoksa tüm servislere erişebilir
+            if (userServId == 0)
+                return true;
+
+            // Kullanıcı sadece kendi servisini görebilir
+            return userServId == servisId;
+        }
+
         private int GetCurrentUserDepartmanId()
         {
             return userDepartmanId ?? 0;
+        }
+
+        private int GetCurrentUserServisId()
+        {
+            return userServisId ?? 0;
         }
 
         private async Task<string?> GetCurrentUserTcKimlikNoAsync()

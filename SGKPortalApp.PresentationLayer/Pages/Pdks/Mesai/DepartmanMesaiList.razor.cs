@@ -184,13 +184,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
 
         private async Task OnDepartmanChangedEvent(ChangeEventArgs e)
         {
+            // ✅ 1. YETKİ KONTROLÜ: Kullanıcı bu filtreyi değiştirebilir mi?
+            if (!CanEditFieldInList("DEPARTMANID"))
+            {
+                await _toastService.ShowWarningAsync("Bu filtreyi değiştirme yetkiniz yok!");
+                Logger.LogWarning("Yetkisiz filtre değiştirme denemesi: DEPARTMANID");
+                return;
+            }
+
             if (int.TryParse(e.Value?.ToString(), out int deptId))
             {
-                // ✅ ERİŞİM KONTROLÜ: Kullanıcı bu departmanı görüntüleyebilir mi?
-                if (deptId > 0 && !CanAccessDepartman(deptId))
+                // ✅ 2. ERİŞİM KONTROLÜ: Edit yetkisi yoksa sadece kendi departmanını seçebilir
+                var hasEditPermission = CanEditFieldInList("DEPARTMANID");
+                if (deptId > 0 && !hasEditPermission && !CanAccessDepartman(deptId))
                 {
                     await _toastService.ShowWarningAsync("Bu departmanı görüntüleme yetkiniz yok!");
-                    // Kullanıcının kendi departmanına geri dön
+                    Logger.LogWarning("Yetkisiz departman erişim denemesi: {DeptId}", deptId);
                     filterDepartmanId = userDepartmanId;
                     return;
                 }
@@ -203,13 +212,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
 
         private async Task OnServisChangedEvent(ChangeEventArgs e)
         {
+            // ✅ 1. YETKİ KONTROLÜ: Kullanıcı bu filtreyi değiştirebilir mi?
+            if (!CanEditFieldInList("SERVISID"))
+            {
+                await _toastService.ShowWarningAsync("Bu filtreyi değiştirme yetkiniz yok!");
+                Logger.LogWarning("Yetkisiz filtre değiştirme denemesi: SERVISID");
+                return;
+            }
+
             if (int.TryParse(e.Value?.ToString(), out int servId))
             {
-                // ✅ ERİŞİM KONTROLÜ: Kullanıcı bu servisi görüntüleyebilir mi?
-                if (servId > 0 && !CanAccessServis(servId))
+                // ✅ 2. ERİŞİM KONTROLÜ: Edit yetkisi yoksa sadece kendi servisini seçebilir
+                var hasEditPermission = CanEditFieldInList("SERVISID");
+                if (servId > 0 && !hasEditPermission && !CanAccessServis(servId))
                 {
                     await _toastService.ShowWarningAsync("Bu servisi görüntüleme yetkiniz yok!");
-                    // Kullanıcının kendi servisine geri dön
+                    Logger.LogWarning("Yetkisiz servis erişim denemesi: {ServId}", servId);
                     filterServisId = userServisId;
                     return;
                 }
