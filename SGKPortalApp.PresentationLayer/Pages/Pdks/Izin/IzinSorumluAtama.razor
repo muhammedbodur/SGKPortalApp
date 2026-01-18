@@ -175,37 +175,47 @@ else
                             <div class="modal-body">
                                 <div class="mb-3">
                                     <label class="form-label">Departman</label>
-                                    <select class="form-select" @bind="EditModel.DepartmanId">
+                                    <select class="form-select" value="@EditModel.DepartmanId" @onchange="OnModalDepartmanChanged">
                                         <option value="">Tüm Departmanlar</option>
-                                        @foreach (var dep in DepartmanList)
+                                        @foreach (var dep in AllDepartmanList)
                                         {
                                             <option value="@dep.DepartmanId">@dep.DepartmanAdi</option>
                                         }
                                     </select>
-                                    <small class="text-muted">Boş bırakılırsa tüm departmanlar için geçerli olur</small>
+                                    <small class="text-muted">Boş bırakılırsa tüm departmanlar için geçerli olur. Seçim yapıldığında personel listesi filtrelenir.</small>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Servis</label>
-                                    <select class="form-select" @bind="EditModel.ServisId">
+                                    <select class="form-select" value="@EditModel.ServisId" @onchange="OnModalServisChanged">
                                         <option value="">Tüm Servisler</option>
-                                        @foreach (var srv in ServisList)
+                                        @foreach (var srv in AllServisList)
                                         {
                                             <option value="@srv.ServisId">@srv.ServisAdi</option>
                                         }
                                     </select>
-                                    <small class="text-muted">Boş bırakılırsa seçilen departmandaki tüm servisler için geçerli olur</small>
+                                    <small class="text-muted">Boş bırakılırsa seçilen departmandaki tüm servisler için geçerli olur. Seçim yapıldığında personel listesi filtrelenir.</small>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Sorumlu Personel *</label>
-                                    <select class="form-select" @bind="EditModel.SorumluPersonelTcKimlikNo">
-                                        <option value="">Seçiniz...</option>
+                                    <select class="form-select" @bind="EditModel.SorumluPersonelTcKimlikNo" disabled="@(!PersonelList.Any())">
+                                        <option value="">@(PersonelList.Any() ? "Seçiniz..." : "Önce departman/servis seçin")</option>
                                         @foreach (var per in PersonelList)
                                         {
                                             <option value="@per.TcKimlikNo">@per.AdSoyad (@per.SicilNo)</option>
                                         }
                                     </select>
+                                    <small class="text-muted">
+                                        @if (PersonelList.Any())
+                                        {
+                                            <span class="text-success">@PersonelList.Count personel listeleniyor</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-warning">Personel listesi için departman veya servis seçiniz</span>
+                                        }
+                                    </small>
                                 </div>
 
                                 <div class="mb-3">

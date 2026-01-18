@@ -17,6 +17,9 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Pdks
             _logger = logger;
         }
 
+        /// <summary>
+        /// Kullanıcının yetkili olduğu departman listesi (claims'e göre filtrelenmiş)
+        /// </summary>
         public async Task<ServiceResult<List<DepartmanDto>>> GetDepartmanListeAsync()
         {
             try
@@ -51,6 +54,46 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Pdks
             }
         }
 
+        /// <summary>
+        /// Tüm departman listesi (modal/form için)
+        /// </summary>
+        public async Task<ServiceResult<List<DepartmanDto>>> GetAllDepartmanListeAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("departman/liste");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetAllDepartmanListeAsync failed: {Error}", errorContent);
+                    return ServiceResult<List<DepartmanDto>>.Fail("Departman listesi alınamadı.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<DepartmanDto>>>();
+
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return ServiceResult<List<DepartmanDto>>.Ok(
+                        apiResponse.Data,
+                        apiResponse.Message ?? "İşlem başarılı"
+                    );
+                }
+
+                return ServiceResult<List<DepartmanDto>>.Fail(
+                    apiResponse?.Message ?? "Departman listesi alınamadı"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetAllDepartmanListeAsync Exception");
+                return ServiceResult<List<DepartmanDto>>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Kullanıcının yetkili olduğu servis listesi (claims'e göre filtrelenmiş)
+        /// </summary>
         public async Task<ServiceResult<List<ServisDto>>> GetServisListeAsync()
         {
             try
@@ -81,6 +124,43 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Pdks
             catch (Exception ex)
             {
                 _logger.LogError(ex, "GetServisListeAsync Exception");
+                return ServiceResult<List<ServisDto>>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Tüm servis listesi (modal/form için)
+        /// </summary>
+        public async Task<ServiceResult<List<ServisDto>>> GetAllServisListeAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("servis/liste");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetAllServisListeAsync failed: {Error}", errorContent);
+                    return ServiceResult<List<ServisDto>>.Fail("Servis listesi alınamadı.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<ServisDto>>>();
+
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return ServiceResult<List<ServisDto>>.Ok(
+                        apiResponse.Data,
+                        apiResponse.Message ?? "İşlem başarılı"
+                    );
+                }
+
+                return ServiceResult<List<ServisDto>>.Fail(
+                    apiResponse?.Message ?? "Servis listesi alınamadı"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetAllServisListeAsync Exception");
                 return ServiceResult<List<ServisDto>>.Fail($"Hata: {ex.Message}");
             }
         }

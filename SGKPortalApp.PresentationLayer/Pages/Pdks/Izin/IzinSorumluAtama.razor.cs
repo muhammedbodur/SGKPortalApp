@@ -31,8 +31,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         // ═══════════════════════════════════════════════════════
 
         private List<IzinSorumluResponseDto> Sorumlular { get; set; } = new();
+
+        // Filter dropdown'lar için (yetkili liste)
         private List<DepartmanDto> DepartmanList { get; set; } = new();
         private List<ServisDto> ServisList { get; set; } = new();
+
+        // Modal dropdown'lar için (tüm liste)
+        private List<DepartmanDto> AllDepartmanList { get; set; } = new();
+        private List<ServisDto> AllServisList { get; set; } = new();
+
         private List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri.PersonelListResponseDto> PersonelList { get; set; } = new();
 
         // ═══════════════════════════════════════════════════════
@@ -95,36 +102,32 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                     userServisId = servId;
                 }
 
-                // Departman listesi (yetkili endpoint kullanılıyor)
+                // Filtre için yetkili departman listesi
                 var deptResult = await _personelListApiService.GetDepartmanListeAsync();
                 if (deptResult.Success && deptResult.Data != null)
                 {
                     DepartmanList = deptResult.Data;
                 }
 
-                // Servis listesi (yetkili endpoint kullanılıyor)
+                // Filtre için yetkili servis listesi
                 var servResult = await _personelListApiService.GetServisListeAsync();
                 if (servResult.Success && servResult.Data != null)
                 {
                     ServisList = servResult.Data;
                 }
 
-                // Personel listesi - kullanıcının departmanına göre filtrelenir
-                var perRequest = new
+                // Modal için TÜM departman listesi
+                var allDeptResult = await _personelListApiService.GetAllDepartmanListeAsync();
+                if (allDeptResult.Success && allDeptResult.Data != null)
                 {
-                    DepartmanId = userDepartmanId,
-                    ServisId = userServisId,
-                    SadeceAktifler = true
-                };
-                var perResult = await _personelListApiService.GetPersonelListeAsync(perRequest);
-                if (perResult.Success && perResult.Data != null)
+                    AllDepartmanList = allDeptResult.Data;
+                }
+
+                // Modal için TÜM servis listesi
+                var allServResult = await _personelListApiService.GetAllServisListeAsync();
+                if (allServResult.Success && allServResult.Data != null)
                 {
-                    PersonelList = perResult.Data.Select(p => new SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri.PersonelListResponseDto
-                    {
-                        TcKimlikNo = p.TcKimlikNo,
-                        AdSoyad = p.AdSoyad,
-                        SicilNo = p.SicilNo
-                    }).ToList();
+                    AllServisList = allServResult.Data;
                 }
             }
             catch (Exception ex)
@@ -177,19 +180,56 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             }
         }
 
+        /// <summary>
+        /// Modal için personel listesini departman/servise göre yükler
+        /// </summary>
+        private async Task LoadPersonelForModal()
+        {
+            try
+            {
+                PersonelList.Clear();
+
+                var perRequest = new
+                {
+                    DepartmanId = EditModel.DepartmanId,
+                    ServisId = EditModel.ServisId,
+                    SadeceAktifler = true
+                };
+
+                var perResult = await _personelListApiService.GetPersonelListeAsync(perRequest);
+                if (perResult.Success && perResult.Data != null)
+                {
+                    PersonelList = perResult.Data.Select(p => new SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri.PersonelListResponseDto
+                    {
+                        TcKimlikNo = p.TcKimlikNo,
+                        AdSoyad = p.AdSoyad,
+                        SicilNo = p.SicilNo
+                    }).ToList();
+                }
+
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Modal personel listesi yüklenirken hata");
+            }
+        }
+
         // ═══════════════════════════════════════════════════════
         // EVENT HANDLERS
         // ═══════════════════════════════════════════════════════
 
-        private void OpenCreateModal()
+        private async Task OpenCreateModal()
         {
             IsEditMode = false;
             EditModel = new IzinSorumluFormModel { OnaySeviyes = 1, Aktif = true };
             ErrorMessage = null;
+            PersonelList.Clear();
             ShowModal = true;
+            await Task.CompletedTask;
         }
 
-        private void OpenEditModal(IzinSorumluResponseDto item)
+        private async Task OpenEditModal(IzinSorumluResponseDto item)
         {
             IsEditMode = true;
             EditModel = new IzinSorumluFormModel
@@ -204,6 +244,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             };
             ErrorMessage = null;
             ShowModal = true;
+
+            // Modal açıldığında mevcut departman/servise göre personel listesini yükle
+            await LoadPersonelForModal();
         }
 
         private void CloseModal()
@@ -299,6 +342,45 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             {
                 IsSaving = false;
             }
+        }
+
+        /// <summary>
+        /// Modal'da departman değiştiğinde personel listesini güncelle
+        /// </summary>
+        private async Task OnModalDepartmanChanged(ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out int deptId) && deptId > 0)
+            {
+                EditModel.DepartmanId = deptId;
+            }
+            else
+            {
+                EditModel.DepartmanId = null;
+            }
+
+            // Departman değiştiğinde servisi sıfırla ve personel listesini yeniden yükle
+            EditModel.ServisId = null;
+            EditModel.SorumluPersonelTcKimlikNo = null;
+            await LoadPersonelForModal();
+        }
+
+        /// <summary>
+        /// Modal'da servis değiştiğinde personel listesini güncelle
+        /// </summary>
+        private async Task OnModalServisChanged(ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out int servId) && servId > 0)
+            {
+                EditModel.ServisId = servId;
+            }
+            else
+            {
+                EditModel.ServisId = null;
+            }
+
+            // Servis değiştiğinde personel seçimini sıfırla ve personel listesini yeniden yükle
+            EditModel.SorumluPersonelTcKimlikNo = null;
+            await LoadPersonelForModal();
         }
 
         private async Task DeactivateSorumlu(int id)
