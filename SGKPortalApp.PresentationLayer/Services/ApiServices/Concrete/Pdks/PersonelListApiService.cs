@@ -21,7 +21,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Pdks
         {
             try
             {
-                var response = await _httpClient.GetAsync("departman/liste");
+                var response = await _httpClient.GetAsync("departman/yetkili-liste");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -55,7 +55,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Pdks
         {
             try
             {
-                var response = await _httpClient.GetAsync("servis/liste");
+                var response = await _httpClient.GetAsync("servis/yetkili-liste");
 
                 if (!response.IsSuccessStatusCode)
                 {
