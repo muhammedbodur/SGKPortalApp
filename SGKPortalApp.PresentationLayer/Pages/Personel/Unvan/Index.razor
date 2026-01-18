@@ -26,31 +26,37 @@
         </div>
 
         <div class="d-flex gap-2">
-            <!-- Excel Export -->
-            <button class="btn btn-success" @onclick="ExportToExcel" disabled="@IsExporting">
-                @if (IsExporting && ExportType == "excel")
-                {
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                }
-                else
-                {
-                    <i class="bx bx-download me-1"></i>
-                }
-                Excel
-            </button>
+            @if (IsActionVisible("EXCEL_EXPORT"))
+            {
+                <!-- Excel Export -->
+                <button class="btn btn-success" @onclick="ExportToExcel" disabled="@IsExporting">
+                    @if (IsExporting && ExportType == "excel")
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    else
+                    {
+                        <i class="bx bx-download me-1"></i>
+                    }
+                    Excel
+                </button>
+            }
 
-            <!-- PDF Export -->
-            <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@IsExporting">
-                @if (IsExporting && ExportType == "pdf")
-                {
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                }
-                else
-                {
-                    <i class="bx bxs-file-pdf me-1"></i>
-                }
-                PDF
-            </button>
+            @if (IsActionVisible("PDF_EXPORT"))
+            {
+                <!-- PDF Export -->
+                <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@IsExporting">
+                    @if (IsExporting && ExportType == "pdf")
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    else
+                    {
+                        <i class="bx bxs-file-pdf me-1"></i>
+                    }
+                    PDF
+                </button>
+            }
 
             <!-- Yeni Unvan -->
             <button class="btn btn-primary" @onclick="NavigateToCreate">

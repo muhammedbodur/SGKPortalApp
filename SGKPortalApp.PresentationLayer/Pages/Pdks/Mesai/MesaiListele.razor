@@ -24,28 +24,34 @@ else
                         <i class="bx bx-user"></i> Personel Bilgileri
                     </h5>
                     <div class="btn-group">
-                        <button class="btn btn-success btn-sm" @onclick="ExportToExcel" disabled="@IsExporting">
-                            @if (IsExporting && ExportType == "excel")
-                            {
-                                <span class="spinner-border spinner-border-sm me-1"></span>
-                            }
-                            else
-                            {
-                                <i class="bx bx-file me-1"></i>
-                            }
-                            Excel
-                        </button>
-                        <button class="btn btn-danger btn-sm" @onclick="ExportToPdf" disabled="@IsExporting">
-                            @if (IsExporting && ExportType == "pdf")
-                            {
-                                <span class="spinner-border spinner-border-sm me-1"></span>
-                            }
-                            else
-                            {
-                                <i class="bx bxs-file-pdf me-1"></i>
-                            }
-                            PDF
-                        </button>
+                        @if (IsActionVisible("EXCEL_EXPORT"))
+                        {
+                            <button class="btn btn-success btn-sm" @onclick="ExportToExcel" disabled="@IsExporting">
+                                @if (IsExporting && ExportType == "excel")
+                                {
+                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                }
+                                else
+                                {
+                                    <i class="bx bx-file me-1"></i>
+                                }
+                                Excel
+                            </button>
+                        }
+                        @if (IsActionVisible("PDF_EXPORT"))
+                        {
+                            <button class="btn btn-danger btn-sm" @onclick="ExportToPdf" disabled="@IsExporting">
+                                @if (IsExporting && ExportType == "pdf")
+                                {
+                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                }
+                                else
+                                {
+                                    <i class="bx bxs-file-pdf me-1"></i>
+                                }
+                                PDF
+                            </button>
+                        }
                     </div>
                 </div>
         <div class="card-body">
