@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.PresentationLayer.Models.FormModels.PdksIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Pdks;
 using System;
@@ -334,9 +336,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                     }
                 }
             }
-            catch
+            catch (DbUpdateException dbEx)
             {
-                ErrorMessage = "İşlem sırasında hata oluştu";
+                _logger.LogError(dbEx, "Veritabanı güncelleme hatası");
+                ErrorMessage = "Veritabanı işlemi sırasında hata oluştu";
+            }
+            catch (SqlException sqlEx)
+            {
+                _logger.LogError(sqlEx, "SQL hatası: {ErrorCode}", sqlEx.Number);
+                ErrorMessage = "Veritabanı bağlantı hatası";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Beklenmeyen hata oluştu");
+                ErrorMessage = "İşlem sırasında beklenmeyen bir hata oluştu";
+
+                ErrorMessage += $" - Detay: {ex.Message}";
             }
             finally
             {
