@@ -59,26 +59,48 @@
                         </div>
                     </div>
                     <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label small text-muted">Departman</label>
-                            <select class="form-select form-select-sm" @bind="FilterDepartmanId" @bind:after="OnDepartmanChanged">
-                                <option value="0">Tümü</option>
-                                @foreach (var d in DepartmanDropdown)
-                                {
-                                    <option value="@d.Id">@d.Ad</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label small text-muted">Servis</label>
-                            <select class="form-select form-select-sm" @bind="FilterServisId" @bind:after="SearchPersonel" disabled="@(FilterDepartmanId <= 0)">
-                                <option value="0">Tümü</option>
-                                @foreach (var s in ServisDropdown)
-                                {
-                                    <option value="@s.Id">@s.Ad</option>
-                                }
-                            </select>
-                        </div>
+                        @if (IsFieldVisibleInList("DEPARTMANID"))
+                        {
+                            <div class="col-6">
+                                <label class="form-label small text-muted">
+                                    <i class="bx bx-briefcase me-1"></i>Departman
+                                    @if (!CanEditFieldInList("DEPARTMANID"))
+                                    {
+                                        <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
+                                            <i class="bx bx-lock-alt"></i>
+                                        </span>
+                                    }
+                                </label>
+                                <select class="form-select form-select-sm" @bind="FilterDepartmanId" @bind:after="OnDepartmanChanged" disabled="@IsFieldDisabledInList("DEPARTMANID")">
+                                    <option value="0">Tümü</option>
+                                    @foreach (var d in DepartmanDropdown)
+                                    {
+                                        <option value="@d.Id">@d.Ad</option>
+                                    }
+                                </select>
+                            </div>
+                        }
+                        @if (IsFieldVisibleInList("SERVISID"))
+                        {
+                            <div class="col-6">
+                                <label class="form-label small text-muted">
+                                    <i class="bx bx-sitemap me-1"></i>Servis
+                                    @if (!CanEditFieldInList("SERVISID"))
+                                    {
+                                        <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
+                                            <i class="bx bx-lock-alt"></i>
+                                        </span>
+                                    }
+                                </label>
+                                <select class="form-select form-select-sm" @bind="FilterServisId" @bind:after="SearchPersonel" disabled="@(FilterDepartmanId <= 0 || IsFieldDisabledInList("SERVISID"))">
+                                    <option value="0">Tümü</option>
+                                    @foreach (var s in ServisDropdown)
+                                    {
+                                        <option value="@s.Id">@s.Ad</option>
+                                    }
+                                </select>
+                            </div>
+                        }
                     </div>
 
                     @* Personel Listesi *@

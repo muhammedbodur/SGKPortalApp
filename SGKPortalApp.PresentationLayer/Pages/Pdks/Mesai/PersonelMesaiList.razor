@@ -53,26 +53,48 @@ else
     <div class="card mb-4">
         <div class="card-body">
             <div class="row">
-                <div class="col-md-3">
-                    <label class="form-label">Departman</label>
-                    <select class="form-select" value="@filterDepartmanId" @onchange="OnDepartmanChangedEvent">
-                        <option value="">Tümü</option>
-                        @foreach (var dept in Departmanlar)
-                        {
-                            <option value="@dept.DepartmanId">@dept.DepartmanAdi</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Servis</label>
-                    <select class="form-select" value="@filterServisId" @onchange="OnServisChangedEvent">
-                        <option value="">Tümü</option>
-                        @foreach (var servis in Servisler)
-                        {
-                            <option value="@servis.ServisId">@servis.ServisAdi</option>
-                        }
-                    </select>
-                </div>
+                @if (IsFieldVisibleInList("DEPARTMANID"))
+                {
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            <i class="bx bx-briefcase me-1"></i>Departman
+                            @if (!CanEditFieldInList("DEPARTMANID"))
+                            {
+                                <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
+                                    <i class="bx bx-lock-alt"></i>
+                                </span>
+                            }
+                        </label>
+                        <select class="form-select" value="@filterDepartmanId" @onchange="OnDepartmanChangedEvent" disabled="@IsFieldDisabledInList("DEPARTMANID")">
+                            <option value="">Tümü</option>
+                            @foreach (var dept in Departmanlar)
+                            {
+                                <option value="@dept.DepartmanId">@dept.DepartmanAdi</option>
+                            }
+                        </select>
+                    </div>
+                }
+                @if (IsFieldVisibleInList("SERVISID"))
+                {
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            <i class="bx bx-sitemap me-1"></i>Servis
+                            @if (!CanEditFieldInList("SERVISID"))
+                            {
+                                <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
+                                    <i class="bx bx-lock-alt"></i>
+                                </span>
+                            }
+                        </label>
+                        <select class="form-select" value="@filterServisId" @onchange="OnServisChangedEvent" disabled="@IsFieldDisabledInList("SERVISID")">
+                            <option value="">Tümü</option>
+                            @foreach (var servis in Servisler)
+                            {
+                                <option value="@servis.ServisId">@servis.ServisAdi</option>
+                            }
+                        </select>
+                    </div>
+                }
                 <div class="col-md-3">
                     <label class="form-label">Arama (Ad/Sicil)</label>
                     <input type="text" class="form-control" @bind="searchTerm" placeholder="Ad soyad veya sicil no" />

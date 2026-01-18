@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
@@ -11,7 +10,6 @@ using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Pdks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
@@ -32,15 +30,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         // DATA PROPERTIES
         // ═══════════════════════════════════════════════════════
 
+        private List<IzinSorumluResponseDto> AllSorumlular { get; set; } = new();
         private List<IzinSorumluResponseDto> Sorumlular { get; set; } = new();
 
-        // Filter dropdown'lar için (yetkili liste)
+        // Dropdown'lar için (tüm liste)
         private List<DepartmanDto> DepartmanList { get; set; } = new();
         private List<ServisDto> ServisList { get; set; } = new();
-
-        // Modal dropdown'lar için (tüm liste)
-        private List<DepartmanDto> AllDepartmanList { get; set; } = new();
-        private List<ServisDto> AllServisList { get; set; } = new();
 
         private List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri.PersonelListResponseDto> PersonelList { get; set; } = new();
 
@@ -48,9 +43,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         // FILTER PROPERTIES
         // ═══════════════════════════════════════════════════════
 
+        private string SearchTerm { get; set; } = "";
         private int? FilterDepartmanId { get; set; } = null;
         private int? FilterServisId { get; set; } = null;
-        private string? FilterAktif { get; set; } = "";
+        private string FilterAktiflik { get; set; } = "";
+        private string SortBy { get; set; } = "name-asc";
         private int? userDepartmanId = null;
         private int? userServisId = null;
 
@@ -62,6 +59,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         private bool ShowModal { get; set; } = false;
         private bool IsEditMode { get; set; } = false;
         private bool IsSaving { get; set; } = false;
+        private bool IsExporting { get; set; } = false;
+        private string ExportType { get; set; } = "";
         private string? ErrorMessage { get; set; } = null;
 
         // ═══════════════════════════════════════════════════════
@@ -104,32 +103,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                     userServisId = servId;
                 }
 
-                // Filtre için yetkili departman listesi
-                var deptResult = await _personelListApiService.GetDepartmanListeAsync();
+                // TÜM departman listesi (filtre ve modal için)
+                var deptResult = await _personelListApiService.GetAllDepartmanListeAsync();
                 if (deptResult.Success && deptResult.Data != null)
                 {
                     DepartmanList = deptResult.Data;
                 }
 
-                // Filtre için yetkili servis listesi
-                var servResult = await _personelListApiService.GetServisListeAsync();
+                // TÜM servis listesi (filtre ve modal için)
+                var servResult = await _personelListApiService.GetAllServisListeAsync();
                 if (servResult.Success && servResult.Data != null)
                 {
                     ServisList = servResult.Data;
-                }
-
-                // Modal için TÜM departman listesi
-                var allDeptResult = await _personelListApiService.GetAllDepartmanListeAsync();
-                if (allDeptResult.Success && allDeptResult.Data != null)
-                {
-                    AllDepartmanList = allDeptResult.Data;
-                }
-
-                // Modal için TÜM servis listesi
-                var allServResult = await _personelListApiService.GetAllServisListeAsync();
-                if (allServResult.Success && allServResult.Data != null)
-                {
-                    AllServisList = allServResult.Data;
                 }
             }
             catch (Exception ex)
@@ -143,42 +128,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             try
             {
                 IsLoading = true;
+                AllSorumlular.Clear();
                 Sorumlular.Clear();
 
-                // API service kullanarak verileri al
-                ServiceResult<List<IzinSorumluResponseDto>> result;
-
-                if (FilterAktif == "true")
-                {
-                    result = await _izinSorumluApiService.GetActiveAsync();
-                }
-                else
-                {
-                    result = await _izinSorumluApiService.GetAllAsync();
-                }
+                var result = await _izinSorumluApiService.GetAllAsync();
 
                 if (result.Success && result.Data != null)
                 {
-                    Sorumlular = result.Data;
-
-                    // Client-side filtreleme (Departman)
-                    if (FilterDepartmanId.HasValue)
-                    {
-                        Sorumlular = Sorumlular.Where(s => s.DepartmanId == FilterDepartmanId.Value || !s.DepartmanId.HasValue).ToList();
-                    }
-
-                    // Client-side filtreleme (Servis)
-                    if (FilterServisId.HasValue)
-                    {
-                        Sorumlular = Sorumlular.Where(s => s.ServisId == FilterServisId.Value || !s.ServisId.HasValue).ToList();
-                    }
-
-                    // Client-side filtreleme (Aktif durum - tekrar kontrol)
-                    if (!string.IsNullOrEmpty(FilterAktif))
-                    {
-                        var aktif = FilterAktif == "true";
-                        Sorumlular = Sorumlular.Where(s => s.Aktif == aktif).ToList();
-                    }
+                    AllSorumlular = result.Data;
+                    ApplyFilters();
                 }
                 else
                 {
@@ -192,6 +150,153 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        private void ApplyFilters()
+        {
+            Sorumlular = AllSorumlular;
+
+            // Arama filtresi
+            if (!string.IsNullOrEmpty(SearchTerm))
+            {
+                var searchLower = SearchTerm.ToLower();
+                Sorumlular = Sorumlular.Where(s => 
+                    s.SorumluPersonelAdSoyad.ToLower().Contains(searchLower) ||
+                    s.SorumluPersonelSicilNo.ToString().Contains(searchLower) ||
+                    s.DepartmanAdi.ToLower().Contains(searchLower) ||
+                    (s.ServisAdi != null && s.ServisAdi.ToLower().Contains(searchLower))
+                ).ToList();
+            }
+
+            // Departman filtresi
+            if (FilterDepartmanId.HasValue)
+            {
+                Sorumlular = Sorumlular.Where(s => s.DepartmanId == FilterDepartmanId.Value || !s.DepartmanId.HasValue).ToList();
+            }
+
+            // Servis filtresi
+            if (FilterServisId.HasValue)
+            {
+                Sorumlular = Sorumlular.Where(s => s.ServisId == FilterServisId.Value || !s.ServisId.HasValue).ToList();
+            }
+
+            // Aktiflik filtresi
+            if (!string.IsNullOrEmpty(FilterAktiflik))
+            {
+                var aktif = FilterAktiflik == "1"; // Aktiflik.Aktif = 1
+                Sorumlular = Sorumlular.Where(s => s.Aktif == aktif).ToList();
+            }
+
+            // Sıralama
+            Sorumlular = SortBy switch
+            {
+                "name-asc" => Sorumlular.OrderBy(s => s.SorumluPersonelAdSoyad).ToList(),
+                "name-desc" => Sorumlular.OrderByDescending(s => s.SorumluPersonelAdSoyad).ToList(),
+                "date-newest" => Sorumlular.OrderByDescending(s => s.EklenmeTarihi).ToList(),
+                "date-oldest" => Sorumlular.OrderBy(s => s.EklenmeTarihi).ToList(),
+                _ => Sorumlular.OrderBy(s => s.SorumluPersonelAdSoyad).ToList()
+            };
+        }
+
+        private void OnSearchChanged()
+        {
+            ApplyFilters();
+        }
+
+        private void OnSortByChanged(ChangeEventArgs e)
+        {
+            SortBy = e.Value?.ToString() ?? "name-asc";
+            ApplyFilters();
+        }
+
+        private void OnDepartmanChanged(ChangeEventArgs e)
+        {
+            if (string.IsNullOrEmpty(e.Value?.ToString()))
+            {
+                FilterDepartmanId = null;
+            }
+            else if (int.TryParse(e.Value.ToString(), out int deptId))
+            {
+                FilterDepartmanId = deptId;
+            }
+            ApplyFilters();
+        }
+
+        private void OnServisChanged(ChangeEventArgs e)
+        {
+            if (string.IsNullOrEmpty(e.Value?.ToString()))
+            {
+                FilterServisId = null;
+            }
+            else if (int.TryParse(e.Value.ToString(), out int servId))
+            {
+                FilterServisId = servId;
+            }
+            ApplyFilters();
+        }
+
+        private void OnAktiflikChanged(ChangeEventArgs e)
+        {
+            FilterAktiflik = e.Value?.ToString() ?? "";
+            ApplyFilters();
+        }
+
+        private void ClearFilters()
+        {
+            SearchTerm = "";
+            FilterDepartmanId = null;
+            FilterServisId = null;
+            FilterAktiflik = "";
+            SortBy = "name-asc";
+            ApplyFilters();
+        }
+
+        private async Task ExportToExcel()
+        {
+            try
+            {
+                IsExporting = true;
+                ExportType = "excel";
+                StateHasChanged();
+
+                // TODO: Excel export implementasyonu
+                await Task.Delay(1000); // Simülasyon
+                await _js.InvokeVoidAsync("alert", "Excel export özelliği yakında eklenecek.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Excel export hatası");
+            }
+            finally
+            {
+                IsExporting = false;
+                ExportType = "";
+                StateHasChanged();
+            }
+        }
+
+        private async Task ExportToPdf()
+        {
+            try
+            {
+                IsExporting = true;
+                ExportType = "pdf";
+                StateHasChanged();
+
+                // TODO: PDF export implementasyonu
+                await Task.Delay(1000); // Simülasyon
+                await _js.InvokeVoidAsync("alert", "PDF export özelliği yakında eklenecek.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "PDF export hatası");
+            }
+            finally
+            {
+                IsExporting = false;
+                ExportType = "";
+                StateHasChanged();
             }
         }
 
@@ -284,11 +389,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                     return;
                 }
 
-                ServiceResult<IzinSorumluResponseDto> result;
-
                 if (IsEditMode)
                 {
-                    // Güncelleme
                     var updateDto = new IzinSorumluUpdateDto
                     {
                         IzinSorumluId = EditModel.IzinSorumluId,
@@ -300,11 +402,21 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                         Aciklama = EditModel.Aciklama
                     };
 
-                    result = await _izinSorumluApiService.UpdateAsync(EditModel.IzinSorumluId, updateDto);
+                    var result = await _izinSorumluApiService.UpdateAsync(EditModel.IzinSorumluId, updateDto);
+
+                    if (result.Success)
+                    {
+                        CloseModal();
+                        await LoadSorumlular();
+                    }
+                    else
+                    {
+                        ErrorMessage = result.Message ?? "İşlem başarısız";
+                        _logger.LogWarning("SaveSorumlu failed: {Message}", result.Message);
+                    }
                 }
                 else
                 {
-                    // Yeni oluşturma
                     var createDto = new IzinSorumluCreateDto
                     {
                         DepartmanId = EditModel.DepartmanId,
@@ -314,18 +426,18 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                         Aciklama = EditModel.Aciklama
                     };
 
-                    result = await _izinSorumluApiService.CreateAsync(createDto);
-                }
+                    var result = await _izinSorumluApiService.CreateAsync(createDto);
 
-                if (result.Success)
-                {
-                    CloseModal();
-                    await LoadSorumlular();
-                }
-                else
-                {
-                    ErrorMessage = result.Message ?? "İşlem başarısız";
-                    _logger.LogWarning("SaveSorumlu failed: {Message}", result.Message);
+                    if (result.Success)
+                    {
+                        CloseModal();
+                        await LoadSorumlular();
+                    }
+                    else
+                    {
+                        ErrorMessage = result.Message ?? "İşlem başarısız";
+                        _logger.LogWarning("SaveSorumlu failed: {Message}", result.Message);
+                    }
                 }
             }
             catch (Exception ex)
@@ -378,27 +490,31 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             await LoadPersonelForModal();
         }
 
-        private async Task DeactivateSorumlu(int id)
+        private async Task ToggleSorumlu(int id, bool currentStatus)
         {
-            var confirmed = await _js.InvokeAsync<bool>("confirm", "Bu sorumlu atamasını pasif yapmak istediğinizden emin misiniz?");
+            var action = currentStatus ? "pasif" : "aktif";
+            var confirmed = await _js.InvokeAsync<bool>("confirm", $"Bu sorumlu atamasını {action} yapmak istediğinizden emin misiniz?");
             if (!confirmed)
                 return;
 
             try
             {
-                var result = await _izinSorumluApiService.DeactivateAsync(id);
+                var result = currentStatus
+                    ? await _izinSorumluApiService.DeactivateAsync(id)
+                    : await _izinSorumluApiService.ActivateAsync(id);
+
                 if (result.Success)
                 {
                     await LoadSorumlular();
                 }
                 else
                 {
-                    _logger.LogWarning("DeactivateSorumlu failed: {Message}", result.Message);
+                    _logger.LogWarning("ToggleSorumlu failed: {Message}", result.Message);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "DeactivateSorumlu exception");
+                _logger.LogError(ex, "ToggleSorumlu exception");
             }
         }
 

@@ -52,6 +52,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
         Task<ApiResponseDto<bool>> DeactivateAsync(int id);
 
         /// <summary>
+        /// İzin sorumlusunu aktif yap
+        /// </summary>
+        Task<ApiResponseDto<bool>> ActivateAsync(int id);
+
+        /// <summary>
         /// İzin sorumlusunu sil (Hard delete)
         /// </summary>
         Task<ApiResponseDto<bool>> DeleteAsync(int id);

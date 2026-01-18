@@ -110,6 +110,16 @@ namespace SGKPortalApp.ApiLayer.Controllers.PdksIslemleri
         }
 
         /// <summary>
+        /// İzin sorumlusunu aktif yap
+        /// </summary>
+        [HttpPatch("{id:int}/aktif")]
+        public async Task<IActionResult> Activate(int id)
+        {
+            var result = await _service.ActivateAsync(id);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
         /// İzin sorumlusunu sil
         /// </summary>
         [HttpDelete("{id:int}")]

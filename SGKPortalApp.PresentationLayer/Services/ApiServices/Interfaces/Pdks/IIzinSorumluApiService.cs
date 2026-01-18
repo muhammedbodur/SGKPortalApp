@@ -32,6 +32,11 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Pdks
         Task<ServiceResult<bool>> DeactivateAsync(int id);
 
         /// <summary>
+        /// İzin sorumlusunu aktif yapar
+        /// </summary>
+        Task<ServiceResult<bool>> ActivateAsync(int id);
+
+        /// <summary>
         /// İzin sorumlusunu siler
         /// </summary>
         Task<ServiceResult<bool>> DeleteAsync(int id);

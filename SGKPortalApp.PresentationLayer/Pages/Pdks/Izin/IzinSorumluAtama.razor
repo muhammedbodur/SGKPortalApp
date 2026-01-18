@@ -1,6 +1,7 @@
 @page "/pdks/izin/sorumlu-atama"
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
 @using SGKPortalApp.PresentationLayer.Components.Permission
 @inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 
@@ -15,152 +16,328 @@
 }
 else
 {
-    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
         <div class="container-xxl flex-grow-1 container-p-y">
-            <!-- Başlık -->
-            <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="mb-0">
-                            <i class="bx bx-user-check"></i> İzin Sorumlu Atama
-                        </h5>
-                        <small class="text-muted">Departman/Servis bazında izin onay Sorumluları</small>
-                    </div>
-                    <div>
-                        @if (CanAction("CREATE"))
-                        {
-                            <button class="btn btn-primary" @onclick="OpenCreateModal">
-                                <i class="bx bx-plus"></i> Yeni Atama
-                            </button>
-                        }
-                    </div>
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- PAGE HEADER -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        <i class="bx bx-user-check me-2"></i>İzin Sorumlu Atama
+                    </h4>
+                    <p class="text-muted mb-0">
+                        Departman/Servis bazında izin onay sorumlularını görüntüleyin ve yönetin
+                    </p>
+                </div>
+
+                <div class="d-flex gap-2">
+                    @if (IsActionVisible("EXCEL_EXPORT"))
+                    {
+                        <!-- Excel Export -->
+                        <button class="btn btn-success" @onclick="ExportToExcel" disabled="@IsExporting">
+                            @if (IsExporting && ExportType == "excel")
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            else
+                            {
+                                <i class="bx bx-download me-1"></i>
+                            }
+                            Excel
+                        </button>
+                    }
+
+                    @if (IsActionVisible("PDF_EXPORT"))
+                    {
+                        <!-- PDF Export -->
+                        <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@IsExporting">
+                            @if (IsExporting && ExportType == "pdf")
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            else
+                            {
+                                <i class="bx bxs-file-pdf me-1"></i>
+                            }
+                            PDF
+                        </button>
+                    }
+
+                    @if (IsActionVisible("CREATE"))
+                    {
+                        <!-- Yeni Atama -->
+                        <button class="btn btn-primary" @onclick="OpenCreateModal" disabled="@(!CanEditAction("CREATE"))">
+                            <i class="bx bx-plus me-1"></i>Yeni Atama
+                        </button>
+                    }
                 </div>
             </div>
 
-            <!-- Filtre -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- FILTER CARD -->
+            <!-- ═══════════════════════════════════════════════════════ -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <label class="form-label">Departman</label>
-                            <select class="form-select" @bind="FilterDepartmanId">
-                                <option value="">Tümü</option>
-                                @foreach (var dep in DepartmanList)
-                                {
-                                    <option value="@dep.DepartmanId">@dep.DepartmanAdi</option>
-                                }
-                            </select>
+                    <div class="row g-3">
+                        <!-- Arama -->
+                        <div class="col-md-4">
+                            <label class="form-label">Sorumlu Ara</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bx bx-search"></i>
+                                </span>
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="Personel adı, sicil no..."
+                                       @bind="SearchTerm"
+                                       @bind:event="oninput"
+                                       @onkeyup="OnSearchChanged" />
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Servis</label>
-                            <select class="form-select" @bind="FilterServisId">
-                                <option value="">Tümü</option>
-                                @foreach (var srv in ServisList)
-                                {
-                                    <option value="@srv.ServisId">@srv.ServisAdi</option>
-                                }
-                            </select>
-                        </div>
+
+                        @if (IsFieldVisibleInList("DEPARTMANID"))
+                        {
+                            <div class="col-md-2">
+                                <label class="form-label">
+                                    <i class="bx bx-briefcase me-1"></i>Departman
+                                    @if (!CanEditFieldInList("DEPARTMANID"))
+                                    {
+                                        <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
+                                            <i class="bx bx-lock-alt"></i>
+                                        </span>
+                                    }
+                                </label>
+                                <select class="form-select" value="@FilterDepartmanId" @onchange="OnDepartmanChanged" disabled="@IsFieldDisabledInList("DEPARTMANID")">
+                                    <option value="">Tümü</option>
+                                    @foreach (var dep in DepartmanList)
+                                    {
+                                        <option value="@dep.DepartmanId">@dep.DepartmanAdi</option>
+                                    }
+                                </select>
+                            </div>
+                        }
+                        @if (IsFieldVisibleInList("SERVISID"))
+                        {
+                            <div class="col-md-2">
+                                <label class="form-label">
+                                    <i class="bx bx-sitemap me-1"></i>Servis
+                                    @if (!CanEditFieldInList("SERVISID"))
+                                    {
+                                        <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
+                                            <i class="bx bx-lock-alt"></i>
+                                        </span>
+                                    }
+                                </label>
+                                <select class="form-select" value="@FilterServisId" @onchange="OnServisChanged" disabled="@IsFieldDisabledInList("SERVISID")">
+                                    <option value="">Tümü</option>
+                                    @foreach (var srv in ServisList)
+                                    {
+                                        <option value="@srv.ServisId">@srv.ServisAdi</option>
+                                    }
+                                </select>
+                            </div>
+                        }
+                        <!-- Durum Filtresi -->
                         <div class="col-md-2">
                             <label class="form-label">Durum</label>
-                            <select class="form-select" @bind="FilterAktif">
+                            <select class="form-select" value="@FilterAktiflik" @onchange="OnAktiflikChanged">
                                 <option value="">Tümü</option>
-                                <option value="true">Aktif</option>
-                                <option value="false">Pasif</option>
+                                <option value="@((int)Aktiflik.Aktif)">Aktif</option>
+                                <option value="@((int)Aktiflik.Pasif)">Pasif</option>
                             </select>
                         </div>
+
+                        <!-- Sıralama -->
+                        <div class="col-md-2">
+                            <label class="form-label">Sıralama</label>
+                            <select class="form-select" value="@SortBy" @onchange="OnSortByChanged">
+                                <option value="name-asc">İsim (A-Z)</option>
+                                <option value="name-desc">İsim (Z-A)</option>
+                                <option value="date-newest">En Yeni</option>
+                                <option value="date-oldest">En Eski</option>
+                            </select>
+                        </div>
+
+                        <!-- Temizle -->
                         <div class="col-md-2 d-flex align-items-end">
-                            <button class="btn btn-secondary w-100" @onclick="LoadSorumlular" disabled="@IsLoading">
-                                <i class="bx bx-search"></i> Filtrele
+                            <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
+                                <i class="bx bx-reset me-1"></i>Temizle
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- İstatistikler -->
+                    <div class="row mt-3">
+                        <div class="col">
+                            <div class="d-flex gap-4 text-muted small">
+                                <span>
+                                    <i class="bx bx-user-check text-primary"></i>
+                                    Toplam: <strong>@AllSorumlular.Count</strong>
+                                </span>
+                                <span>
+                                    <i class="bx bx-check-circle text-success"></i>
+                                    Aktif: <strong>@AllSorumlular.Count(s => s.Aktif)</strong>
+                                </span>
+                                <span>
+                                    <i class="bx bx-x-circle text-danger"></i>
+                                    Pasif: <strong>@AllSorumlular.Count(s => !s.Aktif)</strong>
+                                </span>
+                                <span>
+                                    <i class="bx bx-filter-alt text-info"></i>
+                                    Filtrelenen: <strong>@Sorumlular.Count</strong>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Liste -->
-            @if (IsLoading)
-            {
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Yükleniyor...</span>
-                    </div>
-                </div>
-            }
-            else if (Sorumlular.Any())
-            {
-                <div class="card">
-                    <div class="card-header">
-                        <h6 class="mb-0">Sorumlu Atamaları (@Sorumlular.Count kayıt)</h6>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Departman</th>
-                                    <th>Servis</th>
-                                    <th>Sorumlu Personel</th>
-                                    <th>Sicil No</th>
-                                    <th>Onay Seviyesi</th>
-                                    <th>Durum</th>
-                                    <th>İşlemler</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var item in Sorumlular)
+            <!-- TABLE CARD -->
+            <div class="card">
+                <div class="card-body">
+                    @if (IsLoading)
+                    {
+                        <!-- Loading Spinner -->
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Yükleniyor...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Sorumlu atamaları yükleniyor...</p>
+                        </div>
+                    }
+                    else if (!Sorumlular.Any())
+                    {
+                        <!-- Empty State -->
+                        <div class="text-center py-5">
+                            <i class="bx bx-search-alt display-1 text-muted"></i>
+                            <h5 class="mt-3">Sorumlu Ataması Bulunamadı</h5>
+                            <p class="text-muted">
+                                @if (string.IsNullOrEmpty(SearchTerm) && string.IsNullOrEmpty(FilterAktiflik) && !FilterDepartmanId.HasValue && !FilterServisId.HasValue)
                                 {
-                                    <tr class="@(!item.Aktif ? "table-secondary" : "")">
-                                        <td>@item.DepartmanAdi</td>
-                                        <td>@(item.ServisAdi ?? "-")</td>
-                                        <td>@item.SorumluPersonelAdSoyad</td>
-                                        <td>@item.SorumluPersonelSicilNo</td>
-                                        <td>
+                                    <span>Henüz sorumlu ataması yapılmamış.</span>
+                                }
+                                else
+                                {
+                                    <span>Arama kriterlerinize uygun sorumlu ataması bulunamadı.</span>
+                                }
+                            </p>
+                            @if (string.IsNullOrEmpty(SearchTerm) && string.IsNullOrEmpty(FilterAktiflik) && !FilterDepartmanId.HasValue && !FilterServisId.HasValue)
+                            {
+                                @if (IsActionVisible("CREATE") && CanEditAction("CREATE"))
+                                {
+                                    <button class="btn btn-primary mt-2" @onclick="OpenCreateModal">
+                                        <i class="bx bx-plus me-1"></i>İlk Sorumlu Atamasını Yap
+                                    </button>
+                                }
+                            }
+                            else
+                            {
+                                <button class="btn btn-outline-secondary mt-2" @onclick="ClearFilters">
+                                    <i class="bx bx-reset me-1"></i>Filtreleri Temizle
+                                </button>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">#</th>
+                                        <th>Departman</th>
+                                        <th>Servis</th>
+                                        <th>Sorumlu Personel</th>
+                                        <th class="text-center" style="width: 100px;">Sicil No</th>
+                                        <th class="text-center" style="width: 120px;">Onay Seviyesi</th>
+                                        <th class="text-center" style="width: 100px;">Durum</th>
+                                        <th class="text-center" style="width: 180px;">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var index = 1;
+                                    }
+                                    @foreach (var item in Sorumlular)
+                                    {
+                                        <tr>
+                                            <td>@index</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar avatar-sm me-2">
+                                                        <span class="avatar-initial rounded-circle bg-label-primary">
+                                                            @item.DepartmanAdi.Substring(0, 1).ToUpper()
+                                                        </span>
+                                                    </div>
+                                                    <strong>@item.DepartmanAdi</strong>
+                                                </div>
+                                            </td>
+                                            <td>@(item.ServisAdi ?? "-")</td>
+                                            <td>@item.SorumluPersonelAdSoyad</td>
+                                            <td class="text-center">@item.SorumluPersonelSicilNo</td>
+                                            <td class="text-center">
                                             <span class="badge @(item.OnaySeviyes == 1 ? "bg-label-primary" : "bg-label-success")">
                                                 @item.OnaySeviesiAciklama
                                             </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge @(item.Aktif ? "bg-label-success" : "bg-label-secondary")">
-                                                @(item.Aktif ? "Aktif" : "Pasif")
-                                            </span>
-                                        </td>
-                                        <td>
-                                            @if (CanAction("EDIT"))
+                                            </td>
+                                            <td class="text-center">
+                                                @if (item.Aktif)
                                             {
-                                                <button class="btn btn-sm btn-icon btn-outline-primary" @onclick="() => OpenEditModal(item)" title="Düzenle">
-                                                    <i class="bx bx-edit"></i>
-                                                </button>
+                                                <span class="badge bg-label-success">
+                                                    <i class="bx bx-check-circle me-1"></i>Aktif
+                                                </span>
                                             }
-                                            @if (CanAction("DELETE") && item.Aktif)
+                                            else
                                             {
-                                                <button class="btn btn-sm btn-icon btn-outline-warning" @onclick="() => DeactivateSorumlu(item.IzinSorumluId)" title="Pasif Yap">
-                                                    <i class="bx bx-power-off"></i>
-                                                </button>
+                                                <span class="badge bg-label-danger">
+                                                    <i class="bx bx-x-circle me-1"></i>Pasif
+                                                </span>
                                             }
-                                            @if (CanAction("DELETE") && !item.Aktif)
-                                            {
-                                                <button class="btn btn-sm btn-icon btn-outline-danger" @onclick="() => DeleteSorumlu(item.IzinSorumluId)" title="Sil">
-                                                    <i class="bx bx-trash"></i>
-                                                </button>
-                                            }
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-flex justify-content-center gap-1">
+                                                @if (IsActionVisible("EDIT"))
+                                                {
+                                                    <button class="btn btn-sm btn-icon btn-outline-primary"
+                                                            @onclick="() => OpenEditModal(item)"
+                                                            disabled="@(!CanEditAction("EDIT"))"
+                                                            title="@(CanEditAction("EDIT") ? "Düzenle" : "Düzenle (Yetki Yok)")">
+                                                        <i class="bx bx-edit"></i>
+                                                    </button>
+                                                }
+
+                                                @if (IsActionVisible("TOGGLE"))
+                                                {
+                                                    <button class="btn btn-sm btn-icon @(item.Aktif ? "btn-outline-warning" : "btn-outline-success")"
+                                                            @onclick="() => ToggleSorumlu(item.IzinSorumluId, item.Aktif)"
+                                                            disabled="@(!CanEditAction("TOGGLE"))"
+                                                            title="@(CanEditAction("TOGGLE") ? (item.Aktif ? "Pasif Yap" : "Aktif Yap") : (item.Aktif ? "Pasif Yap (Yetki Yok)" : "Aktif Yap (Yetki Yok)"))">
+                                                        <i class="bx @(item.Aktif ? "bx-toggle-right" : "bx-toggle-left")"></i>
+                                                    </button>
+                                                }
+
+                                                @if (IsActionVisible("DELETE"))
+                                                {
+                                                    <button class="btn btn-sm btn-icon btn-outline-danger"
+                                                            @onclick="() => DeleteSorumlu(item.IzinSorumluId)"
+                                                            disabled="@(!CanEditAction("DELETE"))"
+                                                            title="@(CanEditAction("DELETE") ? "Sil" : "Sil (Yetki Yok)")">
+                                                        <i class="bx bx-trash"></i>
+                                                    </button>
+                                                }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        index++;
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
                 </div>
-            }
-            else if (!IsLoading)
-            {
-                <div class="card">
-                    <div class="card-body text-center py-5">
-                        <i class="bx bx-user-x display-1 text-muted"></i>
-                        <h5 class="mt-3">Kayıt Bulunamadı</h5>
-                        <p class="text-muted">Henüz sorumlu ataması yapılmamış veya filtre kriterlerine uygun kayıt yok.</p>
-                    </div>
-                </div>
-            }
+            </div>
 
             <!-- Modal: Yeni/Düzenle -->
             @if (ShowModal)
@@ -177,7 +354,7 @@ else
                                     <label class="form-label">Departman</label>
                                     <select class="form-select" value="@EditModel.DepartmanId" @onchange="OnModalDepartmanChanged">
                                         <option value="">Tüm Departmanlar</option>
-                                        @foreach (var dep in AllDepartmanList)
+                                        @foreach (var dep in DepartmanList)
                                         {
                                             <option value="@dep.DepartmanId">@dep.DepartmanAdi</option>
                                         }
@@ -189,7 +366,7 @@ else
                                     <label class="form-label">Servis</label>
                                     <select class="form-select" value="@EditModel.ServisId" @onchange="OnModalServisChanged">
                                         <option value="">Tüm Servisler</option>
-                                        @foreach (var srv in AllServisList)
+                                        @foreach (var srv in ServisList)
                                         {
                                             <option value="@srv.ServisId">@srv.ServisAdi</option>
                                         }

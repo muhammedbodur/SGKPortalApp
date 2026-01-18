@@ -188,6 +188,40 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Pdks
             }
         }
 
+        public async Task<ServiceResult<bool>> ActivateAsync(int id)
+        {
+            try
+            {
+                var response = await _httpClient.PatchAsync($"izin-sorumlu/{id}/aktif", null);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("ActivateAsync failed: {Error}", errorContent);
+                    return ServiceResult<bool>.Fail("İzin sorumlusu aktif yapılamadı.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
+
+                if (apiResponse?.Success == true)
+                {
+                    return ServiceResult<bool>.Ok(
+                        true,
+                        apiResponse.Message ?? "İşlem başarılı"
+                    );
+                }
+
+                return ServiceResult<bool>.Fail(
+                    apiResponse?.Message ?? "İzin sorumlusu aktif yapılamadı"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ActivateAsync Exception");
+                return ServiceResult<bool>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
         public async Task<ServiceResult<bool>> DeleteAsync(int id)
         {
             try

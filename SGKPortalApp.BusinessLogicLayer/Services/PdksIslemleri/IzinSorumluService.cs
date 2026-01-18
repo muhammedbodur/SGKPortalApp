@@ -269,6 +269,31 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             }
         }
 
+        public async Task<ApiResponseDto<bool>> ActivateAsync(int id)
+        {
+            try
+            {
+                var repo = _unitOfWork.Repository<IzinSorumlu>();
+                var entity = await repo.GetByIdAsync(id);
+
+                if (entity == null)
+                    return ApiResponseDto<bool>.ErrorResult("İzin sorumlusu bulunamadı");
+
+                entity.Aktif = true;
+                entity.DuzenlenmeTarihi = DateTime.Now;
+
+                repo.Update(entity);
+                await _unitOfWork.SaveChangesAsync();
+
+                return ApiResponseDto<bool>.SuccessResult(true, "İzin sorumlusu aktif yapıldı");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "İzin sorumlusu aktif yapılırken hata: {Id}", id);
+                return ApiResponseDto<bool>.ErrorResult("İşlem sırasında hata oluştu");
+            }
+        }
+
         public async Task<ApiResponseDto<bool>> DeleteAsync(int id)
         {
             try
