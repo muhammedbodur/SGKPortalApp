@@ -71,7 +71,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
             if (string.IsNullOrEmpty(TcKimlikNo))
             {
                 var authState = await _authStateProvider.GetAuthenticationStateAsync();
-                TcKimlikNo = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                TcKimlikNo = authState.User.FindFirst("TcKimlikNo")?.Value;
             }
 
             if (string.IsNullOrEmpty(TcKimlikNo))
