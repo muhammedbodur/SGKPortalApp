@@ -1,4 +1,6 @@
 @page "/"
+@using SGKPortalApp.PresentationLayer.Components.Common
+@using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
 
 <PageTitle>SGK Portal - Ana Sayfa</PageTitle>
 
@@ -108,4 +110,15 @@
             </div>
         </div>
     </div>
+
+    <!-- Resmi Tatil Calendar Widget -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <ResmiTatilCalendarWidget />
+        </div>
+    </div>
 </div>
+
+@code {
+
+}

@@ -181,3 +181,79 @@ window.destroyResmiTatilCalendar = function () {
         console.log('✅ Takvim temizlendi');
     }
 };
+
+// ═══════════════════════════════════════════════════════
+// DASHBOARD WIDGET CALENDAR
+// ═══════════════════════════════════════════════════════
+
+let resmiTatilWidgetCalendar = null;
+
+/**
+ * Dashboard widget için mini takvim başlatır
+ * @param {string} eventsJson - JSON formatında event listesi
+ * @param {number} year - Gösterilecek yıl
+ */
+window.initResmiTatilWidgetCalendar = function (eventsJson, year) {
+    try {
+        const events = JSON.parse(eventsJson);
+        const calendarEl = document.getElementById('resmiTatilWidgetCalendar');
+
+        if (!calendarEl) {
+            console.error('Widget calendar element bulunamadı');
+            return;
+        }
+
+        // Mevcut takvimi temizle
+        if (resmiTatilWidgetCalendar) {
+            resmiTatilWidgetCalendar.destroy();
+        }
+
+        // FullCalendar başlat (compact mode)
+        resmiTatilWidgetCalendar = new FullCalendar.Calendar(calendarEl, {
+            // Görünüm ayarları
+            initialView: 'dayGridMonth',
+            initialDate: `${year}-01-01`,
+
+            // Compact header
+            headerToolbar: {
+                left: 'prev,next',
+                center: 'title',
+                right: ''
+            },
+
+            // Yerelleştirme
+            locale: 'tr',
+
+            // Event'ler
+            events: events,
+
+            // Event görünümü (compact)
+            eventContent: function (arg) {
+                return { html: '<div class="fc-event-title">' + arg.event.title + '</div>' };
+            },
+
+            // Click -> Detay sayfasına git
+            eventClick: function (info) {
+                window.location.href = '/common/resmitatil';
+            },
+
+            // Responsive ayarlar
+            height: 'auto',
+            contentHeight: 'auto',
+
+            // Hafta sonu vurgulama
+            dayCellDidMount: function (info) {
+                if (info.date.getDay() === 0 || info.date.getDay() === 6) {
+                    info.el.style.backgroundColor = '#f8f9fa';
+                }
+            }
+        });
+
+        // Takvimi render et
+        resmiTatilWidgetCalendar.render();
+        console.log(`✅ Widget takvimi başlatıldı (${year})`);
+
+    } catch (error) {
+        console.error('Widget takvim başlatma hatası:', error);
+    }
+};
