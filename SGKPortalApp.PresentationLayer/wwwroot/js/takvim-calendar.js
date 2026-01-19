@@ -299,7 +299,7 @@ window.initTakvimWidgetCalendar = function (eventsJson, year) {
 
             // Responsive ayarlar - Widget için kompakt
             height: 500, // Sabit yükseklik
-            aspectRatio: 1.35 // En/Boy oranı
+            aspectRatio: 1.35, // En/Boy oranı
 
             // Hafta sonu vurgulama
             dayCellDidMount: function (info) {
