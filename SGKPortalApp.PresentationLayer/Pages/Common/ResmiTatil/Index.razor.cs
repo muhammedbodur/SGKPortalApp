@@ -347,7 +347,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
                         .Select(m => new
                         {
                             id = $"mesai-{m.Tarih:yyyyMMdd}",
-                            title = $"🕒 {(m.GirisSaati?.ToString(@"hh\:mm") ?? "?")} - {(m.CikisSaati?.ToString(@"hh\:mm") ?? "?")}",
+                            title = $"🕒 {FormatTimeSpan(m.GirisSaati)} - {FormatTimeSpan(m.CikisSaati)}",
                             start = m.Tarih.ToString("yyyy-MM-dd"),
                             allDay = false,
                             backgroundColor = GetMesaiColor(m),
@@ -355,8 +355,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
                             extendedProps = new
                             {
                                 eventType = "mesai",
-                                girisSaati = m.GirisSaati?.ToString(@"hh\:mm"),
-                                cikisSaati = m.CikisSaati?.ToString(@"hh\:mm"),
+                                girisSaati = FormatTimeSpan(m.GirisSaati),
+                                cikisSaati = FormatTimeSpan(m.CikisSaati),
                                 mesaiSuresi = m.MesaiSuresi,
                                 detay = m.Detay,
                                 gecKalma = m.GecKalma
@@ -457,6 +457,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
                 BusinessObjectLayer.Enums.PdksIslemleri.OnayDurumu.Reddedildi => "#ff3e1d", // Red
                 _ => "#ffab00" // Orange (Beklemede)
             };
+        }
+
+        private string FormatTimeSpan(TimeSpan? timeSpan)
+        {
+            if (!timeSpan.HasValue) return "?";
+            return $"{timeSpan.Value.Hours:D2}:{timeSpan.Value.Minutes:D2}";
         }
 
         // ═══════════════════════════════════════════════════════

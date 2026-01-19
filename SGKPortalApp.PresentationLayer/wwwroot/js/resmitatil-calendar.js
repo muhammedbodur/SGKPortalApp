@@ -51,12 +51,20 @@ window.initResmiTatilCalendar = function (eventsJson, year) {
 
             // Event tıklama
             eventClick: function (info) {
-                const eventId = parseInt(info.event.id);
-                
-                // Blazor'a event ID'yi gönder
-                if (window.DotNet) {
-                    DotNet.invokeMethodAsync('SGKPortalApp.PresentationLayer', 'OnEventClick', eventId)
-                        .catch(err => console.error('OnEventClick hatası:', err));
+                const eventType = info.event.extendedProps?.eventType;
+                const eventId = info.event.id;
+
+                // Event tipine göre işlem yap
+                if (eventType === 'tatil') {
+                    // Tatil edit sayfasına git
+                    const tatilId = parseInt(eventId.replace('tatil-', ''));
+                    window.location.href = `/common/resmitatil/manage/${tatilId}`;
+                } else if (eventType === 'mesai') {
+                    // Mesai detaylarını göster (tooltip veya modal)
+                    console.log('Mesai detayı:', info.event.extendedProps);
+                } else if (eventType === 'izin' || eventType === 'mazeret') {
+                    // İzin/Mazeret detay sayfasına git
+                    console.log('İzin/Mazeret detayı:', info.event.extendedProps);
                 }
             },
 
@@ -84,25 +92,38 @@ window.initResmiTatilCalendar = function (eventsJson, year) {
             // Tooltip (event üzerine gelince)
             eventMouseEnter: function (info) {
                 const props = info.event.extendedProps;
-                
-                let tooltipContent = `
-                    <div class="p-2">
-                        <strong>${info.event.title}</strong><br>
-                        <small class="text-muted">${props.tatilTipi}</small><br>
-                `;
-                
-                if (props.yariGun) {
-                    tooltipContent += '<small><i class="bx bx-time-five"></i> Yarım Gün</small><br>';
+                let tooltipContent = '<div class="p-2">';
+                tooltipContent += `<strong>${info.event.title}</strong><br>`;
+
+                // Event tipine göre içerik
+                if (props.eventType === 'tatil') {
+                    tooltipContent += `<small class="text-muted">${props.tatilTipi || ''}</small><br>`;
+                    if (props.aciklama) {
+                        tooltipContent += `<small>${props.aciklama}</small><br>`;
+                    }
+                } else if (props.eventType === 'mesai') {
+                    tooltipContent += `<small>Giriş: ${props.girisSaati || '?'}</small><br>`;
+                    tooltipContent += `<small>Çıkış: ${props.cikisSaati || '?'}</small><br>`;
+                    if (props.mesaiSuresi) {
+                        tooltipContent += `<small>Mesai Süresi: ${props.mesaiSuresi}</small><br>`;
+                    }
+                    if (props.gecKalma) {
+                        tooltipContent += '<small class="text-danger">⚠️ Geç Kalma</small><br>';
+                    }
+                    if (props.detay) {
+                        tooltipContent += `<small>${props.detay}</small><br>`;
+                    }
+                } else if (props.eventType === 'izin') {
+                    tooltipContent += `<small>${props.tur || ''}</small><br>`;
+                    tooltipContent += `<small>Durum: ${props.onayDurumu || 'Beklemede'}</small><br>`;
+                } else if (props.eventType === 'mazeret') {
+                    tooltipContent += `<small>${props.tur || ''}</small><br>`;
+                    if (props.saatDilimi) {
+                        tooltipContent += `<small>Saat: ${props.saatDilimi}</small><br>`;
+                    }
+                    tooltipContent += `<small>Durum: ${props.onayDurumu || 'Beklemede'}</small><br>`;
                 }
-                
-                if (props.aciklama) {
-                    tooltipContent += `<small>${props.aciklama}</small><br>`;
-                }
-                
-                if (props.otomatikSenkronize) {
-                    tooltipContent += '<small class="text-info"><i class="bx bx-sync"></i> Otomatik</small>';
-                }
-                
+
                 tooltipContent += '</div>';
 
                 // Bootstrap tooltip kullan
