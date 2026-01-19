@@ -8,6 +8,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Pdks;
 using SGKPortalApp.Common.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
 {
@@ -18,9 +19,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         // ═══════════════════════════════════════════════════════
 
         [Inject] private IIzinMazeretTalepApiService _izinMazeretTalepService { get; set; } = default!;
+        [Inject] private IIzinSorumluApiService _izinSorumluApiService { get; set; } = default!;
         [Inject] private AuthenticationStateProvider _authStateProvider { get; set; } = default!;
         [Inject] private IJSRuntime _js { get; set; } = default!;
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
+        [Inject] private ILogger<YeniTalep> Logger { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════
         // DATA PROPERTIES
@@ -31,6 +34,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         private int ToplamGun { get; set; } = 0;
         private string OverlapWarning { get; set; } = string.Empty;
 
+        // Onaycı listeleri
+        private List<IzinSorumluResponseDto> BirinciOnaycılar { get; set; } = new();
+        private List<IzinSorumluResponseDto> IkinciOnaycılar { get; set; } = new();
+
         // ═══════════════════════════════════════════════════════
         // UI STATE
         // ═══════════════════════════════════════════════════════
@@ -38,6 +45,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         private bool ShowTurError { get; set; } = false;
         private bool IsSaving { get; set; } = false;
         private bool IsChecking { get; set; } = false;
+        private bool IsLoadingApprovers { get; set; } = false;
 
         // ═══════════════════════════════════════════════════════
         // LIFECYCLE METHODS
@@ -49,6 +57,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
 
             var tcKimlikNo = await GetCurrentUserTcKimlikNoAsync();
             Request.TcKimlikNo = tcKimlikNo ?? string.Empty;
+
+            // Onaycı listelerini yükle
+            await LoadApproversAsync();
         }
 
         // ═══════════════════════════════════════════════════════
@@ -97,6 +108,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
 
         private async Task CheckOverlap()
         {
+            if (!SelectedTuru.HasValue)
+            {
+                ShowTurError = true;
+                return;
+            }
+
+            // Tür seçilmiş mi kontrol et
             if (!SelectedTuru.HasValue)
             {
                 ShowTurError = true;
@@ -247,6 +265,40 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             catch
             {
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// Onaycı listelerini yükler (aktif olanlar)
+        /// </summary>
+        private async Task LoadApproversAsync()
+        {
+            try
+            {
+                IsLoadingApprovers = true;
+                BirinciOnaycılar.Clear();
+                IkinciOnaycılar.Clear();
+
+                var result = await _izinSorumluApiService.GetActiveAsync();
+
+                if (result.Success && result.Data != null)
+                {
+                    // 1. ve 2. Onaycıları ayır
+                    BirinciOnaycılar = result.Data.Where(s => s.OnaySeviyesi == 1).ToList();
+                    IkinciOnaycılar = result.Data.Where(s => s.OnaySeviyesi == 2).ToList();
+                }
+                else
+                {
+                    Logger.LogWarning("Onaycı listesi alınamadı: {Message}", result.Message);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Onaycı listesi yüklenirken hata oluştu");
+            }
+            finally
+            {
+                IsLoadingApprovers = false;
             }
         }
     }

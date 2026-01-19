@@ -138,8 +138,8 @@ else
                                 <td>@kayit.SicilNo</td>
                                 <td>@kayit.DepartmanAdi</td>
                                 <td>@kayit.ServisAdi</td>
-                                <td>@(kayit.GirisSaati?.ToString(@"hh\:mm") ?? "-")</td>
-                                <td>@(kayit.CikisSaati?.ToString(@"hh\:mm") ?? "-")</td>
+                                <td>@FormatSaat(kayit.GirisSaati)</td>
+                                <td>@FormatSaat(kayit.CikisSaati)</td>
                                 <td>@kayit.MesaiSuresi</td>
                                 <td>
                                     @if (!string.IsNullOrEmpty(kayit.Detay))

@@ -187,8 +187,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
                 foreach (var mesai in MesaiListesi)
                 {
                     worksheet.Cell(row, 1).Value = mesai.Tarih.ToString("dd.MM.yyyy");
-                    worksheet.Cell(row, 2).Value = mesai.GirisSaati?.ToString(@"hh\:mm") ?? "-";
-                    worksheet.Cell(row, 3).Value = mesai.CikisSaati?.ToString(@"hh\:mm") ?? "-";
+                    worksheet.Cell(row, 2).Value = FormatSaat(mesai.GirisSaati);
+                    worksheet.Cell(row, 3).Value = FormatSaat(mesai.CikisSaati);
                     worksheet.Cell(row, 4).Value = mesai.MesaiSuresi ?? "-";
                     worksheet.Cell(row, 5).Value = mesai.Detay ?? "-";
                     row++;
@@ -265,8 +265,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
                             foreach (var mesai in MesaiListesi)
                             {
                                 table.Cell().Padding(5).Text(mesai.Tarih.ToString("dd.MM.yyyy"));
-                                table.Cell().Padding(5).Text(mesai.GirisSaati?.ToString(@"hh\:mm") ?? "-");
-                                table.Cell().Padding(5).Text(mesai.CikisSaati?.ToString(@"hh\:mm") ?? "-");
+                                table.Cell().Padding(5).Text(FormatSaat(mesai.GirisSaati));
+                                table.Cell().Padding(5).Text(FormatSaat(mesai.CikisSaati));
                                 table.Cell().Padding(5).Text(mesai.MesaiSuresi ?? "-");
                                 table.Cell().Padding(5).Text(mesai.Detay ?? "-");
                             }
@@ -297,6 +297,20 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
                 IsExporting = false;
                 ExportType = string.Empty;
             }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // HELPER METHODS
+        // ═══════════════════════════════════════════════════════
+
+        private string FormatSaat(TimeSpan? saat)
+        {
+            if (!saat.HasValue) return "-";
+            
+            // 00:00:00 ise boş göster (giriş/çıkış kaydı yok demektir)
+            if (saat.Value.TotalSeconds == 0) return "-";
+            
+            return $"{saat.Value.Hours:D2}:{saat.Value.Minutes:D2}";
         }
     }
 }

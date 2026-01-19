@@ -113,6 +113,90 @@ else
                                 <ValidationMessage For="@(() => Request.Aciklama)" />
                             </div>
 
+                            <!-- Onaycı Seçimi (Opsiyonel - Sistem otomatik atayabilir) -->
+                            <div class="alert alert-info mb-3">
+                                <i class="bx bx-info-circle"></i>
+                                <strong>Onaycı Bilgisi:</strong>
+                                @if (tur == IzinMazeretTuru.Mazeret)
+                                {
+                                    <span>Mazeret talepleri için 1. VEYA 2. onaycıdan biri onaylar. Boş bırakırsanız sistem otomatik atayacaktır.</span>
+                                }
+                                else
+                                {
+                                    <span>İzin talepleri için 1. VE 2. onaycı sırasıyla onaylar. Boş bırakırsanız sistem otomatik atayacaktır.</span>
+                                }
+                            </div>
+
+                            @if (IsLoadingApprovers)
+                            {
+                                <div class="text-center mb-3">
+                                    <span class="spinner-border spinner-border-sm me-2"></span>
+                                    Onaycılar yükleniyor...
+                                </div>
+                            }
+                            else
+                            {
+                                <!-- Birinci Onaycı -->
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        1. Onaycı (Opsiyonel)
+                                        @if (tur != IzinMazeretTuru.Mazeret)
+                                        {
+                                            <span class="badge bg-warning ms-2">İzin için gerekli</span>
+                                        }
+                                    </label>
+                                    <select class="form-select" @bind="Request.BirinciOnayciTcKimlikNo">
+                                        <option value="">Sistem otomatik atayacak</option>
+                                        @foreach (var onayci in BirinciOnaycılar)
+                                        {
+                                            <option value="@onayci.SorumluPersonelTcKimlikNo">
+                                                @onayci.SorumluPersonelAdSoyad (@onayci.DepartmanAdi@(onayci.ServisAdi != null ? " - " + onayci.ServisAdi : ""))
+                                            </option>
+                                        }
+                                    </select>
+                                    <small class="form-text text-muted">
+                                        @if (BirinciOnaycılar.Any())
+                                        {
+                                            <span>@BirinciOnaycılar.Count adet 1. onaycı bulundu</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-warning">⚠️ Hiç 1. onaycı tanımlı değil</span>
+                                        }
+                                    </small>
+                                </div>
+
+                                <!-- İkinci Onaycı -->
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        2. Onaycı (Opsiyonel)
+                                        @if (tur != IzinMazeretTuru.Mazeret)
+                                        {
+                                            <span class="badge bg-warning ms-2">İzin için gerekli</span>
+                                        }
+                                    </label>
+                                    <select class="form-select" @bind="Request.IkinciOnayciTcKimlikNo">
+                                        <option value="">Sistem otomatik atayacak</option>
+                                        @foreach (var onayci in IkinciOnaycılar)
+                                        {
+                                            <option value="@onayci.SorumluPersonelTcKimlikNo">
+                                                @onayci.SorumluPersonelAdSoyad (@onayci.DepartmanAdi@(onayci.ServisAdi != null ? " - " + onayci.ServisAdi : ""))
+                                            </option>
+                                        }
+                                    </select>
+                                    <small class="form-text text-muted">
+                                        @if (IkinciOnaycılar.Any())
+                                        {
+                                            <span>@IkinciOnaycılar.Count adet 2. onaycı bulundu</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-warning">⚠️ Hiç 2. onaycı tanımlı değil</span>
+                                        }
+                                    </small>
+                                </div>
+                            }
+
                             <!-- Belge Eki (Opsiyonel) -->
                             <div class="mb-3">
                                 <label class="form-label">Belge Eki (Opsiyonel)</label>

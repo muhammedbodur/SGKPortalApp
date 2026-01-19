@@ -264,8 +264,8 @@ else
                                                             <tr class="@satirClass">
                                                                 <td>@gun.Tarih.ToString("dd.MM.yyyy")</td>
                                                                 <td>@GetGunAdi(gun.Tarih.DayOfWeek)</td>
-                                                                <td>@(gun.GirisSaati?.ToString(@"hh\:mm") ?? "-")</td>
-                                                                <td>@(gun.CikisSaati?.ToString(@"hh\:mm") ?? "-")</td>
+                                                                <td>@FormatSaat(gun.GirisSaati)</td>
+                                                                <td>@FormatSaat(gun.CikisSaati)</td>
                                                                 <td>@gun.MesaiSuresi</td>
                                                                 <td>
                                                                     @if (!string.IsNullOrEmpty(gun.Durum))
@@ -300,21 +300,4 @@ else
     }
         </div>
     </FieldPermissionScope>
-}
-
-@code {
-    private string GetGunAdi(DayOfWeek gun)
-    {
-        return gun switch
-        {
-            DayOfWeek.Monday => "Pzt",
-            DayOfWeek.Tuesday => "Sal",
-            DayOfWeek.Wednesday => "Çar",
-            DayOfWeek.Thursday => "Per",
-            DayOfWeek.Friday => "Cum",
-            DayOfWeek.Saturday => "Cmt",
-            DayOfWeek.Sunday => "Paz",
-            _ => ""
-        };
-    }
 }

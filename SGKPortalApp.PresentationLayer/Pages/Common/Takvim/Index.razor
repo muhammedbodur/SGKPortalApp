@@ -1,0 +1,20 @@
+@page "/takvim"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>Takvim - SGK Portal</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <TakvimComponent ShowSidebar="true" CalendarId="takvimCalendar" />
+        </div>
+    </FieldPermissionScope>
+}

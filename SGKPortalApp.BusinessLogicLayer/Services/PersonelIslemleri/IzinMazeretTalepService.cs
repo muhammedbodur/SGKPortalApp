@@ -116,6 +116,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     talep.ToplamGun = (request.BitisTarihi.Value - request.BaslangicTarihi.Value).Days + 1;
                 }
 
+                // Onaycı atama mantığı
+                await AssignApproversAsync(talep, personel);
+
                 await _unitOfWork.Repository<IzinMazeretTalep>().AddAsync(talep);
                 await _unitOfWork.SaveChangesAsync();
 
@@ -706,6 +709,115 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 return "2. Onay Bekliyor";
 
             return "Beklemede";
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // ONAYCI ATAMA MANTĞI
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Talep için onaycıları otomatik atar
+        /// İzin: 1. VE 2. onaycı gerekli (sıralı onay)
+        /// Mazeret: 1. VEYA 2. onaycıdan biri yeterli (tek onay)
+        /// </summary>
+        private async Task AssignApproversAsync(IzinMazeretTalep talep, Personel personel)
+        {
+            try
+            {
+                // Manuel atanmışsa, otomatik atama yapma
+                if (!string.IsNullOrEmpty(talep.BirinciOnayciTcKimlikNo) || 
+                    !string.IsNullOrEmpty(talep.IkinciOnayciTcKimlikNo))
+                {
+                    _logger.LogInformation("Onaycılar manuel atandı, otomatik atama yapılmadı");
+                    return;
+                }
+
+                var izinSorumluRepo = _unitOfWork.Repository<IzinSorumlu>();
+                var allSorumlular = await izinSorumluRepo.GetAllAsync();
+
+                // Aktif sorumluları filtrele
+                var aktiveSorumlular = allSorumlular.Where(s => s.Aktif).ToList();
+
+                if (!aktiveSorumlular.Any())
+                {
+                    _logger.LogWarning("Hiç aktif izin sorumlusu bulunamadı");
+                    return;
+                }
+
+                // Personelin departman ve servisine göre sorumluları filtrele
+                var uygunSorumlular = aktiveSorumlular.Where(s =>
+                    // Departman kontrolü: Null ise tüm departmanlar, değilse eşleşmeli
+                    (!s.DepartmanId.HasValue || s.DepartmanId == personel.DepartmanId) &&
+                    // Servis kontrolü: Null ise tüm servisler, değilse eşleşmeli
+                    (!s.ServisId.HasValue || s.ServisId == personel.ServisId)
+                ).ToList();
+
+                if (!uygunSorumlular.Any())
+                {
+                    _logger.LogWarning("Personel için uygun izin sorumlusu bulunamadı. Departman: {DeptId}, Servis: {ServId}",
+                        personel.DepartmanId, personel.ServisId);
+                    return;
+                }
+
+                // 1. ve 2. Onaycıları ayır
+                var birinciOnaycılar = uygunSorumlular.Where(s => s.OnaySeviyesi == 1).ToList();
+                var ikinciOnaycılar = uygunSorumlular.Where(s => s.OnaySeviyesi == 2).ToList();
+
+                // İZİN TALEPLERİ: 1. VE 2. onaycı gerekli (sıralı onay)
+                if (talep.Turu != IzinMazeretTuru.Mazeret)
+                {
+                    // 1. Onaycı ata
+                    if (birinciOnaycılar.Any())
+                    {
+                        var birinci = birinciOnaycılar.First();
+                        talep.BirinciOnayciTcKimlikNo = birinci.SorumluPersonelTcKimlikNo;
+                        _logger.LogInformation("İzin talebi için 1. Onaycı atandı: {Tc}", birinci.SorumluPersonelTcKimlikNo);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("İzin talebi için 1. Onaycı bulunamadı");
+                    }
+
+                    // 2. Onaycı ata
+                    if (ikinciOnaycılar.Any())
+                    {
+                        var ikinci = ikinciOnaycılar.First();
+                        talep.IkinciOnayciTcKimlikNo = ikinci.SorumluPersonelTcKimlikNo;
+                        _logger.LogInformation("İzin talebi için 2. Onaycı atandı: {Tc}", ikinci.SorumluPersonelTcKimlikNo);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("İzin talebi için 2. Onaycı bulunamadı");
+                    }
+                }
+                // MAZERET TALEPLERİ: 1. VEYA 2. onaycıdan biri yeterli (tek onay)
+                else
+                {
+                    // Önce 1. Onaycı varsa onu ata
+                    if (birinciOnaycılar.Any())
+                    {
+                        var birinci = birinciOnaycılar.First();
+                        talep.BirinciOnayciTcKimlikNo = birinci.SorumluPersonelTcKimlikNo;
+                        _logger.LogInformation("Mazeret talebi için 1. Onaycı atandı: {Tc}", birinci.SorumluPersonelTcKimlikNo);
+                    }
+                    // 1. Onaycı yoksa 2. Onaycıyı ata
+                    else if (ikinciOnaycılar.Any())
+                    {
+                        var ikinci = ikinciOnaycılar.First();
+                        talep.IkinciOnayciTcKimlikNo = ikinci.SorumluPersonelTcKimlikNo;
+                        _logger.LogInformation("Mazeret talebi için 2. Onaycı atandı: {Tc}", ikinci.SorumluPersonelTcKimlikNo);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Mazeret talebi için hiç onaycı bulunamadı");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Onaycı atama sırasında hata oluştu");
+                // Hata olsa bile talep oluşturulsun, manuel atama yapılabilir
+            }
         }
     }
 }

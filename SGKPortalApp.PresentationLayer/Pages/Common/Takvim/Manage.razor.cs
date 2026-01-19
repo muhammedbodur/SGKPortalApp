@@ -5,7 +5,7 @@ using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
-namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
+namespace SGKPortalApp.PresentationLayer.Pages.Common.Takvim
 {
     public partial class Manage
     {

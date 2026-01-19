@@ -426,5 +426,34 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Mesai
                 ExportType = string.Empty;
             }
         }
+
+        // ═══════════════════════════════════════════════════════
+        // HELPER METHODS
+        // ═══════════════════════════════════════════════════════
+
+        private string FormatSaat(TimeSpan? saat)
+        {
+            if (!saat.HasValue) return "-";
+            
+            // 00:00:00 ise boş göster (giriş/çıkış kaydı yok demektir)
+            if (saat.Value.TotalSeconds == 0) return "-";
+            
+            return $"{saat.Value.Hours:D2}:{saat.Value.Minutes:D2}";
+        }
+
+        private string GetGunAdi(DayOfWeek dayOfWeek)
+        {
+            return dayOfWeek switch
+            {
+                DayOfWeek.Monday => "Pazartesi",
+                DayOfWeek.Tuesday => "Salı",
+                DayOfWeek.Wednesday => "Çarşamba",
+                DayOfWeek.Thursday => "Perşembe",
+                DayOfWeek.Friday => "Cuma",
+                DayOfWeek.Saturday => "Cumartesi",
+                DayOfWeek.Sunday => "Pazar",
+                _ => ""
+            };
+        }
     }
 }

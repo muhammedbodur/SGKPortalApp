@@ -106,8 +106,10 @@ window.initResmiTatilCalendar = function (eventsJson, year) {
 
             // Event görünümü
             eventContent: function (arg) {
-                // Default rendering kullan - daha basit ve güvenli
-                return true;
+                // Sneat teması ile uyumlu event rendering
+                return {
+                    html: '<div class="fc-event-title-container"><div class="fc-event-title fc-sticky">' + arg.event.title + '</div></div>'
+                };
             },
 
             // Tooltip (event üzerine gelince)
