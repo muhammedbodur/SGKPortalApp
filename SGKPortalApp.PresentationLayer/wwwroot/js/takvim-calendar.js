@@ -189,7 +189,7 @@ window.initTakvimCalendar = function (eventsJson, year) {
 
         // Takvimi render et
         takvimCalendar.render();
-        console.log(`✅ Resmi Tatil takvimi başlatıldı (${year})`);
+        console.log(`✅ Takvim başlatıldı (${year})`);
 
     } catch (error) {
         console.error('Takvim başlatma hatası:', error);
@@ -298,9 +298,8 @@ window.initTakvimWidgetCalendar = function (eventsJson, year) {
             },
 
             // Responsive ayarlar - Widget için kompakt
-            height: 'auto',
-            contentHeight: 450, // Sabit yükseklik (px)
-            aspectRatio: 1.35, // En/Boy oranı
+            height: 500, // Sabit yükseklik
+            aspectRatio: 1.35 // En/Boy oranı
 
             // Hafta sonu vurgulama
             dayCellDidMount: function (info) {
