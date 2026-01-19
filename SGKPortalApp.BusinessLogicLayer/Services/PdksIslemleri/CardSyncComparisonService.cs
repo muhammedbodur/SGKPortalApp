@@ -62,13 +62,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 var allSpecialCards = await specialCardRepository.GetActiveCardsAsync();
 
                 // Veritabanındaki tüm kartları EnrollNumber ile dictionary'e al
-                var dbCards = new Dictionary<string, (string Name, long CardNumber, string Type, int Id)>();
+                var dbCards = new Dictionary<string, (string NickName, long CardNumber, string Type, int Id)>();
 
                 foreach (var p in allPersonel)
                 {
                     if (!string.IsNullOrWhiteSpace(p.PersonelKayitNo.ToString()))
                     {
-                        dbCards[p.PersonelKayitNo.ToString()] = (p.AdSoyad, p.KartNo, "Personel", p.SicilNo);
+                        dbCards[p.PersonelKayitNo.ToString()] = (p.NickName, p.KartNo, "Personel", p.SicilNo);
                     }
                 }
 
