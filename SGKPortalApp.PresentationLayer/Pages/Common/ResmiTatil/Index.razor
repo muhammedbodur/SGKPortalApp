@@ -77,22 +77,22 @@ else
                             <div class="mb-4">
                                 <small class="text-small text-muted text-uppercase">İstatistikler</small>
                                 <div class="mt-3">
-                                    <div class="d-flex justify-content-between mb-2">
+                                    @* <div class="d-flex justify-content-between mb-2">
                                         <span class="text-muted">Toplam Tatil:</span>
                                         <strong>@Tatiller.Count</strong>
-                                    </div>
+                                    </div> *@
                                     <div class="d-flex justify-content-between mb-2">
-                                        <span class="text-muted">Sabit Tatil:</span>
+                                        <span class="text-muted">Resmi Tatiller:</span>
                                         <strong class="text-primary">@Tatiller.Count(t => t.TatilTipi == BusinessObjectLayer.Enums.Common.TatilTipi.SabitTatil)</strong>
                                     </div>
                                     <div class="d-flex justify-content-between mb-2">
-                                        <span class="text-muted">Dini Tatil:</span>
+                                        <span class="text-muted">Dini Bayram ve Günler:</span>
                                         <strong class="text-success">@Tatiller.Count(t => t.TatilTipi == BusinessObjectLayer.Enums.Common.TatilTipi.DiniTatil)</strong>
                                     </div>
-                                    <div class="d-flex justify-content-between">
-                                        <span class="text-muted">Özel Tatil:</span>
+@*                                     <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Personel Tatil:</span>
                                         <strong class="text-warning">@Tatiller.Count(t => t.TatilTipi == BusinessObjectLayer.Enums.Common.TatilTipi.OzelTatil)</strong>
-                                    </div>
+                                    </div> *@
                                 </div>
                             </div>
 
@@ -105,7 +105,7 @@ else
                                 <input class="form-check-input" type="checkbox" id="filterSabit" 
                                        @bind="FilterSabitTatil" @bind:event="onchange">
                                 <label class="form-check-label" for="filterSabit">
-                                    <span class="badge bg-label-primary">Sabit Tatil</span>
+                                    <span class="badge bg-label-primary">Resmi Tatiller</span>
                                 </label>
                             </div>
 
@@ -113,17 +113,17 @@ else
                                 <input class="form-check-input" type="checkbox" id="filterDini" 
                                        @bind="FilterDiniTatil" @bind:event="onchange">
                                 <label class="form-check-label" for="filterDini">
-                                    <span class="badge bg-label-success">Dini Tatil</span>
+                                    <span class="badge bg-label-success">Dini Bayram ve Günler</span>
                                 </label>
                             </div>
 
-                            <div class="form-check mb-2">
+                            @* <div class="form-check mb-2">
                                 <input class="form-check-input" type="checkbox" id="filterOzel"
                                        @bind="FilterOzelTatil" @bind:event="onchange">
                                 <label class="form-check-label" for="filterOzel">
                                     <span class="badge bg-label-warning">Özel Tatil</span>
                                 </label>
-                            </div>
+                            </div> *@
 
                             <hr class="my-3">
 

@@ -85,12 +85,12 @@ namespace SGKPortalApp.ApiLayer.Controllers.Common
         }
 
         [HttpPost("sync")]
-        public async Task<IActionResult> SyncHolidaysFromNagerDate([FromBody] ResmiTatilSyncRequestDto request)
+        public async Task<IActionResult> SyncHolidaysFromGoogleCalendar([FromBody] ResmiTatilSyncRequestDto request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _resmiTatilService.SyncHolidaysFromNagerDateAsync(request);
+            var result = await _resmiTatilService.SyncHolidaysFromGoogleCalendarAsync(request);
             return result.Success ? Ok(result) : BadRequest(result);
         }
     }

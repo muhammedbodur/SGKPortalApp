@@ -506,7 +506,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
                     MevcutlariSil = DeleteExistingHolidays
                 };
 
-                var result = await _resmiTatilService.SyncHolidaysFromNagerDateAsync(request);
+                var result = await _resmiTatilService.SyncHolidaysFromGoogleCalendarAsync(request);
 
                 if (result.Success)
                 {

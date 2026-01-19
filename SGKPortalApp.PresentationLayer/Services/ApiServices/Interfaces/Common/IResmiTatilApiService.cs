@@ -16,6 +16,6 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
         Task<ApiResponseDto<bool>> DeleteAsync(int id);
         Task<ApiResponseDto<bool>> IsHolidayAsync(DateTime date);
         Task<ApiResponseDto<string>> GetHolidayNameAsync(DateTime date);
-        Task<ApiResponseDto<int>> SyncHolidaysFromNagerDateAsync(ResmiTatilSyncRequestDto request);
+        Task<ApiResponseDto<int>> SyncHolidaysFromGoogleCalendarAsync(ResmiTatilSyncRequestDto request);
     }
 }

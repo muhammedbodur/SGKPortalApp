@@ -1,6 +1,5 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
-using Nager.Date;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
@@ -8,6 +7,8 @@ using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
+using Google.Apis.Calendar.v3;
+using Google.Apis.Services;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 {
@@ -193,7 +194,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             }
         }
 
-        public async Task<ApiResponseDto<int>> SyncHolidaysFromNagerDateAsync(ResmiTatilSyncRequestDto request)
+        public async Task<ApiResponseDto<int>> SyncHolidaysFromGoogleCalendarAsync(ResmiTatilSyncRequestDto request)
         {
             try
             {
@@ -209,39 +210,137 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     }
                 }
 
-                var holidays = HolidaySystem.GetHolidays(request.Yil, "TR");
+                // Tatil isimlerini Türkçeleştirme mapping
+                var turkishNameMapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    // Resmi Tatiller
+                    { "New Year's Day", "Yılbaşı" },
+                    { "New Year's Eve", "Yılbaşı Gecesi" },
+                    { "National Sovereignty and Children's Day", "Ulusal Egemenlik ve Çocuk Bayramı" },
+                    { "Labour Day", "Emek ve Dayanışma Günü" },
+                    { "Labor Day", "Emek ve Dayanışma Günü" },
+                    { "Commemoration of Atatürk, Youth and Sports Day", "Atatürk'ü Anma, Gençlik ve Spor Bayramı" },
+                    { "Democracy and National Unity Day", "Demokrasi ve Millî Birlik Günü" },
+                    { "Victory Day", "Zafer Bayramı" },
+                    { "Republic Day", "Cumhuriyet Bayramı" },
+                    { "Republic Day Eve", "Cumhuriyet Bayramı Arifesi" },
+                    { "Atatürk Memorial Day", "Atatürk'ü Anma Günü" },
+                    
+                    // Ramazan Bayramı
+                    { "Ramadan Feast Eve", "Ramazan Bayramı Arifesi" },
+                    { "Ramadan Feast", "Ramazan Bayramı" },
+                    { "Ramadan Feast Holiday", "Ramazan Bayramı" },
+                    { "Eid al-Fitr", "Ramazan Bayramı" },
+                    
+                    // Kurban Bayramı
+                    { "Sacrifice Feast Eve", "Kurban Bayramı Arifesi" },
+                    { "Sacrifice Feast", "Kurban Bayramı" },
+                    { "Sacrifice Feast Holiday", "Kurban Bayramı" },
+                    { "Kurban Bayrami Day 2", "Kurban Bayramı 2. Gün" },
+                    { "Kurban Bayrami Day 3", "Kurban Bayramı 3. Gün" },
+                    { "Kurban Bayrami Day 4", "Kurban Bayramı 4. Gün" },
+                    { "Eid al-Adha", "Kurban Bayramı" },
+                    
+                    // Dini Günler
+                    { "1 Ramadan", "Ramazan Başlangıcı" },
+                    { "Ramadan Starts", "Ramazan Başlangıcı" },
+                    { "Lailat al-Qadr", "Kadir Gecesi" },
+                    { "Isra and Mi'raj", "Miraç Kandili" },
+                    { "Muharram", "Hicri Yılbaşı" },
+                    { "Ashura", "Aşure Günü" },
+                    { "The Prophet's Birthday", "Mevlid Kandili" }
+                };
+
+                // Google Calendar API kullan (resmi tatiller + dini bayramlar)
+                var service = new CalendarService(new BaseClientService.Initializer
+                {
+                    ApiKey = "AIzaSyDBsBYRevTBzYgoxbfkpmJDOkkfUE60F3Q",
+                    ApplicationName = "SGKPortalApp"
+                });
+
+                var calendars = new[]
+                {
+                    ("tr.turkish#holiday@group.v.calendar.google.com", TatilTipi.SabitTatil),  // Türkiye resmi tatilleri
+                    ("tr.islamic#holiday@group.v.calendar.google.com", TatilTipi.DiniTatil)    // İslami tatiller
+                };
+
                 int addedCount = 0;
 
-                foreach (var holiday in holidays)
+                foreach (var (calendarId, tatilTipi) in calendars)
                 {
-                    var exists = await repo.ExistsByDateAsync(holiday.Date);
-                    if (!exists)
-                    {
-                        var tatil = new ResmiTatil
-                        {
-                            TatilAdi = holiday.LocalName ?? holiday.EnglishName,
-                            Tarih = holiday.Date,
-                            Yil = request.Yil,
-                            TatilTipi = holiday.NationalHoliday ? TatilTipi.SabitTatil : TatilTipi.DiniTatil,
-                            YariGun = false,
-                            OtomatikSenkronize = true,
-                            Aciklama = "Nager.Date'ten otomatik senkronize edildi"
-                        };
+                    var eventsRequest = service.Events.List(calendarId);
+                    eventsRequest.TimeMin = new DateTime(request.Yil, 1, 1);
+                    eventsRequest.TimeMax = new DateTime(request.Yil + 1, 1, 1);
+                    eventsRequest.SingleEvents = true;
+                    eventsRequest.OrderBy = EventsResource.ListRequest.OrderByEnum.StartTime;
+                    eventsRequest.ShowDeleted = false;
 
-                        await repo.AddAsync(tatil);
-                        addedCount++;
+                    var events = await eventsRequest.ExecuteAsync();
+
+                    foreach (var evt in events.Items)
+                    {
+                        if (evt.Start.Date != null) // All-day event
+                        {
+                            var date = DateTime.Parse(evt.Start.Date);
+                            
+                            // Sadece istenen yıl içindeki tatilleri al
+                            if (date.Year != request.Yil)
+                                continue;
+
+                            var exists = await repo.ExistsByDateAsync(date);
+                            if (!exists)
+                            {
+                                // Tatil adını temizle ve Türkçeleştir
+                                var originalName = evt.Summary ?? "Tatil";
+                                
+                                // Gereksiz ekleri temizle
+                                var cleanName = originalName
+                                    .Replace(" (tentative)", "")
+                                    .Replace(" (kesin değil)", "")
+                                    .Replace(" (half-day)", "")
+                                    .Replace(" (yarım gün)", "")
+                                    .Trim();
+                                
+                                // Türkçe karşılığını bul
+                                string turkishName = cleanName;
+                                if (turkishNameMapping.TryGetValue(cleanName, out var mappedName))
+                                {
+                                    turkishName = mappedName;
+                                }
+                                
+                                // Yarım gün kontrolü
+                                bool isHalfDay = originalName.Contains("half-day", StringComparison.OrdinalIgnoreCase) || 
+                                                originalName.Contains("yarım gün", StringComparison.OrdinalIgnoreCase) ||
+                                                originalName.Contains("Eve", StringComparison.OrdinalIgnoreCase) ||
+                                                originalName.Contains("Arifesi", StringComparison.OrdinalIgnoreCase);
+
+                                var tatil = new ResmiTatil
+                                {
+                                    TatilAdi = turkishName,
+                                    Tarih = date,
+                                    Yil = request.Yil,
+                                    TatilTipi = tatilTipi,
+                                    YariGun = isHalfDay,
+                                    OtomatikSenkronize = true,
+                                    Aciklama = $"Google Calendar'dan otomatik senkronize edildi ({(tatilTipi == TatilTipi.SabitTatil ? "Resmi Tatil" : "Dini Bayram")})"
+                                };
+
+                                await repo.AddAsync(tatil);
+                                addedCount++;
+                            }
+                        }
                     }
                 }
 
                 await _unitOfWork.SaveChangesAsync();
 
                 _logger.LogInformation("{Year} yılı için {Count} resmi tatil senkronize edildi", request.Yil, addedCount);
-                return ApiResponseDto<int>.SuccessResult(addedCount, $"{addedCount} resmi tatil başarıyla senkronize edildi");
+                return ApiResponseDto<int>.SuccessResult(addedCount, $"{addedCount} resmi tatil başarıyla senkronize edildi (resmi tatiller + dini bayramlar)");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Resmi tatiller senkronize edilirken hata oluştu. Yıl: {Year}", request.Yil);
-                return ApiResponseDto<int>.ErrorResult("Resmi tatiller senkronize edilirken hata oluştu");
+                return ApiResponseDto<int>.ErrorResult($"Resmi tatiller senkronize edilirken hata oluştu: {ex.Message}");
             }
         }
     }

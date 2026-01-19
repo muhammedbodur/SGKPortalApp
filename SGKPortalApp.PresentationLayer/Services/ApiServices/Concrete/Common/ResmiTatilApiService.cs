@@ -137,7 +137,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
             }
         }
 
-        public async Task<ApiResponseDto<int>> SyncHolidaysFromNagerDateAsync(ResmiTatilSyncRequestDto request)
+        public async Task<ApiResponseDto<int>> SyncHolidaysFromGoogleCalendarAsync(ResmiTatilSyncRequestDto request)
         {
             try
             {

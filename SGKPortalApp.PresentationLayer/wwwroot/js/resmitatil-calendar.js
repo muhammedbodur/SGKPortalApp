@@ -13,8 +13,8 @@ window.initResmiTatilCalendar = function (eventsJson, year) {
     try {
         console.log('📅 initResmiTatilCalendar çağrıldı, yıl:', year);
 
-        // FullCalendar yüklü mü kontrol et
-        if (typeof FullCalendar === 'undefined') {
+        // FullCalendar yüklü mü kontrol et (Sneat window.Calendar olarak export ediyor)
+        if (typeof Calendar === 'undefined') {
             console.error('❌ FullCalendar kütüphanesi yüklenmemiş!');
             return;
         }
@@ -39,26 +39,44 @@ window.initResmiTatilCalendar = function (eventsJson, year) {
 
         // FullCalendar başlat
         console.log('🔧 FullCalendar oluşturuluyor...');
-        resmiTatilCalendar = new FullCalendar.Calendar(calendarEl, {
+        resmiTatilCalendar = new Calendar(calendarEl, {
+            // Plugin'ler (Sneat FullCalendar'dan)
+            plugins: [dayGridPlugin, interactionPlugin, listPlugin, timegridPlugin],
+            
             // Görünüm ayarları
             initialView: 'dayGridMonth',
-            initialDate: `${year}-01-01`,
+            initialDate: new Date(year, new Date().getMonth(), 1), // Seçilen yılın şu anki ayına başla
             
             // Header toolbar
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'dayGridMonth,dayGridWeek,listMonth'
+                right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
             },
+            
+            // Navigasyon
+            navLinks: true,
+            editable: false,
+            dragScroll: false,
 
-            // Yerelleştirme
+            // Yerelleştirme (Türkçe)
             locale: 'tr',
             buttonText: {
                 today: 'Bugün',
                 month: 'Ay',
                 week: 'Hafta',
+                day: 'Gün',
                 list: 'Liste'
             },
+            allDayText: 'Tüm gün',
+            moreLinkText: 'daha fazla',
+            noEventsText: 'Gösterilecek etkinlik yok',
+            weekText: 'Hf',
+            firstDay: 1,
+            
+            // Format ayarları
+            dayHeaderFormat: { weekday: 'long' },
+            titleFormat: { year: 'numeric', month: 'long' },
 
             // Event'ler
             events: events,
@@ -108,9 +126,9 @@ window.initResmiTatilCalendar = function (eventsJson, year) {
                     } else if (props && props.eventType === 'mesai') {
                         tooltipContent += `<small>Giriş: ${props.girisSaati || '?'}</small><br>`;
                         tooltipContent += `<small>Çıkış: ${props.cikisSaati || '?'}</small><br>`;
-                        if (props.mesaiSuresi) {
-                            tooltipContent += `<small>Mesai Süresi: ${props.mesaiSuresi}</small><br>`;
-                        }
+                        //if (props.mesaiSuresi) {
+                        //    tooltipContent += `<small>Mesai Süresi: ${props.mesaiSuresi}</small><br>`;
+                        //}
                         if (props.gecKalma) {
                             tooltipContent += '<small class="text-danger">⚠️ Geç Kalma</small><br>';
                         }
@@ -239,7 +257,10 @@ window.initResmiTatilWidgetCalendar = function (eventsJson, year) {
         }
 
         // FullCalendar başlat (compact mode)
-        resmiTatilWidgetCalendar = new FullCalendar.Calendar(calendarEl, {
+        resmiTatilWidgetCalendar = new Calendar(calendarEl, {
+            // Plugin'ler
+            plugins: [dayGridPlugin, interactionPlugin],
+            
             // Görünüm ayarları
             initialView: 'dayGridMonth',
             initialDate: `${year}-01-01`,
@@ -253,6 +274,13 @@ window.initResmiTatilWidgetCalendar = function (eventsJson, year) {
 
             // Yerelleştirme
             locale: 'tr',
+            buttonText: {
+                today: 'Bugün',
+                prev: 'Önceki',
+                next: 'Sonraki'
+            },
+            allDayText: 'Tüm gün',
+            firstDay: 1,
 
             // Event'ler
             events: events,
