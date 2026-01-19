@@ -95,7 +95,27 @@
 
         <!-- Calendar -->
         <div class="@(ShowSidebar ? "col-12 col-md-9" : "col-12") app-calendar-content">
-            <div class="card-body pb-0">
+            @if (ShowSidebar)
+            {
+                <div class="card-body pb-0">
+                    @if (IsLoading)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Yükleniyor...</span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- FullCalendar -->
+                        <div id="@CalendarId"></div>
+                    }
+                </div>
+            }
+            else
+            {
+                <!-- Widget için card-body yok -->
                 @if (IsLoading)
                 {
                     <div class="text-center py-5">
@@ -106,33 +126,30 @@
                 }
                 else
                 {
-                    @if (!ShowSidebar)
-                    {
-                        <!-- Bilgilendirme (Widget için) -->
-                        <div class="mb-3">
-                            <div class="d-flex flex-wrap gap-3">
-                                <div class="d-flex align-items-center">
-                                    <span class="badge bg-label-primary me-2">RESMİ TATİLLER</span>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <span class="badge bg-label-success me-2">DİNİ BAYRAM VE GÜNLER</span>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <i class="bx bx-time-five text-info me-1"></i>
-                                    <span class="small">GİRİŞ/ÇIKIŞ</span>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <i class="bx bx-calendar text-warning me-1"></i>
-                                    <span class="small">İZİN/MAZERET</span>
-                                </div>
+                    <!-- Bilgilendirme (Widget için) -->
+                    <div class="mb-3">
+                        <div class="d-flex flex-wrap gap-3">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-label-primary me-2">RESMİ TATİLLER</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-label-success me-2">DİNİ BAYRAM VE GÜNLER</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="bx bx-time-five text-info me-1"></i>
+                                <span class="small">GİRİŞ/ÇIKIŞ</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="bx bx-calendar text-warning me-1"></i>
+                                <span class="small">İZİN/MAZERET</span>
                             </div>
                         </div>
-                    }
+                    </div>
 
                     <!-- FullCalendar -->
                     <div id="@CalendarId"></div>
                 }
-            </div>
+            }
         </div>
     </div>
 </div>
@@ -155,6 +172,8 @@
     private bool FilterMesai { get; set; } = true;
     private bool FilterIzinMazeret { get; set; } = true;
 
+    private bool _firstLoadComplete = false;
+
     protected override async Task OnInitializedAsync()
     {
         await GetCurrentUserTc();
@@ -163,8 +182,9 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && !IsLoading)
+        if (!_firstLoadComplete && !IsLoading)
         {
+            _firstLoadComplete = true;
             await Task.Delay(100);
             await RenderCalendar();
         }
