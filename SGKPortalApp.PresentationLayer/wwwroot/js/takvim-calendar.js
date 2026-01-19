@@ -1,17 +1,17 @@
 // ═══════════════════════════════════════════════════════
-// RESMİ TATİL TAKVİMİ - FULLCALENDAR INITIALIZATION
+// TAKVİM - FULLCALENDAR INITIALIZATION
 // ═══════════════════════════════════════════════════════
 
-let resmiTatilCalendar = null;
+let takvimCalendar = null;
 
 /**
- * Resmi Tatil takvimini başlatır
+ * Takvim sayfasını başlatır (full page)
  * @param {string} eventsJson - JSON formatında event listesi
  * @param {number} year - Gösterilecek yıl
  */
-window.initResmiTatilCalendar = function (eventsJson, year) {
+window.initTakvimCalendar = function (eventsJson, year) {
     try {
-        console.log('📅 initResmiTatilCalendar çağrıldı, yıl:', year);
+        console.log('📅 initTakvimCalendar çağrıldı, yıl:', year);
 
         // FullCalendar yüklü mü kontrol et (Sneat window.Calendar olarak export ediyor)
         if (typeof Calendar === 'undefined') {
@@ -22,24 +22,24 @@ window.initResmiTatilCalendar = function (eventsJson, year) {
         const events = JSON.parse(eventsJson);
         console.log('📊 Event sayısı:', events.length);
 
-        const calendarEl = document.getElementById('resmiTatilCalendar');
+        const calendarEl = document.getElementById('takvimCalendar');
 
         if (!calendarEl) {
-            console.error('❌ Calendar element bulunamadı: #resmiTatilCalendar');
+            console.error('❌ Calendar element bulunamadı: #takvimCalendar');
             return;
         }
 
         console.log('✅ Calendar element bulundu');
 
         // Mevcut takvimi temizle
-        if (resmiTatilCalendar) {
+        if (takvimCalendar) {
             console.log('♻️ Mevcut takvim temizleniyor...');
-            resmiTatilCalendar.destroy();
+            takvimCalendar.destroy();
         }
 
         // FullCalendar başlat
         console.log('🔧 FullCalendar oluşturuluyor...');
-        resmiTatilCalendar = new Calendar(calendarEl, {
+        takvimCalendar = new Calendar(calendarEl, {
             // Plugin'ler (Sneat FullCalendar'dan)
             plugins: [dayGridPlugin, interactionPlugin, listPlugin, timegridPlugin],
             
@@ -188,7 +188,7 @@ window.initResmiTatilCalendar = function (eventsJson, year) {
         });
 
         // Takvimi render et
-        resmiTatilCalendar.render();
+        takvimCalendar.render();
         console.log(`✅ Resmi Tatil takvimi başlatıldı (${year})`);
 
     } catch (error) {
@@ -200,9 +200,9 @@ window.initResmiTatilCalendar = function (eventsJson, year) {
  * Takvimi yeniden yükler
  * @param {string} eventsJson - Yeni event listesi
  */
-window.refreshResmiTatilCalendar = function (eventsJson) {
+window.refreshTakvimCalendar = function (eventsJson) {
     try {
-        if (!resmiTatilCalendar) {
+        if (!takvimCalendar) {
             console.warn('Takvim henüz başlatılmamış');
             return;
         }
@@ -210,10 +210,10 @@ window.refreshResmiTatilCalendar = function (eventsJson) {
         const events = JSON.parse(eventsJson);
         
         // Tüm event'leri temizle
-        resmiTatilCalendar.removeAllEvents();
+        takvimCalendar.removeAllEvents();
         
         // Yeni event'leri ekle
-        resmiTatilCalendar.addEventSource(events);
+        takvimCalendar.addEventSource(events);
         
         console.log('✅ Takvim yenilendi');
     } catch (error) {
@@ -224,10 +224,10 @@ window.refreshResmiTatilCalendar = function (eventsJson) {
 /**
  * Takvimi temizler
  */
-window.destroyResmiTatilCalendar = function () {
-    if (resmiTatilCalendar) {
-        resmiTatilCalendar.destroy();
-        resmiTatilCalendar = null;
+window.destroyTakvimCalendar = function () {
+    if (takvimCalendar) {
+        takvimCalendar.destroy();
+        takvimCalendar = null;
         console.log('✅ Takvim temizlendi');
     }
 };
@@ -236,17 +236,17 @@ window.destroyResmiTatilCalendar = function () {
 // DASHBOARD WIDGET CALENDAR
 // ═══════════════════════════════════════════════════════
 
-let resmiTatilWidgetCalendar = null;
+let takvimWidgetCalendar = null;
 
 /**
  * Dashboard widget için mini takvim başlatır
  * @param {string} eventsJson - JSON formatında event listesi
  * @param {number} year - Gösterilecek yıl
  */
-window.initResmiTatilWidgetCalendar = function (eventsJson, year) {
+window.initTakvimWidgetCalendar = function (eventsJson, year) {
     try {
         const events = JSON.parse(eventsJson);
-        const calendarEl = document.getElementById('resmiTatilWidgetCalendar');
+        const calendarEl = document.getElementById('takvimWidgetCalendar');
 
         if (!calendarEl) {
             console.error('Widget calendar element bulunamadı');
@@ -254,12 +254,12 @@ window.initResmiTatilWidgetCalendar = function (eventsJson, year) {
         }
 
         // Mevcut takvimi temizle
-        if (resmiTatilWidgetCalendar) {
-            resmiTatilWidgetCalendar.destroy();
+        if (takvimWidgetCalendar) {
+            takvimWidgetCalendar.destroy();
         }
 
         // FullCalendar başlat (compact mode)
-        resmiTatilWidgetCalendar = new Calendar(calendarEl, {
+        takvimWidgetCalendar = new Calendar(calendarEl, {
             // Plugin'ler
             plugins: [dayGridPlugin, interactionPlugin],
 
@@ -311,7 +311,7 @@ window.initResmiTatilWidgetCalendar = function (eventsJson, year) {
         });
 
         // Takvimi render et
-        resmiTatilWidgetCalendar.render();
+        takvimWidgetCalendar.render();
         console.log(`✅ Widget takvimi başlatıldı (${year})`);
 
     } catch (error) {
