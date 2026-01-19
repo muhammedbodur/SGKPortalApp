@@ -172,6 +172,8 @@
     private bool FilterMesai { get; set; } = true;
     private bool FilterIzinMazeret { get; set; } = true;
 
+    private bool _firstLoadComplete = false;
+
     protected override async Task OnInitializedAsync()
     {
         await GetCurrentUserTc();
@@ -180,8 +182,9 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && !IsLoading)
+        if (!_firstLoadComplete && !IsLoading)
         {
+            _firstLoadComplete = true;
             await Task.Delay(100);
             await RenderCalendar();
         }
