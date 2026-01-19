@@ -1,5 +1,9 @@
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
@@ -9,6 +13,7 @@ using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -36,6 +41,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         private bool isLoading = false;
         private int totalCount = 0;
 
+        // Export state
+        private bool IsExporting { get; set; } = false;
+        private string ExportType { get; set; } = string.Empty;
+
         // Pagination
         private int currentPage = 1;
         private int pageSize = 50;
@@ -56,6 +65,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
 
         protected override async Task OnInitializedAsync()
         {
+            QuestPDF.Settings.License = LicenseType.Community;
             await base.OnInitializedAsync();
             await LoadDevices();
         }
@@ -244,6 +254,175 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
                 currentPage--;
                 ApplyFilters();
             }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // EXPORT METHODS
+        // ═══════════════════════════════════════════════════════
+
+        private async Task ExportToExcel()
+        {
+            IsExporting = true;
+            ExportType = "excel";
+
+            try
+            {
+                using var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add("Attendance Kayıtları");
+
+                // Header
+                worksheet.Cell(1, 1).Value = "Tarih/Saat";
+                worksheet.Cell(1, 2).Value = "Enroll Number";
+                worksheet.Cell(1, 3).Value = "Personel Ad Soyad";
+                worksheet.Cell(1, 4).Value = "Sicil No";
+                worksheet.Cell(1, 5).Value = "TC Kimlik No";
+                worksheet.Cell(1, 6).Value = "Doğrulama Yöntemi";
+                worksheet.Cell(1, 7).Value = "Giriş/Çıkış";
+
+                // Style header
+                var headerRange = worksheet.Range(1, 1, 1, 7);
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.LightBlue;
+
+                // Data
+                int row = 2;
+                foreach (var record in filteredRecords.OrderByDescending(r => r.DateTime))
+                {
+                    worksheet.Cell(row, 1).Value = record.DateTime.ToString("dd.MM.yyyy HH:mm:ss");
+                    worksheet.Cell(row, 2).Value = record.EnrollNumber;
+                    worksheet.Cell(row, 3).Value = record.PersonelAdSoyad ?? "-";
+                    worksheet.Cell(row, 4).Value = record.PersonelSicilNo ?? "-";
+                    worksheet.Cell(row, 5).Value = record.PersonelTcKimlikNo ?? "-";
+                    worksheet.Cell(row, 6).Value = GetVerifyMethodText(record.VerifyMethod);
+                    worksheet.Cell(row, 7).Value = GetInOutModeText(record.InOutMode);
+                    row++;
+                }
+
+                worksheet.Columns().AdjustToContents();
+
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+                var fileName = $"AttendanceKayitlari_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+                await JS.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(content), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                await ToastService.ShowSuccessAsync("Excel dosyası başarıyla indirildi!");
+            }
+            catch (Exception ex)
+            {
+                await ToastService.ShowErrorAsync($"Excel oluşturulurken hata: {ex.Message}");
+            }
+            finally
+            {
+                IsExporting = false;
+                ExportType = string.Empty;
+            }
+        }
+
+        private async Task ExportToPdf()
+        {
+            IsExporting = true;
+            ExportType = "pdf";
+
+            try
+            {
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4.Landscape());
+                        page.Margin(2, Unit.Centimetre);
+                        page.DefaultTextStyle(x => x.FontSize(9));
+
+                        page.Header().Text("Anlık Attendance Kayıtları").FontSize(18).Bold();
+
+                        page.Content().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(3);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Tarih/Saat").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Enroll No").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Personel").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Sicil No").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("TC No").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Doğrulama").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Giriş/Çıkış").Bold();
+                            });
+
+                            foreach (var record in filteredRecords.OrderByDescending(r => r.DateTime))
+                            {
+                                table.Cell().Padding(3).Text(record.DateTime.ToString("dd.MM.yyyy HH:mm"));
+                                table.Cell().Padding(3).Text(record.EnrollNumber);
+                                table.Cell().Padding(3).Text(record.PersonelAdSoyad ?? "-");
+                                table.Cell().Padding(3).Text(record.PersonelSicilNo ?? "-");
+                                table.Cell().Padding(3).Text(record.PersonelTcKimlikNo ?? "-");
+                                table.Cell().Padding(3).Text(GetVerifyMethodText(record.VerifyMethod));
+                                table.Cell().Padding(3).Text(GetInOutModeText(record.InOutMode));
+                            }
+                        });
+
+                        page.Footer().AlignCenter().Text(text =>
+                        {
+                            text.Span("Sayfa ");
+                            text.CurrentPageNumber();
+                            text.Span(" / ");
+                            text.TotalPages();
+                        });
+                    });
+                });
+
+                var pdfBytes = document.GeneratePdf();
+                var fileName = $"AttendanceKayitlari_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+
+                await JS.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pdfBytes), "application/pdf");
+                await ToastService.ShowSuccessAsync("PDF dosyası başarıyla indirildi!");
+            }
+            catch (Exception ex)
+            {
+                await ToastService.ShowErrorAsync($"PDF oluşturulurken hata: {ex.Message}");
+            }
+            finally
+            {
+                IsExporting = false;
+                ExportType = string.Empty;
+            }
+        }
+
+        private string GetVerifyMethodText(VerifyMethod method)
+        {
+            return method switch
+            {
+                VerifyMethod.Password => "Şifre",
+                VerifyMethod.Fingerprint => "Parmak İzi",
+                VerifyMethod.Card => "Kart",
+                VerifyMethod.Face => "Yüz Tanıma",
+                _ => "Bilinmiyor"
+            };
+        }
+
+        private string GetInOutModeText(InOutMode mode)
+        {
+            return mode switch
+            {
+                InOutMode.CheckIn => "Giriş",
+                InOutMode.CheckOut => "Çıkış",
+                InOutMode.BreakOut => "Mola Başlangıç",
+                InOutMode.BreakIn => "Mola Bitiş",
+                InOutMode.OTIn => "Mesai Başlangıç",
+                InOutMode.OTOut => "Mesai Bitiş",
+                _ => "Bilinmiyor"
+            };
         }
     }
 }
