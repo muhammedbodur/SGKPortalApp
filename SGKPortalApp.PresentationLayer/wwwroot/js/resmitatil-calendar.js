@@ -11,20 +11,34 @@ let resmiTatilCalendar = null;
  */
 window.initResmiTatilCalendar = function (eventsJson, year) {
     try {
-        const events = JSON.parse(eventsJson);
-        const calendarEl = document.getElementById('resmiTatilCalendar');
+        console.log('📅 initResmiTatilCalendar çağrıldı, yıl:', year);
 
-        if (!calendarEl) {
-            console.error('Calendar element bulunamadı: #resmiTatilCalendar');
+        // FullCalendar yüklü mü kontrol et
+        if (typeof FullCalendar === 'undefined') {
+            console.error('❌ FullCalendar kütüphanesi yüklenmemiş!');
             return;
         }
 
+        const events = JSON.parse(eventsJson);
+        console.log('📊 Event sayısı:', events.length);
+
+        const calendarEl = document.getElementById('resmiTatilCalendar');
+
+        if (!calendarEl) {
+            console.error('❌ Calendar element bulunamadı: #resmiTatilCalendar');
+            return;
+        }
+
+        console.log('✅ Calendar element bulundu');
+
         // Mevcut takvimi temizle
         if (resmiTatilCalendar) {
+            console.log('♻️ Mevcut takvim temizleniyor...');
             resmiTatilCalendar.destroy();
         }
 
         // FullCalendar başlat
+        console.log('🔧 FullCalendar oluşturuluyor...');
         resmiTatilCalendar = new FullCalendar.Calendar(calendarEl, {
             // Görünüm ayarları
             initialView: 'dayGridMonth',
@@ -51,89 +65,84 @@ window.initResmiTatilCalendar = function (eventsJson, year) {
 
             // Event tıklama
             eventClick: function (info) {
-                const eventType = info.event.extendedProps?.eventType;
-                const eventId = info.event.id;
+                try {
+                    const eventType = info.event.extendedProps?.eventType;
+                    const eventId = info.event.id;
 
-                // Event tipine göre işlem yap
-                if (eventType === 'tatil') {
-                    // Tatil edit sayfasına git
-                    const tatilId = parseInt(eventId.replace('tatil-', ''));
-                    window.location.href = `/common/resmitatil/manage/${tatilId}`;
-                } else if (eventType === 'mesai') {
-                    // Mesai detaylarını göster (tooltip veya modal)
-                    console.log('Mesai detayı:', info.event.extendedProps);
-                } else if (eventType === 'izin' || eventType === 'mazeret') {
-                    // İzin/Mazeret detay sayfasına git
-                    console.log('İzin/Mazeret detayı:', info.event.extendedProps);
+                    // Event tipine göre işlem yap
+                    if (eventType === 'tatil') {
+                        // Tatil edit sayfasına git
+                        const tatilId = parseInt(eventId.replace('tatil-', ''));
+                        window.location.href = `/common/resmitatil/manage/${tatilId}`;
+                    } else if (eventType === 'mesai') {
+                        // Mesai detaylarını göster (tooltip veya modal)
+                        console.log('Mesai detayı:', info.event.extendedProps);
+                    } else if (eventType === 'izin' || eventType === 'mazeret') {
+                        // İzin/Mazeret detay sayfasına git
+                        console.log('İzin/Mazeret detayı:', info.event.extendedProps);
+                    }
+                } catch (err) {
+                    console.error('Event click hatası:', err);
                 }
             },
 
             // Event görünümü
             eventContent: function (arg) {
-                const props = arg.event.extendedProps;
-                
-                let html = '<div class="fc-event-main-frame">';
-                html += '<div class="fc-event-title-container">';
-                html += '<div class="fc-event-title fc-sticky">';
-                
-                // Yarım gün ise özel işaret
-                if (props.yariGun) {
-                    html += '<i class="bx bx-time-five me-1"></i>';
-                }
-                
-                html += arg.event.title;
-                html += '</div>';
-                html += '</div>';
-                html += '</div>';
-
-                return { html: html };
+                // Default rendering kullan - daha basit ve güvenli
+                return true;
             },
 
             // Tooltip (event üzerine gelince)
             eventMouseEnter: function (info) {
-                const props = info.event.extendedProps;
-                let tooltipContent = '<div class="p-2">';
-                tooltipContent += `<strong>${info.event.title}</strong><br>`;
+                try {
+                    const props = info.event.extendedProps;
+                    let tooltipContent = '<div class="p-2">';
+                    tooltipContent += `<strong>${info.event.title}</strong><br>`;
 
-                // Event tipine göre içerik
-                if (props.eventType === 'tatil') {
-                    tooltipContent += `<small class="text-muted">${props.tatilTipi || ''}</small><br>`;
-                    if (props.aciklama) {
-                        tooltipContent += `<small>${props.aciklama}</small><br>`;
+                    // Event tipine göre içerik
+                    if (props && props.eventType === 'tatil') {
+                        tooltipContent += `<small class="text-muted">${props.tatilTipi || ''}</small><br>`;
+                        if (props.aciklama) {
+                            tooltipContent += `<small>${props.aciklama}</small><br>`;
+                        }
+                    } else if (props && props.eventType === 'mesai') {
+                        tooltipContent += `<small>Giriş: ${props.girisSaati || '?'}</small><br>`;
+                        tooltipContent += `<small>Çıkış: ${props.cikisSaati || '?'}</small><br>`;
+                        if (props.mesaiSuresi) {
+                            tooltipContent += `<small>Mesai Süresi: ${props.mesaiSuresi}</small><br>`;
+                        }
+                        if (props.gecKalma) {
+                            tooltipContent += '<small class="text-danger">⚠️ Geç Kalma</small><br>';
+                        }
+                        if (props.detay) {
+                            tooltipContent += `<small>${props.detay}</small><br>`;
+                        }
+                    } else if (props && props.eventType === 'izin') {
+                        tooltipContent += `<small>${props.tur || ''}</small><br>`;
+                        tooltipContent += `<small>Durum: ${props.onayDurumu || 'Beklemede'}</small><br>`;
+                    } else if (props && props.eventType === 'mazeret') {
+                        tooltipContent += `<small>${props.tur || ''}</small><br>`;
+                        if (props.saatDilimi) {
+                            tooltipContent += `<small>Saat: ${props.saatDilimi}</small><br>`;
+                        }
+                        tooltipContent += `<small>Durum: ${props.onayDurumu || 'Beklemede'}</small><br>`;
                     }
-                } else if (props.eventType === 'mesai') {
-                    tooltipContent += `<small>Giriş: ${props.girisSaati || '?'}</small><br>`;
-                    tooltipContent += `<small>Çıkış: ${props.cikisSaati || '?'}</small><br>`;
-                    if (props.mesaiSuresi) {
-                        tooltipContent += `<small>Mesai Süresi: ${props.mesaiSuresi}</small><br>`;
+
+                    tooltipContent += '</div>';
+
+                    // Bootstrap tooltip kullan (jQuery ve Bootstrap yüklüyse)
+                    if (typeof $ !== 'undefined' && $.fn.tooltip) {
+                        $(info.el).tooltip({
+                            title: tooltipContent,
+                            html: true,
+                            placement: 'top',
+                            trigger: 'hover',
+                            container: 'body'
+                        });
                     }
-                    if (props.gecKalma) {
-                        tooltipContent += '<small class="text-danger">⚠️ Geç Kalma</small><br>';
-                    }
-                    if (props.detay) {
-                        tooltipContent += `<small>${props.detay}</small><br>`;
-                    }
-                } else if (props.eventType === 'izin') {
-                    tooltipContent += `<small>${props.tur || ''}</small><br>`;
-                    tooltipContent += `<small>Durum: ${props.onayDurumu || 'Beklemede'}</small><br>`;
-                } else if (props.eventType === 'mazeret') {
-                    tooltipContent += `<small>${props.tur || ''}</small><br>`;
-                    if (props.saatDilimi) {
-                        tooltipContent += `<small>Saat: ${props.saatDilimi}</small><br>`;
-                    }
-                    tooltipContent += `<small>Durum: ${props.onayDurumu || 'Beklemede'}</small><br>`;
+                } catch (err) {
+                    console.error('Tooltip oluşturma hatası:', err);
                 }
-
-                tooltipContent += '</div>';
-
-                // Bootstrap tooltip kullan
-                $(info.el).tooltip({
-                    title: tooltipContent,
-                    html: true,
-                    placement: 'top',
-                    trigger: 'hover',
-                    container: 'body'
-                });
             },
 
             // Takvim yüklendi
