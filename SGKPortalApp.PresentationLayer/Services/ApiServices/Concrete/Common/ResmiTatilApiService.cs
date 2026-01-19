@@ -14,7 +14,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<ResmiTatilApiService> _logger;
-        private const string BaseUrl = "api/resmitati";
+        private const string BaseUrl = "resmitatil";
 
         public ResmiTatilApiService(HttpClient httpClient, ILogger<ResmiTatilApiService> logger)
         {
