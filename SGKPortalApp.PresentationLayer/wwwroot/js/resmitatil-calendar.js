@@ -91,7 +91,7 @@ window.initResmiTatilCalendar = function (eventsJson, year) {
                     if (eventType === 'tatil') {
                         // Tatil edit sayfasına git
                         const tatilId = parseInt(eventId.replace('tatil-', ''));
-                        window.location.href = `/common/resmitatil/manage/${tatilId}`;
+                        window.location.href = `/common/takvim/manage/${tatilId}`;
                     } else if (eventType === 'mesai') {
                         // Mesai detaylarını göster (tooltip veya modal)
                         console.log('Mesai detayı:', info.event.extendedProps);
@@ -262,7 +262,7 @@ window.initResmiTatilWidgetCalendar = function (eventsJson, year) {
         resmiTatilWidgetCalendar = new Calendar(calendarEl, {
             // Plugin'ler
             plugins: [dayGridPlugin, interactionPlugin],
-            
+
             // Görünüm ayarları
             initialView: 'dayGridMonth',
             initialDate: `${year}-01-01`,
@@ -294,12 +294,13 @@ window.initResmiTatilWidgetCalendar = function (eventsJson, year) {
 
             // Click -> Detay sayfasına git
             eventClick: function (info) {
-                window.location.href = '/common/resmitatil';
+                window.location.href = '/common/takvim';
             },
 
-            // Responsive ayarlar
+            // Responsive ayarlar - Widget için kompakt
             height: 'auto',
-            contentHeight: 'auto',
+            contentHeight: 450, // Sabit yükseklik (px)
+            aspectRatio: 1.35, // En/Boy oranı
 
             // Hafta sonu vurgulama
             dayCellDidMount: function (info) {
