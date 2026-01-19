@@ -30,27 +30,35 @@ else
                 </div>
 
                 <div class="d-flex flex-wrap gap-2">
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" disabled="@isLoading">
+                    @if (IsActionVisible("EXCEL_EXPORT"))
+                    {
+                        <button class="btn btn-success" @onclick="ExportToExcel" disabled="@isLoading">
                             @if (isLoading)
                             {
-                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                <span class="spinner-border spinner-border-sm me-1"></span>
                             }
-                            <i class="bx bx-download me-1"></i> Dışa Aktar
+                            else
+                            {
+                                <i class="bx bx-download me-1"></i>
+                            }
+                            Excel
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <button class="dropdown-item" @onclick="ExportToExcel">
-                                    <i class="bx bx-spreadsheet me-2 text-success"></i>Excel
-                                </button>
-                            </li>
-                            <li>
-                                <button class="dropdown-item" @onclick="ExportToPdf">
-                                    <i class="bx bxs-file-pdf me-2 text-danger"></i>PDF
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
+                    }
+
+                    @if (IsActionVisible("PDF_EXPORT"))
+                    {
+                        <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@isLoading">
+                            @if (isLoading)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            else
+                            {
+                                <i class="bx bxs-file-pdf me-1"></i>
+                            }
+                            PDF
+                        </button>
+                    }
 
                     <a href="@GetManageUrl()" class="btn btn-primary">
                         <i class="bx bx-plus me-1"></i>Yeni Alt İşlem

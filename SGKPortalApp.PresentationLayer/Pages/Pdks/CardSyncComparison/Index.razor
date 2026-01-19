@@ -26,18 +26,21 @@ else
                 <div>
                     @if (report != null && report.Mismatches.Any())
                     {
-                        <button class="btn btn-success me-2" @onclick="ExportToExcel" disabled="@(isLoading || isExporting)">
-                            @if (isExporting)
-                            {
-                                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                                <span>Dışa Aktarılıyor...</span>
-                            }
-                            else
-                            {
-                                <i class="bi bi-file-earmark-excel me-1"></i>
-                                <span>Excel'e Aktar</span>
-                            }
-                        </button>
+                        @if (IsActionVisible("EXCEL_EXPORT"))
+                        {
+                            <button class="btn btn-success me-2" @onclick="ExportToExcel" disabled="@(isLoading || isExporting)">
+                                @if (isExporting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                    <span>Dışa Aktarılıyor...</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-file-earmark-excel me-1"></i>
+                                    <span>Excel'e Aktar</span>
+                                }
+                            </button>
+                        }
                     }
                     <button class="btn btn-primary" @onclick="GenerateReport" disabled="@isLoading">
                         <i class="bi bi-arrow-repeat me-1"></i>
