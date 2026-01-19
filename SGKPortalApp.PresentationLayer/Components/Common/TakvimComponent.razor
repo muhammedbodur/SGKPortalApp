@@ -139,7 +139,7 @@
 
 @code {
     [Parameter] public bool ShowSidebar { get; set; } = true;
-    [Parameter] public string CalendarId { get; set; } = "resmiTatilCalendar";
+    [Parameter] public string CalendarId { get; set; } = "takvimCalendar";
 
     private List<ResmiTatilResponseDto> Tatiller { get; set; } = new();
     private List<PersonelMesaiListResponseDto> MesaiKayitlari { get; set; } = new();
@@ -360,9 +360,9 @@
             }
 
             var eventsJson = JsonSerializer.Serialize(events);
-            
+
             // Widget için farklı JS fonksiyonu kullan
-            var jsFunction = ShowSidebar ? "initResmiTatilCalendar" : "initResmiTatilWidgetCalendar";
+            var jsFunction = ShowSidebar ? "initTakvimCalendar" : "initTakvimWidgetCalendar";
             await JSRuntime.InvokeVoidAsync(jsFunction, eventsJson, SelectedYear);
         }
         catch (Exception) { }
