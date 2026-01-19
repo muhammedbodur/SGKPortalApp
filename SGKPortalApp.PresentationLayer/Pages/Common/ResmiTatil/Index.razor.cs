@@ -1,9 +1,13 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Pdks;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System.Text.Json;
 
@@ -16,16 +20,21 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
         // ═══════════════════════════════════════════════════════
 
         [Inject] private IResmiTatilApiService _resmiTatilService { get; set; } = default!;
+        [Inject] private IPersonelMesaiApiService _mesaiService { get; set; } = default!;
+        [Inject] private IIzinMazeretTalepApiService _izinMazeretService { get; set; } = default!;
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
         [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+        [Inject] private AuthenticationStateProvider _authStateProvider { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════
         // DATA PROPERTIES
         // ═══════════════════════════════════════════════════════
 
+        private string? CurrentUserTc { get; set; }
         private List<ResmiTatilResponseDto> Tatiller { get; set; } = new();
-        private List<ResmiTatilResponseDto> FilteredTatiller { get; set; } = new();
+        private List<PersonelMesaiListResponseDto> MesaiKayitlari { get; set; } = new();
+        private List<IzinMazeretTalepListResponseDto> IzinMazeretTalepleri { get; set; } = new();
 
         // ═══════════════════════════════════════════════════════
         // FILTER PROPERTIES
@@ -87,6 +96,34 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
             }
         }
 
+        private bool _filterMesai = true;
+        private bool FilterMesai
+        {
+            get => _filterMesai;
+            set
+            {
+                if (_filterMesai != value)
+                {
+                    _filterMesai = value;
+                    _ = OnFilterChanged();
+                }
+            }
+        }
+
+        private bool _filterIzinMazeret = true;
+        private bool FilterIzinMazeret
+        {
+            get => _filterIzinMazeret;
+            set
+            {
+                if (_filterIzinMazeret != value)
+                {
+                    _filterIzinMazeret = value;
+                    _ = OnFilterChanged();
+                }
+            }
+        }
+
         // ═══════════════════════════════════════════════════════
         // UI STATE
         // ═══════════════════════════════════════════════════════
@@ -118,7 +155,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
 
         protected override async Task OnInitializedAsync()
         {
-            await LoadTatiller();
+            await base.OnInitializedAsync();
+
+            // Get current user's TC
+            var authState = await _authStateProvider.GetAuthenticationStateAsync();
+            CurrentUserTc = authState.User.FindFirst("TcKimlikNo")?.Value;
+
+            await LoadAllData();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -127,11 +170,36 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
             // LoadTatiller() içinde zaten RenderCalendar() çağrılıyor
         }
 
-        private async Task LoadTatiller()
+        private async Task LoadAllData()
         {
             IsLoading = true;
-            StateHasChanged(); // UI'yi güncelle, loading göster
+            StateHasChanged();
 
+            try
+            {
+                // Load all data sources in parallel
+                var tatillerTask = LoadTatiller();
+                var mesaiTask = LoadMesaiKayitlari();
+                var izinMazeretTask = LoadIzinMazeretTalepleri();
+
+                await Task.WhenAll(tatillerTask, mesaiTask, izinMazeretTask);
+            }
+            catch (Exception ex)
+            {
+                await _toastService.ShowErrorAsync($"Veriler yüklenirken hata: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = false;
+                StateHasChanged();
+
+                await Task.Delay(100);
+                await RenderCalendar();
+            }
+        }
+
+        private async Task LoadTatiller()
+        {
             try
             {
                 var result = await _resmiTatilService.GetByYearAsync(SelectedYear);
@@ -139,25 +207,78 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
                 if (result.Success && result.Data != null)
                 {
                     Tatiller = result.Data;
-                    ApplyFilters();
-                }
-                else
-                {
-                    await _toastService.ShowErrorAsync(result.Message ?? "Tatiller yüklenemedi!");
                 }
             }
             catch (Exception ex)
             {
-                await _toastService.ShowErrorAsync($"Hata: {ex.Message}");
+                Logger.LogError(ex, "Tatiller yüklenirken hata");
             }
-            finally
-            {
-                IsLoading = false;
-                StateHasChanged(); // Loading'i kapat
+        }
 
-                // Calendar'ı render et (loading bittikten sonra)
-                await Task.Delay(100); // DOM'un güncellenmesini bekle
-                await RenderCalendar();
+        private async Task LoadMesaiKayitlari()
+        {
+            if (string.IsNullOrEmpty(CurrentUserTc))
+            {
+                MesaiKayitlari.Clear();
+                return;
+            }
+
+            try
+            {
+                var request = new PersonelMesaiFilterRequestDto
+                {
+                    TcKimlikNo = CurrentUserTc,
+                    BaslangicTarihi = new DateTime(SelectedYear, 1, 1),
+                    BitisTarihi = new DateTime(SelectedYear, 12, 31)
+                };
+
+                var result = await _mesaiService.GetListeAsync(request);
+
+                if (result.Success && result.Data != null)
+                {
+                    MesaiKayitlari = result.Data;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Mesai kayıtları yüklenirken hata");
+            }
+        }
+
+        private async Task LoadIzinMazeretTalepleri()
+        {
+            if (string.IsNullOrEmpty(CurrentUserTc))
+            {
+                IzinMazeretTalepleri.Clear();
+                return;
+            }
+
+            try
+            {
+                var result = await _izinMazeretService.GetByPersonelAsync(CurrentUserTc);
+
+                if (result.Success && result.Data != null)
+                {
+                    // Filter by year
+                    IzinMazeretTalepleri = result.Data.Where(t =>
+                    {
+                        // Check if talep falls in selected year
+                        if (t.BaslangicTarihi.HasValue)
+                        {
+                            return t.BaslangicTarihi.Value.Year == SelectedYear ||
+                                   (t.BitisTarihi.HasValue && t.BitisTarihi.Value.Year == SelectedYear);
+                        }
+                        else if (t.MazeretTarihi.HasValue)
+                        {
+                            return t.MazeretTarihi.Value.Year == SelectedYear;
+                        }
+                        return false;
+                    }).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "İzin/Mazeret talepleri yüklenirken hata");
             }
         }
 
@@ -165,27 +286,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
         // FILTER METHODS
         // ═══════════════════════════════════════════════════════
 
-        private void ApplyFilters()
-        {
-            FilteredTatiller = Tatiller.Where(t =>
-            {
-                if (t.TatilTipi == TatilTipi.SabitTatil && !FilterSabitTatil) return false;
-                if (t.TatilTipi == TatilTipi.DiniTatil && !FilterDiniTatil) return false;
-                if (t.TatilTipi == TatilTipi.OzelTatil && !FilterOzelTatil) return false;
-                return true;
-            }).ToList();
-        }
-
         private async Task OnYearChanged()
         {
-            await LoadTatiller();
+            await LoadAllData();
         }
 
         private async Task OnFilterChanged()
         {
-            ApplyFilters();
             StateHasChanged();
-            await Task.Delay(50); // DOM güncellenmesini bekle
+            await Task.Delay(50);
             await RenderCalendar();
         }
 
@@ -199,22 +308,113 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
 
             try
             {
-                var events = FilteredTatiller.Select(t => new
+                var events = new List<object>();
+
+                // 1. Resmi Tatiller
+                if (FilterSabitTatil || FilterDiniTatil || FilterOzelTatil)
                 {
-                    id = t.TatilId,
-                    title = t.TatilAdi,
-                    start = t.Tarih.ToString("yyyy-MM-dd"),
-                    allDay = true,
-                    backgroundColor = GetEventColor(t.TatilTipi),
-                    borderColor = GetEventColor(t.TatilTipi),
-                    extendedProps = new
+                    var tatilEvents = Tatiller
+                        .Where(t =>
+                        {
+                            if (t.TatilTipi == TatilTipi.SabitTatil && !FilterSabitTatil) return false;
+                            if (t.TatilTipi == TatilTipi.DiniTatil && !FilterDiniTatil) return false;
+                            if (t.TatilTipi == TatilTipi.OzelTatil && !FilterOzelTatil) return false;
+                            return true;
+                        })
+                        .Select(t => new
+                        {
+                            id = $"tatil-{t.TatilId}",
+                            title = t.TatilAdi,
+                            start = t.Tarih.ToString("yyyy-MM-dd"),
+                            allDay = true,
+                            backgroundColor = GetTatilColor(t.TatilTipi),
+                            borderColor = GetTatilColor(t.TatilTipi),
+                            extendedProps = new
+                            {
+                                eventType = "tatil",
+                                tatilTipi = t.TatilTipiText,
+                                aciklama = t.Aciklama
+                            }
+                        });
+                    events.AddRange(tatilEvents);
+                }
+
+                // 2. Mesai Kayıtları (Giriş/Çıkış)
+                if (FilterMesai)
+                {
+                    var mesaiEvents = MesaiKayitlari
+                        .Where(m => m.GirisSaati.HasValue || m.CikisSaati.HasValue)
+                        .Select(m => new
+                        {
+                            id = $"mesai-{m.Tarih:yyyyMMdd}",
+                            title = $"🕒 {(m.GirisSaati?.ToString(@"hh\:mm") ?? "?")} - {(m.CikisSaati?.ToString(@"hh\:mm") ?? "?")}",
+                            start = m.Tarih.ToString("yyyy-MM-dd"),
+                            allDay = false,
+                            backgroundColor = GetMesaiColor(m),
+                            borderColor = GetMesaiColor(m),
+                            extendedProps = new
+                            {
+                                eventType = "mesai",
+                                girisSaati = m.GirisSaati?.ToString(@"hh\:mm"),
+                                cikisSaati = m.CikisSaati?.ToString(@"hh\:mm"),
+                                mesaiSuresi = m.MesaiSuresi,
+                                detay = m.Detay,
+                                gecKalma = m.GecKalma
+                            }
+                        });
+                    events.AddRange(mesaiEvents);
+                }
+
+                // 3. İzin/Mazeret Talepleri
+                if (FilterIzinMazeret)
+                {
+                    var izinMazeretEvents = new List<object>();
+
+                    foreach (var talep in IzinMazeretTalepleri)
                     {
-                        tatilTipi = t.TatilTipiText,
-                        aciklama = t.Aciklama,
-                        yariGun = t.YariGun,
-                        otomatikSenkronize = t.OtomatikSenkronize
+                        if (talep.BaslangicTarihi.HasValue && talep.BitisTarihi.HasValue)
+                        {
+                            // İzin (date range)
+                            izinMazeretEvents.Add(new
+                            {
+                                id = $"izin-{talep.IzinMazeretTalepId}",
+                                title = $"📅 {talep.TuruAdi}",
+                                start = talep.BaslangicTarihi.Value.ToString("yyyy-MM-dd"),
+                                end = talep.BitisTarihi.Value.AddDays(1).ToString("yyyy-MM-dd"), // FullCalendar end is exclusive
+                                allDay = true,
+                                backgroundColor = GetIzinMazeretColor(talep),
+                                borderColor = GetIzinMazeretColor(talep),
+                                extendedProps = new
+                                {
+                                    eventType = "izin",
+                                    tur = talep.TuruAdi,
+                                    onayDurumu = talep.BirinciOnayDurumuAdi
+                                }
+                            });
+                        }
+                        else if (talep.MazeretTarihi.HasValue)
+                        {
+                            // Mazeret (single day)
+                            izinMazeretEvents.Add(new
+                            {
+                                id = $"mazeret-{talep.IzinMazeretTalepId}",
+                                title = $"⏰ {talep.TuruAdi}",
+                                start = talep.MazeretTarihi.Value.ToString("yyyy-MM-dd"),
+                                allDay = false,
+                                backgroundColor = GetIzinMazeretColor(talep),
+                                borderColor = GetIzinMazeretColor(talep),
+                                extendedProps = new
+                                {
+                                    eventType = "mazeret",
+                                    tur = talep.TuruAdi,
+                                    saatDilimi = talep.SaatDilimi,
+                                    onayDurumu = talep.BirinciOnayDurumuAdi
+                                }
+                            });
+                        }
                     }
-                }).ToList();
+                    events.AddRange(izinMazeretEvents);
+                }
 
                 var eventsJson = JsonSerializer.Serialize(events);
                 await JSRuntime.InvokeVoidAsync("initResmiTatilCalendar", eventsJson, SelectedYear);
@@ -225,14 +425,37 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
             }
         }
 
-        private string GetEventColor(TatilTipi tatilTipi)
+        private string GetTatilColor(TatilTipi tatilTipi)
         {
             return tatilTipi switch
             {
-                TatilTipi.SabitTatil => "#696cff",
-                TatilTipi.DiniTatil => "#71dd37",
-                TatilTipi.OzelTatil => "#ffab00",
+                TatilTipi.SabitTatil => "#696cff", // Primary blue
+                TatilTipi.DiniTatil => "#71dd37",  // Success green
+                TatilTipi.OzelTatil => "#ffab00",  // Warning orange
                 _ => "#8592a3"
+            };
+        }
+
+        private string GetMesaiColor(PersonelMesaiListResponseDto mesai)
+        {
+            // Geç kalma -> kırmızı
+            if (mesai.GecKalma) return "#ff3e1d";
+
+            // Hafta sonu -> açık mavi
+            if (mesai.HaftaSonu) return "#03c3ec";
+
+            // Normal mesai -> info blue
+            return "#00cfe8";
+        }
+
+        private string GetIzinMazeretColor(IzinMazeretTalepListResponseDto talep)
+        {
+            // Onay durumuna göre renk
+            return talep.BirinciOnayDurumu switch
+            {
+                BusinessObjectLayer.Enums.PdksIslemleri.OnayDurumu.Onaylandi => "#71dd37", // Green
+                BusinessObjectLayer.Enums.PdksIslemleri.OnayDurumu.Reddedildi => "#ff3e1d", // Red
+                _ => "#ffab00" // Orange (Beklemede)
             };
         }
 
@@ -283,10 +506,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
                 {
                     await _toastService.ShowSuccessAsync($"{result.Data} tatil başarıyla senkronize edildi!");
                     CloseSyncModal();
-                    
+
                     if (SyncYear == SelectedYear)
                     {
-                        await LoadTatiller();
+                        await LoadAllData();
                     }
                 }
                 else
@@ -332,7 +555,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
                 {
                     await _toastService.ShowSuccessAsync("Tatil başarıyla silindi!");
                     CloseDeleteModal();
-                    await LoadTatiller();
+                    await LoadAllData();
                 }
                 else
                 {

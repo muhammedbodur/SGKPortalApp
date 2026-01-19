@@ -117,11 +117,29 @@ else
                                 </label>
                             </div>
 
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="filterOzel" 
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filterOzel"
                                        @bind="FilterOzelTatil" @bind:event="onchange">
                                 <label class="form-check-label" for="filterOzel">
                                     <span class="badge bg-label-warning">Özel Tatil</span>
+                                </label>
+                            </div>
+
+                            <hr class="my-3">
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="filterMesai"
+                                       @bind="FilterMesai" @bind:event="onchange">
+                                <label class="form-check-label" for="filterMesai">
+                                    <span class="badge bg-label-info">🕒 Giriş/Çıkış</span>
+                                </label>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filterIzinMazeret"
+                                       @bind="FilterIzinMazeret" @bind:event="onchange">
+                                <label class="form-check-label" for="filterIzinMazeret">
+                                    <span class="badge bg-label-secondary">📅 İzin/Mazeret</span>
                                 </label>
                             </div>
                         </div>
