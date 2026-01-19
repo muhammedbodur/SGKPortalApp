@@ -31,10 +31,61 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
         // FILTER PROPERTIES
         // ═══════════════════════════════════════════════════════
 
-        private int SelectedYear { get; set; } = DateTime.Now.Year;
-        private bool FilterSabitTatil { get; set; } = true;
-        private bool FilterDiniTatil { get; set; } = true;
-        private bool FilterOzelTatil { get; set; } = true;
+        private int _selectedYear = DateTime.Now.Year;
+        private int SelectedYear
+        {
+            get => _selectedYear;
+            set
+            {
+                if (_selectedYear != value)
+                {
+                    _selectedYear = value;
+                    _ = OnYearChanged();
+                }
+            }
+        }
+
+        private bool _filterSabitTatil = true;
+        private bool FilterSabitTatil
+        {
+            get => _filterSabitTatil;
+            set
+            {
+                if (_filterSabitTatil != value)
+                {
+                    _filterSabitTatil = value;
+                    _ = OnFilterChanged();
+                }
+            }
+        }
+
+        private bool _filterDiniTatil = true;
+        private bool FilterDiniTatil
+        {
+            get => _filterDiniTatil;
+            set
+            {
+                if (_filterDiniTatil != value)
+                {
+                    _filterDiniTatil = value;
+                    _ = OnFilterChanged();
+                }
+            }
+        }
+
+        private bool _filterOzelTatil = true;
+        private bool FilterOzelTatil
+        {
+            get => _filterOzelTatil;
+            set
+            {
+                if (_filterOzelTatil != value)
+                {
+                    _filterOzelTatil = value;
+                    _ = OnFilterChanged();
+                }
+            }
+        }
 
         // ═══════════════════════════════════════════════════════
         // UI STATE
@@ -72,15 +123,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            if (firstRender && !IsLoading)
-            {
-                await RenderCalendar();
-            }
+            // İlk render'da calendar'ı başlatmaya gerek yok
+            // LoadTatiller() içinde zaten RenderCalendar() çağrılıyor
         }
 
         private async Task LoadTatiller()
         {
             IsLoading = true;
+            StateHasChanged(); // UI'yi güncelle, loading göster
+
             try
             {
                 var result = await _resmiTatilService.GetByYearAsync(SelectedYear);
@@ -89,7 +140,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
                 {
                     Tatiller = result.Data;
                     ApplyFilters();
-                    await RenderCalendar();
                 }
                 else
                 {
@@ -103,6 +153,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
             finally
             {
                 IsLoading = false;
+                StateHasChanged(); // Loading'i kapat
+
+                // Calendar'ı render et (loading bittikten sonra)
+                await Task.Delay(100); // DOM'un güncellenmesini bekle
+                await RenderCalendar();
             }
         }
 
@@ -129,6 +184,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.ResmiTatil
         private async Task OnFilterChanged()
         {
             ApplyFilters();
+            StateHasChanged();
+            await Task.Delay(50); // DOM güncellenmesini bekle
             await RenderCalendar();
         }
 
