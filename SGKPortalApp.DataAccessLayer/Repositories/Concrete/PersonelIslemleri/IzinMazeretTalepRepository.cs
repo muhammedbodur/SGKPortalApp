@@ -2,12 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.DataAccessLayer.Context;
 using SGKPortalApp.DataAccessLayer.Repositories.Generic;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
-using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri;
 
 namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
 {

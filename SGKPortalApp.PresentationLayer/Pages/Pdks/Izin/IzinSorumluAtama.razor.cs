@@ -7,6 +7,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.PresentationLayer.Models.FormModels.PdksIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Pdks;
+using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         [Inject] private IIzinSorumluApiService _izinSorumluApiService { get; set; } = default!;
         [Inject] private IPersonelListApiService _personelListApiService { get; set; } = default!;
         [Inject] private AuthenticationStateProvider _authStateProvider { get; set; } = default!;
+        [Inject] private IToastService _toastService { get; set; } = default!;
         [Inject] private IJSRuntime _js { get; set; } = default!;
         [Inject] private ILogger<IzinSorumluAtama> _logger { get; set; } = default!;
 
@@ -96,11 +98,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                 if (int.TryParse(departmanIdClaim, out var deptId))
                 {
                     userDepartmanId = deptId;
+                    FilterDepartmanId = deptId; // Set user's departman as default filter
                 }
 
                 if (int.TryParse(servisIdClaim, out var servId))
                 {
                     userServisId = servId;
+                    FilterServisId = servId; // Set user's servis as default filter
                 }
 
                 // TÜM departman listesi (filtre ve modal için)
@@ -210,7 +214,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             ApplyFilters();
         }
 
-        private void OnDepartmanChanged(ChangeEventArgs e)
+        private async Task OnDepartmanChanged(ChangeEventArgs e)
         {
             if (string.IsNullOrEmpty(e.Value?.ToString()))
             {
@@ -218,12 +222,21 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             }
             else if (int.TryParse(e.Value.ToString(), out int deptId))
             {
+                // Yetki kontrolü: Kullanıcı sadece kendi departmanını görebilir
+                if (!CanAccessDepartman(deptId))
+                {
+                    await _toastService.ShowWarningAsync("Bu departmanı görüntüleme yetkiniz yok!");
+                    _logger.LogWarning("Yetkisiz departman erişim denemesi: {DeptId}", deptId);
+                    FilterDepartmanId = userDepartmanId;
+                    return;
+                }
+                
                 FilterDepartmanId = deptId;
             }
             ApplyFilters();
         }
 
-        private void OnServisChanged(ChangeEventArgs e)
+        private async Task OnServisChanged(ChangeEventArgs e)
         {
             if (string.IsNullOrEmpty(e.Value?.ToString()))
             {
@@ -231,6 +244,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             }
             else if (int.TryParse(e.Value.ToString(), out int servId))
             {
+                // Yetki kontrolü: Kullanıcı sadece kendi servisini görebilir
+                if (!CanAccessServis(servId))
+                {
+                    await _toastService.ShowWarningAsync("Bu servisi görüntüleme yetkiniz yok!");
+                    _logger.LogWarning("Yetkisiz servis erişim denemesi: {ServId}", servId);
+                    FilterServisId = userServisId;
+                    return;
+                }
+                
                 FilterServisId = servId;
             }
             ApplyFilters();
@@ -245,11 +267,43 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         private void ClearFilters()
         {
             SearchTerm = "";
-            FilterDepartmanId = null;
-            FilterServisId = null;
+            FilterDepartmanId = userDepartmanId; // Reset to user's departman
+            FilterServisId = userServisId; // Reset to user's servis
             FilterAktiflik = "";
             SortBy = "name-asc";
             ApplyFilters();
+        }
+
+        private bool CanAccessDepartman(int departmanId)
+        {
+            var userDeptId = GetCurrentUserDepartmanId();
+
+            // Kullanıcının departmanı yoksa (admin vs) tüm departmanlara erişebilir
+            if (userDeptId == 0)
+                return true;
+
+            return userDeptId == departmanId;
+        }
+
+        private bool CanAccessServis(int servisId)
+        {
+            var userServId = GetCurrentUserServisId();
+
+            // Kullanıcının servisi yoksa tüm servislere erişebilir
+            if (userServId == 0)
+                return true;
+
+            return userServId == servisId;
+        }
+
+        private int GetCurrentUserDepartmanId()
+        {
+            return userDepartmanId ?? 0;
+        }
+
+        private int GetCurrentUserServisId()
+        {
+            return userServisId ?? 0;
         }
 
         private async Task ExportToExcel()
@@ -342,11 +396,19 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         private async Task OpenCreateModal()
         {
             IsEditMode = false;
-            EditModel = new IzinSorumluFormModel { OnaySeviyes = 1, Aktif = true };
+            EditModel = new IzinSorumluFormModel 
+            { 
+                OnaySeviyesi = 1, 
+                Aktif = true,
+                DepartmanId = userDepartmanId, // Set user's departman as default
+                ServisId = userServisId // Set user's servis as default
+            };
             ErrorMessage = null;
             PersonelList.Clear();
             ShowModal = true;
-            await Task.CompletedTask;
+            
+            // Kullanıcının departman/servisine göre personel listesini yükle
+            await LoadPersonelForModal();
         }
 
         private async Task OpenEditModal(IzinSorumluResponseDto item)
@@ -358,7 +420,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                 DepartmanId = item.DepartmanId,
                 ServisId = item.ServisId,
                 SorumluPersonelTcKimlikNo = item.SorumluPersonelTcKimlikNo,
-                OnaySeviyes = item.OnaySeviyes,
+                OnaySeviyesi = item.OnaySeviyesi,
                 Aktif = item.Aktif,
                 Aciklama = item.Aciklama
             };
@@ -397,7 +459,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                         DepartmanId = EditModel.DepartmanId,
                         ServisId = EditModel.ServisId,
                         SorumluPersonelTcKimlikNo = EditModel.SorumluPersonelTcKimlikNo,
-                        OnaySeviyes = EditModel.OnaySeviyes,
+                        OnaySeviyesi = EditModel.OnaySeviyesi,
                         Aktif = EditModel.Aktif,
                         Aciklama = EditModel.Aciklama
                     };
@@ -422,7 +484,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                         DepartmanId = EditModel.DepartmanId,
                         ServisId = EditModel.ServisId,
                         SorumluPersonelTcKimlikNo = EditModel.SorumluPersonelTcKimlikNo,
-                        OnaySeviyes = EditModel.OnaySeviyes,
+                        OnaySeviyesi = EditModel.OnaySeviyesi,
                         Aciklama = EditModel.Aciklama
                     };
 

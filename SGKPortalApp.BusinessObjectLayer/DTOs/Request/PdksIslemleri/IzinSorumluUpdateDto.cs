@@ -32,7 +32,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri
         /// </summary>
         [Required(ErrorMessage = "Onay seviyesi seçilmelidir")]
         [Range(1, 2, ErrorMessage = "Onay seviyesi 1 veya 2 olmalıdır")]
-        public int OnaySeviyes { get; set; }
+        public int OnaySeviyesi { get; set; }
 
         /// <summary>
         /// Aktif/Pasif durum

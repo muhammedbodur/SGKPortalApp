@@ -1,0 +1,213 @@
+@page "/common/resmitatil/manage"
+@page "/common/resmitatil/manage/{id:int}"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+
+<PageTitle>@(IsEditMode ? "Tatil Düzenle" : "Yeni Tatil") - SGK Portal</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-xxl flex-grow-1 container-p-y">
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb breadcrumb-style1">
+                    <li class="breadcrumb-item">
+                        <a href="javascript:void(0);" @onclick="NavigateToHome">
+                            <i class="bx bx-home-alt me-1"></i>Ana Sayfa
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="javascript:void(0);" @onclick="NavigateToList">
+                            Resmi Tatil Takvimi
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        @(IsEditMode ? "Düzenle" : "Yeni Tatil")
+                    </li>
+                </ol>
+            </nav>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        <i class="bx @(IsEditMode ? "bx-edit" : "bx-plus-circle") me-2"></i>
+                        @(IsEditMode ? "Tatil Düzenle" : "Yeni Tatil Ekle")
+                    </h4>
+                    <p class="text-muted mb-0">
+                        @(IsEditMode ? "Tatil bilgilerini güncelleyin" : "Yeni bir resmi tatil oluşturun")
+                    </p>
+                </div>
+
+                <button class="btn btn-outline-secondary" @onclick="NavigateToList">
+                    <i class="bx bx-arrow-back me-1"></i>Geri Dön
+                </button>
+            </div>
+
+            @if (IsLoading)
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Yükleniyor...</span>
+                        </div>
+                        <p class="text-muted">@(IsEditMode ? "Tatil bilgileri yükleniyor..." : "Hazırlanıyor...")</p>
+                    </div>
+                </div>
+            }
+            else if (NotFound)
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="bx bx-error-circle display-1 text-danger mb-3"></i>
+                        <h5 class="mb-3">Tatil Bulunamadı</h5>
+                        <p class="text-muted mb-4">
+                            Aradığınız tatil bulunamadı veya silinmiş olabilir.
+                        </p>
+                        <button class="btn btn-primary" @onclick="NavigateToList">
+                            <i class="bx bx-calendar me-1"></i>Takvime Dön
+                        </button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    <div class="col-lg-8 col-xl-6 mx-auto">
+                        <div class="card">
+                            <div class="card-header d-flex align-items-center justify-content-between">
+                                <h5 class="mb-0">
+                                    <i class="bx bx-calendar me-2"></i>Tatil Bilgileri
+                                </h5>
+                                @if (IsEditMode)
+                                {
+                                    <span class="badge bg-label-info">ID: @Id</span>
+                                }
+                            </div>
+
+                            <div class="card-body">
+                                <EditForm Model="@FormModel" OnValidSubmit="HandleSubmit">
+                                    <DataAnnotationsValidator />
+
+                                    <div class="mb-3">
+                                        <label class="form-label required">
+                                            <i class="bx bx-text me-1"></i>Tatil Adı
+                                        </label>
+                                        <InputText @bind-Value="FormModel.TatilAdi"
+                                                   class="form-control"
+                                                   placeholder="Örn: Cumhuriyet Bayramı"
+                                                   maxlength="100"
+                                                   disabled="@IsSaving" />
+                                        <ValidationMessage For="@(() => FormModel.TatilAdi)" class="text-danger small mt-1" />
+                                        <div class="form-text">
+                                            @FormModel.TatilAdi.Length / 100 karakter
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label required">
+                                            <i class="bx bx-calendar me-1"></i>Tarih
+                                        </label>
+                                        <InputDate @bind-Value="FormModel.Tarih"
+                                                   class="form-control"
+                                                   disabled="@IsSaving" />
+                                        <ValidationMessage For="@(() => FormModel.Tarih)" class="text-danger small mt-1" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label required">
+                                            <i class="bx bx-category me-1"></i>Tatil Tipi
+                                        </label>
+                                        <InputSelect @bind-Value="FormModel.TatilTipi"
+                                                     class="form-select"
+                                                     disabled="@IsSaving">
+                                            <option value="@TatilTipi.SabitTatil">Sabit Tatil</option>
+                                            <option value="@TatilTipi.DiniTatil">Dini Tatil</option>
+                                            <option value="@TatilTipi.OzelTatil">Özel Tatil</option>
+                                        </InputSelect>
+                                        <ValidationMessage For="@(() => FormModel.TatilTipi)" class="text-danger small mt-1" />
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            <InputCheckbox @bind-Value="FormModel.YariGun"
+                                                           class="form-check-input"
+                                                           id="yariGunSwitch"
+                                                           disabled="@IsSaving" />
+                                            <label class="form-check-label" for="yariGunSwitch">
+                                                Yarım Gün Tatil
+                                            </label>
+                                        </div>
+                                        <div class="form-text">
+                                            Yarım gün tatil olarak işaretlenirse, sadece öğleden sonra tatil sayılır.
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <i class="bx bx-note me-1"></i>Açıklama
+                                        </label>
+                                        <InputTextArea @bind-Value="FormModel.Aciklama"
+                                                       class="form-control"
+                                                       rows="3"
+                                                       placeholder="Tatil hakkında ek bilgiler..."
+                                                       maxlength="500"
+                                                       disabled="@IsSaving" />
+                                        <div class="form-text">
+                                            @(FormModel.Aciklama?.Length ?? 0) / 500 karakter
+                                        </div>
+                                    </div>
+
+                                    @if (IsEditMode && FormModel.OtomatikSenkronize)
+                                    {
+                                        <div class="alert alert-warning d-flex align-items-center mb-4">
+                                            <i class="bx bx-info-circle fs-4 me-2"></i>
+                                            <div class="flex-grow-1">
+                                                <strong>Uyarı:</strong> Bu tatil otomatik senkronizasyon ile oluşturulmuştur.
+                                                Değişiklikler bir sonraki senkronizasyonda kaybolabilir.
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <ValidationSummary class="alert alert-danger" />
+
+                                    <div class="d-flex gap-2 justify-content-end pt-3 border-top">
+                                        <button type="button"
+                                                class="btn btn-outline-secondary"
+                                                @onclick="NavigateToList"
+                                                disabled="@IsSaving">
+                                            <i class="bx bx-x me-1"></i>İptal
+                                        </button>
+
+                                        <button type="submit"
+                                                class="btn btn-primary"
+                                                disabled="@IsSaving">
+                                            @if (IsSaving)
+                                            {
+                                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                            }
+                                            else
+                                            {
+                                                <i class="bx @(IsEditMode ? "bx-save" : "bx-plus") me-1"></i>
+                                            }
+                                            @(IsEditMode ? "Güncelle" : "Kaydet")
+                                        </button>
+                                    </div>
+                                </EditForm>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+        </div>
+    </FieldPermissionScope>
+}

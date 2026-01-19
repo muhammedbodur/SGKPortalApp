@@ -134,7 +134,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     x => x.Servis!,
                     x => x.SorumluPersonel!);
 
-                var dtos = entities.OrderBy(x => x.OnaySeviyes).Select(MapToDto).ToList();
+                var dtos = entities.OrderBy(x => x.OnaySeviyesi).Select(MapToDto).ToList();
                 return ApiResponseDto<List<IzinSorumluResponseDto>>.SuccessResult(dtos);
             }
             catch (Exception ex)
@@ -161,7 +161,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     x => x.Aktif &&
                         x.DepartmanId == request.DepartmanId &&
                         x.ServisId == request.ServisId &&
-                        x.OnaySeviyes == request.OnaySeviyes);
+                        x.OnaySeviyesi == request.OnaySeviyesi);
 
                 if (existing.Any())
                     return ApiResponseDto<IzinSorumluResponseDto>.ErrorResult("Bu departman/servis ve onay seviyesi için zaten sorumlu atanmış");
@@ -172,7 +172,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     DepartmanId = request.DepartmanId,
                     ServisId = request.ServisId,
                     SorumluPersonelTcKimlikNo = request.SorumluPersonelTcKimlikNo,
-                    OnaySeviyes = request.OnaySeviyes,
+                    OnaySeviyesi = request.OnaySeviyesi,
                     Aktif = true,
                     Aciklama = request.Aciklama,
                     EklenmeTarihi = DateTime.Now
@@ -219,7 +219,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 entity.DepartmanId = request.DepartmanId;
                 entity.ServisId = request.ServisId;
                 entity.SorumluPersonelTcKimlikNo = request.SorumluPersonelTcKimlikNo;
-                entity.OnaySeviyes = request.OnaySeviyes;
+                entity.OnaySeviyesi = request.OnaySeviyesi;
                 entity.Aktif = request.Aktif;
                 entity.Aciklama = request.Aciklama;
                 entity.DuzenlenmeTarihi = DateTime.Now;
@@ -328,7 +328,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 SorumluPersonelTcKimlikNo = entity.SorumluPersonelTcKimlikNo,
                 SorumluPersonelAdSoyad = entity.SorumluPersonel?.AdSoyad ?? "",
                 SorumluPersonelSicilNo = entity.SorumluPersonel?.SicilNo ?? 0,
-                OnaySeviyes = entity.OnaySeviyes,
+                OnaySeviyesi = entity.OnaySeviyesi,
                 Aktif = entity.Aktif,
                 Aciklama = entity.Aciklama,
                 EklenmeTarihi = entity.EklenmeTarihi,

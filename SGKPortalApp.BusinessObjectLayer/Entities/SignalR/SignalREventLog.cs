@@ -8,6 +8,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SignalR
     /// <summary>
     /// SignalR Event Log Entity
     /// Gönderilen tüm SignalR mesajlarının kaydını tutar
+    /// Tablo adı: SIG_EventLogs (Configuration'da tanımlanacak)
     /// 
     /// Amaç:
     /// - Kime mesaj gönderildi
@@ -15,7 +16,6 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SignalR
     /// - Ne amaçla gönderildi
     /// - Ulaştı mı (Faz 2 için ACK desteği)
     /// </summary>
-    [Table("SignalREventLogs")]
     public class SignalREventLog
     {
         [Key]

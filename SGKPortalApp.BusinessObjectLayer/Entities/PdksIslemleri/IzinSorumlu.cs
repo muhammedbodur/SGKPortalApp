@@ -9,8 +9,8 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri
     /// İzin/Mazeret Talepleri için Sorumlu Atama
     /// Departman ve/veya Servis bazında izin onay sorumlusu tanımlanır
     /// İki seviye onay yapısı vardır: 1.Onayci (Yönetici) ve 2.Onayci (Üst Yönetim)
+    /// Tablo adı: PDKS_IzinSorumlu (Configuration'da tanımlanacak)
     /// </summary>
-    [Table("IzinSorumlu", Schema = "PdksIslemleri")]
     public class IzinSorumlu : AuditableEntity
     {
         [Key]
@@ -57,7 +57,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri
         /// Onay seviyesi: 1 = Birinci Onayci (Yönetici/Müdür), 2 = İkinci Onayci (Üst Yönetim)
         /// </summary>
         [Required]
-        public int OnaySeviyes { get; set; } = 1;
+        public int OnaySeviyesi { get; set; } = 1;
 
         // ═══════════════════════════════════════════════════════
         // DURUM BİLGİSİ

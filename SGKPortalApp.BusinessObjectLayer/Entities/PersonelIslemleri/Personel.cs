@@ -8,6 +8,7 @@ using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
 {
@@ -39,10 +40,10 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
 
         /// <summary>
         /// NickName - Cihazda görünecek kısa isim
-        /// Otomatik oluşturulur: Max 12 karakter, büyük harf, Türkçe karakter yok
+        /// Otomatik oluşturulur: Max 8 karakter, büyük harf, Türkçe karakter yok
         /// </summary>
         [Required]
-        [StringLength(12)]
+        [StringLength(8)]
         public string NickName { get; set; } = string.Empty;
 
         public int PersonelKayitNo { get; set; }

@@ -49,7 +49,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco
         /// Otomatik oluşturulur: Max 12 karakter, büyük harf, Türkçe karakter yok
         /// </summary>
         [Required]
-        [StringLength(12)]
+        [StringLength(8)]
         public string NickName { get; set; } = string.Empty;
 
         /// <summary>

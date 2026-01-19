@@ -1,6 +1,6 @@
 using AutoMapper;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
-using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri;
 
 namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
 {

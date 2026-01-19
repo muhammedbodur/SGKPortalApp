@@ -403,10 +403,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
         {
             return method switch
             {
-                VerifyMethod.Password => "Şifre",
-                VerifyMethod.Fingerprint => "Parmak İzi",
                 VerifyMethod.Card => "Kart",
-                VerifyMethod.Face => "Yüz Tanıma",
                 _ => "Bilinmiyor"
             };
         }
@@ -417,10 +414,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.ZKTeco
             {
                 InOutMode.CheckIn => "Giriş",
                 InOutMode.CheckOut => "Çıkış",
-                InOutMode.BreakOut => "Mola Başlangıç",
-                InOutMode.BreakIn => "Mola Bitiş",
-                InOutMode.OTIn => "Mesai Başlangıç",
-                InOutMode.OTOut => "Mesai Bitiş",
                 _ => "Bilinmiyor"
             };
         }

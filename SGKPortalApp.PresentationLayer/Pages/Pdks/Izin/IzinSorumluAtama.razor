@@ -278,8 +278,8 @@ else
                                             <td>@item.SorumluPersonelAdSoyad</td>
                                             <td class="text-center">@item.SorumluPersonelSicilNo</td>
                                             <td class="text-center">
-                                            <span class="badge @(item.OnaySeviyes == 1 ? "bg-label-primary" : "bg-label-success")">
-                                                @item.OnaySeviesiAciklama
+                                            <span class="badge @(item.OnaySeviyesi == 1 ? "bg-label-primary" : "bg-label-success")">
+                                                @item.OnaySeviyesiAciklama
                                             </span>
                                             </td>
                                             <td class="text-center">
@@ -350,29 +350,51 @@ else
                                 <button type="button" class="btn-close" @onclick="CloseModal"></button>
                             </div>
                             <div class="modal-body">
-                                <div class="mb-3">
-                                    <label class="form-label">Departman</label>
-                                    <select class="form-select" value="@EditModel.DepartmanId" @onchange="OnModalDepartmanChanged">
-                                        <option value="">Tüm Departmanlar</option>
-                                        @foreach (var dep in DepartmanList)
-                                        {
-                                            <option value="@dep.DepartmanId">@dep.DepartmanAdi</option>
-                                        }
-                                    </select>
-                                    <small class="text-muted">Boş bırakılırsa tüm departmanlar için geçerli olur. Seçim yapıldığında personel listesi filtrelenir.</small>
-                                </div>
+                                @if (IsFieldVisibleInList("DEPARTMANID"))
+                                {
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <i class="bx bx-briefcase me-1"></i>Departman
+                                            @if (!CanEditFieldInList("DEPARTMANID"))
+                                            {
+                                                <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
+                                                    <i class="bx bx-lock-alt"></i>
+                                                </span>
+                                            }
+                                        </label>
+                                        <select class="form-select" value="@EditModel.DepartmanId" @onchange="OnModalDepartmanChanged" disabled="@IsFieldDisabledInList("DEPARTMANID")">
+                                            <option value="">Tüm Departmanlar</option>
+                                            @foreach (var dep in DepartmanList)
+                                            {
+                                                <option value="@dep.DepartmanId">@dep.DepartmanAdi</option>
+                                            }
+                                        </select>
+                                        <small class="text-muted">Boş bırakılırsa tüm departmanlar için geçerli olur. Seçim yapıldığında personel listesi filtrelenir.</small>
+                                    </div>
+                                }
 
-                                <div class="mb-3">
-                                    <label class="form-label">Servis</label>
-                                    <select class="form-select" value="@EditModel.ServisId" @onchange="OnModalServisChanged">
-                                        <option value="">Tüm Servisler</option>
-                                        @foreach (var srv in ServisList)
-                                        {
-                                            <option value="@srv.ServisId">@srv.ServisAdi</option>
-                                        }
-                                    </select>
-                                    <small class="text-muted">Boş bırakılırsa seçilen departmandaki tüm servisler için geçerli olur. Seçim yapıldığında personel listesi filtrelenir.</small>
-                                </div>
+                                @if (IsFieldVisibleInList("SERVISID"))
+                                {
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            <i class="bx bx-sitemap me-1"></i>Servis
+                                            @if (!CanEditFieldInList("SERVISID"))
+                                            {
+                                                <span class="badge bg-label-warning ms-1" title="Sadece görüntüleme yetkiniz var">
+                                                    <i class="bx bx-lock-alt"></i>
+                                                </span>
+                                            }
+                                        </label>
+                                        <select class="form-select" value="@EditModel.ServisId" @onchange="OnModalServisChanged" disabled="@IsFieldDisabledInList("SERVISID")">
+                                            <option value="">Tüm Servisler</option>
+                                            @foreach (var srv in ServisList)
+                                            {
+                                                <option value="@srv.ServisId">@srv.ServisAdi</option>
+                                            }
+                                        </select>
+                                        <small class="text-muted">Boş bırakılırsa seçilen departmandaki tüm servisler için geçerli olur. Seçim yapıldığında personel listesi filtrelenir.</small>
+                                    </div>
+                                }
 
                                 <div class="mb-3">
                                     <label class="form-label">Sorumlu Personel *</label>
@@ -397,7 +419,7 @@ else
 
                                 <div class="mb-3">
                                     <label class="form-label">Onay Seviyesi *</label>
-                                    <select class="form-select" @bind="EditModel.OnaySeviyes">
+                                    <select class="form-select" @bind="EditModel.OnaySeviyesi">
                                         <option value="1">Birinci Onayci (Yönetici/Müdür)</option>
                                         <option value="2">İkinci Onayci (Üst Yönetim)</option>
                                     </select>

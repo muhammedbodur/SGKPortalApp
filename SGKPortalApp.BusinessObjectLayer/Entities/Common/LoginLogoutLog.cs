@@ -4,7 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
 {
-    [Table("CMN_LoginLogoutLogs")]
+    /// <summary>
+    /// Login/Logout Log Entity
+    /// Tablo adı: CMN_LoginLogoutLogs (Configuration'da tanımlanacak)
+    /// </summary>
     public class LoginLogoutLog : BaseEntity
     {
         [Key]

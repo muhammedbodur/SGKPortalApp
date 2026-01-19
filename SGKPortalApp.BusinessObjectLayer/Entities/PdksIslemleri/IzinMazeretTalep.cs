@@ -1,10 +1,11 @@
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
+namespace SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri
 {
     /// <summary>
     /// İzin ve Mazeret talepleri - Tek tabloda birleştirilmiş yapı

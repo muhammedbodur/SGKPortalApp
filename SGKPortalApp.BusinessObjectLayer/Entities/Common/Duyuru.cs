@@ -5,7 +5,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
 {
-    [Table("COM_Duyurular")]
+    /// <summary>
+    /// Duyuru Entity
+    /// Tablo adı: CMN_Duyurular (Configuration'da tanımlanacak)
+    /// </summary>
     public class Duyuru : AuditableEntity
     {
         [Key]

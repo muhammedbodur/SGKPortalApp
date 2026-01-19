@@ -47,12 +47,12 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
         /// <summary>
         /// Onay seviyesi: 1 = Birinci Onayci, 2 = İkinci Onayci
         /// </summary>
-        public int OnaySeviyes { get; set; }
+        public int OnaySeviyesi { get; set; }
 
         /// <summary>
         /// Onay seviyesi açıklaması
         /// </summary>
-        public string OnaySeviesiAciklama => OnaySeviyes == 1 ? "Birinci Onayc" : "İkinci Onayc";
+        public string OnaySeviyesiAciklama => OnaySeviyesi == 1 ? "Birinci Onaycı" : "İkinci Onaycı";
 
         /// <summary>
         /// Aktif/Pasif durum

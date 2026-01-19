@@ -1,9 +1,9 @@
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
-using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri;
 
 namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri
 {

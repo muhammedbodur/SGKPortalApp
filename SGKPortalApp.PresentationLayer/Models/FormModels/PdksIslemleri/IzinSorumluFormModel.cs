@@ -6,7 +6,7 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels.PdksIslemleri
         public int? DepartmanId { get; set; }
         public int? ServisId { get; set; }
         public string SorumluPersonelTcKimlikNo { get; set; } = string.Empty;
-        public int OnaySeviyes { get; set; } = 1;
+        public int OnaySeviyesi { get; set; } = 1;
         public bool Aktif { get; set; } = true;
         public string? Aciklama { get; set; }
     }

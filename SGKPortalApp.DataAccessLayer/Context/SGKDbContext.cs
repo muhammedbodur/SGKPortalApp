@@ -7,6 +7,7 @@ using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using SGKPortalApp.DataAccessLayer.Configurations.Common;
 using SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri;
+using SGKPortalApp.DataAccessLayer.Configurations.PdksIslemleri;
 using SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Configurations.SignalR;
 using SGKPortalApp.DataAccessLayer.Configurations.ZKTeco;
@@ -31,6 +32,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<UserDomainMapping> UserDomainMappings { get; set; }
         public DbSet<LoginLogoutLog> LoginLogoutLogs { get; set; }
         public DbSet<HizmetBinasi> HizmetBinalari { get; set; }
+        public DbSet<ResmiTatil> ResmiTatiller { get; set; }
         #endregion
 
         #region Personel İşlemleri
@@ -109,6 +111,11 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.ApplyConfiguration(new ModulConfiguration());
             modelBuilder.ApplyConfiguration(new ModulControllerConfiguration());
             modelBuilder.ApplyConfiguration(new ModulControllerIslemConfiguration());
+            modelBuilder.ApplyConfiguration(new DuyuruConfiguration());
+            modelBuilder.ApplyConfiguration(new GununMenusuConfiguration());
+            modelBuilder.ApplyConfiguration(new OnemliLinkConfiguration());
+            modelBuilder.ApplyConfiguration(new SikKullanilanProgramConfiguration());
+            modelBuilder.ApplyConfiguration(new ResmiTatilConfiguration());
 
             // Personel İşlemleri
             modelBuilder.ApplyConfiguration(new DepartmanConfiguration());
@@ -126,6 +133,9 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.ApplyConfiguration(new PersonelCezaConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelEngelConfiguration());
             modelBuilder.ApplyConfiguration(new IzinMazeretTalepConfiguration());
+
+            // Pdks İşlemleri
+            modelBuilder.ApplyConfiguration(new IzinSorumluConfiguration());
 
             // Sıramatik İşlemleri
             modelBuilder.ApplyConfiguration(new BankoConfiguration());

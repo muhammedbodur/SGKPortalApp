@@ -4,7 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
 {
-    [Table("COM_SikKullanilanProgramlar")]
+    /// <summary>
+    /// Sık Kullanılan Program Entity
+    /// Tablo adı: CMN_SikKullanilanProgramlar (Configuration'da tanımlanacak)
+    /// </summary>
     public class SikKullanilanProgram : AuditableEntity
     {
         [Key]

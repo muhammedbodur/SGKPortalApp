@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;

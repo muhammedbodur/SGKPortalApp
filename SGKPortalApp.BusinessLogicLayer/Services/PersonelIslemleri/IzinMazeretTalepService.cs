@@ -10,6 +10,7 @@ using SGKPortalApp.BusinessObjectLayer.Exceptions;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 using SGKPortalApp.Common.Extensions;
+using SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 {

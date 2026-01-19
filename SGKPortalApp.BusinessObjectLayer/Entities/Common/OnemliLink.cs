@@ -4,7 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
 {
-    [Table("COM_OnemliLinkler")]
+    /// <summary>
+    /// Önemli Link Entity
+    /// Tablo adı: CMN_OnemliLinkler (Configuration'da tanımlanacak)
+    /// </summary>
     public class OnemliLink : AuditableEntity
     {
         [Key]

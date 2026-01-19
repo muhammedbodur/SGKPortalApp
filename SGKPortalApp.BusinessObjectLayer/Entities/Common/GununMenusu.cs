@@ -5,7 +5,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
 {
-    [Table("COM_GununMenusu")]
+    /// <summary>
+    /// Günün Menüsü Entity
+    /// Tablo adı: CMN_GununMenusu (Configuration'da tanımlanacak)
+    /// </summary>
     public class GununMenusu : AuditableEntity
     {
         [Key]

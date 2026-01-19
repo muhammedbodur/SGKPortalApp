@@ -22,7 +22,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri
         [StringLength(50, ErrorMessage = "EnrollNumber en fazla 50 karakter olabilir")]
         public string EnrollNumber { get; set; } = string.Empty;
 
-        [StringLength(12, ErrorMessage = "NickName en fazla 12 karakter olabilir")]
+        [StringLength(8, ErrorMessage = "NickName en fazla 8 karakter olabilir")]
         public string? NickName { get; set; }
 
         [StringLength(500, ErrorMessage = "Notlar en fazla 500 karakter olabilir")]
