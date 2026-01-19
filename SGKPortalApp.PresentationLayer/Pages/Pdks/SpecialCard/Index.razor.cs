@@ -1,14 +1,21 @@
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
+using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,6 +27,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
         [Inject] private IZKTecoDeviceApiService DeviceApiService { get; set; } = default!;
         [Inject] private IHizmetBinasiApiService HizmetBinasiApiService { get; set; } = default!;
         [Inject] private IToastService ToastService { get; set; } = default!;
+        [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
         private List<SpecialCardResponseDto> specialCards = new();
         private List<SpecialCardResponseDto> filteredCards = new();
@@ -31,6 +39,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
         private bool showAddForm = false;
         private bool showEditForm = false;
         private bool showDeviceSelectModal = false;
+
+        // Export state
+        private bool IsExporting { get; set; } = false;
+        private string ExportType { get; set; } = string.Empty;
 
         private CardModel newCard = new() { CardType = CardType.ViziteKarti };
         private CardModel editCard = new();
@@ -49,6 +61,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
 
         protected override async Task OnInitializedAsync()
         {
+            QuestPDF.Settings.License = LicenseType.Community;
             await LoadHizmetBinalari();
             await LoadCards();
             await LoadDevices();
@@ -406,6 +419,161 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.SpecialCard
                 CardType.MisafirKarti => "bg-info",
                 _ => "bg-secondary"
             };
+        }
+
+        private string GetCardTypeText(CardType cardType)
+        {
+            return cardType switch
+            {
+                CardType.ViziteKarti => "Vizite Kartı",
+                CardType.SaatlikIzinKarti => "Saatlik İzin Kartı",
+                CardType.GorevKarti => "Görev Kartı",
+                CardType.MisafirKarti => "Misafir Kartı",
+                _ => "Bilinmiyor"
+            };
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // EXPORT METHODS
+        // ═══════════════════════════════════════════════════════
+
+        private async Task ExportToExcel()
+        {
+            IsExporting = true;
+            ExportType = "excel";
+
+            try
+            {
+                using var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add("Özel Kartlar");
+
+                // Header
+                worksheet.Cell(1, 1).Value = "Kart Adı";
+                worksheet.Cell(1, 2).Value = "Kart Tipi";
+                worksheet.Cell(1, 3).Value = "NickName";
+                worksheet.Cell(1, 4).Value = "Hizmet Binası";
+                worksheet.Cell(1, 5).Value = "Kart Numarası";
+                worksheet.Cell(1, 6).Value = "EnrollNumber";
+                worksheet.Cell(1, 7).Value = "Notlar";
+
+                // Style header
+                var headerRange = worksheet.Range(1, 1, 1, 7);
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.LightBlue;
+
+                // Data
+                int row = 2;
+                foreach (var card in filteredCards)
+                {
+                    worksheet.Cell(row, 1).Value = card.CardName;
+                    worksheet.Cell(row, 2).Value = GetCardTypeText(card.CardType);
+                    worksheet.Cell(row, 3).Value = card.NickName;
+                    worksheet.Cell(row, 4).Value = card.HizmetBinasiAdi ?? "-";
+                    worksheet.Cell(row, 5).Value = card.CardNumber.ToString();
+                    worksheet.Cell(row, 6).Value = card.EnrollNumber;
+                    worksheet.Cell(row, 7).Value = card.Notes ?? "-";
+                    row++;
+                }
+
+                worksheet.Columns().AdjustToContents();
+
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+                var fileName = $"OzelKartlar_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+                await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(content), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                await ToastService.ShowSuccessAsync("Excel dosyası başarıyla indirildi!");
+            }
+            catch (Exception ex)
+            {
+                await ToastService.ShowErrorAsync($"Excel oluşturulurken hata: {ex.Message}");
+            }
+            finally
+            {
+                IsExporting = false;
+                ExportType = string.Empty;
+            }
+        }
+
+        private async Task ExportToPdf()
+        {
+            IsExporting = true;
+            ExportType = "pdf";
+
+            try
+            {
+                var document = Document.Create(container =>
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4.Landscape());
+                        page.Margin(2, Unit.Centimetre);
+                        page.DefaultTextStyle(x => x.FontSize(9));
+
+                        page.Header().Text("Özel Kartlar Listesi").FontSize(18).Bold();
+
+                        page.Content().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(3);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(3);
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Kart Adı").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Kart Tipi").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("NickName").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Hizmet Binası").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Kart No").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Enroll No").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten2).Padding(5).Text("Notlar").Bold();
+                            });
+
+                            foreach (var card in filteredCards)
+                            {
+                                table.Cell().Padding(3).Text(card.CardName);
+                                table.Cell().Padding(3).Text(GetCardTypeText(card.CardType));
+                                table.Cell().Padding(3).Text(card.NickName);
+                                table.Cell().Padding(3).Text(card.HizmetBinasiAdi ?? "-");
+                                table.Cell().Padding(3).Text(card.CardNumber.ToString());
+                                table.Cell().Padding(3).Text(card.EnrollNumber);
+                                table.Cell().Padding(3).Text(card.Notes ?? "-");
+                            }
+                        });
+
+                        page.Footer().AlignCenter().Text(text =>
+                        {
+                            text.Span("Sayfa ");
+                            text.CurrentPageNumber();
+                            text.Span(" / ");
+                            text.TotalPages();
+                        });
+                    });
+                });
+
+                var pdfBytes = document.GeneratePdf();
+                var fileName = $"OzelKartlar_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+
+                await JSRuntime.InvokeVoidAsync("downloadFile", fileName, Convert.ToBase64String(pdfBytes), "application/pdf");
+                await ToastService.ShowSuccessAsync("PDF dosyası başarıyla indirildi!");
+            }
+            catch (Exception ex)
+            {
+                await ToastService.ShowErrorAsync($"PDF oluşturulurken hata: {ex.Message}");
+            }
+            finally
+            {
+                IsExporting = false;
+                ExportType = string.Empty;
+            }
         }
 
         private class CardModel

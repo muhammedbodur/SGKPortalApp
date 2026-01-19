@@ -26,9 +26,41 @@ else
             <p class="text-muted">Cihazdan çekilen kayıtlar otomatik olarak personel bilgileri ile eşleştirilir</p>
         </div>
         <div class="col-auto">
-            <button class="btn btn-primary" @onclick="() => LoadRecords()" disabled="@(selectedDeviceId == 0 || isLoading)">
-                <i class="bx bx-refresh"></i> Yenile
-            </button>
+            <div class="d-flex gap-2">
+                @if (IsActionVisible("EXCEL_EXPORT"))
+                {
+                    <button class="btn btn-success" @onclick="ExportToExcel" disabled="@(selectedDeviceId == 0 || IsExporting || filteredRecords.Count == 0)">
+                        @if (IsExporting && ExportType == "excel")
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        else
+                        {
+                            <i class="bx bx-download me-1"></i>
+                        }
+                        Excel
+                    </button>
+                }
+
+                @if (IsActionVisible("PDF_EXPORT"))
+                {
+                    <button class="btn btn-danger" @onclick="ExportToPdf" disabled="@(selectedDeviceId == 0 || IsExporting || filteredRecords.Count == 0)">
+                        @if (IsExporting && ExportType == "pdf")
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        else
+                        {
+                            <i class="bx bxs-file-pdf me-1"></i>
+                        }
+                        PDF
+                    </button>
+                }
+
+                <button class="btn btn-primary" @onclick="() => LoadRecords()" disabled="@(selectedDeviceId == 0 || isLoading)">
+                    <i class="bx bx-refresh"></i> Yenile
+                </button>
+            </div>
         </div>
     </div>
 
