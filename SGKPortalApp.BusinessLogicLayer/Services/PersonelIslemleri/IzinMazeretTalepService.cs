@@ -638,13 +638,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
                 var taleplerDto = MapToListDto(items);
 
-                return ApiResponseDto<(List<IzinMazeretTalepListResponseDto>, int)>
-                    .SuccessResult((taleplerDto, totalCount), "Filtrelenmiş talepler başarıyla getirildi");
+                return ApiResponseDto<(List<IzinMazeretTalepListResponseDto> Items, int TotalCount)>
+                    .SuccessResult((Items: taleplerDto, TotalCount: totalCount), "Filtrelenmiş talepler başarıyla getirildi");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Filtrelenmiş talepler getirilirken hata oluştu");
-                return ApiResponseDto<(List<IzinMazeretTalepListResponseDto>, int)>
+                return ApiResponseDto<(List<IzinMazeretTalepListResponseDto> Items, int TotalCount)>
                     .ErrorResult("Talepler getirilirken bir hata oluştu", ex.Message);
             }
         }
