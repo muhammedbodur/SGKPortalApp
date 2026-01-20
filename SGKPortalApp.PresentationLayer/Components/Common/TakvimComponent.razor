@@ -378,8 +378,14 @@ else
             {
                 foreach (var talep in IzinMazeretTalepleri)
                 {
-                    if (talep.Turu == IzinMazeretTipi.Mazeret && talep.MazeretTarihi.HasValue)
+                    if (talep.MazeretTarihi.HasValue)
                     {
+                        var saatDilimi = "-";
+                        if (talep.BaslangicSaati.HasValue && talep.BitisSaati.HasValue)
+                        {
+                            saatDilimi = $"{FormatTimeSpan(talep.BaslangicSaati)}-{FormatTimeSpan(talep.BitisSaati)}";
+                        }
+
                         events.Add(new
                         {
                             id = $"mazeret-{talep.IzinMazeretTalepId}",
@@ -392,7 +398,7 @@ else
                             {
                                 eventType = "mazeret",
                                 tur = talep.TuruAdi,
-                                saatDilimi = talep.SaatDilimi
+                                saatDilimi = saatDilimi
                             }
                         });
                     }

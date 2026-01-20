@@ -159,7 +159,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             // Validasyon
             if (SelectedIzinTuru != null && !SelectedIzinTuru.PlanliIzinMi)
             {
-                if (!Request.MazeretTarihi.HasValue || string.IsNullOrWhiteSpace(Request.SaatDilimi))
+                if (!Request.MazeretTarihi.HasValue || !Request.BaslangicSaati.HasValue || !Request.BitisSaati.HasValue)
                 {
                     await ToastService.ShowWarningAsync("Mazeret için tarih ve saat dilimi zorunludur");
                     return;
