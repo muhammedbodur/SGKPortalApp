@@ -196,13 +196,16 @@ else
                                                         <button class="btn btn-outline-primary" @onclick="() => ViewDetails(talep.IzinMazeretTalepId)" title="Detay">
                                                             <i class="bx bx-show"></i>
                                                         </button>
-                                                        @if (talep.BirinciOnayDurumuAdi == "Beklemede")
+                                                        @if (CanDeleteTalep(talep))
                                                         {
                                                             <button class="btn btn-outline-warning" @onclick="() => EditTalep(talep.IzinMazeretTalepId)" title="Düzenle">
                                                                 <i class="bx bx-edit"></i>
                                                             </button>
-                                                            <button class="btn btn-outline-danger" @onclick="() => CancelTalep(talep.IzinMazeretTalepId)" title="İptal Et">
+                                                            <button class="btn btn-outline-info" @onclick="() => CancelTalep(talep.IzinMazeretTalepId)" title="İptal Et">
                                                                 <i class="bx bx-x"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-danger" @onclick="() => DeleteTalep(talep.IzinMazeretTalepId)" title="Sil">
+                                                                <i class="bx bx-trash"></i>
                                                             </button>
                                                         }
                                                     </div>

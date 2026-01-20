@@ -22,7 +22,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri
         /// <summary>
         /// ID'ye göre talep getir
         /// </summary>
-        Task<ApiResponseDto<IzinMazeretTalepResponseDto>> GetByIdAsync(int id);
+        /// <param name="id">Talep ID</param>
+        /// <param name="currentUserTc">İsteği yapan kullanıcının TC'si (ownership kontrolü için)</param>
+        Task<ApiResponseDto<IzinMazeretTalepResponseDto>> GetByIdAsync(int id, string? currentUserTc = null);
 
         /// <summary>
         /// Yeni izin/mazeret talebi oluştur
@@ -34,12 +36,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri
         /// İzin/mazeret talebini güncelle
         /// Sadece beklemedeki talepler güncellenebilir
         /// </summary>
-        Task<ApiResponseDto<IzinMazeretTalepResponseDto>> UpdateAsync(int id, IzinMazeretTalepUpdateRequestDto request);
+        /// <param name="id">Talep ID</param>
+        /// <param name="request">Güncelleme bilgileri</param>
+        /// <param name="currentUserTc">İsteği yapan kullanıcının TC'si (ownership kontrolü için)</param>
+        Task<ApiResponseDto<IzinMazeretTalepResponseDto>> UpdateAsync(int id, IzinMazeretTalepUpdateRequestDto request, string? currentUserTc = null);
 
         /// <summary>
         /// İzin/mazeret talebini sil (soft delete)
         /// </summary>
-        Task<ApiResponseDto<bool>> DeleteAsync(int id);
+        /// <param name="id">Talep ID</param>
+        /// <param name="currentUserTc">İsteği yapan kullanıcının TC'si (ownership kontrolü için)</param>
+        Task<ApiResponseDto<bool>> DeleteAsync(int id, string? currentUserTc = null);
 
         /// <summary>
         /// İzin/mazeret talebini iptal et (talep sahibi iptal edebilir)
