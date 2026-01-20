@@ -162,6 +162,49 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             }
         }
 
+        private async Task DeleteTalep(int id)
+        {
+            var confirmed = await _js.InvokeAsync<bool>("confirm",
+                "Bu talebi kalıcı olarak silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz!");
+            if (!confirmed) return;
+
+            try
+            {
+                var result = await _izinMazeretTalepService.DeleteAsync(id);
+
+                if (result.Success)
+                {
+                    await ShowToast("success", result.Message ?? "Talep başarıyla silindi");
+                    await LoadTalepler();
+                }
+                else
+                {
+                    await ShowToast("error", result.Message ?? "Talep silinemedi");
+                }
+            }
+            catch
+            {
+                await ShowToast("error", "Talep silinirken bir hata oluştu");
+            }
+        }
+
+        private bool CanDeleteTalep(IzinMazeretTalepListResponseDto talep)
+        {
+            // Tek onaycı: BirinciOnay Beklemede ise silebilir
+            // İki onaycı: Hem BirinciOnay hem de IkinciOnay Beklemede ise silebilir
+
+            // Eğer birinci onay onaylandı veya reddedildi ise silinemez
+            if (talep.BirinciOnayDurumuAdi != "Beklemede")
+                return false;
+
+            // Eğer ikinci onay var ve onaylandı/reddedildi ise silinemez
+            if (!string.IsNullOrEmpty(talep.IkinciOnayDurumuAdi) &&
+                talep.IkinciOnayDurumuAdi != "Beklemede")
+                return false;
+
+            return true;
+        }
+
         // ═══════════════════════════════════════════════════════
         // HELPER METHODS
         // ═══════════════════════════════════════════════════════
