@@ -169,6 +169,37 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
         }
 
         /// <summary>
+        /// Onayci için bekleyen talepler (1. ve 2. onay birleşik)
+        /// </summary>
+        [HttpGet("pending-approvals/{onayciTcKimlikNo}")]
+        public async Task<IActionResult> GetPendingApprovals(string onayciTcKimlikNo)
+        {
+            // 1. onayci için bekleyen talepler
+            var firstApproverResult = await _service.GetPendingForFirstApproverAsync(onayciTcKimlikNo);
+            var firstApproverList = firstApproverResult.Success && firstApproverResult.Data != null 
+                ? firstApproverResult.Data 
+                : new List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri.IzinMazeretTalepListResponseDto>();
+
+            // 2. onayci için bekleyen talepler
+            var secondApproverResult = await _service.GetPendingForSecondApproverAsync(onayciTcKimlikNo);
+            var secondApproverList = secondApproverResult.Success && secondApproverResult.Data != null 
+                ? secondApproverResult.Data 
+                : new List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri.IzinMazeretTalepListResponseDto>();
+
+            // Birleştir ve talep tarihine göre sırala
+            var allPending = firstApproverList.Concat(secondApproverList)
+                .OrderByDescending(t => t.TalepTarihi)
+                .ToList();
+
+            return Ok(new SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common.ApiResponseDto<List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri.IzinMazeretTalepListResponseDto>>
+            {
+                Success = true,
+                Message = "Onay bekleyen talepler başarıyla getirildi",
+                Data = allPending
+            });
+        }
+
+        /// <summary>
         /// 1. Onayci için bekleyen talepler
         /// </summary>
         [HttpGet("pending/first-approver/{onayciTcKimlikNo}")]
@@ -185,6 +216,26 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
         public async Task<IActionResult> GetPendingForSecondApprover(string onayciTcKimlikNo)
         {
             var result = await _service.GetPendingForSecondApproverAsync(onayciTcKimlikNo);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Kullanıcının seçebileceği onaycıları getir
+        /// </summary>
+        [HttpGet("available-approvers/{tcKimlikNo}")]
+        public async Task<IActionResult> GetAvailableApprovers(string tcKimlikNo)
+        {
+            var result = await _service.GetAvailableApproversAsync(tcKimlikNo);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Aktif izin türlerini getir
+        /// </summary>
+        [HttpGet("leave-types")]
+        public async Task<IActionResult> GetAvailableLeaveTypes()
+        {
+            var result = await _service.GetAvailableLeaveTypesAsync();
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -291,6 +342,27 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
                     ? "⚠️ Bu tarih aralığında zaten bir izin/mazeret kaydı var"
                     : "✅ Çakışma yok, talep oluşturulabilir"
             });
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // SGK İŞLEM TAKİBİ
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// SGK sistemine işle veya işlemi geri al
+        /// </summary>
+        [HttpPost("sgk-islem")]
+        public async Task<IActionResult> ProcessSgkIslem([FromBody] IzinSgkIslemRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var kullaniciTc = User.FindFirst("TcKimlikNo")?.Value;
+            if (string.IsNullOrEmpty(kullaniciTc))
+                return Unauthorized(new { message = "Kullanıcı bilgisi bulunamadı" });
+
+            var result = await _service.ProcessSgkIslemAsync(request, kullaniciTc);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
     }
 }

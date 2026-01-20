@@ -11,10 +11,10 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri
     public class IzinMazeretTalepUpdateRequestDto
     {
         /// <summary>
-        /// İzin/Mazeret türü
+        /// İzin/Mazeret türü ID (IzinMazeretTuruTanim tablosundan)
         /// </summary>
         [Required(ErrorMessage = "İzin/Mazeret türü zorunludur")]
-        public IzinMazeretTuru Turu { get; set; }
+        public int IzinMazeretTuruId { get; set; }
 
         /// <summary>
         /// Açıklama/Sebep
@@ -46,15 +46,13 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri
         public DateTime? MazeretTarihi { get; set; }
 
         /// <summary>
-        /// Saat dilimi (Mazeret için)
+        /// Başlangıç saati (Mazeret için zorunlu)
         /// </summary>
-        [StringLength(50)]
-        public string? SaatDilimi { get; set; }
+        public TimeSpan? BaslangicSaati { get; set; }
 
         /// <summary>
-        /// Belge eki
+        /// Bitiş saati (Mazeret için zorunlu)
         /// </summary>
-        [StringLength(1000)]
-        public string? BelgeEki { get; set; }
+        public TimeSpan? BitisSaati { get; set; }
     }
 }

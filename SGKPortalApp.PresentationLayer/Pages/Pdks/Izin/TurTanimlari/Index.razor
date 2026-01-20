@@ -1,0 +1,337 @@
+@page "/pdks/izin/tur-tanimlari"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>İzin Türü Tanımları</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1"><i class="bx bx-list-ul me-2"></i>İzin Türü Tanımları</h4>
+            <p class="text-muted mb-0">İzin ve mazeret türlerini yönetin</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" @onclick="ToggleAddForm">
+                <i class="bx bx-plus"></i> @(showAddForm ? "Formu Kapat" : "Yeni Tür Ekle")
+            </button>
+        </div>
+    </div>
+
+    <!-- Add Form -->
+    @if (showAddForm)
+    {
+        <div class="card mb-3 border-primary">
+            <div class="card-body">
+                <h5 class="card-title text-primary">
+                    <i class="bx bx-plus-circle"></i> Yeni İzin Türü Ekle
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Tür Adı *</label>
+                        <input type="text" class="form-control" @bind="newTur.TuruAdi" placeholder="Yıllık İzin" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Kısa Kod</label>
+                        <input type="text" class="form-control" @bind="newTur.KisaKod" placeholder="YILLIK" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Sıra</label>
+                        <input type="number" class="form-control" @bind="newTur.Sira" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Renk Kodu</label>
+                        <input type="color" class="form-control form-control-color" @bind="newTur.RenkKodu" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label d-block">Durum</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" @bind="newTur.IsActive" />
+                            <label class="form-check-label">Aktif</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3 mt-2">
+                    <div class="col-md-12">
+                        <label class="form-label">Açıklama</label>
+                        <textarea class="form-control" rows="2" @bind="newTur.Aciklama"></textarea>
+                    </div>
+                </div>
+                <div class="row g-3 mt-2">
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="newTur.BirinciOnayciGerekli" />
+                            <label class="form-check-label">1. Onaycı Gerekli</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="newTur.IkinciOnayciGerekli" />
+                            <label class="form-check-label">2. Onaycı Gerekli</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="newTur.PlanliIzinMi" />
+                            <label class="form-check-label">Planlı İzin (Başlangıç-Bitiş Tarihi)</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-success" @onclick="SaveNewAsync">
+                        <i class="bx bx-save"></i> Kaydet
+                    </button>
+                    <button class="btn btn-secondary ms-2" @onclick="ToggleAddForm">
+                        <i class="bx bx-x"></i> İptal
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Edit Form -->
+    @if (showEditForm)
+    {
+        <div class="card mb-3 border-warning">
+            <div class="card-body">
+                <h5 class="card-title text-warning">
+                    <i class="bx bx-edit"></i> İzin Türü Düzenle
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Tür Adı *</label>
+                        <input type="text" class="form-control" @bind="editTur.TuruAdi" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Kısa Kod</label>
+                        <input type="text" class="form-control" @bind="editTur.KisaKod" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Sıra</label>
+                        <input type="number" class="form-control" @bind="editTur.Sira" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Renk Kodu</label>
+                        <input type="color" class="form-control form-control-color" @bind="editTur.RenkKodu" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label d-block">Durum</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" @bind="editTur.IsActive" />
+                            <label class="form-check-label">Aktif</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3 mt-2">
+                    <div class="col-md-12">
+                        <label class="form-label">Açıklama</label>
+                        <textarea class="form-control" rows="2" @bind="editTur.Aciklama"></textarea>
+                    </div>
+                </div>
+                <div class="row g-3 mt-2">
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="editTur.BirinciOnayciGerekli" />
+                            <label class="form-check-label">1. Onaycı Gerekli</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="editTur.IkinciOnayciGerekli" />
+                            <label class="form-check-label">2. Onaycı Gerekli</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" @bind="editTur.PlanliIzinMi" />
+                            <label class="form-check-label">Planlı İzin (Başlangıç-Bitiş Tarihi)</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-warning" @onclick="SaveEditAsync">
+                        <i class="bx bx-save"></i> Güncelle
+                    </button>
+                    <button class="btn btn-secondary ms-2" @onclick="CloseEditForm">
+                        <i class="bx bx-x"></i> İptal
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Ara</label>
+                    <input type="text" class="form-control" placeholder="Tür adı veya kısa kod..." 
+                           value="@searchTerm" @onchange="OnSearchChanged" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Durum</label>
+                    <select class="form-select" @onchange="OnFilterActiveChanged">
+                        <option value="">Tümü</option>
+                        <option value="true">Aktif</option>
+                        <option value="false">Pasif</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
+                        <i class="bx bx-x"></i> Filtreleri Temizle
+                    </button>
+                </div>
+            </div>
+            <!-- Stats -->
+            <div class="row mt-3">
+                <div class="col">
+                    <div class="d-flex gap-4 text-muted small">
+                        <span><i class="bx bx-list-ul text-primary"></i> Toplam: <strong>@GetTotalCount()</strong></span>
+                        <span><i class="bx bx-check-circle text-success"></i> Aktif: <strong>@GetActiveCount()</strong></span>
+                        <span><i class="bx bx-x-circle text-danger"></i> Pasif: <strong>@GetPassiveCount()</strong></span>
+                        <span><i class="bx bx-filter-alt text-info"></i> Filtrelenen: <strong>@GetFilteredCount()</strong></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card">
+        <div class="card-body">
+            @if (isLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="mt-2 text-muted">İzin türleri yükleniyor...</p>
+                </div>
+            }
+            else if (!filteredTurler.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="bx bx-info-circle" style="font-size: 3rem; color: #ccc;"></i>
+                    <p class="text-muted mt-2">Hiç izin türü bulunamadı</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">Sıra</th>
+                                <th>Tür Adı</th>
+                                <th style="width: 120px;">Kısa Kod</th>
+                                <th style="width: 80px;" class="text-center">1. Onaycı</th>
+                                <th style="width: 80px;" class="text-center">2. Onaycı</th>
+                                <th style="width: 100px;" class="text-center">Planlı İzin</th>
+                                <th style="width: 80px;" class="text-center">Durum</th>
+                                <th style="width: 180px;" class="text-center">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var tur in filteredTurler)
+                            {
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-secondary">@tur.Sira</span>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(tur.RenkKodu))
+                                        {
+                                            <span class="badge me-2" style="background-color: @tur.RenkKodu;">&nbsp;&nbsp;&nbsp;</span>
+                                        }
+                                        <strong>@tur.TuruAdi</strong>
+                                        @if (!string.IsNullOrEmpty(tur.Aciklama))
+                                        {
+                                            <br />
+                                            <small class="text-muted">@tur.Aciklama</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(tur.KisaKod))
+                                        {
+                                            <code>@tur.KisaKod</code>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (tur.BirinciOnayciGerekli)
+                                        {
+                                            <i class="bx bx-check-circle text-success" title="Gerekli"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bx bx-x-circle text-danger" title="Gerekli Değil"></i>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (tur.IkinciOnayciGerekli)
+                                        {
+                                            <i class="bx bx-check-circle text-success" title="Gerekli"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bx bx-x-circle text-danger" title="Gerekli Değil"></i>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (tur.PlanliIzinMi)
+                                        {
+                                            <span class="badge bg-info">Planlı</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Mazeret</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (tur.IsActive)
+                                        {
+                                            <span class="badge bg-success">Aktif</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Pasif</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-primary me-1" 
+                                                @onclick="() => OpenEditForm(tur)"
+                                                title="Düzenle">
+                                            <i class="bx bx-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm @(tur.IsActive ? "btn-outline-warning" : "btn-outline-success") me-1"
+                                                @onclick="() => ToggleActiveAsync(tur.IzinMazeretTuruId)"
+                                                title="@(tur.IsActive ? "Pasif Yap" : "Aktif Yap")">
+                                            <i class="bx @(tur.IsActive ? "bx-toggle-right" : "bx-toggle-left")"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                @onclick="() => DeleteAsync(tur.IzinMazeretTuruId, tur.TuruAdi)"
+                                                title="Sil">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+        </div>
+    </FieldPermissionScope>
+}

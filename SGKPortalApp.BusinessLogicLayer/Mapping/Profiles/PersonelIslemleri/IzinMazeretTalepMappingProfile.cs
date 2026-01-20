@@ -1,6 +1,8 @@
 using AutoMapper;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri;
+using SGKPortalApp.Common.Extensions;
 
 namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
 {
@@ -79,11 +81,35 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.IkinciOnayAciklama, opt => opt.Ignore());
 
             // ═══════════════════════════════════════════════════════
-            // NOT: Response DTO Mapping
+            // ENTITY -> RESPONSE DTO (List)
             // ═══════════════════════════════════════════════════════
-            // Response DTO mapping'leri service layer'da manuel yapılıyor.
-            // Sebep: Enum.GetDescription() extension method kullanımı için.
-            // Bu sayede display name'ler otomatik oluşturuluyor.
+
+            CreateMap<IzinMazeretTalep, IzinMazeretTalepListResponseDto>()
+                .ForMember(dest => dest.AdSoyad, opt => opt.MapFrom(src => src.Personel != null ? src.Personel.AdSoyad : ""))
+                .ForMember(dest => dest.SicilNo, opt => opt.MapFrom(src => src.Personel != null ? src.Personel.SicilNo : 0))
+                .ForMember(dest => dest.DepartmanAdi, opt => opt.MapFrom(src => src.Personel != null && src.Personel.Departman != null ? src.Personel.Departman.DepartmanAdi : null))
+                .ForMember(dest => dest.ServisAdi, opt => opt.MapFrom(src => src.Personel != null && src.Personel.Servis != null ? src.Personel.Servis.ServisAdi : null))
+                .ForMember(dest => dest.TuruAdi, opt => opt.MapFrom(src => src.IzinMazeretTuru != null ? src.IzinMazeretTuru.TuruAdi : ""))
+                .ForMember(dest => dest.BirinciOnayDurumuAdi, opt => opt.MapFrom(src => src.BirinciOnayDurumu.GetDescription()))
+                .ForMember(dest => dest.IkinciOnayDurumuAdi, opt => opt.MapFrom(src => src.IkinciOnayDurumu.GetDescription()))
+                .ForMember(dest => dest.BirinciOnayciAdSoyad, opt => opt.MapFrom(src => src.BirinciOnayci != null ? src.BirinciOnayci.AdSoyad : null))
+                .ForMember(dest => dest.IkinciOnayciAdSoyad, opt => opt.MapFrom(src => src.IkinciOnayci != null ? src.IkinciOnayci.AdSoyad : null))
+                .ForMember(dest => dest.GenelDurum, opt => opt.Ignore()); // Service layer'da hesaplanacak
+
+            // ═══════════════════════════════════════════════════════
+            // ENTITY -> RESPONSE DTO (Detail)
+            // ═══════════════════════════════════════════════════════
+
+            CreateMap<IzinMazeretTalep, IzinMazeretTalepResponseDto>()
+                .ForMember(dest => dest.AdSoyad, opt => opt.MapFrom(src => src.Personel != null ? src.Personel.AdSoyad : ""))
+                .ForMember(dest => dest.SicilNo, opt => opt.MapFrom(src => src.Personel != null ? src.Personel.SicilNo : 0))
+                .ForMember(dest => dest.DepartmanAdi, opt => opt.MapFrom(src => src.Personel != null && src.Personel.Departman != null ? src.Personel.Departman.DepartmanAdi : null))
+                .ForMember(dest => dest.ServisAdi, opt => opt.MapFrom(src => src.Personel != null && src.Personel.Servis != null ? src.Personel.Servis.ServisAdi : null))
+                .ForMember(dest => dest.TuruAdi, opt => opt.MapFrom(src => src.IzinMazeretTuru != null ? src.IzinMazeretTuru.TuruAdi : ""))
+                .ForMember(dest => dest.BirinciOnayDurumuAdi, opt => opt.MapFrom(src => src.BirinciOnayDurumu.GetDescription()))
+                .ForMember(dest => dest.IkinciOnayDurumuAdi, opt => opt.MapFrom(src => src.IkinciOnayDurumu.GetDescription()))
+                .ForMember(dest => dest.BirinciOnayciAdSoyad, opt => opt.MapFrom(src => src.BirinciOnayci != null ? src.BirinciOnayci.AdSoyad : null))
+                .ForMember(dest => dest.IkinciOnayciAdSoyad, opt => opt.MapFrom(src => src.IkinciOnayci != null ? src.IkinciOnayci.AdSoyad : null));
         }
     }
 }

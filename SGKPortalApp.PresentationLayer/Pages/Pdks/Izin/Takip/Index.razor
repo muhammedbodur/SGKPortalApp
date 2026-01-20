@@ -1,0 +1,414 @@
+@page "/pdks/izin/takip"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Common
+@using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri
+@using SGKPortalApp.PresentationLayer.Components.Permission
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>İzin Takip - SGK Portal</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- PAGE HEADER -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        <i class="bx bx-list-check me-2"></i>İzin Takip
+                    </h4>
+                    <p class="text-muted mb-0">
+                        Tüm izin/mazeret taleplerini görüntüleyin ve yönetin
+                    </p>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- FILTERS -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Departman -->
+                        <div class="col-md-3">
+                            <label class="form-label">Departman</label>
+                            <select class="form-select" @bind="FilterDepartmanId" @bind:after="OnDepartmanChanged">
+                                <option value="0">Tüm Departmanlar</option>
+                                @foreach (var dept in DepartmanList)
+                                {
+                                    <option value="@dept.DepartmanId">@dept.DepartmanAdi</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Servis -->
+                        <div class="col-md-3">
+                            <label class="form-label">Servis</label>
+                            <select class="form-select" @bind="FilterServisId" @bind:after="ApplyFilters" disabled="@(FilterDepartmanId == 0)">
+                                <option value="0">Tüm Servisler</option>
+                                @foreach (var servis in FilteredServisList)
+                                {
+                                    <option value="@servis.ServisId">@servis.ServisAdi</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Durum -->
+                        <div class="col-md-2">
+                            <label class="form-label">Durum</label>
+                            <select class="form-select" @bind="FilterDurum" @bind:after="ApplyFilters">
+                                <option value="">Tümü</option>
+                                <option value="Beklemede">Beklemede</option>
+                                <option value="Onaylandı">Onaylandı</option>
+                                <option value="Reddedildi">Reddedildi</option>
+                                <option value="İptal">İptal</option>
+                            </select>
+                        </div>
+
+                        <!-- Arama -->
+                        <div class="col-md-4">
+                            <label class="form-label">Arama</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bx bx-search"></i></span>
+                                <input type="text" class="form-control" placeholder="Ad Soyad, Sicil No..."
+                                       @bind="SearchTerm" @bind:event="oninput" @onkeyup="OnSearchKeyUp" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                        <!-- Tarih Aralığı -->
+                        <div class="col-md-3">
+                            <label class="form-label">Başlangıç Tarihi (Min)</label>
+                            <input type="date" class="form-control" @bind="FilterBaslangicMin" @bind:after="ApplyFilters" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Başlangıç Tarihi (Max)</label>
+                            <input type="date" class="form-control" @bind="FilterBaslangicMax" @bind:after="ApplyFilters" />
+                        </div>
+
+                        <!-- Aktiflik -->
+                        <div class="col-md-3">
+                            <label class="form-label">Aktiflik</label>
+                            <select class="form-select" @bind="FilterIsActive" @bind:after="ApplyFilters">
+                                <option value="">Tümü</option>
+                                <option value="true">Aktif</option>
+                                <option value="false">İptal Edilmiş</option>
+                            </select>
+                        </div>
+
+                        <!-- Filtre Temizle -->
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
+                                <i class="bx bx-x me-1"></i>Filtreleri Temizle
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- STATISTICS -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="text-muted">Toplam</h6>
+                            <h3 class="text-primary">@TotalCount</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="text-muted">Beklemede</h6>
+                            <h3 class="text-warning">@Talepler.Count(t => t.GenelDurum.Contains("Bekl"))</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="text-muted">Onaylanan</h6>
+                            <h3 class="text-success">@Talepler.Count(t => t.GenelDurum == "Onaylandı")</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="text-muted">Reddedilen</h6>
+                            <h3 class="text-danger">@Talepler.Count(t => t.GenelDurum == "Reddedildi")</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (IsLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="mt-2">Talepler yükleniyor...</p>
+                </div>
+            }
+            else
+            {
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <!-- TABLE -->
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Personel</th>
+                                        <th>Departman/Servis</th>
+                                        <th>Tür</th>
+                                        <th>Tarih</th>
+                                        <th>Talep Tarihi</th>
+                                        <th>1. Onay</th>
+                                        <th>2. Onay</th>
+                                        <th>Durum</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (!Talepler.Any())
+                                    {
+                                        <tr>
+                                            <td colspan="10" class="text-center text-muted py-4">
+                                                <i class="bx bx-file bx-lg"></i>
+                                                <p class="mb-0 mt-2">Talep bulunamadı</p>
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var talep in Talepler)
+                                        {
+                                            <tr>
+                                                <td><strong>#@talep.IzinMazeretTalepId</strong></td>
+                                                <td>
+                                                    <div>@talep.AdSoyad</div>
+                                                    <small class="text-muted">Sicil: @talep.SicilNo</small>
+                                                </td>
+                                                <td>
+                                                    <div>@talep.DepartmanAdi</div>
+                                                    @if (!string.IsNullOrEmpty(talep.ServisAdi))
+                                                    {
+                                                        <small class="text-muted">@talep.ServisAdi</small>
+                                                    }
+                                                </td>
+                                                <td><span class="badge bg-label-info">@talep.TuruAdi</span></td>
+                                                <td>
+                                                    @if (talep.BaslangicTarihi.HasValue && talep.BitisTarihi.HasValue)
+                                                    {
+                                                        <span>@talep.BaslangicTarihi.Value.ToString("dd.MM.yyyy") - @talep.BitisTarihi.Value.ToString("dd.MM.yyyy")</span>
+                                                    }
+                                                    else if (talep.MazeretTarihi.HasValue)
+                                                    {
+                                                        <span>@talep.MazeretTarihi.Value.ToString("dd.MM.yyyy")</span>
+                                                        @if (talep.BaslangicSaati.HasValue && talep.BitisSaati.HasValue)
+                                                        {
+                                                            <br /><small class="text-muted">@talep.BaslangicSaati.Value.ToString(@"hh\:mm") - @talep.BitisSaati.Value.ToString(@"hh\:mm")</small>
+                                                        }
+                                                    }
+                                                </td>
+                                                <td>@talep.TalepTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                                                <td>
+                                                    <span class="badge @GetOnayBadgeClass(talep.BirinciOnayDurumuAdi)">@talep.BirinciOnayDurumuAdi</span>
+                                                    @if (!string.IsNullOrEmpty(talep.BirinciOnayciAdSoyad))
+                                                    {
+                                                        <br /><small class="text-muted">@talep.BirinciOnayciAdSoyad</small>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <span class="badge @GetOnayBadgeClass(talep.IkinciOnayDurumuAdi)">@talep.IkinciOnayDurumuAdi</span>
+                                                    @if (!string.IsNullOrEmpty(talep.IkinciOnayciAdSoyad))
+                                                    {
+                                                        <br /><small class="text-muted">@talep.IkinciOnayciAdSoyad</small>
+                                                    }
+                                                </td>
+                                                <td><span class="badge @GetDurumBadgeClass(talep.GenelDurum)">@talep.GenelDurum</span></td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <button class="btn btn-outline-primary" @onclick="() => ViewDetails(talep.IzinMazeretTalepId)" title="Detay">
+                                                            <i class="bx bx-show"></i>
+                                                        </button>
+                                                        @if (CanCancelRequest(talep))
+                                                        {
+                                                            <button class="btn btn-outline-danger" @onclick="() => OpenCancelModal(talep)" title="İptal Et">
+                                                                <i class="bx bx-x"></i>
+                                                            </button>
+                                                        }
+                                                        @if (talep.GenelDurum == "Onaylandı" && IsActionVisible("SGK_ISLEM"))
+                                                        {
+                                                            @if (!talep.IzinIslendiMi)
+                                                            {
+                                                                <button class="btn btn-outline-success" @onclick="() => OpenSgkIslemModal(talep, true)" title="SGK'ya İşle">
+                                                                    <i class="bx bx-check-circle"></i>
+                                                                </button>
+                                                            }
+                                                            else
+                                                            {
+                                                                <button class="btn btn-outline-warning" @onclick="() => OpenSgkIslemModal(talep, false)" title="İşlemi Geri Al">
+                                                                    <i class="bx bx-undo"></i>
+                                                                </button>
+                                                            }
+                                                        }
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- ═══════════════════════════════════════════════════════ -->
+                        <!-- PAGINATION -->
+                        <!-- ═══════════════════════════════════════════════════════ -->
+                        @if (TotalPages > 1)
+                        {
+                            <nav aria-label="Page navigation" class="mt-3">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                                        <button class="page-link" @onclick="() => GoToPage(CurrentPage - 1)" disabled="@(CurrentPage == 1)">
+                                            <i class="bx bx-chevron-left"></i>
+                                        </button>
+                                    </li>
+
+                                    @for (int i = Math.Max(1, CurrentPage - 2); i <= Math.Min(TotalPages, CurrentPage + 2); i++)
+                                    {
+                                        var pageNum = i;
+                                        <li class="page-item @(CurrentPage == pageNum ? "active" : "")">
+                                            <button class="page-link" @onclick="() => GoToPage(pageNum)">@pageNum</button>
+                                        </li>
+                                    }
+
+                                    <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                                        <button class="page-link" @onclick="() => GoToPage(CurrentPage + 1)" disabled="@(CurrentPage == TotalPages)">
+                                            <i class="bx bx-chevron-right"></i>
+                                        </button>
+                                    </li>
+                                </ul>
+                                <div class="text-center text-muted">
+                                    <small>Sayfa @CurrentPage / @TotalPages (Toplam @TotalCount kayıt)</small>
+                                </div>
+                            </nav>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- CANCEL MODAL -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        @if (ShowCancelModal)
+        {
+            <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Talebi İptal Et</h5>
+                            <button type="button" class="btn-close" @onclick="CloseCancelModal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>Talep #@SelectedTalep?.IzinMazeretTalepId</strong> iptal edilecek.</p>
+                            <p class="text-muted">Personel: @SelectedTalep?.AdSoyad</p>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">İptal Nedeni <span class="text-danger">*</span></label>
+                                <textarea class="form-control" rows="3" @bind="CancelReason" placeholder="İptal nedenini giriniz..."></textarea>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(ErrorMessage))
+                            {
+                                <div class="alert alert-danger">@ErrorMessage</div>
+                            }
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CloseCancelModal" disabled="@IsCancelling">Kapat</button>
+                            <button type="button" class="btn btn-danger" @onclick="ConfirmCancel" disabled="@IsCancelling">
+                                @if (IsCancelling)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                }
+                                İptal Et
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- SGK İŞLEM MODAL -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        @if (ShowSgkIslemModal)
+        {
+            <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                @if (SgkIslemTipi)
+                                {
+                                    <i class="bx bx-check-circle text-success me-2"></i>
+                                    <text>SGK Sistemine İşle</text>
+                                }
+                                else
+                                {
+                                    <i class="bx bx-undo text-warning me-2"></i>
+                                    <text>SGK İşlemini Geri Al</text>
+                                }
+                            </h5>
+                            <button type="button" class="btn-close" @onclick="CloseSgkIslemModal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>Talep #@SelectedTalep?.IzinMazeretTalepId</strong></p>
+                            <p class="text-muted">Personel: @SelectedTalep?.AdSoyad</p>
+                            <p class="text-muted">Tür: @SelectedTalep?.TuruAdi</p>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">İşlem Notları</label>
+                                <textarea class="form-control" rows="3" @bind="SgkIslemNotlari" 
+                                          placeholder="@(SgkIslemTipi ? "SGK sistemine işlenirken eklemek istediğiniz notlar..." : "Geri alma nedenini yazınız...")"></textarea>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(ErrorMessage))
+                            {
+                                <div class="alert alert-danger">@ErrorMessage</div>
+                            }
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CloseSgkIslemModal" disabled="@IsProcessingSgk">Kapat</button>
+                            <button type="button" class="btn @(SgkIslemTipi ? "btn-success" : "btn-warning")" @onclick="ConfirmSgkIslem" disabled="@IsProcessingSgk">
+                                @if (IsProcessingSgk)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                }
+                                @(SgkIslemTipi ? "İşle" : "Geri Al")
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </FieldPermissionScope>
+}

@@ -161,10 +161,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 // İzin/Mazeret kontrolü
                 if (izinMazeret != null)
                 {
-                    gunlukDto.Durum = izinMazeret.Turu.ToString();
+                    gunlukDto.Durum = izinMazeret.IzinMazeretTuru?.TuruAdi ?? "İzin/Mazeret";
                     gunlukDto.MesaiSuresi = "-";
 
-                    if (izinMazeret.Turu.ToString().Contains("İzin"))
+                    if (izinMazeret.IzinMazeretTuru?.PlanliIzinMi == true)
                         izinliGun++;
                     else
                         mazeretliGun++;

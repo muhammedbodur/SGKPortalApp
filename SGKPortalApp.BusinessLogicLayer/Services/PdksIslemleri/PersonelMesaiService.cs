@@ -142,7 +142,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             // İzin/Mazeret kontrolü
             if (izinMazeret != null)
             {
-                dto.Detay = izinMazeret.Turu.ToString();
+                dto.Detay = izinMazeret.IzinMazeretTuru?.TuruAdi ?? "İzin/Mazeret";
                 dto.MesaiSuresi = "00:00";
                 dto.MesaiSuresiDakika = 0;
                 return dto;

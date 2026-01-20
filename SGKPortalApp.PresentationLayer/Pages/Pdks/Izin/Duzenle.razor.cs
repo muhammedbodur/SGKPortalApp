@@ -90,7 +90,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                     // Response DTO'dan Update DTO'ya dönüştür
                     Request = MapToUpdateRequest(talep);
                     SelectedTuruText = talep.TuruAdi;
-                    IsMazeretTalep = talep.Turu == IzinMazeretTuru.Mazeret;
+                    IsMazeretTalep = talep.MazeretTarihi.HasValue;
 
                     if (!IsMazeretTalep)
                     {

@@ -18,10 +18,10 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri
         public string TcKimlikNo { get; set; } = string.Empty;
 
         /// <summary>
-        /// İzin/Mazeret türü
+        /// İzin/Mazeret türü ID (IzinMazeretTuruTanim tablosundan)
         /// </summary>
         [Required(ErrorMessage = "İzin/Mazeret türü zorunludur")]
-        public IzinMazeretTuru Turu { get; set; }
+        public int IzinMazeretTuruId { get; set; }
 
         /// <summary>
         /// Açıklama/Sebep
@@ -53,10 +53,14 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri
         public DateTime? MazeretTarihi { get; set; }
 
         /// <summary>
-        /// Saat dilimi (ör: "08:00-09:00", Mazeret için zorunlu)
+        /// Başlangıç saati (Mazeret için zorunlu)
         /// </summary>
-        [StringLength(50)]
-        public string? SaatDilimi { get; set; }
+        public TimeSpan? BaslangicSaati { get; set; }
+
+        /// <summary>
+        /// Bitiş saati (Mazeret için zorunlu)
+        /// </summary>
+        public TimeSpan? BitisSaati { get; set; }
 
         // ═══════════════════════════════════════════════════════
         // ONAY BİLGİLERİ (Opsiyonel - sistem tarafından atanabilir)

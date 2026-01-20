@@ -36,9 +36,13 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
             // TALEP BİLGİLERİ
             // ═══════════════════════════════════════════════════════
 
-            builder.Property(t => t.Turu)
-                .IsRequired()
-                .HasConversion<int>(); // Enum -> int
+            builder.Property(t => t.IzinMazeretTuruId)
+                .IsRequired();
+
+            builder.HasOne(t => t.IzinMazeretTuru)
+                .WithMany()
+                .HasForeignKey(t => t.IzinMazeretTuruId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(t => t.Aciklama)
                 .HasMaxLength(500);
@@ -62,8 +66,11 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
             builder.Property(t => t.MazeretTarihi)
                 .HasColumnType("date");
 
-            builder.Property(t => t.SaatDilimi)
-                .HasMaxLength(50);
+            builder.Property(t => t.BaslangicSaati)
+                .HasColumnType("time");
+
+            builder.Property(t => t.BitisSaati)
+                .HasColumnType("time");
 
             // ═══════════════════════════════════════════════════════
             // BİRİNCİ ONAYCI
@@ -107,8 +114,6 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
                 .IsRequired()
                 .HasDefaultValue(true);
 
-            builder.Property(t => t.BelgeEki)
-                .HasMaxLength(1000);
 
             // ═══════════════════════════════════════════════════════
             // AUDİT ALANLARI (AuditableEntity'den gelenler)
@@ -143,8 +148,8 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
                 .HasDatabaseName("IX_PDKS_IzinMazeretTalep_OnayDurumlari");
 
             // Türe göre index
-            builder.HasIndex(t => t.Turu)
-                .HasDatabaseName("IX_PDKS_IzinMazeretTalep_Turu");
+            builder.HasIndex(t => t.IzinMazeretTuruId)
+                .HasDatabaseName("IX_PDKS_IzinMazeretTalep_IzinMazeretTuruId");
 
             // Aktiflik index
             builder.HasIndex(t => t.IsActive)
@@ -166,6 +171,20 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
                 .HasForeignKey(t => t.TcKimlikNo)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_PDKS_IzinMazeretTalep_PER_Personeller");
+
+            // 1. Onayci ile ilişki (optional, cascade yok)
+            builder.HasOne(t => t.BirinciOnayci)
+                .WithMany()
+                .HasForeignKey(t => t.BirinciOnayciTcKimlikNo)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_PDKS_IzinMazeretTalep_BirinciOnayci");
+
+            // 2. Onayci ile ilişki (optional, cascade yok)
+            builder.HasOne(t => t.IkinciOnayci)
+                .WithMany()
+                .HasForeignKey(t => t.IkinciOnayciTcKimlikNo)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_PDKS_IzinMazeretTalep_IkinciOnayci");
         }
     }
 }

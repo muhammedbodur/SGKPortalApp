@@ -51,6 +51,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<Sendika> Sendikalar { get; set; }
         public DbSet<AtanmaNedenleri> AtanmaNedenleri { get; set; }
         public DbSet<IzinMazeretTalep> IzinMazeretTalepler { get; set; }
+        public DbSet<IzinMazeretTuruTanim> IzinMazeretTuruTanimlari { get; set; }
         public DbSet<IzinSorumlu> IzinSorumlular { get; set; }
         public DbSet<Modul> Moduller { get; set; }
         public DbSet<ModulController> ModulControllers { get; set; }
@@ -133,6 +134,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.ApplyConfiguration(new PersonelCezaConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelEngelConfiguration());
             modelBuilder.ApplyConfiguration(new IzinMazeretTalepConfiguration());
+            modelBuilder.ApplyConfiguration(new IzinMazeretTuruTanimConfiguration());
 
             // Pdks İşlemleri
             modelBuilder.ApplyConfiguration(new IzinSorumluConfiguration());

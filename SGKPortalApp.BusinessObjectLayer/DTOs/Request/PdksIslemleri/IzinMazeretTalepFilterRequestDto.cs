@@ -36,9 +36,9 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri
         public int? ServisId { get; set; }
 
         /// <summary>
-        /// İzin/Mazeret türü
+        /// İzin/Mazeret türü ID
         /// </summary>
-        public IzinMazeretTuru? Turu { get; set; }
+        public int? IzinMazeretTuruId { get; set; }
 
         /// <summary>
         /// 1. Onay durumu

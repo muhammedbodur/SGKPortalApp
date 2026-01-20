@@ -107,6 +107,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri
         /// </summary>
         Task<ApiResponseDto<List<IzinMazeretTalepListResponseDto>>> GetPendingByServisAsync(int servisId);
 
+        /// <summary>
+        /// Kullanıcının seçebileceği onaycıları getir
+        /// Kurallar:
+        /// - Unvan ID = 7: Tüm departmanlarda görünür
+        /// - Servis ID = 33: Sadece kendi departmanında görünür
+        /// - Unvan ID IN (5,87): Aynı departman VE aynı servis
+        /// </summary>
+        Task<ApiResponseDto<List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.PersonelResponseDto>>> GetAvailableApproversAsync(string tcKimlikNo);
+
+        /// <summary>
+        /// Aktif izin türlerini getir
+        /// </summary>
+        Task<ApiResponseDto<List<IzinMazeretTuruResponseDto>>> GetAvailableLeaveTypesAsync();
+
         // ═══════════════════════════════════════════════════════
         // RAPORLAMA VE FİLTRELEME
         // ═══════════════════════════════════════════════════════
@@ -158,5 +172,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri
             DateTime? bitisTarihi,
             DateTime? mazeretTarihi,
             int? excludeTalepId = null);
+
+        // ═══════════════════════════════════════════════════════
+        // SGK İŞLEM TAKİBİ
+        // ═══════════════════════════════════════════════════════
+
+        /// <summary>
+        /// SGK sistemine işle veya işlemi geri al
+        /// </summary>
+        Task<ApiResponseDto<bool>> ProcessSgkIslemAsync(IzinSgkIslemRequestDto request, string kullaniciTc);
     }
 }

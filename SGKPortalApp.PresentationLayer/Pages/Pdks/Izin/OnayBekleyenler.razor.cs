@@ -200,6 +200,38 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             }
         }
 
+        private bool CanApproveTalep(IzinMazeretTalepListResponseDto talep)
+        {
+            // 1. onayci için her zaman onaylayabilir
+            if (talep.BirinciOnayDurumu == OnayDurumu.Beklemede)
+            {
+                return true;
+            }
+
+            // 2. onayci için sadece 1. onay tamamlanmışsa onaylayabilir
+            if (talep.IkinciOnayDurumu == OnayDurumu.Beklemede)
+            {
+                return talep.BirinciOnayDurumu == OnayDurumu.Onaylandi;
+            }
+
+            return false;
+        }
+
+        private string GetDisableReason(IzinMazeretTalepListResponseDto talep)
+        {
+            // 2. onayci için 1. onay bekleniyor
+            if (talep.IkinciOnayDurumu == OnayDurumu.Beklemede && 
+                talep.BirinciOnayDurumu != OnayDurumu.Onaylandi)
+            {
+                var onayciAdi = !string.IsNullOrEmpty(talep.BirinciOnayciAdSoyad) 
+                    ? $" ({talep.BirinciOnayciAdSoyad})" 
+                    : "";
+                return $"1. Onayın tamamlanması bekleniyor{onayciAdi}";
+            }
+
+            return string.Empty;
+        }
+
         // ═══════════════════════════════════════════════════════
         // EXPORT METHODS
         // ═══════════════════════════════════════════════════════

@@ -25,7 +25,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
         // TALEP BİLGİLERİ
         // ═══════════════════════════════════════════════════════
 
-        public IzinMazeretTuru Turu { get; set; }
+        public int IzinMazeretTuruId { get; set; }
         public string TuruAdi { get; set; } = string.Empty; // Display name
         public string? Aciklama { get; set; }
         public DateTime TalepTarihi { get; set; }
@@ -44,7 +44,8 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
         // ═══════════════════════════════════════════════════════
 
         public DateTime? MazeretTarihi { get; set; }
-        public string? SaatDilimi { get; set; }
+        public TimeSpan? BaslangicSaati { get; set; }
+        public TimeSpan? BitisSaati { get; set; }
 
         // ═══════════════════════════════════════════════════════
         // BİRİNCİ ONAYCI
@@ -71,8 +72,6 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
         // ═══════════════════════════════════════════════════════
         // EK BİLGİLER
         // ═══════════════════════════════════════════════════════
-
-        public string? BelgeEki { get; set; }
 
         // Audit bilgileri
         public DateTime EklenmeTarihi { get; set; }

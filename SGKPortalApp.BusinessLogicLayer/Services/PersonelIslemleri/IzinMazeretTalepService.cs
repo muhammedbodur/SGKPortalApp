@@ -9,6 +9,7 @@ using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Exceptions;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PdksIslemleri;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri;
 
@@ -98,8 +99,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 if (personel == null)
                     return ApiResponseDto<IzinMazeretTalepResponseDto>.ErrorResult("Personel bulunamadı");
 
+                // İzin türü kontrolü
+                var izinTuruRepository = _unitOfWork.GetRepository<IIzinMazeretTuruTanimRepository>();
+                var izinTuru = await izinTuruRepository.GetByIdAsync(request.IzinMazeretTuruId);
+                if (izinTuru == null)
+                    return ApiResponseDto<IzinMazeretTalepResponseDto>.ErrorResult("İzin türü bulunamadı");
+
                 // Türe göre validasyon
-                var validationResult = ValidateRequestByType(request.Turu, request.BaslangicTarihi, request.BitisTarihi, request.MazeretTarihi, request.SaatDilimi);
+                var validationResult = ValidateRequestByType(izinTuru.PlanliIzinMi, request.BaslangicTarihi, request.BitisTarihi, request.MazeretTarihi, request.BaslangicSaati, request.BitisSaati);
                 if (!string.IsNullOrEmpty(validationResult))
                     return ApiResponseDto<IzinMazeretTalepResponseDto>.ErrorResult(validationResult);
 
@@ -114,7 +121,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 if (overlapCheck.Data)
                 {
                     return ApiResponseDto<IzinMazeretTalepResponseDto>
-                        .ErrorResult("⚠️ Bu tarih aralığında zaten bir izin/mazeret kaydı bulunmaktadır. Lütfen çakışan kayıtları kontrol edin.");
+                        .ErrorResult("Bu tarih aralığında zaten bir izin/mazeret kaydı bulunmaktadır. Lütfen çakışan kayıtları kontrol edin.");
                 }
 
                 // Talep oluştur
@@ -134,8 +141,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 await _unitOfWork.Repository<IzinMazeretTalep>().AddAsync(talep);
                 await _unitOfWork.SaveChangesAsync();
 
-                _logger.LogInformation("İzin/Mazeret talebi oluşturuldu. ID: {Id}, TC: {Tc}, Tür: {Tur}",
-                    talep.IzinMazeretTalepId, talep.TcKimlikNo, talep.Turu);
+                _logger.LogInformation("İzin/Mazeret talebi oluşturuldu. ID: {Id}, TC: {Tc}, Tür ID: {TurId}",
+                    talep.IzinMazeretTalepId, talep.TcKimlikNo, talep.IzinMazeretTuruId);
 
                 var talepDto = MapToResponseDto(talep);
                 return ApiResponseDto<IzinMazeretTalepResponseDto>
@@ -183,8 +190,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         .ErrorResult("Sadece beklemede olan talepler güncellenebilir");
                 }
 
+                // İzin türü kontrolü
+                var izinTuruRepository = _unitOfWork.GetRepository<IIzinMazeretTuruTanimRepository>();
+                var izinTuru = await izinTuruRepository.GetByIdAsync(request.IzinMazeretTuruId);
+                if (izinTuru == null)
+                    return ApiResponseDto<IzinMazeretTalepResponseDto>.ErrorResult("İzin türü bulunamadı");
+
                 // Validasyon
-                var validationResult = ValidateRequestByType(request.Turu, request.BaslangicTarihi, request.BitisTarihi, request.MazeretTarihi, request.SaatDilimi);
+                var validationResult = ValidateRequestByType(izinTuru.PlanliIzinMi, request.BaslangicTarihi, request.BitisTarihi, request.MazeretTarihi, request.BaslangicSaati, request.BitisSaati);
                 if (!string.IsNullOrEmpty(validationResult))
                     return ApiResponseDto<IzinMazeretTalepResponseDto>.ErrorResult(validationResult);
 
@@ -493,6 +506,108 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             }
         }
 
+        public async Task<ApiResponseDto<List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.PersonelResponseDto>>> GetAvailableApproversAsync(string tcKimlikNo)
+        {
+            try
+            {
+                // Kullanıcının bilgilerini al
+                var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
+                var currentPersonel = await personelRepo.GetByTcKimlikNoAsync(tcKimlikNo);
+
+                if (currentPersonel == null)
+                {
+                    return ApiResponseDto<List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.PersonelResponseDto>>
+                        .ErrorResult("Personel bulunamadı");
+                }
+
+                var currentDepartmanId = currentPersonel.DepartmanId;
+                var currentServisId = currentPersonel.ServisId;
+
+                // Tüm aktif personelleri getir
+                var allPersonel = await personelRepo.GetActiveAsync();
+
+                // Filtreleme kuralları:
+                // 1. Unvan ID = 7: Tüm departmanlarda görünür
+                // 2. Servis ID = 33: Sadece kendi departmanında görünür
+                // 3. Unvan ID IN (5,87): Aynı departman VE aynı servis
+
+                var availableApprovers = allPersonel
+                    .Where(p => p.TcKimlikNo != tcKimlikNo) // Kendisi hariç
+                    .Where(p => p.PersonelAktiflikDurum == SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri.PersonelAktiflikDurum.Aktif) // Sadece aktif personeller
+                    .Where(p =>
+                        // Kural 1: Unvan ID = 7 (SG İL MÜDÜR YARDIMCISI) - Tüm departmanlarda
+                        (p.UnvanId == 7) ||
+                        // Kural 2: Servis ID = 33 (İDARE) - Sadece kendi departmanında
+                        (p.ServisId == 33 && p.DepartmanId == currentDepartmanId) ||
+                        // Kural 3: Unvan ID IN (5,87) (ŞEF, ŞEF V.) - Aynı departman VE aynı servis
+                        ((p.UnvanId == 5 || p.UnvanId == 87) && 
+                         p.DepartmanId == currentDepartmanId && 
+                         p.ServisId == currentServisId)
+                    )
+                    .OrderBy(p => p.AdSoyad)
+                    .ToList();
+
+                // PersonelResponseDto'ya map et
+                var approverDtos = availableApprovers.Select(p => new SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.PersonelResponseDto
+                {
+                    TcKimlikNo = p.TcKimlikNo,
+                    AdSoyad = p.AdSoyad,
+                    SicilNo = p.SicilNo,
+                    DepartmanId = p.DepartmanId,
+                    DepartmanAdi = p.Departman?.DepartmanAdi ?? string.Empty,
+                    ServisId = p.ServisId,
+                    ServisAdi = p.Servis?.ServisAdi ?? string.Empty,
+                    UnvanId = p.UnvanId,
+                    UnvanAdi = p.Unvan?.UnvanAdi ?? string.Empty,
+                    Email = p.Email,
+                    PersonelAktiflikDurum = p.PersonelAktiflikDurum,
+                    EklenmeTarihi = p.EklenmeTarihi,
+                    DuzenlenmeTarihi = p.DuzenlenmeTarihi
+                }).ToList();
+
+                return ApiResponseDto<List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.PersonelResponseDto>>
+                    .SuccessResult(approverDtos, $"{approverDtos.Count} adet onaycı bulundu");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Onaycılar getirilirken hata oluştu. TC: {Tc}", tcKimlikNo);
+                return ApiResponseDto<List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.PersonelResponseDto>>
+                    .ErrorResult("Onaycılar getirilirken bir hata oluştu", ex.Message);
+            }
+        }
+
+        public async Task<ApiResponseDto<List<IzinMazeretTuruResponseDto>>> GetAvailableLeaveTypesAsync()
+        {
+            try
+            {
+                var repository = _unitOfWork.GetRepository<IIzinMazeretTuruTanimRepository>();
+                var turuTanimlari = await repository.GetAllActiveAsync();
+
+                var turuDtos = turuTanimlari.Select(t => new IzinMazeretTuruResponseDto
+                {
+                    IzinMazeretTuruId = t.IzinMazeretTuruId,
+                    TuruAdi = t.TuruAdi,
+                    KisaKod = t.KisaKod,
+                    Aciklama = t.Aciklama,
+                    BirinciOnayciGerekli = t.BirinciOnayciGerekli,
+                    IkinciOnayciGerekli = t.IkinciOnayciGerekli,
+                    PlanliIzinMi = t.PlanliIzinMi,
+                    Sira = t.Sira,
+                    IsActive = t.IsActive,
+                    RenkKodu = t.RenkKodu
+                }).ToList();
+
+                return ApiResponseDto<List<IzinMazeretTuruResponseDto>>
+                    .SuccessResult(turuDtos, $"{turuDtos.Count} adet izin türü bulundu");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "İzin türleri getirilirken hata oluştu");
+                return ApiResponseDto<List<IzinMazeretTuruResponseDto>>
+                    .ErrorResult("İzin türleri getirilirken bir hata oluştu", ex.Message);
+            }
+        }
+
         // ═══════════════════════════════════════════════════════
         // RAPORLAMA VE FİLTRELEME
         // ═══════════════════════════════════════════════════════
@@ -508,7 +623,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     filter.TcKimlikNo,
                     filter.DepartmanId,
                     filter.ServisId,
-                    filter.Turu,
+                    filter.IzinMazeretTuruId,
                     filter.BirinciOnayDurumu,
                     filter.IkinciOnayDurumu,
                     filter.BaslangicTarihiMin,
@@ -585,12 +700,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             try
             {
                 var repository = _unitOfWork.GetRepository<IIzinMazeretTalepRepository>();
-
-                IzinMazeretTuru? turu = izinTuruValue.HasValue
-                    ? (IzinMazeretTuru)izinTuruValue.Value
-                    : null;
-
-                var totalDays = await repository.GetTotalUsedDaysAsync(tcKimlikNo, turu, year);
+                var totalDays = await repository.GetTotalUsedDaysAsync(tcKimlikNo, izinTuruValue, year);
 
                 return ApiResponseDto<int>.SuccessResult(totalDays, "Toplam kullanılan gün başarıyla hesaplandı");
             }
@@ -636,21 +746,24 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
         // ═══════════════════════════════════════════════════════
 
         private string ValidateRequestByType(
-            IzinMazeretTuru turu,
+            bool planliIzinMi,
             DateTime? baslangicTarihi,
             DateTime? bitisTarihi,
             DateTime? mazeretTarihi,
-            string? saatDilimi)
+            TimeSpan? baslangicSaati,
+            TimeSpan? bitisSaati)
         {
-            // Mazeret ise
-            if (turu == IzinMazeretTuru.Mazeret)
+            // Mazeret ise (planlı izin değilse)
+            if (!planliIzinMi)
             {
                 if (!mazeretTarihi.HasValue)
                     return "Mazeret için tarih zorunludur";
-                if (string.IsNullOrWhiteSpace(saatDilimi))
-                    return "Mazeret için saat dilimi zorunludur";
+                if (!baslangicSaati.HasValue || !bitisSaati.HasValue)
+                    return "Mazeret için başlangıç ve bitiş saati zorunludur";
+                if (baslangicSaati.Value >= bitisSaati.Value)
+                    return "Başlangıç saati bitiş saatinden önce olmalıdır";
             }
-            // İzin ise
+            // İzin ise (planlı izin)
             else
             {
                 if (!baslangicTarihi.HasValue || !bitisTarihi.HasValue)
@@ -672,8 +785,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 SicilNo = talep.Personel?.SicilNo ?? 0,
                 DepartmanAdi = talep.Personel?.Departman?.DepartmanAdi,
                 ServisAdi = talep.Personel?.Servis?.ServisAdi,
-                Turu = talep.Turu,
-                TuruAdi = talep.Turu.GetDescription(),
+                IzinMazeretTuruId = talep.IzinMazeretTuruId,
+                TuruAdi = talep.IzinMazeretTuru?.TuruAdi ?? "",
                 Aciklama = talep.Aciklama,
                 TalepTarihi = talep.TalepTarihi,
                 IsActive = talep.IsActive,
@@ -681,7 +794,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 BitisTarihi = talep.BitisTarihi,
                 ToplamGun = talep.ToplamGun,
                 MazeretTarihi = talep.MazeretTarihi,
-                SaatDilimi = talep.SaatDilimi,
+                BaslangicSaati = talep.BaslangicSaati,
+                BitisSaati = talep.BitisSaati,
                 BirinciOnayciTcKimlikNo = talep.BirinciOnayciTcKimlikNo,
                 BirinciOnayDurumu = talep.BirinciOnayDurumu,
                 BirinciOnayDurumuAdi = talep.BirinciOnayDurumu.GetDescription(),
@@ -692,7 +806,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 IkinciOnayDurumuAdi = talep.IkinciOnayDurumu.GetDescription(),
                 IkinciOnayTarihi = talep.IkinciOnayTarihi,
                 IkinciOnayAciklama = talep.IkinciOnayAciklama,
-                BelgeEki = talep.BelgeEki,
                 EklenmeTarihi = talep.EklenmeTarihi,
                 EkleyenKullanici = talep.EkleyenKullanici,
                 DuzenlenmeTarihi = talep.DuzenlenmeTarihi,
@@ -702,29 +815,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
         private List<IzinMazeretTalepListResponseDto> MapToListDto(IEnumerable<IzinMazeretTalep> talepler)
         {
-            return talepler.Select(t => new IzinMazeretTalepListResponseDto
+            // AutoMapper kullanarak map et
+            var dtoList = _mapper.Map<List<IzinMazeretTalepListResponseDto>>(talepler);
+            
+            // GenelDurum'u manuel hesapla (AutoMapper'da Ignore edildi)
+            foreach (var dto in dtoList)
             {
-                IzinMazeretTalepId = t.IzinMazeretTalepId,
-                TcKimlikNo = t.TcKimlikNo,
-                AdSoyad = t.Personel?.AdSoyad ?? "",
-                SicilNo = t.Personel?.SicilNo ?? 0,
-                DepartmanAdi = t.Personel?.Departman?.DepartmanAdi,
-                ServisAdi = t.Personel?.Servis?.ServisAdi,
-                Turu = t.Turu,
-                TuruAdi = t.Turu.GetDescription(),
-                TalepTarihi = t.TalepTarihi,
-                BaslangicTarihi = t.BaslangicTarihi,
-                BitisTarihi = t.BitisTarihi,
-                MazeretTarihi = t.MazeretTarihi,
-                SaatDilimi = t.SaatDilimi,
-                ToplamGun = t.ToplamGun,
-                BirinciOnayDurumu = t.BirinciOnayDurumu,
-                BirinciOnayDurumuAdi = t.BirinciOnayDurumu.GetDescription(),
-                IkinciOnayDurumu = t.IkinciOnayDurumu,
-                IkinciOnayDurumuAdi = t.IkinciOnayDurumu.GetDescription(),
-                GenelDurum = GetGenelDurum(t),
-                IsActive = t.IsActive
-            }).ToList();
+                var talep = talepler.FirstOrDefault(t => t.IzinMazeretTalepId == dto.IzinMazeretTalepId);
+                if (talep != null)
+                {
+                    dto.GenelDurum = GetGenelDurum(talep);
+                }
+            }
+            
+            return dtoList;
         }
 
         private string GetGenelDurum(IzinMazeretTalep talep)
@@ -800,7 +904,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 var ikinciOnaycılar = uygunSorumlular.Where(s => s.OnaySeviyesi == 2).ToList();
 
                 // İZİN TALEPLERİ: 1. VE 2. onaycı gerekli (sıralı onay)
-                if (talep.Turu != IzinMazeretTuru.Mazeret)
+                // Planlı izinler için (mazeret değilse)
+                if (talep.IzinMazeretTuru?.PlanliIzinMi == true)
                 {
                     // 1. Onaycı ata
                     if (birinciOnaycılar.Any())
@@ -853,6 +958,63 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             {
                 _logger.LogError(ex, "Onaycı atama sırasında hata oluştu");
                 // Hata olsa bile talep oluşturulsun, manuel atama yapılabilir
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // SGK İŞLEM TAKİBİ
+        // ═══════════════════════════════════════════════════════
+
+        public async Task<ApiResponseDto<bool>> ProcessSgkIslemAsync(IzinSgkIslemRequestDto request, string kullaniciTc)
+        {
+            try
+            {
+                var repository = _unitOfWork.GetRepository<IIzinMazeretTalepRepository>();
+                var talep = await repository.GetByIdAsync(request.IzinMazeretTalepId);
+
+                if (talep == null)
+                    return ApiResponseDto<bool>.ErrorResult("Talep bulunamadı");
+
+                // Sadece onaylanmış talepler işlenebilir
+                if (talep.BirinciOnayDurumu != OnayDurumu.Onaylandi || 
+                    talep.IkinciOnayDurumu != OnayDurumu.Onaylandi)
+                {
+                    return ApiResponseDto<bool>.ErrorResult("Sadece onaylanmış talepler işlenebilir");
+                }
+
+                if (request.Isle)
+                {
+                    // SGK'ya işle
+                    if (talep.IzinIslendiMi)
+                        return ApiResponseDto<bool>.ErrorResult("Bu talep zaten işlenmiş");
+
+                    talep.IzinIslendiMi = true;
+                    talep.IzinIslemTarihi = DateTime.Now;
+                    talep.IzinIslemYapanKullanici = kullaniciTc;
+                    talep.IzinIslemNotlari = request.Notlar;
+                }
+                else
+                {
+                    // İşlemi geri al
+                    if (!talep.IzinIslendiMi)
+                        return ApiResponseDto<bool>.ErrorResult("Bu talep henüz işlenmemiş");
+
+                    talep.IzinIslendiMi = false;
+                    talep.IzinIslemTarihi = null;
+                    talep.IzinIslemYapanKullanici = null;
+                    talep.IzinIslemNotlari = request.Notlar; // Geri alma nedeni
+                }
+
+                await repository.UpdateAsync(talep);
+                await _unitOfWork.SaveChangesAsync();
+
+                var mesaj = request.Isle ? "İzin SGK sistemine başarıyla işlendi" : "SGK işlemi başarıyla geri alındı";
+                return ApiResponseDto<bool>.SuccessResult(true, mesaj);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "SGK işlem sırasında hata: {TalepId}", request.IzinMazeretTalepId);
+                return ApiResponseDto<bool>.ErrorResult($"İşlem sırasında hata: {ex.Message}");
             }
         }
     }

@@ -38,10 +38,16 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri
         // ═══════════════════════════════════════════════════════
 
         /// <summary>
-        /// İzin/Mazeret türü (Yıllık, Mazeret, Hastalık vb.)
+        /// İzin/Mazeret türü ID (IzinMazeretTuruTanim tablosundan)
         /// </summary>
         [Required]
-        public IzinMazeretTuru Turu { get; set; }
+        public int IzinMazeretTuruId { get; set; }
+
+        /// <summary>
+        /// İzin/Mazeret türü (Navigation Property)
+        /// </summary>
+        [ForeignKey(nameof(IzinMazeretTuruId))]
+        public IzinMazeretTuruTanim? IzinMazeretTuru { get; set; }
 
         /// <summary>
         /// Açıklama/Sebep
@@ -81,10 +87,16 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri
         public DateTime? MazeretTarihi { get; set; }
 
         /// <summary>
-        /// Saat dilimi (ör: "08:00-09:00", Mazeret için)
+        /// Başlangıç saati (Mazeret için)
         /// </summary>
-        [StringLength(50)]
-        public string? SaatDilimi { get; set; }
+        [Column(TypeName = "time")]
+        public TimeSpan? BaslangicSaati { get; set; }
+
+        /// <summary>
+        /// Bitiş saati (Mazeret için)
+        /// </summary>
+        [Column(TypeName = "time")]
+        public TimeSpan? BitisSaati { get; set; }
 
         // ═══════════════════════════════════════════════════════
         // BİRİNCİ ONAYCI (YÖNETİCİ/MÜDÜR)
@@ -95,6 +107,12 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri
         /// </summary>
         [StringLength(11)]
         public string? BirinciOnayciTcKimlikNo { get; set; }
+
+        /// <summary>
+        /// 1. Onayci personel bilgisi (Navigation Property)
+        /// </summary>
+        [ForeignKey(nameof(BirinciOnayciTcKimlikNo))]
+        public Personel? BirinciOnayci { get; set; }
 
         /// <summary>
         /// 1. Onay durumu
@@ -121,6 +139,12 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri
         /// </summary>
         [StringLength(11)]
         public string? IkinciOnayciTcKimlikNo { get; set; }
+
+        /// <summary>
+        /// 2. Onayci personel bilgisi (Navigation Property)
+        /// </summary>
+        [ForeignKey(nameof(IkinciOnayciTcKimlikNo))]
+        public Personel? IkinciOnayci { get; set; }
 
         /// <summary>
         /// 2. Onay durumu
@@ -152,11 +176,30 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri
         /// </summary>
         public bool IsActive { get; set; } = true;
 
+        // ═══════════════════════════════════════════════════════
+        // SGK SİSTEM İŞLEM TAKİBİ
+        // ═══════════════════════════════════════════════════════
+
         /// <summary>
-        /// Belge eki (ör: Rapor, Evlilik cüzdanı vb.)
-        /// Dosya yolu veya base64 string
+        /// SGK sistemine işlendi mi? (Onaylanan izinler için)
+        /// </summary>
+        public bool IzinIslendiMi { get; set; } = false;
+
+        /// <summary>
+        /// SGK sistemine işlenme tarihi
+        /// </summary>
+        public DateTime? IzinIslemTarihi { get; set; }
+
+        /// <summary>
+        /// İşlemi yapan kullanıcı TC (SGK ve evrak işlemleri için)
+        /// </summary>
+        [StringLength(11)]
+        public string? IzinIslemYapanKullanici { get; set; }
+
+        /// <summary>
+        /// İşlem notları (SGK girişi, belge hazırlama vb. için)
         /// </summary>
         [StringLength(1000)]
-        public string? BelgeEki { get; set; }
+        public string? IzinIslemNotlari { get; set; }
     }
 }

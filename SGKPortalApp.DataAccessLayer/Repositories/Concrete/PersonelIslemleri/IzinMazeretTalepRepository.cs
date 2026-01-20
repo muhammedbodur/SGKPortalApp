@@ -33,6 +33,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
             var query = _dbSet
                 .AsNoTracking()
                 .Include(t => t.Personel)
+                .Include(t => t.BirinciOnayci)
+                .Include(t => t.IkinciOnayci)
                 .Where(t => t.TcKimlikNo == tcKimlikNo && !t.SilindiMi);
 
             if (!includeInactive)
@@ -188,6 +190,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                     .ThenInclude(p => p!.Departman)
                 .Include(t => t.Personel)
                     .ThenInclude(p => p!.Servis)
+                .Include(t => t.BirinciOnayci)
+                .Include(t => t.IkinciOnayci)
                 .Where(t => t.BirinciOnayciTcKimlikNo == onayciTcKimlikNo &&
                            !t.SilindiMi &&
                            t.IsActive &&
@@ -207,10 +211,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                     .ThenInclude(p => p!.Departman)
                 .Include(t => t.Personel)
                     .ThenInclude(p => p!.Servis)
+                .Include(t => t.BirinciOnayci)
+                .Include(t => t.IkinciOnayci)
                 .Where(t => t.IkinciOnayciTcKimlikNo == onayciTcKimlikNo &&
                            !t.SilindiMi &&
                            t.IsActive &&
-                           t.BirinciOnayDurumu == OnayDurumu.Onaylandi && // 1. onay geçmiş olmalı
                            t.IkinciOnayDurumu == OnayDurumu.Beklemede)
                 .OrderBy(t => t.TalepTarihi)
                 .ToListAsync();
@@ -258,7 +263,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
             string? tcKimlikNo = null,
             int? departmanId = null,
             int? servisId = null,
-            IzinMazeretTuru? turu = null,
+            int? izinMazeretTuruId = null,
             OnayDurumu? birinciOnayDurumu = null,
             OnayDurumu? ikinciOnayDurumu = null,
             DateTime? baslangicTarihiMin = null,
@@ -277,6 +282,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                     .ThenInclude(p => p!.Departman)
                 .Include(t => t.Personel)
                     .ThenInclude(p => p!.Servis)
+                .Include(t => t.BirinciOnayci)
+                .Include(t => t.IkinciOnayci)
+                .Include(t => t.IzinMazeretTuru)
                 .Where(t => !t.SilindiMi);
 
             // Filtreler
@@ -295,9 +303,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                 query = query.Where(t => t.Personel!.ServisId == servisId.Value);
             }
 
-            if (turu.HasValue)
+            if (izinMazeretTuruId.HasValue)
             {
-                query = query.Where(t => t.Turu == turu.Value);
+                query = query.Where(t => t.IzinMazeretTuruId == izinMazeretTuruId.Value);
             }
 
             if (birinciOnayDurumu.HasValue)
@@ -404,7 +412,6 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                 .Where(t => t.TcKimlikNo == tcKimlikNo &&
                            !t.SilindiMi &&
                            t.IsActive &&
-                           t.Turu == IzinMazeretTuru.YillikIzin &&
                            t.BirinciOnayDurumu == OnayDurumu.Onaylandi &&
                            t.IkinciOnayDurumu == OnayDurumu.Onaylandi &&
                            t.BaslangicTarihi >= startDate &&
@@ -414,7 +421,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
             return totalDays;
         }
 
-        public async Task<int> GetTotalUsedDaysAsync(string tcKimlikNo, IzinMazeretTuru? turu = null, int? year = null)
+        public async Task<int> GetTotalUsedDaysAsync(string tcKimlikNo, int? izinMazeretTuruId = null, int? year = null)
         {
             if (string.IsNullOrWhiteSpace(tcKimlikNo))
                 return 0;
@@ -427,9 +434,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                            t.BirinciOnayDurumu == OnayDurumu.Onaylandi &&
                            t.IkinciOnayDurumu == OnayDurumu.Onaylandi);
 
-            if (turu.HasValue)
+            if (izinMazeretTuruId.HasValue)
             {
-                query = query.Where(t => t.Turu == turu.Value);
+                query = query.Where(t => t.IzinMazeretTuruId == izinMazeretTuruId.Value);
             }
 
             if (year.HasValue)
@@ -442,14 +449,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
             return await query.SumAsync(t => t.ToplamGun ?? 0);
         }
 
-        public async Task<Dictionary<IzinMazeretTuru, int>> GetDepartmanStatisticsAsync(int departmanId, int year)
+        public async Task<Dictionary<int, int>> GetDepartmanStatisticsAsync(int departmanId, int year)
         {
             var startDate = new DateTime(year, 1, 1);
             var endDate = new DateTime(year, 12, 31);
 
-            var statistics = await _dbSet
+            return await _dbSet
                 .AsNoTracking()
-                .Include(t => t.Personel)
                 .Where(t => t.Personel!.DepartmanId == departmanId &&
                            !t.SilindiMi &&
                            t.IsActive &&
@@ -457,11 +463,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                            t.IkinciOnayDurumu == OnayDurumu.Onaylandi &&
                            t.BaslangicTarihi >= startDate &&
                            t.BitisTarihi <= endDate)
-                .GroupBy(t => t.Turu)
-                .Select(g => new { Turu = g.Key, TotalDays = g.Sum(t => t.ToplamGun ?? 0) })
-                .ToListAsync();
-
-            return statistics.ToDictionary(s => s.Turu, s => s.TotalDays);
+                .GroupBy(t => t.IzinMazeretTuruId)
+                .Select(g => new { TuruId = g.Key, TotalDays = g.Sum(t => t.ToplamGun ?? 0) })
+                .ToDictionaryAsync(x => x.TuruId, x => x.TotalDays);
         }
 
         // ═══════════════════════════════════════════════════════
@@ -487,8 +491,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                     ? query.OrderByDescending(t => t.Personel!.AdSoyad)
                     : query.OrderBy(t => t.Personel!.AdSoyad),
                 "tur" => sortDescending
-                    ? query.OrderByDescending(t => t.Turu)
-                    : query.OrderBy(t => t.Turu),
+                    ? query.OrderByDescending(t => t.IzinMazeretTuruId)
+                    : query.OrderBy(t => t.IzinMazeretTuruId),
                 "taleptarihi" => sortDescending
                     ? query.OrderByDescending(t => t.TalepTarihi)
                     : query.OrderBy(t => t.TalepTarihi),

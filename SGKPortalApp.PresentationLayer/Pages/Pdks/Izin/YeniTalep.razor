@@ -45,22 +45,24 @@ else
                             <select class="form-select @(ShowTurError ? "is-invalid" : "")"
                                     value="@SelectedTuru" @onchange="OnTuruChanged">
                                 <option value="">Seçiniz...</option>
-                                @foreach (IzinMazeretTuru tur in Enum.GetValues(typeof(IzinMazeretTuru)))
+                                @foreach (var izinTuru in IzinTurleri)
                                 {
-                                    <option value="@((int)tur)">@tur.GetDescription()</option>
+                                    <option value="@izinTuru.IzinMazeretTuruId">@izinTuru.TuruAdi @izinTuru.Aciklama</option>
                                 }
                             </select>
                             @if (ShowTurError)
                             {
                                 <div class="invalid-feedback">İzin/Mazeret türü seçmelisiniz</div>
                             }
+                            @if (IzinTurleri.Any())
+                            {
+                                <small class="form-text text-muted">@IzinTurleri.Count adet izin türü mevcut</small>
+                            }
                         </div>
 
-                        @if (SelectedTuru.HasValue)
+                        @if (SelectedTuru.HasValue && SelectedIzinTuru != null)
                         {
-                            var tur = (IzinMazeretTuru)SelectedTuru.Value;
-
-                            @if (tur == IzinMazeretTuru.Mazeret)
+                            @if (!SelectedIzinTuru.PlanliIzinMi)
                             {
                                 <!-- Mazeret için: Tarih + Saat Dilimi -->
                                 <div class="mb-3">
@@ -69,13 +71,19 @@ else
                                     <ValidationMessage For="@(() => Request.MazeretTarihi)" />
                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label">Saat Dilimi <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" @bind="Request.SaatDilimi"
-                                           placeholder="Örn: 09:00-10:00" />
-                                    <ValidationMessage For="@(() => Request.SaatDilimi)" />
-                                    <small class="form-text text-muted">Mazeret gösterdiğiniz saat aralığını girin</small>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Başlangıç Saati <span class="text-danger">*</span></label>
+                                        <input type="time" class="form-control" @bind="BaslangicSaatiStr" />
+                                        <ValidationMessage For="@(() => Request.BaslangicSaati)" />
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Bitiş Saati <span class="text-danger">*</span></label>
+                                        <input type="time" class="form-control" @bind="BitisSaatiStr" />
+                                        <ValidationMessage For="@(() => Request.BitisSaati)" />
+                                    </div>
                                 </div>
+                                <small class="form-text text-muted">Mazeret gösterdiğiniz saat aralığını seçin</small>
                             }
                             else
                             {
@@ -117,13 +125,13 @@ else
                             <div class="alert alert-info mb-3">
                                 <i class="bx bx-info-circle"></i>
                                 <strong>Onaycı Bilgisi:</strong>
-                                @if (tur == IzinMazeretTuru.Mazeret)
+                                @if (!RequiresSecondApprover())
                                 {
-                                    <span>Mazeret talepleri için 1. VEYA 2. onaycıdan biri onaylar. Boş bırakırsanız sistem otomatik atayacaktır.</span>
+                                    <span>Bu izin türü için sadece 1. onaycı onayı yeterlidir. Boş bırakırsanız sistem otomatik atayacaktır.</span>
                                 }
                                 else
                                 {
-                                    <span>İzin talepleri için 1. VE 2. onaycı sırasıyla onaylar. Boş bırakırsanız sistem otomatik atayacaktır.</span>
+                                    <span>Bu izin türü için 1. VE 2. onaycı sırasıyla onaylar. Boş bırakırsanız sistem otomatik atayacaktır.</span>
                                 }
                             </div>
 
@@ -139,70 +147,72 @@ else
                                 <!-- Birinci Onaycı -->
                                 <div class="mb-3">
                                     <label class="form-label">
-                                        1. Onaycı (Opsiyonel)
-                                        @if (tur != IzinMazeretTuru.Mazeret)
+                                        1. Onaycı
+                                        @if (SelectedIzinTuru.BirinciOnayciGerekli)
                                         {
-                                            <span class="badge bg-warning ms-2">İzin için gerekli</span>
+                                            <span class="badge bg-warning ms-2">Gerekli</span>
                                         }
                                     </label>
-                                    <select class="form-select" @bind="Request.BirinciOnayciTcKimlikNo">
+                                    <select class="form-select" @bind="SelectedBirinciOnayci">
                                         <option value="">Sistem otomatik atayacak</option>
-                                        @foreach (var onayci in BirinciOnaycılar)
+                                        @foreach (var onayci in AvailableApprovers)
                                         {
-                                            <option value="@onayci.SorumluPersonelTcKimlikNo">
-                                                @onayci.SorumluPersonelAdSoyad (@onayci.DepartmanAdi@(onayci.ServisAdi != null ? " - " + onayci.ServisAdi : ""))
+                                            <option value="@onayci.TcKimlikNo" disabled="@(onayci.TcKimlikNo == SelectedIkinciOnayci)">
+                                                @onayci.AdSoyad (@onayci.DepartmanAdi@(onayci.ServisAdi != null ? " - " + onayci.ServisAdi : "")) - @onayci.UnvanAdi
                                             </option>
                                         }
                                     </select>
                                     <small class="form-text text-muted">
-                                        @if (BirinciOnaycılar.Any())
+                                        @if (AvailableApprovers.Any())
                                         {
-                                            <span>@BirinciOnaycılar.Count adet 1. onaycı bulundu</span>
+                                            <span>@AvailableApprovers.Count adet onaycı bulundu</span>
                                         }
                                         else
                                         {
-                                            <span class="text-warning">⚠️ Hiç 1. onaycı tanımlı değil</span>
+                                            <span class="text-warning">⚠️ Hiç onaycı bulunamadı</span>
                                         }
                                     </small>
                                 </div>
 
-                                <!-- İkinci Onaycı -->
-                                <div class="mb-3">
-                                    <label class="form-label">
-                                        2. Onaycı (Opsiyonel)
-                                        @if (tur != IzinMazeretTuru.Mazeret)
+                                <!-- İkinci Onaycı - Sadece gerekli ise göster -->
+                                @if (RequiresSecondApprover())
+                                {
+                                    <div class="mb-3">
+                                        <label class="form-label">
+                                            2. Onaycı
+                                            @if (SelectedIzinTuru.IkinciOnayciGerekli)
+                                            {
+                                                <span class="badge bg-warning ms-2">Gerekli</span>
+                                            }
+                                        </label>
+                                        <select class="form-select" @bind="SelectedIkinciOnayci">
+                                            <option value="">Sistem otomatik atayacak</option>
+                                            @foreach (var onayci in AvailableApprovers)
+                                            {
+                                                <option value="@onayci.TcKimlikNo" disabled="@(onayci.TcKimlikNo == SelectedBirinciOnayci)">
+                                                    @onayci.AdSoyad (@onayci.DepartmanAdi@(onayci.ServisAdi != null ? " - " + onayci.ServisAdi : "")) - @onayci.UnvanAdi
+                                                </option>
+                                            }
+                                        </select>
+                                        <small class="form-text text-muted">
+                                            @if (AvailableApprovers.Any())
+                                            {
+                                                <span>@AvailableApprovers.Count adet onaycı bulundu</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-warning">⚠️ Hiç onaycı bulunamadı</span>
+                                            }
+                                        </small>
+                                        @if (!string.IsNullOrEmpty(SelectedBirinciOnayci) && SelectedBirinciOnayci == SelectedIkinciOnayci)
                                         {
-                                            <span class="badge bg-warning ms-2">İzin için gerekli</span>
+                                            <div class="text-danger mt-1">
+                                                <i class="bx bx-error-circle"></i> 1. ve 2. onaycı aynı kişi olamaz!
+                                            </div>
                                         }
-                                    </label>
-                                    <select class="form-select" @bind="Request.IkinciOnayciTcKimlikNo">
-                                        <option value="">Sistem otomatik atayacak</option>
-                                        @foreach (var onayci in IkinciOnaycılar)
-                                        {
-                                            <option value="@onayci.SorumluPersonelTcKimlikNo">
-                                                @onayci.SorumluPersonelAdSoyad (@onayci.DepartmanAdi@(onayci.ServisAdi != null ? " - " + onayci.ServisAdi : ""))
-                                            </option>
-                                        }
-                                    </select>
-                                    <small class="form-text text-muted">
-                                        @if (IkinciOnaycılar.Any())
-                                        {
-                                            <span>@IkinciOnaycılar.Count adet 2. onaycı bulundu</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-warning">⚠️ Hiç 2. onaycı tanımlı değil</span>
-                                        }
-                                    </small>
-                                </div>
+                                    </div>
+                                }
                             }
-
-                            <!-- Belge Eki (Opsiyonel) -->
-                            <div class="mb-3">
-                                <label class="form-label">Belge Eki (Opsiyonel)</label>
-                                <InputFile class="form-control" OnChange="HandleFileSelected" />
-                                <small class="form-text text-muted">Rapor, evlilik cüzdanı vb. belge ekleyebilirsiniz</small>
-                            </div>
 
                             <!-- Çakışma Uyarısı -->
                             @if (!string.IsNullOrEmpty(OverlapWarning))
@@ -255,22 +265,11 @@ else
                     <h5 class="card-title mb-0"><i class="bx bx-help-circle me-1"></i> Yardım</h5>
                 </div>
                 <div class="card-body">
-                    <h6>İzin Türleri:</h6>
-                    <ul class="small">
-                        <li><strong>Yıllık İzin:</strong> Yıllık izin hakkınızdan kullanım</li>
-                        <li><strong>Hastalık İzni:</strong> Rapor ile belgelendirilir</li>
-                        <li><strong>Babalık İzni:</strong> 5 gün ücretli izin</li>
-                        <li><strong>Evlilik İzni:</strong> 3 gün ücretli izin</li>
-                        <li><strong>Mazeret:</strong> Geç kalma, erken çıkış gibi durumlar</li>
-                    </ul>
-
-                    <hr />
-
                     <h6>Onay Süreci:</h6>
                     <ol class="small">
                         <li>Talep oluşturulur</li>
-                        <li>1. Onayci değerlendirir</li>
-                        <li>2. Onayci değerlendirir</li>
+                        <li>1. Onaycı değerlendirir</li>
+                        <li>2. Onaycı seçilmiş ise değerlendirir</li>
                         <li>Her iki onay sonrası kesinleşir</li>
                     </ol>
 

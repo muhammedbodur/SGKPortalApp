@@ -5,8 +5,10 @@ using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Pdks;
+using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using SGKPortalApp.Common.Extensions;
 using Microsoft.Extensions.Logging;
 
@@ -21,8 +23,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         [Inject] private IIzinMazeretTalepApiService _izinMazeretTalepService { get; set; } = default!;
         [Inject] private IIzinSorumluApiService _izinSorumluApiService { get; set; } = default!;
         [Inject] private AuthenticationStateProvider _authStateProvider { get; set; } = default!;
-        [Inject] private IJSRuntime _js { get; set; } = default!;
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
+        [Inject] private IToastService ToastService { get; set; } = default!;
         [Inject] private ILogger<YeniTalep> Logger { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════
@@ -34,9 +36,35 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         private int ToplamGun { get; set; } = 0;
         private string OverlapWarning { get; set; } = string.Empty;
 
+        // TimeSpan için string conversion (HTML time input için)
+        private string BaslangicSaatiStr
+        {
+            get => Request.BaslangicSaati?.ToString(@"hh\:mm") ?? "";
+            set
+            {
+                if (TimeSpan.TryParse(value, out var time))
+                    Request.BaslangicSaati = time;
+            }
+        }
+
+        private string BitisSaatiStr
+        {
+            get => Request.BitisSaati?.ToString(@"hh\:mm") ?? "";
+            set
+            {
+                if (TimeSpan.TryParse(value, out var time))
+                    Request.BitisSaati = time;
+            }
+        }
+
+        // İzin türü listesi
+        private List<IzinMazeretTuruResponseDto> IzinTurleri { get; set; } = new();
+        private IzinMazeretTuruResponseDto? SelectedIzinTuru { get; set; }
+
         // Onaycı listeleri
-        private List<IzinSorumluResponseDto> BirinciOnaycılar { get; set; } = new();
-        private List<IzinSorumluResponseDto> IkinciOnaycılar { get; set; } = new();
+        private List<PersonelResponseDto> AvailableApprovers { get; set; } = new();
+        private string? SelectedBirinciOnayci { get; set; }
+        private string? SelectedIkinciOnayci { get; set; }
 
         // ═══════════════════════════════════════════════════════
         // UI STATE
@@ -58,6 +86,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             var tcKimlikNo = await GetCurrentUserTcKimlikNoAsync();
             Request.TcKimlikNo = tcKimlikNo ?? string.Empty;
 
+            // İzin türlerini yükle
+            await LoadLeaveTypesAsync();
+
             // Onaycı listelerini yükle
             await LoadApproversAsync();
         }
@@ -71,19 +102,23 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             if (int.TryParse(e.Value?.ToString(), out var turValue))
             {
                 SelectedTuru = turValue;
-                Request.Turu = (IzinMazeretTuru)turValue;
+                SelectedIzinTuru = IzinTurleri.FirstOrDefault(t => t.IzinMazeretTuruId == turValue);
+                Request.IzinMazeretTuruId = turValue;
                 ShowTurError = false;
                 OverlapWarning = string.Empty;
 
+                // Form alanlarını temizle
                 Request.BaslangicTarihi = null;
                 Request.BitisTarihi = null;
                 Request.MazeretTarihi = null;
-                Request.SaatDilimi = null;
+                Request.BaslangicSaati = null;
+                Request.BitisSaati = null;
                 ToplamGun = 0;
             }
             else
             {
                 SelectedTuru = null;
+                SelectedIzinTuru = null;
             }
         }
 
@@ -122,11 +157,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             }
 
             // Validasyon
-            if (Request.Turu == IzinMazeretTuru.Mazeret)
+            if (SelectedIzinTuru != null && !SelectedIzinTuru.PlanliIzinMi)
             {
                 if (!Request.MazeretTarihi.HasValue || string.IsNullOrWhiteSpace(Request.SaatDilimi))
                 {
-                    await ShowToast("warning", "Mazeret tarihi ve saat dilimi zorunludur");
+                    await ToastService.ShowWarningAsync("Mazeret için tarih ve saat dilimi zorunludur");
                     return;
                 }
             }
@@ -134,7 +169,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             {
                 if (!Request.BaslangicTarihi.HasValue || !Request.BitisTarihi.HasValue)
                 {
-                    await ShowToast("warning", "Başlangıç ve bitiş tarihi zorunludur");
+                    await ToastService.ShowWarningAsync("Başlangıç ve bitiş tarihi zorunludur");
                     return;
                 }
             }
@@ -151,22 +186,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                     if (result.Data.HasOverlap)
                     {
                         OverlapWarning = result.Data.Message ?? "Bu tarih aralığında çakışma var!";
-                        await ShowToast("warning", "⚠️ Çakışma tespit edildi");
+                        await ToastService.ShowWarningAsync("⚠️ Çakışma tespit edildi");
                     }
                     else
                     {
-                        await ShowToast("success", "✅ Çakışma yok, talep oluşturabilirsiniz");
+                        await ToastService.ShowSuccessAsync("✅ Çakışma yok, talep oluşturabilirsiniz");
                     }
                 }
                 else
                 {
-                    await ShowToast("error", result.Message ?? "Çakışma kontrolü yapılamadı");
+                    await ToastService.ShowErrorAsync(result.Message ?? "Çakışma kontrolü yapılamadı");
                 }
             }
             catch (Exception ex)
             {
                 Logger.LogError(ex, "Çakışma kontrolü sırasında hata oluştu");
-                await ShowToast("error", "Çakışma kontrolü yapılamadı");
+                await ToastService.ShowErrorAsync("Çakışma kontrolü yapılamadı");
             }
             finally
             {
@@ -182,26 +217,37 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                 return;
             }
 
+            // Aynı kişi kontrolü
+            if (!ValidateApprovers())
+            {
+                await ToastService.ShowErrorAsync("1. ve 2. onaycı aynı kişi olamaz!");
+                return;
+            }
+
             try
             {
                 IsSaving = true;
+
+                // Seçilen onaycıları request'e ata
+                Request.BirinciOnayciTcKimlikNo = SelectedBirinciOnayci;
+                Request.IkinciOnayciTcKimlikNo = SelectedIkinciOnayci;
 
                 var result = await _izinMazeretTalepService.CreateAsync(Request);
 
                 if (result.Success)
                 {
-                    await ShowToast("success", "✅ Talep başarıyla oluşturuldu");
+                    await ToastService.ShowSuccessAsync("✅ Talep başarıyla oluşturuldu");
                     await Task.Delay(500);
                     _navigationManager.NavigateTo("/pdks/izin/taleplerim");
                 }
                 else
                 {
-                    await ShowToast("error", result.Message ?? "Talep oluşturulamadı");
+                    await ToastService.ShowErrorAsync(result.Message ?? "Talep oluşturulamadı");
                 }
             }
             catch (Exception ex)
             {
-                await ShowToast("error", "Talep oluşturulurken bir hata oluştu");
+                await ToastService.ShowErrorAsync("Talep oluşturulurken bir hata oluştu");
             }
             finally
             {
@@ -209,47 +255,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             }
         }
 
-        private async Task HandleFileSelected(InputFileChangeEventArgs e)
-        {
-            try
-            {
-                var file = e.File;
-                if (file == null) return;
 
-                // Max 5MB
-                const long maxFileSize = 5 * 1024 * 1024;
-                if (file.Size > maxFileSize)
-                {
-                    await ShowToast("warning", "Dosya boyutu 5MB'dan küçük olmalıdır");
-                    return;
-                }
-
-                // Dosyayı base64'e çevir ve request'e ekle
-                using var stream = file.OpenReadStream(maxFileSize);
-                using var ms = new MemoryStream();
-                await stream.CopyToAsync(ms);
-                var base64 = Convert.ToBase64String(ms.ToArray());
-                Request.BelgeEki = $"data:{file.ContentType};base64,{base64}";
-
-                await ShowToast("success", "Belge yüklendi");
-            }
-            catch
-            {
-                await ShowToast("error", "Dosya yüklenemedi");
-            }
-        }
-
-        private async Task ShowToast(string type, string message)
-        {
-            try
-            {
-                await _js.InvokeVoidAsync("showToast", type, message);
-            }
-            catch
-            {
-                // Toast gösterilemezse sessizce devam et
-            }
-        }
 
         // ═══════════════════════════════════════════════════════
         // HELPER METHODS
@@ -269,23 +275,32 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         }
 
         /// <summary>
-        /// Onaycı listelerini yükler (aktif olanlar)
+        /// Kullanıcının seçebileceği onaycıları yükler
+        /// Kurallar:
+        /// - Unvan ID = 7: Tüm departmanlarda
+        /// - Servis ID = 33: Sadece kendi departmanında
+        /// - Unvan ID IN (5,87): Aynı departman VE aynı servis
         /// </summary>
         private async Task LoadApproversAsync()
         {
             try
             {
                 IsLoadingApprovers = true;
-                BirinciOnaycılar.Clear();
-                IkinciOnaycılar.Clear();
+                AvailableApprovers.Clear();
 
-                var result = await _izinSorumluApiService.GetActiveAsync();
+                var tcKimlikNo = await GetCurrentUserTcKimlikNoAsync();
+                if (string.IsNullOrEmpty(tcKimlikNo))
+                {
+                    Logger.LogWarning("Kullanıcı TC Kimlik No alınamadı");
+                    return;
+                }
+
+                var result = await _izinMazeretTalepService.GetAvailableApproversAsync(tcKimlikNo);
 
                 if (result.Success && result.Data != null)
                 {
-                    // 1. ve 2. Onaycıları ayır
-                    BirinciOnaycılar = result.Data.Where(s => s.OnaySeviyesi == 1).ToList();
-                    IkinciOnaycılar = result.Data.Where(s => s.OnaySeviyesi == 2).ToList();
+                    AvailableApprovers = result.Data;
+                    Logger.LogInformation("{Count} adet onaycı bulundu", AvailableApprovers.Count);
                 }
                 else
                 {
@@ -300,6 +315,55 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             {
                 IsLoadingApprovers = false;
             }
+        }
+
+        /// <summary>
+        /// İzin türlerini yükler
+        /// </summary>
+        private async Task LoadLeaveTypesAsync()
+        {
+            try
+            {
+                var result = await _izinMazeretTalepService.GetAvailableLeaveTypesAsync();
+
+                if (result.Success && result.Data != null)
+                {
+                    IzinTurleri = result.Data;
+                    Logger.LogInformation("{Count} adet izin türü yüklendi", IzinTurleri.Count);
+                }
+                else
+                {
+                    Logger.LogWarning("İzin türleri alınamadı: {Message}", result.Message);
+                    await ToastService.ShowWarningAsync("İzin türleri yüklenemedi");
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "İzin türleri yüklenirken hata oluştu");
+                await ToastService.ShowErrorAsync("İzin türleri yüklenemedi");
+            }
+        }
+
+        /// <summary>
+        /// Seçili izin türü için 2. onaycı gerekli mi?
+        /// </summary>
+        private bool RequiresSecondApprover()
+        {
+            return SelectedIzinTuru?.IkinciOnayciGerekli ?? true;
+        }
+
+        /// <summary>
+        /// 1. ve 2. onaycı için aynı kişi seçilip seçilmediğini kontrol eder
+        /// </summary>
+        private bool ValidateApprovers()
+        {
+            if (!string.IsNullOrEmpty(SelectedBirinciOnayci) && 
+                !string.IsNullOrEmpty(SelectedIkinciOnayci) &&
+                SelectedBirinciOnayci == SelectedIkinciOnayci)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

@@ -448,6 +448,18 @@
                                     <div>Sorumlu Atama</div>
                                 </a>
                             </li>
+                            <li class="menu-item @(IsActive("/pdks/izin/tur-tanimlari") ? "active" : "")">
+                                <a href="/pdks/izin/tur-tanimlari" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-list-ul"></i>
+                                    <div>İzin Türü Tanımları</div>
+                                </a>
+                            </li>
+                            <li class="menu-item @(IsActive("/pdks/izin/takip") ? "active" : "")">
+                                <a href="/pdks/izin/takip" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-list-check"></i>
+                                    <div>İzin Takip</div>
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     <li class="menu-item @(IsSectionActive("/pdks/mesai") ? "active open" : "")">

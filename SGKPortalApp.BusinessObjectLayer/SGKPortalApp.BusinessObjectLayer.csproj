@@ -23,7 +23,6 @@
     <Folder Include="Entities\DenetmenlikIslemleri\" />
     <Folder Include="Entities\RucuIslemleri\" />
     <Folder Include="Enums\EshotIslemleri\" />
-    <Folder Include="Enums\PdksIslemleri\" />
   </ItemGroup>
 
   <ItemGroup>

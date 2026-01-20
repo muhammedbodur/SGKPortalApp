@@ -171,16 +171,19 @@ else
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="badge @GetTurBadgeClass(talep.Turu)">
+                                    <span class="badge bg-label-info">
                                         @talep.TuruAdi
                                     </span>
                                 </td>
                                 <td>
-                                    @if (talep.Turu == IzinMazeretTuru.Mazeret)
+                                    @if (talep.MazeretTarihi.HasValue)
                                     {
                                         <div>
                                             <strong>@talep.MazeretTarihi?.ToString("dd.MM.yyyy")</strong><br />
-                                            <small class="text-muted">@talep.SaatDilimi</small>
+                                            @if (talep.BaslangicSaati.HasValue && talep.BitisSaati.HasValue)
+                                            {
+                                                <small class="text-muted">@talep.BaslangicSaati.Value.ToString(@"hh\:mm") - @talep.BitisSaati.Value.ToString(@"hh\:mm")</small>
+                                            }
                                         </div>
                                     }
                                     else
@@ -207,22 +210,51 @@ else
                                     @if (talep.BirinciOnayDurumu == OnayDurumu.Beklemede)
                                     {
                                         <span class="badge bg-label-warning">1. Onay Bekliyor</span>
+                                        @if (!string.IsNullOrEmpty(talep.BirinciOnayciAdSoyad))
+                                        {
+                                            <br /><small class="text-muted">Onayci: @talep.BirinciOnayciAdSoyad</small>
+                                        }
                                     }
                                     else if (talep.BirinciOnayDurumu == OnayDurumu.Onaylandi && talep.IkinciOnayDurumu == OnayDurumu.Beklemede)
                                     {
                                         <span class="badge bg-label-info">2. Onay Bekliyor</span>
+                                        @if (!string.IsNullOrEmpty(talep.IkinciOnayciAdSoyad))
+                                        {
+                                            <br /><small class="text-muted">Onayci: @talep.IkinciOnayciAdSoyad</small>
+                                        }
                                     }
                                 </td>
                                 <td>
+                                    @{
+                                        var canApprove = CanApproveTalep(talep);
+                                        var disableReason = GetDisableReason(talep);
+                                    }
                                     <div class="dropdown">
-                                        <button type="button" class="btn btn-sm btn-icon btn-outline-primary dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                        <button type="button" class="btn btn-sm btn-icon btn-outline-primary dropdown-toggle hide-arrow" 
+                                                data-bs-toggle="dropdown"
+                                                disabled="@(!canApprove)"
+                                                title="@disableReason">
                                             <i class="bx bx-dots-vertical-rounded"></i>
                                         </button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="javascript:void(0);" @onclick="() => OpenApprovalModal(talep, true)">
+                                            @if (!canApprove)
+                                            {
+                                                <div class="dropdown-item-text text-warning">
+                                                    <i class="bx bx-info-circle me-1"></i>
+                                                    <small>@disableReason</small>
+                                                </div>
+                                                <div class="dropdown-divider"></div>
+                                            }
+                                            <a class="dropdown-item @(!canApprove ? "disabled" : "")" 
+                                               href="javascript:void(0);" 
+                                               @onclick="() => OpenApprovalModal(talep, true)"
+                                               style="@(!canApprove ? "pointer-events: none; opacity: 0.5;" : "")">
                                                 <i class="bx bx-check me-1"></i> Onayla
                                             </a>
-                                            <a class="dropdown-item" href="javascript:void(0);" @onclick="() => OpenApprovalModal(talep, false)">
+                                            <a class="dropdown-item @(!canApprove ? "disabled" : "")" 
+                                               href="javascript:void(0);" 
+                                               @onclick="() => OpenApprovalModal(talep, false)"
+                                               style="@(!canApprove ? "pointer-events: none; opacity: 0.5;" : "")">
                                                 <i class="bx bx-x me-1"></i> Reddet
                                             </a>
                                             <div class="dropdown-divider"></div>
@@ -265,10 +297,14 @@ else
                         <div class="mb-3">
                             <strong>Talep Sahibi:</strong> @SelectedTalep.AdSoyad<br />
                             <strong>Tür:</strong> @SelectedTalep.TuruAdi<br />
-                            @if (SelectedTalep.Turu == IzinMazeretTuru.Mazeret)
+                            @if (SelectedTalep.MazeretTarihi.HasValue)
                             {
                                 <strong>Tarih:</strong>
-                                <text>@SelectedTalep.MazeretTarihi?.ToString("dd.MM.yyyy") (@SelectedTalep.SaatDilimi)</text>
+                                <text>@SelectedTalep.MazeretTarihi?.ToString("dd.MM.yyyy")</text>
+                                @if (SelectedTalep.BaslangicSaati.HasValue && SelectedTalep.BitisSaati.HasValue)
+                                {
+                                    <text> (@SelectedTalep.BaslangicSaati.Value.ToString(@"hh\:mm") - @SelectedTalep.BitisSaati.Value.ToString(@"hh\:mm"))</text>
+                                }
                             }
                             else
                             {
@@ -326,7 +362,7 @@ else
                             </div>
                             <div class="col-md-6 mb-3">
                                 <strong>Tür:</strong><br />
-                                <span class="badge @GetTurBadgeClass(SelectedTalep.Turu)">@SelectedTalep.TuruAdi</span>
+                                <span class="badge bg-label-info">@SelectedTalep.TuruAdi</span>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <strong>Talep Tarihi:</strong><br />
@@ -338,16 +374,19 @@ else
                                     @SelectedTalep.GenelDurum
                                 </span>
                             </div>
-                            @if (SelectedTalep.Turu == IzinMazeretTuru.Mazeret)
+                            @if (SelectedTalep.MazeretTarihi.HasValue)
                             {
                                 <div class="col-md-6 mb-3">
                                     <strong>Mazeret Tarihi:</strong><br />
                                     @SelectedTalep.MazeretTarihi?.ToString("dd.MM.yyyy")
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <strong>Saat Dilimi:</strong><br />
-                                    @SelectedTalep.SaatDilimi
-                                </div>
+                                @if (SelectedTalep.BaslangicSaati.HasValue && SelectedTalep.BitisSaati.HasValue)
+                                {
+                                    <div class="col-md-6 mb-3">
+                                        <strong>Saat Dilimi:</strong><br />
+                                        @SelectedTalep.BaslangicSaati.Value.ToString(@"hh\:mm") - @SelectedTalep.BitisSaati.Value.ToString(@"hh\:mm")
+                                    </div>
+                                }
                             }
                             else
                             {
@@ -394,22 +433,6 @@ else
 }
 
 @code {
-    private string GetTurBadgeClass(IzinMazeretTuru tur)
-    {
-        return tur switch
-        {
-            IzinMazeretTuru.YillikIzin => "bg-label-success",
-            IzinMazeretTuru.HastalikIzni => "bg-label-danger",
-            IzinMazeretTuru.BabalikIzni => "bg-label-primary",
-            IzinMazeretTuru.DogumIzni => "bg-label-info",
-            IzinMazeretTuru.EvlilikIzni => "bg-label-warning",
-            IzinMazeretTuru.OlumIzni => "bg-label-dark",
-            IzinMazeretTuru.UcretsizIzin => "bg-label-secondary",
-            IzinMazeretTuru.Mazeret => "bg-label-warning",
-            _ => "bg-label-secondary"
-        };
-    }
-
     private string GetDurumBadgeClass(OnayDurumu durum)
     {
         return durum switch

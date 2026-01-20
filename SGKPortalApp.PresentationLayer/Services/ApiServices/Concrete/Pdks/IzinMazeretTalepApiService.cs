@@ -62,6 +62,21 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Pdks
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
                     _logger.LogError("CreateAsync failed: {Error}", errorContent);
+                    
+                    // API'den gelen hata mesajını parse et
+                    try
+                    {
+                        var errorResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<IzinMazeretTalepResponseDto>>();
+                        if (errorResponse != null && !string.IsNullOrEmpty(errorResponse.Message))
+                        {
+                            return ServiceResult<IzinMazeretTalepResponseDto>.Fail(errorResponse.Message);
+                        }
+                    }
+                    catch
+                    {
+                        // Parse edilemezse raw content'i kullan
+                    }
+                    
                     return ServiceResult<IzinMazeretTalepResponseDto>.Fail("Talep oluşturulamadı.");
                 }
 
@@ -96,6 +111,21 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Pdks
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
                     _logger.LogError("UpdateAsync failed: {Error}", errorContent);
+                    
+                    // API'den gelen hata mesajını parse et
+                    try
+                    {
+                        var errorResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<IzinMazeretTalepResponseDto>>();
+                        if (errorResponse != null && !string.IsNullOrEmpty(errorResponse.Message))
+                        {
+                            return ServiceResult<IzinMazeretTalepResponseDto>.Fail(errorResponse.Message);
+                        }
+                    }
+                    catch
+                    {
+                        // Parse edilemezse fallback mesaj
+                    }
+                    
                     return ServiceResult<IzinMazeretTalepResponseDto>.Fail("Talep güncellenemedi.");
                 }
 
@@ -309,7 +339,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Pdks
             }
         }
 
-        public async Task<ServiceResult<List<IzinMazeretTalepListResponseDto>>> GetFilteredAsync(IzinMazeretTalepFilterRequestDto filter)
+        public async Task<ServiceResult<(List<IzinMazeretTalepListResponseDto> Items, int TotalCount)>> GetFilteredAsync(IzinMazeretTalepFilterRequestDto filter)
         {
             try
             {
@@ -319,27 +349,141 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Pdks
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
                     _logger.LogError("GetFilteredAsync failed: {Error}", errorContent);
-                    return ServiceResult<List<IzinMazeretTalepListResponseDto>>.Fail("Filtrelenmiş talepler alınamadı.");
+                    return ServiceResult<(List<IzinMazeretTalepListResponseDto>, int)>.Fail("Filtrelenmiş talepler alınamadı.");
                 }
 
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<IzinMazeretTalepListResponseDto>>>();
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<(List<IzinMazeretTalepListResponseDto> Items, int TotalCount)>>();
 
-                if (apiResponse?.Success == true && apiResponse.Data != null)
+                if (apiResponse?.Success == true && apiResponse.Data.Items != null)
                 {
-                    return ServiceResult<List<IzinMazeretTalepListResponseDto>>.Ok(
+                    return ServiceResult<(List<IzinMazeretTalepListResponseDto>, int)>.Ok(
                         apiResponse.Data,
                         apiResponse.Message ?? "İşlem başarılı"
                     );
                 }
 
-                return ServiceResult<List<IzinMazeretTalepListResponseDto>>.Fail(
+                return ServiceResult<(List<IzinMazeretTalepListResponseDto>, int)>.Fail(
                     apiResponse?.Message ?? "Filtrelenmiş talepler alınamadı"
                 );
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "GetFilteredAsync Exception");
-                return ServiceResult<List<IzinMazeretTalepListResponseDto>>.Fail($"Hata: {ex.Message}");
+                return ServiceResult<(List<IzinMazeretTalepListResponseDto>, int)>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.PersonelResponseDto>>> GetAvailableApproversAsync(string tcKimlikNo)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"izin-mazeret-talep/available-approvers/{tcKimlikNo}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetAvailableApproversAsync failed: {Error}", errorContent);
+                    return ServiceResult<List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.PersonelResponseDto>>.Fail("Onaycılar alınamadı.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.PersonelResponseDto>>>();
+
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return ServiceResult<List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.PersonelResponseDto>>.Ok(
+                        apiResponse.Data,
+                        apiResponse.Message ?? "İşlem başarılı"
+                    );
+                }
+
+                return ServiceResult<List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.PersonelResponseDto>>.Fail(
+                    apiResponse?.Message ?? "Onaycılar alınamadı"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetAvailableApproversAsync Exception");
+                return ServiceResult<List<SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri.PersonelResponseDto>>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<List<IzinMazeretTuruResponseDto>>> GetAvailableLeaveTypesAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("izin-mazeret-talep/leave-types");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("GetAvailableLeaveTypesAsync failed: {Error}", errorContent);
+                    return ServiceResult<List<IzinMazeretTuruResponseDto>>.Fail("İzin türleri alınamadı.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<List<IzinMazeretTuruResponseDto>>>();
+
+                if (apiResponse?.Success == true && apiResponse.Data != null)
+                {
+                    return ServiceResult<List<IzinMazeretTuruResponseDto>>.Ok(
+                        apiResponse.Data,
+                        apiResponse.Message ?? "İşlem başarılı"
+                    );
+                }
+
+                return ServiceResult<List<IzinMazeretTuruResponseDto>>.Fail(
+                    apiResponse?.Message ?? "İzin türleri alınamadı"
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetAvailableLeaveTypesAsync Exception");
+                return ServiceResult<List<IzinMazeretTuruResponseDto>>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<bool>> ProcessSgkIslemAsync(IzinSgkIslemRequestDto request)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("izin-mazeret-talep/sgk-islem", request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("ProcessSgkIslemAsync failed: {Error}", errorContent);
+
+                    try
+                    {
+                        var errorResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
+                        if (errorResponse != null && !string.IsNullOrEmpty(errorResponse.Message))
+                        {
+                            return ServiceResult<bool>.Fail(errorResponse.Message);
+                        }
+                    }
+                    catch
+                    {
+                        // Parse edilemezse fallback
+                    }
+
+                    return ServiceResult<bool>.Fail("SGK işlemi yapılamadı");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
+
+                if (apiResponse?.Success == true)
+                {
+                    return ServiceResult<bool>.Ok(
+                        apiResponse.Data,
+                        apiResponse.Message ?? "İşlem başarılı"
+                    );
+                }
+
+                return ServiceResult<bool>.Fail(apiResponse?.Message ?? "SGK işlemi yapılamadı");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ProcessSgkIslemAsync Exception");
+                return ServiceResult<bool>.Fail($"Hata: {ex.Message}");
             }
         }
     }

@@ -91,7 +91,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri
             string? tcKimlikNo = null,
             int? departmanId = null,
             int? servisId = null,
-            IzinMazeretTuru? turu = null,
+            int? izinMazeretTuruId = null,
             OnayDurumu? birinciOnayDurumu = null,
             OnayDurumu? ikinciOnayDurumu = null,
             DateTime? baslangicTarihiMin = null,
@@ -125,11 +125,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri
         /// <summary>
         /// Personelin toplam kullanılan izin günü (türe göre)
         /// </summary>
-        Task<int> GetTotalUsedDaysAsync(string tcKimlikNo, IzinMazeretTuru? turu = null, int? year = null);
+        Task<int> GetTotalUsedDaysAsync(string tcKimlikNo, int? izinMazeretTuruId = null, int? year = null);
 
         /// <summary>
         /// Departman bazında izin istatistiği
         /// </summary>
-        Task<Dictionary<IzinMazeretTuru, int>> GetDepartmanStatisticsAsync(int departmanId, int year);
+        Task<Dictionary<int, int>> GetDepartmanStatisticsAsync(int departmanId, int year);
     }
 }
