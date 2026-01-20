@@ -1,0 +1,174 @@
+@page "/pdks/izin/duzenle/{id:int}"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
+@using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri
+@using SGKPortalApp.Common.Extensions
+@using SGKPortalApp.PresentationLayer.Components.Permission
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>İzin/Mazeret Talebi Düzenle</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-fluid">
+            <!-- Header -->
+            <div class="row mb-3">
+                <div class="col">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/pdks/izin/taleplerim">Taleplerim</a></li>
+                            <li class="breadcrumb-item active">Talep Düzenle</li>
+                        </ol>
+                    </nav>
+                    <h3>✏️ İzin/Mazeret Talebi Düzenle</h3>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-secondary" @onclick="GoBack">
+                        <i class="bx bx-arrow-back me-1"></i>Geri Dön
+                    </button>
+                </div>
+            </div>
+
+            @if (IsLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="mt-2">Talep bilgileri yükleniyor...</p>
+                </div>
+            }
+            else if (Request == null)
+            {
+                <div class="alert alert-warning">
+                    <i class="bx bx-info-circle me-2"></i>
+                    Talep bulunamadı veya düzenlenemez.
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-body">
+                                <EditForm Model="@Request" OnValidSubmit="HandleSubmit">
+                                    <DataAnnotationsValidator />
+
+                                    <!-- İzin/Mazeret Türü (Salt okunur) -->
+                                    <div class="mb-3">
+                                        <label class="form-label">İzin/Mazeret Türü</label>
+                                        <input type="text" class="form-control" value="@SelectedTuruText" readonly />
+                                        <small class="form-text text-muted">Talep türü değiştirilemez</small>
+                                    </div>
+
+                                    @if (IsMazeretTalep)
+                                    {
+                                        <!-- Mazeret için: Tarih + Saat Dilimi -->
+                                        <div class="mb-3">
+                                            <label class="form-label">Mazeret Tarihi <span class="text-danger">*</span></label>
+                                            <input type="date" class="form-control" @bind="Request.MazeretTarihi" />
+                                            <ValidationMessage For="@(() => Request.MazeretTarihi)" />
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Saat Dilimi <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" @bind="Request.SaatDilimi"
+                                                   placeholder="Örn: 09:00-10:00" />
+                                            <ValidationMessage For="@(() => Request.SaatDilimi)" />
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <!-- İzin için: Başlangıç + Bitiş Tarihi -->
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Başlangıç Tarihi <span class="text-danger">*</span></label>
+                                                <input type="date" class="form-control"
+                                                       value="@(Request.BaslangicTarihi?.ToString("yyyy-MM-dd"))"
+                                                       @onchange="@(e => { Request.BaslangicTarihi = DateTime.TryParse(e.Value?.ToString(), out var d) ? d : (DateTime?)null; CalculateDays(); })" />
+                                                <ValidationMessage For="@(() => Request.BaslangicTarihi)" />
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Bitiş Tarihi <span class="text-danger">*</span></label>
+                                                <input type="date" class="form-control"
+                                                       value="@(Request.BitisTarihi?.ToString("yyyy-MM-dd"))"
+                                                       @onchange="@(e => { Request.BitisTarihi = DateTime.TryParse(e.Value?.ToString(), out var d) ? d : (DateTime?)null; CalculateDays(); })" />
+                                                <ValidationMessage For="@(() => Request.BitisTarihi)" />
+                                            </div>
+                                        </div>
+
+                                        @if (ToplamGun > 0)
+                                        {
+                                            <div class="alert alert-info">
+                                                <i class="bx bx-calendar me-2"></i>
+                                                <strong>Toplam: @ToplamGun gün</strong>
+                                            </div>
+                                        }
+                                    }
+
+                                    <!-- Açıklama -->
+                                    <div class="mb-3">
+                                        <label class="form-label">Açıklama</label>
+                                        <textarea class="form-control" rows="4" @bind="Request.Aciklama"
+                                                  placeholder="Talep hakkında açıklama giriniz..."></textarea>
+                                    </div>
+
+                                    <!-- Buttons -->
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button type="button" class="btn btn-secondary" @onclick="GoBack">
+                                            İptal
+                                        </button>
+                                        <button type="submit" class="btn btn-primary" disabled="@IsSubmitting">
+                                            @if (IsSubmitting)
+                                            {
+                                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                            }
+                                            else
+                                            {
+                                                <i class="bx bx-save me-1"></i>
+                                            }
+                                            Güncelle
+                                        </button>
+                                    </div>
+                                </EditForm>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Info Panel -->
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">💡 Bilgilendirme</h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-2">
+                                        <i class="bx bx-check text-success me-2"></i>
+                                        Sadece onaylanmamış talepler düzenlenebilir
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bx bx-check text-success me-2"></i>
+                                        Talep türü değiştirilemez
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bx bx-check text-success me-2"></i>
+                                        Tarih ve açıklama bilgileri güncellenebilir
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </FieldPermissionScope>
+}

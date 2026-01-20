@@ -1,0 +1,191 @@
+@page "/pdks/izin/detay/{id:int}"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
+@using SGKPortalApp.PresentationLayer.Components.Permission
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+
+<PageTitle>İzin/Mazeret Talep Detayı</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
+        <div class="container-fluid">
+            <!-- Header -->
+            <div class="row mb-3">
+                <div class="col">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/pdks/izin/taleplerim">Taleplerim</a></li>
+                            <li class="breadcrumb-item active">Talep Detayı</li>
+                        </ol>
+                    </nav>
+                    <h3>📋 İzin/Mazeret Talep Detayı</h3>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-secondary" @onclick="GoBack">
+                        <i class="bx bx-arrow-back me-1"></i>Geri Dön
+                    </button>
+                </div>
+            </div>
+
+            @if (IsLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="mt-2">Talep detayları yükleniyor...</p>
+                </div>
+            }
+            else if (Talep == null)
+            {
+                <div class="alert alert-warning">
+                    <i class="bx bx-info-circle me-2"></i>
+                    Talep bulunamadı.
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    <!-- Talep Bilgileri -->
+                    <div class="col-md-8">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h5 class="mb-0">Talep Bilgileri</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Talep No:</label>
+                                        <p class="form-control-plaintext">#@Talep.IzinMazeretTalepId</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Talep Türü:</label>
+                                        <p class="form-control-plaintext">
+                                            <span class="badge bg-label-info">@Talep.TuruAdi</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                @if (Talep.BaslangicTarihi.HasValue && Talep.BitisTarihi.HasValue)
+                                {
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Başlangıç Tarihi:</label>
+                                            <p class="form-control-plaintext">@Talep.BaslangicTarihi.Value.ToString("dd.MM.yyyy")</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Bitiş Tarihi:</label>
+                                            <p class="form-control-plaintext">@Talep.BitisTarihi.Value.ToString("dd.MM.yyyy")</p>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Toplam Gün:</label>
+                                            <p class="form-control-plaintext">@(Talep.ToplamGun ?? 0) gün</p>
+                                        </div>
+                                    </div>
+                                }
+                                else if (Talep.MazeretTarihi.HasValue)
+                                {
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Mazeret Tarihi:</label>
+                                            <p class="form-control-plaintext">@Talep.MazeretTarihi.Value.ToString("dd.MM.yyyy")</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Saat Dilimi:</label>
+                                            <p class="form-control-plaintext">@Talep.SaatDilimi</p>
+                                        </div>
+                                    </div>
+                                }
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <label class="form-label fw-bold">Açıklama:</label>
+                                        <p class="form-control-plaintext">@(string.IsNullOrEmpty(Talep.Aciklama) ? "-" : Talep.Aciklama)</p>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Talep Tarihi:</label>
+                                        <p class="form-control-plaintext">@Talep.TalepTarihi.ToString("dd.MM.yyyy HH:mm")</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Genel Durum:</label>
+                                        <p class="form-control-plaintext">
+                                            <span class="badge @GetDurumBadgeClass(Talep.GenelDurum)">@Talep.GenelDurum</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Onay Bilgileri -->
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h5 class="mb-0">Onay Süreci</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Birinci Onay -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">1. Onay:</label>
+                                    <p class="form-control-plaintext">
+                                        <span class="badge @GetOnayBadgeClass(Talep.BirinciOnayDurumuAdi)">
+                                            @Talep.BirinciOnayDurumuAdi
+                                        </span>
+                                    </p>
+                                    @if (!string.IsNullOrEmpty(Talep.BirinciOnayYapanKisiAdi))
+                                    {
+                                        <small class="text-muted">@Talep.BirinciOnayYapanKisiAdi</small>
+                                    }
+                                </div>
+
+                                <!-- İkinci Onay -->
+                                @if (!string.IsNullOrEmpty(Talep.IkinciOnayDurumuAdi))
+                                {
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">2. Onay:</label>
+                                        <p class="form-control-plaintext">
+                                            <span class="badge @GetOnayBadgeClass(Talep.IkinciOnayDurumuAdi)">
+                                                @Talep.IkinciOnayDurumuAdi
+                                            </span>
+                                        </p>
+                                        @if (!string.IsNullOrEmpty(Talep.IkinciOnayYapanKisiAdi))
+                                        {
+                                            <small class="text-muted">@Talep.IkinciOnayYapanKisiAdi</small>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Dosya Bilgisi -->
+                        @if (!string.IsNullOrEmpty(Talep.DosyaYolu))
+                        {
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Ekli Dosya</h5>
+                                </div>
+                                <div class="card-body">
+                                    <a href="@Talep.DosyaYolu" target="_blank" class="btn btn-outline-primary btn-sm">
+                                        <i class="bx bx-download me-1"></i>Dosyayı İndir
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </FieldPermissionScope>
+}
