@@ -121,7 +121,7 @@ else
                                     <div class="col-md-6">
                                         <label class="form-label fw-bold">Genel Durum:</label>
                                         <p class="form-control-plaintext">
-                                            <span class="badge @GetDurumBadgeClass(Talep.GenelDurum)">@Talep.GenelDurum</span>
+                                            <span class="badge @GetDurumBadgeClass(GetGenelDurum())">@GetGenelDurum()</span>
                                         </p>
                                     </div>
                                 </div>
@@ -144,9 +144,9 @@ else
                                             @Talep.BirinciOnayDurumuAdi
                                         </span>
                                     </p>
-                                    @if (!string.IsNullOrEmpty(Talep.BirinciOnayYapanKisiAdi))
+                                    @if (!string.IsNullOrEmpty(Talep.BirinciOnayciAdSoyad))
                                     {
-                                        <small class="text-muted">@Talep.BirinciOnayYapanKisiAdi</small>
+                                        <small class="text-muted">@Talep.BirinciOnayciAdSoyad</small>
                                     }
                                 </div>
 
@@ -160,9 +160,9 @@ else
                                                 @Talep.IkinciOnayDurumuAdi
                                             </span>
                                         </p>
-                                        @if (!string.IsNullOrEmpty(Talep.IkinciOnayYapanKisiAdi))
+                                        @if (!string.IsNullOrEmpty(Talep.IkinciOnayciAdSoyad))
                                         {
-                                            <small class="text-muted">@Talep.IkinciOnayYapanKisiAdi</small>
+                                            <small class="text-muted">@Talep.IkinciOnayciAdSoyad</small>
                                         }
                                     </div>
                                 }
@@ -170,14 +170,14 @@ else
                         </div>
 
                         <!-- Dosya Bilgisi -->
-                        @if (!string.IsNullOrEmpty(Talep.DosyaYolu))
+                        @if (!string.IsNullOrEmpty(Talep.BelgeEki))
                         {
                             <div class="card">
                                 <div class="card-header">
                                     <h5 class="mb-0">Ekli Dosya</h5>
                                 </div>
                                 <div class="card-body">
-                                    <a href="@Talep.DosyaYolu" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <a href="@Talep.BelgeEki" target="_blank" class="btn btn-outline-primary btn-sm">
                                         <i class="bx bx-download me-1"></i>Dosyayı İndir
                                     </a>
                                 </div>

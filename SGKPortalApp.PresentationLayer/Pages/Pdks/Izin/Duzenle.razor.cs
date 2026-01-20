@@ -90,7 +90,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                     // Response DTO'dan Update DTO'ya dönüştür
                     Request = MapToUpdateRequest(talep);
                     SelectedTuruText = talep.TuruAdi;
-                    IsMazeretTalep = talep.IzinMazeretTuruId == (int)IzinMazeretTuru.Mazeret;
+                    IsMazeretTalep = talep.Turu == IzinMazeretTuru.Mazeret;
 
                     if (!IsMazeretTalep)
                     {
@@ -121,12 +121,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         private bool CanEdit(IzinMazeretTalepResponseDto talep)
         {
             // Eğer birinci onay onaylandı veya reddedildi ise düzenlenemez
-            if (talep.BirinciOnayDurumuId != (int)OnayDurumu.Beklemede)
+            if (talep.BirinciOnayDurumu != OnayDurumu.Beklemede)
                 return false;
 
             // Eğer ikinci onay var ve onaylandı/reddedildi ise düzenlenemez
-            if (talep.IkinciOnayDurumuId.HasValue &&
-                talep.IkinciOnayDurumuId != (int)OnayDurumu.Beklemede)
+            if (talep.IkinciOnayDurumu != OnayDurumu.Beklemede)
                 return false;
 
             return true;
@@ -136,13 +135,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         {
             return new IzinMazeretTalepUpdateRequestDto
             {
-                IzinMazeretTuruId = source.IzinMazeretTuruId,
+                Turu = source.Turu,
                 BaslangicTarihi = source.BaslangicTarihi,
                 BitisTarihi = source.BitisTarihi,
                 MazeretTarihi = source.MazeretTarihi,
                 SaatDilimi = source.SaatDilimi,
                 Aciklama = source.Aciklama,
-                ToplamGun = source.ToplamGun
+                BelgeEki = source.BelgeEki
             };
         }
 
@@ -152,12 +151,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             {
                 var days = (Request.BitisTarihi.Value - Request.BaslangicTarihi.Value).Days + 1;
                 ToplamGun = days > 0 ? days : 0;
-                Request.ToplamGun = ToplamGun;
+                // Not: ToplamGun backend'de hesaplanıyor, UpdateRequestDto'da yok
             }
             else
             {
                 ToplamGun = 0;
-                Request.ToplamGun = null;
             }
         }
 
