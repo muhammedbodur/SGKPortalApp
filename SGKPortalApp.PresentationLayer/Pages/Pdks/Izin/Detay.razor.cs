@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Pdks;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
@@ -91,6 +92,34 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                 "İptal" => "bg-label-secondary",
                 _ => "bg-label-warning"
             };
+        }
+
+        /// <summary>
+        /// Talebin genel durumunu hesaplar (IsActive + onay durumları)
+        /// </summary>
+        private string GetGenelDurum()
+        {
+            if (Talep == null)
+                return "Bilinmiyor";
+
+            if (!Talep.IsActive)
+                return "İptal";
+
+            if (Talep.BirinciOnayDurumu == OnayDurumu.Reddedildi ||
+                Talep.IkinciOnayDurumu == OnayDurumu.Reddedildi)
+                return "Reddedildi";
+
+            if (Talep.BirinciOnayDurumu == OnayDurumu.Onaylandi &&
+                Talep.IkinciOnayDurumu == OnayDurumu.Onaylandi)
+                return "Onaylandı";
+
+            if (Talep.BirinciOnayDurumu == OnayDurumu.Beklemede)
+                return "1. Onay Bekliyor";
+
+            if (Talep.IkinciOnayDurumu == OnayDurumu.Beklemede)
+                return "2. Onay Bekliyor";
+
+            return "Beklemede";
         }
 
         private async Task ShowToast(string type, string message)
