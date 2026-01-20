@@ -74,12 +74,16 @@ else
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Başlangıç Saati <span class="text-danger">*</span></label>
-                                        <input type="time" class="form-control" @bind="BaslangicSaatiStr" />
+                                        <input type="time" class="form-control"
+                                               value="@BaslangicSaatiStr"
+                                               @onchange="@(e => BaslangicSaatiStr = e.Value?.ToString() ?? "")" />
                                         <ValidationMessage For="@(() => Request.BaslangicSaati)" />
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Bitiş Saati <span class="text-danger">*</span></label>
-                                        <input type="time" class="form-control" @bind="BitisSaatiStr" />
+                                        <input type="time" class="form-control"
+                                               value="@BitisSaatiStr"
+                                               @onchange="@(e => BitisSaatiStr = e.Value?.ToString() ?? "")" />
                                         <ValidationMessage For="@(() => Request.BitisSaati)" />
                                     </div>
                                 </div>

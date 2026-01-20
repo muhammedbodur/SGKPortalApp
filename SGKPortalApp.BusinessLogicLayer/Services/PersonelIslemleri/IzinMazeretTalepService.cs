@@ -1005,7 +1005,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     talep.IzinIslemNotlari = request.Notlar; // Geri alma nedeni
                 }
 
-                await repository.UpdateAsync(talep);
+                repository.Update(talep);
                 await _unitOfWork.SaveChangesAsync();
 
                 var mesaj = request.Isle ? "İzin SGK sistemine başarıyla işlendi" : "SGK işlemi başarıyla geri alındı";
