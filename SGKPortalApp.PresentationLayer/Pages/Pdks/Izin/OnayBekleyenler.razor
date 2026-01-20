@@ -229,39 +229,37 @@ else
                                         var canApprove = CanApproveTalep(talep);
                                         var disableReason = GetDisableReason(talep);
                                     }
-                                    <div class="dropdown">
-                                        <button type="button" class="btn btn-sm btn-icon btn-outline-primary dropdown-toggle hide-arrow" 
-                                                data-bs-toggle="dropdown"
-                                                disabled="@(!canApprove)"
-                                                title="@disableReason">
-                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                    <div class="btn-group" role="group" aria-label="Talep İşlemleri">
+                                        @if (!canApprove)
+                                        {
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-warning"
+                                                    disabled
+                                                    title="@disableReason">
+                                                <i class="bx bx-info-circle"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button"
+                                                    class="btn btn-sm btn-success"
+                                                    @onclick="() => OpenApprovalModal(talep, true)"
+                                                    title="Onayla">
+                                                <i class="bx bx-check"></i>
+                                            </button>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-danger"
+                                                    @onclick="() => OpenApprovalModal(talep, false)"
+                                                    title="Reddet">
+                                                <i class="bx bx-x"></i>
+                                            </button>
+                                        }
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-secondary"
+                                                @onclick="() => OpenDetailModal(talep)"
+                                                title="Detay Görüntüle">
+                                            <i class="bx bx-detail"></i>
                                         </button>
-                                        <div class="dropdown-menu">
-                                            @if (!canApprove)
-                                            {
-                                                <div class="dropdown-item-text text-warning">
-                                                    <i class="bx bx-info-circle me-1"></i>
-                                                    <small>@disableReason</small>
-                                                </div>
-                                                <div class="dropdown-divider"></div>
-                                            }
-                                            <a class="dropdown-item @(!canApprove ? "disabled" : "")" 
-                                               href="javascript:void(0);" 
-                                               @onclick="() => OpenApprovalModal(talep, true)"
-                                               style="@(!canApprove ? "pointer-events: none; opacity: 0.5;" : "")">
-                                                <i class="bx bx-check me-1"></i> Onayla
-                                            </a>
-                                            <a class="dropdown-item @(!canApprove ? "disabled" : "")" 
-                                               href="javascript:void(0);" 
-                                               @onclick="() => OpenApprovalModal(talep, false)"
-                                               style="@(!canApprove ? "pointer-events: none; opacity: 0.5;" : "")">
-                                                <i class="bx bx-x me-1"></i> Reddet
-                                            </a>
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="javascript:void(0);" @onclick="() => OpenDetailModal(talep)">
-                                                <i class="bx bx-detail me-1"></i> Detay Görüntüle
-                                            </a>
-                                        </div>
                                     </div>
                                 </td>
                             </tr>
