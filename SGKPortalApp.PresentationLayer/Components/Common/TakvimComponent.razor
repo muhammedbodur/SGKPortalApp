@@ -16,14 +16,18 @@
 {
     <!-- FULL PAGE MODE -->
     <div class="card app-calendar-wrapper">
-        <div class="row g-0">
+        <div class="d-flex">
             <!-- Calendar Sidebar -->
-            <div class="col-12 col-md-3 app-calendar-sidebar border-end">
+            <div class="app-calendar-sidebar border-end" style="flex: 0 0 260px;">
                 <div class="border-bottom p-4">
-                    <div class="d-grid">
-                        <button class="btn btn-primary" disabled>
+                    <div class="d-grid gap-2">
+                        <a href="/common/takvim/manage" class="btn btn-primary">
                             <i class="bx bx-plus me-1"></i>
                             <span class="align-middle">Yeni Tatil Ekle</span>
+                        </a>
+                        <button class="btn btn-outline-secondary" @onclick="SyncCalendar" disabled="@IsLoading">
+                            <i class="bx bx-sync me-1"></i>
+                            <span class="align-middle">Senkronize Et</span>
                         </button>
                     </div>
                 </div>
@@ -93,7 +97,7 @@
             </div>
 
             <!-- Calendar Content (Full Page) -->
-            <div class="col-12 col-md-9 app-calendar-content">
+            <div class="app-calendar-content" style="flex: 1;">
                 <div class="card-body pb-0">
                     @if (IsLoading)
                     {
@@ -126,22 +130,8 @@ else
     }
     else
     {
-        <!-- Bilgilendirme (Widget için) -->
-        <div class="mb-3">
-            <div class="d-flex flex-wrap gap-2">
-                <span class="badge bg-label-primary">RESMİ TATİLLER</span>
-                <span class="badge bg-label-success">DİNİ BAYRAM VE GÜNLER</span>
-                <span class="badge bg-label-info">
-                    <i class="bx bx-time-five"></i> GİRİŞ/ÇIKIŞ
-                </span>
-                <span class="badge bg-label-warning">
-                    <i class="bx bx-calendar"></i> İZİN/MAZERET
-                </span>
-            </div>
-        </div>
-
         <!-- FullCalendar Widget -->
-        <div id="@CalendarId" style="min-height: 400px;"></div>
+        <div id="@CalendarId"></div>
     }
 }
 
@@ -154,14 +144,71 @@ else
     private List<IzinMazeretTalepListResponseDto> IzinMazeretTalepleri { get; set; } = new();
     
     private bool IsLoading { get; set; } = true;
-    private int SelectedYear { get; set; } = DateTime.Now.Year;
     private string? CurrentUserTc { get; set; }
 
-    // Filters
-    private bool FilterSabitTatil { get; set; } = true;
-    private bool FilterDiniTatil { get; set; } = true;
-    private bool FilterMesai { get; set; } = true;
-    private bool FilterIzinMazeret { get; set; } = true;
+    // Year selection with auto-reload
+    private int _selectedYear = DateTime.Now.Year;
+    private int SelectedYear
+    {
+        get => _selectedYear;
+        set
+        {
+            if (_selectedYear != value)
+            {
+                _selectedYear = value;
+                _ = Task.Run(async () =>
+                {
+                    await LoadAllData();
+                    await RenderCalendar();
+                });
+            }
+        }
+    }
+
+    // Filters with auto-reload
+    private bool _filterSabitTatil = true;
+    private bool FilterSabitTatil
+    {
+        get => _filterSabitTatil;
+        set
+        {
+            _filterSabitTatil = value;
+            _ = RenderCalendar();
+        }
+    }
+
+    private bool _filterDiniTatil = true;
+    private bool FilterDiniTatil
+    {
+        get => _filterDiniTatil;
+        set
+        {
+            _filterDiniTatil = value;
+            _ = RenderCalendar();
+        }
+    }
+
+    private bool _filterMesai = true;
+    private bool FilterMesai
+    {
+        get => _filterMesai;
+        set
+        {
+            _filterMesai = value;
+            _ = RenderCalendar();
+        }
+    }
+
+    private bool _filterIzinMazeret = true;
+    private bool FilterIzinMazeret
+    {
+        get => _filterIzinMazeret;
+        set
+        {
+            _filterIzinMazeret = value;
+            _ = RenderCalendar();
+        }
+    }
 
     private bool _firstLoadComplete = false;
 
@@ -309,7 +356,7 @@ else
                     .Select(m => new
                     {
                         id = $"mesai-{m.Tarih:yyyyMMdd}",
-                        title = $"🕒 {FormatTimeSpan(m.GirisSaati)} - {FormatTimeSpan(m.CikisSaati)}",
+                        title = $"{FormatTimeSpan(m.GirisSaati)}",
                         start = m.Tarih.ToString("yyyy-MM-dd"),
                         allDay = false,
                         backgroundColor = GetMesaiColor(m),
@@ -319,7 +366,8 @@ else
                             eventType = "mesai",
                             girisSaati = FormatTimeSpan(m.GirisSaati),
                             cikisSaati = FormatTimeSpan(m.CikisSaati),
-                            gecKalma = m.GecKalma
+                            gecKalma = m.GecKalma,
+                            description = $"Giriş: {FormatTimeSpan(m.GirisSaati)}\nÇıkış: {FormatTimeSpan(m.CikisSaati)}"
                         }
                     });
                 events.AddRange(mesaiEvents);
@@ -402,6 +450,12 @@ else
         if (mesai.GecKalma) return "#ff3e1d";
         if (mesai.HaftaSonu) return "#03c3ec";
         return "#00cfe8";
+    }
+
+    private async Task SyncCalendar()
+    {
+        await LoadAllData();
+        await RenderCalendar();
     }
 
     private string GetIzinMazeretColor(IzinMazeretTalepListResponseDto talep)

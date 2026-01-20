@@ -51,7 +51,7 @@ window.initTakvimCalendar = function (eventsJson, year) {
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+                right: ''
             },
             
             // Navigasyon
@@ -176,8 +176,8 @@ window.initTakvimCalendar = function (eventsJson, year) {
 
             // Responsive ayarlar
             height: 'auto',
-            contentHeight: 'auto',
-            aspectRatio: 1.8,
+            contentHeight: 650,
+            aspectRatio: 1.5,
 
             // Hafta sonu vurgulama
             dayCellDidMount: function (info) {
@@ -292,14 +292,55 @@ window.initTakvimWidgetCalendar = function (eventsJson, year) {
                 return { html: '<div class="fc-event-title">' + arg.event.title + '</div>' };
             },
 
+            // Tooltip (event üzerine gelince)
+            eventMouseEnter: function (info) {
+                try {
+                    const props = info.event.extendedProps;
+                    let tooltipContent = '<div class="p-2">';
+                    tooltipContent += `<strong>${info.event.title}</strong><br>`;
+
+                    if (props && props.eventType === 'mesai') {
+                        tooltipContent += `<small>Giriş: ${props.girisSaati || '-'}</small><br>`;
+                        tooltipContent += `<small>Çıkış: ${props.cikisSaati || '-'}</small><br>`;
+                        if (props.gecKalma) {
+                            tooltipContent += '<small class="text-danger">⚠️ Geç Kalma</small>';
+                        }
+                    } else if (props && props.eventType === 'tatil') {
+                        if (props.aciklama) {
+                            tooltipContent += `<small>${props.aciklama}</small>`;
+                        }
+                    } else if (props && (props.eventType === 'izin' || props.eventType === 'mazeret')) {
+                        tooltipContent += `<small>${props.tur || ''}</small><br>`;
+                        tooltipContent += `<small>Durum: ${props.onayDurumu || 'Beklemede'}</small>`;
+                    }
+
+                    tooltipContent += '</div>';
+
+                    // Bootstrap tooltip
+                    if (typeof $ !== 'undefined' && $.fn.tooltip) {
+                        $(info.el).tooltip({
+                            title: tooltipContent,
+                            html: true,
+                            placement: 'top',
+                            trigger: 'hover',
+                            container: 'body'
+                        });
+                    }
+                } catch (err) {
+                    console.error('Widget tooltip hatası:', err);
+                }
+            },
+
             // Click -> Detay sayfasına git
             eventClick: function (info) {
                 window.location.href = '/common/takvim';
             },
 
             // Responsive ayarlar - Widget için kompakt
-            height: 500, // Sabit yükseklik
-            aspectRatio: 1.35, // En/Boy oranı
+            height: 'auto',
+            contentHeight: 'auto',
+            aspectRatio: 1.35,
+            expandRows: false,
 
             // Hafta sonu vurgulama
             dayCellDidMount: function (info) {
