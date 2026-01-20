@@ -109,13 +109,17 @@ else
                                 else if (Talep.MazeretTarihi.HasValue)
                                 {
                                     <div class="row mb-3">
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <label class="form-label fw-bold">Mazeret Tarihi:</label>
                                             <p class="form-control-plaintext">@Talep.MazeretTarihi.Value.ToString("dd.MM.yyyy")</p>
                                         </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-bold">Saat Dilimi:</label>
-                                            <p class="form-control-plaintext">@Talep.SaatDilimi</p>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Başlangıç Saati:</label>
+                                            <p class="form-control-plaintext">@(Talep.BaslangicSaati?.ToString(@"hh\:mm") ?? "-")</p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Bitiş Saati:</label>
+                                            <p class="form-control-plaintext">@(Talep.BitisSaati?.ToString(@"hh\:mm") ?? "-")</p>
                                         </div>
                                     </div>
                                 }
@@ -182,21 +186,6 @@ else
                                 }
                             </div>
                         </div>
-
-                        <!-- Dosya Bilgisi -->
-                        @if (!string.IsNullOrEmpty(Talep.BelgeEki))
-                        {
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">Ekli Dosya</h5>
-                                </div>
-                                <div class="card-body">
-                                    <a href="@Talep.BelgeEki" target="_blank" class="btn btn-outline-primary btn-sm">
-                                        <i class="bx bx-download me-1"></i>Dosyayı İndir
-                                    </a>
-                                </div>
-                            </div>
-                        }
                     </div>
                 </div>
             }

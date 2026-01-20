@@ -135,13 +135,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         {
             return new IzinMazeretTalepUpdateRequestDto
             {
-                Turu = source.Turu,
+                IzinMazeretTuruId = source.IzinMazeretTuruId,
                 BaslangicTarihi = source.BaslangicTarihi,
                 BitisTarihi = source.BitisTarihi,
                 MazeretTarihi = source.MazeretTarihi,
-                SaatDilimi = source.SaatDilimi,
-                Aciklama = source.Aciklama,
-                BelgeEki = source.BelgeEki
+                BaslangicSaati = source.BaslangicSaati,
+                BitisSaati = source.BitisSaati,
+                Aciklama = source.Aciklama
             };
         }
 

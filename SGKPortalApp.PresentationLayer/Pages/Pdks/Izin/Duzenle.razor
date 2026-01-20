@@ -78,11 +78,17 @@ else
                                             <ValidationMessage For="@(() => Request.MazeretTarihi)" />
                                         </div>
 
-                                        <div class="mb-3">
-                                            <label class="form-label">Saat Dilimi <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" @bind="Request.SaatDilimi"
-                                                   placeholder="Örn: 09:00-10:00" />
-                                            <ValidationMessage For="@(() => Request.SaatDilimi)" />
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Başlangıç Saati <span class="text-danger">*</span></label>
+                                                <input type="time" class="form-control" @bind="Request.BaslangicSaati" />
+                                                <ValidationMessage For="@(() => Request.BaslangicSaati)" />
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Bitiş Saati <span class="text-danger">*</span></label>
+                                                <input type="time" class="form-control" @bind="Request.BitisSaati" />
+                                                <ValidationMessage For="@(() => Request.BitisSaati)" />
+                                            </div>
                                         </div>
                                     }
                                     else
