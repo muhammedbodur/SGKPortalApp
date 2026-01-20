@@ -28,9 +28,23 @@ else
                     <h3>📋 İzin/Mazeret Talep Detayı</h3>
                 </div>
                 <div class="col-auto">
-                    <button class="btn btn-secondary" @onclick="GoBack">
-                        <i class="bx bx-arrow-back me-1"></i>Geri Dön
-                    </button>
+                    <div class="btn-group">
+                        @if (Talep != null && CanEdit(Talep))
+                        {
+                            <button class="btn btn-outline-warning" @onclick="EditTalep" title="Düzenle">
+                                <i class="bx bx-edit me-1"></i>Düzenle
+                            </button>
+                            <button class="btn btn-outline-info" @onclick="CancelTalep" title="İptal Et">
+                                <i class="bx bx-x me-1"></i>İptal Et
+                            </button>
+                            <button class="btn btn-outline-danger" @onclick="DeleteTalep" title="Sil">
+                                <i class="bx bx-trash me-1"></i>Sil
+                            </button>
+                        }
+                        <button class="btn btn-secondary" @onclick="GoBack">
+                            <i class="bx bx-arrow-back me-1"></i>Geri Dön
+                        </button>
+                    </div>
                 </div>
             </div>
 

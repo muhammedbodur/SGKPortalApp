@@ -71,6 +71,91 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             _navigationManager.NavigateTo("/pdks/izin/taleplerim");
         }
 
+        /// <summary>
+        /// Talebin düzenlenebilir olup olmadığını kontrol eder
+        /// Sadece tüm onaylar "Beklemede" olan talepler düzenlenebilir
+        /// </summary>
+        private bool CanEdit(IzinMazeretTalepResponseDto talep)
+        {
+            // Eğer birinci onay onaylandı veya reddedildi ise düzenlenemez
+            if (talep.BirinciOnayDurumu != OnayDurumu.Beklemede)
+                return false;
+
+            // Eğer ikinci onay var ve onaylandı/reddedildi ise düzenlenemez
+            if (talep.IkinciOnayDurumu != OnayDurumu.Beklemede)
+                return false;
+
+            return true;
+        }
+
+        private void EditTalep()
+        {
+            if (Talep == null) return;
+            _navigationManager.NavigateTo($"/pdks/izin/duzenle/{Talep.IzinMazeretTalepId}");
+        }
+
+        private async Task CancelTalep()
+        {
+            if (Talep == null) return;
+
+            var iptalNedeni = await _js.InvokeAsync<string>("prompt",
+                "Lütfen iptal nedenini giriniz:");
+
+            if (string.IsNullOrWhiteSpace(iptalNedeni))
+                return;
+
+            try
+            {
+                var result = await _izinMazeretTalepService.CancelAsync(Talep.IzinMazeretTalepId, iptalNedeni);
+
+                if (result.Success)
+                {
+                    await ShowToast("success", result.Message ?? "Talep başarıyla iptal edildi");
+                    await Task.Delay(1500);
+                    _navigationManager.NavigateTo("/pdks/izin/taleplerim");
+                }
+                else
+                {
+                    await ShowToast("error", result.Message ?? "Talep iptal edilemedi");
+                }
+            }
+            catch (Exception ex)
+            {
+                await ShowToast("error", $"Hata: {ex.Message}");
+            }
+        }
+
+        private async Task DeleteTalep()
+        {
+            if (Talep == null) return;
+
+            var confirmed = await _js.InvokeAsync<bool>("confirm",
+                "Bu talebi kalıcı olarak silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz!");
+
+            if (!confirmed)
+                return;
+
+            try
+            {
+                var result = await _izinMazeretTalepService.DeleteAsync(Talep.IzinMazeretTalepId);
+
+                if (result.Success)
+                {
+                    await ShowToast("success", result.Message ?? "Talep başarıyla silindi");
+                    await Task.Delay(1500);
+                    _navigationManager.NavigateTo("/pdks/izin/taleplerim");
+                }
+                else
+                {
+                    await ShowToast("error", result.Message ?? "Talep silinemedi");
+                }
+            }
+            catch (Exception ex)
+            {
+                await ShowToast("error", $"Hata: {ex.Message}");
+            }
+        }
+
         private string GetOnayBadgeClass(string onayDurumu)
         {
             return onayDurumu switch
