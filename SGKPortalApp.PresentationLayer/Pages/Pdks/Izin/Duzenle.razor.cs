@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
@@ -18,6 +19,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
         [Inject] private IIzinMazeretTalepApiService _izinMazeretTalepService { get; set; } = default!;
         [Inject] private IJSRuntime _js { get; set; } = default!;
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
+        [Inject] private AuthenticationStateProvider _authStateProvider { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════
         // PARAMETERS
@@ -66,6 +68,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                 if (result.Success && result.Data != null)
                 {
                     var talep = result.Data;
+
+                    // 🔒 FRONTEND OWNERSHIP KONTROLÜ (Defense in Depth)
+                    // Backend'de de kontrol var, ama frontend'de de kontrol ederek daha iyi UX sağlıyoruz
+                    var currentUserTc = await GetCurrentUserTcKimlikNoAsync();
+                    if (!string.IsNullOrEmpty(currentUserTc) && talep.TcKimlikNo != currentUserTc)
+                    {
+                        await ShowToast("error", "Bu kaydı düzenleme yetkiniz yok");
+                        _navigationManager.NavigateTo("/pdks/izin/taleplerim");
+                        return;
+                    }
 
                     // Sadece "Beklemede" olan talepler düzenlenebilir
                     if (!CanEdit(talep))
@@ -196,6 +208,22 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             catch
             {
                 // Toast gösterilemezse sessizce devam et
+            }
+        }
+
+        /// <summary>
+        /// Giriş yapmış kullanıcının TC Kimlik Numarasını alır
+        /// </summary>
+        private async Task<string?> GetCurrentUserTcKimlikNoAsync()
+        {
+            try
+            {
+                var authState = await _authStateProvider.GetAuthenticationStateAsync();
+                return authState.User.FindFirst("TcKimlikNo")?.Value;
+            }
+            catch
+            {
+                return null;
             }
         }
     }

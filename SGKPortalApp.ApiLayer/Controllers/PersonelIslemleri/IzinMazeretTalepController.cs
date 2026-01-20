@@ -39,11 +39,15 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
 
         /// <summary>
         /// ID'ye göre talep getir
+        /// 🔒 Kullanıcı sadece kendi taleplerini görebilir
         /// </summary>
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _service.GetByIdAsync(id);
+            // Kullanıcının TC'sini claim'den al
+            var currentUserTc = User?.FindFirst("TcKimlikNo")?.Value;
+
+            var result = await _service.GetByIdAsync(id, currentUserTc);
             return result.Success ? Ok(result) : NotFound(result);
         }
 
@@ -64,6 +68,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
 
         /// <summary>
         /// İzin/mazeret talebini güncelle (sadece beklemedeki talepler)
+        /// 🔒 Kullanıcı sadece kendi taleplerini düzenleyebilir
         /// </summary>
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] IzinMazeretTalepUpdateRequestDto request)
@@ -71,17 +76,24 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _service.UpdateAsync(id, request);
+            // Kullanıcının TC'sini claim'den al
+            var currentUserTc = User?.FindFirst("TcKimlikNo")?.Value;
+
+            var result = await _service.UpdateAsync(id, request, currentUserTc);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
         /// <summary>
         /// İzin/mazeret talebini sil (soft delete)
+        /// 🔒 Kullanıcı sadece kendi taleplerini silebilir
         /// </summary>
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var result = await _service.DeleteAsync(id);
+            // Kullanıcının TC'sini claim'den al
+            var currentUserTc = User?.FindFirst("TcKimlikNo")?.Value;
+
+            var result = await _service.DeleteAsync(id, currentUserTc);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 

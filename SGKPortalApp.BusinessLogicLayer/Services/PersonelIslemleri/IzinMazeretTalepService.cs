@@ -56,7 +56,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             }
         }
 
-        public async Task<ApiResponseDto<IzinMazeretTalepResponseDto>> GetByIdAsync(int id)
+        public async Task<ApiResponseDto<IzinMazeretTalepResponseDto>> GetByIdAsync(int id, string? currentUserTc = null)
         {
             try
             {
@@ -64,6 +64,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
                 if (talep == null)
                     return ApiResponseDto<IzinMazeretTalepResponseDto>.ErrorResult("Talep bulunamadı");
+
+                // 🔒 OWNERSHIP KONTROLÜ
+                // Eğer currentUserTc belirtilmişse, kaydın sahibi olup olmadığını kontrol et
+                if (!string.IsNullOrEmpty(currentUserTc) && talep.TcKimlikNo != currentUserTc)
+                {
+                    _logger.LogWarning(
+                        "⚠️ SECURITY: Yetkisiz erişim denemesi! Talep ID: {TalepId}, Sahip: {SahipTc}, İsteyen: {IsteyenTc}",
+                        id, talep.TcKimlikNo, currentUserTc);
+
+                    return ApiResponseDto<IzinMazeretTalepResponseDto>
+                        .ErrorResult("Bu kaydı görüntüleme yetkiniz yok");
+                }
 
                 var talepDto = MapToResponseDto(talep);
                 return ApiResponseDto<IzinMazeretTalepResponseDto>
@@ -143,7 +155,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             }
         }
 
-        public async Task<ApiResponseDto<IzinMazeretTalepResponseDto>> UpdateAsync(int id, IzinMazeretTalepUpdateRequestDto request)
+        public async Task<ApiResponseDto<IzinMazeretTalepResponseDto>> UpdateAsync(int id, IzinMazeretTalepUpdateRequestDto request, string? currentUserTc = null)
         {
             try
             {
@@ -151,6 +163,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
                 if (talep == null)
                     return ApiResponseDto<IzinMazeretTalepResponseDto>.ErrorResult("Talep bulunamadı");
+
+                // 🔒 OWNERSHIP KONTROLÜ
+                // Eğer currentUserTc belirtilmişse, kaydın sahibi olup olmadığını kontrol et
+                if (!string.IsNullOrEmpty(currentUserTc) && talep.TcKimlikNo != currentUserTc)
+                {
+                    _logger.LogWarning(
+                        "⚠️ SECURITY: Yetkisiz güncelleme denemesi! Talep ID: {TalepId}, Sahip: {SahipTc}, İsteyen: {IsteyenTc}",
+                        id, talep.TcKimlikNo, currentUserTc);
+
+                    return ApiResponseDto<IzinMazeretTalepResponseDto>
+                        .ErrorResult("Bu kaydı düzenleme yetkiniz yok");
+                }
 
                 // Sadece beklemedeki talepler güncellenebilir
                 if (talep.BirinciOnayDurumu != OnayDurumu.Beklemede)
@@ -208,7 +232,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             }
         }
 
-        public async Task<ApiResponseDto<bool>> DeleteAsync(int id)
+        public async Task<ApiResponseDto<bool>> DeleteAsync(int id, string? currentUserTc = null)
         {
             try
             {
@@ -216,6 +240,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
                 if (talep == null)
                     return ApiResponseDto<bool>.ErrorResult("Talep bulunamadı");
+
+                // 🔒 OWNERSHIP KONTROLÜ
+                // Eğer currentUserTc belirtilmişse, kaydın sahibi olup olmadığını kontrol et
+                if (!string.IsNullOrEmpty(currentUserTc) && talep.TcKimlikNo != currentUserTc)
+                {
+                    _logger.LogWarning(
+                        "⚠️ SECURITY: Yetkisiz silme denemesi! Talep ID: {TalepId}, Sahip: {SahipTc}, İsteyen: {IsteyenTc}",
+                        id, talep.TcKimlikNo, currentUserTc);
+
+                    return ApiResponseDto<bool>
+                        .ErrorResult("Bu kaydı silme yetkiniz yok");
+                }
 
                 _unitOfWork.Repository<IzinMazeretTalep>().Delete(talep);
                 await _unitOfWork.SaveChangesAsync();
