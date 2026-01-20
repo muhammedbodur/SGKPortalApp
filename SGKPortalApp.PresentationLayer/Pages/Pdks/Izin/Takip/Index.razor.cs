@@ -190,14 +190,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin.Takip
 
         private void UpdateFilteredServisList()
         {
-            if (FilterDepartmanId > 0)
-            {
-                FilteredServisList = ServisList.Where(s => s.DepartmanId == FilterDepartmanId).ToList();
-            }
-            else
-            {
-                FilteredServisList = ServisList;
-            }
+            // ServisDto'da DepartmanId property'si yok
+            // Tüm servisleri göster (filtreleme backend'de yapılacak)
+            FilteredServisList = ServisList;
         }
 
         private async Task OnDepartmanChanged()
