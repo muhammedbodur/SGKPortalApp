@@ -24,6 +24,10 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
                 .HasMaxLength(150)
                 .HasComment("Departman adı");
 
+            builder.Property(d => d.DepartmanAdiKisa)
+                .HasMaxLength(50)
+                .HasComment("Departman kısa adı");
+
             builder.Property(d => d.Aktiflik)
                 .IsRequired()
                 .HasConversion<int>()

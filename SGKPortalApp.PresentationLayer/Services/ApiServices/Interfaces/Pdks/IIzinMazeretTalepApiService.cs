@@ -17,7 +17,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Pdks
         Task<ServiceResult<List<IzinMazeretTalepListResponseDto>>> GetPendingApprovalsAsync(string sorumluTc);
         Task<ServiceResult<bool>> ApproveOrRejectAsync(int id, IzinMazeretTalepOnayRequestDto request);
         Task<ServiceResult<OverlapCheckResponseDto>> CheckOverlapAsync(IzinMazeretTalepCreateRequestDto request);
-        Task<ServiceResult<(List<IzinMazeretTalepListResponseDto> Items, int TotalCount)>> GetFilteredAsync(IzinMazeretTalepFilterRequestDto filter);
+        Task<ServiceResult<IzinMazeretTalepFilterResponseDto>> GetFilteredAsync(IzinMazeretTalepFilterRequestDto filter);
         Task<ServiceResult<List<PersonelResponseDto>>> GetAvailableApproversAsync(string tcKimlikNo);
         Task<ServiceResult<List<IzinMazeretTuruResponseDto>>> GetAvailableLeaveTypesAsync();
         Task<ServiceResult<bool>> ProcessSgkIslemAsync(IzinSgkIslemRequestDto request);

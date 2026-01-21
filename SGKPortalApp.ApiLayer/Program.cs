@@ -409,29 +409,39 @@ namespace SGKPortalApp.ApiLayer
             }).WithTags("Info");
 
             // ═══════════════════════════════════════════════════════
-            // 🗄️ DATABASE MIGRATION (Sadece Production)
+            // 🗄️ DATABASE MIGRATION & SEEDING
             // ═══════════════════════════════════════════════════════
             // Development'ta manuel migration kullanılır: Add-Migration, Update-Database
             // Production'da otomatik migration uygulanır
-            if (!app.Environment.IsDevelopment())
+            using (var scope = app.Services.CreateScope())
             {
-                using (var scope = app.Services.CreateScope())
+                try
                 {
-                    try
+                    // Migration (sadece Production'da otomatik)
+                    if (!app.Environment.IsDevelopment())
                     {
                         var migrationService = scope.ServiceProvider.GetRequiredService<IDatabaseMigrationService>();
                         await migrationService.ApplyMigrationsAsync();
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        Console.WriteLine($"❌ Migration hatası: {ex.Message}");
-                        throw; // Production'da migration hatası kritik
+                        Console.WriteLine("ℹ️  Development ortamı - Migration'lar manuel uygulanmalı (Add-Migration, Update-Database)");
+                    }
+
+                    // Database Seeding (tüm ortamlarda çalışır)
+                    var context = scope.ServiceProvider.GetRequiredService<SGKPortalApp.DataAccessLayer.Context.SGKDbContext>();
+                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<SGKPortalApp.DataAccessLayer.Seeding.DatabaseSeeder>>();
+                    var seeder = new SGKPortalApp.DataAccessLayer.Seeding.DatabaseSeeder(context, logger);
+                    await seeder.SeedAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"❌ Database initialization hatası: {ex.Message}");
+                    if (!app.Environment.IsDevelopment())
+                    {
+                        throw; // Production'da hata kritik
                     }
                 }
-            }
-            else
-            {
-                Console.WriteLine("ℹ️  Development ortamı - Migration'lar manuel uygulanmalı (Add-Migration, Update-Database)");
             }
 
             Console.WriteLine("\n╔════════════════════════════════════════════════════════╗");

@@ -36,7 +36,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin.Takip
         // DATA PROPERTIES
         // ═══════════════════════════════════════════════════════
 
-        private List<IzinMazeretTalepListResponseDto> Talepler { get; set; } = new();
+        private List<IzinMazeretTalepListResponseDto> AllTalepler { get; set; } = new(); // Backend'den gelen orijinal liste
+        private List<IzinMazeretTalepListResponseDto> Talepler { get; set; } = new(); // Filtrelenmiş liste
         private List<DepartmanDto> DepartmanList { get; set; } = new();
         private List<ServisDto> ServisList { get; set; } = new();
         private List<ServisDto> FilteredServisList { get; set; } = new();
@@ -52,6 +53,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin.Takip
         private DateTime? FilterBaslangicMin { get; set; }
         private DateTime? FilterBaslangicMax { get; set; }
         private string FilterIsActive { get; set; } = "";
+        private string FilterSgkIslendi { get; set; } = "false"; // Varsayılan: İşlenmedi
 
         private int? userDepartmanId = null;
         private int? userServisId = null;
@@ -143,6 +145,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin.Takip
             try
             {
                 IsLoading = true;
+                AllTalepler.Clear();
                 Talepler.Clear();
 
                 var filter = new IzinMazeretTalepFilterRequestDto
@@ -152,6 +155,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin.Takip
                     BaslangicTarihiMin = FilterBaslangicMin,
                     BaslangicTarihiMax = FilterBaslangicMax,
                     IsActive = string.IsNullOrEmpty(FilterIsActive) ? null : bool.Parse(FilterIsActive),
+                    IzinIslendiMi = string.IsNullOrEmpty(FilterSgkIslendi) ? null : bool.Parse(FilterSgkIslendi),
                     PageNumber = CurrentPage,
                     PageSize = PageSize,
                     SortBy = "taleptarihi",
@@ -162,10 +166,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin.Takip
 
                 if (result.Success)
                 {
-                    Talepler = result.Data.Items;
+                    AllTalepler = result.Data.Items;
                     TotalCount = result.Data.TotalCount;
 
-                    // Client-side filtering for search and durum
+                    // Client-side filtering for search, durum and SGK
                     ApplyClientSideFilters();
                 }
                 else
@@ -211,7 +215,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin.Takip
 
         private void ApplyClientSideFilters()
         {
-            var filteredList = Talepler.AsEnumerable();
+            // Orijinal listeden başla
+            var filteredList = AllTalepler.AsEnumerable();
 
             // Search filter
             if (!string.IsNullOrWhiteSpace(SearchTerm))
@@ -248,6 +253,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin.Takip
             FilterBaslangicMin = null;
             FilterBaslangicMax = null;
             FilterIsActive = "";
+            FilterSgkIslendi = "false"; // Varsayılan: İşlenmedi
             CurrentPage = 1;
 
             UpdateFilteredServisList();

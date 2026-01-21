@@ -86,6 +86,11 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PdksIslemleri
         public bool? IsActive { get; set; }
 
         /// <summary>
+        /// SGK'ya işlendi mi? (true=işlendi, false=işlenmedi, null=hepsi)
+        /// </summary>
+        public bool? IzinIslendiMi { get; set; }
+
+        /// <summary>
         /// Sayfa numarası (pagination)
         /// </summary>
         public int PageNumber { get; set; } = 1;

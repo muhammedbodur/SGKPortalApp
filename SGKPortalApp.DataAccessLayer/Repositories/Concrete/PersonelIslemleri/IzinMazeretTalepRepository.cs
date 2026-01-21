@@ -271,6 +271,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
             DateTime? talepTarihiMin = null,
             DateTime? talepTarihiMax = null,
             bool? isActive = null,
+            bool? izinIslendiMi = null,
             int pageNumber = 1,
             int pageSize = 50,
             string? sortBy = null,
@@ -345,6 +346,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
             if (isActive.HasValue)
             {
                 query = query.Where(t => t.IsActive == isActive.Value);
+            }
+
+            if (izinIslendiMi.HasValue)
+            {
+                query = query.Where(t => t.IzinIslendiMi == izinIslendiMi.Value);
             }
 
             // Toplam kayıt sayısı

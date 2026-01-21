@@ -79,6 +79,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                         FormModel = new DepartmanFormModel
                         {
                             DepartmanAdi = departman.DepartmanAdi,
+                            DepartmanAdiKisa = departman.DepartmanAdiKisa,
                             IsActive = departman.Aktiflik == Aktiflik.Aktif
                         };
 
@@ -127,6 +128,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                     var updateDto = new DepartmanUpdateRequestDto
                     {
                         DepartmanAdi = FormModel.DepartmanAdi.Trim(),
+                        DepartmanAdiKisa = string.IsNullOrWhiteSpace(FormModel.DepartmanAdiKisa) ? null : FormModel.DepartmanAdiKisa.Trim(),
                         Aktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
@@ -147,6 +149,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
                     var createDto = new DepartmanCreateRequestDto
                     {
                         DepartmanAdi = FormModel.DepartmanAdi.Trim(),
+                        DepartmanAdiKisa = string.IsNullOrWhiteSpace(FormModel.DepartmanAdiKisa) ? null : FormModel.DepartmanAdiKisa.Trim(),
                         Aktiflik = FormModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif
                     };
 
@@ -239,6 +242,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
             [Required(ErrorMessage = "Departman adı zorunludur")]
             [StringLength(150, ErrorMessage = "Departman adı en fazla 150 karakter olabilir")]
             public string DepartmanAdi { get; set; } = string.Empty;
+
+            [StringLength(50, ErrorMessage = "Departman kısa adı en fazla 50 karakter olabilir")]
+            public string? DepartmanAdiKisa { get; set; }
 
             public bool IsActive { get; set; } = true;
         }

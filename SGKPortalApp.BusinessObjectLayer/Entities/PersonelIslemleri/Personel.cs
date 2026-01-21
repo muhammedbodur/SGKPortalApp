@@ -170,7 +170,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         [StringLength(100)]
         public string? BitirdigiBolum { get; set; }
 
-        public int OgrenimSuresi { get; set; }
+        public int OgrenimSuresi { get; set; } = 0;
 
         [StringLength(100)]
         public string? Bransi { get; set; }

@@ -203,6 +203,7 @@ else
                                     <tr>
                                         <th style="width: 50px;">#</th>
                                         <th>Departman Adı</th>
+                                        <th style="width: 120px;">Kısa Ad</th>
                                         <th class="text-center" style="width: 120px;">Personel Sayısı</th>
                                         <th class="text-center" style="width: 100px;">Durum</th>
                                         <th class="text-center" style="width: 150px;">Eklenme Tarihi</th>
@@ -230,6 +231,16 @@ else
                                                     </div>
                                                     <strong>@departman.DepartmanAdi</strong>
                                                 </div>
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(departman.DepartmanAdiKisa))
+                                                {
+                                                    <span class="text-muted">@departman.DepartmanAdiKisa</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted fst-italic">-</span>
+                                                }
                                             </td>
                                             <td class="text-center">
                                                 <span class="badge bg-label-info">

@@ -129,7 +129,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri
         /// Gelişmiş filtreleme ile talepleri getir (raporlama için)
         /// Permission-based filtering destekler
         /// </summary>
-        Task<ApiResponseDto<(List<IzinMazeretTalepListResponseDto> Items, int TotalCount)>> GetFilteredAsync(
+        Task<ApiResponseDto<IzinMazeretTalepFilterResponseDto>> GetFilteredAsync(
             IzinMazeretTalepFilterRequestDto filter);
 
         /// <summary>

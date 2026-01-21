@@ -29,7 +29,6 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<Il> Iller { get; set; }
         public DbSet<Ilce> Ilceler { get; set; }
         public DbSet<DatabaseLog> DatabaseLogs { get; set; }
-        public DbSet<UserDomainMapping> UserDomainMappings { get; set; }
         public DbSet<LoginLogoutLog> LoginLogoutLogs { get; set; }
         public DbSet<HizmetBinasi> HizmetBinalari { get; set; }
         public DbSet<ResmiTatil> ResmiTatiller { get; set; }
@@ -38,7 +37,6 @@ namespace SGKPortalApp.DataAccessLayer.Context
         #region Personel İşlemleri
         public DbSet<Personel> Personeller { get; set; }
         public DbSet<PersonelCocuk> PersonelCocuklari { get; set; }
-        public DbSet<PersonelDepartman> PersonelDepartmanlar { get; set; }
         public DbSet<PersonelYetki> PersonelYetkileri { get; set; }
         public DbSet<PersonelHizmet> PersonelHizmetleri { get; set; }
         public DbSet<PersonelEgitim> PersonelEgitimleri { get; set; }
@@ -50,9 +48,6 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<Unvan> Unvanlar { get; set; }
         public DbSet<Sendika> Sendikalar { get; set; }
         public DbSet<AtanmaNedenleri> AtanmaNedenleri { get; set; }
-        public DbSet<IzinMazeretTalep> IzinMazeretTalepler { get; set; }
-        public DbSet<IzinMazeretTuruTanim> IzinMazeretTuruTanimlari { get; set; }
-        public DbSet<IzinSorumlu> IzinSorumlular { get; set; }
         public DbSet<Modul> Moduller { get; set; }
         public DbSet<ModulController> ModulControllers { get; set; }
         public DbSet<ModulControllerIslem> ModulControllerIslemleri { get; set; }
@@ -89,6 +84,12 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<CekilenData> CekilenDatalar { get; set; }
         #endregion
 
+        #region Pdks İşlemleri
+        public DbSet<IzinMazeretTalep> IzinMazeretTalepler { get; set; }
+        public DbSet<IzinMazeretTuruTanim> IzinMazeretTuruTanimlari { get; set; }
+        public DbSet<IzinSorumlu> IzinSorumlular { get; set; }
+        #endregion
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -107,7 +108,6 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.ApplyConfiguration(new IlceConfiguration());
             modelBuilder.ApplyConfiguration(new HizmetBinasiConfiguration());
             modelBuilder.ApplyConfiguration(new DatabaseLogConfiguration());
-            modelBuilder.ApplyConfiguration(new UserDomainMappingConfiguration());
             modelBuilder.ApplyConfiguration(new LoginLogoutLogConfiguration());
             modelBuilder.ApplyConfiguration(new ModulConfiguration());
             modelBuilder.ApplyConfiguration(new ModulControllerConfiguration());
@@ -126,18 +126,17 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.ApplyConfiguration(new AtanmaNedenleriConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelCocukConfiguration());
-            modelBuilder.ApplyConfiguration(new PersonelDepartmanConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelYetkiConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelHizmetConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelEgitimConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelImzaYetkisiConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelCezaConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelEngelConfiguration());
-            modelBuilder.ApplyConfiguration(new IzinMazeretTalepConfiguration());
-            modelBuilder.ApplyConfiguration(new IzinMazeretTuruTanimConfiguration());
 
             // Pdks İşlemleri
             modelBuilder.ApplyConfiguration(new IzinSorumluConfiguration());
+            modelBuilder.ApplyConfiguration(new IzinMazeretTalepConfiguration());
+            modelBuilder.ApplyConfiguration(new IzinMazeretTuruTanimConfiguration());
 
             // Sıramatik İşlemleri
             modelBuilder.ApplyConfiguration(new BankoConfiguration());

@@ -339,7 +339,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Pdks
             }
         }
 
-        public async Task<ServiceResult<(List<IzinMazeretTalepListResponseDto> Items, int TotalCount)>> GetFilteredAsync(IzinMazeretTalepFilterRequestDto filter)
+        public async Task<ServiceResult<IzinMazeretTalepFilterResponseDto>> GetFilteredAsync(IzinMazeretTalepFilterRequestDto filter)
         {
             try
             {
@@ -349,27 +349,27 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Pdks
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
                     _logger.LogError("GetFilteredAsync failed: {Error}", errorContent);
-                    return ServiceResult<(List<IzinMazeretTalepListResponseDto>, int)>.Fail("Filtrelenmiş talepler alınamadı.");
+                    return ServiceResult<IzinMazeretTalepFilterResponseDto>.Fail("Filtrelenmiş talepler alınamadı.");
                 }
 
-                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<(List<IzinMazeretTalepListResponseDto> Items, int TotalCount)>>();
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<IzinMazeretTalepFilterResponseDto>>();
 
-                if (apiResponse?.Success == true && apiResponse.Data.Items != null)
+                if (apiResponse?.Success == true && apiResponse.Data != null)
                 {
-                    return ServiceResult<(List<IzinMazeretTalepListResponseDto>, int)>.Ok(
+                    return ServiceResult<IzinMazeretTalepFilterResponseDto>.Ok(
                         apiResponse.Data,
                         apiResponse.Message ?? "İşlem başarılı"
                     );
                 }
 
-                return ServiceResult<(List<IzinMazeretTalepListResponseDto>, int)>.Fail(
+                return ServiceResult<IzinMazeretTalepFilterResponseDto>.Fail(
                     apiResponse?.Message ?? "Filtrelenmiş talepler alınamadı"
                 );
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "GetFilteredAsync Exception");
-                return ServiceResult<(List<IzinMazeretTalepListResponseDto>, int)>.Fail($"Hata: {ex.Message}");
+                return ServiceResult<IzinMazeretTalepFilterResponseDto>.Fail($"Hata: {ex.Message}");
             }
         }
 

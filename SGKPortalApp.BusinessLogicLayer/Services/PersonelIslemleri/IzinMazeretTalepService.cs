@@ -612,7 +612,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
         // RAPORLAMA VE FİLTRELEME
         // ═══════════════════════════════════════════════════════
 
-        public async Task<ApiResponseDto<(List<IzinMazeretTalepListResponseDto> Items, int TotalCount)>> GetFilteredAsync(
+        public async Task<ApiResponseDto<IzinMazeretTalepFilterResponseDto>> GetFilteredAsync(
             IzinMazeretTalepFilterRequestDto filter)
         {
             try
@@ -631,6 +631,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     filter.TalepTarihiMin,
                     filter.TalepTarihiMax,
                     filter.IsActive,
+                    filter.IzinIslendiMi,
                     filter.PageNumber,
                     filter.PageSize,
                     filter.SortBy,
@@ -638,13 +639,19 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
                 var taleplerDto = MapToListDto(items);
 
-                return ApiResponseDto<(List<IzinMazeretTalepListResponseDto> Items, int TotalCount)>
-                    .SuccessResult((Items: taleplerDto, TotalCount: totalCount), "Filtrelenmiş talepler başarıyla getirildi");
+                var response = new IzinMazeretTalepFilterResponseDto
+                {
+                    Items = taleplerDto,
+                    TotalCount = totalCount
+                };
+
+                return ApiResponseDto<IzinMazeretTalepFilterResponseDto>
+                    .SuccessResult(response, "Filtrelenmiş talepler başarıyla getirildi");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Filtrelenmiş talepler getirilirken hata oluştu");
-                return ApiResponseDto<(List<IzinMazeretTalepListResponseDto> Items, int TotalCount)>
+                return ApiResponseDto<IzinMazeretTalepFilterResponseDto>
                     .ErrorResult("Talepler getirilirken bir hata oluştu", ex.Message);
             }
         }

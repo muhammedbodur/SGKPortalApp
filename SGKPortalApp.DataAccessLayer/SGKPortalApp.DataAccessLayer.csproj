@@ -10,6 +10,7 @@
     <Folder Include="Configurations\Auth\" />
     <Folder Include="Configurations\EshotIslemleri\" />
     <Folder Include="Configurations\PdksIslemleri\" />
+    <Folder Include="Migrations\" />
     <Folder Include="Repositories\Concrete\EshotIslemleri\" />
     <Folder Include="Repositories\Concrete\PdksIslemleri\" />
     <Folder Include="Repositories\Interfaces\EshotIslemleri\" />

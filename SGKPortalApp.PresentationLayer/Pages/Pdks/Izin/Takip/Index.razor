@@ -97,7 +97,7 @@ else
                         </div>
 
                         <!-- Aktiflik -->
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label">Aktiflik</label>
                             <select class="form-select" @bind="FilterIsActive" @bind:after="ApplyFilters">
                                 <option value="">Tümü</option>
@@ -106,8 +106,18 @@ else
                             </select>
                         </div>
 
+                        <!-- SGK İşlenme -->
+                        <div class="col-md-2">
+                            <label class="form-label">SGK İşlenme</label>
+                            <select class="form-select" @bind="FilterSgkIslendi" @bind:after="ApplyFilters">
+                                <option value="">Tümü</option>
+                                <option value="true">İşlendi</option>
+                                <option value="false">İşlenmedi</option>
+                            </select>
+                        </div>
+
                         <!-- Filtre Temizle -->
-                        <div class="col-md-3 d-flex align-items-end">
+                        <div class="col-md-2 d-flex align-items-end">
                             <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
                                 <i class="bx bx-x me-1"></i>Filtreleri Temizle
                             </button>
@@ -174,16 +184,16 @@ else
                             <table class="table table-hover table-sm">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Personel</th>
-                                        <th>Departman/Servis</th>
-                                        <th>Tür</th>
-                                        <th>Tarih</th>
-                                        <th>Talep Tarihi</th>
-                                        <th>1. Onay</th>
-                                        <th>2. Onay</th>
-                                        <th>Durum</th>
-                                        <th>İşlemler</th>
+                                        <th style="width: 60px;">ID</th>
+                                        <th style="width: 150px;">Personel</th>
+                                        <th style="width: 180px;">Departman/Servis</th>
+                                        <th style="width: 120px;">Tür</th>
+                                        <th style="width: 140px;">Tarih</th>
+                                        <th style="width: 130px;">Talep Tarihi</th>
+                                        <th style="width: 120px;">1. Onay</th>
+                                        <th style="width: 120px;">2. Onay</th>
+                                        <th style="width: 100px;">Durum</th>
+                                        <th style="width: 120px;">İşlemler</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -207,13 +217,13 @@ else
                                                     <small class="text-muted">Sicil: @talep.SicilNo</small>
                                                 </td>
                                                 <td>
-                                                    <div>@talep.DepartmanAdi</div>
+                                                    <div class="text-truncate" style="max-width: 180px;" title="@talep.DepartmanAdi">@talep.DepartmanAdi</div>
                                                     @if (!string.IsNullOrEmpty(talep.ServisAdi))
                                                     {
-                                                        <small class="text-muted">@talep.ServisAdi</small>
+                                                        <small class="text-muted text-truncate d-block" style="max-width: 180px;" title="@talep.ServisAdi">@talep.ServisAdi</small>
                                                     }
                                                 </td>
-                                                <td><span class="badge bg-label-info">@talep.TuruAdi</span></td>
+                                                <td><span class="badge bg-label-info text-truncate d-inline-block" style="max-width: 120px;" title="@talep.TuruAdi">@talep.TuruAdi</span></td>
                                                 <td>
                                                     @if (talep.BaslangicTarihi.HasValue && talep.BitisTarihi.HasValue)
                                                     {
@@ -233,14 +243,14 @@ else
                                                     <span class="badge @GetOnayBadgeClass(talep.BirinciOnayDurumuAdi)">@talep.BirinciOnayDurumuAdi</span>
                                                     @if (!string.IsNullOrEmpty(talep.BirinciOnayciAdSoyad))
                                                     {
-                                                        <br /><small class="text-muted">@talep.BirinciOnayciAdSoyad</small>
+                                                        <br /><small class="text-muted text-truncate d-block" style="max-width: 120px;" title="@talep.BirinciOnayciAdSoyad">@talep.BirinciOnayciAdSoyad</small>
                                                     }
                                                 </td>
                                                 <td>
                                                     <span class="badge @GetOnayBadgeClass(talep.IkinciOnayDurumuAdi)">@talep.IkinciOnayDurumuAdi</span>
                                                     @if (!string.IsNullOrEmpty(talep.IkinciOnayciAdSoyad))
                                                     {
-                                                        <br /><small class="text-muted">@talep.IkinciOnayciAdSoyad</small>
+                                                        <br /><small class="text-muted text-truncate d-block" style="max-width: 120px;" title="@talep.IkinciOnayciAdSoyad">@talep.IkinciOnayciAdSoyad</small>
                                                     }
                                                 </td>
                                                 <td><span class="badge @GetDurumBadgeClass(talep.GenelDurum)">@talep.GenelDurum</span></td>

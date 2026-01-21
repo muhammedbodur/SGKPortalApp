@@ -99,6 +99,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri
             DateTime? talepTarihiMin = null,
             DateTime? talepTarihiMax = null,
             bool? isActive = null,
+            bool? izinIslendiMi = null,
             int pageNumber = 1,
             int pageSize = 50,
             string? sortBy = null,

@@ -16,6 +16,12 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         public string DepartmanAdi { get; set; } = string.Empty;
 
         /// <summary>
+        /// Departman kısa adı
+        /// </summary>
+        [StringLength(50, ErrorMessage = "Departman kısa adı en fazla 50 karakter olabilir")]
+        public string? DepartmanAdiKisa { get; set; }
+
+        /// <summary>
         /// Departman aktiflik durumu
         /// </summary>
         [Required(ErrorMessage = "Aktiflik durumu zorunludur")]

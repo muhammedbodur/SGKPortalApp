@@ -7,5 +7,6 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
     {
         public int DepartmanId { get; set; }
         public string DepartmanAdi { get; set; } = string.Empty;
+        public string? DepartmanAdiKisa { get; set; }
     }
 }

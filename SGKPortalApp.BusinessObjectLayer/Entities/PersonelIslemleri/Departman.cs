@@ -17,6 +17,8 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         [StringLength(150)]
         public required string DepartmanAdi { get; set; }
 
+        public string? DepartmanAdiKisa { get; set; }
+
         public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
 
         [InverseProperty("Departman")]
