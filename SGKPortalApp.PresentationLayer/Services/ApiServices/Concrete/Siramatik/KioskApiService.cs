@@ -25,7 +25,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             => await GetListAsync("kiosk/aktif");
 
         public async Task<ServiceResult<List<KioskResponseDto>>> GetByHizmetBinasiAsync(int hizmetBinasiId)
-            => await GetListAsync($"kiosk/bina/{hizmetBinasiId}");
+            => await GetListAsync($"kiosk/departman-hizmet-binasi/{hizmetBinasiId}");
 
         public async Task<ServiceResult<KioskResponseDto>> GetByIdAsync(int kioskId)
             => await GetSingleAsync($"kiosk/{kioskId}");

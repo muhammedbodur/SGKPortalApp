@@ -16,14 +16,17 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         public SiraRepository(SGKDbContext context) : base(context) { }
 
         // Sıra numarası ile sırayı getirir
-        public async Task<Sira?> GetBySiraNoAsync(int siraNo, int hizmetBinasiId)
+        public async Task<Sira?> GetBySiraNoAsync(int siraNo, int departmanHizmetBinasiId)
         {
             return await _dbSet
                 .AsNoTracking()
                 .Include(s => s.KanalAltIslem)
-                .Include(s => s.HizmetBinasi)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(s => s.Personel)
-                .FirstOrDefaultAsync(s => s.SiraNo == siraNo && s.HizmetBinasiId == hizmetBinasiId);
+                .FirstOrDefaultAsync(s => s.SiraNo == siraNo && s.DepartmanHizmetBinasiId == departmanHizmetBinasiId);
         }
 
         // Personel bazında sıraları listeler
@@ -32,7 +35,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(s => s.KanalAltIslem)
-                .Include(s => s.HizmetBinasi)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(s => s.Personel)
                 .Where(s => s.TcKimlikNo == tcKimlikNo)
                 .ToListAsync();
@@ -44,7 +50,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(s => s.KanalAltIslem)
-                .Include(s => s.HizmetBinasi)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(s => s.Personel)
                 .FirstOrDefaultAsync(s => s.TcKimlikNo == tcKimlikNo && s.BeklemeDurum == BeklemeDurum.Beklemede);
         }
@@ -57,15 +66,18 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .FirstOrDefaultAsync(s => s.TcKimlikNo == tcKimlikNo && s.BeklemeDurum == BeklemeDurum.Cagrildi);
         }
 
-        // Hizmet binası bazında sıraları listeler
-        public async Task<IEnumerable<Sira>> GetByHizmetBinasiAsync(int hizmetBinasiId)
+        // Departman-hizmet binası bazında sıraları listeler
+        public async Task<IEnumerable<Sira>> GetByDepartmanHizmetBinasiAsync(int departmanHizmetBinasiId)
         {
             return await _dbSet
                 .AsNoTracking()
                 .Include(s => s.KanalAltIslem)
-                .Include(s => s.HizmetBinasi)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(s => s.Personel)
-                .Where(s => s.HizmetBinasiId == hizmetBinasiId)
+                .Where(s => s.DepartmanHizmetBinasiId == departmanHizmetBinasiId)
                 .ToListAsync();
         }
 
@@ -75,7 +87,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(s => s.KanalAltIslem)
-                .Include(s => s.HizmetBinasi)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(s => s.Personel)
                 .Where(s => s.KanalAltIslemId == kanalAltIslemId)
                 .ToListAsync();
@@ -87,7 +102,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(s => s.KanalAltIslem)
-                .Include(s => s.HizmetBinasi)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(s => s.Personel)
                 .Where(s => s.SiraAlisZamani >= startDate && s.SiraAlisZamani <= endDate)
                 .ToListAsync();
@@ -100,7 +118,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(s => s.KanalAltIslem)
-                .Include(s => s.HizmetBinasi)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(s => s.Personel)
                 .Where(s => s.SiraAlisZamani.Date == today)
                 .ToListAsync();
@@ -112,7 +133,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(s => s.KanalAltIslem)
-                .Include(s => s.HizmetBinasi)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(s => s.Personel)
                 .Where(s => s.BeklemeDurum == BeklemeDurum.Beklemede || s.BeklemeDurum == BeklemeDurum.Cagrildi)
                 .ToListAsync();
@@ -124,7 +148,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(s => s.KanalAltIslem)
-                .Include(s => s.HizmetBinasi)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(s => s.Personel)
                 .Where(s => s.BeklemeDurum == BeklemeDurum.Beklemede)
                 .ToListAsync();
@@ -136,7 +163,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(s => s.KanalAltIslem)
-                .Include(s => s.HizmetBinasi)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(s => s.Personel)
                 .Where(s => s.BeklemeDurum == BeklemeDurum.Bitti)
                 .ToListAsync();
@@ -148,7 +178,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(s => s.KanalAltIslem)
-                .Include(s => s.HizmetBinasi)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(s => s.Personel)
                 .FirstOrDefaultAsync(s => s.SiraId == siraId);
         }
@@ -159,7 +192,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(s => s.KanalAltIslem)
-                .Include(s => s.HizmetBinasi)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(s => s.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(s => s.Personel)
                 .ToListAsync();
         }

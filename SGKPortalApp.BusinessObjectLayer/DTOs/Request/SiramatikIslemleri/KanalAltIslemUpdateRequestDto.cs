@@ -13,9 +13,9 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri
         [Range(1, int.MaxValue, ErrorMessage = "Geçerli bir kanal işlem seçiniz")]
         public int KanalIslemId { get; set; }
 
-        [Required(ErrorMessage = "Hizmet binası zorunludur")]
-        [Range(1, int.MaxValue, ErrorMessage = "Geçerli bir hizmet binası seçiniz")]
-        public int HizmetBinasiId { get; set; }
+        [Required(ErrorMessage = "Departman-Hizmet Binası kombinasyonu zorunludur")]
+        [Range(1, int.MaxValue, ErrorMessage = "Geçerli bir departman-bina kombinasyonu seçiniz")]
+        public int DepartmanHizmetBinasiId { get; set; }
 
         public int? KioskIslemGrupId { get; set; }
 

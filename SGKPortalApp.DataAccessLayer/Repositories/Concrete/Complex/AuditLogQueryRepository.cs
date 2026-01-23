@@ -306,9 +306,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
 
                     // Sıramatik - Banko
                     "BankoId" or "YonlendirenBankoId" or "HedefBankoId" or "AktifBankoId" => await _context.Bankolar
-                        .Include(b => b.HizmetBinasi)
+                        .Include(b => b.DepartmanHizmetBinasi)
+                            .ThenInclude(dhb => dhb.HizmetBinasi)
                         .Where(b => b.BankoId == id)
-                        .Select(b => "Banko #" + b.BankoNo + " (" + b.HizmetBinasi.HizmetBinasiAdi + ")")
+                        .Select(b => "Banko #" + b.BankoNo + " (" + b.DepartmanHizmetBinasi.HizmetBinasi.HizmetBinasiAdi + ")")
                         .FirstOrDefaultAsync(),
 
                     // Sıramatik - Tv

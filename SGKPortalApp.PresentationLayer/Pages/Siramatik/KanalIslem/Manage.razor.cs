@@ -424,21 +424,21 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             if (!CanAccessHizmetBinasi(model.HizmetBinasiId))
             {
                 await _toastService.ShowErrorAsync("Bu Hizmet Binasında kayıt oluşturma yetkiniz yok!");
-                _logger.LogWarning("Yetkisiz kayıt oluşturma denemesi: HizmetBinasiId={BinaId}", model.HizmetBinasiId);
+                _logger.LogWarning("Yetkisiz kayıt oluşturma denemesi: DepartmanHizmetBinasiId={BinaId}", model.DepartmanHizmetBinasiId);
                 return;
             }
 
             var createDto = new KanalIslemCreateRequestDto
             {
                 KanalId = model.KanalId,
-                HizmetBinasiId = model.HizmetBinasiId,
+                DepartmanHizmetBinasiId = model.DepartmanHizmetBinasiId,
                 BaslangicNumara = model.BaslangicNumara,
                 BitisNumara = model.BitisNumara,
                 Sira = model.Sira,
                 Aktiflik = model.Aktiflik
             };
 
-            _logger.LogInformation($"📤 API'ye gönderilecek DTO: KanalId={createDto.KanalId}, HizmetBinasiId={createDto.HizmetBinasiId}, Sira={createDto.Sira}");
+            _logger.LogInformation($"📤 API'ye gönderilecek DTO: KanalId={createDto.KanalId}, DepartmanHizmetBinasiId={createDto.DepartmanHizmetBinasiId}, Sira={createDto.Sira}");
 
             var result = await _kanalIslemService.CreateAsync(createDto);
 
@@ -464,14 +464,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             var updateDto = new KanalIslemUpdateRequestDto
             {
                 KanalId = model.KanalId,
-                HizmetBinasiId = model.HizmetBinasiId,
+                DepartmanHizmetBinasiId = model.DepartmanHizmetBinasiId,
                 BaslangicNumara = model.BaslangicNumara,
                 BitisNumara = model.BitisNumara,
                 Sira = model.Sira,
                 Aktiflik = model.Aktiflik
             };
 
-            _logger.LogInformation($"📤 API'ye gönderilecek DTO: KanalId={updateDto.KanalId}, HizmetBinasiId={updateDto.HizmetBinasiId}, Sira={updateDto.Sira}, Aktiflik={updateDto.Aktiflik}");
+            _logger.LogInformation($"📤 API'ye gönderilecek DTO: KanalId={updateDto.KanalId}, DepartmanHizmetBinasiId={updateDto.DepartmanHizmetBinasiId}, Sira={updateDto.Sira}, Aktiflik={updateDto.Aktiflik}");
             _logger.LogInformation($"🎯 API Endpoint: PUT /api/kanalislem/{KanalIslemId!.Value}");
 
             var result = await _kanalIslemService.UpdateAsync(KanalIslemId!.Value, updateDto);

@@ -103,10 +103,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         .ErrorResult("Kanal seçimi zorunludur");
                 }
 
-                if (request.HizmetBinasiId <= 0)
+                if (request.DepartmanHizmetBinasiId <= 0)
                 {
                     return ApiResponseDto<KanalIslemResponseDto>
-                        .ErrorResult("Hizmet binası seçimi zorunludur");
+                        .ErrorResult("Departman-Hizmet binası seçimi zorunludur");
                 }
 
                 if (request.BaslangicNumara >= request.BitisNumara)
@@ -136,7 +136,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 // Eğer sıra 0 veya belirtilmemişse, otomatik sıra ata
                 if (request.Sira <= 0)
                 {
-                    var maxSira = await kanalIslemRepo.GetMaxSiraByKanalAndBinaAsync(request.KanalId, request.HizmetBinasiId);
+                    var maxSira = await kanalIslemRepo.GetMaxSiraByKanalAndBinaAsync(request.KanalId, request.DepartmanHizmetBinasiId);
                     request.Sira = maxSira + 1;
                 }
 
@@ -148,8 +148,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 var kanalIslemDto = _mapper.Map<KanalIslemResponseDto>(kanalIslem);
 
-                _logger.LogInformation("Yeni kanal işlem oluşturuldu. ID: {KanalIslemId}, KanalId: {KanalId}, HizmetBinasiId: {HizmetBinasiId}",
-                    kanalIslem.KanalIslemId, kanalIslem.KanalId, kanalIslem.HizmetBinasiId);
+                _logger.LogInformation("Yeni kanal işlem oluşturuldu. ID: {KanalIslemId}, KanalId: {KanalId}, DepartmanHizmetBinasiId: {DepartmanHizmetBinasiId}",
+                    kanalIslem.KanalIslemId, kanalIslem.KanalId, kanalIslem.DepartmanHizmetBinasiId);
 
                 return ApiResponseDto<KanalIslemResponseDto>
                     .SuccessResult(kanalIslemDto, "Kanal işlem başarıyla oluşturuldu");
@@ -179,10 +179,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         .ErrorResult("Kanal seçimi zorunludur");
                 }
 
-                if (request.HizmetBinasiId <= 0)
+                if (request.DepartmanHizmetBinasiId <= 0)
                 {
                     return ApiResponseDto<KanalIslemResponseDto>
-                        .ErrorResult("Hizmet binası seçimi zorunludur");
+                        .ErrorResult("Departman-Hizmet binası seçimi zorunludur");
                 }
 
                 if (request.BaslangicNumara >= request.BitisNumara)
@@ -247,7 +247,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 // Update
                 kanalIslem.KanalId = request.KanalId;
-                kanalIslem.HizmetBinasiId = request.HizmetBinasiId;
+                kanalIslem.DepartmanHizmetBinasiId = request.DepartmanHizmetBinasiId;
                 kanalIslem.Sira = request.Sira;
                 kanalIslem.BaslangicNumara = request.BaslangicNumara;
                 kanalIslem.BitisNumara = request.BitisNumara;
@@ -348,18 +348,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
         }
 
-        public async Task<ApiResponseDto<List<KanalIslemResponseDto>>> GetByHizmetBinasiIdAsync(int hizmetBinasiId)
+        public async Task<ApiResponseDto<List<KanalIslemResponseDto>>> GetByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId)
         {
             try
             {
-                if (hizmetBinasiId <= 0)
+                if (departmanHizmetBinasiId <= 0)
                 {
                     return ApiResponseDto<List<KanalIslemResponseDto>>
-                        .ErrorResult("Geçersiz hizmet binası ID");
+                        .ErrorResult("Geçersiz departman-hizmet binası ID");
                 }
 
                 var kanalIslemRepo = _unitOfWork.GetRepository<IKanalIslemRepository>();
-                var kanalIslemler = await kanalIslemRepo.GetByHizmetBinasiAsync(hizmetBinasiId);
+                var kanalIslemler = await kanalIslemRepo.GetByDepartmanHizmetBinasiAsync(departmanHizmetBinasiId);
 
                 var kanalIslemDtos = _mapper.Map<List<KanalIslemResponseDto>>(kanalIslemler);
 
@@ -368,7 +368,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kanal işlem listesi getirilirken hata oluştu. HizmetBinasiId: {HizmetBinasiId}", hizmetBinasiId);
+                _logger.LogError(ex, "Kanal işlem listesi getirilirken hata oluştu. DepartmanHizmetBinasiId: {DepartmanHizmetBinasiId}", departmanHizmetBinasiId);
                 return ApiResponseDto<List<KanalIslemResponseDto>>
                     .ErrorResult("Kanal işlemler getirilirken bir hata oluştu", ex.Message);
             }

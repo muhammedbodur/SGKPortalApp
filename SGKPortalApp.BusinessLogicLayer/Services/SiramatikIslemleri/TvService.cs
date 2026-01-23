@@ -207,13 +207,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
         }
 
-        public async Task<ApiResponseDto<List<TvResponseDto>>> GetByHizmetBinasiAsync(int hizmetBinasiId)
+        public async Task<ApiResponseDto<List<TvResponseDto>>> GetByDepartmanHizmetBinasiAsync(int departmanHizmetBinasiId)
         {
             try
             {
                 var tvRepo = _unitOfWork.GetRepository<ITvRepository>();
                 var tvler = await tvRepo.GetAllWithDetailsAsync();
-                var filteredTvler = tvler.Where(t => t.HizmetBinasiId == hizmetBinasiId).ToList();
+                var filteredTvler = tvler.Where(t => t.DepartmanHizmetBinasiId == departmanHizmetBinasiId).ToList();
                 var response = _mapper.Map<List<TvResponseDto>>(filteredTvler);
                 
                 // Her TV için banko sayısını ve bağlantı durumunu set et
@@ -350,18 +350,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
         }
 
-        public async Task<ApiResponseDto<List<(int Id, string Ad)>>> GetByHizmetBinasiDropdownAsync(int hizmetBinasiId)
+        public async Task<ApiResponseDto<List<(int Id, string Ad)>>> GetByDepartmanHizmetBinasiDropdownAsync(int departmanHizmetBinasiId)
         {
             try
             {
                 var tvRepo = _unitOfWork.GetRepository<ITvRepository>();
-                var tvler = await tvRepo.GetByHizmetBinasiDropdownAsync(hizmetBinasiId);
+                var tvler = await tvRepo.GetByDepartmanHizmetBinasiDropdownAsync(departmanHizmetBinasiId);
                 return ApiResponseDto<List<(int Id, string Ad)>>.SuccessResult(tvler.ToList());
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Hizmet binası TV dropdown getirilirken hata oluştu");
-                return ApiResponseDto<List<(int Id, string Ad)>>.ErrorResult($"Hizmet binası TV dropdown getirilirken bir hata oluştu: {ex.Message}");
+                _logger.LogError(ex, "Departman-Hizmet binası TV dropdown getirilirken hata oluştu");
+                return ApiResponseDto<List<(int Id, string Ad)>>.ErrorResult($"Departman-Hizmet binası TV dropdown getirilirken bir hata oluştu: {ex.Message}");
             }
         }
 

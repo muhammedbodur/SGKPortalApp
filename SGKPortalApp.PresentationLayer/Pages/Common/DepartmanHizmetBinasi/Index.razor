@@ -1,0 +1,289 @@
+@page "/common/departman-hizmet-binasi"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+@attribute [Authorize]
+
+<PageTitle>Departman-Hizmet Binası Eşleştirme - SGK Portal</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-xxl flex-grow-1 container-p-y">
+    
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        <i class="bx bx-link me-2"></i>Departman-Hizmet Binası Eşleştirme
+                    </h4>
+                    <p class="text-muted mb-0">Departmanların hangi hizmet binalarında çalıştığını yönetin</p>
+                </div>
+                <button class="btn btn-outline-secondary" @onclick="RefreshAsync" disabled="@isLoading">
+                    <i class="bx bx-refresh"></i>
+                </button>
+            </div>
+
+
+            @if (isLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Veriler yükleniyor...</p>
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    <!-- Sol Panel - Departman Listesi -->
+                    <div class="col-lg-3 mb-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="bx bx-briefcase me-2"></i>Departmanlar
+                                </h5>
+                            </div>
+                            <div class="card-body p-0" style="max-height: 700px; overflow-y: auto;">
+                                @if (!departmanlar.Any())
+                                {
+                                    <div class="text-center py-4">
+                                        <i class="bx bx-info-circle" style="font-size: 2rem; color: #ddd;"></i>
+                                        <p class="mt-2 text-muted small">Departman bulunamadı</p>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="list-group list-group-flush">
+                                        @foreach (var dept in departmanlar)
+                                        {
+                                            <button type="button"
+                                                    class="list-group-item list-group-item-action @(selectedDepartmanId == dept.DepartmanId ? "active" : "")"
+                                                    @onclick="() => SelectDepartman(dept.DepartmanId)">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <i class="bx bx-briefcase me-1"></i>
+                                                        <strong>@dept.DepartmanAdi</strong>
+                                                    </div>
+                                                    <span class="badge bg-label-primary">
+                                                        @assignedBinalar.Count(b => b.DepartmanId == dept.DepartmanId)
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Orta Panel - Eşleştirilmiş Binalar -->
+                    <div class="col-lg-6 mb-4">
+                        @if (selectedDepartmanId == 0)
+                        {
+                            <div class="card">
+                                <div class="card-body text-center py-5">
+                                    <i class="bx bx-briefcase" style="font-size: 4rem; color: #ddd;"></i>
+                                    <h5 class="mt-3 text-muted">Departman Seçiniz</h5>
+                                    <p class="text-muted">Hizmet binası eşleştirmek için önce bir departman seçin</p>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card h-100">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0">
+                                        <i class="bx bx-check-circle me-1"></i>
+                                        Eşleştirilmiş Hizmet Binaları (@assignedBinalar.Count(b => b.DepartmanId == selectedDepartmanId))
+                                    </h6>
+                                </div>
+                                <div class="card-body" style="max-height: 650px; overflow-y: auto;">
+                                    @if (isLoadingBinalar)
+                                    {
+                                        <div class="text-center py-4">
+                                            <div class="spinner-border spinner-border-sm text-primary"></div>
+                                            <p class="mt-2 text-muted small">Yükleniyor...</p>
+                                        </div>
+                                    }
+                                    else if (!assignedBinalar.Any(b => b.DepartmanId == selectedDepartmanId))
+                                    {
+                                        <div class="text-center py-4"
+                                             @ondragover:preventDefault
+                                             @ondrop="OnDropToAssigned"
+                                             style="min-height: 200px; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                            <div>
+                                                <i class="bx bx-info-circle" style="font-size: 2rem; color: #ddd;"></i>
+                                                <p class="mt-2 text-muted small">Henüz bina eşleştirilmemiş</p>
+                                                <p class="text-muted small">Sağdaki binalardan sürükleyip buraya bırakın</p>
+                                            </div>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="list-group"
+                                             @ondragover:preventDefault
+                                             @ondrop="OnDropToAssigned">
+                                            @foreach (var item in assignedBinalar.Where(b => b.DepartmanId == selectedDepartmanId).OrderBy(b => b.HizmetBinasiAdi))
+                                            {
+                                                <div class="list-group-item d-flex justify-content-between align-items-center"
+                                                     draggable="true"
+                                                     @ondragstart="() => OnDragStart(item.HizmetBinasiId)"
+                                                     style="cursor: move;">
+                                                    <div class="flex-grow-1">
+                                                        <i class="bx bx-grid-vertical me-2 text-muted"></i>
+                                                        <strong>@item.HizmetBinasiAdi</strong>
+                                                        @if (item.AnaBina)
+                                                        {
+                                                            <span class="badge bg-label-warning ms-2">
+                                                                <i class="bx bx-star"></i> Ana Bina
+                                                            </span>
+                                                        }
+                                                    </div>
+                                                    <div class="btn-group">
+                                                        <button class="btn btn-sm btn-outline-warning"
+                                                                @onclick="() => ToggleAnaBina(item)"
+                                                                disabled="@isSaving"
+                                                                title="@(item.AnaBina ? "Şube Yap" : "Ana Bina Yap")">
+                                                            <i class="bx @(item.AnaBina ? "bx-building-house" : "bx-star")"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-danger"
+                                                                @onclick="() => RemoveBina(item.DepartmanHizmetBinasiId)"
+                                                                disabled="@isSaving">
+                                                            <i class="bx bx-x"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Sağ Panel - Eşleştirilmemiş Binalar -->
+                    <div class="col-lg-3 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-secondary text-white">
+                                <h6 class="mb-0">
+                                    <i class="bx bx-building me-1"></i>
+                                    Hizmet Binaları
+                                </h6>
+                            </div>
+                            <div class="card-body p-0" style="max-height: 700px; overflow-y: auto;">
+                                @if (isLoadingBinalar)
+                                {
+                                    <div class="text-center py-4">
+                                        <div class="spinner-border spinner-border-sm text-primary"></div>
+                                        <p class="mt-2 text-muted small">Yükleniyor...</p>
+                                    </div>
+                                }
+                                else if (!hizmetBinalari.Any())
+                                {
+                                    <div class="text-center py-4">
+                                        <i class="bx bx-info-circle" style="font-size: 2rem; color: #ddd;"></i>
+                                        <p class="mt-2 text-muted small">Hizmet binası bulunamadı</p>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="list-group list-group-flush">
+                                        @foreach (var bina in hizmetBinalari.OrderBy(b => b.HizmetBinasiAdi))
+                                        {
+                                            var isAssigned = selectedDepartmanId > 0 && assignedBinalar.Any(ab => ab.DepartmanId == selectedDepartmanId && ab.HizmetBinasiId == bina.HizmetBinasiId);
+                                            <div class="list-group-item d-flex justify-content-between align-items-center @(isAssigned ? "bg-light text-muted" : "")"
+                                                 draggable="@(!isAssigned).ToString().ToLower()"
+                                                 @ondragstart="() => OnDragStart(bina.HizmetBinasiId)"
+                                                 style="cursor: @(isAssigned ? "not-allowed" : "move");">
+                                                <div class="flex-grow-1">
+                                                    @if (!isAssigned)
+                                                    {
+                                                        <i class="bx bx-grid-vertical me-2 text-muted"></i>
+                                                    }
+                                                    <span class="@(isAssigned ? "text-muted" : "")">@bina.HizmetBinasiAdi</span>
+                                                </div>
+                                                @if (selectedDepartmanId > 0 && !isAssigned)
+                                                {
+                                                    <button class="btn btn-sm btn-outline-success"
+                                                            @onclick="() => AddBina(bina.HizmetBinasiId)"
+                                                            disabled="@isSaving">
+                                                        <i class="bx bx-plus"></i>
+                                                    </button>
+                                                }
+                                                @if (isAssigned)
+                                                {
+                                                    <i class="bx bx-check text-success"></i>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bilgi Kutusu -->
+                @if (selectedDepartmanId > 0)
+                {
+                    <div class="alert alert-info">
+                        <i class="bx bx-info-circle me-1"></i>
+                        <strong>İpucu:</strong> Hizmet binalarını sürükleyip ortadaki alana bırakarak veya <i class="bx bx-plus"></i>/<i class="bx bx-x"></i> butonlarını kullanarak eşleştirebilirsiniz.
+                    </div>
+                }
+            }
+        </div>
+
+    </FieldPermissionScope>
+}
+
+<!-- Delete Modal -->
+@if (showDeleteModal && selectedItem != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bx bx-trash me-2"></i>Eşleştirmeyi Sil
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="HideDeleteConfirm" disabled="@isDeleting"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">
+                        <strong>@selectedItem.DepartmanAdi</strong> departmanının <strong>@selectedItem.HizmetBinasiAdi</strong> binası ile eşleştirmesini silmek istediğinize emin misiniz?
+                    </p>
+                    <p class="text-muted mb-0 mt-2">
+                        <i class="bx bx-info-circle me-1"></i>Bu işlem geri alınamaz.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="HideDeleteConfirm" disabled="@isDeleting">
+                        İptal
+                    </button>
+                    <button type="button" class="btn btn-danger" @onclick="DeleteItem" disabled="@isDeleting">
+                        @if (isDeleting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        else
+                        {
+                            <i class="bx bx-trash me-1"></i>
+                        }
+                        Sil
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+}

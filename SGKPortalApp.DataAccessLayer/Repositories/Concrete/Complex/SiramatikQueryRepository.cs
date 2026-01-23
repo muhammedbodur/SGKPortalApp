@@ -46,14 +46,15 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             return await query.AsNoTracking().ToListAsync();
         }
 
-        public async Task<List<KanalAltIslemResponseDto>> GetKanalAltIslemlerByHizmetBinasiIdAsync(int hizmetBinasiId)
+        public async Task<List<KanalAltIslemResponseDto>> GetKanalAltIslemlerByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId)
         {
             var query = from kai in _context.KanalAltIslemleri
                         join ka in _context.KanallarAlt on kai.KanalAltId equals ka.KanalAltId
                         join k in _context.Kanallar on ka.KanalId equals k.KanalId
                         join ki in _context.KanalIslemleri on kai.KanalIslemId equals ki.KanalIslemId
-                        join hb in _context.HizmetBinalari on kai.HizmetBinasiId equals hb.HizmetBinasiId
-                        where kai.HizmetBinasiId == hizmetBinasiId
+                        join dhb in _context.DepartmanHizmetBinalari on kai.DepartmanHizmetBinasiId equals dhb.DepartmanHizmetBinasiId
+                        join hb in _context.HizmetBinalari on dhb.HizmetBinasiId equals hb.HizmetBinasiId
+                        where kai.DepartmanHizmetBinasiId == departmanHizmetBinasiId
                               && !kai.SilindiMi
                         select new KanalAltIslemResponseDto
                         {
@@ -71,24 +72,28 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                                 .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId 
                                           && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
                                           && !kp.SilindiMi
-                                          && kp.Personel != null && kp.Personel.HizmetBinasiId == hizmetBinasiId),
+                                          && kp.Personel != null && kp.Personel.HizmetBinasiId == dhb.HizmetBinasiId
+                                          && kp.Personel.DepartmanId == dhb.DepartmanId),
                             SefSayisi = _context.KanalPersonelleri
                                 .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId 
                                           && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
                                           && !kp.SilindiMi
-                                          && kp.Personel != null && kp.Personel.HizmetBinasiId == hizmetBinasiId
+                                          && kp.Personel != null && kp.Personel.HizmetBinasiId == dhb.HizmetBinasiId
+                                          && kp.Personel.DepartmanId == dhb.DepartmanId
                                           && kp.Uzmanlik == BusinessObjectLayer.Enums.SiramatikIslemleri.PersonelUzmanlik.Sef),
                             UzmanSayisi = _context.KanalPersonelleri
                                 .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId 
                                           && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
                                           && !kp.SilindiMi
-                                          && kp.Personel != null && kp.Personel.HizmetBinasiId == hizmetBinasiId
+                                          && kp.Personel != null && kp.Personel.HizmetBinasiId == dhb.HizmetBinasiId
+                                          && kp.Personel.DepartmanId == dhb.DepartmanId
                                           && kp.Uzmanlik == BusinessObjectLayer.Enums.SiramatikIslemleri.PersonelUzmanlik.Uzman),
                             YrdUzmanSayisi = _context.KanalPersonelleri
                                 .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId 
                                           && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
                                           && !kp.SilindiMi
-                                          && kp.Personel != null && kp.Personel.HizmetBinasiId == hizmetBinasiId
+                                          && kp.Personel != null && kp.Personel.HizmetBinasiId == dhb.HizmetBinasiId
+                                          && kp.Personel.DepartmanId == dhb.DepartmanId
                                           && kp.Uzmanlik == BusinessObjectLayer.Enums.SiramatikIslemleri.PersonelUzmanlik.YrdUzman)
                         };
 
@@ -101,7 +106,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                         join ka in _context.KanallarAlt on kai.KanalAltId equals ka.KanalAltId
                         join k in _context.Kanallar on ka.KanalId equals k.KanalId
                         join ki in _context.KanalIslemleri on kai.KanalIslemId equals ki.KanalIslemId
-                        join hb in _context.HizmetBinalari on kai.HizmetBinasiId equals hb.HizmetBinasiId
+                        join dhb in _context.DepartmanHizmetBinalari on kai.DepartmanHizmetBinasiId equals dhb.DepartmanHizmetBinasiId
+                        join hb in _context.HizmetBinalari on dhb.HizmetBinasiId equals hb.HizmetBinasiId
                         where kai.KanalAltIslemId == kanalAltIslemId
                            && !kai.SilindiMi
                         select new KanalAltIslemResponseDto
@@ -109,7 +115,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             KanalAltIslemId = kai.KanalAltIslemId,
                             KanalAltId = kai.KanalAltId,
                             KanalAltAdi = ka.KanalAltAdi,
-                            HizmetBinasiId = kai.HizmetBinasiId,
+                            HizmetBinasiId = dhb.HizmetBinasiId,
                             HizmetBinasiAdi = hb.HizmetBinasiAdi,
                             KanalIslemId = kai.KanalIslemId,
                             KanalAdi = k.KanalAdi,
@@ -170,18 +176,19 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         // KANAL İŞLEM SORGULARI
         // ═══════════════════════════════════════════════════════
 
-        public async Task<List<KanalIslemResponseDto>> GetKanalIslemlerByHizmetBinasiIdAsync(int hizmetBinasiId)
+        public async Task<List<KanalIslemResponseDto>> GetKanalIslemlerByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId)
         {
             var query = from ki in _context.KanalIslemleri
                         join k in _context.Kanallar on ki.KanalId equals k.KanalId
-                        where ki.HizmetBinasiId == hizmetBinasiId
+                        join dhb in _context.DepartmanHizmetBinalari on ki.DepartmanHizmetBinasiId equals dhb.DepartmanHizmetBinasiId
+                        where ki.DepartmanHizmetBinasiId == departmanHizmetBinasiId
                               && !ki.SilindiMi
                         select new KanalIslemResponseDto
                         {
                             KanalIslemId = ki.KanalIslemId,
                             KanalId = ki.KanalId,
                             KanalAdi = k.KanalAdi,
-                            HizmetBinasiId = ki.HizmetBinasiId,
+                            HizmetBinasiId = dhb.HizmetBinasiId,
                             Sira = ki.Sira,
                             BaslangicNumara = ki.BaslangicNumara,
                             BitisNumara = ki.BitisNumara,
@@ -190,7 +197,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             DuzenlenmeTarihi = ki.DuzenlenmeTarihi,
                             KanalAltIslemSayisi = _context.KanalAltIslemleri
                                 .Count(x => x.KanalIslemId == ki.KanalIslemId 
-                                         && x.HizmetBinasiId == hizmetBinasiId
+                                         && x.DepartmanHizmetBinasiId == departmanHizmetBinasiId
                                          && !x.SilindiMi 
                                          && x.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
                                          && x.KanalAlt != null 
@@ -205,6 +212,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         {
             var query = from ki in _context.KanalIslemleri
                         join k in _context.Kanallar on ki.KanalId equals k.KanalId
+                        join dhb in _context.DepartmanHizmetBinalari on ki.DepartmanHizmetBinasiId equals dhb.DepartmanHizmetBinasiId
                         where ki.KanalIslemId == kanalIslemId
                               && !ki.SilindiMi
                         select new KanalIslemResponseDto
@@ -212,7 +220,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             KanalIslemId = ki.KanalIslemId,
                             KanalId = ki.KanalId,
                             KanalAdi = k.KanalAdi,
-                            HizmetBinasiId = ki.HizmetBinasiId,
+                            HizmetBinasiId = dhb.HizmetBinasiId,
                             Sira = ki.Sira,
                             BaslangicNumara = ki.BaslangicNumara,
                             BitisNumara = ki.BitisNumara,
@@ -235,13 +243,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         // KANAL PERSONEL SORGULARI
         // ═══════════════════════════════════════════════════════
 
-        public async Task<List<KanalPersonelResponseDto>> GetKanalPersonellerByHizmetBinasiIdAsync(int hizmetBinasiId)
+        public async Task<List<KanalPersonelResponseDto>> GetKanalPersonellerByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId)
         {
             var query = from kp in _context.KanalPersonelleri
                         join p in _context.Personeller on kp.TcKimlikNo equals p.TcKimlikNo
                         join kai in _context.KanalAltIslemleri on kp.KanalAltIslemId equals kai.KanalAltIslemId
                         join ka in _context.KanallarAlt on kai.KanalAltId equals ka.KanalAltId
-                        where kai.HizmetBinasiId == hizmetBinasiId
+                        where kai.DepartmanHizmetBinasiId == departmanHizmetBinasiId
                         select new KanalPersonelResponseDto
                         {
                             KanalPersonelId = kp.KanalPersonelId,
@@ -285,10 +293,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         // İSTATİSTİK VE DASHBOARD SORGULARI
         // ═══════════════════════════════════════════════════════
 
-        public async Task<Dictionary<int, int>> GetKanalAltIslemPersonelSayilariAsync(int hizmetBinasiId)
+        public async Task<Dictionary<int, int>> GetKanalAltIslemPersonelSayilariAsync(int departmanHizmetBinasiId)
         {
             var query = from kai in _context.KanalAltIslemleri
-                        where kai.HizmetBinasiId == hizmetBinasiId
+                        where kai.DepartmanHizmetBinasiId == departmanHizmetBinasiId
                         select new
                         {
                             KanalAltIslemId = kai.KanalAltIslemId,
@@ -302,13 +310,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             return result.ToDictionary(x => x.KanalAltIslemId, x => x.PersonelSayisi);
         }
 
-        public async Task<List<KanalAltIslemResponseDto>> GetEslestirmeYapilmamisKanalAltIslemlerAsync(int hizmetBinasiId)
+        public async Task<List<KanalAltIslemResponseDto>> GetEslestirmeYapilmamisKanalAltIslemlerAsync(int departmanHizmetBinasiId)
         {
             var query = from kai in _context.KanalAltIslemleri
                         join ka in _context.KanallarAlt on kai.KanalAltId equals ka.KanalAltId
                         join k in _context.Kanallar on ka.KanalId equals k.KanalId
                         join ki in _context.KanalIslemleri on kai.KanalIslemId equals ki.KanalIslemId
-                        where kai.HizmetBinasiId == hizmetBinasiId &&
+                        where kai.DepartmanHizmetBinasiId == departmanHizmetBinasiId &&
                               !_context.KanalPersonelleri.Any(kp => kp.KanalAltIslemId == kai.KanalAltIslemId 
                                                                 && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
                                                                 && !kp.SilindiMi)
@@ -328,7 +336,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             return await query.AsNoTracking().ToListAsync();
         }
 
-        public async Task<List<KanalPersonelResponseDto>> GetPersonelKanalAtamalarByHizmetBinasiIdAsync(int hizmetBinasiId)
+        public async Task<List<KanalPersonelResponseDto>> GetPersonelKanalAtamalarByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId)
         {
             var query = from personel in _context.Personeller
                         join kanalPersonel in _context.KanalPersonelleri
@@ -343,7 +351,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                         join kanal in _context.Kanallar
                             on ka.KanalId equals kanal.KanalId into kGroup
                         from k in kGroup.DefaultIfEmpty() 
-                        where personel.HizmetBinasiId == hizmetBinasiId
+                        join dhb in _context.DepartmanHizmetBinalari
+                            on kai.DepartmanHizmetBinasiId equals dhb.DepartmanHizmetBinasiId into dhbGroup
+                        from dhb in dhbGroup.DefaultIfEmpty()
+                        where (kai == null || kai.DepartmanHizmetBinasiId == departmanHizmetBinasiId)
+                           && (dhb == null || dhb.DepartmanHizmetBinasiId == departmanHizmetBinasiId)
                            && personel.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif
                         select new KanalPersonelResponseDto
                         {
@@ -376,11 +388,17 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                 .ToListAsync();
         }
 
-        public async Task<List<PersonelAtamaMatrixDto>> GetPersonelAtamaMatrixByHizmetBinasiIdAsync(int hizmetBinasiId)
+        public async Task<List<PersonelAtamaMatrixDto>> GetPersonelAtamaMatrixByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId)
         {
-            // 1. Hizmet binasındaki aktif personelleri getir
+            // 1. Departman-Hizmet binasındaki aktif personelleri getir
+            var dhb = await _context.DepartmanHizmetBinalari
+                .FirstOrDefaultAsync(x => x.DepartmanHizmetBinasiId == departmanHizmetBinasiId);
+            
+            if (dhb == null) return new List<PersonelAtamaMatrixDto>();
+            
             var personelQuery = from p in _context.Personeller
-                                where p.HizmetBinasiId == hizmetBinasiId
+                                where p.HizmetBinasiId == dhb.HizmetBinasiId
+                                   && p.DepartmanId == dhb.DepartmanId
                                    && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif
                                    && !p.SilindiMi
                                 select new PersonelAtamaMatrixDto
@@ -412,7 +430,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                              join ka in _context.KanallarAlt on kai.KanalAltId equals ka.KanalAltId
                              join k in _context.Kanallar on ka.KanalId equals k.KanalId
                              where tcKimlikNolar.Contains(kp.TcKimlikNo)
-                                && kai.HizmetBinasiId == hizmetBinasiId
+                                && kai.DepartmanHizmetBinasiId == departmanHizmetBinasiId
                                 && kp.Aktiflik == Aktiflik.Aktif
                                 && !kp.SilindiMi
                              select new
@@ -629,7 +647,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                         join b in _context.Bankolar on bk.BankoId equals b.BankoId
                         join p in _context.Personeller on bk.TcKimlikNo equals p.TcKimlikNo
                         join u in _context.Users on p.TcKimlikNo equals u.TcKimlikNo
-                        join hb in _context.HizmetBinalari on bk.HizmetBinasiId equals hb.HizmetBinasiId
+                        join dhb in _context.DepartmanHizmetBinalari on bk.DepartmanHizmetBinasiId equals dhb.DepartmanHizmetBinasiId
+                        join hb in _context.HizmetBinalari on dhb.HizmetBinasiId equals hb.HizmetBinasiId
 
                         // ⭐ YENİ: HubConnection ve HubBankoConnection JOIN'leri
                         join hc in _context.HubConnections on u.TcKimlikNo equals hc.TcKimlikNo
@@ -652,7 +671,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                            && b.Aktiflik == Aktiflik.Aktif
                            && !b.SilindiMi
                            && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif
-                           && p.HizmetBinasiId == b.HizmetBinasiId
+                           && p.HizmetBinasiId == dhb.HizmetBinasiId
                            && !p.SilindiMi
                            && u.BankoModuAktif
                            && u.AktifMi
@@ -670,7 +689,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                            && kp.Aktiflik == Aktiflik.Aktif
                            && !kp.SilindiMi
                            && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok
-                           && s.HizmetBinasiId == bk.HizmetBinasiId
+                           && s.DepartmanHizmetBinasiId == bk.DepartmanHizmetBinasiId
                            && !s.SilindiMi
                            && s.SiraAlisZamani.Date == today
                            && (
@@ -1019,7 +1038,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                 select new
                 {
                     s.KanalAltIslemId,
-                    s.HizmetBinasiId,
+                    s.DepartmanHizmetBinasiId,
                     s.YonlendirmeTipi
                 }
             ).FirstOrDefaultAsync();
@@ -1056,8 +1075,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                         join u in _context.Users on pPersonel.TcKimlikNo equals u.TcKimlikNo
                         join hc in _context.HubConnections on u.TcKimlikNo equals hc.TcKimlikNo
                         join hbc in _context.HubBankoConnections on hc.HubConnectionId equals hbc.HubConnectionId
-                        join hb in _context.HizmetBinalari on bk.HizmetBinasiId equals hb.HizmetBinasiId
-                        join s in _context.Siralar on bk.HizmetBinasiId equals s.HizmetBinasiId
+                        join dhb in _context.DepartmanHizmetBinalari on bk.DepartmanHizmetBinasiId equals dhb.DepartmanHizmetBinasiId
+                        join hb in _context.HizmetBinalari on dhb.HizmetBinasiId equals hb.HizmetBinasiId
+                        join s in _context.Siralar on bk.DepartmanHizmetBinasiId equals s.DepartmanHizmetBinasiId
                         join kp in _context.KanalPersonelleri on new { TcKimlikNo = pPersonel.TcKimlikNo, s.KanalAltIslemId } equals new { kp.TcKimlikNo, kp.KanalAltIslemId }
                         join kai in _context.KanalAltIslemleri on s.KanalAltIslemId equals kai.KanalAltIslemId
                         join pYonlendiren in _context.Personeller on s.YonlendirenPersonelTc equals pYonlendiren.TcKimlikNo into yonGroup
@@ -1069,7 +1089,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                            && !bk.SilindiMi
                            && b.Aktiflik == Aktiflik.Aktif
                            && !b.SilindiMi
-                           && b.HizmetBinasiId == siraInfo.HizmetBinasiId
+                           && b.DepartmanHizmetBinasiId == siraInfo.DepartmanHizmetBinasiId
                            && u.BankoModuAktif
                            && u.AktifMi
                            && hc.ConnectionStatus == ConnectionStatus.online
@@ -1082,7 +1102,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                            && kp.Uzmanlik != PersonelUzmanlik.BilgisiYok
                            && kai.Aktiflik == Aktiflik.Aktif
                            && !kai.SilindiMi
-                           && s.HizmetBinasiId == bk.HizmetBinasiId
+                           && s.DepartmanHizmetBinasiId == bk.DepartmanHizmetBinasiId
                            && !s.SilindiMi
                            && s.SiraAlisZamani.Date == today
                            && (
@@ -1242,23 +1262,23 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         /// </summary>
         public async Task<List<string>> GetSiraEtkilenenPersonellerAsync(int siraId)
         {
-            // 1. Sıranın KanalAltIslemId ve HizmetBinasiId'sini bul
+            // 1. Sıranın KanalAltIslemId ve DepartmanHizmetBinasiId'sini bul
             var sira = await _context.Siralar
                 .AsNoTracking()
                 .Where(s => s.SiraId == siraId)
-                .Select(s => new { s.KanalAltIslemId, s.HizmetBinasiId })
+                .Select(s => new { s.KanalAltIslemId, s.DepartmanHizmetBinasiId })
                 .FirstOrDefaultAsync();
 
             if (sira == null)
                 return new List<string>();
 
-            return await GetBankoModundakiPersonellerAsync(sira.HizmetBinasiId, sira.KanalAltIslemId);
+            return await GetBankoModundakiPersonellerAsync(sira.DepartmanHizmetBinasiId, sira.KanalAltIslemId);
         }
 
         /// <summary>
-        /// Belirli bir HizmetBinasi ve KanalAltIslem için banko modunda olan personellerin TC listesini döner.
+        /// Belirli bir DepartmanHizmetBinasi ve KanalAltIslem için banko modunda olan personellerin TC listesini döner.
         /// </summary>
-        public async Task<List<string>> GetBankoModundakiPersonellerAsync(int hizmetBinasiId, int kanalAltIslemId)
+        public async Task<List<string>> GetBankoModundakiPersonellerAsync(int departmanHizmetBinasiId, int kanalAltIslemId)
         {
             // Banko modunda olan personelleri bul:
             // 1. KanalPersonel tablosunda bu KanalAltIslem'e atanmış
@@ -1276,7 +1296,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                    && kp.Aktiflik == Aktiflik.Aktif
                    && !kp.SilindiMi
                    && u.BankoModuAktif == true
-                   && (b == null || b.HizmetBinasiId == hizmetBinasiId)
+                   && (b == null || b.DepartmanHizmetBinasiId == departmanHizmetBinasiId)
                 select kp.TcKimlikNo
             ).Distinct().ToListAsync();
 
@@ -1284,7 +1304,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         }
 
         /// <summary>
-        /// Belirli bir HizmetBinasi ve KanalAltIslemId için banko modunda olan ve en az Yrd.Uzman yetkisine sahip personellerin TC listesini döner.
+        /// Belirli bir DepartmanHizmetBinasi ve KanalAltIslemId için banko modunda olan ve en az Yrd.Uzman yetkisine sahip personellerin TC listesini döner.
         /// Kiosk sıra alma için kullanılır - sadece işlem yapabilecek personel varsa sıra alınabilir.
         /// 
         /// NOT: kanalAltIslemId parametresi KanalAltIslem tablosundaki ID'dir!
@@ -1294,15 +1314,15 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
         /// 1. KanalPersonel: Bu KanalAltIslem'e atanmış, aktif, en az Yrd.Uzman
         /// 2. User: BankoModuAktif = true (personel ŞU AN banko modunda mı?)
         /// 3. BankoKullanici: Personel bir bankoya atanmış mı?
-        /// 4. Banko: Aynı hizmet binasında ve aktif mi?
+        /// 4. Banko: Aynı departman-hizmet binasında ve aktif mi?
         /// </summary>
-        public async Task<List<string>> GetBankoModundakiYetkiliPersonellerAsync(int hizmetBinasiId, int kanalAltIslemId)
+        public async Task<List<string>> GetBankoModundakiYetkiliPersonellerAsync(int departmanHizmetBinasiId, int kanalAltIslemId)
         {
-            // Eski proje mantığı: KanalAltIslem → Banko (HizmetBinasi üzerinden) → BankoKullanici → KanalPersonel
+            // Yeni proje mantığı: KanalAltIslem → Banko (DepartmanHizmetBinasiId üzerinden) → BankoKullanici → KanalPersonel
             var yetkiliPersoneller = await (
                 from kai in _context.KanalAltIslemleri
                 join ka in _context.KanallarAlt on kai.KanalAltId equals ka.KanalAltId
-                join b in _context.Bankolar on kai.HizmetBinasiId equals b.HizmetBinasiId
+                join b in _context.Bankolar on kai.DepartmanHizmetBinasiId equals b.DepartmanHizmetBinasiId
                 join bk in _context.BankoKullanicilari on b.BankoId equals bk.BankoId
                 join kp in _context.KanalPersonelleri on new { bk.TcKimlikNo, kai.KanalAltIslemId } 
                     equals new { kp.TcKimlikNo, kp.KanalAltIslemId }
@@ -1415,14 +1435,15 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             km.MenuSira;
  
             */
-            var query = from hb in _context.HizmetBinalari
-                        join k in _context.Kiosklar on hb.HizmetBinasiId equals k.HizmetBinasiId
+            var query = from k in _context.Kiosklar
+                        join dhb in _context.DepartmanHizmetBinalari on k.DepartmanHizmetBinasiId equals dhb.DepartmanHizmetBinasiId
+                        join hb in _context.HizmetBinalari on dhb.HizmetBinasiId equals hb.HizmetBinasiId
                         join kma in _context.KioskMenuAtamalari on k.KioskId equals kma.KioskId
                         join km in _context.KioskMenuler on kma.KioskMenuId equals km.KioskMenuId
                         join kmi in _context.KioskMenuIslemleri on km.KioskMenuId equals kmi.KioskMenuId
                         join ka in _context.KanallarAlt on kmi.KanalAltId equals ka.KanalAltId
-                        join kai in _context.KanalAltIslemleri on new { ka.KanalAltId, k.HizmetBinasiId }
-                            equals new { kai.KanalAltId, kai.HizmetBinasiId }
+                        join kai in _context.KanalAltIslemleri on new { ka.KanalAltId, k.DepartmanHizmetBinasiId }
+                            equals new { kai.KanalAltId, kai.DepartmanHizmetBinasiId }
                         join kp in _context.KanalPersonelleri on kai.KanalAltIslemId equals kp.KanalAltIslemId
                         join u in _context.Users on kp.TcKimlikNo equals u.TcKimlikNo
                         where k.KioskId == kioskId
@@ -1554,16 +1575,26 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
 
             var today = DateTime.Today;
 
+            // Kiosk'un DepartmanHizmetBinasiId'sini al
+            var kioskDhbId = await _context.Kiosklar
+                .Where(k => k.KioskId == kioskId)
+                .Select(k => k.DepartmanHizmetBinasiId)
+                .FirstOrDefaultAsync();
+
+            if (kioskDhbId == 0)
+                return new List<KioskAltIslemDto>();
+
             // GetKioskMenulerByKioskIdAsync ile aynı yapıda tek sorgu
-            var query = from hb in _context.HizmetBinalari
-                        join k in _context.Kiosklar on hb.HizmetBinasiId equals k.HizmetBinasiId
+            var query = from k in _context.Kiosklar
+                        join dhb in _context.DepartmanHizmetBinalari on k.DepartmanHizmetBinasiId equals dhb.DepartmanHizmetBinasiId
+                        join hb in _context.HizmetBinalari on dhb.HizmetBinasiId equals hb.HizmetBinasiId
                         join kma in _context.KioskMenuAtamalari on k.KioskId equals kma.KioskId
                         join km in _context.KioskMenuler on kma.KioskMenuId equals km.KioskMenuId
                         join kmi in _context.KioskMenuIslemleri on km.KioskMenuId equals kmi.KioskMenuId
                         join ka in _context.KanallarAlt on kmi.KanalAltId equals ka.KanalAltId
                         join kn in _context.Kanallar on ka.KanalId equals kn.KanalId
-                        join kai in _context.KanalAltIslemleri on new { ka.KanalAltId, k.HizmetBinasiId }
-                            equals new { kai.KanalAltId, kai.HizmetBinasiId }
+                        join kai in _context.KanalAltIslemleri on new { ka.KanalAltId, k.DepartmanHizmetBinasiId }
+                            equals new { kai.KanalAltId, kai.DepartmanHizmetBinasiId }
                         join kp in _context.KanalPersonelleri on kai.KanalAltIslemId equals kp.KanalAltIslemId
                         join u in _context.Users on kp.TcKimlikNo equals u.TcKimlikNo
                         where k.KioskId == kioskId
@@ -1594,7 +1625,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             kn.KanalAdi,
                             kmi.MenuSira,
                             kai.KanalAltIslemId,
-                            k.HizmetBinasiId
+                            dhb.HizmetBinasiId
                         };
 
             // Distinct ile benzersiz alt işlemleri al
@@ -1636,7 +1667,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                 var bekleyenSayisi = await _context.Siralar
                     .AsNoTracking()
                     .CountAsync(s => s.KanalAltIslemId == islem.KanalAltIslemId
-                                  && s.HizmetBinasiId == islem.HizmetBinasiId
+                                  && s.DepartmanHizmetBinasiId == kioskDhbId
                                   && s.BeklemeDurum == BeklemeDurum.Beklemede
                                   && s.SiraAlisZamani.Date == today
                                   && !s.SilindiMi);
@@ -1756,7 +1787,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             var result = await (
                 from kai in _context.KanalAltIslemleri
                 join ka in _context.KanallarAlt on kai.KanalAltId equals ka.KanalAltId
-                join hb in _context.HizmetBinalari on kai.HizmetBinasiId equals hb.HizmetBinasiId
+                join dhb in _context.DepartmanHizmetBinalari on kai.DepartmanHizmetBinasiId equals dhb.DepartmanHizmetBinasiId
+                join hb in _context.HizmetBinalari on dhb.HizmetBinasiId equals hb.HizmetBinasiId
                 join kp in _context.KanalPersonelleri on kai.KanalAltIslemId equals kp.KanalAltIslemId
                 join u in _context.Users on kp.TcKimlikNo equals u.TcKimlikNo
                 where kai.KanalAltIslemId == kanalAltIslemId

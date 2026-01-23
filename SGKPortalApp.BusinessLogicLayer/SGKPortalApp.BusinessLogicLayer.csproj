@@ -9,7 +9,6 @@
   <ItemGroup>
     <Folder Include="Interfaces\Auth\" />
     <Folder Include="Interfaces\EshotIslemleri\" />
-    <Folder Include="Interfaces\PdksIslemleri\" />
     <Folder Include="Interfaces\SiramatikIslemleri\" />
     <Folder Include="Mapping\Extensions\" />
     <Folder Include="Mapping\Profiles\DenetmenlikIslemleri\" />

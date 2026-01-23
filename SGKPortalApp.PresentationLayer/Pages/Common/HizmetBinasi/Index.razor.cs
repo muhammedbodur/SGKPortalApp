@@ -75,6 +75,24 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
         private bool IsDeleting { get; set; } = false;
 
         // ═══════════════════════════════════════════════════════
+        // FORM STATE
+        // ═══════════════════════════════════════════════════════
+
+        private bool showAddForm { get; set; } = false;
+        private bool showEditForm { get; set; } = false;
+        private bool isSaving { get; set; } = false;
+        private HizmetBinasiFormModel newModel { get; set; } = new();
+        private HizmetBinasiFormModel editModel { get; set; } = new();
+
+        private class HizmetBinasiFormModel
+        {
+            public int HizmetBinasiId { get; set; }
+            public string HizmetBinasiAdi { get; set; } = string.Empty;
+            public string Adres { get; set; } = string.Empty;
+            public bool IsActive { get; set; } = true;
+        }
+
+        // ═══════════════════════════════════════════════════════
         // LIFECYCLE METHODS
         // ═══════════════════════════════════════════════════════
 
@@ -186,12 +204,128 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
         }
 
         // ═══════════════════════════════════════════════════════
-        // NAVİGASYON
+        // FORM METHODS
         // ═══════════════════════════════════════════════════════
 
-        private void NavigateToCreate() => _navigationManager.NavigateTo("/common/hizmetbinasi/manage");
-        private void NavigateToEdit(int id) => _navigationManager.NavigateTo($"/common/hizmetbinasi/manage/{id}");
-        private void NavigateToDetail(int id) => _navigationManager.NavigateTo($"/common/hizmetbinasi/detail/{id}");
+        private void ToggleAddForm()
+        {
+            showAddForm = !showAddForm;
+            if (showAddForm)
+            {
+                showEditForm = false;
+                newModel = new HizmetBinasiFormModel { IsActive = true };
+            }
+        }
+
+        private void ShowEditForm(HizmetBinasiResponseDto hizmetBinasi)
+        {
+            showEditForm = true;
+            showAddForm = false;
+            editModel = new HizmetBinasiFormModel
+            {
+                HizmetBinasiId = hizmetBinasi.HizmetBinasiId,
+                HizmetBinasiAdi = hizmetBinasi.HizmetBinasiAdi,
+                Adres = hizmetBinasi.Adres ?? string.Empty,
+                IsActive = hizmetBinasi.Aktiflik == Aktiflik.Aktif
+            };
+        }
+
+        private void CancelEdit()
+        {
+            showEditForm = false;
+            editModel = new HizmetBinasiFormModel();
+        }
+
+        private async Task SaveHizmetBinasi()
+        {
+            if (string.IsNullOrWhiteSpace(newModel.HizmetBinasiAdi))
+            {
+                await _toastService.ShowErrorAsync("Hizmet Binası adı zorunludur!");
+                return;
+            }
+
+            isSaving = true;
+            try
+            {
+                var createDto = new BusinessObjectLayer.DTOs.Request.Common.HizmetBinasiCreateRequestDto
+                {
+                    HizmetBinasiAdi = newModel.HizmetBinasiAdi,
+                    Adres = newModel.Adres,
+                    Aktiflik = newModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif,
+                    DepartmanIds = new List<int>(),
+                    AnaDepartmanId = null
+                };
+
+                var result = await _hizmetBinasiService.CreateAsync(createDto);
+
+                if (result.Success)
+                {
+                    await _toastService.ShowSuccessAsync("Hizmet Binası başarıyla eklendi!");
+                    showAddForm = false;
+                    newModel = new HizmetBinasiFormModel { IsActive = true };
+                    await LoadHizmetBinalari();
+                }
+                else
+                {
+                    await _toastService.ShowErrorAsync(result.Message ?? "Hizmet Binası eklenemedi!");
+                }
+            }
+            catch (Exception ex)
+            {
+                await _toastService.ShowErrorAsync($"Hata: {ex.Message}");
+            }
+            finally
+            {
+                isSaving = false;
+            }
+        }
+
+        private async Task UpdateHizmetBinasi()
+        {
+            if (string.IsNullOrWhiteSpace(editModel.HizmetBinasiAdi))
+            {
+                await _toastService.ShowErrorAsync("Hizmet Binası adı zorunludur!");
+                return;
+            }
+
+            isSaving = true;
+            try
+            {
+                var hizmetBinasi = HizmetBinalari.FirstOrDefault(d => d.HizmetBinasiId == editModel.HizmetBinasiId);
+                if (hizmetBinasi == null) return;
+
+                var updateDto = new BusinessObjectLayer.DTOs.Request.Common.HizmetBinasiUpdateRequestDto
+                {
+                    HizmetBinasiAdi = editModel.HizmetBinasiAdi,
+                    Adres = editModel.Adres,
+                    Aktiflik = editModel.IsActive ? Aktiflik.Aktif : Aktiflik.Pasif,
+                    DepartmanIds = hizmetBinasi.Departmanlar?.Select(d => d.DepartmanId).ToList() ?? new List<int>(),
+                    AnaDepartmanId = hizmetBinasi.Departmanlar?.FirstOrDefault(d => d.AnaBina)?.DepartmanId
+                };
+
+                var result = await _hizmetBinasiService.UpdateAsync(editModel.HizmetBinasiId, updateDto);
+
+                if (result.Success)
+                {
+                    await _toastService.ShowSuccessAsync("Hizmet Binası başarıyla güncellendi!");
+                    showEditForm = false;
+                    editModel = new HizmetBinasiFormModel();
+                    await LoadHizmetBinalari();
+                }
+                else
+                {
+                    await _toastService.ShowErrorAsync(result.Message ?? "Hizmet Binası güncellenemedi!");
+                }
+            }
+            catch (Exception ex)
+            {
+                await _toastService.ShowErrorAsync($"Hata: {ex.Message}");
+            }
+            finally
+            {
+                isSaving = false;
+            }
+        }
 
         // ═══════════════════════════════════════════════════════
         // TOGGLE STATUS MODAL
@@ -224,7 +358,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
                 var updateDto = new BusinessObjectLayer.DTOs.Request.Common.HizmetBinasiUpdateRequestDto
                 {
                     HizmetBinasiAdi = hizmetBinasi.HizmetBinasiAdi,
-                    DepartmanId = hizmetBinasi.DepartmanId,
+                    DepartmanIds = hizmetBinasi.Departmanlar?.Select(d => d.DepartmanId).ToList() ?? new List<int>(),
+                    AnaDepartmanId = hizmetBinasi.Departmanlar?.FirstOrDefault(d => d.AnaBina)?.DepartmanId,
                     Adres = hizmetBinasi.Adres ?? string.Empty,
                     Aktiflik = newStatus
                 };

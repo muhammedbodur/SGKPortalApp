@@ -35,18 +35,18 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .IsRequired()
                 .HasDefaultValue(false);
 
-            builder.HasIndex(kt => new { kt.HizmetBinasiId, kt.KioskAdi })
+            builder.HasIndex(kt => new { kt.DepartmanHizmetBinasiId, kt.KioskAdi })
                 .IsUnique()
-                .HasDatabaseName("IX_SIR_KioskTanim_HizmetBinasi_KioskAdi")
+                .HasDatabaseName("IX_SIR_KioskTanim_DepartmanHizmetBinasi_KioskAdi")
                 .HasFilter("[SilindiMi] = 0");
 
             builder.HasQueryFilter(kt => !kt.SilindiMi);
 
-            builder.HasOne(kt => kt.HizmetBinasi)
-                .WithMany()
-                .HasForeignKey(kt => kt.HizmetBinasiId)
+            builder.HasOne(kt => kt.DepartmanHizmetBinasi)
+                .WithMany(dhb => dhb.Kiosklar)
+                .HasForeignKey(kt => kt.DepartmanHizmetBinasiId)
                 .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_SIR_KioskTanim_CMN_HizmetBinalari");
+                .HasConstraintName("FK_SIR_KioskTanim_CMN_DepartmanHizmetBinalari");
 
             builder.HasMany(kt => kt.MenuAtamalari)
                 .WithOne(kma => kma.Kiosk)

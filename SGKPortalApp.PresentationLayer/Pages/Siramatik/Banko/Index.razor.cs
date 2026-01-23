@@ -291,11 +291,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
             {
                 modalSelectedDepartmanId = deptId;
                 
-                // Departmana göre hizmet binalarını filtrele
+                // Departmana göre hizmet binalarını filtrele (many-to-many)
                 if (deptId > 0)
                 {
                     modalHizmetBinalari = hizmetBinalari
-                        .Where(b => b.DepartmanId == deptId)
+                        .Where(b => b.Departmanlar != null && b.Departmanlar.Any(d => d.DepartmanId == deptId))
                         .ToList();
                 }
                 else
@@ -459,7 +459,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
                 {
                     var createDto = new BankoCreateRequestDto
                     {
-                        HizmetBinasiId = currentBanko.HizmetBinasiId,
+                        DepartmanHizmetBinasiId = currentBanko.DepartmanHizmetBinasiId,
                         BankoNo = currentBanko.BankoNo,
                         KatTipi = currentBanko.KatTipi,
                         BankoTipi = currentBanko.BankoTipi,

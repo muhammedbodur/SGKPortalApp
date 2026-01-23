@@ -8,7 +8,10 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
     /// </summary>
     public class KioskMenuDetayResponseDto
     {
-        // Hizmet Binası Bilgileri
+        // Departman-Hizmet Binası Bilgileri
+        public int DepartmanHizmetBinasiId { get; set; }
+        public int DepartmanId { get; set; }
+        public string DepartmanAdi { get; set; } = string.Empty;
         public int HizmetBinasiId { get; set; }
         public string HizmetBinasiAdi { get; set; } = string.Empty;
 

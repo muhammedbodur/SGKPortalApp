@@ -415,7 +415,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
             {
                 KanalAltId = model.KanalAltId,
                 KanalIslemId = model.KanalIslemId,
-                HizmetBinasiId = model.HizmetBinasiId,
+                DepartmanHizmetBinasiId = model.DepartmanHizmetBinasiId,
                 KioskIslemGrupId = model.KioskIslemGrupId,
                 Aktiflik = model.Aktiflik
             };
@@ -439,7 +439,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
             {
                 KanalAltId = model.KanalAltId,
                 KanalIslemId = model.KanalIslemId,
-                HizmetBinasiId = model.HizmetBinasiId,
+                DepartmanHizmetBinasiId = model.DepartmanHizmetBinasiId,
                 KioskIslemGrupId = model.KioskIslemGrupId,
                 Aktiflik = model.Aktiflik
             };

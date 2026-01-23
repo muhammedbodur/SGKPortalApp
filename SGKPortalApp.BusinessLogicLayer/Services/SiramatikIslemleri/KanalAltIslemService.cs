@@ -51,18 +51,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
         }
 
-        public async Task<ApiResponseDto<List<KanalAltIslemResponseDto>>> GetByHizmetBinasiIdAsync(int hizmetBinasiId)
+        public async Task<ApiResponseDto<List<KanalAltIslemResponseDto>>> GetByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId)
         {
             try
             {
-                if (hizmetBinasiId <= 0)
+                if (departmanHizmetBinasiId <= 0)
                 {
                     return ApiResponseDto<List<KanalAltIslemResponseDto>>
-                        .ErrorResult("Geçersiz hizmet binası ID");
+                        .ErrorResult("Geçersiz departman-hizmet binası ID");
                 }
 
                 var kanalAltIslemler = await _siramatikQueryRepo
-                    .GetKanalAltIslemlerByHizmetBinasiIdAsync(hizmetBinasiId);
+                    .GetKanalAltIslemlerByDepartmanHizmetBinasiIdAsync(departmanHizmetBinasiId);
 
                 return ApiResponseDto<List<KanalAltIslemResponseDto>>
                     .SuccessResult(kanalAltIslemler, 
@@ -70,8 +70,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Hizmet binası için kanal alt işlemler getirilirken hata oluştu. HizmetBinasiId: {HizmetBinasiId}", 
-                    hizmetBinasiId);
+                _logger.LogError(ex, "Departman-Hizmet binası için kanal alt işlemler getirilirken hata oluştu. DepartmanHizmetBinasiId: {DepartmanHizmetBinasiId}", 
+                    departmanHizmetBinasiId);
                 return ApiResponseDto<List<KanalAltIslemResponseDto>>
                     .ErrorResult("Kanal alt işlemler getirilirken bir hata oluştu", ex.Message);
             }
@@ -331,7 +331,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 // Update
                 kanalAltIslem.KanalAltId = request.KanalAltId;
                 kanalAltIslem.KanalIslemId = request.KanalIslemId;
-                kanalAltIslem.HizmetBinasiId = request.HizmetBinasiId;
+                kanalAltIslem.DepartmanHizmetBinasiId = request.DepartmanHizmetBinasiId;
                 kanalAltIslem.Aktiflik = request.Aktiflik;
                 kanalAltIslem.DuzenlenmeTarihi = DateTime.Now;
 

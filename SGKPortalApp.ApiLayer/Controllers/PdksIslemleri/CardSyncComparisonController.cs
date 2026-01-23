@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.Interfaces;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
 using System.Threading.Tasks;
 
 namespace SGKPortalApp.ApiLayer.Controllers.PdksIslemleri

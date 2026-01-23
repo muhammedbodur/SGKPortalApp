@@ -62,11 +62,11 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
 
             builder.HasQueryFilter(t => !t.SilindiMi);
 
-            builder.HasOne(t => t.HizmetBinasi)
-                .WithMany()
-                .HasForeignKey(t => t.HizmetBinasiId)
+            builder.HasOne(t => t.DepartmanHizmetBinasi)
+                .WithMany(dhb => dhb.Tvler)
+                .HasForeignKey(t => t.DepartmanHizmetBinasiId)
                 .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_SIR_Tvler_CMN_HizmetBinalari");
+                .HasConstraintName("FK_SIR_Tvler_CMN_DepartmanHizmetBinalari");
         }
     }
 }

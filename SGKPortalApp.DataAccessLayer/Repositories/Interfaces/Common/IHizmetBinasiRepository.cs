@@ -64,5 +64,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common
         /// Dropdown için ID ve Ad listesi
         /// </summary>
         Task<IEnumerable<(int Id, string Ad)>> GetDropdownAsync();
+
+        /// <summary>
+        /// LegacyKod'a göre hizmet binası getirir (MySQL sync için)
+        /// </summary>
+        Task<HizmetBinasi?> GetByLegacyKodAsync(int legacyKod);
     }
 }

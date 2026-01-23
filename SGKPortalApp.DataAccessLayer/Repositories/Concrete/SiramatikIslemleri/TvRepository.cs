@@ -15,13 +15,16 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
     {
         public TvRepository(SGKDbContext context) : base(context) { }
 
-        // Hizmet binası bazında TV'leri listeler
-        public async Task<IEnumerable<Tv>> GetByHizmetBinasiAsync(int hizmetBinasiId)
+        // Departman-hizmet binası bazında TV'leri listeler
+        public async Task<IEnumerable<Tv>> GetByDepartmanHizmetBinasiAsync(int departmanHizmetBinasiId)
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(tv => tv.HizmetBinasi)
-                .Where(tv => tv.HizmetBinasiId == hizmetBinasiId)
+                .Include(tv => tv.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(tv => tv.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
+                .Where(tv => tv.DepartmanHizmetBinasiId == departmanHizmetBinasiId)
                 .ToListAsync();
         }
 
@@ -30,7 +33,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(tv => tv.HizmetBinasi)
+                .Include(tv => tv.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(tv => tv.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(tv => tv.HubTvConnections)
                 .Include(tv => tv.TvBankolar)
                 .FirstOrDefaultAsync(tv => tv.TvId == tvId);
@@ -41,7 +47,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(tv => tv.HizmetBinasi)
+                .Include(tv => tv.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(tv => tv.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(tv => tv.HubTvConnections)
                 .Include(tv => tv.TvBankolar)
                 .ToListAsync();
@@ -80,7 +89,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(tv => tv.HizmetBinasi)
+                .Include(tv => tv.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(tv => tv.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(tv => tv.TvBankolar.Where(tb => tb.Aktiflik == Aktiflik.Aktif))
                 .Where(tv => tv.Aktiflik == Aktiflik.Aktif)
                 .ToListAsync();
@@ -91,7 +103,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(tv => tv.HizmetBinasi)
+                .Include(tv => tv.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(tv => tv.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(tv => tv.TvBankolar.Where(tb => tb.Aktiflik == Aktiflik.Aktif))
                 .ToListAsync();
         }
@@ -105,12 +120,12 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .ToListAsync();
         }
 
-        // Hizmet binası için dropdown TV'leri listeler
-        public async Task<IEnumerable<(int Id, string Ad)>> GetByHizmetBinasiDropdownAsync(int hizmetBinasiId)
+        // Departman-hizmet binası için dropdown TV'leri listeler
+        public async Task<IEnumerable<(int Id, string Ad)>> GetByDepartmanHizmetBinasiDropdownAsync(int departmanHizmetBinasiId)
         {
             return await _dbSet
                 .AsNoTracking()
-                .Where(tv => tv.HizmetBinasiId == hizmetBinasiId)
+                .Where(tv => tv.DepartmanHizmetBinasiId == departmanHizmetBinasiId)
                 .Select(tv => new ValueTuple<int, string>(tv.TvId, tv.TvAciklama ?? tv.TvId.ToString()))
                 .ToListAsync();
         }

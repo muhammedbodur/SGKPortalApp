@@ -52,8 +52,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 SiraAlisZamani = s.SiraAlisZamani,
                 IslemBaslamaZamani = s.IslemBaslamaZamani,
                 PersonelAdSoyad = s.Personel?.AdSoyad,
-                HizmetBinasiId = s.HizmetBinasiId,
-                HizmetBinasiAdi = s.HizmetBinasi?.HizmetBinasiAdi ?? "Bilinmiyor"
+                HizmetBinasiId = s.DepartmanHizmetBinasi?.HizmetBinasiId ?? 0,
+                HizmetBinasiAdi = s.DepartmanHizmetBinasi?.HizmetBinasi?.HizmetBinasiAdi ?? "Bilinmiyor"
             }).ToList();
         }
 
@@ -71,8 +71,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 SiraAlisZamani = s.SiraAlisZamani,
                 IslemBaslamaZamani = s.IslemBaslamaZamani,
                 PersonelAdSoyad = s.Personel?.AdSoyad,
-                HizmetBinasiId = s.HizmetBinasiId,
-                HizmetBinasiAdi = s.HizmetBinasi?.HizmetBinasiAdi ?? "Bilinmiyor"
+                HizmetBinasiId = s.DepartmanHizmetBinasi?.HizmetBinasiId ?? 0,
+                HizmetBinasiAdi = s.DepartmanHizmetBinasi?.HizmetBinasi?.HizmetBinasiAdi ?? "Bilinmiyor"
             }).ToList();
         }
 
@@ -194,13 +194,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 await _unitOfWork.SaveChangesAsync();
 
-                // HizmetBinasi adını ayrı sorgu ile al (navigation property yok)
+                // HizmetBinasi adını DepartmanHizmetBinasi üzerinden al
                 string hizmetBinasiAdi = "Bilinmiyor";
-                var hizmetBinasiRepo = _unitOfWork.GetRepository<IHizmetBinasiRepository>();
-                var hizmetBinasi = await hizmetBinasiRepo.GetByIdAsync(sira.HizmetBinasiId);
-                if (hizmetBinasi != null)
+                int? hizmetBinasiId = null;
+                if (sira.DepartmanHizmetBinasi?.HizmetBinasi != null)
                 {
-                    hizmetBinasiAdi = hizmetBinasi.HizmetBinasiAdi;
+                    hizmetBinasiAdi = sira.DepartmanHizmetBinasi.HizmetBinasi.HizmetBinasiAdi;
+                    hizmetBinasiId = sira.DepartmanHizmetBinasi.HizmetBinasiId;
                 }
 
                 result = new SiraCagirmaResponseDto
@@ -211,8 +211,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     BeklemeDurum = sira.BeklemeDurum,
                     SiraAlisZamani = sira.SiraAlisZamani,
                     IslemBaslamaZamani = sira.IslemBaslamaZamani,
-                    PersonelAdSoyad = null, // Navigation property yok, gerekirse ayrı sorgu yapılabilir
-                    HizmetBinasiId = sira.HizmetBinasiId,
+                    PersonelAdSoyad = null,
+                    HizmetBinasiId = hizmetBinasiId ?? 0,
                     HizmetBinasiAdi = hizmetBinasiAdi,
                     KanalAltIslemId = sira.KanalAltIslemId
                 };
@@ -276,7 +276,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
 
             // Broadcast için bilgileri sakla
-            var hizmetBinasiId = sira.HizmetBinasiId;
+            var hizmetBinasiId = sira.DepartmanHizmetBinasi?.HizmetBinasiId ?? 0;
             var kanalAltIslemId = sira.KanalAltIslemId;
 
             var islemBitisZamani = DateTime.Now;
@@ -321,7 +321,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
 
             // Broadcast için bilgileri sakla
-            var hizmetBinasiId = sira.HizmetBinasiId;
+            var hizmetBinasiId = sira.DepartmanHizmetBinasi?.HizmetBinasiId ?? 0;
             var kanalAltIslemId = sira.KanalAltIslemId;
 
             // İptal için Bitti durumuna set ediyoruz (enum'da IptalEdildi yok)

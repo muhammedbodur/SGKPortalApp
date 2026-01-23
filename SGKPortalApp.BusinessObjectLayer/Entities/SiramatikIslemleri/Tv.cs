@@ -15,10 +15,14 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
 
         public string TvAdi { get; set; } = string.Empty;
 
-        public int HizmetBinasiId { get; set; }
-        [ForeignKey(nameof(HizmetBinasiId))]
+        /// <summary>
+        /// Departman-Bina kombinasyonu (Junction table referansı)
+        /// Aynı binada farklı departmanların farklı TV'leri olabilir
+        /// </summary>
+        public int DepartmanHizmetBinasiId { get; set; }
+        [ForeignKey(nameof(DepartmanHizmetBinasiId))]
         [InverseProperty("Tvler")]
-        public HizmetBinasi? HizmetBinasi { get; set; }
+        public DepartmanHizmetBinasi? DepartmanHizmetBinasi { get; set; }
 
         public KatTipi KatTipi { get; set; }
         public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;

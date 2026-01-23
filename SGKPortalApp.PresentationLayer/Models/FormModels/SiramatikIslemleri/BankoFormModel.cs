@@ -7,9 +7,11 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels.SiramatikIslemleri
     {
         public int BankoId { get; set; }
 
-        [Required(ErrorMessage = "Hizmet binası seçilmelidir")]
-        [Range(1, int.MaxValue, ErrorMessage = "Hizmet binası seçilmelidir")]
-        public int HizmetBinasiId { get; set; }
+        [Required(ErrorMessage = "Departman-Hizmet binası seçilmelidir")]
+        [Range(1, int.MaxValue, ErrorMessage = "Departman-Hizmet binası seçilmelidir")]
+        public int DepartmanHizmetBinasiId { get; set; }
+        
+        public int HizmetBinasiId { get; set; } // Response'dan gelen bina bilgisi için
 
         [Required(ErrorMessage = "Kat seçilmelidir")]
         public KatTipi KatTipi { get; set; }

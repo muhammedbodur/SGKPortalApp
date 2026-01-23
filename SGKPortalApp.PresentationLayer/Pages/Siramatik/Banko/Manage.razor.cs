@@ -207,7 +207,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
                     // Create
                     var createDto = new BankoCreateRequestDto
                     {
-                        HizmetBinasiId = model.HizmetBinasiId,
+                        DepartmanHizmetBinasiId = model.DepartmanHizmetBinasiId,
                         BankoNo = model.BankoNo,
                         KatTipi = model.KatTipi,
                         BankoTipi = model.BankoTipi,

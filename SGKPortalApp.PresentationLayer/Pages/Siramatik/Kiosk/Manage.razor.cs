@@ -51,7 +51,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
             {
                 model = new KioskFormModel
                 {
-                    HizmetBinasiId = 0,
+                    DepartmanHizmetBinasiId = 0,
                     KioskAdi = string.Empty,
                     KioskIp = string.Empty,
                     Aktiflik = Aktiflik.Aktif
@@ -69,7 +69,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
                     }
 
                     selectedHizmetBinasiId = HizmetBinasiId.Value;
-                    model.HizmetBinasiId = HizmetBinasiId.Value;
+                    model.DepartmanHizmetBinasiId = HizmetBinasiId.Value;
                 }
                 else
                 {
@@ -78,7 +78,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
                     if (userHizmetBinasiId > 0)
                     {
                         selectedHizmetBinasiId = userHizmetBinasiId;
-                        model.HizmetBinasiId = userHizmetBinasiId;
+                        model.DepartmanHizmetBinasiId = userHizmetBinasiId;
                     }
                 }
 
@@ -134,7 +134,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
                     {
                         KioskId = kiosk.KioskId,
                         KioskAdi = kiosk.KioskAdi,
-                        HizmetBinasiId = kiosk.HizmetBinasiId,
+                        DepartmanHizmetBinasiId = kiosk.DepartmanHizmetBinasiId,
                         KioskIp = kiosk.KioskIp,
                         Aktiflik = kiosk.Aktiflik
                     };
@@ -171,7 +171,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
                 }
 
                 selectedHizmetBinasiId = hizmetBinasiId;
-                model.HizmetBinasiId = hizmetBinasiId;
+                model.DepartmanHizmetBinasiId = hizmetBinasiId;
             }
         }
 
@@ -205,17 +205,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
         private async Task CreateKioskAsync()
         {
             // ✅ Güvenlik: Form submit öncesi son kontrol (form manipulation önlemi)
-            if (!CanAccessHizmetBinasi(model.HizmetBinasiId))
+            if (!CanAccessHizmetBinasi(model.DepartmanHizmetBinasiId))
             {
                 await _toastService.ShowErrorAsync("Bu Hizmet Binasında kayıt oluşturma yetkiniz yok!");
-                _logger.LogWarning("Yetkisiz kayıt oluşturma denemesi: HizmetBinasiId={BinaId}", model.HizmetBinasiId);
+                _logger.LogWarning("Yetkisiz kayıt oluşturma denemesi: DepartmanHizmetBinasiId={BinaId}", model.DepartmanHizmetBinasiId);
                 return;
             }
 
             var createDto = new KioskCreateRequestDto
             {
                 KioskAdi = model.KioskAdi,
-                HizmetBinasiId = model.HizmetBinasiId,
+                DepartmanHizmetBinasiId = model.DepartmanHizmetBinasiId,
                 KioskIp = model.KioskIp,
                 Aktiflik = model.Aktiflik
             };
@@ -238,7 +238,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
             {
                 KioskId = model.KioskId,
                 KioskAdi = model.KioskAdi,
-                HizmetBinasiId = model.HizmetBinasiId,
+                DepartmanHizmetBinasiId = model.DepartmanHizmetBinasiId,
                 KioskIp = model.KioskIp,
                 Aktiflik = model.Aktiflik
             };

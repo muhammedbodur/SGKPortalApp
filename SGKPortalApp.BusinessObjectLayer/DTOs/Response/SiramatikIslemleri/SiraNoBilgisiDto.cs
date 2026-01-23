@@ -7,6 +7,9 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
     public class SiraNoBilgisiDto
     {
         public int SiraNo { get; set; }
+        public int DepartmanHizmetBinasiId { get; set; }
+        public int DepartmanId { get; set; }
+        public string DepartmanAdi { get; set; } = string.Empty;
         public int HizmetBinasiId { get; set; }
         public string HizmetBinasiAdi { get; set; } = string.Empty;
         public string KanalAltAdi { get; set; } = string.Empty;

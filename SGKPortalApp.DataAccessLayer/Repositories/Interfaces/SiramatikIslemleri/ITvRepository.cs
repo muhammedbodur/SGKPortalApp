@@ -8,8 +8,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
 {
     public interface ITvRepository : IGenericRepository<Tv>
     {
-        // Hizmet binası bazında TV'leri listeler
-        Task<IEnumerable<Tv>> GetByHizmetBinasiAsync(int hizmetBinasiId);
+        // Departman-hizmet binası bazında TV'leri listeler
+        Task<IEnumerable<Tv>> GetByDepartmanHizmetBinasiAsync(int departmanHizmetBinasiId);
 
         // TV'yi detaylı getirir
         Task<Tv?> GetWithDetailsAsync(int tvId);
@@ -35,8 +35,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
         // Dropdown için TV'leri listeler
         Task<IEnumerable<(int Id, string Ad)>> GetDropdownAsync();
 
-        // Hizmet binası için dropdown TV'leri listeler
-        Task<IEnumerable<(int Id, string Ad)>> GetByHizmetBinasiDropdownAsync(int hizmetBinasiId);
+        // Departman-hizmet binası için dropdown TV'leri listeler
+        Task<IEnumerable<(int Id, string Ad)>> GetByDepartmanHizmetBinasiDropdownAsync(int departmanHizmetBinasiId);
 
         // TV'ye bağlı bankoları getirir
         Task<IEnumerable<TvBanko>> GetTvBankolarAsync(int tvId);

@@ -18,7 +18,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(kma => kma.Kiosk)
-                    .ThenInclude(k => k.HizmetBinasi)
+                    .ThenInclude(k => k.DepartmanHizmetBinasi)
+                        .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(kma => kma.KioskMenu)
                 .Where(kma => kma.KioskId == kioskId)
                 .OrderByDescending(kma => kma.AtamaTarihi)
@@ -39,8 +40,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(kma => kma.Kiosk)
-                    .ThenInclude(k => k.HizmetBinasi)
-                        .ThenInclude(hb => hb.Departman)
+                    .ThenInclude(k => k.DepartmanHizmetBinasi)
+                        .ThenInclude(dhb => dhb.HizmetBinasi)
+                .Include(kma => kma.Kiosk)
+                    .ThenInclude(k => k.DepartmanHizmetBinasi)
+                        .ThenInclude(dhb => dhb.Departman)
                 .Include(kma => kma.KioskMenu)
                 .FirstOrDefaultAsync(kma => kma.KioskMenuAtamaId == kioskMenuAtamaId);
         }

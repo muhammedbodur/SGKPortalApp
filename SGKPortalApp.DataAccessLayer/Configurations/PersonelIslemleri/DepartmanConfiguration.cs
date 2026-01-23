@@ -72,11 +72,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_PER_Personeller_PER_Departmanlar");
 
-            builder.HasMany(d => d.HizmetBinalari)
-                .WithOne(hb => hb.Departman)
-                .HasForeignKey(hb => hb.DepartmanId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_CMN_HizmetBinalari_PER_Departmanlar");
+            // Many-to-many ilişki DepartmanHizmetBinasi üzerinden (DepartmanHizmetBinasiConfiguration'da tanımlı)
         }
     }
 }

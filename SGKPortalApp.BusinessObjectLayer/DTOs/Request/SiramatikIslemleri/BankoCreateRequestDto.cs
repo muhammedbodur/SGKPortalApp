@@ -5,8 +5,8 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri
 {
     public class BankoCreateRequestDto
     {
-        [Required(ErrorMessage = "Hizmet binası seçilmelidir")]
-        public int HizmetBinasiId { get; set; }
+        [Required(ErrorMessage = "Departman-Hizmet binası seçilmelidir")]
+        public int DepartmanHizmetBinasiId { get; set; }
 
         [Required(ErrorMessage = "Kat tipi seçilmelidir")]
         public KatTipi KatTipi { get; set; }

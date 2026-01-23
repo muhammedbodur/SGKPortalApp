@@ -41,9 +41,9 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .HasDefaultValue(false);
 
             // Indexes
-            builder.HasIndex(s => new { s.SiraNo, s.HizmetBinasiId, s.SiraAlisZamani })
+            builder.HasIndex(s => new { s.SiraNo, s.DepartmanHizmetBinasiId, s.SiraAlisZamani })
                 .IsUnique()
-                .HasDatabaseName("IX_SIR_Siralar_SiraNo_HizmetBinasi_Zaman")
+                .HasDatabaseName("IX_SIR_Siralar_SiraNo_DepartmanHizmetBinasi_Zaman")
                 .HasFilter("[SilindiMi] = 0");
 
             builder.HasIndex(s => s.BeklemeDurum)

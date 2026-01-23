@@ -31,6 +31,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<DatabaseLog> DatabaseLogs { get; set; }
         public DbSet<LoginLogoutLog> LoginLogoutLogs { get; set; }
         public DbSet<HizmetBinasi> HizmetBinalari { get; set; }
+        public DbSet<DepartmanHizmetBinasi> DepartmanHizmetBinalari { get; set; }
         public DbSet<ResmiTatil> ResmiTatiller { get; set; }
         #endregion
 
@@ -107,6 +108,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.ApplyConfiguration(new IlConfiguration());
             modelBuilder.ApplyConfiguration(new IlceConfiguration());
             modelBuilder.ApplyConfiguration(new HizmetBinasiConfiguration());
+            modelBuilder.ApplyConfiguration(new DepartmanHizmetBinasiConfiguration());
             modelBuilder.ApplyConfiguration(new DatabaseLogConfiguration());
             modelBuilder.ApplyConfiguration(new LoginLogoutLogConfiguration());
             modelBuilder.ApplyConfiguration(new ModulConfiguration());

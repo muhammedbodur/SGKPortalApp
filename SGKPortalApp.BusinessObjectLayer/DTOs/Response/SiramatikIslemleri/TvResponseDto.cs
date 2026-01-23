@@ -16,7 +16,10 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
         public KatTipi KatTipi { get; set; }
         public Aktiflik Aktiflik { get; set; }
 
-        // Foreign Key - Hizmet Binası
+        // Departman-Hizmet Binası kombinasyonu
+        public int DepartmanHizmetBinasiId { get; set; }
+        public int DepartmanId { get; set; }
+        public string DepartmanAdi { get; set; } = string.Empty;
         public int HizmetBinasiId { get; set; }
         public string? HizmetBinasiAdi { get; set; }
 

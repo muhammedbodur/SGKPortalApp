@@ -11,6 +11,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
         // Kanal bazında işlemleri listeler
         Task<IEnumerable<KanalIslem>> GetByKanalAsync(int kanalId);
 
+        // Departman-Hizmet binası bazında işlemleri listeler
+        Task<IEnumerable<KanalIslem>> GetByDepartmanHizmetBinasiAsync(int departmanHizmetBinasiId);
+
         // Hizmet binası bazında işlemleri listeler
         Task<IEnumerable<KanalIslem>> GetByHizmetBinasiAsync(int hizmetBinasiId);
 

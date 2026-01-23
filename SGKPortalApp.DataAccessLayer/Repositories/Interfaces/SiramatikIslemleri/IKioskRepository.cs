@@ -7,7 +7,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
 {
     public interface IKioskRepository : IGenericRepository<Kiosk>
     {
-        Task<IEnumerable<Kiosk>> GetByHizmetBinasiAsync(int hizmetBinasiId);
+        Task<IEnumerable<Kiosk>> GetByDepartmanHizmetBinasiAsync(int departmanHizmetBinasiId);
 
         Task<Kiosk?> GetWithMenuAsync(int kioskId);
 
@@ -15,6 +15,6 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
 
         Task<IEnumerable<Kiosk>> GetActiveAsync();
 
-        Task<bool> ExistsByNameAsync(string kioskAdi, int hizmetBinasiId);
+        Task<bool> ExistsByNameAsync(string kioskAdi, int departmanHizmetBinasiId);
     }
 }

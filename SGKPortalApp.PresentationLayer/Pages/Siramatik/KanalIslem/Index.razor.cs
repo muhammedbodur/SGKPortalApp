@@ -220,7 +220,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 var updateDto = new KanalIslemUpdateRequestDto
                 {
                     KanalId = kanal.KanalId,
-                    HizmetBinasiId = kanal.HizmetBinasiId,
+                    DepartmanHizmetBinasiId = kanal.DepartmanHizmetBinasiId,
                     BaslangicNumara = kanal.BaslangicNumara,
                     BitisNumara = kanal.BitisNumara,
                     Sira = kanal.Sira,

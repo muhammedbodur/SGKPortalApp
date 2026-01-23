@@ -30,8 +30,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(kai => kai.HizmetBinasi)
-                .Where(kai => kai.HizmetBinasiId == hizmetBinasiId)
+                .Include(kai => kai.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(kai => kai.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
+                .Where(kai => kai.DepartmanHizmetBinasi.HizmetBinasiId == hizmetBinasiId)
                 .ToListAsync();
         }
 
@@ -60,7 +63,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(kai => kai.KanalAlt)
-                .Include(kai => kai.HizmetBinasi)
+                .Include(kai => kai.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(kai => kai.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(kai => kai.KanalIslem)
                 .Include(kai => kai.Siralar)
                 .Include(kai => kai.KanalPersonelleri)
@@ -73,7 +79,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(kai => kai.KanalAlt)
-                .Include(kai => kai.HizmetBinasi)
+                .Include(kai => kai.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(kai => kai.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(kai => kai.KanalIslem)
                 .Include(kai => kai.Siralar)
                 .Include(kai => kai.KanalPersonelleri)

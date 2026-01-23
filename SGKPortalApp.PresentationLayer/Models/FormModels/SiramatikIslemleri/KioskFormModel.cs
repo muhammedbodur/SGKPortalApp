@@ -11,9 +11,9 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels.SiramatikIslemleri
         [StringLength(100, ErrorMessage = "Kiosk adı en fazla 100 karakter olabilir")]
         public string KioskAdi { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Hizmet binası seçilmelidir")]
-        [Range(1, int.MaxValue, ErrorMessage = "Hizmet binası seçilmelidir")]
-        public int HizmetBinasiId { get; set; }
+        [Required(ErrorMessage = "Departman-Hizmet binası seçilmelidir")]
+        [Range(1, int.MaxValue, ErrorMessage = "Departman-Hizmet binası seçilmelidir")]
+        public int DepartmanHizmetBinasiId { get; set; }
 
         [StringLength(16, ErrorMessage = "Kiosk IP en fazla 16 karakter olabilir")]
         public string? KioskIp { get; set; }

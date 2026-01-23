@@ -19,6 +19,10 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.Common
                 .IsRequired()
                 .HasMaxLength(200);
 
+            // MySQL legacy sistemdeki KOD değeri (senkronizasyon için)
+            builder.Property(hb => hb.LegacyKod)
+                .IsRequired(false);
+
             builder.Property(hb => hb.Adres)
                 .HasMaxLength(500);
 
@@ -39,13 +43,19 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.Common
                 .HasDatabaseName("IX_CMN_HizmetBinalari_HizmetBinasiAdi")
                 .HasFilter("[SilindiMi] = 0");
 
+            // LegacyKod için unique index (MySQL sync için)
+            builder.HasIndex(hb => hb.LegacyKod)
+                .IsUnique()
+                .HasDatabaseName("IX_CMN_HizmetBinalari_LegacyKod")
+                .HasFilter("[LegacyKod] IS NOT NULL AND [SilindiMi] = 0");
+
             builder.HasQueryFilter(hb => !hb.SilindiMi);
 
-            builder.HasOne(hb => hb.Departman)
-                .WithMany(d => d.HizmetBinalari)
-                .HasForeignKey(hb => hb.DepartmanId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_CMN_HizmetBinalari_PER_Departmanlar");
+            // Many-to-many ilişki DepartmanHizmetBinasi üzerinden
+            builder.HasMany(hb => hb.DepartmanHizmetBinalari)
+                .WithOne(dhb => dhb.HizmetBinasi)
+                .HasForeignKey(dhb => dhb.HizmetBinasiId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasMany(hb => hb.Personeller)
                 .WithOne(p => p.HizmetBinasi)

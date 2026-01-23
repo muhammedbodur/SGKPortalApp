@@ -237,7 +237,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
         private class TvFormModel
         {
             public string TvAdi { get; set; } = string.Empty;
-            public int HizmetBinasiId { get; set; }
+            public int DepartmanHizmetBinasiId { get; set; }
+            public int HizmetBinasiId { get; set; } // Response'dan gelen bina bilgisi için
             public KatTipi KatTipi { get; set; } = KatTipi.zemin;
             public string? TvAciklama { get; set; }
         }

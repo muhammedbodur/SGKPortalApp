@@ -13,7 +13,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
             CreateMap<KanalIslemCreateRequestDto, KanalIslem>()
                 .ForMember(dest => dest.KanalIslemId, opt => opt.Ignore())
                 .ForMember(dest => dest.Kanal, opt => opt.Ignore())
-                .ForMember(dest => dest.HizmetBinasi, opt => opt.Ignore())
+                .ForMember(dest => dest.DepartmanHizmetBinasi, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
@@ -22,7 +22,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
             CreateMap<KanalIslemUpdateRequestDto, KanalIslem>()
                 .ForMember(dest => dest.KanalIslemId, opt => opt.Ignore())
                 .ForMember(dest => dest.Kanal, opt => opt.Ignore())
-                .ForMember(dest => dest.HizmetBinasi, opt => opt.Ignore())
+                .ForMember(dest => dest.DepartmanHizmetBinasi, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
@@ -33,8 +33,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
                 .ForMember(dest => dest.KanalAdi,
                     opt => opt.MapFrom(src => src.Kanal != null ? src.Kanal.KanalAdi : string.Empty))
                 .ForMember(dest => dest.HizmetBinasiAdi,
-                    opt => opt.MapFrom(src => src.HizmetBinasi != null
-                        ? src.HizmetBinasi.HizmetBinasiAdi
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinasi != null && src.DepartmanHizmetBinasi.HizmetBinasi != null
+                        ? src.DepartmanHizmetBinasi.HizmetBinasi.HizmetBinasiAdi
                         : string.Empty))
                 .ForMember(dest => dest.KanalAltIslemSayisi,
                     opt => opt.MapFrom(src => src.KanalAltIslemleri != null

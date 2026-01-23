@@ -31,7 +31,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .IsRequired()
                 .HasDefaultValue(false);
 
-            builder.Property(bk => bk.HizmetBinasiId)
+            builder.Property(bk => bk.DepartmanHizmetBinasiId)
                 .IsRequired();
 
             // UNIQUE: Bir banko sadece bir personele atanabilir (1-to-1)
@@ -40,10 +40,10 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .HasDatabaseName("IX_SIR_BankoKullanicilari_BankoId")
                 .HasFilter("[SilindiMi] = 0");
 
-            // UNIQUE: Bir personel sadece bir hizmet binasında bir bankoya atanabilir (1-to-1)
-            builder.HasIndex(bk => new { bk.TcKimlikNo, bk.HizmetBinasiId })
+            // UNIQUE: Bir personel sadece bir departman-bina kombinasyonunda bir bankoya atanabilir (1-to-1)
+            builder.HasIndex(bk => new { bk.TcKimlikNo, bk.DepartmanHizmetBinasiId })
                 .IsUnique()
-                .HasDatabaseName("IX_SIR_BankoKullanicilari_TcKimlik_HizmetBinasi")
+                .HasDatabaseName("IX_SIR_BankoKullanicilari_TcKimlik_DepartmanHizmetBinasi")
                 .HasFilter("[SilindiMi] = 0");
 
             builder.HasQueryFilter(bk => !bk.SilindiMi);
@@ -60,11 +60,11 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_SIR_BankoKullanicilari_SIR_Bankolar");
 
-            builder.HasOne(bk => bk.HizmetBinasi)
-                .WithMany()
-                .HasForeignKey(bk => bk.HizmetBinasiId)
+            builder.HasOne(bk => bk.DepartmanHizmetBinasi)
+                .WithMany(dhb => dhb.BankoKullanicilari)
+                .HasForeignKey(bk => bk.DepartmanHizmetBinasiId)
                 .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_SIR_BankoKullanicilari_CMN_HizmetBinalari");
+                .HasConstraintName("FK_SIR_BankoKullanicilari_CMN_DepartmanHizmetBinalari");
         }
     }
 }

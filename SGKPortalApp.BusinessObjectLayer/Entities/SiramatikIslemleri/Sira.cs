@@ -21,9 +21,13 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
 
         public string KanalAltAdi { get; set; } = string.Empty;
 
-        public int HizmetBinasiId { get; set; }
-        [ForeignKey("HizmetBinasiId")]
-        public required HizmetBinasi HizmetBinasi { get; set; }
+        /// <summary>
+        /// Departman-Bina kombinasyonu (Junction table referansı)
+        /// Sıra doğru departman-bina kombinasyonunda alınmalı
+        /// </summary>
+        public int DepartmanHizmetBinasiId { get; set; }
+        [ForeignKey(nameof(DepartmanHizmetBinasiId))]
+        public required DepartmanHizmetBinasi DepartmanHizmetBinasi { get; set; }
 
         public string? TcKimlikNo { get; set; }
         [ForeignKey("TcKimlikNo")]

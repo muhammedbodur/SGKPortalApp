@@ -6,11 +6,14 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
+using SGKPortalApp.DataAccessLayer.Repositories.Generic;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 {
@@ -61,10 +64,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     {
                         HizmetBinasiId = hb.HizmetBinasiId,
                         HizmetBinasiAdi = hb.HizmetBinasiAdi,
-                        DepartmanId = hb.DepartmanId,
-                        DepartmanAdi = hb.Departman?.DepartmanAdi ?? string.Empty,
+                        LegacyKod = hb.LegacyKod,
                         Adres = hb.Adres,
                         Aktiflik = hb.Aktiflik,
+                        Departmanlar = hb.DepartmanHizmetBinalari?
+                            .Where(dhb => !dhb.SilindiMi)
+                            .Select(dhb => new DepartmanBinaDto
+                            {
+                                DepartmanId = dhb.DepartmanId,
+                                DepartmanAdi = dhb.Departman?.DepartmanAdi ?? string.Empty,
+                                AnaBina = dhb.AnaBina
+                            }).ToList() ?? new List<DepartmanBinaDto>(),
                         PersonelSayisi = personelCount,
                         BankoSayisi = bankoCount,
                         TvSayisi = tvCount,
@@ -102,10 +112,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 {
                     HizmetBinasiId = entity.HizmetBinasiId,
                     HizmetBinasiAdi = entity.HizmetBinasiAdi,
-                    DepartmanId = entity.DepartmanId,
-                    DepartmanAdi = entity.Departman?.DepartmanAdi ?? string.Empty,
+                    LegacyKod = entity.LegacyKod,
                     Adres = entity.Adres,
                     Aktiflik = entity.Aktiflik,
+                    Departmanlar = entity.DepartmanHizmetBinalari?
+                        .Where(dhb => !dhb.SilindiMi)
+                        .Select(dhb => new DepartmanBinaDto
+                        {
+                            DepartmanId = dhb.DepartmanId,
+                            DepartmanAdi = dhb.Departman?.DepartmanAdi ?? string.Empty,
+                            AnaBina = dhb.AnaBina
+                        }).ToList() ?? new List<DepartmanBinaDto>(),
                     PersonelSayisi = personelCount,
                     BankoSayisi = bankoCount,
                     TvSayisi = tvCount,
@@ -160,12 +177,42 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     return ApiResponseDto<HizmetBinasiResponseDto>
                         .ErrorResult("Bu isimde bir hizmet binası zaten mevcut");
 
-                var entity = _mapper.Map<HizmetBinasi>(request);
+                // Entity oluştur (sadece temel bilgiler)
+                var entity = new HizmetBinasi
+                {
+                    HizmetBinasiAdi = request.HizmetBinasiAdi,
+                    Adres = request.Adres,
+                    Aktiflik = request.Aktiflik
+                };
+
                 await hizmetBinasiRepo.AddAsync(entity);
                 await _unitOfWork.SaveChangesAsync();
 
-                var dto = _mapper.Map<HizmetBinasiResponseDto>(entity);
-                _logger.LogInformation("Yeni hizmet binası oluşturuldu. ID: {Id}", entity.HizmetBinasiId);
+                // Many-to-many ilişkiyi manuel olarak oluştur
+                if (request.DepartmanIds != null && request.DepartmanIds.Any())
+                {
+                    var dhbRepo = _unitOfWork.GetRepository<IDepartmanHizmetBinasiRepository>();
+                    
+                    foreach (var departmanId in request.DepartmanIds)
+                    {
+                        var dhb = new DepartmanHizmetBinasi
+                        {
+                            HizmetBinasiId = entity.HizmetBinasiId,
+                            DepartmanId = departmanId,
+                            AnaBina = request.AnaDepartmanId.HasValue && request.AnaDepartmanId.Value == departmanId
+                        };
+                        await dhbRepo.AddAsync(dhb);
+                    }
+                    
+                    await _unitOfWork.SaveChangesAsync();
+                }
+
+                // DTO için entity'yi yeniden yükle (ilişkilerle birlikte)
+                var createdEntity = await hizmetBinasiRepo.GetWithDepartmanAsync(entity.HizmetBinasiId);
+                var dto = _mapper.Map<HizmetBinasiResponseDto>(createdEntity);
+                
+                _logger.LogInformation("Yeni hizmet binası oluşturuldu. ID: {Id}, Departman Sayısı: {Count}", 
+                    entity.HizmetBinasiId, request.DepartmanIds?.Count ?? 0);
 
                 return ApiResponseDto<HizmetBinasiResponseDto>
                     .SuccessResult(dto, "Hizmet binası başarıyla oluşturuldu");
@@ -224,12 +271,52 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                         unauthorizedFields.Count);
                 }
 
-                _mapper.Map(request, entity);
+                // Temel bilgileri güncelle
+                entity.HizmetBinasiAdi = request.HizmetBinasiAdi;
+                entity.Adres = request.Adres;
+                entity.Aktiflik = request.Aktiflik;
+                
                 hizmetBinasiRepo.Update(entity);
                 await _unitOfWork.SaveChangesAsync();
 
-                var dto = _mapper.Map<HizmetBinasiResponseDto>(entity);
-                _logger.LogInformation("Hizmet binası güncellendi. ID: {Id}", id);
+                // Many-to-many ilişkiyi güncelle
+                var dhbRepo = _unitOfWork.GetRepository<IDepartmanHizmetBinasiRepository>();
+                
+                // Mevcut ilişkileri soft delete yap
+                var existingRelations = (await dhbRepo.GetAllAsync())
+                    .Where(dhb => dhb.HizmetBinasiId == id && !dhb.SilindiMi)
+                    .ToList();
+                
+                foreach (var relation in existingRelations)
+                {
+                    relation.SilindiMi = true;
+                    relation.SilinmeTarihi = DateTime.Now;
+                    dhbRepo.Update(relation);
+                }
+                
+                // Yeni ilişkileri ekle
+                if (request.DepartmanIds != null && request.DepartmanIds.Any())
+                {
+                    foreach (var departmanId in request.DepartmanIds)
+                    {
+                        var dhb = new DepartmanHizmetBinasi
+                        {
+                            HizmetBinasiId = id,
+                            DepartmanId = departmanId,
+                            AnaBina = request.AnaDepartmanId.HasValue && request.AnaDepartmanId.Value == departmanId
+                        };
+                        await dhbRepo.AddAsync(dhb);
+                    }
+                }
+                
+                await _unitOfWork.SaveChangesAsync();
+
+                // DTO için entity'yi yeniden yükle (ilişkilerle birlikte)
+                var updatedEntity = await hizmetBinasiRepo.GetWithDepartmanAsync(id);
+                var dto = _mapper.Map<HizmetBinasiResponseDto>(updatedEntity);
+                
+                _logger.LogInformation("Hizmet binası güncellendi. ID: {Id}, Departman Sayısı: {Count}", 
+                    id, request.DepartmanIds?.Count ?? 0);
 
                 return ApiResponseDto<HizmetBinasiResponseDto>
                     .SuccessResult(dto, "Hizmet binası başarıyla güncellendi");
@@ -416,11 +503,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
         /// </summary>
         private async Task CascadeAktiflikUpdateAsync(int hizmetBinasiId)
         {
-            // Banko kayıtlarını pasif yap
-            await _cascadeHelper.CascadeAktiflikUpdateAsync<Banko>(x => x.HizmetBinasiId == hizmetBinasiId, Aktiflik.Pasif);
+            // Banko kayıtlarını pasif yap (DepartmanHizmetBinasi üzerinden)
+            await _cascadeHelper.CascadeAktiflikUpdateAsync<Banko>(x => x.DepartmanHizmetBinasi != null && x.DepartmanHizmetBinasi.HizmetBinasiId == hizmetBinasiId, Aktiflik.Pasif);
             
-            // Tv kayıtlarını pasif yap
-            await _cascadeHelper.CascadeAktiflikUpdateAsync<Tv>(x => x.HizmetBinasiId == hizmetBinasiId, Aktiflik.Pasif);
+            // Tv kayıtlarını pasif yap (DepartmanHizmetBinasi üzerinden)
+            await _cascadeHelper.CascadeAktiflikUpdateAsync<Tv>(x => x.DepartmanHizmetBinasi != null && x.DepartmanHizmetBinasi.HizmetBinasiId == hizmetBinasiId, Aktiflik.Pasif);
 
             _logger.LogInformation("Cascade pasif: HizmetBinasiId={HizmetBinasiId}", hizmetBinasiId);
         }

@@ -1,0 +1,60 @@
+============================================================================
+LEGACY DATA IMPORT TALIMATLARI
+============================================================================
+
+3 adet SQL import dosyası oluşturuldu:
+
+1. IMPORT_DEPARTMANLAR.sql  - 31 departman (birim.sql'den)
+2. IMPORT_SERVISLER.sql     - Servisler için şablon (manuel tamamlanacak)
+3. IMPORT_UNVANLAR.sql      - Ünvanlar için şablon (manuel tamamlanacak)
+
+============================================================================
+KULLANIM
+============================================================================
+
+1. SSMS'de SGKPortalDB veritabanını seçin
+
+2. Önce SEED_DATA_FIXED.sql'i çalıştırın (temel veriler için)
+
+3. Sonra sırayla import dosyalarını çalıştırın:
+   - IMPORT_DEPARTMANLAR.sql
+   - IMPORT_SERVISLER.sql (tamamlandıktan sonra)
+   - IMPORT_UNVANLAR.sql (tamamlandıktan sonra)
+
+============================================================================
+SERVISLER VE ÜNVANLAR İÇİN
+============================================================================
+
+Servisler.sql ve unvanlar.sql dosyalarında 100+ kayıt var.
+Bu dosyaları manuel olarak SQL Server formatına çevirmeniz gerekiyor.
+
+ÖRNEK DÖNÜŞÜM:
+
+MySQL formatı:
+INSERT INTO `servisler` VALUES (2, 'BAĞ-KUR LOJMANLARI');
+
+SQL Server formatı:
+IF NOT EXISTS (SELECT 1 FROM PER_Servisler WHERE ServisId = 2) 
+    INSERT INTO PER_Servisler (ServisId, ServisAdi, Aktiflik, EkleyenKullanici, EklenmeTarihi, DuzenleyenKullanici, DuzenlenmeTarihi) 
+    VALUES (2, N'BAĞ-KUR LOJMANLARI', 0, 'IMPORT', GETDATE(), 'IMPORT', GETDATE());
+
+============================================================================
+ALTERNATIF: PYTHON SCRIPT KULLANIMI
+============================================================================
+
+Eğer Python yüklüyse, convert_import_data.py scriptini kullanabilirsiniz:
+
+python convert_import_data.py
+
+Bu script otomatik olarak tüm dosyaları dönüştürür.
+
+============================================================================
+NOT
+============================================================================
+
+- Kullanıcı verileri (kullanici.sql) import EDİLMEZ (ID çakışması olmaması için)
+- ID'ler korunarak import edilir (IDENTITY_INSERT kullanılır)
+- Mevcut kayıtlar atlanır (IF NOT EXISTS kontrolleri var)
+- Script idempotent'tir (tekrar çalıştırılabilir)
+
+============================================================================

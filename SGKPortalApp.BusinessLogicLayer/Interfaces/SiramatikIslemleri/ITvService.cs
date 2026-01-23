@@ -14,12 +14,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
         Task<ApiResponseDto<bool>> DeleteAsync(int tvId);
         Task<ApiResponseDto<TvResponseDto>> GetByIdAsync(int tvId);
         Task<ApiResponseDto<List<TvResponseDto>>> GetAllAsync();
-        Task<ApiResponseDto<List<TvResponseDto>>> GetByHizmetBinasiAsync(int hizmetBinasiId);
+        Task<ApiResponseDto<List<TvResponseDto>>> GetByDepartmanHizmetBinasiAsync(int departmanHizmetBinasiId);
         Task<ApiResponseDto<List<TvResponseDto>>> GetByKatTipiAsync(KatTipi katTipi);
         Task<ApiResponseDto<List<TvResponseDto>>> GetActiveAsync();
         Task<ApiResponseDto<TvResponseDto>> GetWithDetailsAsync(int tvId);
         Task<ApiResponseDto<List<(int Id, string Ad)>>> GetDropdownAsync();
-        Task<ApiResponseDto<List<(int Id, string Ad)>>> GetByHizmetBinasiDropdownAsync(int hizmetBinasiId);
+        Task<ApiResponseDto<List<(int Id, string Ad)>>> GetByDepartmanHizmetBinasiDropdownAsync(int departmanHizmetBinasiId);
         
         // TV-Banko İlişkileri
         Task<ApiResponseDto<bool>> AddBankoToTvAsync(int tvId, int bankoId);

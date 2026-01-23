@@ -13,7 +13,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
         Task<ApiResponseDto<KanalPersonelResponseDto>> GetByIdAsync(int kanalPersonelId);
         
         // Business Operations
-        Task<ApiResponseDto<List<KanalPersonelResponseDto>>> GetPersonellerByHizmetBinasiIdAsync(int hizmetBinasiId);
+        Task<ApiResponseDto<List<KanalPersonelResponseDto>>> GetPersonellerByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId);
         Task<ApiResponseDto<List<KanalPersonelResponseDto>>> GetByPersonelTcAsync(string tcKimlikNo);
         Task<ApiResponseDto<List<KanalPersonelResponseDto>>> GetByKanalAltIslemIdAsync(int kanalAltIslemId);
         

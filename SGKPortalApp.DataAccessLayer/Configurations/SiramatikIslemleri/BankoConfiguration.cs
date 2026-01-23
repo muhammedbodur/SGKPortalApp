@@ -57,9 +57,9 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
                 .HasDefaultValue(false);
 
             // Indexes
-            builder.HasIndex(b => new { b.HizmetBinasiId, b.KatTipi, b.BankoNo })
+            builder.HasIndex(b => new { b.DepartmanHizmetBinasiId, b.KatTipi, b.BankoNo })
                 .IsUnique()
-                .HasDatabaseName("IX_SIR_Bankolar_HizmetBinasi_Kat_BankoNo")
+                .HasDatabaseName("IX_SIR_Bankolar_DepartmanHizmetBinasi_Kat_BankoNo")
                 .HasFilter("[SilindiMi] = 0");
 
             builder.HasIndex(b => b.Aktiflik)
@@ -68,11 +68,11 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
             builder.HasQueryFilter(b => !b.SilindiMi);
 
             // Relationships
-            builder.HasOne(b => b.HizmetBinasi)
-                .WithMany()
-                .HasForeignKey(b => b.HizmetBinasiId)
+            builder.HasOne(b => b.DepartmanHizmetBinasi)
+                .WithMany(dhb => dhb.Bankolar)
+                .HasForeignKey(b => b.DepartmanHizmetBinasiId)
                 .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_SIR_Bankolar_CMN_HizmetBinalari");
+                .HasConstraintName("FK_SIR_Bankolar_CMN_DepartmanHizmetBinalari");
         }
     }
 }

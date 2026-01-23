@@ -107,7 +107,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Include(bh => bh.Banko)
-                    .ThenInclude(b => b.HizmetBinasi)
+                    .ThenInclude(b => b.DepartmanHizmetBinasi)
+                        .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(bh => bh.Personel)
                     .ThenInclude(p => p.Servis)
                 .Include(bh => bh.Sira)

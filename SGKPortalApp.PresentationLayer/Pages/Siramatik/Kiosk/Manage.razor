@@ -86,14 +86,14 @@
                                     <label class="form-label required">
                                         <i class="bx bx-building me-1"></i>Hizmet Binası
                                     </label>
-                                    <InputSelect @bind-Value="model.HizmetBinasiId" class="form-select" disabled="@isSaving">
+                                    <InputSelect @bind-Value="model.DepartmanHizmetBinasiId" class="form-select" disabled="@isSaving">
                                         <option value="0">-- Hizmet Binası Seçiniz --</option>
                                         @foreach (var bina in hizmetBinalari)
                                         {
                                             <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
                                         }
                                     </InputSelect>
-                                    <ValidationMessage For="@(() => model.HizmetBinasiId)" class="text-danger small mt-1" />
+                                    <ValidationMessage For="@(() => model.DepartmanHizmetBinasiId)" class="text-danger small mt-1" />
                                 </div>
 
                                 <!-- Kiosk Adı -->

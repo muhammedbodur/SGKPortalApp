@@ -91,11 +91,11 @@ namespace SGKPortalApp.ApiLayer.Controllers.Siramatik
         /// <summary>
         /// Hizmet binasına göre personel atamalarını getirir
         /// </summary>
-        [HttpGet("hizmet-binasi/{hizmetBinasiId:int}")]
-        public async Task<ActionResult<ApiResponseDto<List<KanalPersonelResponseDto>>>> GetByHizmetBinasiId(
-            int hizmetBinasiId)
+        [HttpGet("departman-hizmet-binasi/{dhbId:int}")]
+        public async Task<ActionResult<ApiResponseDto<List<KanalPersonelResponseDto>>>> GetByDepartmanHizmetBinasiId(
+            int dhbId)
         {
-            var result = await _kanalPersonelService.GetPersonellerByHizmetBinasiIdAsync(hizmetBinasiId);
+            var result = await _kanalPersonelService.GetPersonellerByDepartmanHizmetBinasiIdAsync(dhbId);
 
             return result.Success ? Ok(result) : NotFound(result);
         }

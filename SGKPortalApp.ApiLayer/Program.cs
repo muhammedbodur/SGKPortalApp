@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore;
 using SGKPortalApp.ApiLayer.Services.Hubs;
 using SGKPortalApp.ApiLayer.Services.Hubs.Concrete;
 using SGKPortalApp.ApiLayer.Services.Hubs.Filters;
@@ -15,6 +16,9 @@ using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.BusinessLogicLayer.Extensions;
 using SGKPortalApp.DataAccessLayer.Extensions;
 using System.Text.Json.Serialization;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.BackgroundServiceManager;
+using SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync;
 
 namespace SGKPortalApp.ApiLayer
 {
@@ -144,6 +148,31 @@ namespace SGKPortalApp.ApiLayer
             builder.Services.AddDataAccessLayer(connectionString);
             builder.Services.AddAuditLogging(builder.Configuration);
 
+            // 2.1 MySQL Legacy Database (Sync için)
+            var mysqlConnectionString = builder.Configuration.GetConnectionString("MySqlConnection");
+            if (!string.IsNullOrEmpty(mysqlConnectionString))
+            {
+                builder.Services.AddDbContext<SGKPortalApp.DataAccessLayer.Context.MysqlDbContext>(options =>
+                    options.UseMySql(mysqlConnectionString, ServerVersion.AutoDetect(mysqlConnectionString)));
+                
+                // MySqlSyncService - hem HostedService hem IManagedBackgroundService olarak kaydet
+                builder.Services.AddSingleton<MySqlSyncService>();
+                builder.Services.AddHostedService(sp => sp.GetRequiredService<MySqlSyncService>());
+                builder.Services.AddSingleton<IManagedBackgroundService>(
+                    sp => sp.GetRequiredService<MySqlSyncService>());
+                
+                Console.WriteLine("🔄 MySQL Sync Service yapılandırıldı");
+            }
+            else
+            {
+                Console.WriteLine("⚠️  MySQL bağlantısı yapılandırılmadı, sync devre dışı");
+            }
+
+            // 2.2 Background Service Manager
+            builder.Services.AddSingleton<IBackgroundServiceManager, 
+                SGKPortalApp.BusinessLogicLayer.Services.BackgroundServiceManager.BackgroundServiceManager>();
+            Console.WriteLine("🎛️ Background Service Manager yapılandırıldı");
+
             // 3. Business Logic Layer (Business Services)
             builder.Services.AddBusinessLogicLayer();
 
@@ -189,7 +218,7 @@ namespace SGKPortalApp.ApiLayer
             builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri.IDeviceBusinessService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.DeviceBusinessService>();
             builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri.IDeviceService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.DeviceService>();
             builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri.IZKTecoAttendanceService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoAttendanceService>();
-            builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.Interfaces.ICardSyncComparisonService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.CardSyncComparisonService>();
+            builder.Services.AddScoped<ICardSyncComparisonService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.CardSyncComparisonService>();
             builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.IPersonelMesaiService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelMesaiService>();
             builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.IPersonelListService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelListService>();
             builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.IDepartmanMesaiService, SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.DepartmanMesaiService>();
@@ -217,12 +246,28 @@ namespace SGKPortalApp.ApiLayer
             // ═══════════════════════════════════════════════════════
             // 🧹 BACKGROUND SERVICES
             // ═══════════════════════════════════════════════════════
-            builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.SessionCleanupService>();
-            builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.IdleSessionCleanupService>(); // 30 dakika idle timeout
+            // Session Cleanup Services (BusinessLogicLayer'dan)
+            builder.Services.AddSingleton<SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.SessionCleanupService>();
+            builder.Services.AddHostedService(sp => sp.GetRequiredService<SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.SessionCleanupService>());
+            builder.Services.AddSingleton<IManagedBackgroundService>(
+                sp => sp.GetRequiredService<SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.SessionCleanupService>());
 
-            // ZKTeco background services
-            builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService>(); // ZKTeco realtime event listener
-            builder.Services.AddHostedService<SGKPortalApp.ApiLayer.Services.BackgroundServices.AttendanceSyncBackgroundService>(); // ZKTeco attendance periodic sync (00:00 ve 12:00)
+            builder.Services.AddSingleton<SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService>();
+            builder.Services.AddHostedService(sp => sp.GetRequiredService<SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService>());
+            builder.Services.AddSingleton<IManagedBackgroundService>(
+                sp => sp.GetRequiredService<SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService>());
+
+            // ZKTeco Attendance Sync Service (BusinessLogicLayer'dan - SignalR bağımlılığı yok)
+            builder.Services.AddSingleton<SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.AttendanceSyncService>();
+            builder.Services.AddHostedService(sp => sp.GetRequiredService<SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.AttendanceSyncService>());
+            builder.Services.AddSingleton<IManagedBackgroundService>(
+                sp => sp.GetRequiredService<SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.AttendanceSyncService>());
+
+            // ZKTeco Realtime Listener Service - ApiLayer'da kalıyor (SignalR Hub bağımlılığı var)
+            builder.Services.AddSingleton<SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService>();
+            builder.Services.AddHostedService(sp => sp.GetRequiredService<SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService>());
+            builder.Services.AddSingleton<IManagedBackgroundService>(
+                sp => sp.GetRequiredService<SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService>());
 
             // ═══════════════════════════════════════════════════════
             // 🔧 AUTOMAPPER
@@ -428,11 +473,7 @@ namespace SGKPortalApp.ApiLayer
                         Console.WriteLine("ℹ️  Development ortamı - Migration'lar manuel uygulanmalı (Add-Migration, Update-Database)");
                     }
 
-                    // Database Seeding (tüm ortamlarda çalışır)
-                    var context = scope.ServiceProvider.GetRequiredService<SGKPortalApp.DataAccessLayer.Context.SGKDbContext>();
-                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<SGKPortalApp.DataAccessLayer.Seeding.DatabaseSeeder>>();
-                    var seeder = new SGKPortalApp.DataAccessLayer.Seeding.DatabaseSeeder(context, logger);
-                    await seeder.SeedAsync();
+                    // Database Seeding devre dışı - Manuel SQL script kullanılıyor
                 }
                 catch (Exception ex)
                 {

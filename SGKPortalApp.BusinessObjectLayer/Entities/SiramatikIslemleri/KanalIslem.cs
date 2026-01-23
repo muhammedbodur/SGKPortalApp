@@ -19,9 +19,14 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
 
         public int Sira { get; set; }
 
-        public int HizmetBinasiId { get; set; }
-        [ForeignKey("HizmetBinasiId")]
-        public required HizmetBinasi HizmetBinasi { get; set; }
+        /// <summary>
+        /// Departman-Bina kombinasyonu (Junction table referansı)
+        /// Bu sayede hem departman hem bina bilgisi garanti altında
+        /// </summary>
+        public int DepartmanHizmetBinasiId { get; set; }
+        [ForeignKey(nameof(DepartmanHizmetBinasiId))]
+        [InverseProperty("KanalIslemleri")]
+        public required DepartmanHizmetBinasi DepartmanHizmetBinasi { get; set; }
 
         [Range(0, 9999, ErrorMessage = "BaslangicNumara 0 ile 9999 arasında olmalıdır.")]
         public int BaslangicNumara { get; set; }

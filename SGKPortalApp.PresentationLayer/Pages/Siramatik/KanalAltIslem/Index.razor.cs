@@ -373,7 +373,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
                 {
                     KanalAltId = altIslem.KanalAltId,
                     KanalIslemId = altIslem.KanalIslemId,
-                    HizmetBinasiId = altIslem.HizmetBinasiId,
+                    DepartmanHizmetBinasiId = altIslem.DepartmanHizmetBinasiId,
                     KioskIslemGrupId = null,
                     Aktiflik = yeniAktiflik
                 };

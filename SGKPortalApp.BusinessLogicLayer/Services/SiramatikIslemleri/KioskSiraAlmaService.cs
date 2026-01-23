@@ -100,8 +100,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     KanalAltIslemId = siraNoBilgisi.KanalAltIslemId,
                     KanalAltIslem = null!,  // FK üzerinden ilişki kurulacak
                     KanalAltAdi = siraNoBilgisi.KanalAltAdi,
-                    HizmetBinasiId = siraNoBilgisi.HizmetBinasiId,
-                    HizmetBinasi = null!,   // FK üzerinden ilişki kurulacak
+                    DepartmanHizmetBinasiId = siraNoBilgisi.DepartmanHizmetBinasiId,
+                    DepartmanHizmetBinasi = null!,   // FK üzerinden ilişki kurulacak
                     SiraAlisZamani = DateTime.Now,
                     BeklemeDurum = BeklemeDurum.Beklemede
                 };
@@ -121,7 +121,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     yeniSira.SiraId, yeniSira.SiraNo, siraNoBilgisi.KanalAltIslemId);
 
                 // Bekleyen sıra sayısını hesapla
-                var bekleyenSiraSayisi = await GetBekleyenSiraSayisiAsync(siraNoBilgisi.HizmetBinasiId, siraNoBilgisi.KanalAltIslemId);
+                var bekleyenSiraSayisi = await GetBekleyenSiraSayisiAsync(siraNoBilgisi.DepartmanHizmetBinasiId, siraNoBilgisi.KanalAltIslemId);
 
                 // SignalR ile banko panellerine bildirim gönder
                 var siraDto = new SiraCagirmaResponseDto
@@ -184,7 +184,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
             // Bugünkü en yüksek sıra numarasını bul
             var siralar = await _siraRepository.GetByKanalAltIslemAsync(kanalAltIslemId);
-            var bugunSiralar = siralar.Where(s => s.HizmetBinasiId == hizmetBinasiId 
+            var bugunSiralar = siralar.Where(s => s.DepartmanHizmetBinasiId == hizmetBinasiId 
                                                 && s.SiraAlisZamani >= today 
                                                 && s.SiraAlisZamani < tomorrow);
 
@@ -201,7 +201,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             var tomorrow = today.AddDays(1);
 
             var siralar = await _siraRepository.GetByKanalAltIslemAsync(kanalAltIslemId);
-            return siralar.Count(s => s.HizmetBinasiId == hizmetBinasiId
+            return siralar.Count(s => s.DepartmanHizmetBinasiId == hizmetBinasiId
                                    && s.BeklemeDurum == BeklemeDurum.Beklemede
                                    && s.SiraAlisZamani >= today
                                    && s.SiraAlisZamani < tomorrow);
@@ -333,7 +333,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                             // Bekleyen sıra sayısı için KanalAltIslem'i bul
                             var kanalAltIslemler = await _kanalAltIslemRepository.GetByKanalAltAsync(islem.KanalAltId);
                             var kanalAltIslem = kanalAltIslemler
-                                .FirstOrDefault(kai => kai.HizmetBinasiId == hizmetBinasiId && kai.Aktiflik == Aktiflik.Aktif);
+                                .FirstOrDefault(kai => kai.DepartmanHizmetBinasiId == hizmetBinasiId && kai.Aktiflik == Aktiflik.Aktif);
                             if (kanalAltIslem != null)
                             {
                                 toplamBekleyenSiraSayisi += await GetBekleyenSiraSayisiAsync(hizmetBinasiId, kanalAltIslem.KanalAltIslemId);
@@ -394,7 +394,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     // Bu alt işlem için HizmetBinasi'ndaki KanalAltIslem'i bul
                     var kanalAltIslemler = await _kanalAltIslemRepository.GetByKanalAltAsync(islem.KanalAltId);
                     var kanalAltIslem = kanalAltIslemler
-                        .FirstOrDefault(kai => kai.HizmetBinasiId == hizmetBinasiId && kai.Aktiflik == Aktiflik.Aktif);
+                        .FirstOrDefault(kai => kai.DepartmanHizmetBinasiId == hizmetBinasiId && kai.Aktiflik == Aktiflik.Aktif);
 
                     if (kanalAltIslem != null)
                     {

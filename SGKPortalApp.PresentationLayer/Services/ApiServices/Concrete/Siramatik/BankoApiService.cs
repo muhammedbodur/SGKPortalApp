@@ -94,7 +94,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         {
             try
             {
-                var response = await _httpClient.GetAsync($"banko/bina/{hizmetBinasiId}");
+                var response = await _httpClient.GetAsync($"banko/departman-hizmet-binasi/{hizmetBinasiId}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -128,7 +128,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         {
             try
             {
-                var response = await _httpClient.GetAsync($"banko/bina/{hizmetBinasiId}/grouped");
+                var response = await _httpClient.GetAsync($"banko/departman-hizmet-binasi/{hizmetBinasiId}/grouped");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -162,7 +162,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         {
             try
             {
-                var response = await _httpClient.GetAsync($"banko/bina/{hizmetBinasiId}/bos");
+                var response = await _httpClient.GetAsync($"banko/departman-hizmet-binasi/{hizmetBinasiId}/bos");
 
                 if (!response.IsSuccessStatusCode)
                 {

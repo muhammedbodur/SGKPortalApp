@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.BackgroundServiceManager;
 
 namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
 {
@@ -16,7 +17,7 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
     /// Her cihaz 5 dakika arayla sırayla senkronize edilir
     /// appsettings.json'dan aktif/pasif ve başlama saatleri yapılandırılabilir
     /// </summary>
-    public class AttendanceSyncBackgroundService : BackgroundService
+    public class AttendanceSyncBackgroundService : BackgroundService, IManagedBackgroundService
     {
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<AttendanceSyncBackgroundService> _logger;
@@ -24,6 +25,24 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
         private readonly bool _isEnabled;
         private readonly List<TimeSpan> _syncTimes;
         private readonly TimeSpan _deviceSyncInterval;
+        private bool _isRunning;
+        private TimeSpan _checkInterval = TimeSpan.FromHours(1);
+
+        // IManagedBackgroundService properties
+        public string ServiceName => "AttendanceSyncService";
+        public string DisplayName => "ZKTeco Attendance Senkronizasyonu";
+        public bool IsRunning => _isRunning;
+        public bool IsPaused { get; set; }
+        public DateTime? LastRunTime { get; private set; }
+        public DateTime? NextRunTime { get; private set; }
+        public TimeSpan Interval
+        {
+            get => _checkInterval;
+            set => _checkInterval = value;
+        }
+        public string? LastError { get; private set; }
+        public int SuccessCount { get; private set; }
+        public int ErrorCount { get; private set; }
 
         public AttendanceSyncBackgroundService(
             IServiceScopeFactory serviceScopeFactory,
@@ -55,11 +74,34 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
             _deviceSyncInterval = TimeSpan.FromMinutes(deviceIntervalMinutes);
         }
 
+        public async Task TriggerAsync(CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("🔄 {ServiceName} manuel tetiklendi", ServiceName);
+            _isRunning = true;
+            try
+            {
+                await SyncAllDevicesSequentiallyAsync(cancellationToken);
+                LastRunTime = DateTime.Now;
+                LastError = null;
+                SuccessCount++;
+            }
+            catch (Exception ex)
+            {
+                LastError = ex.Message;
+                ErrorCount++;
+                throw;
+            }
+            finally
+            {
+                _isRunning = false;
+            }
+        }
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             if (!_isEnabled)
             {
-                _logger.LogInformation("⏸️ Attendance Sync Background Service is DISABLED (appsettings.json)");
+                _logger.LogInformation("⏸️ {ServiceName} is DISABLED (appsettings.json)", ServiceName);
                 return;
             }
 
@@ -69,20 +111,18 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                 return;
             }
 
-            _logger.LogInformation($"🔄 Attendance Sync Background Service started");
+            _logger.LogInformation($"🔄 {ServiceName} started");
             _logger.LogInformation($"📅 Scheduled sync times: {string.Join(", ", _syncTimes.Select(t => t.ToString(@"hh\:mm")))}");
             _logger.LogInformation($"⏱️ Device sync interval: {_deviceSyncInterval.TotalMinutes} minutes");
-            _logger.LogInformation($"🕐 Hourly check enabled: Will check every hour if today's sync is needed");
 
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
                     var now = DateTime.Now;
-                    
-                    // Her saat başı kontrol et (örn: 13:00, 14:00, 15:00)
                     var nextHour = now.Date.AddHours(now.Hour + 1);
                     var delayUntilNextHour = nextHour - now;
+                    NextRunTime = nextHour;
 
                     _logger.LogInformation($"⏰ Next check at: {nextHour:HH:mm} (in {delayUntilNextHour.TotalMinutes:F0} minutes)");
                     await Task.Delay(delayUntilNextHour, stoppingToken);
@@ -90,11 +130,20 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                     if (stoppingToken.IsCancellationRequested)
                         break;
 
-                    // Bugün için sync gerekli mi kontrol et
+                    if (IsPaused)
+                    {
+                        _logger.LogDebug("⏸️ {ServiceName} duraklatıldı, atlanıyor...", ServiceName);
+                        continue;
+                    }
+
                     if (await IsSyncNeededTodayAsync())
                     {
                         _logger.LogInformation($"🚀 Sync needed! Starting attendance sync at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                        _isRunning = true;
                         await SyncAllDevicesSequentiallyAsync(stoppingToken);
+                        LastRunTime = DateTime.Now;
+                        LastError = null;
+                        SuccessCount++;
                         _logger.LogInformation($"✅ Attendance sync completed at {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
                     }
                     else
@@ -104,13 +153,18 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "❌ Error in Attendance Sync Background Service");
-                    // Hata durumunda 1 dakika bekle ve devam et
+                    _logger.LogError(ex, "❌ Error in {ServiceName}", ServiceName);
+                    LastError = ex.Message;
+                    ErrorCount++;
                     await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
+                }
+                finally
+                {
+                    _isRunning = false;
                 }
             }
 
-            _logger.LogInformation("⏹️ Attendance Sync Background Service stopped");
+            _logger.LogInformation("⏹️ {ServiceName} stopped", ServiceName);
         }
 
         /// <summary>

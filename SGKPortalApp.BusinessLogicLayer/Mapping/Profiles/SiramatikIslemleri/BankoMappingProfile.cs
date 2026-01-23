@@ -23,21 +23,21 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
-                .ForMember(dest => dest.HizmetBinasi, opt => opt.Ignore())
+                .ForMember(dest => dest.DepartmanHizmetBinasi, opt => opt.Ignore())
                 .ForMember(dest => dest.BankoKullanicilari, opt => opt.Ignore())
                 .ForMember(dest => dest.TvBankolar, opt => opt.Ignore())
                 .ForMember(dest => dest.BankoHareketleri, opt => opt.Ignore());
 
             CreateMap<BankoUpdateRequestDto, Banko>()
                 .ForMember(dest => dest.BankoId, opt => opt.Ignore())
-                .ForMember(dest => dest.HizmetBinasiId, opt => opt.Ignore())
+                .ForMember(dest => dest.DepartmanHizmetBinasiId, opt => opt.Ignore())
                 .ForMember(dest => dest.BankoNo, opt => opt.Ignore())
                 .ForMember(dest => dest.KatTipi, opt => opt.Ignore())
                 .ForMember(dest => dest.BankoSira, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
-                .ForMember(dest => dest.HizmetBinasi, opt => opt.Ignore())
+                .ForMember(dest => dest.DepartmanHizmetBinasi, opt => opt.Ignore())
                 .ForMember(dest => dest.BankoKullanicilari, opt => opt.Ignore())
                 .ForMember(dest => dest.TvBankolar, opt => opt.Ignore())
                 .ForMember(dest => dest.BankoHareketleri, opt => opt.Ignore());
@@ -51,8 +51,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
                     opt => opt.MapFrom(src => src.BankoTipi.GetDisplayName()))
                 .ForMember(dest => dest.KatTipiAdi, 
                     opt => opt.MapFrom(src => src.KatTipi.GetDisplayName()))
+                .ForMember(dest => dest.DepartmanId,
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinasi != null ? src.DepartmanHizmetBinasi.DepartmanId : (int?)null))
+                .ForMember(dest => dest.DepartmanAdi,
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinasi != null && src.DepartmanHizmetBinasi.Departman != null ? src.DepartmanHizmetBinasi.Departman.DepartmanAdi : null))
                 .ForMember(dest => dest.HizmetBinasiAdi, 
-                    opt => opt.MapFrom(src => src.HizmetBinasi != null ? src.HizmetBinasi.HizmetBinasiAdi : string.Empty))
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinasi != null && src.DepartmanHizmetBinasi.HizmetBinasi != null ? src.DepartmanHizmetBinasi.HizmetBinasi.HizmetBinasiAdi : null))
                 .ForMember(dest => dest.AtananPersonel, 
                     opt => opt.MapFrom(src => src.BankoKullanicilari != null && src.BankoKullanicilari.Any() 
                         ? src.BankoKullanicilari.First() 

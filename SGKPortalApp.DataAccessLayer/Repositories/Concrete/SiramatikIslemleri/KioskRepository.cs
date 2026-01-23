@@ -23,23 +23,27 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(kiosk => kiosk.HizmetBinasi)
-                    .ThenInclude(hb => hb.Departman)
+                .Include(kiosk => kiosk.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(kiosk => kiosk.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(kiosk => kiosk.MenuAtamalari.Where(ma => ma.Aktiflik == Aktiflik.Aktif))
                     .ThenInclude(ma => ma.KioskMenu)
                 .OrderBy(kiosk => kiosk.KioskAdi)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Kiosk>> GetByHizmetBinasiAsync(int hizmetBinasiId)
+        public async Task<IEnumerable<Kiosk>> GetByDepartmanHizmetBinasiAsync(int departmanHizmetBinasiId)
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(kiosk => kiosk.HizmetBinasi)
-                    .ThenInclude(hb => hb.Departman)
+                .Include(kiosk => kiosk.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(kiosk => kiosk.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(kiosk => kiosk.MenuAtamalari.Where(ma => ma.Aktiflik == Aktiflik.Aktif))
                     .ThenInclude(ma => ma.KioskMenu)
-                .Where(kiosk => kiosk.HizmetBinasiId == hizmetBinasiId)
+                .Where(kiosk => kiosk.DepartmanHizmetBinasiId == departmanHizmetBinasiId)
                 .OrderBy(kiosk => kiosk.KioskAdi)
                 .ToListAsync();
         }
@@ -48,8 +52,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(kiosk => kiosk.HizmetBinasi)
-                    .ThenInclude(hb => hb.Departman)
+                .Include(kiosk => kiosk.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(kiosk => kiosk.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(kiosk => kiosk.MenuAtamalari)
                     .ThenInclude(ma => ma.KioskMenu)
                 .FirstOrDefaultAsync(kiosk => kiosk.KioskId == kioskId);
@@ -59,8 +65,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(kiosk => kiosk.HizmetBinasi)
-                    .ThenInclude(hb => hb.Departman)
+                .Include(kiosk => kiosk.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(kiosk => kiosk.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(kiosk => kiosk.MenuAtamalari)
                     .ThenInclude(ma => ma.KioskMenu)
                 .Where(kiosk => kioskIds.Contains(kiosk.KioskId))
@@ -76,11 +84,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .ToListAsync();
         }
 
-        public async Task<bool> ExistsByNameAsync(string kioskAdi, int hizmetBinasiId)
+        public async Task<bool> ExistsByNameAsync(string kioskAdi, int departmanHizmetBinasiId)
         {
             return await _dbSet
                 .AsNoTracking()
-                .AnyAsync(kiosk => kiosk.HizmetBinasiId == hizmetBinasiId && kiosk.KioskAdi == kioskAdi);
+                .AnyAsync(kiosk => kiosk.DepartmanHizmetBinasiId == departmanHizmetBinasiId && kiosk.KioskAdi == kioskAdi);
         }
     }
 }

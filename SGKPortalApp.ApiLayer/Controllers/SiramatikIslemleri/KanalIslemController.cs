@@ -100,10 +100,10 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         /// <summary>
         /// Hizmet binası ID'ye göre kanal işlemleri getirir
         /// </summary>
-        [HttpGet("hizmet-binasi/{hizmetBinasiId:int}")]
-        public async Task<IActionResult> GetByHizmetBinasiId(int hizmetBinasiId)
+        [HttpGet("departman-hizmet-binasi/{dhbId:int}")]
+        public async Task<IActionResult> GetByDepartmanHizmetBinasiId(int dhbId)
         {
-            var result = await _kanalIslemService.GetByHizmetBinasiIdAsync(hizmetBinasiId);
+            var result = await _kanalIslemService.GetByDepartmanHizmetBinasiIdAsync(dhbId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
     }

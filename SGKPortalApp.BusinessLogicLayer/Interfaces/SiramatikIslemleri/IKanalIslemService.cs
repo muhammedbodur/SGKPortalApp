@@ -15,7 +15,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
         
         // Business Operations
         Task<ApiResponseDto<List<KanalIslemResponseDto>>> GetByKanalIdAsync(int kanalId);
-        Task<ApiResponseDto<List<KanalIslemResponseDto>>> GetByHizmetBinasiIdAsync(int hizmetBinasiId);
+        Task<ApiResponseDto<List<KanalIslemResponseDto>>> GetByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId);
         Task<ApiResponseDto<List<KanalIslemResponseDto>>> GetActiveAsync();
     }
 }

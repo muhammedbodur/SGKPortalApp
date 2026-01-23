@@ -241,40 +241,26 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
         }
 
-        public async Task<ApiResponseDto<List<KanalPersonelResponseDto>>> GetPersonellerByHizmetBinasiIdAsync(int hizmetBinasiId)
+        public async Task<ApiResponseDto<List<KanalPersonelResponseDto>>> GetPersonellerByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId)
         {
             try
             {
-                if (hizmetBinasiId <= 0)
+                if (departmanHizmetBinasiId <= 0)
                 {
                     return ApiResponseDto<List<KanalPersonelResponseDto>>
-                        .ErrorResult("Geçersiz hizmet binası ID");
-                }
-
-
-                var kanalPersonelDtos = await _siramatikQueryRepository
-                    .GetPersonelKanalAtamalarByHizmetBinasiIdAsync(hizmetBinasiId);
-
-                if (!kanalPersonelDtos.Any())
-                {
-                    _logger.LogWarning(
-                        "Hizmet binasında personel bulunamadı. HizmetBinasiId: {HizmetBinasiId}",
-                        hizmetBinasiId);
-
-                    return ApiResponseDto<List<KanalPersonelResponseDto>>
-                        .SuccessResult(
-                            new List<KanalPersonelResponseDto>(),
-                            "Bu hizmet binasında personel bulunamadı");
+                        .ErrorResult("Geçersiz departman-hizmet binası ID");
                 }
 
                 var kanalPersonelRepo = _unitOfWork.GetRepository<IKanalPersonelRepository>();
                 
-                var kanalPersoneller = await kanalPersonelRepo.GetByHizmetBinasiIdAsync(hizmetBinasiId);
+                var kanalPersoneller = await kanalPersonelRepo.GetByDepartmanHizmetBinasiIdAsync(departmanHizmetBinasiId);
 
                 _logger.LogInformation(
-                    "Hizmet binası personel atamaları getirildi. HizmetBinasiId: {HizmetBinasiId}, Adet: {Count}",
-                    hizmetBinasiId,
-                    kanalPersonelDtos.Count);
+                    "Departman-Hizmet binası personel atamaları getirildi. DepartmanHizmetBinasiId: {DepartmanHizmetBinasiId}, Adet: {Count}",
+                    departmanHizmetBinasiId,
+                    kanalPersoneller.Count());
+
+                var kanalPersonelDtos = _mapper.Map<List<KanalPersonelResponseDto>>(kanalPersoneller);
 
                 return ApiResponseDto<List<KanalPersonelResponseDto>>
                     .SuccessResult(
@@ -285,8 +271,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             {
                 _logger.LogError(
                     ex,
-                    "Hizmet binası personel atamaları getirilirken hata oluştu. HizmetBinasiId: {HizmetBinasiId}",
-                    hizmetBinasiId);
+                    "Hizmet binası personel atamaları getirilirken hata oluştu. DepartmanHizmetBinasiId: {DepartmanHizmetBinasiId}",
+                    departmanHizmetBinasiId);
 
                 return ApiResponseDto<List<KanalPersonelResponseDto>>
                     .ErrorResult("Personel atamaları getirilirken bir hata oluştu", ex.Message);
@@ -345,24 +331,24 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
         }
 
-        public async Task<ApiResponseDto<List<PersonelAtamaMatrixDto>>> GetPersonelAtamaMatrixAsync(int hizmetBinasiId)
+        public async Task<ApiResponseDto<List<PersonelAtamaMatrixDto>>> GetPersonelAtamaMatrixAsync(int departmanHizmetBinasiId)
         {
             try
             {
-                if (hizmetBinasiId <= 0)
+                if (departmanHizmetBinasiId <= 0)
                 {
                     return ApiResponseDto<List<PersonelAtamaMatrixDto>>
-                        .ErrorResult("Geçersiz hizmet binası ID");
+                        .ErrorResult("Geçersiz departman-hizmet binası ID");
                 }
 
                 var matrixData = await _siramatikQueryRepository
-                    .GetPersonelAtamaMatrixByHizmetBinasiIdAsync(hizmetBinasiId);
+                    .GetPersonelAtamaMatrixByDepartmanHizmetBinasiIdAsync(departmanHizmetBinasiId);
 
                 if (!matrixData.Any())
                 {
                     _logger.LogWarning(
-                        "Hizmet binasında personel bulunamadı. HizmetBinasiId: {HizmetBinasiId}",
-                        hizmetBinasiId);
+                        "Departman-Hizmet binasında personel bulunamadı. DepartmanHizmetBinasiId: {DepartmanHizmetBinasiId}",
+                        departmanHizmetBinasiId);
 
                     return ApiResponseDto<List<PersonelAtamaMatrixDto>>
                         .SuccessResult(
@@ -371,8 +357,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 }
 
                 _logger.LogInformation(
-                    "Personel atama matrix getirildi. HizmetBinasiId: {HizmetBinasiId}, Personel Sayısı: {Count}",
-                    hizmetBinasiId,
+                    "Personel atama matrix getirildi. DepartmanHizmetBinasiId: {DepartmanHizmetBinasiId}, Personel Sayısı: {Count}",
+                    departmanHizmetBinasiId,
                     matrixData.Count);
 
                 return ApiResponseDto<List<PersonelAtamaMatrixDto>>
@@ -384,8 +370,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             {
                 _logger.LogError(
                     ex,
-                    "Personel atama matrix getirilirken hata oluştu. HizmetBinasiId: {HizmetBinasiId}",
-                    hizmetBinasiId);
+                    "Personel atama matrix getirilirken hata oluştu. DepartmanHizmetBinasiId: {DepartmanHizmetBinasiId}",
+                    departmanHizmetBinasiId);
 
                 return ApiResponseDto<List<PersonelAtamaMatrixDto>>
                     .ErrorResult("Personel atama matrix getirilirken bir hata oluştu", ex.Message);

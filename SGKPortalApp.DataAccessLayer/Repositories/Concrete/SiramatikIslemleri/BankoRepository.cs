@@ -15,41 +15,50 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
     {
         public BankoRepository(SGKDbContext context) : base(context) { }
 
-        // Banko numarası ve hizmet binasıyla bankoyu getirir
-        public async Task<Banko?> GetByBankoNoAsync(int bankoNo, int hizmetBinasiId)
+        // Banko numarası ve departman-bina kombinasyonuyla bankoyu getirir
+        public async Task<Banko?> GetByBankoNoAsync(int bankoNo, int departmanHizmetBinasiId)
         {
             return await _dbSet
                 .AsNoTracking()
-                .FirstOrDefaultAsync(b => b.BankoNo == bankoNo && b.HizmetBinasiId == hizmetBinasiId);
+                .FirstOrDefaultAsync(b => b.BankoNo == bankoNo && b.DepartmanHizmetBinasiId == departmanHizmetBinasiId);
         }
 
-        // Hizmet binasındaki bankoları listeler
-        public async Task<IEnumerable<Banko>> GetByHizmetBinasiAsync(int hizmetBinasiId)
+        // Departman-hizmet binasındaki bankoları listeler
+        public async Task<IEnumerable<Banko>> GetByDepartmanHizmetBinasiAsync(int departmanHizmetBinasiId)
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(b => b.HizmetBinasi)
+                .Include(b => b.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(b => b.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(b => b.BankoKullanicilari.Where(bk => !bk.SilindiMi))
                     .ThenInclude(bk => bk.Personel)
-                .Where(b => b.HizmetBinasiId == hizmetBinasiId)
+                .Where(b => b.DepartmanHizmetBinasiId == departmanHizmetBinasiId)
                 .ToListAsync();
         }
 
-        // Bankoyu hizmet binası ile getirir
-        public async Task<Banko?> GetWithHizmetBinasiAsync(int bankoId)
+        // Bankoyu departman-hizmet binası ile getirir
+        public async Task<Banko?> GetWithDepartmanHizmetBinasiAsync(int bankoId)
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(b => b.HizmetBinasi)
+                .Include(b => b.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(b => b.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .FirstOrDefaultAsync(b => b.BankoId == bankoId);
         }
 
-        // Tüm bankoları hizmet binası ile listeler
-        public async Task<IEnumerable<Banko>> GetAllWithHizmetBinasiAsync()
+        // Tüm bankoları departman-hizmet binası ile listeler
+        public async Task<IEnumerable<Banko>> GetAllWithDepartmanHizmetBinasiAsync()
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(b => b.HizmetBinasi)
+                .Include(b => b.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(b => b.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .ToListAsync();
         }
 
@@ -64,16 +73,17 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         }
 
         // Personelin bankosunu getirir
-        // ⭐ ARTıK ÇOK BASİT: HizmetBinasiId BankoKullanici'da olduğu için database garantisi var
         public async Task<Banko?> GetByKullaniciAsync(string tcKimlikNo)
         {
             return await _dbSet
                 .AsNoTracking()
                 .Include(b => b.BankoKullanicilari.Where(bk => !bk.SilindiMi))
-                .Include(b => b.HizmetBinasi)
+                .Include(b => b.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(b => b.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .FirstOrDefaultAsync(b => b.BankoKullanicilari != null &&
                                          b.BankoKullanicilari.Any(bk => bk.TcKimlikNo == tcKimlikNo && !bk.SilindiMi));
-            // ⭐ HizmetBinasiId kontrolü artık gerekli değil - database seviyesinde garanti ediliyor!
         }
 
         // Aktif bankoları listeler
@@ -102,22 +112,22 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .ToListAsync();
         }
 
-        // Hizmet binası için dropdown bankoları listeler
-        public async Task<IEnumerable<(int Id, string Ad)>> GetByHizmetBinasiDropdownAsync(int hizmetBinasiId)
+        // Departman-hizmet binası için dropdown bankoları listeler
+        public async Task<IEnumerable<(int Id, string Ad)>> GetByDepartmanHizmetBinasiDropdownAsync(int departmanHizmetBinasiId)
         {
             return await _dbSet
                 .AsNoTracking()
-                .Where(b => b.HizmetBinasiId == hizmetBinasiId)
+                .Where(b => b.DepartmanHizmetBinasiId == departmanHizmetBinasiId)
                 .Select(b => new ValueTuple<int, string>(b.BankoId, b.BankoNo.ToString()))
                 .ToListAsync();
         }
 
-        // Hizmet binasındaki aktif banko sayısını getirir
-        public async Task<int> GetActiveBankoCountAsync(int hizmetBinasiId)
+        // Departman-hizmet binasındaki aktif banko sayısını getirir
+        public async Task<int> GetActiveBankoCountAsync(int departmanHizmetBinasiId)
         {
             return await _dbSet
                 .AsNoTracking()
-                .CountAsync(b => b.HizmetBinasiId == hizmetBinasiId && b.Aktiflik == Aktiflik.Aktif);
+                .CountAsync(b => b.DepartmanHizmetBinasiId == departmanHizmetBinasiId && b.Aktiflik == Aktiflik.Aktif);
         }
 
         // Banko tipine göre bankoları listeler
@@ -139,13 +149,16 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         }
 
         // Boş bankoları listeler (personel atanmamış)
-        public async Task<IEnumerable<Banko>> GetAvailableBankosAsync(int hizmetBinasiId)
+        public async Task<IEnumerable<Banko>> GetAvailableBankosAsync(int departmanHizmetBinasiId)
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(b => b.HizmetBinasi)
+                .Include(b => b.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(b => b.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(b => b.BankoKullanicilari.Where(bk => !bk.SilindiMi))
-                .Where(b => b.HizmetBinasiId == hizmetBinasiId
+                .Where(b => b.DepartmanHizmetBinasiId == departmanHizmetBinasiId
                          && b.Aktiflik == Aktiflik.Aktif
                          && (b.BankoKullanicilari == null || !b.BankoKullanicilari.Any()))
                 .OrderBy(b => b.KatTipi)
@@ -158,7 +171,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         {
             return await _dbSet
                 .AsNoTracking()
-                .Include(b => b.HizmetBinasi)
+                .Include(b => b.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(b => b.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(b => b.BankoKullanicilari!.Where(bk => !bk.SilindiMi))
                     .ThenInclude(bk => bk.Personel)
                         .ThenInclude(p => p.Servis)
@@ -166,15 +182,18 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
         }
 
         // Bina bazlı kat gruplu bankoları getirir
-        public async Task<Dictionary<KatTipi, List<Banko>>> GetGroupedByKatAsync(int hizmetBinasiId)
+        public async Task<Dictionary<KatTipi, List<Banko>>> GetGroupedByKatAsync(int departmanHizmetBinasiId)
         {
             var bankolar = await _dbSet
                 .AsNoTracking()
-                .Include(b => b.HizmetBinasi)
+                .Include(b => b.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.Departman)
+                .Include(b => b.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(b => b.BankoKullanicilari!.Where(bk => !bk.SilindiMi))
                     .ThenInclude(bk => bk.Personel)
                         .ThenInclude(p => p.Servis)
-                .Where(b => b.HizmetBinasiId == hizmetBinasiId)
+                .Where(b => b.DepartmanHizmetBinasiId == departmanHizmetBinasiId)
                 .OrderBy(b => b.BankoNo)
                 .ToListAsync();
 

@@ -88,7 +88,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 try
                 {
                     var repo = _unitOfWork.GetRepository<IKioskRepository>();
-                    var exists = await repo.ExistsByNameAsync(request.KioskAdi, request.HizmetBinasiId);
+                    var exists = await repo.ExistsByNameAsync(request.KioskAdi, request.DepartmanHizmetBinasiId);
                     if (exists)
                     {
                         return ApiResponseDto<KioskResponseDto>.ErrorResult("Bu binada aynı isimde kiosk mevcut");
@@ -129,9 +129,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         return ApiResponseDto<KioskResponseDto>.ErrorResult("Kiosk bulunamadı");
                     }
 
-                    if (!string.Equals(entity.KioskAdi, request.KioskAdi, StringComparison.OrdinalIgnoreCase) || entity.HizmetBinasiId != request.HizmetBinasiId)
+                    if (!string.Equals(entity.KioskAdi, request.KioskAdi, StringComparison.OrdinalIgnoreCase) || entity.DepartmanHizmetBinasiId != request.DepartmanHizmetBinasiId)
                     {
-                        var exists = await repo.ExistsByNameAsync(request.KioskAdi, request.HizmetBinasiId);
+                        var exists = await repo.ExistsByNameAsync(request.KioskAdi, request.DepartmanHizmetBinasiId);
                         if (exists)
                         {
                             return ApiResponseDto<KioskResponseDto>.ErrorResult("Bu binada aynı isimde kiosk mevcut");
@@ -223,23 +223,23 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             });
         }
 
-        public async Task<ApiResponseDto<List<KioskResponseDto>>> GetByHizmetBinasiAsync(int hizmetBinasiId)
+        public async Task<ApiResponseDto<List<KioskResponseDto>>> GetByDepartmanHizmetBinasiAsync(int departmanHizmetBinasiId)
         {
-            if (hizmetBinasiId <= 0)
+            if (departmanHizmetBinasiId <= 0)
             {
-                return ApiResponseDto<List<KioskResponseDto>>.ErrorResult("Geçersiz hizmet binası ID");
+                return ApiResponseDto<List<KioskResponseDto>>.ErrorResult("Geçersiz departman-hizmet binası ID");
             }
 
             try
             {
                 var repo = _unitOfWork.GetRepository<IKioskRepository>();
-                var list = await repo.GetByHizmetBinasiAsync(hizmetBinasiId);
+                var list = await repo.GetByDepartmanHizmetBinasiAsync(departmanHizmetBinasiId);
                 var dto = _mapper.Map<List<KioskResponseDto>>(list);
                 return ApiResponseDto<List<KioskResponseDto>>.SuccessResult(dto, "Kiosk listesi getirildi");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Hizmet binası kioskları getirilemedi. HizmetBinasiId: {HizmetBinasiId}", hizmetBinasiId);
+                _logger.LogError(ex, "Departman-Hizmet binası kioskları getirilemedi. DepartmanHizmetBinasiId: {DepartmanHizmetBinasiId}", departmanHizmetBinasiId);
                 return ApiResponseDto<List<KioskResponseDto>>.ErrorResult("Kiosk listesi getirilemedi", ex.Message);
             }
         }

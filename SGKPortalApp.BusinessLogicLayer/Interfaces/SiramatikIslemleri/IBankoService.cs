@@ -20,9 +20,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
         // QUERY OPERATIONS
         // ═══════════════════════════════════════════════════════
 
-        Task<ApiResponseDto<List<BankoResponseDto>>> GetByHizmetBinasiAsync(int hizmetBinasiId);
-        Task<ApiResponseDto<List<BankoKatGrupluResponseDto>>> GetGroupedByKatAsync(int hizmetBinasiId);
-        Task<ApiResponseDto<List<BankoResponseDto>>> GetAvailableBankosAsync(int hizmetBinasiId);
+        Task<ApiResponseDto<List<BankoResponseDto>>> GetByDepartmanHizmetBinasiAsync(int departmanHizmetBinasiId);
+        Task<ApiResponseDto<List<BankoKatGrupluResponseDto>>> GetGroupedByKatAsync(int departmanHizmetBinasiId);
+        Task<ApiResponseDto<List<BankoResponseDto>>> GetAvailableBankosAsync(int departmanHizmetBinasiId);
         Task<ApiResponseDto<List<BankoResponseDto>>> GetActiveAsync();
 
         // ═══════════════════════════════════════════════════════

@@ -24,6 +24,21 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
         public string KanalAltAdi { get; set; } = string.Empty;
 
         /// <summary>
+        /// Departman-Hizmet binası kombinasyonu ID
+        /// </summary>
+        public int DepartmanHizmetBinasiId { get; set; }
+        
+        /// <summary>
+        /// Departman ID
+        /// </summary>
+        public int DepartmanId { get; set; }
+        
+        /// <summary>
+        /// Departman adı
+        /// </summary>
+        public string DepartmanAdi { get; set; } = string.Empty;
+        
+        /// <summary>
         /// Hizmet binası ID
         /// </summary>
         public int HizmetBinasiId { get; set; }

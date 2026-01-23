@@ -10,7 +10,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
     public interface ISiraRepository : IGenericRepository<Sira>
     {
         // Sıra numarası ile sırayı getirir
-        Task<Sira?> GetBySiraNoAsync(int siraNo, int hizmetBinasiId);
+        Task<Sira?> GetBySiraNoAsync(int siraNo, int departmanHizmetBinasiId);
 
         // Personel bazında sıraları listeler
         Task<IEnumerable<Sira>> GetByPersonelAsync(string tcKimlikNo);
@@ -21,8 +21,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
         // Personelin çağırdığı ve henüz tamamlanmamış sırayı getirir
         Task<Sira?> GetCalledByPersonelAsync(string tcKimlikNo);
 
-        // Hizmet binası bazında sıraları listeler
-        Task<IEnumerable<Sira>> GetByHizmetBinasiAsync(int hizmetBinasiId);
+        // Departman-hizmet binası bazında sıraları listeler
+        Task<IEnumerable<Sira>> GetByDepartmanHizmetBinasiAsync(int departmanHizmetBinasiId);
 
         // Kanal alt işlem bazında sıraları listeler
         Task<IEnumerable<Sira>> GetByKanalAltIslemAsync(int kanalAltIslemId);

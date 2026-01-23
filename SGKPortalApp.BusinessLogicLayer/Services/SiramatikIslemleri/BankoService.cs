@@ -51,7 +51,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             try
             {
                 var bankoRepo = _unitOfWork.GetRepository<IBankoRepository>();
-                var bankolar = await bankoRepo.GetAllWithHizmetBinasiAsync();
+                var bankolar = await bankoRepo.GetAllWithDepartmanHizmetBinasiAsync();
 
                 var bankoDtos = _mapper.Map<List<BankoResponseDto>>(bankolar);
 
@@ -119,7 +119,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     var bankoRepo = _unitOfWork.GetRepository<IBankoRepository>();
 
                     // Aynı binada, aynı katta, aynı numara kontrolü
-                    var existingBanko = await bankoRepo.GetByBankoNoAsync(request.BankoNo, request.HizmetBinasiId);
+                    var existingBanko = await bankoRepo.GetByBankoNoAsync(request.BankoNo, request.DepartmanHizmetBinasiId);
                     if (existingBanko != null && existingBanko.KatTipi == request.KatTipi)
                     {
                         return ApiResponseDto<BankoResponseDto>
@@ -167,7 +167,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     // Banko No veya Kat değişiyorsa, unique kontrolü yap
                     if (banko.BankoNo != request.BankoNo || banko.KatTipi != request.KatTipi)
                     {
-                        var existingBanko = await bankoRepo.GetByBankoNoAsync(request.BankoNo, banko.HizmetBinasiId);
+                        var existingBanko = await bankoRepo.GetByBankoNoAsync(request.BankoNo, banko.DepartmanHizmetBinasiId);
                         if (existingBanko != null && existingBanko.BankoId != bankoId && existingBanko.KatTipi == request.KatTipi)
                         {
                             return ApiResponseDto<BankoResponseDto>
@@ -265,12 +265,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
         // QUERY OPERATIONS
         // ═══════════════════════════════════════════════════════
 
-        public async Task<ApiResponseDto<List<BankoResponseDto>>> GetByHizmetBinasiAsync(int hizmetBinasiId)
+        public async Task<ApiResponseDto<List<BankoResponseDto>>> GetByDepartmanHizmetBinasiAsync(int departmanHizmetBinasiId)
         {
             try
             {
                 var bankoRepo = _unitOfWork.GetRepository<IBankoRepository>();
-                var bankolar = await bankoRepo.GetByHizmetBinasiAsync(hizmetBinasiId);
+                var bankolar = await bankoRepo.GetByDepartmanHizmetBinasiAsync(departmanHizmetBinasiId);
 
                 var bankoDtos = _mapper.Map<List<BankoResponseDto>>(bankolar);
 
@@ -279,18 +279,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Hizmet binası bankoları getirilirken hata oluştu. BinaId: {BinaId}", hizmetBinasiId);
+                _logger.LogError(ex, "Departman-Hizmet binası bankoları getirilirken hata oluştu. DepartmanHizmetBinasiId: {DepartmanHizmetBinasiId}", departmanHizmetBinasiId);
                 return ApiResponseDto<List<BankoResponseDto>>
                     .ErrorResult("Bankolar getirilirken bir hata oluştu", ex.Message);
             }
         }
 
-        public async Task<ApiResponseDto<List<BankoKatGrupluResponseDto>>> GetGroupedByKatAsync(int hizmetBinasiId)
+        public async Task<ApiResponseDto<List<BankoKatGrupluResponseDto>>> GetGroupedByKatAsync(int departmanHizmetBinasiId)
         {
             try
             {
                 var bankoRepo = _unitOfWork.GetRepository<IBankoRepository>();
-                var bankoDict = await bankoRepo.GetGroupedByKatAsync(hizmetBinasiId);
+                var bankoDict = await bankoRepo.GetGroupedByKatAsync(departmanHizmetBinasiId);
 
                 var result = bankoDict.Select(kvp => new BankoKatGrupluResponseDto
                 {
@@ -304,18 +304,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kat gruplu bankolar getirilirken hata oluştu. BinaId: {BinaId}", hizmetBinasiId);
+                _logger.LogError(ex, "Kat gruplu bankolar getirilirken hata oluştu. DepartmanHizmetBinasiId: {DepartmanHizmetBinasiId}", departmanHizmetBinasiId);
                 return ApiResponseDto<List<BankoKatGrupluResponseDto>>
                     .ErrorResult("Bankolar getirilirken bir hata oluştu", ex.Message);
             }
         }
 
-        public async Task<ApiResponseDto<List<BankoResponseDto>>> GetAvailableBankosAsync(int hizmetBinasiId)
+        public async Task<ApiResponseDto<List<BankoResponseDto>>> GetAvailableBankosAsync(int departmanHizmetBinasiId)
         {
             try
             {
                 var bankoRepo = _unitOfWork.GetRepository<IBankoRepository>();
-                var bankolar = await bankoRepo.GetAvailableBankosAsync(hizmetBinasiId);
+                var bankolar = await bankoRepo.GetAvailableBankosAsync(departmanHizmetBinasiId);
 
                 var bankoDtos = _mapper.Map<List<BankoResponseDto>>(bankolar);
 
@@ -324,7 +324,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Boş bankolar getirilirken hata oluştu. BinaId: {BinaId}", hizmetBinasiId);
+                _logger.LogError(ex, "Boş bankolar getirilirken hata oluştu. DepartmanHizmetBinasiId: {DepartmanHizmetBinasiId}", departmanHizmetBinasiId);
                 return ApiResponseDto<List<BankoResponseDto>>
                     .ErrorResult("Bankolar getirilirken bir hata oluştu", ex.Message);
             }
@@ -411,11 +411,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     await _unitOfWork.SaveChangesAsync();
                 }
 
-                // ⭐ YENİ: HizmetBinasiId kontrolü - Personel ve Banko aynı hizmet binasında olmalı
-                if (personelExists.HizmetBinasiId != bankoExists.HizmetBinasiId)
+                // ⭐ YENİ: DepartmanHizmetBinasiId kontrolü - Personel ve Banko aynı departman-hizmet binasında olmalı
+                if (personelExists.HizmetBinasiId != bankoExists.DepartmanHizmetBinasi?.HizmetBinasiId || 
+                    personelExists.DepartmanId != bankoExists.DepartmanHizmetBinasi?.DepartmanId)
                 {
                     return ApiResponseDto<bool>.ErrorResult(
-                        $"Personel ({personelExists.HizmetBinasi?.HizmetBinasiAdi}) ve Banko ({bankoExists.HizmetBinasi?.HizmetBinasiAdi}) farklı hizmet binalarında. Atama yapılamaz.");
+                        $"Personel ve Banko farklı departman-hizmet binalarında. Atama yapılamaz.");
                 }
 
                 // Yeni atama yap
@@ -423,14 +424,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 {
                     BankoId = request.BankoId,
                     TcKimlikNo = request.TcKimlikNo,
-                    // ⭐ ÖNEMLİ: Banko'nun HizmetBinasiId'si kullanılmalı (personel'in değil)
-                    // Çünkü bu field "Bu banko hangi hizmet binasında?" sorusunu cevaplar
-                    HizmetBinasiId = bankoExists.HizmetBinasiId,
+                    // ⭐ ÖNEMLİ: Banko'nun DepartmanHizmetBinasiId'si kullanılmalı
+                    DepartmanHizmetBinasiId = bankoExists.DepartmanHizmetBinasiId,
                     EklenmeTarihi = DateTime.Now,
                     DuzenlenmeTarihi = DateTime.Now,
                     Banko = null!,
                     Personel = null!,
-                    HizmetBinasi = null!
+                    DepartmanHizmetBinasi = null!
                 };
 
                 await bankoKullaniciRepo.AddAsync(bankoKullanici);
@@ -558,16 +558,19 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                             continue;
                         }
 
-                        // Tutarsızlık kontrolü: Personel.HizmetBinasiId != BankoKullanici.HizmetBinasiId
-                        if (personel.HizmetBinasiId != assignment.HizmetBinasiId)
+                        // Tutarsızlık kontrolü: Personel.HizmetBinasiId ve DepartmanId != BankoKullanici.DepartmanHizmetBinasi
+                        if (assignment.DepartmanHizmetBinasi == null || 
+                            personel.HizmetBinasiId != assignment.DepartmanHizmetBinasi.HizmetBinasiId ||
+                            personel.DepartmanId != assignment.DepartmanHizmetBinasi.DepartmanId)
                         {
                             _logger.LogWarning(
                                 "Tutarsız kayıt tespit edildi. TC: {TcKimlikNo}, " +
-                                "Personel HizmetBinasi: {PersonelHizmetBinasi}, " +
-                                "BankoKullanici HizmetBinasi: {BankoKullaniciHizmetBinasi}",
+                                "Personel HizmetBinasi: {PersonelHizmetBinasi}, DepartmanId: {PersonelDepartmanId}, " +
+                                "BankoKullanici DepartmanHizmetBinasiId: {BankoKullaniciDhbId}",
                                 assignment.TcKimlikNo,
                                 personel.HizmetBinasiId,
-                                assignment.HizmetBinasiId);
+                                personel.DepartmanId,
+                                assignment.DepartmanHizmetBinasiId);
 
                             // Soft delete
                             bankoKullaniciRepo.Delete(assignment);

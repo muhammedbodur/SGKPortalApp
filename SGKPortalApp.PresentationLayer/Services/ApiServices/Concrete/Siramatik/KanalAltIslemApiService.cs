@@ -90,7 +90,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         {
             try
             {
-                var response = await _httpClient.GetAsync($"kanalaltislem/hizmet-binasi/{hizmetBinasiId}");
+                var response = await _httpClient.GetAsync($"kanalaltislem/departman-hizmet-binasi/{hizmetBinasiId}");
 
                 if (!response.IsSuccessStatusCode)
                 {

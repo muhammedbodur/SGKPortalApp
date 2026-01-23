@@ -100,7 +100,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         {
             try
             {
-                var response = await _httpClient.GetAsync($"{BaseEndpoint}/byhizmetbinasi/{hizmetBinasiId}");
+                var response = await _httpClient.GetAsync($"{BaseEndpoint}/departman-hizmet-binasi/{hizmetBinasiId}");
                 return await response.Content.ReadFromJsonAsync<ApiResponseDto<List<TvResponseDto>>>()
                     ?? ApiResponseDto<List<TvResponseDto>>.ErrorResult("Yanıt alınamadı");
             }
@@ -170,7 +170,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
         {
             try
             {
-                var response = await _httpClient.GetAsync($"{BaseEndpoint}/dropdown/byhizmetbinasi/{hizmetBinasiId}");
+                var response = await _httpClient.GetAsync($"{BaseEndpoint}/dropdown/departman-hizmet-binasi/{hizmetBinasiId}");
                 return await response.Content.ReadFromJsonAsync<ApiResponseDto<List<(int Id, string Ad)>>>()
                     ?? ApiResponseDto<List<(int Id, string Ad)>>.ErrorResult("Yanıt alınamadı");
             }

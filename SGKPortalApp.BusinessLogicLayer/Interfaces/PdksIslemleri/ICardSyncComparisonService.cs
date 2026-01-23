@@ -1,7 +1,7 @@
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using System.Threading.Tasks;
 
-namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.Interfaces
+namespace SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri
 {
     public interface ICardSyncComparisonService
     {

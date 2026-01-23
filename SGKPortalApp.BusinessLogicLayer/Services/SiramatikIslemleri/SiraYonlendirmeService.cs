@@ -191,7 +191,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         SiraNo = sira.SiraNo,
                         KanalAltIslemId = sira.KanalAltIslemId,
                         KanalAltAdi = sira.KanalAltAdi,
-                        HizmetBinasiId = sira.HizmetBinasiId,
+                        HizmetBinasiId = sira.DepartmanHizmetBinasi?.HizmetBinasiId ?? 0,
                         SiraAlisZamani = sira.SiraAlisZamani,
                         BeklemeDurum = BeklemeDurum.Yonlendirildi,
                         YonlendirildiMi = true,

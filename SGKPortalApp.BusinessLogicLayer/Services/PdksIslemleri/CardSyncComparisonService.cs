@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
-using SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.Interfaces;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PdksIslemleri;

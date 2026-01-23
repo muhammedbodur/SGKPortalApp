@@ -11,7 +11,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.SiramatikIslemleri
         Task<ApiResponseDto<KioskResponseDto>> CreateAsync(KioskCreateRequestDto request);
         Task<ApiResponseDto<KioskResponseDto>> UpdateAsync(KioskUpdateRequestDto request);
         Task<ApiResponseDto<bool>> DeleteAsync(int kioskId);
-        Task<ApiResponseDto<List<KioskResponseDto>>> GetByHizmetBinasiAsync(int hizmetBinasiId);
+        Task<ApiResponseDto<List<KioskResponseDto>>> GetByDepartmanHizmetBinasiAsync(int departmanHizmetBinasiId);
         Task<ApiResponseDto<List<KioskResponseDto>>> GetActiveAsync();
         Task<ApiResponseDto<KioskResponseDto>> GetWithMenuAsync(int kioskId);
     }

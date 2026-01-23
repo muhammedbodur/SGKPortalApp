@@ -20,19 +20,28 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
             // ═══════════════════════════════════════════════════════
 
             CreateMap<HizmetBinasi, HizmetBinasiResponseDto>()
-                .ForMember(dest => dest.DepartmanAdi,
-                    opt => opt.MapFrom(src => src.Departman != null ? src.Departman.DepartmanAdi : string.Empty))
+                .ForMember(dest => dest.Departmanlar,
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinalari != null
+                        ? src.DepartmanHizmetBinalari
+                            .Where(dhb => !dhb.SilindiMi)
+                            .Select(dhb => new DepartmanBinaDto
+                            {
+                                DepartmanId = dhb.DepartmanId,
+                                DepartmanAdi = dhb.Departman != null ? dhb.Departman.DepartmanAdi : string.Empty,
+                                AnaBina = dhb.AnaBina
+                            }).ToList()
+                        : new List<DepartmanBinaDto>()))
                 .ForMember(dest => dest.PersonelSayisi,
                     opt => opt.MapFrom(src => src.Personeller != null
                         ? src.Personeller.Count(p => !p.SilindiMi && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif)
                         : 0))
                 .ForMember(dest => dest.BankoSayisi,
-                    opt => opt.MapFrom(src => src.Bankolar != null
-                        ? src.Bankolar.Count(b => !b.SilindiMi && b.Aktiflik == Aktiflik.Aktif)
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinalari != null
+                        ? src.DepartmanHizmetBinalari.SelectMany(dhb => dhb.Bankolar ?? new List<Banko>()).Count(b => !b.SilindiMi && b.Aktiflik == Aktiflik.Aktif)
                         : 0))
                 .ForMember(dest => dest.TvSayisi,
-                    opt => opt.MapFrom(src => src.Tvler != null
-                        ? src.Tvler.Count(t => !t.SilindiMi && t.Aktiflik == Aktiflik.Aktif)
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinalari != null
+                        ? src.DepartmanHizmetBinalari.SelectMany(dhb => dhb.Tvler ?? new List<Tv>()).Count(t => !t.SilindiMi && t.Aktiflik == Aktiflik.Aktif)
                         : 0));
 
             // ═══════════════════════════════════════════════════════
@@ -45,14 +54,23 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
                     opt => opt.MapFrom(src => src.HizmetBinasiId))
                 .ForMember(dest => dest.HizmetBinasiAdi,
                     opt => opt.MapFrom(src => src.HizmetBinasiAdi))
+                .ForMember(dest => dest.LegacyKod,
+                    opt => opt.MapFrom(src => src.LegacyKod))
                 .ForMember(dest => dest.Adres,
-                    opt => opt.MapFrom(src => src.Adres)) // ✅ EKLEME
+                    opt => opt.MapFrom(src => src.Adres))
                 .ForMember(dest => dest.Aktiflik,
                     opt => opt.MapFrom(src => src.Aktiflik))
-                .ForMember(dest => dest.DepartmanId,
-                    opt => opt.MapFrom(src => src.DepartmanId))
-                .ForMember(dest => dest.DepartmanAdi,
-                    opt => opt.MapFrom(src => src.Departman != null ? src.Departman.DepartmanAdi : string.Empty))
+                .ForMember(dest => dest.Departmanlar,
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinalari != null
+                        ? src.DepartmanHizmetBinalari
+                            .Where(dhb => !dhb.SilindiMi)
+                            .Select(dhb => new DepartmanBinaDto
+                            {
+                                DepartmanId = dhb.DepartmanId,
+                                DepartmanAdi = dhb.Departman != null ? dhb.Departman.DepartmanAdi : string.Empty,
+                                AnaBina = dhb.AnaBina
+                            }).ToList()
+                        : new List<DepartmanBinaDto>()))
                 .ForMember(dest => dest.EklenmeTarihi,
                     opt => opt.MapFrom(src => src.EklenmeTarihi))
                 .ForMember(dest => dest.DuzenlenmeTarihi,
@@ -64,23 +82,31 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
                 .ForMember(dest => dest.AktifPersonelSayisi,
                     opt => opt.MapFrom(src => src.Personeller != null
                         ? src.Personeller.Count(p => p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif)
-                        : 0)) // ✅ EKLEME
+                        : 0)) // 
                 .ForMember(dest => dest.ToplamBankoSayisi,
-                    opt => opt.MapFrom(src => src.Bankolar != null ? src.Bankolar.Count : 0))
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinalari != null
+                        ? src.DepartmanHizmetBinalari.SelectMany(dhb => dhb.Bankolar ?? new List<Banko>()).Count()
+                        : 0))
                 .ForMember(dest => dest.AktifBankoSayisi,
-                    opt => opt.MapFrom(src => src.Bankolar != null
-                        ? src.Bankolar.Count(b => b.Aktiflik == Aktiflik.Aktif)
-                        : 0)) // ✅ EKLEME
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinalari != null
+                        ? src.DepartmanHizmetBinalari.SelectMany(dhb => dhb.Bankolar ?? new List<Banko>()).Count(b => b.Aktiflik == Aktiflik.Aktif)
+                        : 0))
                 .ForMember(dest => dest.ToplamTvSayisi,
-                    opt => opt.MapFrom(src => src.Tvler != null ? src.Tvler.Count : 0))
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinalari != null
+                        ? src.DepartmanHizmetBinalari.SelectMany(dhb => dhb.Tvler ?? new List<Tv>()).Count()
+                        : 0))
 
                 // İlişkili veriler
                 .ForMember(dest => dest.Personeller,
                     opt => opt.MapFrom(src => src.Personeller ?? new List<Personel>()))
                 .ForMember(dest => dest.Bankolar,
-                    opt => opt.MapFrom(src => src.Bankolar ?? new List<Banko>()))
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinalari != null
+                        ? src.DepartmanHizmetBinalari.SelectMany(dhb => dhb.Bankolar ?? new List<Banko>()).ToList()
+                        : new List<Banko>()))
                 .ForMember(dest => dest.Tvler,
-                    opt => opt.MapFrom(src => src.Tvler ?? new List<Tv>()))
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinalari != null
+                        ? src.DepartmanHizmetBinalari.SelectMany(dhb => dhb.Tvler ?? new List<Tv>()).ToList()
+                        : new List<Tv>()))
 
                 // Personel durum istatistikleri
                 .ForMember(dest => dest.PersonelDurumIstatistikleri,
@@ -110,9 +136,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
                 .ForMember(dest => dest.Aktiflik,
                     opt => opt.MapFrom(src => src.Aktiflik))
                 .ForMember(dest => dest.HizmetBinasiId,
-                    opt => opt.MapFrom(src => src.HizmetBinasiId))
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinasi != null ? src.DepartmanHizmetBinasi.HizmetBinasiId : 0))
                 .ForMember(dest => dest.HizmetBinasiAdi,
-                    opt => opt.MapFrom(src => src.HizmetBinasi != null ? src.HizmetBinasi.HizmetBinasiAdi : null))
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinasi != null && src.DepartmanHizmetBinasi.HizmetBinasi != null ? src.DepartmanHizmetBinasi.HizmetBinasi.HizmetBinasiAdi : null))
                 .ForMember(dest => dest.BankoSayisi,
                     opt => opt.MapFrom(src => src.TvBankolar != null
                         ? src.TvBankolar.Count(tb => tb.Aktiflik == Aktiflik.Aktif)
@@ -134,12 +160,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
 
             CreateMap<HizmetBinasiCreateRequestDto, HizmetBinasi>()
                 .ForMember(dest => dest.HizmetBinasiId, opt => opt.Ignore())
+                .ForMember(dest => dest.LegacyKod, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.Ignore())
-                .ForMember(dest => dest.Departman, opt => opt.Ignore())
+                .ForMember(dest => dest.DepartmanHizmetBinalari, opt => opt.Ignore())
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore())
-                .ForMember(dest => dest.Bankolar, opt => opt.Ignore())
-                .ForMember(dest => dest.Tvler, opt => opt.Ignore())
+                .ForMember(dest => dest.Devices, opt => opt.Ignore())
+                .ForMember(dest => dest.SpecialCards, opt => opt.Ignore())
                 .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
                 .ForMember(dest => dest.SilinmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.SilenKullanici, opt => opt.Ignore());
@@ -150,12 +177,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
 
             CreateMap<HizmetBinasiUpdateRequestDto, HizmetBinasi>()
                 .ForMember(dest => dest.HizmetBinasiId, opt => opt.Ignore())
+                .ForMember(dest => dest.LegacyKod, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.Ignore())
-                .ForMember(dest => dest.Departman, opt => opt.Ignore())
+                .ForMember(dest => dest.DepartmanHizmetBinalari, opt => opt.Ignore())
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore())
-                .ForMember(dest => dest.Bankolar, opt => opt.Ignore())
-                .ForMember(dest => dest.Tvler, opt => opt.Ignore())
+                .ForMember(dest => dest.Devices, opt => opt.Ignore())
+                .ForMember(dest => dest.SpecialCards, opt => opt.Ignore())
                 .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
                 .ForMember(dest => dest.SilinmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.SilenKullanici, opt => opt.Ignore());
@@ -165,13 +193,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
             // ═══════════════════════════════════════════════════════
 
             CreateMap<HizmetBinasiResponseDto, HizmetBinasi>()
-                .ForMember(dest => dest.Departman, opt => opt.Ignore())
+                .ForMember(dest => dest.DepartmanHizmetBinalari, opt => opt.Ignore())
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore())
-                .ForMember(dest => dest.Bankolar, opt => opt.Ignore())
-                .ForMember(dest => dest.Tvler, opt => opt.Ignore())
+                .ForMember(dest => dest.Devices, opt => opt.Ignore())
+                .ForMember(dest => dest.SpecialCards, opt => opt.Ignore())
                 .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
                 .ForMember(dest => dest.SilinmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.SilenKullanici, opt => opt.Ignore());
+
+            // ═══════════════════════════════════════════════════════
+            // REVERSE MAPPING (Entity -> Update Request DTO)
+            // Field permission kontrolü için gerekli
+            // ═══════════════════════════════════════════════════════
+
+            CreateMap<HizmetBinasi, HizmetBinasiUpdateRequestDto>();
         }
     }
 }

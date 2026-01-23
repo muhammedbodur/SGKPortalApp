@@ -34,8 +34,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.ZKTeco
                 .ForMember(dest => dest.HizmetBinasiAdi,
                     opt => opt.MapFrom(src => src.HizmetBinasi != null ? src.HizmetBinasi.HizmetBinasiAdi : null))
                 .ForMember(dest => dest.DepartmanAdi,
-                    opt => opt.MapFrom(src => src.HizmetBinasi != null && src.HizmetBinasi.Departman != null 
-                        ? src.HizmetBinasi.Departman.DepartmanAdi 
+                    opt => opt.MapFrom(src => src.HizmetBinasi != null && src.HizmetBinasi.DepartmanHizmetBinalari != null 
+                        ? src.HizmetBinasi.DepartmanHizmetBinalari.Where(dhb => !dhb.SilindiMi && dhb.Departman != null).Select(dhb => dhb.Departman!.DepartmanAdi).FirstOrDefault() 
                         : null))
                 .ForMember(dest => dest.LastSyncTime,
                     opt => opt.MapFrom(src => src.LastSyncTime))

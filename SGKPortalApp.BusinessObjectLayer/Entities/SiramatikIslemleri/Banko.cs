@@ -13,11 +13,15 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         [Key]
         public int BankoId { get; set; }
 
+        /// <summary>
+        /// Departman-Bina kombinasyonu (Junction table referansı)
+        /// Aynı binada farklı departmanların farklı bankoları olabilir
+        /// </summary>
         [Required]
-        public int HizmetBinasiId { get; set; }
-        [ForeignKey(nameof(HizmetBinasiId))]
+        public int DepartmanHizmetBinasiId { get; set; }
+        [ForeignKey(nameof(DepartmanHizmetBinasiId))]
         [InverseProperty("Bankolar")]
-        public required HizmetBinasi HizmetBinasi { get; set; }
+        public required DepartmanHizmetBinasi DepartmanHizmetBinasi { get; set; }
 
         [Required]
         [Range(1, 999)]

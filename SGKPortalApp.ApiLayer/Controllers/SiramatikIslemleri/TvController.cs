@@ -38,10 +38,10 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
             return result.Success ? Ok(result) : NotFound(result);
         }
 
-        [HttpGet("byhizmetbinasi/{hizmetBinasiId:int}")]
-        public async Task<IActionResult> GetByHizmetBinasi(int hizmetBinasiId)
+        [HttpGet("departman-hizmet-binasi/{dhbId:int}")]
+        public async Task<IActionResult> GetByDepartmanHizmetBinasi(int dhbId)
         {
-            var result = await _tvService.GetByHizmetBinasiAsync(hizmetBinasiId);
+            var result = await _tvService.GetByDepartmanHizmetBinasiAsync(dhbId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
@@ -66,10 +66,10 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        [HttpGet("dropdown/byhizmetbinasi/{hizmetBinasiId:int}")]
-        public async Task<IActionResult> GetByHizmetBinasiDropdown(int hizmetBinasiId)
+        [HttpGet("dropdown/departman-hizmet-binasi/{dhbId:int}")]
+        public async Task<IActionResult> GetByDepartmanHizmetBinasiDropdown(int dhbId)
         {
-            var result = await _tvService.GetByHizmetBinasiDropdownAsync(hizmetBinasiId);
+            var result = await _tvService.GetByDepartmanHizmetBinasiDropdownAsync(dhbId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 

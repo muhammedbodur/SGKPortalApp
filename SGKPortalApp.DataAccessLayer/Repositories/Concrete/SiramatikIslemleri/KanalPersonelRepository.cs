@@ -37,14 +37,15 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .ToListAsync();
         }
 
-        // Hizmet binası bazında atamalari listeler
-        public async Task<IEnumerable<KanalPersonel>> GetByHizmetBinasiIdAsync(int hizmetBinasiId)
+        // Departman-Hizmet binası bazında atamalari listeler
+        public async Task<IEnumerable<KanalPersonel>> GetByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId)
         {
             return await _dbSet
                 .AsNoTracking()
                 .Include(kp => kp.Personel)
                 .Include(kp => kp.KanalAltIslem)
-                .Where(kp => kp.Personel != null && kp.Personel.HizmetBinasiId == hizmetBinasiId)
+                    .ThenInclude(kai => kai.DepartmanHizmetBinasi)
+                .Where(kp => kp.KanalAltIslem != null && kp.KanalAltIslem.DepartmanHizmetBinasiId == departmanHizmetBinasiId)
                 .ToListAsync();
         }
 

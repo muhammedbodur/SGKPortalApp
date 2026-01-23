@@ -15,6 +15,9 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
         public DateTime SiraAlisZamani { get; set; }
         public DateTime? IslemBaslamaZamani { get; set; }
         public string? PersonelAdSoyad { get; set; }
+        public int DepartmanHizmetBinasiId { get; set; }
+        public int DepartmanId { get; set; }
+        public string DepartmanAdi { get; set; } = string.Empty;
         public int HizmetBinasiId { get; set; }
         public string HizmetBinasiAdi { get; set; } = string.Empty;
         public int? BankoId { get; set; }

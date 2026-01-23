@@ -34,6 +34,12 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.SiramatikIslemleri
 
             builder.HasQueryFilter(kai => !kai.SilindiMi);
 
+            builder.HasOne(kai => kai.DepartmanHizmetBinasi)
+                .WithMany(dhb => dhb.KanalAltIslemleri)
+                .HasForeignKey(kai => kai.DepartmanHizmetBinasiId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_SIR_KanalAltIslemleri_CMN_DepartmanHizmetBinalari");
+
             builder.HasMany(kai => kai.KanalPersonelleri)
                 .WithOne(kp => kp.KanalAltIslem)
                 .HasForeignKey(kp => kp.KanalAltIslemId)

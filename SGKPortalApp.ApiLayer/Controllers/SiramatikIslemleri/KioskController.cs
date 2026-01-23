@@ -47,10 +47,10 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        [HttpGet("bina/{binaId:int}")]
-        public async Task<IActionResult> GetByHizmetBinasi(int binaId)
+        [HttpGet("departman-hizmet-binasi/{dhbId:int}")]
+        public async Task<IActionResult> GetByDepartmanHizmetBinasi(int dhbId)
         {
-            var result = await _kioskService.GetByHizmetBinasiAsync(binaId);
+            var result = await _kioskService.GetByDepartmanHizmetBinasiAsync(dhbId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 

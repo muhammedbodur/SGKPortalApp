@@ -15,11 +15,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
 
             CreateMap<Kiosk, KioskResponseDto>()
                 .ForMember(dest => dest.HizmetBinasiAdi,
-                    opt => opt.MapFrom(src => src.HizmetBinasi != null ? src.HizmetBinasi.HizmetBinasiAdi : null))
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinasi != null && src.DepartmanHizmetBinasi.HizmetBinasi != null ? src.DepartmanHizmetBinasi.HizmetBinasi.HizmetBinasiAdi : null))
                 .ForMember(dest => dest.DepartmanId,
-                    opt => opt.MapFrom(src => src.HizmetBinasi != null ? (int?)src.HizmetBinasi.DepartmanId : null))
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinasi != null ? src.DepartmanHizmetBinasi.DepartmanId : (int?)null))
                 .ForMember(dest => dest.DepartmanAdi,
-                    opt => opt.MapFrom(src => src.HizmetBinasi != null && src.HizmetBinasi.Departman != null ? src.HizmetBinasi.Departman.DepartmanAdi : null))
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinasi != null && src.DepartmanHizmetBinasi.Departman != null ? src.DepartmanHizmetBinasi.Departman.DepartmanAdi : null))
                 .ForMember(dest => dest.AtananKioskMenuId,
                     opt => opt.MapFrom(src => src.MenuAtamalari != null && src.MenuAtamalari.Any(ma => ma.Aktiflik == Aktiflik.Aktif) 
                         ? src.MenuAtamalari.First(ma => ma.Aktiflik == Aktiflik.Aktif).KioskMenuId 
@@ -35,7 +35,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
 
             CreateMap<KioskMenuAtama, KioskMenuAtamaResponseDto>()
                 .ForMember(dest => dest.KioskAdi, opt => opt.MapFrom(src => src.Kiosk != null ? src.Kiosk.KioskAdi : null))
-                .ForMember(dest => dest.HizmetBinasiAdi, opt => opt.MapFrom(src => src.Kiosk != null && src.Kiosk.HizmetBinasi != null ? src.Kiosk.HizmetBinasi.HizmetBinasiAdi : null))
+                .ForMember(dest => dest.HizmetBinasiAdi, opt => opt.MapFrom(src => src.Kiosk != null && src.Kiosk.DepartmanHizmetBinasi != null && src.Kiosk.DepartmanHizmetBinasi.HizmetBinasi != null ? src.Kiosk.DepartmanHizmetBinasi.HizmetBinasi.HizmetBinasiAdi : null))
                 .ForMember(dest => dest.KioskMenuAdi, opt => opt.MapFrom(src => src.KioskMenu != null ? src.KioskMenu.MenuAdi : null));
 
             CreateMap<Kiosk, KioskSummaryDto>();

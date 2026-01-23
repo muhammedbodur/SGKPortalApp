@@ -18,10 +18,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PdksIslemleri
 
         public override async Task<IEnumerable<Device>> GetAllAsync()
         {
-            // HizmetBinasi ve Departman navigation property'lerini yükle
+            // HizmetBinasi ve Departmanlar navigation property'lerini yükle (many-to-many)
             return await _context.Devices
                 .Include(d => d.HizmetBinasi)
-                    .ThenInclude(hb => hb!.Departman)
+                    .ThenInclude(hb => hb!.DepartmanHizmetBinalari.Where(dhb => !dhb.SilindiMi))
+                        .ThenInclude(dhb => dhb.Departman)
                 .ToListAsync();
         }
 
@@ -29,7 +30,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PdksIslemleri
         {
             return await _context.Devices
                 .Include(d => d.HizmetBinasi)
-                    .ThenInclude(hb => hb!.Departman)
+                    .ThenInclude(hb => hb!.DepartmanHizmetBinalari.Where(dhb => !dhb.SilindiMi))
+                        .ThenInclude(dhb => dhb.Departman)
                 .FirstOrDefaultAsync(d => d.IpAddress == ipAddress);
         }
 
@@ -44,7 +46,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PdksIslemleri
         {
             return await _context.Devices
                 .Include(d => d.HizmetBinasi)
-                    .ThenInclude(hb => hb!.Departman)
+                    .ThenInclude(hb => hb!.DepartmanHizmetBinalari.Where(dhb => !dhb.SilindiMi))
+                        .ThenInclude(dhb => dhb.Departman)
                 .Where(d => !d.SilindiMi)
                 .OrderBy(d => d.DeviceName)
                 .ToListAsync();
@@ -54,7 +57,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PdksIslemleri
         {
             return await _context.Devices
                 .Include(d => d.HizmetBinasi)
-                    .ThenInclude(hb => hb!.Departman)
+                    .ThenInclude(hb => hb!.DepartmanHizmetBinalari.Where(dhb => !dhb.SilindiMi))
+                        .ThenInclude(dhb => dhb.Departman)
                 .FirstOrDefaultAsync(d => d.DeviceId == id && !d.SilindiMi);
         }
     }

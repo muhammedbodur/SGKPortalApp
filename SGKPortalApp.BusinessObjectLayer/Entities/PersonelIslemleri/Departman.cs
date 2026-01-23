@@ -24,7 +24,10 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         [InverseProperty("Departman")]
         public ICollection<Personel>? Personeller { get; set; } = new List<Personel>();
 
+        /// <summary>
+        /// Many-to-many ilişki: Bir departman birden fazla binada olabilir
+        /// </summary>
         [InverseProperty("Departman")]
-        public ICollection<HizmetBinasi>? HizmetBinalari { get; set; } = new List<HizmetBinasi>();
+        public ICollection<DepartmanHizmetBinasi> DepartmanHizmetBinalari { get; set; } = new List<DepartmanHizmetBinasi>();
     }
 }

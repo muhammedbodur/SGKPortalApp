@@ -8,17 +8,17 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
 {
     public interface IBankoRepository : IGenericRepository<Banko>
     {
-        // Banko numarası ve hizmet binasıyla bankoyu getirir
-        Task<Banko?> GetByBankoNoAsync(int bankoNo, int hizmetBinasiId);
+        // Banko numarası ve departman-hizmet binası kombinasyonuyla bankoyu getirir
+        Task<Banko?> GetByBankoNoAsync(int bankoNo, int departmanHizmetBinasiId);
 
-        // Hizmet binasındaki bankoları listeler
-        Task<IEnumerable<Banko>> GetByHizmetBinasiAsync(int hizmetBinasiId);
+        // Departman-hizmet binasındaki bankoları listeler
+        Task<IEnumerable<Banko>> GetByDepartmanHizmetBinasiAsync(int departmanHizmetBinasiId);
 
-        // Bankoyu hizmet binası ile getirir
-        Task<Banko?> GetWithHizmetBinasiAsync(int bankoId);
+        // Bankoyu departman-hizmet binası ile getirir
+        Task<Banko?> GetWithDepartmanHizmetBinasiAsync(int bankoId);
 
-        // Tüm bankoları hizmet binası ile listeler
-        Task<IEnumerable<Banko>> GetAllWithHizmetBinasiAsync();
+        // Tüm bankoları departman-hizmet binası ile listeler
+        Task<IEnumerable<Banko>> GetAllWithDepartmanHizmetBinasiAsync();
 
         // Kullanıcı atanmış bankoları listeler
         Task<IEnumerable<Banko>> GetWithKullaniciAsync();
@@ -35,11 +35,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
         // Dropdown için bankoları listeler
         Task<IEnumerable<(int Id, string Ad)>> GetDropdownAsync();
 
-        // Hizmet binası için dropdown bankoları listeler
-        Task<IEnumerable<(int Id, string Ad)>> GetByHizmetBinasiDropdownAsync(int hizmetBinasiId);
+        // Departman-hizmet binası için dropdown bankoları listeler
+        Task<IEnumerable<(int Id, string Ad)>> GetByDepartmanHizmetBinasiDropdownAsync(int departmanHizmetBinasiId);
 
-        // Hizmet binasındaki aktif banko sayısını getirir
-        Task<int> GetActiveBankoCountAsync(int hizmetBinasiId);
+        // Departman-hizmet binasındaki aktif banko sayısını getirir
+        Task<int> GetActiveBankoCountAsync(int departmanHizmetBinasiId);
 
         // Banko tipine göre bankoları listeler
         Task<IEnumerable<Banko>> GetByBankoTipiAsync(BankoTipi bankoTipi);
@@ -48,12 +48,12 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
         Task<IEnumerable<Banko>> GetByKatTipiAsync(KatTipi katTipi);
 
         // Boş bankoları listeler (personel atanmamış)
-        Task<IEnumerable<Banko>> GetAvailableBankosAsync(int hizmetBinasiId);
+        Task<IEnumerable<Banko>> GetAvailableBankosAsync(int departmanHizmetBinasiId);
 
         // Bankoyu atanmış personel ile getirir
         Task<Banko?> GetWithPersonelAsync(int bankoId);
 
-        // Bina bazlı kat gruplu bankoları getirir
-        Task<Dictionary<KatTipi, List<Banko>>> GetGroupedByKatAsync(int hizmetBinasiId);
+        // Departman-hizmet binası bazlı kat gruplu bankoları getirir
+        Task<Dictionary<KatTipi, List<Banko>>> GetGroupedByKatAsync(int departmanHizmetBinasiId);
     }
 }

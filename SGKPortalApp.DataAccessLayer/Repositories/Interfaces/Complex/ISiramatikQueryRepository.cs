@@ -6,26 +6,26 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex
     {
         // Kanal Alt İşlem Sorguları
         Task<List<KanalAltIslemResponseDto>> GetAllKanalAltIslemlerAsync();
-        Task<List<KanalAltIslemResponseDto>> GetKanalAltIslemlerByHizmetBinasiIdAsync(int hizmetBinasiId);
+        Task<List<KanalAltIslemResponseDto>> GetKanalAltIslemlerByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId);
         Task<KanalAltIslemResponseDto?> GetKanalAltIslemByIdWithDetailsAsync(int kanalAltIslemId);
         Task<List<KanalAltIslemResponseDto>> GetKanalAltIslemlerByKanalIslemIdAsync(int kanalIslemId);
         
         // Kanal İşlem Sorguları
-        Task<List<KanalIslemResponseDto>> GetKanalIslemlerByHizmetBinasiIdAsync(int hizmetBinasiId);
+        Task<List<KanalIslemResponseDto>> GetKanalIslemlerByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId);
         Task<KanalIslemResponseDto?> GetKanalIslemByIdWithDetailsAsync(int kanalIslemId);
         
         // Kanal Personel Sorguları
-        Task<List<KanalPersonelResponseDto>> GetKanalPersonellerByHizmetBinasiIdAsync(int hizmetBinasiId);
+        Task<List<KanalPersonelResponseDto>> GetKanalPersonellerByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId);
         Task<List<KanalPersonelResponseDto>> GetKanalPersonellerByKanalAltIslemIdAsync(int kanalAltIslemId);
         
         // İstatistik ve Dashboard Sorguları
-        Task<Dictionary<int, int>> GetKanalAltIslemPersonelSayilariAsync(int hizmetBinasiId);
-        Task<List<KanalAltIslemResponseDto>> GetEslestirmeYapilmamisKanalAltIslemlerAsync(int hizmetBinasiId);
+        Task<Dictionary<int, int>> GetKanalAltIslemPersonelSayilariAsync(int departmanHizmetBinasiId);
+        Task<List<KanalAltIslemResponseDto>> GetEslestirmeYapilmamisKanalAltIslemlerAsync(int departmanHizmetBinasiId);
 
-        Task<List<KanalPersonelResponseDto>> GetPersonelKanalAtamalarByHizmetBinasiIdAsync(int hizmetBinasiId);
+        Task<List<KanalPersonelResponseDto>> GetPersonelKanalAtamalarByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId);
         
         // Personel Atama Matrix Sorgusu (Yeni Yapı)
-        Task<List<PersonelAtamaMatrixDto>> GetPersonelAtamaMatrixByHizmetBinasiIdAsync(int hizmetBinasiId);
+        Task<List<PersonelAtamaMatrixDto>> GetPersonelAtamaMatrixByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId);
 
         // Banko Sıra Çağırma Paneli
         Task<List<SiraCagirmaResponseDto>> GetBankoPanelBekleyenSiralarAsync(string tcKimlikNo);
@@ -50,15 +50,15 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex
         Task<List<string>> GetSiraEtkilenenPersonellerAsync(int siraId);
 
         /// <summary>
-        /// Belirli bir HizmetBinasi ve KanalAltIslem için banko modunda olan personellerin TC listesini döner.
+        /// Belirli bir DepartmanHizmetBinasi ve KanalAltIslem için banko modunda olan personellerin TC listesini döner.
         /// </summary>
-        Task<List<string>> GetBankoModundakiPersonellerAsync(int hizmetBinasiId, int kanalAltIslemId);
+        Task<List<string>> GetBankoModundakiPersonellerAsync(int departmanHizmetBinasiId, int kanalAltIslemId);
 
         /// <summary>
-        /// Belirli bir HizmetBinasi ve KanalAltIslem için banko modunda olan ve en az Yrd.Uzman yetkisine sahip personellerin TC listesini döner.
+        /// Belirli bir DepartmanHizmetBinasi ve KanalAltIslem için banko modunda olan ve en az Yrd.Uzman yetkisine sahip personellerin TC listesini döner.
         /// Kiosk sıra alma için kullanılır - sadece işlem yapabilecek personel varsa sıra alınabilir.
         /// </summary>
-        Task<List<string>> GetBankoModundakiYetkiliPersonellerAsync(int hizmetBinasiId, int kanalAltIslemId);
+        Task<List<string>> GetBankoModundakiYetkiliPersonellerAsync(int departmanHizmetBinasiId, int kanalAltIslemId);
 
         // Kiosk Menü Sorguları
         /// <summary>

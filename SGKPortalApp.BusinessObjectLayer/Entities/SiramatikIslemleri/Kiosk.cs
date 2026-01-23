@@ -11,10 +11,14 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri
         [Key]
         public int KioskId { get; set; }
 
+        /// <summary>
+        /// Departman-Bina kombinasyonu (Junction table referansı)
+        /// Aynı binada farklı departmanların farklı kiosk'ları olabilir
+        /// </summary>
         [Required]
-        public int HizmetBinasiId { get; set; }
-        [ForeignKey(nameof(HizmetBinasiId))]
-        public required HizmetBinasi HizmetBinasi { get; set; }
+        public int DepartmanHizmetBinasiId { get; set; }
+        [ForeignKey(nameof(DepartmanHizmetBinasiId))]
+        public required DepartmanHizmetBinasi DepartmanHizmetBinasi { get; set; }
 
         [Required]
         [StringLength(100)]

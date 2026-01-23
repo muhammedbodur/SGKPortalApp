@@ -18,23 +18,27 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
         [StringLength(200)]
         public required string HizmetBinasiAdi { get; set; }
 
-        public int DepartmanId { get; set; }
-        [ForeignKey(nameof(DepartmanId))]
-        [InverseProperty("HizmetBinalari")]
-        public Departman? Departman { get; set; }
+        /// <summary>
+        /// MySQL legacy sistemdeki KOD değeri (senkronizasyon için)
+        /// </summary>
+        public int? LegacyKod { get; set; }
 
         public string Adres { get; set; } = string.Empty;
 
         public Aktiflik Aktiflik { get; set; }
 
+        /// <summary>
+        /// Many-to-many ilişki: Bir binada birden fazla departman olabilir
+        /// </summary>
         [InverseProperty("HizmetBinasi")]
-        public ICollection<Banko>? Bankolar { get; set; } = new List<Banko>();
+        public ICollection<DepartmanHizmetBinasi> DepartmanHizmetBinalari { get; set; } = new List<DepartmanHizmetBinasi>();
 
-        [InverseProperty("HizmetBinasi")]
-        public ICollection<Tv>? Tvler { get; set; } = new List<Tv>();
-
+        /// <summary>
+        /// Personeller hala doğrudan HizmetBinasi'na bağlı (departman bazlı değil)
+        /// </summary>
         [InverseProperty("HizmetBinasi")]
         public ICollection<Personel>? Personeller { get; set; } = new List<Personel>();
+        
         public ICollection<Device> Devices { get; set; } = new List<Device>();
         
         [InverseProperty("HizmetBinasi")]

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.ApiLayer.Services.Hubs;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.BackgroundServiceManager;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
@@ -24,7 +25,7 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
     /// Gelen event'leri PdksHub'a broadcast eder
     /// Opsiyonel olarak veritabanına kaydeder (configuration ile kontrol)
     /// </summary>
-    public class ZKTecoRealtimeListenerService : BackgroundService
+    public class ZKTecoRealtimeListenerService : BackgroundService, IManagedBackgroundService
     {
         private readonly ILogger<ZKTecoRealtimeListenerService> _logger;
         private readonly IServiceProvider _serviceProvider;
@@ -32,6 +33,24 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
         private readonly IHubContext<PdksHub> _pdksHubContext;
         private readonly IConfiguration _configuration;
         private readonly bool _saveToDatabase;
+        private bool _isRunning;
+        private TimeSpan _interval = TimeSpan.Zero; // Sürekli çalışır
+
+        // IManagedBackgroundService properties
+        public string ServiceName => "ZKTecoRealtimeService";
+        public string DisplayName => "ZKTeco Realtime Event Dinleyici";
+        public bool IsRunning => _isRunning;
+        public bool IsPaused { get; set; }
+        public DateTime? LastRunTime { get; private set; }
+        public DateTime? NextRunTime => null; // Sürekli çalışır
+        public TimeSpan Interval
+        {
+            get => _interval;
+            set => _interval = value;
+        }
+        public string? LastError { get; private set; }
+        public int SuccessCount { get; private set; }
+        public int ErrorCount { get; private set; }
 
         public ZKTecoRealtimeListenerService(
             ILogger<ZKTecoRealtimeListenerService> logger,
@@ -51,9 +70,28 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
             _logger.LogInformation($"ZKTeco Realtime - SaveToDatabase: {_saveToDatabase}");
         }
 
+        public async Task TriggerAsync(CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("🔄 {ServiceName} manuel tetiklendi - cihaz monitoring yeniden başlatılıyor", ServiceName);
+            try
+            {
+                await InitializeDeviceMonitoringAsync();
+                LastRunTime = DateTime.Now;
+                LastError = null;
+                SuccessCount++;
+            }
+            catch (Exception ex)
+            {
+                LastError = ex.Message;
+                ErrorCount++;
+                throw;
+            }
+        }
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("ZKTeco Realtime Listener Service starting...");
+            _logger.LogInformation("🔄 {ServiceName} starting...", ServiceName);
+            _isRunning = true;
 
             try
             {
@@ -63,25 +101,36 @@ namespace SGKPortalApp.ApiLayer.Services.BackgroundServices
                 // Event handler'ı kaydet
                 _realtimeService.OnRealtimeEvent += async (sender, evt) =>
                 {
-                    await ProcessRealtimeEventAsync(evt);
+                    if (!IsPaused)
+                    {
+                        await ProcessRealtimeEventAsync(evt);
+                        SuccessCount++;
+                    }
                 };
 
                 // Veritabanından aktif cihazları al ve her birine abone ol
                 await InitializeDeviceMonitoringAsync();
+                LastRunTime = DateTime.Now;
 
-                _logger.LogInformation("ZKTeco Realtime Listener Service started successfully");
+                _logger.LogInformation("✅ {ServiceName} started successfully", ServiceName);
 
                 // Servis durdurulana kadar çalış
                 await Task.Delay(Timeout.Infinite, stoppingToken);
             }
             catch (OperationCanceledException)
             {
-                _logger.LogInformation("ZKTeco Realtime Listener Service is stopping due to cancellation");
+                _logger.LogInformation("⏹️ {ServiceName} is stopping due to cancellation", ServiceName);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "ZKTeco Realtime Listener Service failed");
+                _logger.LogError(ex, "❌ {ServiceName} failed", ServiceName);
+                LastError = ex.Message;
+                ErrorCount++;
                 throw;
+            }
+            finally
+            {
+                _isRunning = false;
             }
         }
 

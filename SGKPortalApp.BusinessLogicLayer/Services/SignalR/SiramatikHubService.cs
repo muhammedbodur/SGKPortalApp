@@ -81,13 +81,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 }
 
                 // 3. TV ekranlarına bildirim gönder
-                if (!string.IsNullOrEmpty(request.BankoNo) && request.Sira.HizmetBinasiId > 0)
+                var hizmetBinasiId = request.Sira.HizmetBinasiId;
+                if (!string.IsNullOrEmpty(request.BankoNo) && hizmetBinasiId > 0)
                 {
                     await BroadcastSiraToTvAsync(new BroadcastSiraToTvRequest
                     {
                         Sira = request.Sira,
                         BankoNo = request.BankoNo,
-                        HizmetBinasiId = request.Sira.HizmetBinasiId
+                        HizmetBinasiId = hizmetBinasiId
                     });
                 }
             }
@@ -638,8 +639,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     return;
                 }
 
-                _logger.LogInformation("🔍 Sıra bulundu. KanalAltIslemId: {KanalAltIslemId}, HizmetBinasiId: {HizmetBinasiId}",
-                    sira.KanalAltIslemId, sira.HizmetBinasiId);
+                _logger.LogInformation("🔍 Sıra bulundu. KanalAltIslemId: {KanalAltIslemId}, DepartmanHizmetBinasiId: {DepartmanHizmetBinasiId}",
+                    sira.KanalAltIslemId, sira.DepartmanHizmetBinasiId);
 
                 // Repository'den tüm satırları al (PersonelTc + ConnectionId içeren)
                 var rawData = await _siramatikQueryRepository.GetBankoPanelBekleyenSiralarBySiraIdAsync(request.SiraId);
@@ -648,8 +649,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
 
                 if (!rawData.Any())
                 {
-                    _logger.LogWarning("⚠️ SiraId: {SiraId} için etkilenen personel bulunamadı! HizmetBinasiId: {HizmetBinasiId}, KanalAltIslemId: {KanalAltIslemId}",
-                        request.SiraId, sira.HizmetBinasiId, sira.KanalAltIslemId);
+                    _logger.LogWarning("⚠️ SiraId: {SiraId} için etkilenen personel bulunamadı! DepartmanHizmetBinasiId: {DepartmanHizmetBinasiId}, KanalAltIslemId: {KanalAltIslemId}",
+                        request.SiraId, sira.DepartmanHizmetBinasiId, sira.KanalAltIslemId);
                     return;
                 }
 

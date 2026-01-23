@@ -86,32 +86,32 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         // ═══════════════════════════════════════════════════════
 
         /// <summary>
-        /// Hizmet binasına göre bankoları getirir
+        /// Departman-Hizmet binasına göre bankoları getirir
         /// </summary>
-        [HttpGet("bina/{binaId:int}")]
-        public async Task<IActionResult> GetByHizmetBinasi(int binaId)
+        [HttpGet("departman-hizmet-binasi/{dhbId:int}")]
+        public async Task<IActionResult> GetByDepartmanHizmetBinasi(int dhbId)
         {
-            var result = await _bankoService.GetByHizmetBinasiAsync(binaId);
+            var result = await _bankoService.GetByDepartmanHizmetBinasiAsync(dhbId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
         /// <summary>
-        /// Hizmet binasına göre kat gruplu bankoları getirir
+        /// Departman-Hizmet binasına göre kat gruplu bankoları getirir
         /// </summary>
-        [HttpGet("bina/{binaId:int}/grouped")]
-        public async Task<IActionResult> GetGroupedByKat(int binaId)
+        [HttpGet("departman-hizmet-binasi/{dhbId:int}/grouped")]
+        public async Task<IActionResult> GetGroupedByKat(int dhbId)
         {
-            var result = await _bankoService.GetGroupedByKatAsync(binaId);
+            var result = await _bankoService.GetGroupedByKatAsync(dhbId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
         /// <summary>
-        /// Hizmet binasındaki boş bankoları getirir
+        /// Departman-Hizmet binasındaki boş bankoları getirir
         /// </summary>
-        [HttpGet("bina/{binaId:int}/bos")]
-        public async Task<IActionResult> GetAvailableBankos(int binaId)
+        [HttpGet("departman-hizmet-binasi/{dhbId:int}/bos")]
+        public async Task<IActionResult> GetAvailableBankos(int dhbId)
         {
-            var result = await _bankoService.GetAvailableBankosAsync(binaId);
+            var result = await _bankoService.GetAvailableBankosAsync(dhbId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
