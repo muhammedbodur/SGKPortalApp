@@ -49,5 +49,11 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
 
         [InverseProperty("DepartmanHizmetBinasi")]
         public ICollection<BankoKullanici>? BankoKullanicilari { get; set; } = new List<BankoKullanici>();
+
+        /// <summary>
+        /// Bu departman-hizmet binası kombinasyonundaki personeller
+        /// </summary>
+        [InverseProperty("DepartmanHizmetBinasi")]
+        public ICollection<Personel>? Personeller { get; set; } = new List<Personel>();
     }
 }
