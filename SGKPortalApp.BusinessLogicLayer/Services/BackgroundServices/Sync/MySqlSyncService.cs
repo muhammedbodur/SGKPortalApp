@@ -130,16 +130,21 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
             var legacyBirimler = await legacyRepo.GetAllAsync(ct);
 
             // SQL Server'dan oku (UnitOfWork üzerinden)
-            var existingDepartmanlar = await unitOfWork.Repository<Departman>()
-                .GetAllAsync();
-            var departmanDict = existingDepartmanlar.ToDictionary(d => d.DepartmanId);
+            var existingDepartmanlar = await unitOfWork.Repository<Departman>().GetAllAsync();
+
+            // LegacyKod ile eşleştirme dictionary'si
+            var departmanByLegacyKod = existingDepartmanlar
+                .Where(d => d.LegacyKod.HasValue)
+                .ToDictionary(d => d.LegacyKod!.Value);
 
             int added = 0, updated = 0;
 
             foreach (var birim in legacyBirimler)
             {
-                if (departmanDict.TryGetValue(birim.Kod, out var existing))
+                // LegacyKod ile eşleştir
+                if (departmanByLegacyKod.TryGetValue(birim.Kod, out var existing))
                 {
+                    // Mevcut kayıt - güncelle
                     if (existing.DepartmanAdi != birim.BirimAd || existing.DepartmanAdiKisa != birim.KisaAd)
                     {
                         existing.DepartmanAdi = birim.BirimAd;
@@ -151,7 +156,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 }
                 else
                 {
-                    // IDENTITY_INSERT için raw SQL kullan (EF Core INSERT ifadesine Id'yi dahil etmez)
+                    // Yeni kayıt - IDENTITY_INSERT ile ekle
                     var now = DateTime.Now;
                     await unitOfWork.ExecuteSqlInterpolatedAsync(
                         $@"SET IDENTITY_INSERT [dbo].[PER_Departmanlar] ON;
@@ -177,14 +182,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
 
             var legacyServisler = await legacyRepo.GetAllAsync(ct);
             var existingServisler = await unitOfWork.Repository<Servis>().GetAllAsync();
-            var servisDict = existingServisler.ToDictionary(s => s.ServisId);
+
+            // LegacyKod ile eşleştirme dictionary'si
+            var servisByLegacyKod = existingServisler
+                .Where(s => s.LegacyKod.HasValue)
+                .ToDictionary(s => s.LegacyKod!.Value);
 
             int added = 0, updated = 0;
 
             foreach (var servis in legacyServisler)
             {
-                if (servisDict.TryGetValue(servis.ServisId, out var existing))
+                // LegacyKod ile eşleştir
+                if (servisByLegacyKod.TryGetValue(servis.ServisId, out var existing))
                 {
+                    // Mevcut kayıt - güncelle
                     if (existing.ServisAdi != servis.ServisAdi)
                     {
                         existing.ServisAdi = servis.ServisAdi;
@@ -195,7 +206,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 }
                 else
                 {
-                    // IDENTITY_INSERT için raw SQL kullan
+                    // Yeni kayıt - IDENTITY_INSERT ile ekle
                     var now = DateTime.Now;
                     await unitOfWork.ExecuteSqlInterpolatedAsync(
                         $@"SET IDENTITY_INSERT [dbo].[PER_Servisler] ON;
@@ -221,14 +232,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
 
             var legacyUnvanlar = await legacyRepo.GetAllAsync(ct);
             var existingUnvanlar = await unitOfWork.Repository<Unvan>().GetAllAsync();
-            var unvanDict = existingUnvanlar.ToDictionary(u => u.UnvanId);
+
+            // LegacyKod ile eşleştirme dictionary'si
+            var unvanByLegacyKod = existingUnvanlar
+                .Where(u => u.LegacyKod.HasValue)
+                .ToDictionary(u => u.LegacyKod!.Value);
 
             int added = 0, updated = 0;
 
             foreach (var unvan in legacyUnvanlar)
             {
-                if (unvanDict.TryGetValue(unvan.Id, out var existing))
+                // LegacyKod ile eşleştir
+                if (unvanByLegacyKod.TryGetValue(unvan.Id, out var existing))
                 {
+                    // Mevcut kayıt - güncelle
                     if (existing.UnvanAdi != unvan.Unvan)
                     {
                         existing.UnvanAdi = unvan.Unvan;
@@ -239,7 +256,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 }
                 else
                 {
-                    // IDENTITY_INSERT için raw SQL kullan
+                    // Yeni kayıt - IDENTITY_INSERT ile ekle
                     var now = DateTime.Now;
                     await unitOfWork.ExecuteSqlInterpolatedAsync(
                         $@"SET IDENTITY_INSERT [dbo].[PER_Unvanlar] ON;
