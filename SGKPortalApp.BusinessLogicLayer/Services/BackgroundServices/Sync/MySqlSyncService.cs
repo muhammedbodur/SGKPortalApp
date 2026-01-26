@@ -556,7 +556,42 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 await unitOfWork.Repository<DepartmanHizmetBinasi>().AddAsync(departmanHizmetBinasi);
                 await unitOfWork.SaveChangesAsync();
             }
-            
+
+            // AtanmaNedeniId validasyonu
+            var requestedAtanmaNedeniId = k.Atanma ?? 1;
+            var allAtanmaNedenleri = await unitOfWork.Repository<AtanmaNedenleri>().GetAllAsync();
+            var atanmaNedeniExists = allAtanmaNedenleri.Any(a => a.AtanmaNedeniId == requestedAtanmaNedeniId);
+
+            int validAtanmaNedeniId;
+            if (atanmaNedeniExists)
+            {
+                validAtanmaNedeniId = requestedAtanmaNedeniId;
+            }
+            else
+            {
+                // İlk mevcut AtanmaNedeni'ni kullan veya yoksa oluştur
+                var firstAtanmaNedeni = allAtanmaNedenleri.FirstOrDefault();
+                if (firstAtanmaNedeni != null)
+                {
+                    validAtanmaNedeniId = firstAtanmaNedeni.AtanmaNedeniId;
+                    _logger.LogWarning("AtanmaNedeniId {RequestedId} bulunamadı, {UsedId} kullanılıyor", requestedAtanmaNedeniId, validAtanmaNedeniId);
+                }
+                else
+                {
+                    // Tablo boş - varsayılan kayıt oluştur
+                    var newAtanmaNedeni = new AtanmaNedenleri
+                    {
+                        AtanmaNedeni = "Belirtilmemiş",
+                        EklenmeTarihi = DateTime.Now,
+                        DuzenlenmeTarihi = DateTime.Now
+                    };
+                    await unitOfWork.Repository<AtanmaNedenleri>().AddAsync(newAtanmaNedeni);
+                    await unitOfWork.SaveChangesAsync();
+                    validAtanmaNedeniId = newAtanmaNedeni.AtanmaNedeniId;
+                    _logger.LogInformation("Varsayılan AtanmaNedeni oluşturuldu: {Id}", validAtanmaNedeniId);
+                }
+            }
+
             return new Personel
             {
                 TcKimlikNo = tcKimlikNo,
@@ -572,7 +607,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 DepartmanId = departmanId,
                 ServisId = servisId,
                 UnvanId = unvanId,
-                AtanmaNedeniId = k.Atanma ?? 1,
+                AtanmaNedeniId = validAtanmaNedeniId,
                 DepartmanHizmetBinasiId = departmanHizmetBinasi.DepartmanHizmetBinasiId,
                 DepartmanHizmetBinasi = null!, // required property - FK yeterli, EF Core ilişkiyi yönetir
                 IlId = ilId,
