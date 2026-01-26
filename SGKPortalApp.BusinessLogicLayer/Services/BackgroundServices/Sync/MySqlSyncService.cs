@@ -562,7 +562,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 UnvanId = unvanId,
                 AtanmaNedeniId = k.Atanma ?? 1,
                 DepartmanHizmetBinasiId = departmanHizmetBinasi.DepartmanHizmetBinasiId,
-                // Navigation property atanmaz - sadece FK yeterli (tracking conflict önlenir)
+                DepartmanHizmetBinasi = null!, // required property - FK yeterli, EF Core ilişkiyi yönetir
                 IlId = ilId,
                 IlceId = ilceId,
                 SendikaId = k.Sendika > 0 ? k.Sendika : null,
