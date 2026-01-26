@@ -24,7 +24,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             return await (
                 from p in _context.Set<Personel>().AsNoTracking()
                 join s in _context.Set<Servis>().AsNoTracking() on p.ServisId equals s.ServisId
-                where p.HizmetBinasiId == hizmetBinasiId
+                where p.DepartmanHizmetBinasi.HizmetBinasiId == hizmetBinasiId
                       && !p.SilindiMi
                       && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif
                       && !s.SilindiMi

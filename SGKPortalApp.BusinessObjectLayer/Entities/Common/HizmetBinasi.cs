@@ -33,12 +33,9 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
         [InverseProperty("HizmetBinasi")]
         public ICollection<DepartmanHizmetBinasi> DepartmanHizmetBinalari { get; set; } = new List<DepartmanHizmetBinasi>();
 
-        /// <summary>
-        /// Personeller hala doğrudan HizmetBinasi'na bağlı (departman bazlı değil)
-        /// </summary>
-        [InverseProperty("HizmetBinasi")]
-        public ICollection<Personel>? Personeller { get; set; } = new List<Personel>();
-        
+        // Not: Personeller artık doğrudan HizmetBinasi'na bağlı değil.
+        // Personel -> DepartmanHizmetBinasi -> HizmetBinasi şeklinde dolaylı ilişki var.
+
         public ICollection<Device> Devices { get; set; } = new List<Device>();
         
         [InverseProperty("HizmetBinasi")]
