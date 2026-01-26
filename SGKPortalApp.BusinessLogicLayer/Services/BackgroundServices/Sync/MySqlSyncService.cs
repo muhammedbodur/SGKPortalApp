@@ -160,6 +160,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                         DepartmanId = birim.Kod,
                         DepartmanAdi = birim.BirimAd,
                         DepartmanAdiKisa = birim.KisaAd ?? birim.BirimAd,
+                        LegacyKod = birim.Kod,
                         Aktiflik = Aktiflik.Aktif,
                         EkleyenKullanici = "SYNC",
                         EklenmeTarihi = DateTime.Now,
@@ -211,6 +212,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                     {
                         ServisId = servis.ServisId,
                         ServisAdi = servis.ServisAdi,
+                        LegacyKod = servis.ServisId,
                         Aktiflik = Aktiflik.Aktif,
                         EkleyenKullanici = "SYNC",
                         EklenmeTarihi = DateTime.Now,
@@ -262,6 +264,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                     {
                         UnvanId = unvan.Id,
                         UnvanAdi = unvan.Unvan,
+                        LegacyKod = unvan.Id,
                         Aktiflik = Aktiflik.Aktif,
                         EkleyenKullanici = "SYNC",
                         EklenmeTarihi = DateTime.Now,
@@ -288,13 +291,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
 
             var legacyBinalar = await legacyRepo.GetAllAsync(ct);
             var existingBinalar = await unitOfWork.Repository<HizmetBinasi>().GetAllAsync();
-            var binaDict = existingBinalar.Where(h => h.LegacyKod.HasValue).ToDictionary(h => h.LegacyKod!.Value);
+            var binaByLegacyKod = existingBinalar.Where(h => h.LegacyKod.HasValue).ToDictionary(h => h.LegacyKod!.Value);
+            var binaByAdi = existingBinalar.ToDictionary(h => h.HizmetBinasiAdi.ToUpperInvariant());
 
-            int added = 0, updated = 0;
+            int added = 0, updated = 0, skipped = 0;
 
             foreach (var bina in legacyBinalar)
             {
-                if (binaDict.TryGetValue(bina.Kod, out var existing))
+                // Önce LegacyKod ile kontrol et
+                if (binaByLegacyKod.TryGetValue(bina.Kod, out var existing))
                 {
                     // Güncelleme
                     if (existing.HizmetBinasiAdi != bina.BinaAdi)
@@ -305,10 +310,27 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                         updated++;
                     }
                 }
+                // Aynı isimde bina var mı kontrol et (unique constraint)
+                else if (binaByAdi.ContainsKey(bina.BinaAdi.ToUpperInvariant()))
+                {
+                    // Aynı isimde bina var, LegacyKod'u güncelle
+                    var existingByName = binaByAdi[bina.BinaAdi.ToUpperInvariant()];
+                    if (!existingByName.LegacyKod.HasValue)
+                    {
+                        existingByName.LegacyKod = bina.Kod;
+                        existingByName.DuzenleyenKullanici = "SYNC";
+                        existingByName.DuzenlenmeTarihi = DateTime.Now;
+                        updated++;
+                    }
+                    else
+                    {
+                        skipped++;
+                    }
+                }
                 else
                 {
                     // Yeni kayıt
-                    await unitOfWork.Repository<HizmetBinasi>().AddAsync(new HizmetBinasi
+                    var newBina = new HizmetBinasi
                     {
                         HizmetBinasiAdi = bina.BinaAdi,
                         LegacyKod = bina.Kod,
@@ -317,13 +339,19 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                         EklenmeTarihi = DateTime.Now,
                         DuzenleyenKullanici = "SYNC",
                         DuzenlenmeTarihi = DateTime.Now
-                    });
+                    };
+                    await unitOfWork.Repository<HizmetBinasi>().AddAsync(newBina);
+                    await unitOfWork.SaveChangesAsync(); // Hemen kaydet - duplicate key hatasını önle
+                    
+                    // Dictionary'ye ekle
+                    binaByLegacyKod[bina.Kod] = newBina;
+                    binaByAdi[bina.BinaAdi.ToUpperInvariant()] = newBina;
+                    
                     added++;
                 }
             }
 
-            await unitOfWork.SaveChangesAsync();
-            _logger.LogInformation("  ✅ Hizmet Binaları: {Added} eklendi, {Updated} güncellendi", added, updated);
+            _logger.LogInformation("  ✅ Hizmet Binaları: {Added} eklendi, {Updated} güncellendi, {Skipped} atlandı", added, updated, skipped);
         }
 
         private async Task SyncDepartmanHizmetBinalariAsync(ILegacyKullaniciRepository legacyRepo, IUnitOfWork unitOfWork, CancellationToken ct)
@@ -421,14 +449,26 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
             var iller = await unitOfWork.Repository<Il>().GetAllAsync();
             var ilDict = iller.ToDictionary(i => i.IlAdi.ToUpperInvariant());
             var ilceler = await unitOfWork.Repository<Ilce>().GetAllAsync();
+            
             var departmanlar = await unitOfWork.Repository<Departman>().GetAllAsync();
-            var departmanIds = departmanlar.Select(d => d.DepartmanId).ToList();
+            var departmanByLegacyKod = departmanlar
+                .Where(d => d.LegacyKod.HasValue)
+                .ToDictionary(d => d.LegacyKod!.Value, d => d.DepartmanId);
+            
             var servisler = await unitOfWork.Repository<Servis>().GetAllAsync();
-            var servisIds = servisler.Select(s => s.ServisId).ToList();
+            var servisByLegacyKod = servisler
+                .Where(s => s.LegacyKod.HasValue)
+                .ToDictionary(s => s.LegacyKod!.Value, s => s.ServisId);
+            
             var unvanlar = await unitOfWork.Repository<Unvan>().GetAllAsync();
-            var unvanIds = unvanlar.Select(u => u.UnvanId).ToList();
+            var unvanByLegacyKod = unvanlar
+                .Where(u => u.LegacyKod.HasValue)
+                .ToDictionary(u => u.LegacyKod!.Value, u => u.UnvanId);
+            
             var hizmetBinalari = await unitOfWork.Repository<HizmetBinasi>().GetAllAsync();
-            var hizmetBinasiIds = hizmetBinalari.Select(h => h.HizmetBinasiId).ToList();
+            var hizmetBinasiByLegacyKod = hizmetBinalari
+                .Where(h => h.LegacyKod.HasValue)
+                .ToDictionary(h => h.LegacyKod!.Value, h => h.HizmetBinasiId);
 
             int added = 0, updated = 0, skipped = 0;
 
@@ -441,11 +481,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                     continue;
                 }
 
-                // FK validasyonları
-                var departmanId = departmanIds.Contains(kullanici.Birim) ? kullanici.Birim : 1;
-                var hizmetBinasiId = hizmetBinasiIds.Contains(kullanici.Bina) ? kullanici.Bina : 1;
-                var servisId = int.TryParse(kullanici.Servis, out var sId) && servisIds.Contains(sId) ? sId : 1;
-                var unvanId = int.TryParse(kullanici.Unvan, out var uId) && unvanIds.Contains(uId) ? uId : 1;
+                // FK validasyonları - LegacyKod kullanarak doğru ID'leri bul
+                var departmanId = departmanByLegacyKod.TryGetValue(kullanici.Birim, out var dId) ? dId : 1;
+                var hizmetBinasiId = hizmetBinasiByLegacyKod.TryGetValue(kullanici.Bina, out var hbId) ? hbId : 1;
+                var servisId = int.TryParse(kullanici.Servis, out var sId) && servisByLegacyKod.TryGetValue(sId, out var servId) ? servId : 1;
+                var unvanId = int.TryParse(kullanici.Unvan, out var uId) && unvanByLegacyKod.TryGetValue(uId, out var unvId) ? unvId : 1;
 
                 // İl/İlçe lookup
                 var ilId = 35; // Default İzmir
