@@ -128,7 +128,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
 
             // Legacy MySQL'den oku (Repository üzerinden)
             var legacyBirimler = await legacyRepo.GetAllAsync(ct);
-            
+
             // SQL Server'dan oku (UnitOfWork üzerinden)
             var existingDepartmanlar = await unitOfWork.Repository<Departman>()
                 .GetAllAsync();
@@ -151,27 +151,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 }
                 else
                 {
-                    // IDENTITY_INSERT için özel SQL komutu
-                    await unitOfWork.ExecuteSqlRawAsync(
-                        "SET IDENTITY_INSERT PER_Departmanlar ON", ct);
-
-                    await unitOfWork.Repository<Departman>().AddAsync(new Departman
-                    {
-                        DepartmanId = birim.Kod,
-                        DepartmanAdi = birim.BirimAd,
-                        DepartmanAdiKisa = birim.KisaAd ?? birim.BirimAd,
-                        LegacyKod = birim.Kod,
-                        Aktiflik = Aktiflik.Aktif,
-                        EkleyenKullanici = "SYNC",
-                        EklenmeTarihi = DateTime.Now,
-                        DuzenleyenKullanici = "SYNC",
-                        DuzenlenmeTarihi = DateTime.Now
-                    });
-
-                    await unitOfWork.SaveChangesAsync();
-
-                    await unitOfWork.ExecuteSqlRawAsync(
-                        "SET IDENTITY_INSERT PER_Departmanlar OFF", ct);
+                    // IDENTITY_INSERT için raw SQL kullan (EF Core INSERT ifadesine Id'yi dahil etmez)
+                    var now = DateTime.Now;
+                    await unitOfWork.ExecuteSqlInterpolatedAsync(
+                        $@"SET IDENTITY_INSERT [dbo].[PER_Departmanlar] ON;
+                        INSERT INTO [dbo].[PER_Departmanlar]
+                            ([DepartmanId], [DepartmanAdi], [DepartmanAdiKisa], [LegacyKod], [Aktiflik],
+                             [EkleyenKullanici], [EklenmeTarihi], [DuzenleyenKullanici], [DuzenlenmeTarihi], [SilindiMi])
+                        VALUES
+                            ({birim.Kod}, {birim.BirimAd}, {birim.KisaAd ?? birim.BirimAd}, {birim.Kod}, {(int)Aktiflik.Aktif},
+                             {"SYNC"}, {now}, {"SYNC"}, {now}, {false});
+                        SET IDENTITY_INSERT [dbo].[PER_Departmanlar] OFF;", ct);
 
                     added++;
                 }
@@ -205,25 +195,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 }
                 else
                 {
-                    await unitOfWork.ExecuteSqlRawAsync(
-                        "SET IDENTITY_INSERT PER_Servisler ON", ct);
-
-                    await unitOfWork.Repository<Servis>().AddAsync(new Servis
-                    {
-                        ServisId = servis.ServisId,
-                        ServisAdi = servis.ServisAdi,
-                        LegacyKod = servis.ServisId,
-                        Aktiflik = Aktiflik.Aktif,
-                        EkleyenKullanici = "SYNC",
-                        EklenmeTarihi = DateTime.Now,
-                        DuzenleyenKullanici = "SYNC",
-                        DuzenlenmeTarihi = DateTime.Now
-                    });
-
-                    await unitOfWork.SaveChangesAsync();
-
-                    await unitOfWork.ExecuteSqlRawAsync(
-                        "SET IDENTITY_INSERT PER_Servisler OFF", ct);
+                    // IDENTITY_INSERT için raw SQL kullan
+                    var now = DateTime.Now;
+                    await unitOfWork.ExecuteSqlInterpolatedAsync(
+                        $@"SET IDENTITY_INSERT [dbo].[PER_Servisler] ON;
+                        INSERT INTO [dbo].[PER_Servisler]
+                            ([ServisId], [ServisAdi], [LegacyKod], [Aktiflik],
+                             [EkleyenKullanici], [EklenmeTarihi], [DuzenleyenKullanici], [DuzenlenmeTarihi], [SilindiMi])
+                        VALUES
+                            ({servis.ServisId}, {servis.ServisAdi}, {servis.ServisId}, {(int)Aktiflik.Aktif},
+                             {"SYNC"}, {now}, {"SYNC"}, {now}, {false});
+                        SET IDENTITY_INSERT [dbo].[PER_Servisler] OFF;", ct);
 
                     added++;
                 }
@@ -257,25 +239,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 }
                 else
                 {
-                    await unitOfWork.ExecuteSqlRawAsync(
-                        "SET IDENTITY_INSERT PER_Unvanlar ON", ct);
-
-                    await unitOfWork.Repository<Unvan>().AddAsync(new Unvan
-                    {
-                        UnvanId = unvan.Id,
-                        UnvanAdi = unvan.Unvan,
-                        LegacyKod = unvan.Id,
-                        Aktiflik = Aktiflik.Aktif,
-                        EkleyenKullanici = "SYNC",
-                        EklenmeTarihi = DateTime.Now,
-                        DuzenleyenKullanici = "SYNC",
-                        DuzenlenmeTarihi = DateTime.Now
-                    });
-
-                    await unitOfWork.SaveChangesAsync();
-
-                    await unitOfWork.ExecuteSqlRawAsync(
-                        "SET IDENTITY_INSERT PER_Unvanlar OFF", ct);
+                    // IDENTITY_INSERT için raw SQL kullan
+                    var now = DateTime.Now;
+                    await unitOfWork.ExecuteSqlInterpolatedAsync(
+                        $@"SET IDENTITY_INSERT [dbo].[PER_Unvanlar] ON;
+                        INSERT INTO [dbo].[PER_Unvanlar]
+                            ([UnvanId], [UnvanAdi], [LegacyKod], [Aktiflik],
+                             [EkleyenKullanici], [EklenmeTarihi], [DuzenleyenKullanici], [DuzenlenmeTarihi], [SilindiMi])
+                        VALUES
+                            ({unvan.Id}, {unvan.Unvan}, {unvan.Id}, {(int)Aktiflik.Aktif},
+                             {"SYNC"}, {now}, {"SYNC"}, {now}, {false});
+                        SET IDENTITY_INSERT [dbo].[PER_Unvanlar] OFF;", ct);
 
                     added++;
                 }

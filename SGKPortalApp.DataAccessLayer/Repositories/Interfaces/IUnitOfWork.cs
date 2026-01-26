@@ -115,6 +115,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces
         /// </summary>
         Task<int> ExecuteSqlRawAsync(string sql, CancellationToken ct = default);
 
+        /// <summary>
+        /// Interpolated SQL komutu çalıştırır (parameterized query ile - SQL injection korumalı)
+        /// </summary>
+        Task<int> ExecuteSqlInterpolatedAsync(FormattableString sql, CancellationToken ct = default);
+
         #endregion
     }
 }
