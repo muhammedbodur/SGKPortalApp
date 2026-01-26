@@ -135,8 +135,8 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
             builder.HasIndex(p => p.PersonelAktiflikDurum)
                 .HasDatabaseName("IX_PER_Personeller_AktiflikDurum");
 
-            builder.HasIndex(p => new { p.HizmetBinasiId, p.PersonelAktiflikDurum })
-                .HasDatabaseName("IX_PER_Personeller_HizmetBinasi_Aktiflik");
+            builder.HasIndex(p => new { p.DepartmanHizmetBinasiId, p.PersonelAktiflikDurum })
+                .HasDatabaseName("IX_PER_Personeller_DepartmanHizmetBinasi_Aktiflik");
 
             // Query Filter
             builder.HasQueryFilter(p => !p.SilindiMi);

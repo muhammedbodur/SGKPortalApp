@@ -57,11 +57,8 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.Common
                 .HasForeignKey(dhb => dhb.HizmetBinasiId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasMany(hb => hb.Personeller)
-                .WithOne(p => p.HizmetBinasi)
-                .HasForeignKey(p => p.HizmetBinasiId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("FK_PER_Personeller_CMN_HizmetBinalari");
+            // Not: Personel artık doğrudan HizmetBinasi'na bağlı değil.
+            // Personel -> DepartmanHizmetBinasi -> HizmetBinasi şeklinde dolaylı ilişki var.
         }
     }
 }

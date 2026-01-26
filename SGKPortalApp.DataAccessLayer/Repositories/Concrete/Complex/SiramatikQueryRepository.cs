@@ -69,31 +69,27 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                             EklenmeTarihi = kai.EklenmeTarihi,
                             DuzenlenmeTarihi = kai.DuzenlenmeTarihi,
                             PersonelSayisi = _context.KanalPersonelleri
-                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId 
+                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId
                                           && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
                                           && !kp.SilindiMi
-                                          && kp.Personel != null && kp.Personel.HizmetBinasiId == dhb.HizmetBinasiId
-                                          && kp.Personel.DepartmanId == dhb.DepartmanId),
+                                          && kp.Personel != null && kp.Personel.DepartmanHizmetBinasiId == dhb.DepartmanHizmetBinasiId),
                             SefSayisi = _context.KanalPersonelleri
-                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId 
+                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId
                                           && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
                                           && !kp.SilindiMi
-                                          && kp.Personel != null && kp.Personel.HizmetBinasiId == dhb.HizmetBinasiId
-                                          && kp.Personel.DepartmanId == dhb.DepartmanId
+                                          && kp.Personel != null && kp.Personel.DepartmanHizmetBinasiId == dhb.DepartmanHizmetBinasiId
                                           && kp.Uzmanlik == BusinessObjectLayer.Enums.SiramatikIslemleri.PersonelUzmanlik.Sef),
                             UzmanSayisi = _context.KanalPersonelleri
-                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId 
+                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId
                                           && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
                                           && !kp.SilindiMi
-                                          && kp.Personel != null && kp.Personel.HizmetBinasiId == dhb.HizmetBinasiId
-                                          && kp.Personel.DepartmanId == dhb.DepartmanId
+                                          && kp.Personel != null && kp.Personel.DepartmanHizmetBinasiId == dhb.DepartmanHizmetBinasiId
                                           && kp.Uzmanlik == BusinessObjectLayer.Enums.SiramatikIslemleri.PersonelUzmanlik.Uzman),
                             YrdUzmanSayisi = _context.KanalPersonelleri
-                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId 
+                                .Count(kp => kp.KanalAltIslemId == kai.KanalAltIslemId
                                           && kp.Aktiflik == BusinessObjectLayer.Enums.Common.Aktiflik.Aktif
                                           && !kp.SilindiMi
-                                          && kp.Personel != null && kp.Personel.HizmetBinasiId == dhb.HizmetBinasiId
-                                          && kp.Personel.DepartmanId == dhb.DepartmanId
+                                          && kp.Personel != null && kp.Personel.DepartmanHizmetBinasiId == dhb.DepartmanHizmetBinasiId
                                           && kp.Uzmanlik == BusinessObjectLayer.Enums.SiramatikIslemleri.PersonelUzmanlik.YrdUzman)
                         };
 
@@ -397,8 +393,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
             if (dhb == null) return new List<PersonelAtamaMatrixDto>();
             
             var personelQuery = from p in _context.Personeller
-                                where p.HizmetBinasiId == dhb.HizmetBinasiId
-                                   && p.DepartmanId == dhb.DepartmanId
+                                where p.DepartmanHizmetBinasiId == dhb.DepartmanHizmetBinasiId
                                    && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif
                                    && !p.SilindiMi
                                 select new PersonelAtamaMatrixDto
@@ -410,8 +405,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                                     DepartmanAdi = p.Departman != null ? p.Departman.DepartmanAdi : "",
                                     ServisId = p.ServisId,
                                     ServisAdi = p.Servis != null ? p.Servis.ServisAdi : "",
-                                    HizmetBinasiId = p.HizmetBinasiId,
-                                    HizmetBinasiAdi = p.HizmetBinasi != null ? p.HizmetBinasi.HizmetBinasiAdi : "",
+                                    HizmetBinasiId = p.DepartmanHizmetBinasi != null ? p.DepartmanHizmetBinasi.HizmetBinasiId : 0,
+                                    HizmetBinasiAdi = p.DepartmanHizmetBinasi != null && p.DepartmanHizmetBinasi.HizmetBinasi != null ? p.DepartmanHizmetBinasi.HizmetBinasi.HizmetBinasiAdi : "",
                                     Resim = p.Resim,
                                     Aktiflik = (Aktiflik)p.PersonelAktiflikDurum,
                                     KanalAtamalari = new List<PersonelKanalAtamaDto>()
@@ -671,7 +666,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                            && b.Aktiflik == Aktiflik.Aktif
                            && !b.SilindiMi
                            && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif
-                           && p.HizmetBinasiId == dhb.HizmetBinasiId
+                           && p.DepartmanHizmetBinasiId == dhb.DepartmanHizmetBinasiId
                            && !p.SilindiMi
                            && u.BankoModuAktif
                            && u.AktifMi

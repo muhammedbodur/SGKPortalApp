@@ -28,7 +28,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
                 .Include(u => u.Personel)
                     .ThenInclude(p => p.Servis)
                 .Include(u => u.Personel)
-                    .ThenInclude(p => p.HizmetBinasi)
+                    .ThenInclude(p => p.DepartmanHizmetBinasi)
+                        .ThenInclude(dhb => dhb.HizmetBinasi)
                 .FirstOrDefaultAsync(u => u.TcKimlikNo == tcKimlikNo && !u.SilindiMi);
         }
 

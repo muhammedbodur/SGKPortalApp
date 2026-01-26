@@ -119,7 +119,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
         public async Task<int> GetPersonelCountAsync(int hizmetBinasiId)
         {
             return await _context.Set<Personel>()
-                .CountAsync(p => p.HizmetBinasiId == hizmetBinasiId && !p.SilindiMi && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif);
+                .CountAsync(p => p.DepartmanHizmetBinasi.HizmetBinasiId == hizmetBinasiId && !p.SilindiMi && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif);
         }
 
         public async Task<int> GetBankoCountAsync(int hizmetBinasiId)

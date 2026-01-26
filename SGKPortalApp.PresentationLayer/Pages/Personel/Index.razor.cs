@@ -164,7 +164,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                     DepartmanId = filterDepartmanId > 0 ? filterDepartmanId : null,
                     ServisId = filterServisId > 0 ? filterServisId : null,
                     UnvanId = filterUnvanId > 0 ? filterUnvanId : null,
-                    HizmetBinasiId = filterHizmetBinasiId > 0 ? filterHizmetBinasiId : null,
+                    DepartmanHizmetBinasiId = filterHizmetBinasiId > 0 ? filterHizmetBinasiId : null,
                     AktiflikDurum = filterAktiflik >= 0 ? (PersonelAktiflikDurum)filterAktiflik : null,
                     PageNumber = CurrentPage,
                     PageSize = PageSize,
