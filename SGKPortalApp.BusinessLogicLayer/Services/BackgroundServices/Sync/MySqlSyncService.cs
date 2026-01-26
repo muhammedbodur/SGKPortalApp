@@ -538,11 +538,23 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
             // DepartmanHizmetBinasiId'yi hesapla
             var allDhb = await unitOfWork.Repository<DepartmanHizmetBinasi>().GetAllAsync();
             var departmanHizmetBinasi = allDhb.FirstOrDefault(dhb => dhb.DepartmanId == departmanId && dhb.HizmetBinasiId == hizmetBinasiId && !dhb.SilindiMi);
-            
+
+            // Eğer DepartmanHizmetBinasi yoksa, otomatik oluştur
             if (departmanHizmetBinasi == null)
             {
-                _logger.LogWarning("DepartmanHizmetBinasi bulunamadı. DepartmanId: {DepartmanId}, HizmetBinasiId: {HizmetBinasiId}", departmanId, hizmetBinasiId);
-                throw new InvalidOperationException($"DepartmanHizmetBinasi bulunamadı: DepartmanId={departmanId}, HizmetBinasiId={hizmetBinasiId}");
+                _logger.LogInformation("DepartmanHizmetBinasi otomatik oluşturuluyor. DepartmanId: {DepartmanId}, HizmetBinasiId: {HizmetBinasiId}", departmanId, hizmetBinasiId);
+
+                departmanHizmetBinasi = new DepartmanHizmetBinasi
+                {
+                    DepartmanId = departmanId,
+                    HizmetBinasiId = hizmetBinasiId,
+                    AnaBina = false,
+                    EklenmeTarihi = DateTime.Now,
+                    DuzenlenmeTarihi = DateTime.Now
+                };
+
+                await unitOfWork.Repository<DepartmanHizmetBinasi>().AddAsync(departmanHizmetBinasi);
+                await unitOfWork.SaveChangesAsync();
             }
             
             return new Personel
