@@ -290,8 +290,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                         DepartmanAdi = user.Personel.Departman?.DepartmanAdi ?? "",
                         ServisId = user.Personel.ServisId,
                         ServisAdi = user.Personel.Servis?.ServisAdi ?? "",
-                        HizmetBinasiId = user.Personel.HizmetBinasiId,
-                        HizmetBinasiAdi = user.Personel.HizmetBinasi?.HizmetBinasiAdi ?? "",
+                        HizmetBinasiId = user.Personel.DepartmanHizmetBinasi?.HizmetBinasiId ?? 0,
+                        HizmetBinasiAdi = user.Personel.DepartmanHizmetBinasi?.HizmetBinasi?.HizmetBinasiAdi ?? "",
                         Resim = user.Personel.Resim,
                         SessionId = sessionId,
                         UserType = "Personel", // 🎯 Personel kullanıcısı

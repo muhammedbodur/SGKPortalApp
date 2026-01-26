@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SGKPortalApp.DataAccessLayer.Context.Legacy
+namespace SGKPortalApp.BusinessObjectLayer.Entities.Legacy
 {
     [Table("kullanici")]
     public class LegacyKullanici

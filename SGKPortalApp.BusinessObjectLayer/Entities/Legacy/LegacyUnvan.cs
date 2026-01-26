@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SGKPortalApp.DataAccessLayer.Context.Legacy
+namespace SGKPortalApp.BusinessObjectLayer.Entities.Legacy
 {
     [Table("unvanlar")]
     public class LegacyUnvan
@@ -11,7 +11,7 @@ namespace SGKPortalApp.DataAccessLayer.Context.Legacy
         public int Id { get; set; } // UnvanId
 
         [Column("unvan")]
-        [StringLength(50)]
+        [StringLength(150)]
         public string Unvan { get; set; } = string.Empty; // UnvanAdi
     }
 }

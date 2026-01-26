@@ -365,6 +365,15 @@ namespace SGKPortalApp.DataAccessLayer.Repositories
 
         #endregion
 
+        #region Raw SQL Operations
+
+        public async Task<int> ExecuteSqlRawAsync(string sql, CancellationToken ct = default)
+        {
+            return await _context.Database.ExecuteSqlRawAsync(sql, ct);
+        }
+
+        #endregion
+
         #region Helper Methods
 
         /// <summary>

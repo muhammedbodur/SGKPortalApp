@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SGKPortalApp.DataAccessLayer.Context.Legacy;
+using SGKPortalApp.BusinessObjectLayer.Entities.Legacy;
 
 namespace SGKPortalApp.DataAccessLayer.Context
 {

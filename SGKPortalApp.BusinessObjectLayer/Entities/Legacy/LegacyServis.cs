@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SGKPortalApp.DataAccessLayer.Context.Legacy
+namespace SGKPortalApp.BusinessObjectLayer.Entities.Legacy
 {
     [Table("servisler")]
     public class LegacyServis
@@ -11,7 +11,7 @@ namespace SGKPortalApp.DataAccessLayer.Context.Legacy
         public int ServisId { get; set; }
 
         [Column("servisadi")]
-        [StringLength(50)]
+        [StringLength(255)]
         public string ServisAdi { get; set; } = string.Empty;
     }
 }

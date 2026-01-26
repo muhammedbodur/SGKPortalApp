@@ -412,7 +412,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 }
 
                 // ⭐ YENİ: DepartmanHizmetBinasiId kontrolü - Personel ve Banko aynı departman-hizmet binasında olmalı
-                if (personelExists.HizmetBinasiId != bankoExists.DepartmanHizmetBinasi?.HizmetBinasiId || 
+                if (personelExists.DepartmanHizmetBinasi?.HizmetBinasiId != bankoExists.DepartmanHizmetBinasi?.HizmetBinasiId || 
                     personelExists.DepartmanId != bankoExists.DepartmanHizmetBinasi?.DepartmanId)
                 {
                     return ApiResponseDto<bool>.ErrorResult(
@@ -558,17 +558,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                             continue;
                         }
 
-                        // Tutarsızlık kontrolü: Personel.HizmetBinasiId ve DepartmanId != BankoKullanici.DepartmanHizmetBinasi
+                        // Tutarsızlık kontrolü: Personel.DepartmanHizmetBinasiId != BankoKullanici.DepartmanHizmetBinasiId
                         if (assignment.DepartmanHizmetBinasi == null || 
-                            personel.HizmetBinasiId != assignment.DepartmanHizmetBinasi.HizmetBinasiId ||
+                            personel.DepartmanHizmetBinasi?.HizmetBinasiId != assignment.DepartmanHizmetBinasi.HizmetBinasiId ||
                             personel.DepartmanId != assignment.DepartmanHizmetBinasi.DepartmanId)
                         {
                             _logger.LogWarning(
                                 "Tutarsız kayıt tespit edildi. TC: {TcKimlikNo}, " +
-                                "Personel HizmetBinasi: {PersonelHizmetBinasi}, DepartmanId: {PersonelDepartmanId}, " +
+                                "Personel DepartmanHizmetBinasiId: {PersonelDhbId}, DepartmanId: {PersonelDepartmanId}, " +
                                 "BankoKullanici DepartmanHizmetBinasiId: {BankoKullaniciDhbId}",
                                 assignment.TcKimlikNo,
-                                personel.HizmetBinasiId,
+                                personel.DepartmanHizmetBinasiId,
                                 personel.DepartmanId,
                                 assignment.DepartmanHizmetBinasiId);
 

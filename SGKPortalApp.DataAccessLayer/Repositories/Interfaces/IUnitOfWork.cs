@@ -107,5 +107,14 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces
         void DetachEntity<T>(T entity) where T : class;
 
         #endregion
+
+        #region Raw SQL Operations
+
+        /// <summary>
+        /// Raw SQL komutu çalıştırır (IDENTITY_INSERT gibi özel durumlar için)
+        /// </summary>
+        Task<int> ExecuteSqlRawAsync(string sql, CancellationToken ct = default);
+
+        #endregion
     }
 }

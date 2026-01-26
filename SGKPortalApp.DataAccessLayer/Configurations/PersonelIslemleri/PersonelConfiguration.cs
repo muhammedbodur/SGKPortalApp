@@ -141,7 +141,15 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.PersonelIslemleri
             // Query Filter
             builder.HasQueryFilter(p => !p.SilindiMi);
 
-            // Relationships (zaten SGKDbContext'te tanımlı, çakışma olmaması için yorum satırı)
+            // Relationships
+            // DepartmanHizmetBinasi ilişkisi - Cascade delete KAPALI (çoklu cascade path hatası önlenir)
+            builder.HasOne(p => p.DepartmanHizmetBinasi)
+                .WithMany(dhb => dhb.Personeller)
+                .HasForeignKey(p => p.DepartmanHizmetBinasiId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_PER_Personeller_CMN_DepartmanHizmetBinalari_DepartmanHizmetBinasiId");
+
+            // Diğer relationships (zaten SGKDbContext'te tanımlı, çakışma olmaması için yorum satırı)
             // builder.HasOne(p => p.Departman)...
             // builder.HasOne(p => p.Servis)...
             // vs. SGKDbContext'teki ConfigureOnlyNonConflictingRelationships metodunda tanımlı

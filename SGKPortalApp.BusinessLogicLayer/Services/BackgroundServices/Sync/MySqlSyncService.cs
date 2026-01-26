@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -7,8 +6,9 @@ using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
-using SGKPortalApp.DataAccessLayer.Context;
-using SGKPortalApp.DataAccessLayer.Context.Legacy;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
+using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Legacy;
+using SGKPortalApp.BusinessObjectLayer.Entities.Legacy;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.BackgroundServiceManager;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
@@ -92,31 +92,53 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
             _logger.LogInformation("🔄 Sync başlıyor...");
 
             using var scope = _serviceProvider.CreateScope();
-            var mysqlContext = scope.ServiceProvider.GetRequiredService<MysqlDbContext>();
-            var sqlServerContext = scope.ServiceProvider.GetRequiredService<SGKDbContext>();
+            
+            // Repository'leri al
+            var legacyBirimRepo = scope.ServiceProvider.GetRequiredService<ILegacyBirimRepository>();
+            var legacyServisRepo = scope.ServiceProvider.GetRequiredService<ILegacyServisRepository>();
+            var legacyKullaniciRepo = scope.ServiceProvider.GetRequiredService<ILegacyKullaniciRepository>();
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-            await SyncDepartmanlarAsync(mysqlContext, sqlServerContext, cancellationToken);
-            await SyncServislerAsync(mysqlContext, sqlServerContext, cancellationToken);
-            await SyncUnvanlarAsync(mysqlContext, sqlServerContext, cancellationToken);
-            await SyncHizmetBinalariAsync(mysqlContext, sqlServerContext, cancellationToken);
-            await SyncDepartmanHizmetBinalariAsync(mysqlContext, sqlServerContext, cancellationToken);
-            await SyncPersonellerAsync(mysqlContext, sqlServerContext, cancellationToken);
+            try { await SyncDepartmanlarAsync(legacyBirimRepo, unitOfWork, cancellationToken); }
+            catch (Exception ex) { _logger.LogError(ex, "❌ SyncDepartmanlarAsync hatası"); }
+
+            try { await SyncServislerAsync(legacyServisRepo, unitOfWork, cancellationToken); }
+            catch (Exception ex) { _logger.LogError(ex, "❌ SyncServislerAsync hatası"); }
+
+            var legacyUnvanRepo = scope.ServiceProvider.GetRequiredService<ILegacyUnvanRepository>();
+            try { await SyncUnvanlarAsync(legacyUnvanRepo, unitOfWork, cancellationToken); }
+            catch (Exception ex) { _logger.LogError(ex, "❌ SyncUnvanlarAsync hatası"); }
+
+            var legacyBinaRepo = scope.ServiceProvider.GetRequiredService<ILegacyBinaRepository>();
+            try { await SyncHizmetBinalariAsync(legacyBinaRepo, unitOfWork, cancellationToken); }
+            catch (Exception ex) { _logger.LogError(ex, "❌ SyncHizmetBinalariAsync hatası"); }
+
+            try { await SyncDepartmanHizmetBinalariAsync(legacyKullaniciRepo, unitOfWork, cancellationToken); }
+            catch (Exception ex) { _logger.LogError(ex, "❌ SyncDepartmanHizmetBinalariAsync hatası"); }
+
+            try { await SyncPersonellerAsync(legacyKullaniciRepo, unitOfWork, cancellationToken); }
+            catch (Exception ex) { _logger.LogError(ex, "❌ SyncPersonellerAsync hatası"); }
 
             _logger.LogInformation("✅ Sync tamamlandı");
         }
 
-        private async Task SyncDepartmanlarAsync(MysqlDbContext mysql, SGKDbContext sqlServer, CancellationToken ct)
+        private async Task SyncDepartmanlarAsync(ILegacyBirimRepository legacyRepo, IUnitOfWork unitOfWork, CancellationToken ct)
         {
             _logger.LogInformation("📦 Departmanlar sync ediliyor...");
 
-            var legacyBirimler = await mysql.Birimler.AsNoTracking().ToListAsync(ct);
-            var existingDepartmanlar = await sqlServer.Departmanlar.ToDictionaryAsync(d => d.DepartmanId, ct);
+            // Legacy MySQL'den oku (Repository üzerinden)
+            var legacyBirimler = await legacyRepo.GetAllAsync(ct);
+            
+            // SQL Server'dan oku (UnitOfWork üzerinden)
+            var existingDepartmanlar = await unitOfWork.Repository<Departman>()
+                .GetAllAsync();
+            var departmanDict = existingDepartmanlar.ToDictionary(d => d.DepartmanId);
 
             int added = 0, updated = 0;
 
             foreach (var birim in legacyBirimler)
             {
-                if (existingDepartmanlar.TryGetValue(birim.Kod, out var existing))
+                if (departmanDict.TryGetValue(birim.Kod, out var existing))
                 {
                     if (existing.DepartmanAdi != birim.BirimAd || existing.DepartmanAdiKisa != birim.KisaAd)
                     {
@@ -129,10 +151,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 }
                 else
                 {
-                    await sqlServer.Database.ExecuteSqlRawAsync(
+                    // IDENTITY_INSERT için özel SQL komutu
+                    await unitOfWork.ExecuteSqlRawAsync(
                         "SET IDENTITY_INSERT PER_Departmanlar ON", ct);
 
-                    sqlServer.Departmanlar.Add(new Departman
+                    await unitOfWork.Repository<Departman>().AddAsync(new Departman
                     {
                         DepartmanId = birim.Kod,
                         DepartmanAdi = birim.BirimAd,
@@ -144,31 +167,32 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                         DuzenlenmeTarihi = DateTime.Now
                     });
 
-                    await sqlServer.SaveChangesAsync(ct);
+                    await unitOfWork.SaveChangesAsync();
 
-                    await sqlServer.Database.ExecuteSqlRawAsync(
+                    await unitOfWork.ExecuteSqlRawAsync(
                         "SET IDENTITY_INSERT PER_Departmanlar OFF", ct);
 
                     added++;
                 }
             }
 
-            await sqlServer.SaveChangesAsync(ct);
+            await unitOfWork.SaveChangesAsync();
             _logger.LogInformation("  ✅ Departmanlar: {Added} eklendi, {Updated} güncellendi", added, updated);
         }
 
-        private async Task SyncServislerAsync(MysqlDbContext mysql, SGKDbContext sqlServer, CancellationToken ct)
+        private async Task SyncServislerAsync(ILegacyServisRepository legacyRepo, IUnitOfWork unitOfWork, CancellationToken ct)
         {
             _logger.LogInformation("📦 Servisler sync ediliyor...");
 
-            var legacyServisler = await mysql.Servisler.AsNoTracking().ToListAsync(ct);
-            var existingServisler = await sqlServer.Servisler.ToDictionaryAsync(s => s.ServisId, ct);
+            var legacyServisler = await legacyRepo.GetAllAsync(ct);
+            var existingServisler = await unitOfWork.Repository<Servis>().GetAllAsync();
+            var servisDict = existingServisler.ToDictionary(s => s.ServisId);
 
             int added = 0, updated = 0;
 
             foreach (var servis in legacyServisler)
             {
-                if (existingServisler.TryGetValue(servis.ServisId, out var existing))
+                if (servisDict.TryGetValue(servis.ServisId, out var existing))
                 {
                     if (existing.ServisAdi != servis.ServisAdi)
                     {
@@ -180,10 +204,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 }
                 else
                 {
-                    await sqlServer.Database.ExecuteSqlRawAsync(
+                    await unitOfWork.ExecuteSqlRawAsync(
                         "SET IDENTITY_INSERT PER_Servisler ON", ct);
 
-                    sqlServer.Servisler.Add(new Servis
+                    await unitOfWork.Repository<Servis>().AddAsync(new Servis
                     {
                         ServisId = servis.ServisId,
                         ServisAdi = servis.ServisAdi,
@@ -194,31 +218,32 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                         DuzenlenmeTarihi = DateTime.Now
                     });
 
-                    await sqlServer.SaveChangesAsync(ct);
+                    await unitOfWork.SaveChangesAsync();
 
-                    await sqlServer.Database.ExecuteSqlRawAsync(
+                    await unitOfWork.ExecuteSqlRawAsync(
                         "SET IDENTITY_INSERT PER_Servisler OFF", ct);
 
                     added++;
                 }
             }
 
-            await sqlServer.SaveChangesAsync(ct);
+            await unitOfWork.SaveChangesAsync();
             _logger.LogInformation("  ✅ Servisler: {Added} eklendi, {Updated} güncellendi", added, updated);
         }
 
-        private async Task SyncUnvanlarAsync(MysqlDbContext mysql, SGKDbContext sqlServer, CancellationToken ct)
+        private async Task SyncUnvanlarAsync(ILegacyUnvanRepository legacyRepo, IUnitOfWork unitOfWork, CancellationToken ct)
         {
             _logger.LogInformation("📦 Ünvanlar sync ediliyor...");
 
-            var legacyUnvanlar = await mysql.Unvanlar.AsNoTracking().ToListAsync(ct);
-            var existingUnvanlar = await sqlServer.Unvanlar.ToDictionaryAsync(u => u.UnvanId, ct);
+            var legacyUnvanlar = await legacyRepo.GetAllAsync(ct);
+            var existingUnvanlar = await unitOfWork.Repository<Unvan>().GetAllAsync();
+            var unvanDict = existingUnvanlar.ToDictionary(u => u.UnvanId);
 
             int added = 0, updated = 0;
 
             foreach (var unvan in legacyUnvanlar)
             {
-                if (existingUnvanlar.TryGetValue(unvan.Id, out var existing))
+                if (unvanDict.TryGetValue(unvan.Id, out var existing))
                 {
                     if (existing.UnvanAdi != unvan.Unvan)
                     {
@@ -230,10 +255,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 }
                 else
                 {
-                    await sqlServer.Database.ExecuteSqlRawAsync(
+                    await unitOfWork.ExecuteSqlRawAsync(
                         "SET IDENTITY_INSERT PER_Unvanlar ON", ct);
 
-                    sqlServer.Unvanlar.Add(new Unvan
+                    await unitOfWork.Repository<Unvan>().AddAsync(new Unvan
                     {
                         UnvanId = unvan.Id,
                         UnvanAdi = unvan.Unvan,
@@ -244,37 +269,37 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                         DuzenlenmeTarihi = DateTime.Now
                     });
 
-                    await sqlServer.SaveChangesAsync(ct);
+                    await unitOfWork.SaveChangesAsync();
 
-                    await sqlServer.Database.ExecuteSqlRawAsync(
+                    await unitOfWork.ExecuteSqlRawAsync(
                         "SET IDENTITY_INSERT PER_Unvanlar OFF", ct);
 
                     added++;
                 }
             }
 
-            await sqlServer.SaveChangesAsync(ct);
+            await unitOfWork.SaveChangesAsync();
             _logger.LogInformation("  ✅ Ünvanlar: {Added} eklendi, {Updated} güncellendi", added, updated);
         }
 
-        private async Task SyncHizmetBinalariAsync(MysqlDbContext mysql, SGKDbContext sqlServer, CancellationToken ct)
+        private async Task SyncHizmetBinalariAsync(ILegacyBinaRepository legacyRepo, IUnitOfWork unitOfWork, CancellationToken ct)
         {
             _logger.LogInformation("📦 Hizmet Binaları sync ediliyor...");
 
-            var legacyBinalar = await mysql.Binalar.AsNoTracking().ToListAsync(ct);
-            var existingBinalar = await sqlServer.HizmetBinalari.ToDictionaryAsync(h => h.LegacyKod ?? 0, ct);
+            var legacyBinalar = await legacyRepo.GetAllAsync(ct);
+            var existingBinalar = await unitOfWork.Repository<HizmetBinasi>().GetAllAsync();
+            var binaDict = existingBinalar.Where(h => h.LegacyKod.HasValue).ToDictionary(h => h.LegacyKod!.Value);
 
             int added = 0, updated = 0;
 
             foreach (var bina in legacyBinalar)
             {
-                if (existingBinalar.TryGetValue(bina.Kod, out var existing))
+                if (binaDict.TryGetValue(bina.Kod, out var existing))
                 {
                     // Güncelleme
-                    if (existing.HizmetBinasiAdi != bina.BinaAdi || existing.Adres != bina.Adres)
+                    if (existing.HizmetBinasiAdi != bina.BinaAdi)
                     {
                         existing.HizmetBinasiAdi = bina.BinaAdi;
-                        existing.Adres = bina.Adres;
                         existing.DuzenleyenKullanici = "SYNC";
                         existing.DuzenlenmeTarihi = DateTime.Now;
                         updated++;
@@ -283,11 +308,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 else
                 {
                     // Yeni kayıt
-                    sqlServer.HizmetBinalari.Add(new HizmetBinasi
+                    await unitOfWork.Repository<HizmetBinasi>().AddAsync(new HizmetBinasi
                     {
                         HizmetBinasiAdi = bina.BinaAdi,
                         LegacyKod = bina.Kod,
-                        Adres = bina.Adres,
                         Aktiflik = Aktiflik.Aktif,
                         EkleyenKullanici = "SYNC",
                         EklenmeTarihi = DateTime.Now,
@@ -298,37 +322,39 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 }
             }
 
-            await sqlServer.SaveChangesAsync(ct);
+            await unitOfWork.SaveChangesAsync();
             _logger.LogInformation("  ✅ Hizmet Binaları: {Added} eklendi, {Updated} güncellendi", added, updated);
         }
 
-        private async Task SyncDepartmanHizmetBinalariAsync(MysqlDbContext mysql, SGKDbContext sqlServer, CancellationToken ct)
+        private async Task SyncDepartmanHizmetBinalariAsync(ILegacyKullaniciRepository legacyRepo, IUnitOfWork unitOfWork, CancellationToken ct)
         {
             _logger.LogInformation("📦 Departman-Bina İlişkileri sync ediliyor...");
 
-            // MySQL'den DISTINCT departman-bina eşleşmelerini al
-            var departmanBinaEslesmeleri = await mysql.Kullanicilar
+            // Legacy'den tüm kullanıcıları al ve DISTINCT departman-bina eşleşmelerini bul
+            var legacyKullanicilar = await legacyRepo.GetAllActiveAsync(ct);
+            var departmanBinaEslesmeleri = legacyKullanicilar
                 .Where(k => k.Birim > 0 && k.Bina > 0)
                 .Select(k => new { DepartmanId = k.Birim, BinaKod = k.Bina })
                 .Distinct()
-                .ToListAsync(ct);
+                .ToList();
 
             _logger.LogInformation("  📊 {Count} adet benzersiz departman-bina eşleşmesi bulundu", departmanBinaEslesmeleri.Count);
 
             // Mevcut HizmetBinasi ve Departman kayıtlarını al
-            var hizmetBinalari = await sqlServer.HizmetBinalari
+            var hizmetBinalari = await unitOfWork.Repository<HizmetBinasi>().GetAllAsync();
+            var hizmetBinaDictByLegacy = hizmetBinalari
                 .Where(h => h.LegacyKod.HasValue)
-                .ToDictionaryAsync(h => h.LegacyKod!.Value, h => h.HizmetBinasiId, ct);
+                .ToDictionary(h => h.LegacyKod!.Value, h => h.HizmetBinasiId);
 
-            var departmanlar = await sqlServer.Departmanlar
-                .Select(d => d.DepartmanId)
-                .ToListAsync(ct);
+            var departmanlar = await unitOfWork.Repository<Departman>().GetAllAsync();
+            var departmanIds = departmanlar.Select(d => d.DepartmanId).ToList();
 
             // Mevcut ilişkileri al
-            var mevcutIliskiler = await sqlServer.DepartmanHizmetBinalari
+            var mevcutIliskiler = await unitOfWork.Repository<DepartmanHizmetBinasi>().GetAllAsync();
+            var mevcutIliskilerAktif = mevcutIliskiler
                 .Where(dhb => !dhb.SilindiMi)
                 .Select(dhb => new { dhb.DepartmanId, dhb.HizmetBinasiId })
-                .ToListAsync(ct);
+                .ToList();
 
             var mevcutIliskilerSet = new HashSet<(int, int)>(
                 mevcutIliskiler.Select(x => (x.DepartmanId, x.HizmetBinasiId))
@@ -339,13 +365,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
             foreach (var eslesme in departmanBinaEslesmeleri)
             {
                 // Departman ve Bina var mı kontrol et
-                if (!departmanlar.Contains(eslesme.DepartmanId))
+                if (!departmanIds.Contains(eslesme.DepartmanId))
                 {
                     skipped++;
                     continue;
                 }
 
-                if (!hizmetBinalari.TryGetValue(eslesme.BinaKod, out var hizmetBinasiId))
+                if (!hizmetBinaDictByLegacy.TryGetValue(eslesme.BinaKod, out var hizmetBinasiId))
                 {
                     skipped++;
                     continue;
@@ -359,10 +385,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
 
                 // Yeni ilişki ekle
                 // İlk eşleşmeyi AnaBina olarak işaretle
-                var anaBina = !await sqlServer.DepartmanHizmetBinalari
-                    .AnyAsync(dhb => dhb.HizmetBinasiId == hizmetBinasiId && !dhb.SilindiMi, ct);
+                var anaBina = !mevcutIliskilerAktif.Any(x => x.HizmetBinasiId == hizmetBinasiId);
 
-                sqlServer.DepartmanHizmetBinalari.Add(new DepartmanHizmetBinasi
+                await unitOfWork.Repository<DepartmanHizmetBinasi>().AddAsync(new DepartmanHizmetBinasi
                 {
                     DepartmanId = eslesme.DepartmanId,
                     HizmetBinasiId = hizmetBinasiId,
@@ -374,32 +399,36 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 added++;
             }
 
-            await sqlServer.SaveChangesAsync(ct);
+            await unitOfWork.SaveChangesAsync();
             _logger.LogInformation("  ✅ Departman-Bina İlişkileri: {Added} eklendi, {Skipped} atlandı", added, skipped);
         }
 
-        private async Task SyncPersonellerAsync(MysqlDbContext mysql, SGKDbContext sqlServer, CancellationToken ct)
+        private async Task SyncPersonellerAsync(ILegacyKullaniciRepository legacyRepo, IUnitOfWork unitOfWork, CancellationToken ct)
         {
             _logger.LogInformation("📦 Personeller sync ediliyor...");
 
-            var legacyKullanicilar = await mysql.Kullanicilar
-                .AsNoTracking()
-                .Where(k => k.Username != null && k.Username > 10000000000) // Geçerli TC'ler
-                .ToListAsync(ct);
+            // Legacy MySQL'den oku (Repository üzerinden)
+            var legacyKullanicilar = await legacyRepo.GetAllActiveAsync(ct);
 
-            var existingPersoneller = await sqlServer.Personeller
-                .ToDictionaryAsync(p => p.TcKimlikNo, ct);
+            // SQL Server'dan oku (UnitOfWork üzerinden)
+            var existingPersoneller = await unitOfWork.Repository<Personel>().GetAllAsync();
+            var personelDict = existingPersoneller.ToDictionary(p => p.TcKimlikNo);
 
-            var existingUsers = await sqlServer.Users
-                .ToDictionaryAsync(u => u.TcKimlikNo, ct);
+            var existingUsers = await unitOfWork.Repository<User>().GetAllAsync();
+            var userDict = existingUsers.ToDictionary(u => u.TcKimlikNo);
 
             // Lookup tabloları
-            var iller = await sqlServer.Iller.ToDictionaryAsync(i => i.IlAdi.ToUpperInvariant(), ct);
-            var ilceler = await sqlServer.Ilceler.ToListAsync(ct);
-            var departmanlar = await sqlServer.Departmanlar.Select(d => d.DepartmanId).ToListAsync(ct);
-            var servisler = await sqlServer.Servisler.Select(s => s.ServisId).ToListAsync(ct);
-            var unvanlar = await sqlServer.Unvanlar.Select(u => u.UnvanId).ToListAsync(ct);
-            var hizmetBinalari = await sqlServer.HizmetBinalari.Select(h => h.HizmetBinasiId).ToListAsync(ct);
+            var iller = await unitOfWork.Repository<Il>().GetAllAsync();
+            var ilDict = iller.ToDictionary(i => i.IlAdi.ToUpperInvariant());
+            var ilceler = await unitOfWork.Repository<Ilce>().GetAllAsync();
+            var departmanlar = await unitOfWork.Repository<Departman>().GetAllAsync();
+            var departmanIds = departmanlar.Select(d => d.DepartmanId).ToList();
+            var servisler = await unitOfWork.Repository<Servis>().GetAllAsync();
+            var servisIds = servisler.Select(s => s.ServisId).ToList();
+            var unvanlar = await unitOfWork.Repository<Unvan>().GetAllAsync();
+            var unvanIds = unvanlar.Select(u => u.UnvanId).ToList();
+            var hizmetBinalari = await unitOfWork.Repository<HizmetBinasi>().GetAllAsync();
+            var hizmetBinasiIds = hizmetBinalari.Select(h => h.HizmetBinasiId).ToList();
 
             int added = 0, updated = 0, skipped = 0;
 
@@ -413,15 +442,15 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 }
 
                 // FK validasyonları
-                var departmanId = departmanlar.Contains(kullanici.Birim) ? kullanici.Birim : 1;
-                var hizmetBinasiId = hizmetBinalari.Contains(departmanId) ? departmanId : 1;
-                var servisId = int.TryParse(kullanici.Servis, out var sId) && servisler.Contains(sId) ? sId : 1;
-                var unvanId = int.TryParse(kullanici.Unvan, out var uId) && unvanlar.Contains(uId) ? uId : 1;
+                var departmanId = departmanIds.Contains(kullanici.Birim) ? kullanici.Birim : 1;
+                var hizmetBinasiId = hizmetBinasiIds.Contains(kullanici.Bina) ? kullanici.Bina : 1;
+                var servisId = int.TryParse(kullanici.Servis, out var sId) && servisIds.Contains(sId) ? sId : 1;
+                var unvanId = int.TryParse(kullanici.Unvan, out var uId) && unvanIds.Contains(uId) ? uId : 1;
 
                 // İl/İlçe lookup
                 var ilId = 35; // Default İzmir
                 var ilceId = 1;
-                if (!string.IsNullOrEmpty(kullanici.Il) && iller.TryGetValue(kullanici.Il.ToUpperInvariant(), out var il))
+                if (!string.IsNullOrEmpty(kullanici.Il) && ilDict.TryGetValue(kullanici.Il.ToUpperInvariant(), out var il))
                 {
                     ilId = il.IlId;
                     if (!string.IsNullOrEmpty(kullanici.Ilce))
@@ -433,10 +462,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                     }
                 }
 
-                if (existingPersoneller.TryGetValue(tcKimlikNo, out var existingPersonel))
+                if (personelDict.TryGetValue(tcKimlikNo, out var existingPersonel))
                 {
                     // Güncelleme
-                    var hasChanges = UpdatePersonelFromLegacy(existingPersonel, kullanici, departmanId, servisId, unvanId, hizmetBinasiId, ilId, ilceId);
+                    var hasChanges = await UpdatePersonelFromLegacyAsync(existingPersonel, kullanici, departmanId, servisId, unvanId, hizmetBinasiId, ilId, ilceId, unitOfWork, ct);
                     if (hasChanges)
                     {
                         existingPersonel.DuzenleyenKullanici = "SYNC";
@@ -447,14 +476,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 else
                 {
                     // Yeni kayıt
-                    var personel = CreatePersonelFromLegacy(kullanici, tcKimlikNo, departmanId, servisId, unvanId, hizmetBinasiId, ilId, ilceId);
-                    sqlServer.Personeller.Add(personel);
+                    var personel = await CreatePersonelFromLegacyAsync(kullanici, tcKimlikNo, departmanId, servisId, unvanId, hizmetBinasiId, ilId, ilceId, unitOfWork, ct);
+                    await unitOfWork.Repository<Personel>().AddAsync(personel);
                     added++;
 
                     // User da ekle
-                    if (!existingUsers.ContainsKey(tcKimlikNo))
+                    if (!userDict.ContainsKey(tcKimlikNo))
                     {
-                        sqlServer.Users.Add(new User
+                        await unitOfWork.Repository<User>().AddAsync(new User
                         {
                             TcKimlikNo = tcKimlikNo,
                             UserType = UserType.Personel,
@@ -469,12 +498,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 }
             }
 
-            await sqlServer.SaveChangesAsync(ct);
+            await unitOfWork.SaveChangesAsync();
             _logger.LogInformation("  ✅ Personeller: {Added} eklendi, {Updated} güncellendi, {Skipped} atlandı", added, updated, skipped);
         }
 
-        private Personel CreatePersonelFromLegacy(LegacyKullanici k, string tcKimlikNo, int departmanId, int servisId, int unvanId, int hizmetBinasiId, int ilId, int ilceId)
+        private async Task<Personel> CreatePersonelFromLegacyAsync(LegacyKullanici k, string tcKimlikNo, int departmanId, int servisId, int unvanId, int hizmetBinasiId, int ilId, int ilceId, IUnitOfWork unitOfWork, CancellationToken ct)
         {
+            // DepartmanHizmetBinasiId'yi hesapla
+            var allDhb = await unitOfWork.Repository<DepartmanHizmetBinasi>().GetAllAsync();
+            var departmanHizmetBinasi = allDhb.FirstOrDefault(dhb => dhb.DepartmanId == departmanId && dhb.HizmetBinasiId == hizmetBinasiId && !dhb.SilindiMi);
+            
+            if (departmanHizmetBinasi == null)
+            {
+                _logger.LogWarning("DepartmanHizmetBinasi bulunamadı. DepartmanId: {DepartmanId}, HizmetBinasiId: {HizmetBinasiId}", departmanId, hizmetBinasiId);
+                throw new InvalidOperationException($"DepartmanHizmetBinasi bulunamadı: DepartmanId={departmanId}, HizmetBinasiId={hizmetBinasiId}");
+            }
+            
             return new Personel
             {
                 TcKimlikNo = tcKimlikNo,
@@ -491,11 +530,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 ServisId = servisId,
                 UnvanId = unvanId,
                 AtanmaNedeniId = k.Atanma ?? 1,
-                HizmetBinasiId = hizmetBinasiId,
+                DepartmanHizmetBinasiId = departmanHizmetBinasi.DepartmanHizmetBinasiId,
+                DepartmanHizmetBinasi = departmanHizmetBinasi,
                 IlId = ilId,
                 IlceId = ilceId,
                 SendikaId = k.Sendika > 0 ? k.Sendika : null,
                 Gorev = k.Gorev,
+                Uzmanlik = k.Brans, // Brans alanı Uzmanlik olarak mapping
                 PersonelTipi = PersonelTipi.memur,
                 Email = k.Email ?? "",
                 Dahili = (int)k.Dahili,
@@ -534,7 +575,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
             };
         }
 
-        private bool UpdatePersonelFromLegacy(Personel p, LegacyKullanici k, int departmanId, int servisId, int unvanId, int hizmetBinasiId, int ilId, int ilceId)
+        private async Task<bool> UpdatePersonelFromLegacyAsync(Personel p, LegacyKullanici k, int departmanId, int servisId, int unvanId, int hizmetBinasiId, int ilId, int ilceId, IUnitOfWork unitOfWork, CancellationToken ct)
         {
             bool hasChanges = false;
 
@@ -543,15 +584,29 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
             if (p.DepartmanId != departmanId) { p.DepartmanId = departmanId; hasChanges = true; }
             if (p.ServisId != servisId) { p.ServisId = servisId; hasChanges = true; }
             if (p.UnvanId != unvanId) { p.UnvanId = unvanId; hasChanges = true; }
-            if (p.HizmetBinasiId != hizmetBinasiId) { p.HizmetBinasiId = hizmetBinasiId; hasChanges = true; }
+            
+            // DepartmanHizmetBinasiId kontrolü
+            var allDhb = await unitOfWork.Repository<DepartmanHizmetBinasi>().GetAllAsync();
+            var departmanHizmetBinasi = allDhb.FirstOrDefault(dhb => dhb.DepartmanId == departmanId && dhb.HizmetBinasiId == hizmetBinasiId && !dhb.SilindiMi);
+            
+            if (departmanHizmetBinasi != null && p.DepartmanHizmetBinasiId != departmanHizmetBinasi.DepartmanHizmetBinasiId) 
+            { 
+                p.DepartmanHizmetBinasiId = departmanHizmetBinasi.DepartmanHizmetBinasiId; 
+                hasChanges = true; 
+            }
             if (p.Email != (k.Email ?? "")) { p.Email = k.Email ?? ""; hasChanges = true; }
             if (p.Dahili != (int)k.Dahili) { p.Dahili = (int)k.Dahili; hasChanges = true; }
+            if (p.Gorev != k.Gorev) { p.Gorev = k.Gorev; hasChanges = true; }
+            if (p.Uzmanlik != k.Brans) { p.Uzmanlik = k.Brans; hasChanges = true; }
 
             var newKartNo = int.TryParse(k.KartNo, out var kn) ? kn : 0;
             if (p.KartNo != newKartNo) { p.KartNo = newKartNo; hasChanges = true; }
 
             var newAktiflik = MapCalisanDurum(k.CalisanDurum);
             if (p.PersonelAktiflikDurum != newAktiflik) { p.PersonelAktiflikDurum = newAktiflik; hasChanges = true; }
+
+            if (p.IlId != ilId) { p.IlId = ilId; hasChanges = true; }
+            if (p.IlceId != ilceId) { p.IlceId = ilceId; hasChanges = true; }
 
             return hasChanges;
         }

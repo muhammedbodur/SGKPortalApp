@@ -4,7 +4,16 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- EF Core Migration için default DbContext -->
+    <UserSecretsId>aspnet-SGKPortalApp-default</UserSecretsId>
   </PropertyGroup>
+
+  <!-- EF Core Design-Time için default DbContext ayarı -->
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\launchSettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Configurations\Auth\" />

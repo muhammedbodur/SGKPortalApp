@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SGKPortalApp.DataAccessLayer.Context.Legacy
+namespace SGKPortalApp.BusinessObjectLayer.Entities.Legacy
 {
     [Table("birim")]
     public class LegacyBirim
@@ -11,11 +11,11 @@ namespace SGKPortalApp.DataAccessLayer.Context.Legacy
         public int Kod { get; set; } // DepartmanId
 
         [Column("BIRIMAD")]
-        [StringLength(50)]
+        [StringLength(55)]
         public string BirimAd { get; set; } = string.Empty; // DepartmanAdi
 
         [Column("KISAAD")]
-        [StringLength(10)]
+        [StringLength(25)]
         public string? KisaAd { get; set; } // DepartmanAdiKisa
 
         [Column("CALISMA_BASLANGIC")]
@@ -25,10 +25,11 @@ namespace SGKPortalApp.DataAccessLayer.Context.Legacy
         public TimeSpan? CalismaBitis { get; set; }
 
         [Column("BAGLI_ILCELER")]
-        [StringLength(200)]
+        [StringLength(100)]
         public string? BagliIlceler { get; set; }
 
         [Column("BAGLI_NUFUS")]
-        public int? BagliNufus { get; set; }
+        [StringLength(9)]
+        public string? BagliNufus { get; set; }
     }
 }
