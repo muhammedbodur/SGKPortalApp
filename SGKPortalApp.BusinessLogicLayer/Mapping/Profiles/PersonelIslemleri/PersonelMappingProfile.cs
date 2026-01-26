@@ -105,8 +105,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                     opt => opt.MapFrom(src => src.Unvan != null ? src.Unvan.UnvanAdi : ""))
                 .ForMember(dest => dest.AtanmaNedeniAdi,
                     opt => opt.MapFrom(src => src.AtanmaNedeni != null ? src.AtanmaNedeni.AtanmaNedeni : ""))
+                .ForMember(dest => dest.DepartmanHizmetBinasiId,
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinasiId))
+                .ForMember(dest => dest.HizmetBinasiId,
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinasi != null ? src.DepartmanHizmetBinasi.HizmetBinasiId : 0))
                 .ForMember(dest => dest.HizmetBinasiAdi,
-                    opt => opt.MapFrom(src => src.HizmetBinasi != null ? src.HizmetBinasi.HizmetBinasiAdi : "Hizmet Binası Yok"))
+                    opt => opt.MapFrom(src => src.DepartmanHizmetBinasi != null && src.DepartmanHizmetBinasi.HizmetBinasi != null
+                        ? src.DepartmanHizmetBinasi.HizmetBinasi.HizmetBinasiAdi
+                        : "Hizmet Binası Yok"))
                 .ForMember(dest => dest.SendikaAdi,
                 opt => opt.MapFrom(src => src.Sendika != null ? src.Sendika.SendikaAdi : ""))
 
@@ -170,7 +176,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.Servis, opt => opt.Ignore())
                 .ForMember(dest => dest.Unvan, opt => opt.Ignore())
                 .ForMember(dest => dest.AtanmaNedeni, opt => opt.Ignore())
-                .ForMember(dest => dest.HizmetBinasi, opt => opt.Ignore())
+                .ForMember(dest => dest.DepartmanHizmetBinasi, opt => opt.Ignore())
                 .ForMember(dest => dest.Il, opt => opt.Ignore())
                 .ForMember(dest => dest.Ilce, opt => opt.Ignore())
                 .ForMember(dest => dest.Sendika, opt => opt.Ignore())
@@ -216,7 +222,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.Servis, opt => opt.Ignore())
                 .ForMember(dest => dest.Unvan, opt => opt.Ignore())
                 .ForMember(dest => dest.AtanmaNedeni, opt => opt.Ignore())
-                .ForMember(dest => dest.HizmetBinasi, opt => opt.Ignore())
+                .ForMember(dest => dest.DepartmanHizmetBinasi, opt => opt.Ignore())
                 .ForMember(dest => dest.Il, opt => opt.Ignore())
                 .ForMember(dest => dest.Ilce, opt => opt.Ignore())
                 .ForMember(dest => dest.Sendika, opt => opt.Ignore())

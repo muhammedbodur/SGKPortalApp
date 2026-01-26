@@ -52,9 +52,9 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         public int? UnvanId { get; set; }
 
         /// <summary>
-        /// Hizmet binası filtresi
+        /// Departman Hizmet Binası filtresi
         /// </summary>
-        public int? HizmetBinasiId { get; set; }
+        public int? DepartmanHizmetBinasiId { get; set; }
 
         /// <summary>
         /// Birden fazla departman seçimi

@@ -24,7 +24,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         public int DepartmanId { get; set; }
         public int ServisId { get; set; }
         public int UnvanId { get; set; }
-        public int HizmetBinasiId { get; set; }
+        public int DepartmanHizmetBinasiId { get; set; }
 
         public int Dahili { get; set; }
 

@@ -40,9 +40,13 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels.PersonelIslemleri
         [Range(1, int.MaxValue, ErrorMessage = "Lütfen bir ünvan seçiniz")]
         public int UnvanId { get; set; }
 
+        /// <summary>
+        /// Departman-HizmetBinası kombinasyonu (junction table ID)
+        /// Departman seçildikten sonra o departmana bağlı binalar listelenir
+        /// </summary>
         [Required(ErrorMessage = "Hizmet binası seçimi zorunludur")]
         [Range(1, int.MaxValue, ErrorMessage = "Lütfen bir hizmet binası seçiniz")]
-        public int HizmetBinasiId { get; set; }
+        public int DepartmanHizmetBinasiId { get; set; }
 
         public int? AtanmaNedeniId { get; set; }
         public int? SendikaId { get; set; }
