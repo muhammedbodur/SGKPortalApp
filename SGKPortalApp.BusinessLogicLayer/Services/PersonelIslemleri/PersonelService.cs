@@ -626,7 +626,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     }
 
                     // Hizmet binası veya departman değişikliği kontrolü
-                    var eskiHizmetBinasiId = personel.HizmetBinasiId;
+                    var eskiDepartmanHizmetBinasiId = personel.DepartmanHizmetBinasiId;
                     var eskiDepartmanId = personel.DepartmanId;
 
                     _mapper.Map(request.Personel, personel);
@@ -637,8 +637,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     _unitOfWork.Repository<Personel>().Update(personel);
                     await _unitOfWork.SaveChangesAsync();
 
-                    // ⭐ Hizmet binası VEYA departman değiştiyse, eski banko atamasını temizle
-                    if (eskiHizmetBinasiId != request.Personel.HizmetBinasiId ||
+                    // ⭐ DepartmanHizmetBinasi VEYA departman değiştiyse, eski banko atamasını temizle
+                    if (eskiDepartmanHizmetBinasiId != request.Personel.DepartmanHizmetBinasiId ||
                         eskiDepartmanId != request.Personel.DepartmanId)
                     {
                         var bankoKullaniciRepo = _unitOfWork.GetRepository<IBankoKullaniciRepository>();
@@ -648,8 +648,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         {
                             bankoKullaniciRepo.Delete(eskiBankoAtamasi);
 
-                            var degisiklikTipi = eskiHizmetBinasiId != request.Personel.HizmetBinasiId
-                                ? $"hizmet binası ({eskiHizmetBinasiId} -> {request.Personel.HizmetBinasiId})"
+                            var degisiklikTipi = eskiDepartmanHizmetBinasiId != request.Personel.DepartmanHizmetBinasiId
+                                ? $"departman hizmet binası ({eskiDepartmanHizmetBinasiId} -> {request.Personel.DepartmanHizmetBinasiId})"
                                 : $"departman ({eskiDepartmanId} -> {request.Personel.DepartmanId})";
 
                             _logger.LogInformation(
@@ -665,7 +665,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                             user.AktifBankoId = null;
                             user.BankoModuBaslangic = null;
                             _unitOfWork.Repository<User>().Update(user);
-                            _logger.LogInformation("UpdateCompleteAsync: Personel hizmet binası/departman değiştiği için banko modundan çıkarıldı. TC: {TcKimlikNo}", tcKimlikNo);
+                            _logger.LogInformation("UpdateCompleteAsync: Personel departman hizmet binası/departman değiştiği için banko modundan çıkarıldı. TC: {TcKimlikNo}", tcKimlikNo);
                         }
 
                         await _unitOfWork.SaveChangesAsync();

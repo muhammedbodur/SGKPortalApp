@@ -88,7 +88,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                 .Include(p => p.Servis)
                 .Include(p => p.Unvan)
                 .Include(p => p.AtanmaNedeni)
-                .Include(p => p.HizmetBinasi)
+                .Include(p => p.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Include(p => p.Sendika)
                 .Include(p => p.Il)
                 .Include(p => p.Ilce)
@@ -124,8 +125,10 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                 .Include(p => p.Departman)
                 .Include(p => p.Servis)
                 .Include(p => p.Unvan)
+                .Include(p => p.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .AsNoTracking()
-                .Where(p => p.HizmetBinasiId == hizmetBinasiId &&
+                .Where(p => p.DepartmanHizmetBinasi.HizmetBinasiId == hizmetBinasiId &&
                            !p.SilindiMi &&
                            p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif)
                 .OrderBy(p => p.AdSoyad)
@@ -149,7 +152,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                 .Include(p => p.Departman)
                 .Include(p => p.Servis)
                 .Include(p => p.Unvan)
-                .Include(p => p.HizmetBinasi)
+                .Include(p => p.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .AsNoTracking()
                 .Where(p => !p.SilindiMi)
                 .OrderBy(p => p.AdSoyad)
@@ -162,7 +166,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                 .Include(p => p.Departman)
                 .Include(p => p.Servis)
                 .Include(p => p.Unvan)
-                .Include(p => p.HizmetBinasi)
+                .Include(p => p.DepartmanHizmetBinasi)
+                    .ThenInclude(dhb => dhb.HizmetBinasi)
                 .Where(p => !p.SilindiMi)
                 .AsQueryable();
 
@@ -194,9 +199,9 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                 query = query.Where(p => p.UnvanId == filter.UnvanId.Value);
             }
 
-            if (filter.HizmetBinasiId.HasValue && filter.HizmetBinasiId > 0)
+            if (filter.DepartmanHizmetBinasiId.HasValue && filter.DepartmanHizmetBinasiId > 0)
             {
-                query = query.Where(p => p.HizmetBinasiId == filter.HizmetBinasiId.Value);
+                query = query.Where(p => p.DepartmanHizmetBinasiId == filter.DepartmanHizmetBinasiId.Value);
             }
 
             if (filter.AktiflikDurum.HasValue)
@@ -231,8 +236,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                     : query.OrderBy(p => p.Servis != null ? p.Servis.ServisAdi : ""),
 
                 "hizmetbinasiadi" => filter.SortDescending
-                    ? query.OrderByDescending(p => p.HizmetBinasi != null ? p.HizmetBinasi.HizmetBinasiAdi : "")
-                    : query.OrderBy(p => p.HizmetBinasi != null ? p.HizmetBinasi.HizmetBinasiAdi : ""),
+                    ? query.OrderByDescending(p => p.DepartmanHizmetBinasi != null && p.DepartmanHizmetBinasi.HizmetBinasi != null ? p.DepartmanHizmetBinasi.HizmetBinasi.HizmetBinasiAdi : "")
+                    : query.OrderBy(p => p.DepartmanHizmetBinasi != null && p.DepartmanHizmetBinasi.HizmetBinasi != null ? p.DepartmanHizmetBinasi.HizmetBinasi.HizmetBinasiAdi : ""),
 
                 "unvanadi" => filter.SortDescending
                     ? query.OrderByDescending(p => p.Unvan != null ? p.Unvan.UnvanAdi : "")
@@ -262,7 +267,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                     DepartmanAdi = p.Departman != null ? p.Departman.DepartmanAdi : "",
                     ServisAdi = p.Servis != null ? p.Servis.ServisAdi : "",
                     UnvanAdi = p.Unvan != null ? p.Unvan.UnvanAdi : "",
-                    HizmetBinasiAdi = p.HizmetBinasi != null ? p.HizmetBinasi.HizmetBinasiAdi : "",
+                    HizmetBinasiAdi = p.DepartmanHizmetBinasi != null && p.DepartmanHizmetBinasi.HizmetBinasi != null ? p.DepartmanHizmetBinasi.HizmetBinasi.HizmetBinasiAdi : "",
                     Dahili = p.Dahili,
                     CepTelefonu = p.CepTelefonu,
                     Resim = p.Resim ?? "",

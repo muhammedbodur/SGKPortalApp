@@ -38,6 +38,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         [Inject] private IServisApiService _servisApiService { get; set; } = default!;
         [Inject] private IUnvanApiService _unvanApiService { get; set; } = default!;
         [Inject] private IHizmetBinasiApiService _hizmetBinasiApiService { get; set; } = default!;
+        [Inject] private IDepartmanHizmetBinasiApiService _departmanHizmetBinasiApiService { get; set; } = default!;
         [Inject] private ISendikaApiService _sendikaApiService { get; set; } = default!;
         [Inject] private IIlApiService _ilApiService { get; set; } = default!;
         [Inject] private IIlceApiService _ilceApiService { get; set; } = default!;
@@ -75,6 +76,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private List<ServisResponseDto> Servisler { get; set; } = new();
         private List<UnvanResponseDto> Unvanlar { get; set; } = new();
         private List<HizmetBinasiResponseDto> HizmetBinalari { get; set; } = new();
+        private List<DepartmanHizmetBinasiResponseDto> DepartmanHizmetBinalari { get; set; } = new();
         private List<SendikaResponseDto> Sendikalar { get; set; } = new();
         private List<IlResponseDto> Iller { get; set; } = new();
         private List<IlceResponseDto> TumIlceler { get; set; } = new();
@@ -266,6 +268,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 // İlçeleri filtreleniyor
                 FilterIlceler();
 
+                // Departmana bağlı hizmet binalarını yükle
+                if (FormModel.DepartmanId > 0)
+                {
+                    await LoadDepartmanHizmetBinalariAsync(FormModel.DepartmanId);
+                }
+
                 // Select2'leri initialize ediliyor
                 await RefreshSelect2();
             }
@@ -291,30 +299,30 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         // ═══════════════════════════════════════════════════════
 
         /// <summary>
-        /// Hizmet Binası değişiklik handler - GÜVENLİ INT PARSE
+        /// DepartmanHizmetBinasi değişiklik handler - GÜVENLİ INT PARSE
         /// </summary>
-        private void OnHizmetBinasiChanged(ChangeEventArgs e)
+        private void OnDepartmanHizmetBinasiChanged(ChangeEventArgs e)
         {
             try
             {
                 var value = e.Value?.ToString();
-                Console.WriteLine($" [HIZMET BINASI] Raw Value: '{value}'");
+                Console.WriteLine($" [DEPARTMAN HIZMET BINASI] Raw Value: '{value}'");
 
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    Console.WriteLine(" [HIZMET BINASI] Boş değer");
-                    FormModel.HizmetBinasiId = 0;
+                    Console.WriteLine(" [DEPARTMAN HIZMET BINASI] Boş değer");
+                    FormModel.DepartmanHizmetBinasiId = 0;
                     StateHasChanged();
                     return;
                 }
 
                 if (int.TryParse(value, out int parsedValue))
                 {
-                    FormModel.HizmetBinasiId = parsedValue;
-                    Console.WriteLine($" [HIZMET BINASI] Parse başarılı: {parsedValue}");
+                    FormModel.DepartmanHizmetBinasiId = parsedValue;
+                    Console.WriteLine($" [DEPARTMAN HIZMET BINASI] Parse başarılı: {parsedValue}");
 
                     // Seçilen binayı logla
-                    var selectedBina = HizmetBinalari.FirstOrDefault(b => b.HizmetBinasiId == parsedValue);
+                    var selectedBina = DepartmanHizmetBinalari.FirstOrDefault(b => b.DepartmanHizmetBinasiId == parsedValue);
                     if (selectedBina != null)
                     {
                         Console.WriteLine($"    Seçilen Bina: {selectedBina.HizmetBinasiAdi}");
@@ -322,24 +330,24 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 }
                 else
                 {
-                    Console.WriteLine($" [HIZMET BINASI] Parse BAŞARISIZ: '{value}'");
-                    FormModel.HizmetBinasiId = 0;
+                    Console.WriteLine($" [DEPARTMAN HIZMET BINASI] Parse BAŞARISIZ: '{value}'");
+                    FormModel.DepartmanHizmetBinasiId = 0;
                 }
 
                 StateHasChanged();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($" [HIZMET BINASI] EXCEPTION: {ex.Message}");
-                FormModel.HizmetBinasiId = 0;
+                Console.WriteLine($" [DEPARTMAN HIZMET BINASI] EXCEPTION: {ex.Message}");
+                FormModel.DepartmanHizmetBinasiId = 0;
                 StateHasChanged();
             }
         }
 
         /// <summary>
-        /// Departman değişiklik handler - GÜVENLİ INT PARSE
+        /// Departman değişiklik handler - GÜVENLİ INT PARSE + DepartmanHizmetBinalari yükleme
         /// </summary>
-        private void OnDepartmanChanged(ChangeEventArgs e)
+        private async Task OnDepartmanChangedAsync(ChangeEventArgs e)
         {
             try
             {
@@ -347,11 +355,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 if (int.TryParse(value, out int parsedValue))
                 {
                     FormModel.DepartmanId = parsedValue;
+                    FormModel.DepartmanHizmetBinasiId = 0; // Bina seçimini sıfırla
                     Console.WriteLine($" [DEPARTMAN] ID: {parsedValue}");
+
+                    // Seçilen departmana bağlı hizmet binalarını yükle
+                    await LoadDepartmanHizmetBinalariAsync(parsedValue);
                 }
                 else
                 {
                     FormModel.DepartmanId = 0;
+                    FormModel.DepartmanHizmetBinasiId = 0;
+                    DepartmanHizmetBinalari = new List<DepartmanHizmetBinasiResponseDto>();
                     Console.WriteLine($" [DEPARTMAN] Parse başarısız: '{value}'");
                 }
                 StateHasChanged();
@@ -360,6 +374,40 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             {
                 Console.WriteLine($" [DEPARTMAN] EXCEPTION: {ex.Message}");
                 FormModel.DepartmanId = 0;
+                FormModel.DepartmanHizmetBinasiId = 0;
+                DepartmanHizmetBinalari = new List<DepartmanHizmetBinasiResponseDto>();
+            }
+        }
+
+        /// <summary>
+        /// Seçilen departmana bağlı DepartmanHizmetBinalari listesini yükler
+        /// </summary>
+        private async Task LoadDepartmanHizmetBinalariAsync(int departmanId)
+        {
+            try
+            {
+                if (departmanId <= 0)
+                {
+                    DepartmanHizmetBinalari = new List<DepartmanHizmetBinasiResponseDto>();
+                    return;
+                }
+
+                var result = await _departmanHizmetBinasiApiService.GetByDepartmanAsync(departmanId);
+                if (result?.Success == true && result.Data != null)
+                {
+                    DepartmanHizmetBinalari = result.Data;
+                    Console.WriteLine($"   📍 {DepartmanHizmetBinalari.Count} hizmet binası yüklendi (Departman: {departmanId})");
+                }
+                else
+                {
+                    DepartmanHizmetBinalari = new List<DepartmanHizmetBinasiResponseDto>();
+                    Console.WriteLine($"   ⚠️ Departman için hizmet binası bulunamadı (Departman: {departmanId})");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($" [DepartmanHizmetBinalari] EXCEPTION: {ex.Message}");
+                DepartmanHizmetBinalari = new List<DepartmanHizmetBinasiResponseDto>();
             }
         }
 
@@ -543,7 +591,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             Console.WriteLine($"📋 Email: {FormModel.Email}");
             Console.WriteLine($"📋 Sicil No: {FormModel.SicilNo}");
             Console.WriteLine($"───────────────────────────────────────────────────────");
-            Console.WriteLine($" HizmetBinasiId: {FormModel.HizmetBinasiId}");
+            Console.WriteLine($" HizmetBinasiId: {FormModel.DepartmanHizmetBinasiId}");
             Console.WriteLine($" DepartmanId: {FormModel.DepartmanId}");
             Console.WriteLine($" ServisId: {FormModel.ServisId}");
             Console.WriteLine($" UnvanId: {FormModel.UnvanId}");
@@ -572,7 +620,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 validationErrors.Add("❌ Sicil No zorunludur");
 
             // Kurum bilgileri
-            if (FormModel.HizmetBinasiId == 0)
+            if (FormModel.DepartmanHizmetBinasiId == 0)
                 validationErrors.Add("❌ Hizmet Binası seçimi zorunludur");
 
             if (FormModel.DepartmanId == 0)
@@ -612,7 +660,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 // Toplu kayıt DTO'sunu hazırla
                 var completeRequest = MapToCompleteDto(FormModel);
 
-                Console.WriteLine($"🚀 API'ye gönderiliyor... HizmetBinasiId: {completeRequest.Personel.HizmetBinasiId}");
+                Console.WriteLine($"🚀 API'ye gönderiliyor... DepartmanHizmetBinasiId: {completeRequest.Personel.DepartmanHizmetBinasiId}");
 
                 if (IsEditMode)
                 {

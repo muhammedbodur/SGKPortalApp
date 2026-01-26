@@ -305,7 +305,7 @@ else
                                                 <div class="col-md-6 mb-3">
                                                     <label class="form-label">Departman</label>
                                                     <select value="@FormModel.DepartmanId"
-                                                            @onchange="OnDepartmanChanged"
+                                                            @onchange="async (e) => await OnDepartmanChangedAsync(e)"
                                                             class="form-select @(FormModel.DepartmanId == 0 ? "border-warning" : "")"
                                                             data-placeholder="Departman seçiniz"
                                                             disabled="@(perm.IsDisabled || IsSaving)">
@@ -366,35 +366,42 @@ else
                                                 </div>
                                             </PermissionField>
 
-                                            <!-- Hizmet Binası -->
+                                            <!-- Hizmet Binası (Departmana bağlı) -->
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">
                                                     Hizmet Binası
                                                     <span class="text-danger">*</span>
                                                 </label>
-                                                <select value="@FormModel.HizmetBinasiId"
-                                                        @onchange="OnHizmetBinasiChanged"
-                                                        class="form-select @(FormModel.HizmetBinasiId == 0 ? "border-danger" : "")"
+                                                <select value="@FormModel.DepartmanHizmetBinasiId"
+                                                        @onchange="OnDepartmanHizmetBinasiChanged"
+                                                        class="form-select @(FormModel.DepartmanHizmetBinasiId == 0 ? "border-danger" : "")"
                                                         data-placeholder="Hizmet Binası seçiniz"
-                                                        disabled="@IsSaving">
+                                                        disabled="@(IsSaving || FormModel.DepartmanId == 0)">
                                                     <option value="0">Seçiniz</option>
-                                                    @foreach (var bina in HizmetBinalari)
+                                                    @foreach (var dhb in DepartmanHizmetBinalari)
                                                     {
-                                                        <option value="@bina.HizmetBinasiId">@bina.HizmetBinasiAdi</option>
+                                                        <option value="@dhb.DepartmanHizmetBinasiId">@dhb.HizmetBinasiAdi @(dhb.AnaBina ? "(Ana Bina)" : "")</option>
                                                     }
                                                 </select>
-                                                @if (FormModel.HizmetBinasiId == 0 && HizmetBinalari.Any())
+                                                @if (FormModel.DepartmanId == 0)
+                                                {
+                                                    <small class="text-info">
+                                                        <i class="bx bx-info-circle me-1"></i>
+                                                        Önce departman seçiniz
+                                                    </small>
+                                                }
+                                                else if (FormModel.DepartmanHizmetBinasiId == 0 && DepartmanHizmetBinalari.Any())
                                                 {
                                                     <small class="text-danger">
                                                         <i class="bx bx-error-circle me-1"></i>
-                                                        Lütfen hizmet binası seçiniz (Toplam: @HizmetBinalari.Count)
+                                                        Lütfen hizmet binası seçiniz (Toplam: @DepartmanHizmetBinalari.Count)
                                                     </small>
                                                 }
-                                                else if (!HizmetBinalari.Any())
+                                                else if (FormModel.DepartmanId > 0 && !DepartmanHizmetBinalari.Any())
                                                 {
                                                     <small class="text-warning">
                                                         <i class="bx bx-info-circle me-1"></i>
-                                                        Hizmet binası yüklenmedi!
+                                                        Bu departmana tanımlı hizmet binası yok!
                                                     </small>
                                                 }
                                             </div>
