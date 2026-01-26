@@ -592,6 +592,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 }
             }
 
+            // SendikaId validasyonu (nullable FK)
+            int? validSendikaId = null;
+            if (k.Sendika > 0)
+            {
+                var allSendikalar = await unitOfWork.Repository<Sendika>().GetAllAsync();
+                var sendikaExists = allSendikalar.Any(s => s.SendikaId == k.Sendika);
+                if (sendikaExists)
+                {
+                    validSendikaId = k.Sendika;
+                }
+                else
+                {
+                    _logger.LogWarning("SendikaId {RequestedId} bulunamadı, null olarak ayarlanıyor", k.Sendika);
+                }
+            }
+
             return new Personel
             {
                 TcKimlikNo = tcKimlikNo,
@@ -612,7 +628,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 DepartmanHizmetBinasi = null!, // required property - FK yeterli, EF Core ilişkiyi yönetir
                 IlId = ilId,
                 IlceId = ilceId,
-                SendikaId = k.Sendika > 0 ? k.Sendika : null,
+                SendikaId = validSendikaId,
                 Gorev = k.Gorev,
                 Uzmanlik = k.Brans, // Brans alanı Uzmanlik olarak mapping
                 PersonelTipi = PersonelTipi.memur,
