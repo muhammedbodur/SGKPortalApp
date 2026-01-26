@@ -283,7 +283,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                         Success = true,
                         Message = "Giriş başarılı!",
                         TcKimlikNo = user.Personel.TcKimlikNo,
-                        SicilNo = user.Personel.SicilNo,
+                        SicilNo = user.Personel.SicilNo ?? 0,
                         AdSoyad = user.Personel.AdSoyad,
                         Email = user.Personel.Email,
                         DepartmanId = user.Personel.DepartmanId,

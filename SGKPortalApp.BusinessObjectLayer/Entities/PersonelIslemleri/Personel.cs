@@ -32,7 +32,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         [SensitiveData]
         public string TcKimlikNo { get; set; } = string.Empty;
 
-        public int SicilNo { get; set; }
+        public int? SicilNo { get; set; }
 
         [Required]
         [StringLength(200)]
@@ -115,9 +115,8 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
 
         public PersonelTipi PersonelTipi { get; set; }
 
-        [Required]
         [StringLength(100)]
-        public string Email { get; set; } = string.Empty;
+        public string? Email { get; set; }
 
         public int Dahili { get; set; }
 

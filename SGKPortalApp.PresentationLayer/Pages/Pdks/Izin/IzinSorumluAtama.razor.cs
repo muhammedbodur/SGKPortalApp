@@ -377,7 +377,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
                     {
                         TcKimlikNo = p.TcKimlikNo,
                         AdSoyad = p.AdSoyad,
-                        SicilNo = p.SicilNo
+                        SicilNo = p.SicilNo ?? 0
                     }).ToList();
                 }
 

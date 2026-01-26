@@ -113,6 +113,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
             try { await SyncHizmetBinalariAsync(legacyBinaRepo, unitOfWork, cancellationToken); }
             catch (Exception ex) { _logger.LogError(ex, "❌ SyncHizmetBinalariAsync hatası"); }
 
+            var legacyAtanmaRepo = scope.ServiceProvider.GetRequiredService<ILegacyAtanmaRepository>();
+            try { await SyncAtanmaNedenleriAsync(legacyAtanmaRepo, unitOfWork, cancellationToken); }
+            catch (Exception ex) { _logger.LogError(ex, "❌ SyncAtanmaNedenleriAsync hatası"); }
+
             try { await SyncDepartmanHizmetBinalariAsync(legacyKullaniciRepo, unitOfWork, cancellationToken); }
             catch (Exception ex) { _logger.LogError(ex, "❌ SyncDepartmanHizmetBinalariAsync hatası"); }
 
@@ -493,43 +497,52 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                     }
                 }
 
-                if (personelDict.TryGetValue(tcKimlikNo, out var existingPersonel))
+                try
                 {
-                    // Güncelleme
-                    var hasChanges = await UpdatePersonelFromLegacyAsync(existingPersonel, kullanici, departmanId, servisId, unvanId, hizmetBinasiId, ilId, ilceId, unitOfWork, ct);
-                    if (hasChanges)
+                    if (personelDict.TryGetValue(tcKimlikNo, out var existingPersonel))
                     {
-                        existingPersonel.DuzenleyenKullanici = "SYNC";
-                        existingPersonel.DuzenlenmeTarihi = DateTime.Now;
-                        updated++;
-                    }
-                }
-                else
-                {
-                    // Yeni kayıt
-                    var personel = await CreatePersonelFromLegacyAsync(kullanici, tcKimlikNo, departmanId, servisId, unvanId, hizmetBinasiId, ilId, ilceId, unitOfWork, ct);
-                    await unitOfWork.Repository<Personel>().AddAsync(personel);
-                    added++;
-
-                    // User da ekle
-                    if (!userDict.ContainsKey(tcKimlikNo))
-                    {
-                        await unitOfWork.Repository<User>().AddAsync(new User
+                        // Güncelleme
+                        var hasChanges = await UpdatePersonelFromLegacyAsync(existingPersonel, kullanici, departmanId, servisId, unvanId, hizmetBinasiId, ilId, ilceId, unitOfWork, ct);
+                        if (hasChanges)
                         {
-                            TcKimlikNo = tcKimlikNo,
-                            UserType = UserType.Personel,
-                            PassWord = kullanici.Password ?? tcKimlikNo,
-                            AktifMi = kullanici.CalisanDurum == 1,
-                            EkleyenKullanici = "SYNC",
-                            EklenmeTarihi = DateTime.Now,
-                            DuzenleyenKullanici = "SYNC",
-                            DuzenlenmeTarihi = DateTime.Now
-                        });
+                            existingPersonel.DuzenleyenKullanici = "SYNC";
+                            existingPersonel.DuzenlenmeTarihi = DateTime.Now;
+                            updated++;
+                        }
                     }
+                    else
+                    {
+                        // Yeni kayıt
+                        var personel = await CreatePersonelFromLegacyAsync(kullanici, tcKimlikNo, departmanId, servisId, unvanId, hizmetBinasiId, ilId, ilceId, unitOfWork, ct);
+                        await unitOfWork.Repository<Personel>().AddAsync(personel);
+                        added++;
+
+                        // User da ekle
+                        if (!userDict.ContainsKey(tcKimlikNo))
+                        {
+                            await unitOfWork.Repository<User>().AddAsync(new User
+                            {
+                                TcKimlikNo = tcKimlikNo,
+                                UserType = UserType.Personel,
+                                PassWord = kullanici.Password ?? tcKimlikNo,
+                                AktifMi = kullanici.CalisanDurum == 1,
+                                EkleyenKullanici = "SYNC",
+                                EklenmeTarihi = DateTime.Now,
+                                DuzenleyenKullanici = "SYNC",
+                                DuzenlenmeTarihi = DateTime.Now
+                            });
+                        }
+                    }
+
+                    await unitOfWork.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "❌ Personel sync hatası - TC: {TC}, SicilNo: {SicilNo}, AdSoyad: {AdSoyad}", 
+                        tcKimlikNo, kullanici.SicilNo, kullanici.KullaniciAdi);
+                    skipped++;
                 }
             }
-
-            await unitOfWork.SaveChangesAsync();
             _logger.LogInformation("  ✅ Personeller: {Added} eklendi, {Updated} güncellendi, {Skipped} atlandı", added, updated, skipped);
         }
 
@@ -557,24 +570,24 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 await unitOfWork.SaveChangesAsync();
             }
 
-            // AtanmaNedeniId validasyonu
-            var requestedAtanmaNedeniId = k.Atanma ?? 1;
+            // AtanmaNedeniId validasyonu (LegacyKod ile mapping)
+            var requestedLegacyKod = k.Atanma ?? 1;
             var allAtanmaNedenleri = await unitOfWork.Repository<AtanmaNedenleri>().GetAllAsync();
-            var atanmaNedeniExists = allAtanmaNedenleri.Any(a => a.AtanmaNedeniId == requestedAtanmaNedeniId);
+            var atanmaNedeni = allAtanmaNedenleri.FirstOrDefault(a => a.LegacyKod == requestedLegacyKod);
 
             int validAtanmaNedeniId;
-            if (atanmaNedeniExists)
+            if (atanmaNedeni != null)
             {
-                validAtanmaNedeniId = requestedAtanmaNedeniId;
+                validAtanmaNedeniId = atanmaNedeni.AtanmaNedeniId;
             }
             else
             {
-                // İlk mevcut AtanmaNedeni'ni kullan veya yoksa oluştur
+                // LegacyKod ile eşleşen bulunamadı - ilk mevcut AtanmaNedeni'ni kullan veya yoksa oluştur
                 var firstAtanmaNedeni = allAtanmaNedenleri.FirstOrDefault();
                 if (firstAtanmaNedeni != null)
                 {
                     validAtanmaNedeniId = firstAtanmaNedeni.AtanmaNedeniId;
-                    _logger.LogWarning("AtanmaNedeniId {RequestedId} bulunamadı, {UsedId} kullanılıyor", requestedAtanmaNedeniId, validAtanmaNedeniId);
+                    _logger.LogWarning("LegacyKod {LegacyKod} ile eşleşen AtanmaNedeni bulunamadı, {UsedId} kullanılıyor. TC: {Tc}", requestedLegacyKod, validAtanmaNedeniId, tcKimlikNo);
                 }
                 else
                 {
@@ -582,6 +595,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                     var newAtanmaNedeni = new AtanmaNedenleri
                     {
                         AtanmaNedeni = "Belirtilmemiş",
+                        LegacyKod = null,
                         EklenmeTarihi = DateTime.Now,
                         DuzenlenmeTarihi = DateTime.Now
                     };
@@ -592,10 +606,27 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 }
             }
 
+            // SendikaId validasyonu (LegacyKod ile mapping)
+            int? validSendikaId = null;
+            if (k.Sendika.HasValue)
+            {
+                var allSendikalar = await unitOfWork.Repository<Sendika>().GetAllAsync();
+                var sendika = allSendikalar.FirstOrDefault(s => s.LegacyKod == k.Sendika.Value);
+                
+                if (sendika != null)
+                {
+                    validSendikaId = sendika.SendikaId;
+                }
+                else
+                {
+                    _logger.LogWarning("LegacyKod {LegacyKod} ile eşleşen sendika bulunamadı, null olarak set ediliyor. TC: {Tc}", k.Sendika.Value, tcKimlikNo);
+                }
+            }
+
             return new Personel
             {
                 TcKimlikNo = tcKimlikNo,
-                SicilNo = k.SicilNo,
+                SicilNo = k.SicilNo > 0 ? k.SicilNo : null,
                 AdSoyad = k.KullaniciAdi,
                 NickName = GenerateNickName(k.KullaniciAdi),
                 PersonelKayitNo = 0,
@@ -612,11 +643,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 DepartmanHizmetBinasi = null!, // required property - FK yeterli, EF Core ilişkiyi yönetir
                 IlId = ilId,
                 IlceId = ilceId,
-                SendikaId = k.Sendika > 0 ? k.Sendika : null,
+                SendikaId = validSendikaId,
                 Gorev = k.Gorev,
                 Uzmanlik = k.Brans, // Brans alanı Uzmanlik olarak mapping
                 PersonelTipi = PersonelTipi.memur,
-                Email = k.Email ?? "",
+                Email = string.IsNullOrWhiteSpace(k.Email) ? null : k.Email,
                 Dahili = (int)k.Dahili,
                 CepTelefonu = k.CepTel > 0 ? k.CepTel.ToString() : null,
                 CepTelefonu2 = k.CepTel2 > 0 ? k.CepTel2.ToString() : null,
@@ -632,7 +663,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 UlasimServis2 = k.Servis2,
                 Tabldot = k.Tabldot ?? 0,
                 PersonelAktiflikDurum = MapCalisanDurum(k.CalisanDurum),
-                EmekliSicilNo = k.EmekliSicilNo,
+                EmekliSicilNo = ParseEmekliSicilNo(k.EmekliSicilNo),
                 OgrenimDurumu = OgrenimDurumu.ilkokul,
                 BitirdigiOkul = k.BitirdigiOkul,
                 BitirdigiBolum = k.BitirdigiBolum,
@@ -658,7 +689,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
             bool hasChanges = false;
 
             if (p.AdSoyad != k.KullaniciAdi) { p.AdSoyad = k.KullaniciAdi; hasChanges = true; }
-            if (p.SicilNo != k.SicilNo) { p.SicilNo = k.SicilNo; hasChanges = true; }
+            var newSicilNo = k.SicilNo > 0 ? k.SicilNo : (int?)null;
+            if (p.SicilNo != newSicilNo) { p.SicilNo = newSicilNo; hasChanges = true; }
             if (p.DepartmanId != departmanId) { p.DepartmanId = departmanId; hasChanges = true; }
             if (p.ServisId != servisId) { p.ServisId = servisId; hasChanges = true; }
             if (p.UnvanId != unvanId) { p.UnvanId = unvanId; hasChanges = true; }
@@ -672,7 +704,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 p.DepartmanHizmetBinasiId = departmanHizmetBinasi.DepartmanHizmetBinasiId; 
                 hasChanges = true; 
             }
-            if (p.Email != (k.Email ?? "")) { p.Email = k.Email ?? ""; hasChanges = true; }
+            var newEmail = string.IsNullOrWhiteSpace(k.Email) ? null : k.Email;
+            if (p.Email != newEmail) { p.Email = newEmail; hasChanges = true; }
             if (p.Dahili != (int)k.Dahili) { p.Dahili = (int)k.Dahili; hasChanges = true; }
             if (p.Gorev != k.Gorev) { p.Gorev = k.Gorev; hasChanges = true; }
             if (p.Uzmanlik != k.Brans) { p.Uzmanlik = k.Brans; hasChanges = true; }
@@ -685,6 +718,21 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
 
             if (p.IlId != ilId) { p.IlId = ilId; hasChanges = true; }
             if (p.IlceId != ilceId) { p.IlceId = ilceId; hasChanges = true; }
+
+            // SendikaId validasyonu (LegacyKod ile mapping)
+            int? validSendikaId = null;
+            if (k.Sendika.HasValue)
+            {
+                var allSendikalar = await unitOfWork.Repository<Sendika>().GetAllAsync();
+                var sendika = allSendikalar.FirstOrDefault(s => s.LegacyKod == k.Sendika.Value);
+                
+                if (sendika != null)
+                {
+                    validSendikaId = sendika.SendikaId;
+                }
+            }
+
+            if (p.SendikaId != validSendikaId) { p.SendikaId = validSendikaId; hasChanges = true; }
 
             return hasChanges;
         }
@@ -747,6 +795,62 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 6 => EsininIsDurumu.kamu,
                 _ => EsininIsDurumu.belirtilmemis
             };
+        }
+
+        private string? ParseEmekliSicilNo(string? emekliSicilNo)
+        {
+            if (string.IsNullOrWhiteSpace(emekliSicilNo))
+                return null;
+
+            // Eğer int değer DEĞİLSE NULL döndür (sadece int değerler kabul edilir)
+            if (!int.TryParse(emekliSicilNo, out _))
+                return null;
+
+            // 20 karakterden uzunsa kısalt
+            return emekliSicilNo.Length > 20 ? emekliSicilNo.Substring(0, 20) : emekliSicilNo;
+        }
+
+        private async Task SyncAtanmaNedenleriAsync(ILegacyAtanmaRepository legacyRepo, IUnitOfWork unitOfWork, CancellationToken ct)
+        {
+            _logger.LogInformation("📦 Atanma Nedenleri sync ediliyor...");
+
+            var legacyAtanmalar = await legacyRepo.GetAllAsync();
+            var atanmaNedenleri = await unitOfWork.Repository<AtanmaNedenleri>().GetAllAsync();
+
+            int added = 0, updated = 0;
+
+            foreach (var la in legacyAtanmalar)
+            {
+                if (string.IsNullOrWhiteSpace(la.AtanmaNedeni)) continue;
+
+                var existing = atanmaNedenleri.FirstOrDefault(a => a.LegacyKod == la.AtanmaId);
+
+                if (existing == null)
+                {
+                    var newAtanma = new AtanmaNedenleri
+                    {
+                        AtanmaNedeni = la.AtanmaNedeni,
+                        LegacyKod = la.AtanmaId,
+                        EkleyenKullanici = "SYNC",
+                        EklenmeTarihi = DateTime.Now
+                    };
+                    await unitOfWork.Repository<AtanmaNedenleri>().AddAsync(newAtanma);
+                    added++;
+                }
+                else if (existing.AtanmaNedeni != la.AtanmaNedeni)
+                {
+                    existing.AtanmaNedeni = la.AtanmaNedeni;
+                    existing.DuzenleyenKullanici = "SYNC";
+                    existing.DuzenlenmeTarihi = DateTime.Now;
+                    unitOfWork.Repository<AtanmaNedenleri>().Update(existing);
+                    updated++;
+                }
+            }
+
+            if (added > 0 || updated > 0)
+                await unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("  ✅ Atanma Nedenleri: {added} eklendi, {updated} güncellendi", added, updated);
         }
     }
 }

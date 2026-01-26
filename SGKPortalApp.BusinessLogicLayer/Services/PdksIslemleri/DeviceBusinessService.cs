@@ -585,7 +585,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                             PersonelKayitNo = personel.PersonelKayitNo,
                             AdSoyad = personel.AdSoyad,
                             NickName = personel.NickName,
-                            SicilNo = personel.SicilNo,
+                            SicilNo = personel.SicilNo ?? 0,
                             TcKimlikNo = personel.TcKimlikNo,
                             KartNo = personel.KartNo,
                             DepartmanAdi = personel.Departman?.DepartmanAdi,
@@ -730,7 +730,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                             PersonelKayitNo = personel.PersonelKayitNo,
                             AdSoyad = personel.AdSoyad,
                             NickName = personel.NickName,
-                            SicilNo = personel.SicilNo,
+                            SicilNo = personel.SicilNo ?? 0,
                             TcKimlikNo = personel.TcKimlikNo,
                             KartNo = personel.KartNo,
                             DepartmanAdi = personel.Departman?.DepartmanAdi,
@@ -806,7 +806,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                             PersonelKayitNo = p.PersonelKayitNo,
                             AdSoyad = p.AdSoyad,
                             NickName = p.NickName,
-                            SicilNo = p.SicilNo,
+                            SicilNo = p.SicilNo ?? 0,
                             TcKimlikNo = p.TcKimlikNo,
                             KartNo = p.KartNo,
                             DepartmanAdi = p.Departman?.DepartmanAdi,
@@ -1193,7 +1193,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     if (personelByKartNo.TryGetValue(enrollNumber, out var personelByKart))
                     {
                         log.PersonelAdSoyad = personelByKart.AdSoyad;
-                        log.PersonelSicilNo = personelByKart.SicilNo.ToString();
+                        log.PersonelSicilNo = (personelByKart.SicilNo ?? 0).ToString();
                         log.PersonelTcKimlikNo = personelByKart.TcKimlikNo;
                         log.PersonelDepartman = personelByKart.Departman?.DepartmanAdi;
                         log.PersonelServis = personelByKart.Servis?.ServisAdi;
@@ -1204,7 +1204,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     if (personelByEnrollNo.TryGetValue(enrollNumber, out var personelByEnroll))
                     {
                         log.PersonelAdSoyad = personelByEnroll.AdSoyad;
-                        log.PersonelSicilNo = personelByEnroll.SicilNo.ToString();
+                        log.PersonelSicilNo = (personelByEnroll.SicilNo ?? 0).ToString();
                         log.PersonelTcKimlikNo = personelByEnroll.TcKimlikNo;
                         log.PersonelDepartman = personelByEnroll.Departman?.DepartmanAdi;
                         log.PersonelServis = personelByEnroll.Servis?.ServisAdi;

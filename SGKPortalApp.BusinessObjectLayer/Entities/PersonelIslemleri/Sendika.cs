@@ -13,6 +13,9 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         public int SendikaId { get; set; }
 
         public required string SendikaAdi { get; set; }
+        
+        public int? LegacyKod { get; set; }
+        
         public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
 
         [InverseProperty("Sendika")]

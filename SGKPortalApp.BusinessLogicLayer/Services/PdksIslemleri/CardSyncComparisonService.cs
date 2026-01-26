@@ -67,7 +67,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 {
                     if (!string.IsNullOrWhiteSpace(p.PersonelKayitNo.ToString()))
                     {
-                        dbCards[p.PersonelKayitNo.ToString()] = (p.NickName, p.KartNo, "Personel", p.SicilNo);
+                        dbCards[p.PersonelKayitNo.ToString()] = (p.NickName, p.KartNo, "Personel", p.SicilNo ?? 0);
                     }
                 }
 

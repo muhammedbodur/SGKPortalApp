@@ -110,7 +110,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     AdSoyad = personel.AdSoyad,
                     DepartmanAdi = personel.Departman?.DepartmanAdi ?? "",
                     BirimAdi = personel.Servis?.ServisAdi,
-                    SicilNo = personel.SicilNo
+                    SicilNo = personel.SicilNo ?? 0
                 };
 
                 return ApiResponseDto<PersonelMesaiBaslikDto>.SuccessResult(baslik);
@@ -133,7 +133,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 Tarih = tarih,
                 TcKimlikNo = personel.TcKimlikNo,
                 AdSoyad = personel.AdSoyad,
-                SicilNo = personel.SicilNo,
+                SicilNo = personel.SicilNo ?? 0,
                 DepartmanAdi = personel.Departman?.DepartmanAdi ?? "",
                 ServisAdi = personel.Servis?.ServisAdi,
                 HaftaSonu = IsWeekend(tarih)

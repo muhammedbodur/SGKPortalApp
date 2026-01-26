@@ -74,7 +74,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
             return await _dbSet
                 .AsNoTracking()
                 .Where(p => !p.SilindiMi)
-                .Select(p => new ValueTuple<int, string>(p.SicilNo, p.AdSoyad))
+                .Select(p => new ValueTuple<int, string>(p.SicilNo ?? 0, p.AdSoyad))
                 .ToListAsync();
         }
 

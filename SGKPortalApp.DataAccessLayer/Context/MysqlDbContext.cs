@@ -14,6 +14,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<LegacyServis> Servisler { get; set; }
         public DbSet<LegacyUnvan> Unvanlar { get; set; }
         public DbSet<LegacyBina> Binalar { get; set; }
+        public DbSet<LegacyAtanma> Atanmalar { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,6 +25,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.Entity<LegacyServis>().ToTable("servisler");
             modelBuilder.Entity<LegacyUnvan>().ToTable("unvanlar");
             modelBuilder.Entity<LegacyBina>().ToTable("binalar");
+            modelBuilder.Entity<LegacyAtanma>().ToTable("atanma");
         }
     }
 }

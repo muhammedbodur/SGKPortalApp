@@ -62,7 +62,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     var aramaMetni = request.AramaMetni.ToLower();
                     query = query.Where(p =>
                         p.AdSoyad.ToLower().Contains(aramaMetni) ||
-                        p.SicilNo.ToString().Contains(aramaMetni));
+                        (p.SicilNo.HasValue && p.SicilNo.Value.ToString().Contains(aramaMetni)));
                 }
 
                 // 3. DTO'ya dönüştür
@@ -70,7 +70,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 {
                     TcKimlikNo = p.TcKimlikNo,
                     AdSoyad = p.AdSoyad,
-                    SicilNo = p.SicilNo,
+                    SicilNo = p.SicilNo ?? 0,
                     PersonelKayitNo = p.PersonelKayitNo,
                     DepartmanAdi = p.Departman != null ? p.Departman.DepartmanAdi : "",
                     ServisAdi = p.Servis != null ? p.Servis.ServisAdi : null,

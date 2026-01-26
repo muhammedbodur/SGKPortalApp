@@ -15,6 +15,8 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         [StringLength(200)]
         public required string AtanmaNedeni { get; set; }
 
+        public int? LegacyKod { get; set; }
+
         // Navigation Properties
         [InverseProperty("AtanmaNedeni")]
         public ICollection<Personel>? Personeller { get; set; } = new List<Personel>();

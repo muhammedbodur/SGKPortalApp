@@ -1,0 +1,87 @@
+============================================================================
+MYSQL SYNC HATASI ÇÖZÜMÜ
+============================================================================
+
+SORUN:
+------
+MySQL sync sırasında FK_PER_Personeller_PER_Sendikalar foreign key constraint hatası.
+Legacy MySQL'de sendika değerleri hardcoded (0-9, 99) ve tablo yok.
+SQL Server'da bu SendikaId'ler mevcut değil.
+
+ÇÖZÜM:
+------
+
+1. LegacyAtanma Entity ve Repository Eklendi
+   ✅ LegacyAtanma.cs
+   ✅ ILegacyAtanmaRepository.cs
+   ✅ LegacyAtanmaRepository.cs
+   ✅ MysqlDbContext.cs güncellendi
+
+2. LegacyKod Alanı Eklendi (Mapping için)
+   ✅ AtanmaNedenleri.cs - LegacyKod alanı eklendi
+   ✅ Sendika.cs - LegacyKod alanı eklendi
+   
+   Mantık: MySQL'deki ID değerleri ile SQL Server'daki ID değerleri farklı olabilir.
+   LegacyKod ile mapping yaparak doğru kayıtları eşleştiriyoruz.
+
+3. SendikaId ve AtanmaNedeniId Validasyonu (LegacyKod ile)
+   ✅ MySqlSyncService.CreatePersonelFromLegacyAsync - LegacyKod mapping
+   ✅ MySqlSyncService.UpdatePersonelFromLegacyAsync - LegacyKod mapping
+   
+   Mantık: Legacy MySQL'deki değerler LegacyKod ile eşleştiriliyor.
+
+4. Import Script'leri Oluşturuldu
+   📄 IMPORT_SENDIKALAR_FULL.sql - Sendika kayıtları (LegacyKod ile)
+   📄 IMPORT_ATANMA_NEDENLERI.sql - Atanma nedenleri (LegacyKod ile)
+   
+   PHP Legacy Mapping:
+   - 0  = Belirtilmemiş
+   - 1  = Büro Emekçileri Sendikası
+   - 2  = Büro Memur Sen
+   - 3  = Türk Büro Sen
+   - 4  = Türkiye Demokratik Ofis Çal. Sen.
+   - 5  = Büro Hak Sen
+   - 6  = Birleşik Büro-İş
+   - 7  = Tüm Büro-Sen
+   - 8  = Ufuk Büro Sen
+   - 9  = Savdes-Sen
+   - 99 = Üye Değil
+
+ADIMLAR:
+--------
+
+1. SQL Server'da migration çalıştır (LegacyKod kolonları için):
+   
+   Package Manager Console'da:
+   > Add-Migration Add_LegacyKod_To_Sendika_And_AtanmaNedeni
+   > Update-Database
+
+2. SQL Server'da import script'lerini çalıştır:
+   
+   SQL Server Management Studio'da sırasıyla:
+   > IMPORT_ATANMA_NEDENLERI.sql
+   > IMPORT_SENDIKALAR_FULL.sql
+
+3. Uygulamayı yeniden başlat ve sync'i test et
+
+NOT:
+----
+- LegacyKod ile mapping yapıldığı için MySQL ve SQL Server ID'leri farklı olabilir
+- Örnek: MySQL atanma_id=1 → SQL Server AtanmaNedeniId=5 (LegacyKod=1 ile eşleşir)
+- Sendika alanı nullable olduğu için, eşleşmeyen değerler null olarak kaydedilecek
+- Sync loglarında "LegacyKod X ile eşleşen sendika bulunamadı" uyarısı görebilirsiniz
+- Bu normal bir durumdur ve hata değildir
+
+LEGACY KOD MAPPING ÖRNEĞİ:
+--------------------------
+MySQL: kullanici.sendika = 1 (Büro Emekçileri Sendikası)
+   ↓ LegacyKod mapping
+SQL Server: PER_Sendikalar.SendikaId = 1, LegacyKod = 1
+   ↓
+Personel.SendikaId = 1 (Doğru eşleşme!)
+
+MySQL: kullanici.atanma = 5 (KPSS İlk Atama)
+   ↓ LegacyKod mapping
+SQL Server: PER_AtanmaNedenleri.AtanmaNedeniId = 12, LegacyKod = 5
+   ↓
+Personel.AtanmaNedeniId = 12 (Doğru eşleşme!)

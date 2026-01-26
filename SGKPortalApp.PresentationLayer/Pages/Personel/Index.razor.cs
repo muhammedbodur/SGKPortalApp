@@ -179,7 +179,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                     FilteredPersoneller = result.Data.Items.Select(p => new PersonelResponseDto
                     {
                         TcKimlikNo = p.TcKimlikNo,
-                        SicilNo = p.SicilNo,
+                        SicilNo = p.SicilNo ?? 0,
                         AdSoyad = p.AdSoyad,
                         Email = p.Email,
                         DepartmanId = 0,

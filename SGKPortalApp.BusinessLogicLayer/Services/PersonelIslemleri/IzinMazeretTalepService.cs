@@ -552,7 +552,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 {
                     TcKimlikNo = p.TcKimlikNo,
                     AdSoyad = p.AdSoyad,
-                    SicilNo = p.SicilNo,
+                    SicilNo = p.SicilNo ?? 0,
                     DepartmanId = p.DepartmanId,
                     DepartmanAdi = p.Departman?.DepartmanAdi ?? string.Empty,
                     ServisId = p.ServisId,

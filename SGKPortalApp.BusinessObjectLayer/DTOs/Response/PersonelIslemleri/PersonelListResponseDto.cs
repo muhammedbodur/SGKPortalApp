@@ -8,7 +8,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
     public class PersonelListResponseDto
     {
         public string TcKimlikNo { get; set; } = string.Empty;
-        public int SicilNo { get; set; }
+        public int? SicilNo { get; set; }
         public string AdSoyad { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string DepartmanAdi { get; set; } = string.Empty;

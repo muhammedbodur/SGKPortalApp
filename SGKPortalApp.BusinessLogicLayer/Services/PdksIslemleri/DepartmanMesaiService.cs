@@ -249,7 +249,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             {
                 TcKimlikNo = personel.TcKimlikNo,
                 AdSoyad = personel.AdSoyad,
-                SicilNo = personel.SicilNo,
+                SicilNo = personel.SicilNo ?? 0,
                 DepartmanAdi = personel.Departman?.DepartmanAdi ?? "",
                 ServisAdi = personel.Servis?.ServisAdi,
                 ToplamGun = toplamGun,

@@ -399,7 +399,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Complex
                                 select new PersonelAtamaMatrixDto
                                 {
                                     TcKimlikNo = p.TcKimlikNo,
-                                    SicilNo = p.SicilNo,
+                                    SicilNo = p.SicilNo ?? 0,
                                     PersonelAdSoyad = p.AdSoyad,
                                     DepartmanId = p.DepartmanId,
                                     DepartmanAdi = p.Departman != null ? p.Departman.DepartmanAdi : "",
