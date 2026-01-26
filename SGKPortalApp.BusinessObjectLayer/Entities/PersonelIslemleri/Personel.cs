@@ -79,10 +79,10 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         [InverseProperty("Personeller")]
         public AtanmaNedenleri? AtanmaNedeni { get; set; }
 
-        public int HizmetBinasiId { get; set; }
-        [ForeignKey(nameof(HizmetBinasiId))]
+        public int DepartmanHizmetBinasiId { get; set; }
+        [ForeignKey(nameof(DepartmanHizmetBinasiId))]
         [InverseProperty("Personeller")]
-        public HizmetBinasi? HizmetBinasi { get; set; }
+        public required DepartmanHizmetBinasi DepartmanHizmetBinasi { get; set; }
 
         public int IlId { get; set; }
         [ForeignKey(nameof(IlId))]

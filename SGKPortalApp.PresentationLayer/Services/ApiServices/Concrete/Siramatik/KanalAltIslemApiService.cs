@@ -86,11 +86,11 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             }
         }
 
-        public async Task<ServiceResult<List<KanalAltIslemResponseDto>>> GetByHizmetBinasiIdAsync(int hizmetBinasiId)
+        public async Task<ServiceResult<List<KanalAltIslemResponseDto>>> GetByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"kanalaltislem/departman-hizmet-binasi/{hizmetBinasiId}");
+                var response = await _httpClient.GetAsync($"kanalaltislem/departman-hizmet-binasi/{departmanHizmetBinasiId}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -154,11 +154,11 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             }
         }
 
-        public async Task<ServiceResult<Dictionary<int, int>>> GetPersonelSayilariAsync(int hizmetBinasiId)
+        public async Task<ServiceResult<Dictionary<int, int>>> GetPersonelSayilariAsync(int departmanHizmetBinasiId)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"kanalaltislem/hizmet-binasi/{hizmetBinasiId}/personel-sayilari");
+                var response = await _httpClient.GetAsync($"kanalaltislem/departman-hizmet-binasi/{departmanHizmetBinasiId}/personel-sayilari");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -188,11 +188,11 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             }
         }
 
-        public async Task<ServiceResult<List<KanalAltIslemResponseDto>>> GetEslestirmeYapilmamisAsync(int hizmetBinasiId)
+        public async Task<ServiceResult<List<KanalAltIslemResponseDto>>> GetEslestirmeYapilmamisAsync(int departmanHizmetBinasiId)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"kanalaltislem/hizmet-binasi/{hizmetBinasiId}/eslestirme-yapilmamis");
+                var response = await _httpClient.GetAsync($"kanalaltislem/departman-hizmet-binasi/{departmanHizmetBinasiId}/eslestirme-yapilmamis");
 
                 if (!response.IsSuccessStatusCode)
                 {

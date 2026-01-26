@@ -200,7 +200,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
 
         private async Task LoadAltIslemler()
         {
-            var result = await _kanalAltIslemService.GetByHizmetBinasiIdAsync(selectedHizmetBinasiId);
+            // DepartmanHizmetBinasiId'yi hesapla
+            var departmanHizmetBinasiId = await GetDepartmanHizmetBinasiIdAsync(selectedHizmetBinasiId);
+            if (departmanHizmetBinasiId == 0)
+            {
+                await _toastService.ShowWarningAsync("Bu hizmet binası için departman eşleşmesi bulunamadı!");
+                return;
+            }
+            
+            var result = await _kanalAltIslemService.GetByDepartmanHizmetBinasiIdAsync(departmanHizmetBinasiId);
 
             if (result.Success && result.Data != null)
             {
@@ -215,7 +223,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAltIslem
 
         private async Task LoadKanalIslemler()
         {
-            var result = await _kanalIslemService.GetByHizmetBinasiIdAsync(selectedHizmetBinasiId);
+            // DepartmanHizmetBinasiId'yi hesapla
+            var departmanHizmetBinasiId = await GetDepartmanHizmetBinasiIdAsync(selectedHizmetBinasiId);
+            if (departmanHizmetBinasiId == 0)
+            {
+                await _toastService.ShowWarningAsync("Bu hizmet binası için departman eşleşmesi bulunamadı!");
+                return;
+            }
+            
+            var result = await _kanalIslemService.GetByDepartmanHizmetBinasiIdAsync(departmanHizmetBinasiId);
 
             if (result.Success && result.Data != null)
             {

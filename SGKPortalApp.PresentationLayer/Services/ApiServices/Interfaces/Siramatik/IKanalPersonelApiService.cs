@@ -6,7 +6,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramat
 {
     public interface IKanalPersonelApiService
     {
-        Task<ServiceResult<List<KanalPersonelResponseDto>>> GetPersonellerByHizmetBinasiIdAsync(int hizmetBinasiId);
+        Task<ServiceResult<List<KanalPersonelResponseDto>>> GetPersonellerByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId);
         Task<ServiceResult<List<KanalPersonelResponseDto>>> GetByPersonelTcAsync(string tcKimlikNo);
         Task<ServiceResult<List<KanalPersonelResponseDto>>> GetByKanalAltIslemIdAsync(int kanalAltIslemId);
         Task<ServiceResult<KanalPersonelResponseDto>> GetByIdAsync(int id);
@@ -17,6 +17,6 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramat
         Task<ServiceResult<bool>> DeleteAsync(int id);
 
         // Personel Atama Matrix (Yeni Yapı)
-        Task<ServiceResult<List<PersonelAtamaMatrixDto>>> GetPersonelAtamaMatrixAsync(int hizmetBinasiId);
+        Task<ServiceResult<List<PersonelAtamaMatrixDto>>> GetPersonelAtamaMatrixAsync(int departmanHizmetBinasiId);
     }
 }

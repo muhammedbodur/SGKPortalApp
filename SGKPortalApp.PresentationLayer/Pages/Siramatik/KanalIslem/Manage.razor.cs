@@ -89,6 +89,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                     }
 
                     model.HizmetBinasiId = HizmetBinasiId.Value;
+                    // DepartmanHizmetBinasiId'yi hesapla
+                    model.DepartmanHizmetBinasiId = await GetDepartmanHizmetBinasiIdAsync(HizmetBinasiId.Value);
                     isHizmetBinasiFromUrl = true;
                     var bina = hizmetBinalari.FirstOrDefault(b => b.HizmetBinasiId == HizmetBinasiId.Value);
                     hizmetBinasiAdi = bina?.HizmetBinasiAdi ?? "Bilinmeyen";
@@ -102,6 +104,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                     if (userHizmetBinasiId > 0)
                     {
                         model.HizmetBinasiId = userHizmetBinasiId;
+                        // DepartmanHizmetBinasiId'yi hesapla
+                        model.DepartmanHizmetBinasiId = await GetDepartmanHizmetBinasiIdAsync(userHizmetBinasiId);
                         await LoadMevcutKanalIslemler(userHizmetBinasiId);
                         SuggestNextValues();
                     }
@@ -115,7 +119,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
         {
             try
             {
-                var result = await _kanalIslemService.GetByHizmetBinasiIdAsync(hizmetBinasiId);
+                // DepartmanHizmetBinasiId'yi hesapla
+                var departmanHizmetBinasiId = await GetDepartmanHizmetBinasiIdAsync(hizmetBinasiId);
+                if (departmanHizmetBinasiId == 0)
+                {
+                    _logger.LogWarning("DepartmanHizmetBinasi eşleşmesi bulunamadı. HizmetBinasiId: {BinaId}", hizmetBinasiId);
+                    mevcutKanalIslemler = new();
+                    filteredAnaKanallar = anaKanallar.ToList();
+                    return;
+                }
+                
+                var result = await _kanalIslemService.GetByDepartmanHizmetBinasiIdAsync(departmanHizmetBinasiId);
                 if (result.Success && result.Data != null)
                 {
                     mevcutKanalIslemler = result.Data;
@@ -258,6 +272,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
                 }
 
                 model.HizmetBinasiId = binaId;
+                // DepartmanHizmetBinasiId'yi hesapla
+                model.DepartmanHizmetBinasiId = await GetDepartmanHizmetBinasiIdAsync(binaId);
+                
+                if (model.DepartmanHizmetBinasiId == 0)
+                {
+                    await _toastService.ShowWarningAsync("Bu hizmet binası için departman eşleşmesi bulunamadı!");
+                    _logger.LogWarning("DepartmanHizmetBinasi eşleşmesi bulunamadı. HizmetBinasiId: {BinaId}", binaId);
+                }
+                
                 await LoadMevcutKanalIslemler(binaId);
                 SuggestNextValues();
                 StateHasChanged();

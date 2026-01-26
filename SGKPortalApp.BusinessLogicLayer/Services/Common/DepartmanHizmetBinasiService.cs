@@ -307,5 +307,42 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     .ErrorResult("Dropdown listesi getirilirken bir hata oluştu", ex.Message);
             }
         }
+
+        public async Task<ApiResponseDto<int>> GetDepartmanHizmetBinasiIdAsync(int departmanId, int hizmetBinasiId)
+        {
+            try
+            {
+                if (departmanId <= 0)
+                {
+                    return ApiResponseDto<int>
+                        .ErrorResult("Geçersiz Departman ID");
+                }
+
+                if (hizmetBinasiId <= 0)
+                {
+                    return ApiResponseDto<int>
+                        .ErrorResult("Geçersiz Hizmet Binası ID");
+                }
+
+                var repository = _unitOfWork.GetRepository<IDepartmanHizmetBinasiRepository>();
+                var entity = await repository.GetByDepartmanAndHizmetBinasiAsync(departmanId, hizmetBinasiId);
+
+                if (entity == null)
+                {
+                    return ApiResponseDto<int>
+                        .ErrorResult($"Departman (ID:{departmanId}) ve Hizmet Binası (ID:{hizmetBinasiId}) kombinasyonu bulunamadı");
+                }
+
+                return ApiResponseDto<int>
+                    .SuccessResult(entity.DepartmanHizmetBinasiId, "DepartmanHizmetBinasiId başarıyla bulundu");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DepartmanHizmetBinasiId bulunurken hata oluştu. DepartmanId: {DepartmanId}, HizmetBinasiId: {HizmetBinasiId}", 
+                    departmanId, hizmetBinasiId);
+                return ApiResponseDto<int>
+                    .ErrorResult("DepartmanHizmetBinasiId bulunurken bir hata oluştu", ex.Message);
+            }
+        }
     }
 }

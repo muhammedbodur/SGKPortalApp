@@ -8,10 +8,10 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramat
     {
         Task<ServiceResult<List<KanalAltIslemResponseDto>>> GetAllAsync();
         Task<ServiceResult<KanalAltIslemResponseDto>> GetByIdWithDetailsAsync(int id);
-        Task<ServiceResult<List<KanalAltIslemResponseDto>>> GetByHizmetBinasiIdAsync(int hizmetBinasiId);
+        Task<ServiceResult<List<KanalAltIslemResponseDto>>> GetByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId);
         Task<ServiceResult<List<KanalAltIslemResponseDto>>> GetByKanalIslemIdAsync(int kanalIslemId);
-        Task<ServiceResult<Dictionary<int, int>>> GetPersonelSayilariAsync(int hizmetBinasiId);
-        Task<ServiceResult<List<KanalAltIslemResponseDto>>> GetEslestirmeYapilmamisAsync(int hizmetBinasiId);
+        Task<ServiceResult<Dictionary<int, int>>> GetPersonelSayilariAsync(int departmanHizmetBinasiId);
+        Task<ServiceResult<List<KanalAltIslemResponseDto>>> GetEslestirmeYapilmamisAsync(int departmanHizmetBinasiId);
         
         // CRUD Operations
         Task<ServiceResult<KanalAltIslemResponseDto>> CreateAsync(KanalAltIslemCreateRequestDto dto);

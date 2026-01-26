@@ -13,8 +13,8 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri
         [StringLength(100, ErrorMessage = "TV adı en fazla 100 karakter olabilir")]
         public string TvAdi { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Hizmet binası seçimi zorunludur")]
-        public int HizmetBinasiId { get; set; }
+        [Required(ErrorMessage = "Departman-Hizmet binası seçimi zorunludur")]
+        public int DepartmanHizmetBinasiId { get; set; }
 
         [Required(ErrorMessage = "Kat tipi seçimi zorunludur")]
         public KatTipi KatTipi { get; set; }

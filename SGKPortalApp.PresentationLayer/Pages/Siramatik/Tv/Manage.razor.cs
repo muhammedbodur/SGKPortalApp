@@ -112,6 +112,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
 
                         selectedHizmetBinasiId = HizmetBinasiId.Value;
                         model.HizmetBinasiId = HizmetBinasiId.Value;
+                        // DepartmanHizmetBinasiId'yi hesapla
+                        model.DepartmanHizmetBinasiId = await GetDepartmanHizmetBinasiIdAsync(HizmetBinasiId.Value);
                     }
                     else
                     {
@@ -121,6 +123,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
                         {
                             selectedHizmetBinasiId = userHizmetBinasiId;
                             model.HizmetBinasiId = userHizmetBinasiId;
+                            // DepartmanHizmetBinasiId'yi hesapla
+                            model.DepartmanHizmetBinasiId = await GetDepartmanHizmetBinasiIdAsync(userHizmetBinasiId);
                         }
                     }
                 }
@@ -149,6 +153,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
 
                 selectedHizmetBinasiId = hizmetBinasiId;
                 model.HizmetBinasiId = hizmetBinasiId;
+                
+                // ✅ DepartmanHizmetBinasiId'yi hesapla
+                model.DepartmanHizmetBinasiId = await GetDepartmanHizmetBinasiIdAsync(hizmetBinasiId);
+                
+                if (model.DepartmanHizmetBinasiId == 0)
+                {
+                    await _toastService.ShowWarningAsync("Bu hizmet binası için departman eşleşmesi bulunamadı!");
+                    _logger.LogWarning("DepartmanHizmetBinasi eşleşmesi bulunamadı. HizmetBinasiId: {BinaId}", hizmetBinasiId);
+                }
             }
         }
 
@@ -170,7 +183,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
                     {
                         TvId = TvId,
                         TvAdi = model.TvAdi,
-                        HizmetBinasiId = model.HizmetBinasiId,
+                        DepartmanHizmetBinasiId = model.DepartmanHizmetBinasiId,
                         KatTipi = model.KatTipi,
                         TvAciklama = model.TvAciklama,
                         Aktiflik = isAktif ? Aktiflik.Aktif : Aktiflik.Pasif
@@ -200,7 +213,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
                     var createDto = new TvCreateRequestDto
                     {
                         TvAdi = model.TvAdi,
-                        HizmetBinasiId = model.HizmetBinasiId,
+                        DepartmanHizmetBinasiId = model.DepartmanHizmetBinasiId,
                         KatTipi = model.KatTipi,
                         TvAciklama = model.TvAciklama,
                         Aktiflik = isAktif ? Aktiflik.Aktif : Aktiflik.Pasif

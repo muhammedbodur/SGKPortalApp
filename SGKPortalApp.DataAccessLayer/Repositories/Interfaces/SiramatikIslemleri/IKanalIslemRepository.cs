@@ -14,9 +14,6 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
         // Departman-Hizmet binası bazında işlemleri listeler
         Task<IEnumerable<KanalIslem>> GetByDepartmanHizmetBinasiAsync(int departmanHizmetBinasiId);
 
-        // Hizmet binası bazında işlemleri listeler
-        Task<IEnumerable<KanalIslem>> GetByHizmetBinasiAsync(int hizmetBinasiId);
-
         // Tarih aralığına göre işlemleri listeler
         Task<IEnumerable<KanalIslem>> GetByDateRangeAsync(DateTime startDate, DateTime endDate);
 
@@ -35,7 +32,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemler
         // Günlük işlem sayısını getirir
         Task<int> GetDailyIslemCountAsync(int kanalId, DateTime date);
 
-        // Kanal ve hizmet binası için maksimum sıra numarasını getirir
-        Task<int> GetMaxSiraByKanalAndBinaAsync(int kanalId, int hizmetBinasiId);
+        // Kanal ve departman-hizmet binası için maksimum sıra numarasını getirir
+        Task<int> GetMaxSiraByKanalAndBinaAsync(int kanalId, int departmanHizmetBinasiId);
     }
 }

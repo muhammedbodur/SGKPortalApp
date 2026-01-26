@@ -46,22 +46,6 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .ToListAsync();
         }
 
-        // Hizmet binası bazında işlemleri listeler
-        public async Task<IEnumerable<KanalIslem>> GetByHizmetBinasiAsync(int hizmetBinasiId)
-        {
-            return await _dbSet
-                .AsNoTracking()
-                .Include(ki => ki.Kanal)
-                .Include(ki => ki.DepartmanHizmetBinasi)
-                    .ThenInclude(dhb => dhb.Departman)
-                .Include(ki => ki.DepartmanHizmetBinasi)
-                    .ThenInclude(dhb => dhb.HizmetBinasi)
-                .Include(ki => ki.KanalAltIslemleri)
-                .Where(ki => ki.DepartmanHizmetBinasi.HizmetBinasiId == hizmetBinasiId && !ki.SilindiMi)
-                .OrderBy(ki => ki.Sira)
-                .ToListAsync();
-        }
-
         // Tarih aralığına göre işlemleri listeler
         public async Task<IEnumerable<KanalIslem>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
@@ -144,12 +128,12 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.SiramatikIslemleri
                 .CountAsync(ki => ki.KanalId == kanalId && ki.EklenmeTarihi.Date == date.Date);
         }
 
-        // Kanal ve hizmet binası için maksimum sıra numarasını getirir
-        public async Task<int> GetMaxSiraByKanalAndBinaAsync(int kanalId, int hizmetBinasiId)
+        // Kanal ve departman-hizmet binası için maksimum sıra numarasını getirir
+        public async Task<int> GetMaxSiraByKanalAndBinaAsync(int kanalId, int departmanHizmetBinasiId)
         {
             var maxSira = await _dbSet
                 .AsNoTracking()
-                .Where(ki => ki.KanalId == kanalId && ki.DepartmanHizmetBinasi.HizmetBinasiId == hizmetBinasiId)
+                .Where(ki => ki.KanalId == kanalId && ki.DepartmanHizmetBinasiId == departmanHizmetBinasiId)
                 .MaxAsync(ki => (int?)ki.Sira);
             
             return maxSira ?? 0;

@@ -99,7 +99,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalIslem
             try
             {
                 isLoading = true;
-                var result = await _kanalService.GetByHizmetBinasiIdAsync(selectedHizmetBinasiId);
+                
+                // DepartmanHizmetBinasiId'yi hesapla
+                var departmanHizmetBinasiId = await GetDepartmanHizmetBinasiIdAsync(selectedHizmetBinasiId);
+                if (departmanHizmetBinasiId == 0)
+                {
+                    await _toastService.ShowWarningAsync("Bu hizmet binası için departman eşleşmesi bulunamadı!");
+                    return;
+                }
+                
+                var result = await _kanalService.GetByDepartmanHizmetBinasiIdAsync(departmanHizmetBinasiId);
 
                 if (result.Success && result.Data != null)
                 {

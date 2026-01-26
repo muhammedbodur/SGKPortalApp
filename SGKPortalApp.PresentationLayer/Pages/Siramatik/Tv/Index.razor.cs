@@ -160,7 +160,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Tv
                 {
                     TvId = tv.TvId,
                     TvAdi = tv.TvAdi,
-                    HizmetBinasiId = tv.HizmetBinasiId,
+                    DepartmanHizmetBinasiId = tv.DepartmanHizmetBinasiId,
                     KatTipi = tv.KatTipi,
                     TvAciklama = tv.TvAciklama,
                     Aktiflik = tv.Aktiflik == Aktiflik.Aktif ? Aktiflik.Pasif : Aktiflik.Aktif

@@ -253,11 +253,11 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             }
         }
 
-        public async Task<ServiceResult<List<KanalIslemResponseDto>>> GetByHizmetBinasiIdAsync(int hizmetBinasiId)
+        public async Task<ServiceResult<List<KanalIslemResponseDto>>> GetByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"kanalislem/departman-hizmet-binasi/{hizmetBinasiId}");
+                var response = await _httpClient.GetAsync($"kanalislem/departman-hizmet-binasi/{departmanHizmetBinasiId}");
 
                 if (!response.IsSuccessStatusCode)
                 {

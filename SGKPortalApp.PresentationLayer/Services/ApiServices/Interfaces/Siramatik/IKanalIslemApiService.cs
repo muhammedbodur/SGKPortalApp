@@ -13,6 +13,6 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Siramat
         Task<ServiceResult<bool>> DeleteAsync(int id);
         Task<ServiceResult<List<KanalIslemResponseDto>>> GetActiveAsync();
         Task<ServiceResult<List<KanalIslemResponseDto>>> GetByKanalIdAsync(int kanalId);
-        Task<ServiceResult<List<KanalIslemResponseDto>>> GetByHizmetBinasiIdAsync(int hizmetBinasiId);
+        Task<ServiceResult<List<KanalIslemResponseDto>>> GetByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId);
     }
 }

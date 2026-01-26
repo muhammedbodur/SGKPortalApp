@@ -70,6 +70,16 @@ namespace SGKPortalApp.ApiLayer.Controllers.Common
             return Ok(result);
         }
 
+        /// <summary>
+        /// Departman ve Hizmet Binası kombinasyonundan DepartmanHizmetBinasiId bulur
+        /// </summary>
+        [HttpGet("find/{departmanId}/{hizmetBinasiId}")]
+        public async Task<IActionResult> GetDepartmanHizmetBinasiId(int departmanId, int hizmetBinasiId)
+        {
+            var result = await _service.GetDepartmanHizmetBinasiIdAsync(departmanId, hizmetBinasiId);
+            return Ok(result);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] DepartmanHizmetBinasiCreateRequestDto request)
         {

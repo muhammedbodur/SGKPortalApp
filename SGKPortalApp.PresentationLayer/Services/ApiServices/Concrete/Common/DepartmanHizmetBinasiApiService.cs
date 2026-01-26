@@ -118,6 +118,21 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
             }
         }
 
+        public async Task<ApiResponseDto<int>> GetDepartmanHizmetBinasiIdAsync(int departmanId, int hizmetBinasiId)
+        {
+            try
+            {
+                var response = await _httpClient.GetFromJsonAsync<ApiResponseDto<int>>($"{BaseUrl}/find/{departmanId}/{hizmetBinasiId}");
+                return response ?? ApiResponseDto<int>.ErrorResult("Veri alınamadı");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "GetDepartmanHizmetBinasiIdAsync hatası. DepartmanId: {DepartmanId}, HizmetBinasiId: {HizmetBinasiId}", 
+                    departmanId, hizmetBinasiId);
+                return ApiResponseDto<int>.ErrorResult("Bir hata oluştu", ex.Message);
+            }
+        }
+
         public async Task<ApiResponseDto<DepartmanHizmetBinasiResponseDto>> CreateAsync(DepartmanHizmetBinasiCreateRequestDto request)
         {
             try

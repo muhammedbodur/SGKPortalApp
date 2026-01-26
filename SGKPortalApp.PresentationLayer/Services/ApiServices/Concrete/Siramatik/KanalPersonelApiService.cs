@@ -18,11 +18,11 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             _logger = logger;
         }
 
-        public async Task<ServiceResult<List<KanalPersonelResponseDto>>> GetPersonellerByHizmetBinasiIdAsync(int hizmetBinasiId)
+        public async Task<ServiceResult<List<KanalPersonelResponseDto>>> GetPersonellerByDepartmanHizmetBinasiIdAsync(int departmanHizmetBinasiId)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"kanalpersonel/departman-hizmet-binasi/{hizmetBinasiId}");
+                var response = await _httpClient.GetAsync($"kanalpersonel/departman-hizmet-binasi/{departmanHizmetBinasiId}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -253,11 +253,11 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Siramatik
             }
         }
 
-        public async Task<ServiceResult<List<PersonelAtamaMatrixDto>>> GetPersonelAtamaMatrixAsync(int hizmetBinasiId)
+        public async Task<ServiceResult<List<PersonelAtamaMatrixDto>>> GetPersonelAtamaMatrixAsync(int departmanHizmetBinasiId)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"kanalpersonel/matrix/{hizmetBinasiId}");
+                var response = await _httpClient.GetAsync($"kanalpersonel/matrix/{departmanHizmetBinasiId}");
 
                 if (!response.IsSuccessStatusCode)
                 {

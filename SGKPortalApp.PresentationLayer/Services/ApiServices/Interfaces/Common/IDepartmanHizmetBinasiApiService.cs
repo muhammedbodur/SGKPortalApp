@@ -13,6 +13,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
         Task<ApiResponseDto<List<DepartmanHizmetBinasiDto>>> GetDropdownAsync();
         Task<ApiResponseDto<List<DepartmanHizmetBinasiDto>>> GetDropdownByDepartmanAsync(int departmanId);
         Task<ApiResponseDto<List<DepartmanHizmetBinasiDto>>> GetDropdownByHizmetBinasiAsync(int hizmetBinasiId);
+        Task<ApiResponseDto<int>> GetDepartmanHizmetBinasiIdAsync(int departmanId, int hizmetBinasiId);
         Task<ApiResponseDto<DepartmanHizmetBinasiResponseDto>> CreateAsync(DepartmanHizmetBinasiCreateRequestDto request);
         Task<ApiResponseDto<DepartmanHizmetBinasiResponseDto>> UpdateAsync(int id, DepartmanHizmetBinasiUpdateRequestDto request);
         Task<ApiResponseDto<bool>> DeleteAsync(int id);

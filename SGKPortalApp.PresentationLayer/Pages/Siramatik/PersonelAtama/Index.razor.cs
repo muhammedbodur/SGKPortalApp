@@ -322,7 +322,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.PersonelAtama
                 }
 
                 // 2. Kanal Alt İşlemleri yükle (sütunlar)
-                var kanalAltIslemResult = await _kanalAltIslemService.GetByHizmetBinasiIdAsync(SelectedHizmetBinasiId);
+                // DepartmanHizmetBinasiId'yi hesapla
+                var departmanHizmetBinasiId = await GetDepartmanHizmetBinasiIdAsync(SelectedHizmetBinasiId);
+                if (departmanHizmetBinasiId == 0)
+                {
+                    await _toastService.ShowWarningAsync("Bu hizmet binası için departman eşleşmesi bulunamadı!");
+                    return;
+                }
+                
+                var kanalAltIslemResult = await _kanalAltIslemService.GetByDepartmanHizmetBinasiIdAsync(departmanHizmetBinasiId);
                 KanalAltIslemler = kanalAltIslemResult.Success && kanalAltIslemResult.Data != null
                     ? kanalAltIslemResult.Data
                     : new List<KanalAltIslemResponseDto>();

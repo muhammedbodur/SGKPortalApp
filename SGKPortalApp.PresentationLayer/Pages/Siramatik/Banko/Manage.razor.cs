@@ -72,6 +72,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
 
                     selectedHizmetBinasiId = HizmetBinasiId.Value;
                     model.HizmetBinasiId = HizmetBinasiId.Value;
+                    // DepartmanHizmetBinasiId'yi hesapla
+                    model.DepartmanHizmetBinasiId = await GetDepartmanHizmetBinasiIdAsync(HizmetBinasiId.Value);
                     _logger.LogInformation($"🔗 URL'den HizmetBinasiId alındı: {HizmetBinasiId.Value}");
                 }
                 else
@@ -82,6 +84,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
                     {
                         selectedHizmetBinasiId = userHizmetBinasiId;
                         model.HizmetBinasiId = userHizmetBinasiId;
+                        // DepartmanHizmetBinasiId'yi hesapla
+                        model.DepartmanHizmetBinasiId = await GetDepartmanHizmetBinasiIdAsync(userHizmetBinasiId);
                     }
                 }
             }
@@ -164,6 +168,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Banko
 
                 selectedHizmetBinasiId = hizmetBinasiId;
                 model.HizmetBinasiId = hizmetBinasiId;
+                
+                // ✅ DepartmanHizmetBinasiId'yi hesapla
+                model.DepartmanHizmetBinasiId = await GetDepartmanHizmetBinasiIdAsync(hizmetBinasiId);
+                
+                if (model.DepartmanHizmetBinasiId == 0)
+                {
+                    await _toastService.ShowWarningAsync("Bu hizmet binası için departman eşleşmesi bulunamadı!");
+                    _logger.LogWarning("DepartmanHizmetBinasi eşleşmesi bulunamadı. HizmetBinasiId: {BinaId}", hizmetBinasiId);
+                }
             }
         }
 

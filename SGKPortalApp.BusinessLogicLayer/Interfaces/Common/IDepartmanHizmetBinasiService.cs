@@ -16,5 +16,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.Common
         Task<ApiResponseDto<List<DepartmanHizmetBinasiDto>>> GetAllForDropdownAsync();
         Task<ApiResponseDto<List<DepartmanHizmetBinasiDto>>> GetDropdownByDepartmanAsync(int departmanId);
         Task<ApiResponseDto<List<DepartmanHizmetBinasiDto>>> GetDropdownByHizmetBinasiAsync(int hizmetBinasiId);
+        Task<ApiResponseDto<int>> GetDepartmanHizmetBinasiIdAsync(int departmanId, int hizmetBinasiId);
     }
 }

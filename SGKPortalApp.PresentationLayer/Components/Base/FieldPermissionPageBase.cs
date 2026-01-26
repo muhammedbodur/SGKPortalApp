@@ -28,6 +28,7 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
         [Inject] protected PermissionStateService PermissionStateService { get; set; } = default!;
         [Inject] protected IPermissionKeyResolverService PermissionKeyResolver { get; set; } = default!;
         [Inject] protected ILogger<FieldPermissionPageBase> Logger { get; set; } = default!;
+        [Inject] protected IServiceProvider ServiceProvider { get; set; } = default!;
 
         /// <summary>
         /// Permissions yüklendi mi?
@@ -376,6 +377,68 @@ namespace SGKPortalApp.PresentationLayer.Components.Base
 
             var userHizmetBinasiId = GetCurrentUserHizmetBinasiId();
             return userHizmetBinasiId == hizmetBinasiId;
+        }
+
+        /// <summary>
+        /// Giriş yapmış kullanıcının Departman ID'sini döndürür
+        /// Claim'de yoksa 0 döner
+        /// </summary>
+        protected int GetCurrentUserDepartmanId()
+        {
+            var authState = AuthStateProvider.GetAuthenticationStateAsync().Result;
+            var claim = authState.User.FindFirst("DepartmanId");
+            return claim != null && int.TryParse(claim.Value, out var id) ? id : 0;
+        }
+
+        /// <summary>
+        /// Kullanıcının DepartmanId ve seçilen HizmetBinasiId kombinasyonundan DepartmanHizmetBinasiId bulur
+        /// UI'da kullanıcı HizmetBinasi seçer ama backend'e DepartmanHizmetBinasiId gönderilmelidir
+        /// </summary>
+        protected async Task<int> GetDepartmanHizmetBinasiIdAsync(int hizmetBinasiId)
+        {
+            var departmanId = GetCurrentUserDepartmanId();
+            
+            if (departmanId == 0)
+            {
+                Logger?.LogWarning("Kullanıcının DepartmanId'si bulunamadı");
+                return 0;
+            }
+
+            if (hizmetBinasiId == 0)
+            {
+                Logger?.LogWarning("HizmetBinasiId sıfır olamaz");
+                return 0;
+            }
+
+            try
+            {
+                // DepartmanHizmetBinasiApiService inject edilmeli
+                var dhbService = ServiceProvider?.GetService<SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common.IDepartmanHizmetBinasiApiService>();
+                
+                if (dhbService == null)
+                {
+                    Logger?.LogError("IDepartmanHizmetBinasiApiService inject edilemedi");
+                    return 0;
+                }
+
+                var result = await dhbService.GetDepartmanHizmetBinasiIdAsync(departmanId, hizmetBinasiId);
+                
+                if (result.Success && result.Data > 0)
+                {
+                    return result.Data;
+                }
+                else
+                {
+                    Logger?.LogWarning("DepartmanHizmetBinasiId bulunamadı. DepartmanId: {DepartmanId}, HizmetBinasiId: {HizmetBinasiId}, Hata: {Error}", 
+                        departmanId, hizmetBinasiId, result.Message);
+                    return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger?.LogError(ex, "DepartmanHizmetBinasiId hesaplanırken hata oluştu");
+                return 0;
+            }
         }
 
         #endregion

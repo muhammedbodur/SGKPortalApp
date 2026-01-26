@@ -60,22 +60,22 @@ namespace SGKPortalApp.ApiLayer.Controllers.SiramatikIslemleri
         }
 
         /// <summary>
-        /// Hizmet binasına göre kanal alt işlem personel sayılarını getirir
+        /// Departman-Hizmet binasına göre kanal alt işlem personel sayılarını getirir
         /// </summary>
-        [HttpGet("hizmet-binasi/{hizmetBinasiId:int}/personel-sayilari")]
-        public async Task<IActionResult> GetPersonelSayilari(int hizmetBinasiId)
+        [HttpGet("departman-hizmet-binasi/{dhbId:int}/personel-sayilari")]
+        public async Task<IActionResult> GetPersonelSayilari(int dhbId)
         {
-            var result = await _kanalAltIslemService.GetPersonelSayilariAsync(hizmetBinasiId);
+            var result = await _kanalAltIslemService.GetPersonelSayilariAsync(dhbId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
         /// <summary>
-        /// Hizmet binasına göre personel eşleştirilmemiş kanal alt işlemleri getirir
+        /// Departman-Hizmet binasına göre personel eşleştirilmemiş kanal alt işlemleri getirir
         /// </summary>
-        [HttpGet("hizmet-binasi/{hizmetBinasiId:int}/eslestirme-yapilmamis")]
-        public async Task<IActionResult> GetEslestirmeYapilmamis(int hizmetBinasiId)
+        [HttpGet("departman-hizmet-binasi/{dhbId:int}/eslestirme-yapilmamis")]
+        public async Task<IActionResult> GetEslestirmeYapilmamis(int dhbId)
         {
-            var result = await _kanalAltIslemService.GetEslestirmeYapilmamisAsync(hizmetBinasiId);
+            var result = await _kanalAltIslemService.GetEslestirmeYapilmamisAsync(dhbId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
