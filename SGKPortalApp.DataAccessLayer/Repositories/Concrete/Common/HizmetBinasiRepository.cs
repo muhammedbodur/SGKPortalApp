@@ -54,11 +54,13 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
 
         public async Task<HizmetBinasi?> GetWithPersonellerAsync(int hizmetBinasiId)
         {
+            // Not: Personeller artık DepartmanHizmetBinasi üzerinden erişiliyor
             return await _dbSet
-                .Include(hb => hb.Personeller)
-                    .ThenInclude(p => p.Departman)
                 .Include(hb => hb.DepartmanHizmetBinalari.Where(dhb => !dhb.SilindiMi))
                     .ThenInclude(dhb => dhb.Departman)
+                .Include(hb => hb.DepartmanHizmetBinalari)
+                    .ThenInclude(dhb => dhb.Personeller.Where(p => !p.SilindiMi && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif))
+                        .ThenInclude(p => p.Departman)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(hb => hb.HizmetBinasiId == hizmetBinasiId);
         }
@@ -87,6 +89,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
 
         public async Task<HizmetBinasi?> GetWithAllDetailsAsync(int hizmetBinasiId)
         {
+            // Not: Personeller artık DepartmanHizmetBinasi üzerinden erişiliyor
             return await _dbSet
                 .Include(hb => hb.DepartmanHizmetBinalari.Where(dhb => !dhb.SilindiMi))
                     .ThenInclude(dhb => dhb.Departman)
@@ -94,14 +97,16 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
                     .ThenInclude(dhb => dhb.Bankolar.Where(b => !b.SilindiMi))
                 .Include(hb => hb.DepartmanHizmetBinalari)
                     .ThenInclude(dhb => dhb.Tvler.Where(t => !t.SilindiMi))
-                .Include(hb => hb.Personeller)
-                    .ThenInclude(p => p.Departman)
+                .Include(hb => hb.DepartmanHizmetBinalari)
+                    .ThenInclude(dhb => dhb.Personeller.Where(p => !p.SilindiMi && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif))
+                        .ThenInclude(p => p.Departman)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(hb => hb.HizmetBinasiId == hizmetBinasiId);
         }
 
         public async Task<IEnumerable<HizmetBinasi>> GetActiveAsync()
         {
+            // Not: Personeller artık DepartmanHizmetBinasi üzerinden erişiliyor
             return await _dbSet
                 .AsNoTracking()
                 .Include(hb => hb.DepartmanHizmetBinalari.Where(dhb => !dhb.SilindiMi))
@@ -110,7 +115,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
                     .ThenInclude(dhb => dhb.Bankolar.Where(b => !b.SilindiMi && b.Aktiflik == Aktiflik.Aktif))
                 .Include(hb => hb.DepartmanHizmetBinalari)
                     .ThenInclude(dhb => dhb.Tvler.Where(t => !t.SilindiMi && t.Aktiflik == Aktiflik.Aktif))
-                .Include(hb => hb.Personeller.Where(p => !p.SilindiMi && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif))
+                .Include(hb => hb.DepartmanHizmetBinalari)
+                    .ThenInclude(dhb => dhb.Personeller.Where(p => !p.SilindiMi && p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif))
                 .Where(hb => hb.Aktiflik == Aktiflik.Aktif)
                 .OrderBy(hb => hb.HizmetBinasiAdi)
                 .ToListAsync();
