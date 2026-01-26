@@ -372,6 +372,11 @@ namespace SGKPortalApp.DataAccessLayer.Repositories
             return await _context.Database.ExecuteSqlRawAsync(sql, ct);
         }
 
+        public async Task<int> ExecuteSqlInterpolatedAsync(FormattableString sql, CancellationToken ct = default)
+        {
+            return await _context.Database.ExecuteSqlInterpolatedAsync(sql, ct);
+        }
+
         #endregion
 
         #region Helper Methods
