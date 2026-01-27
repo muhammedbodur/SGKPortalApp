@@ -689,7 +689,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
         {
             bool hasChanges = false;
 
-            if (p.AdSoyad != k.KullaniciAdi) { p.AdSoyad = k.KullaniciAdi; hasChanges = true; }
+            if (p.AdSoyad != k.KullaniciAdi)
+            {
+                p.AdSoyad = k.KullaniciAdi;
+                // AdSoyad değiştiğinde NickName de güncellenir
+                p.NickName = StringHelper.GenerateNickName(k.KullaniciAdi, 8);
+                hasChanges = true;
+            }
             var newSicilNo = k.SicilNo > 0 ? k.SicilNo : (int?)null;
             if (p.SicilNo != newSicilNo) { p.SicilNo = newSicilNo; hasChanges = true; }
             if (p.DepartmanId != departmanId) { p.DepartmanId = departmanId; hasChanges = true; }
@@ -711,6 +717,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
             if (p.Gorev != k.Gorev) { p.Gorev = k.Gorev; hasChanges = true; }
             if (p.Uzmanlik != k.Brans) { p.Uzmanlik = k.Brans; hasChanges = true; }
 
+            // KartNo: Her zaman legacy'den (kullanici tablosu) alınır
             var newKartNo = int.TryParse(k.KartNo, out var kn) ? kn : 0;
             if (p.KartNo != newKartNo) { p.KartNo = newKartNo; hasChanges = true; }
 
