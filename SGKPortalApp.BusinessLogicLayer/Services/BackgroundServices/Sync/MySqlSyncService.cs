@@ -751,15 +751,25 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
 
             if (p.SendikaId != validSendikaId) { p.SendikaId = validSendikaId; hasChanges = true; }
 
-            // Resim: Sadece mevcut resim yoksa legacy'den kopyala
-            if (string.IsNullOrEmpty(p.Resim) && !string.IsNullOrEmpty(k.ResimYolu))
+            // Resim: Format kontrolü ve düzeltme
+            var expectedResimPath = $"/images/avatars/{p.TcKimlikNo}.jpg";
+
+            if (string.IsNullOrEmpty(p.Resim))
             {
+                // Resim yok - legacy'den kopyala
                 var copiedResim = CopyPersonelFotoFromLegacy(k.ResimYolu, p.TcKimlikNo);
                 if (!string.IsNullOrEmpty(copiedResim))
                 {
                     p.Resim = copiedResim;
                     hasChanges = true;
                 }
+            }
+            else if (p.Resim != expectedResimPath)
+            {
+                // Resim var ama format yanlış - düzelt
+                p.Resim = expectedResimPath;
+                hasChanges = true;
+                _logger.LogDebug("📷 Resim formatı düzeltildi: {TcKimlikNo}", p.TcKimlikNo);
             }
 
             return hasChanges;
