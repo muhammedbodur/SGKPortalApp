@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Components;
-using SGKPortalApp.PresentationLayer.Services.Interfaces.PersonelIslemleri;
-using SGKPortalApp.PresentationLayer.Services.Interfaces;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
+using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Personel;
 
