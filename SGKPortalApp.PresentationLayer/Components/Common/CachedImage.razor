@@ -24,12 +24,12 @@
          width="@Width"
          height="@Height"
          loading="lazy"
-         onerror="this.src='/images/placeholder.png'" />
+         onerror="this.src='/portal/assets/img/avatars/1.png'" />
 }
 else
 {
     <!-- Placeholder görüntü -->
-    <img src="/images/placeholder.png"
+    <img src="/portal/assets/img/avatars/1.png"
          alt="@(Alt ?? "Resim")"
          class="@(Class ?? "img-fluid")"
          style="@Style"
@@ -96,7 +96,7 @@ else
     private string GetCachedUrl()
     {
         if (string.IsNullOrEmpty(Src))
-            return "/images/placeholder.png";
+            return "/portal/assets/img/avatars/1.png";
 
         // Cache busting devre dışı bırakıldıysa orijinal URL'yi döndür
         if (!EnableCacheBusting)

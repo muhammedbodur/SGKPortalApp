@@ -304,7 +304,8 @@ else
                                             <PermissionField FieldName="@nameof(FormModel.DepartmanId)" Context="perm">
                                                 <div class="col-md-6 mb-3">
                                                     <label class="form-label">Departman</label>
-                                                    <select value="@FormModel.DepartmanId"
+                                                    <select id="departmanSelect"
+                                                            value="@FormModel.DepartmanId"
                                                             @onchange="async (e) => await OnDepartmanChangedAsync(e)"
                                                             class="form-select @(FormModel.DepartmanId == 0 ? "border-warning" : "")"
                                                             data-placeholder="Departman seçiniz"
@@ -326,7 +327,8 @@ else
                                             <PermissionField FieldName="@nameof(FormModel.ServisId)" Context="perm">
                                                 <div class="col-md-6 mb-3">
                                                     <label class="form-label">Servis</label>
-                                                    <select value="@FormModel.ServisId"
+                                                    <select id="servisSelect"
+                                                            value="@FormModel.ServisId"
                                                             @onchange="OnServisChanged"
                                                             class="form-select @(FormModel.ServisId == 0 ? "border-warning" : "")"
                                                             data-placeholder="Servis seçiniz"
@@ -348,7 +350,8 @@ else
                                             <PermissionField FieldName="@nameof(FormModel.UnvanId)" Context="perm">
                                                 <div class="col-md-6 mb-3">
                                                     <label class="form-label">Unvan</label>
-                                                    <select value="@FormModel.UnvanId"
+                                                    <select id="unvanSelect"
+                                                            value="@FormModel.UnvanId"
                                                             @onchange="OnUnvanChanged"
                                                             class="form-select @(FormModel.UnvanId == 0 ? "border-warning" : "")"
                                                             data-placeholder="Ünvan seçiniz"
@@ -372,7 +375,8 @@ else
                                                     Hizmet Binası
                                                     <span class="text-danger">*</span>
                                                 </label>
-                                                <select value="@FormModel.DepartmanHizmetBinasiId"
+                                                <select id="hizmetBinasiSelect"
+                                                        value="@FormModel.DepartmanHizmetBinasiId"
                                                         @onchange="OnDepartmanHizmetBinasiChanged"
                                                         class="form-select @(FormModel.DepartmanHizmetBinasiId == 0 ? "border-danger" : "")"
                                                         data-placeholder="Hizmet Binası seçiniz"
