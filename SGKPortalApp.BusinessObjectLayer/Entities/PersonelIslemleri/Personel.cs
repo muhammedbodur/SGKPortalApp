@@ -154,6 +154,50 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         
         public PersonelAktiflikDurum PersonelAktiflikDurum { get; set; }
 
+        /// <summary>
+        /// Pasif/ayrılış nedeni açıklaması
+        /// </summary>
+        [StringLength(500)]
+        public string? PasifNedeni { get; set; }
+
+        /// <summary>
+        /// Durum değişiklik tarihi (pasif/emekli/istifa vb. olduğu tarih)
+        /// </summary>
+        public DateTime? DurumDegisiklikTarihi { get; set; }
+
+        // Acil Durum Yakını Bilgileri
+        [StringLength(100)]
+        public string? YakinAdSoyad { get; set; }
+
+        [StringLength(50)]
+        public string? YakinlikDerecesi { get; set; }
+
+        [StringLength(20)]
+        [SensitiveData]
+        public string? YakinTelefonu { get; set; }
+
+        // Kadro ve Göreve Başlama Bilgileri
+        [StringLength(50)]
+        public string? KadroDerecesi { get; set; }
+
+        public DateTime? GoreveBaslamaTarihi { get; set; }
+
+        // Finansal Bilgiler
+        [StringLength(34)]
+        [SensitiveData]
+        public string? Iban { get; set; }
+
+        // Ulaşım Bilgileri
+        [StringLength(20)]
+        public string? EshotHat { get; set; }
+
+        [StringLength(50)]
+        public string? Durak { get; set; }
+
+        // Taşeron Bilgisi
+        [StringLength(100)]
+        public string? TaseronFirma { get; set; }
+
         // PDKS.Net4.8 mesai saatleri uyumluluğu (mesaiBaslar, mesaiBiter)
         public TimeSpan? MesaiBaslangicSaati { get; set; }
         public TimeSpan? MesaiBitisSaati { get; set; }
