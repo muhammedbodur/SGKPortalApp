@@ -465,7 +465,7 @@ else
                                         <div class="row">
                                             <div class="col-md-12 mb-3">
                                                 <label class="form-label">Aktiflik Durumu <span class="text-danger">*</span></label>
-                                                <div class="d-flex gap-4">
+                                                <div class="d-flex gap-4 flex-wrap">
                                                     @if (IsEditMode)
                                                     {
                                                         @foreach (var durum in Enum.GetValues<PersonelAktiflikDurum>())
@@ -501,6 +501,50 @@ else
                                                         <small class="form-text text-muted">Yeni personel kaydı aktif olarak oluşturulur</small>
                                                     }
                                                 </div>
+                                            </div>
+
+                                            @if (FormModel.PersonelAktiflikDurum != PersonelAktiflikDurum.Aktif)
+                                            {
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">Pasif/Ayrılış Nedeni</label>
+                                                    <InputText @bind-Value="FormModel.PasifNedeni"
+                                                               class="form-control"
+                                                               placeholder="Örn: İstifa, Nakil, Emeklilik"
+                                                               maxlength="200" />
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">Durum Değişiklik Tarihi</label>
+                                                    <input type="text"
+                                                           @bind="FormModel.DurumDegisiklikTarihi"
+                                                           @bind:format="yyyy-MM-dd"
+                                                           class="form-control flatpickr-date"
+                                                           placeholder="YYYY-MM-DD" />
+                                                </div>
+                                            }
+                                        </div>
+
+                                        <!-- Kadro Bilgileri -->
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Kadro Derecesi</label>
+                                                <InputText @bind-Value="FormModel.KadroDerecesi"
+                                                           class="form-control"
+                                                           maxlength="50" />
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Göreve Başlama Tarihi</label>
+                                                <input type="text"
+                                                       @bind="FormModel.GoreveBaslamaTarihi"
+                                                       @bind:format="yyyy-MM-dd"
+                                                       class="form-control flatpickr-date"
+                                                       placeholder="YYYY-MM-DD" />
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Taşeron Firma</label>
+                                                <InputText @bind-Value="FormModel.TaseronFirma"
+                                                           class="form-control"
+                                                           placeholder="Taşeron firma adı (varsa)"
+                                                           maxlength="200" />
                                             </div>
                                         </div>
                                     </div>
@@ -609,6 +653,36 @@ else
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Acil Durum Yakını -->
+                                <div class="card mb-4">
+                                    <h5 class="card-header">Acil Durum Yakını</h5>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Yakın Ad Soyad</label>
+                                                <InputText @bind-Value="FormModel.YakinAdSoyad"
+                                                           class="form-control"
+                                                           placeholder="Acil durumda aranacak kişi"
+                                                           maxlength="100" />
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Yakınlık Derecesi</label>
+                                                <InputText @bind-Value="FormModel.YakinlikDerecesi"
+                                                           class="form-control"
+                                                           placeholder="Örn: Eş, Anne, Baba, Kardeş"
+                                                           maxlength="50" />
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Yakın Telefonu</label>
+                                                <InputText @bind-Value="FormModel.YakinTelefonu"
+                                                           class="form-control"
+                                                           placeholder="05XX XXX XX XX"
+                                                           maxlength="20" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             }
 
                             <!-- KİŞİSEL TAB -->
@@ -678,6 +752,20 @@ else
                                                              class="form-control"
                                                              min="0" />
                                                 <small class="form-text text-muted">Servis numarası (0 = Yok)</small>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">ESHOT Hat</label>
+                                                <InputText @bind-Value="FormModel.EshotHat"
+                                                           class="form-control"
+                                                           placeholder="ESHOT hat numarası"
+                                                           maxlength="50" />
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Durak</label>
+                                                <InputText @bind-Value="FormModel.Durak"
+                                                           class="form-control"
+                                                           placeholder="İndiği durak"
+                                                           maxlength="100" />
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">PDKS Personel Kayıt No</label>
@@ -761,6 +849,14 @@ else
                                                         <option value="@yakinlik">@GetEnumDisplayName(yakinlik)</option>
                                                     }
                                                 </select>
+                                            </div>
+                                            <div class="col-12 mb-3">
+                                                <label class="form-label">IBAN</label>
+                                                <InputText @bind-Value="FormModel.Iban"
+                                                           class="form-control font-monospace"
+                                                           placeholder="TR00 0000 0000 0000 0000 0000 00"
+                                                           maxlength="34" />
+                                                <small class="form-text text-muted">Maaş ödemesi için IBAN numarası</small>
                                             </div>
                                         </div>
                                     </div>
