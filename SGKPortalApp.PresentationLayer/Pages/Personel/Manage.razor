@@ -413,8 +413,10 @@ else
                                             <!-- Personel Tipi -->
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Personel Tipi</label>
-                                                <select @bind="FormModel.PersonelTipi"
+                                                <select id="personelTipiSelect"
+                                                        @bind="FormModel.PersonelTipi"
                                                         class="form-select"
+                                                        data-no-select2="true"
                                                         disabled="@IsSaving">
                                                     @foreach (var tip in Enum.GetValues<PersonelTipi>())
                                                     {
@@ -441,8 +443,10 @@ else
                                             <!-- Sendika -->
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Sendika</label>
-                                                <select @bind="FormModel.SendikaId"
+                                                <select id="sendikaSelect"
+                                                        @bind="FormModel.SendikaId"
                                                         class="form-select"
+                                                        data-placeholder="Sendika seçiniz"
                                                         disabled="@IsSaving">
                                                     <option value="0">Seçiniz (Opsiyonel)</option>
                                                     @foreach (var sendika in Sendikalar)
@@ -546,7 +550,8 @@ else
                                             <!-- İl -->
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">İl</label>
-                                                <select value="@FormModel.IlId"
+                                                <select id="ilSelect"
+                                                        value="@FormModel.IlId"
                                                         @onchange="OnIlChanged"
                                                         class="form-select"
                                                         data-placeholder="İl seçiniz"
@@ -562,7 +567,8 @@ else
                                             <!-- İlçe -->
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">İlçe</label>
-                                                <select value="@FormModel.IlceId"
+                                                <select id="ilceSelect"
+                                                        value="@FormModel.IlceId"
                                                         @onchange="OnIlceChanged"
                                                         class="form-select"
                                                         data-placeholder="İlçe seçiniz"
@@ -618,7 +624,7 @@ else
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Cinsiyet</label>
-                                                <select @bind="FormModel.Cinsiyet" class="form-select">
+                                                <select id="cinsiyetSelect" @bind="FormModel.Cinsiyet" class="form-select" data-no-select2="true">
                                                     @foreach (var cinsiyet in Enum.GetValues<Cinsiyet>())
                                                     {
                                                         <option value="@cinsiyet">@GetEnumDisplayName(cinsiyet)</option>
@@ -627,7 +633,7 @@ else
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Medeni Durumu</label>
-                                                <select @bind="FormModel.MedeniDurumu" class="form-select">
+                                                <select id="medeniDurumuSelect" @bind="FormModel.MedeniDurumu" class="form-select" data-no-select2="true">
                                                     @foreach (var durum in Enum.GetValues<MedeniDurumu>())
                                                     {
                                                         <option value="@durum">@GetEnumDisplayName(durum)</option>
@@ -636,7 +642,7 @@ else
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Kan Grubu</label>
-                                                <select @bind="FormModel.KanGrubu" class="form-select">
+                                                <select id="kanGrubuSelect" @bind="FormModel.KanGrubu" class="form-select" data-no-select2="true">
                                                     @foreach (var kan in Enum.GetValues<KanGrubu>())
                                                     {
                                                         <option value="@kan">@GetEnumDisplayName(kan)</option>
@@ -645,7 +651,7 @@ else
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Ev Durumu</label>
-                                                <select @bind="FormModel.EvDurumu" class="form-select">
+                                                <select id="evDurumuSelect" @bind="FormModel.EvDurumu" class="form-select" data-no-select2="true">
                                                     @foreach (var ev in Enum.GetValues<EvDurumu>())
                                                     {
                                                         <option value="@ev">@GetEnumDisplayName(ev)</option>
@@ -709,7 +715,7 @@ else
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Öğrenim Durumu</label>
-                                                <select @bind="FormModel.OgrenimDurumu" class="form-select">
+                                                <select id="ogrenimDurumuSelect" @bind="FormModel.OgrenimDurumu" class="form-select" data-no-select2="true">
                                                     @foreach (var ogr in Enum.GetValues<OgrenimDurumu>())
                                                     {
                                                         <option value="@ogr">@GetEnumDisplayName(ogr)</option>
@@ -749,7 +755,7 @@ else
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Şehit Yakınlığı</label>
-                                                <select @bind="FormModel.SehitYakinligi" class="form-select">
+                                                <select id="sehitYakinligiSelect" @bind="FormModel.SehitYakinligi" class="form-select" data-no-select2="true">
                                                     @foreach (var yakinlik in Enum.GetValues<SehitYakinligi>())
                                                     {
                                                         <option value="@yakinlik">@GetEnumDisplayName(yakinlik)</option>
@@ -774,7 +780,7 @@ else
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Eş İş Durumu</label>
-                                                <select @bind="FormModel.EsininIsDurumu" class="form-select">
+                                                <select id="esininIsDurumuSelect" @bind="FormModel.EsininIsDurumu" class="form-select" data-no-select2="true">
                                                     @foreach (var durum in Enum.GetValues<EsininIsDurumu>())
                                                     {
                                                         <option value="@durum">@GetEnumDisplayName(durum)</option>
@@ -816,7 +822,7 @@ else
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label class="form-label small">Eğitim</label>
-                                                        <select @bind="cocuk.OgrenimDurumu" class="form-select form-select-sm">
+                                                        <select @bind="cocuk.OgrenimDurumu" class="form-select form-select-sm" data-no-select2="true">
                                                             @foreach (var ogrenim in Enum.GetValues<OgrenimDurumu>())
                                                             {
                                                                 <option value="@ogrenim">@GetEnumDisplayName(ogrenim)</option>
@@ -860,7 +866,7 @@ else
                                                 <div class="row mb-3 pb-3 border-bottom">
                                                     <div class="col-md-2">
                                                         <label class="form-label small">Departman</label>
-                                                        <select @bind="hizmet.DepartmanId" class="form-select form-select-sm">
+                                                        <select @bind="hizmet.DepartmanId" class="form-select form-select-sm" data-no-select2="true">
                                                             <option value="0">Seçiniz...</option>
                                                             @foreach (var departman in Departmanlar)
                                                             {
@@ -870,7 +876,7 @@ else
                                                     </div>
                                                     <div class="col-md-2">
                                                         <label class="form-label small">Servis</label>
-                                                        <select @bind="hizmet.ServisId" class="form-select form-select-sm">
+                                                        <select @bind="hizmet.ServisId" class="form-select form-select-sm" data-no-select2="true">
                                                             <option value="0">Seçiniz...</option>
                                                             @foreach (var servis in Servisler)
                                                             {
@@ -974,7 +980,7 @@ else
                                                 <div class="row mb-3 pb-3 border-bottom">
                                                     <div class="col-md-2">
                                                         <label class="form-label small">Departman</label>
-                                                        <select @bind="yetki.DepartmanId" class="form-select form-select-sm">
+                                                        <select @bind="yetki.DepartmanId" class="form-select form-select-sm" data-no-select2="true">
                                                             <option value="0">Seçiniz</option>
                                                             @foreach (var departman in Departmanlar)
                                                             {
@@ -984,7 +990,7 @@ else
                                                     </div>
                                                     <div class="col-md-2">
                                                         <label class="form-label small">Servis</label>
-                                                        <select @bind="yetki.ServisId" class="form-select form-select-sm">
+                                                        <select @bind="yetki.ServisId" class="form-select form-select-sm" data-no-select2="true">
                                                             <option value="0">Seçiniz</option>
                                                             @foreach (var servis in Servisler)
                                                             {
@@ -1088,7 +1094,7 @@ else
                                                 <div class="row mb-3 pb-3 border-bottom">
                                                     <div class="col-md-2">
                                                         <label class="form-label small">Engel Derecesi</label>
-                                                        <select @bind="engel.EngelDerecesi" class="form-select form-select-sm">
+                                                        <select @bind="engel.EngelDerecesi" class="form-select form-select-sm" data-no-select2="true">
                                                             @foreach (var derece in Enum.GetValues<EngelDerecesi>())
                                                             {
                                                                 <option value="@derece">@derece</option>
