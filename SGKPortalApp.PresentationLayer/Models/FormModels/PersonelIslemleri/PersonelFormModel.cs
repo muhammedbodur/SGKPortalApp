@@ -89,6 +89,47 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels.PersonelIslemleri
         public PersonelAktiflikDurum PersonelAktiflikDurum { get; set; } = PersonelAktiflikDurum.Aktif;
         public PersonelTipi PersonelTipi { get; set; }
 
+        /// <summary>
+        /// Pasif/ayrılış nedeni açıklaması
+        /// </summary>
+        public string? PasifNedeni { get; set; }
+
+        /// <summary>
+        /// Durum değişiklik tarihi (pasif/emekli/istifa vb. olduğu tarih)
+        /// </summary>
+        public DateTime? DurumDegisiklikTarihi { get; set; }
+
+        // ═══════════════════════════════════════════════════════
+        // ACİL DURUM YAKINI BİLGİLERİ
+        // ═══════════════════════════════════════════════════════
+        public string? YakinAdSoyad { get; set; }
+        public string? YakinlikDerecesi { get; set; }
+        public string? YakinTelefonu { get; set; }
+
+        // ═══════════════════════════════════════════════════════
+        // KADRO VE GÖREVE BAŞLAMA BİLGİLERİ
+        // ═══════════════════════════════════════════════════════
+        public string? KadroDerecesi { get; set; }
+        public DateTime? GoreveBaslamaTarihi { get; set; }
+
+        // ═══════════════════════════════════════════════════════
+        // FİNANSAL BİLGİLER
+        // ═══════════════════════════════════════════════════════
+        public string? Iban { get; set; }
+
+        // ═══════════════════════════════════════════════════════
+        // ULAŞIM BİLGİLERİ
+        // ═══════════════════════════════════════════════════════
+        public string? EshotHat { get; set; }
+        public string? Durak { get; set; }
+
+        // ═══════════════════════════════════════════════════════
+        // TAŞERON BİLGİSİ
+        // ═══════════════════════════════════════════════════════
+        public string? TaseronFirma { get; set; }
+
+        // ═══════════════════════════════════════════════════════
+        // EĞİTİM BİLGİLERİ
         // ═══════════════════════════════════════════════════════
         public OgrenimDurumu OgrenimDurumu { get; set; }
         public string? BitirdigiOkul { get; set; }

@@ -260,7 +260,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                                 ? src.Resim
                                 : $"/images/avatars/{src.Resim.TrimStart('/')}")))
                 .ForMember(dest => dest.PersonelAktiflikDurum,
-                    opt => opt.MapFrom(src => src.PersonelAktiflikDurum.ToString()));
+                    opt => opt.MapFrom(src => src.PersonelAktiflikDurum));
         }
     }
 }
