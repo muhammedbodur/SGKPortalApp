@@ -3,6 +3,7 @@
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
 @using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
+@using static SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri.PersonelAktiflikDurumExtensions
 @using SGKPortalApp.PresentationLayer.Components.Permission
 @using SGKPortalApp.PresentationLayer.Components.Common
 
@@ -349,24 +350,9 @@ else
                                             <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.HizmetBinasiAdi</td>
                                             <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.UnvanAdi</td>
                                             <td class="text-center" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
-                                                @switch (personel.PersonelAktiflikDurum)
-                                                {
-                                                    case PersonelAktiflikDurum.Aktif:
-                                                        <span class="badge bg-label-success">
-                                                            <i class="bx bx-check-circle me-1"></i>Aktif
-                                                        </span>
-                                                        break;
-                                                    case PersonelAktiflikDurum.Pasif:
-                                                        <span class="badge bg-label-danger">
-                                                            <i class="bx bx-x-circle me-1"></i>Pasif
-                                                        </span>
-                                                        break;
-                                                    case PersonelAktiflikDurum.Emekli:
-                                                        <span class="badge bg-label-info">
-                                                            <i class="bx bx-user-check me-1"></i>Emekli
-                                                        </span>
-                                                        break;
-                                                }
+                                                <span class="badge @personel.PersonelAktiflikDurum.GetBadgeClass()">
+                                                    <i class="@personel.PersonelAktiflikDurum.GetIconClass() me-1"></i>@GetEnumDisplayName(personel.PersonelAktiflikDurum)
+                                                </span>
                                             </td>
                                             <td class="text-center">
                                                 <div class="d-flex justify-content-center gap-1">
