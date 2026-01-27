@@ -46,7 +46,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         [StringLength(8)]
         public string NickName { get; set; } = string.Empty;
 
-        public int PersonelKayitNo { get; set; }
+        public int? PersonelKayitNo { get; set; }
         public int KartNo { get; set; }
         public DateTime? KartNoAktiflikTarihi { get; set; }
         public DateTime? KartNoDuzenlenmeTarihi { get; set; }

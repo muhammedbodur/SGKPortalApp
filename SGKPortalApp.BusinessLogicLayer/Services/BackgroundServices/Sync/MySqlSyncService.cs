@@ -17,7 +17,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<MySqlSyncService> _logger;
-        private TimeSpan _syncInterval = TimeSpan.FromMinutes(5);
+        private TimeSpan _syncInterval = TimeSpan.FromMinutes(120);
         private bool _isRunning;
         private readonly SemaphoreSlim _triggerSemaphore = new(0, 1);
 
@@ -629,7 +629,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 SicilNo = k.SicilNo > 0 ? k.SicilNo : null,
                 AdSoyad = k.KullaniciAdi,
                 NickName = GenerateNickName(k.KullaniciAdi),
-                PersonelKayitNo = 0,
+                PersonelKayitNo = null,
                 KartNo = int.TryParse(k.KartNo, out var kartNo) ? kartNo : 0,
                 KartNoAktiflikTarihi = k.KartAktifTarihi,
                 KartNoDuzenlenmeTarihi = k.KartGuncellemeZamani,

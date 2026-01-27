@@ -71,7 +71,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     TcKimlikNo = p.TcKimlikNo,
                     AdSoyad = p.AdSoyad,
                     SicilNo = p.SicilNo ?? 0,
-                    PersonelKayitNo = p.PersonelKayitNo,
+                    PersonelKayitNo = p.PersonelKayitNo ?? 0,
                     DepartmanAdi = p.Departman != null ? p.Departman.DepartmanAdi : "",
                     ServisAdi = p.Servis != null ? p.Servis.ServisAdi : null,
                     Aktif = p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif,

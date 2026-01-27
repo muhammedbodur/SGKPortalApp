@@ -582,7 +582,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     {
                         match.PersonelInfo = new PersonelResponseDto
                         {
-                            PersonelKayitNo = personel.PersonelKayitNo,
+                            PersonelKayitNo = personel.PersonelKayitNo ?? 0,
                             AdSoyad = personel.AdSoyad,
                             NickName = personel.NickName,
                             SicilNo = personel.SicilNo ?? 0,
@@ -727,7 +727,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     {
                         match.PersonelInfo = new PersonelResponseDto
                         {
-                            PersonelKayitNo = personel.PersonelKayitNo,
+                            PersonelKayitNo = personel.PersonelKayitNo ?? 0,
                             AdSoyad = personel.AdSoyad,
                             NickName = personel.NickName,
                             SicilNo = personel.SicilNo ?? 0,
@@ -803,7 +803,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                         .Where(p => !p.SilindiMi)
                         .ToDictionary(p => p.PersonelKayitNo.ToString(), p => new PersonelResponseDto
                         {
-                            PersonelKayitNo = p.PersonelKayitNo,
+                            PersonelKayitNo = p.PersonelKayitNo ?? 0,
                             AdSoyad = p.AdSoyad,
                             NickName = p.NickName,
                             SicilNo = p.SicilNo ?? 0,
