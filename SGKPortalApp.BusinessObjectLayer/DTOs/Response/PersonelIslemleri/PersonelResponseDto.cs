@@ -64,6 +64,35 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
         public PersonelAktiflikDurum PersonelAktiflikDurum { get; set; }
         public bool IsOnline { get; set; } = false;
 
+        /// <summary>
+        /// Pasif/ayrılış nedeni açıklaması
+        /// </summary>
+        public string? PasifNedeni { get; set; }
+
+        /// <summary>
+        /// Durum değişiklik tarihi (pasif/emekli/istifa vb. olduğu tarih)
+        /// </summary>
+        public DateTime? DurumDegisiklikTarihi { get; set; }
+
+        // Acil Durum Yakını Bilgileri
+        public string? YakinAdSoyad { get; set; }
+        public string? YakinlikDerecesi { get; set; }
+        public string? YakinTelefonu { get; set; }
+
+        // Kadro ve Göreve Başlama Bilgileri
+        public string? KadroDerecesi { get; set; }
+        public DateTime? GoreveBaslamaTarihi { get; set; }
+
+        // Finansal Bilgiler
+        public string? Iban { get; set; }
+
+        // Ulaşım Bilgileri
+        public string? EshotHat { get; set; }
+        public string? Durak { get; set; }
+
+        // Taşeron Bilgisi
+        public string? TaseronFirma { get; set; }
+
         // Eğitim bilgileri
         public OgrenimDurumu OgrenimDurumu { get; set; }
         public string? BitirdigiOkul { get; set; }

@@ -315,8 +315,10 @@ else
                                                        @onchange="() => TogglePersonelSelection(personel.TcKimlikNo)" />
                                             </td>
                                             <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@((CurrentPage - 1) * PageSize + index + 1)</td>
-                                            <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
-                                                <span class="fw-medium">@personel.TcKimlikNo</span>
+                                            <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem; white-space: nowrap;">
+                                                <PersonelHoverCard Personel="personel">
+                                                    <span class="fw-medium text-primary" style="cursor: pointer;">@personel.TcKimlikNo</span>
+                                                </PersonelHoverCard>
                                             </td>
                                             <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.SicilNo</td>
                                             <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">

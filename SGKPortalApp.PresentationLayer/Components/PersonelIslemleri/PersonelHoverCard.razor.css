@@ -1,0 +1,152 @@
+.personel-hover-trigger {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.personel-hover-card {
+    position: fixed;
+    z-index: 9999;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e0e0e0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    pointer-events: none;
+    max-width: 420px;
+    min-width: 360px;
+}
+
+.personel-hover-card.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.hover-card-content {
+    display: flex;
+    padding: 16px;
+    gap: 16px;
+}
+
+/* Sol: Resim */
+.hover-card-image {
+    flex-shrink: 0;
+    width: 100px;
+    height: 100px;
+}
+
+.hover-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #f0f0f0;
+}
+
+.hover-card-image .avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #696cff 0%, #8592ff 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hover-card-image .avatar-placeholder span {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+/* Sag: Icerikler */
+.hover-card-info {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.hover-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.hover-card-header h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hover-card-header .badge {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    flex-shrink: 0;
+}
+
+.hover-card-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: #555;
+}
+
+.detail-row i {
+    font-size: 1rem;
+    color: #696cff;
+    width: 18px;
+    flex-shrink: 0;
+}
+
+.detail-row span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hover-card-details hr {
+    margin: 4px 0;
+    border-color: #f0f0f0;
+}
+
+/* Dark mode support */
+:root[data-theme="dark"] .personel-hover-card,
+.dark-style .personel-hover-card {
+    background: #2b2c40;
+    border-color: #444564;
+}
+
+:root[data-theme="dark"] .hover-card-header h6,
+.dark-style .hover-card-header h6 {
+    color: #e7e7e7;
+}
+
+:root[data-theme="dark"] .detail-row,
+.dark-style .detail-row {
+    color: #b4b4b4;
+}
+
+:root[data-theme="dark"] .hover-card-header,
+.dark-style .hover-card-header {
+    border-color: #444564;
+}
+
+:root[data-theme="dark"] .hover-card-details hr,
+.dark-style .hover-card-details hr {
+    border-color: #444564;
+}

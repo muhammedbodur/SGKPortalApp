@@ -686,6 +686,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 EsininIsAdresi = k.EsIsAdres,
                 EsininIsSemt = k.EsSemt,
                 Resim = CopyPersonelFotoFromLegacy(k.ResimYolu, tcKimlikNo),
+                // Yeni alanlar (Legacy'den)
+                YakinAdSoyad = k.YakinAdSoyad,
+                YakinlikDerecesi = k.YakinDerece,
+                YakinTelefonu = k.YakinTel > 0 ? k.YakinTel.ToString() : null,
+                KadroDerecesi = k.KadroDerecesi,
+                GoreveBaslamaTarihi = ParseNullableDate(k.GoreveBaslama),
+                Iban = k.Iban,
+                PasifNedeni = k.PasifNedeni,
+                EshotHat = k.EshotHat,
+                Durak = k.Durak,
+                TaseronFirma = k.Taseron,
                 // Aktiflik AuditableEntity'den geliyor, Personel'de yok
                 EkleyenKullanici = "SYNC",
                 EklenmeTarihi = DateTime.Now,
@@ -771,6 +782,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
             if (string.IsNullOrEmpty(dogumTarihi)) return new DateTime(1970, 1, 1);
             if (DateTime.TryParse(dogumTarihi, out var dt)) return dt;
             return new DateTime(1970, 1, 1);
+        }
+
+        private DateTime? ParseNullableDate(string? dateStr)
+        {
+            if (string.IsNullOrEmpty(dateStr)) return null;
+            if (DateTime.TryParse(dateStr, out var dt)) return dt;
+            return null;
         }
 
         private KanGrubu ParseKanGrubu(string? kan)
