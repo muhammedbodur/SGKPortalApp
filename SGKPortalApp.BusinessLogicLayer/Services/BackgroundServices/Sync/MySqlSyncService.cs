@@ -711,8 +711,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
             if (p.Gorev != k.Gorev) { p.Gorev = k.Gorev; hasChanges = true; }
             if (p.Uzmanlik != k.Brans) { p.Uzmanlik = k.Brans; hasChanges = true; }
 
+            // KartNo: Mevcut değer varsa (0'dan farklı) korur, sadece boşsa legacy'den alır
             var newKartNo = int.TryParse(k.KartNo, out var kn) ? kn : 0;
-            if (p.KartNo != newKartNo) { p.KartNo = newKartNo; hasChanges = true; }
+            if (p.KartNo == 0 && newKartNo != 0) { p.KartNo = newKartNo; hasChanges = true; }
 
             var newAktiflik = MapCalisanDurum(k.CalisanDurum);
             if (p.PersonelAktiflikDurum != newAktiflik) { p.PersonelAktiflikDurum = newAktiflik; hasChanges = true; }
