@@ -1,14 +1,24 @@
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
 @using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+@using SGKPortalApp.PresentationLayer.Services.StateServices
+@inject PermissionStateService PermissionState
 
-<div class="personel-hover-trigger"
-     @onmouseenter="ShowCard"
-     @onmouseleave="HideCard"
-     @onmousemove="UpdatePosition">
+@if (_hasPermission)
+{
+    <div class="personel-hover-trigger"
+         @onmouseenter="ShowCard"
+         @onmouseleave="HideCard"
+         @onmousemove="UpdatePosition">
+        @ChildContent
+    </div>
+}
+else
+{
     @ChildContent
-</div>
+}
 
-@if (IsVisible && Personel != null)
+@if (_hasPermission && IsVisible && Personel != null)
 {
     <div class="personel-hover-card @(IsVisible ? "show" : "")"
          style="left: @(PositionX)px; top: @(PositionY)px;">
@@ -115,20 +125,36 @@
 
 @code {
     [Parameter]
-    public PersonelListResponseDto? Personel { get; set; }
+    public PersonelResponseDto? Personel { get; set; }
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
+    /// <summary>
+    /// Permission key for viewing the hover card (e.g., "PER.PERSONEL.INDEX.COMPONENT.HOVERCARD")
+    /// If empty, hover card is shown without permission check (backward compatible)
+    /// </summary>
+    [Parameter]
+    public string PermissionKey { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Required permission level (default: View)
+    /// </summary>
+    [Parameter]
+    public YetkiSeviyesi RequiredLevel { get; set; } = YetkiSeviyesi.View;
+
     private bool IsVisible { get; set; }
     private double PositionX { get; set; }
     private double PositionY { get; set; }
+    private bool _hasPermission = true;
 
     private System.Timers.Timer? _showTimer;
     private System.Timers.Timer? _hideTimer;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        await CheckPermission();
+
         _showTimer = new System.Timers.Timer(300); // 300ms delay before show
         _showTimer.AutoReset = false;
         _showTimer.Elapsed += async (s, e) => await InvokeAsync(() => { IsVisible = true; StateHasChanged(); });
@@ -136,6 +162,24 @@
         _hideTimer = new System.Timers.Timer(200); // 200ms delay before hide
         _hideTimer.AutoReset = false;
         _hideTimer.Elapsed += async (s, e) => await InvokeAsync(() => { IsVisible = false; StateHasChanged(); });
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await CheckPermission();
+    }
+
+    private async Task CheckPermission()
+    {
+        if (string.IsNullOrWhiteSpace(PermissionKey))
+        {
+            _hasPermission = true;
+            return;
+        }
+
+        await PermissionState.EnsureLoadedAsync();
+        var level = PermissionState.GetLevel(PermissionKey);
+        _hasPermission = level >= RequiredLevel;
     }
 
     private void ShowCard()
