@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -18,6 +19,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<MySqlSyncService> _logger;
+        private readonly IConfiguration _configuration;
+        private readonly string? _legacyFotoPath;
+        private readonly string? _localFotoPath;
+        private readonly bool _syncPersonelFoto;
         private TimeSpan _syncInterval = TimeSpan.FromMinutes(120);
         private bool _isRunning;
         private readonly SemaphoreSlim _triggerSemaphore = new(0, 1);
@@ -38,10 +43,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
         public int SuccessCount { get; private set; }
         public int ErrorCount { get; private set; }
 
-        public MySqlSyncService(IServiceProvider serviceProvider, ILogger<MySqlSyncService> logger)
+        public MySqlSyncService(IServiceProvider serviceProvider, ILogger<MySqlSyncService> logger, IConfiguration configuration)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
+            _configuration = configuration;
+            _legacyFotoPath = _configuration["LegacySettings:PersonelFotoPath"];
+            _localFotoPath = _configuration["LegacySettings:LocalPersonelFotoPath"];
+            _syncPersonelFoto = _configuration.GetValue<bool>("LegacySettings:SyncPersonelFoto", false);
         }
 
         public async Task TriggerAsync(CancellationToken cancellationToken = default)
@@ -676,7 +685,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 EsininUnvani = k.EsIsUnvan,
                 EsininIsAdresi = k.EsIsAdres,
                 EsininIsSemt = k.EsSemt,
-                Resim = k.ResimYolu,
+                Resim = CopyPersonelFotoFromLegacy(k.ResimYolu, tcKimlikNo) ?? k.ResimYolu,
                 // Aktiflik AuditableEntity'den geliyor, Personel'de yok
                 EkleyenKullanici = "SYNC",
                 EklenmeTarihi = DateTime.Now,
@@ -741,6 +750,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
             }
 
             if (p.SendikaId != validSendikaId) { p.SendikaId = validSendikaId; hasChanges = true; }
+
+            // Resim: Sadece mevcut resim yoksa legacy'den kopyala
+            if (string.IsNullOrEmpty(p.Resim) && !string.IsNullOrEmpty(k.ResimYolu))
+            {
+                var copiedResim = CopyPersonelFotoFromLegacy(k.ResimYolu, p.TcKimlikNo);
+                if (!string.IsNullOrEmpty(copiedResim))
+                {
+                    p.Resim = copiedResim;
+                    hasChanges = true;
+                }
+            }
 
             return hasChanges;
         }
@@ -849,6 +869,78 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 await unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("  ✅ Atanma Nedenleri: {added} eklendi, {updated} güncellendi", added, updated);
+        }
+
+        /// <summary>
+        /// Legacy sunucudan personel fotoğrafını kopyalar
+        /// </summary>
+        /// <param name="legacyResimYolu">Legacy'den gelen resim dosya adı (örn: "28165202398.jpg")</param>
+        /// <param name="tcKimlikNo">Personel TC Kimlik No</param>
+        /// <returns>Kopyalanan resmin relative yolu (örn: "/images/avatars/28165202398.jpg") veya null</returns>
+        private string? CopyPersonelFotoFromLegacy(string? legacyResimYolu, string tcKimlikNo)
+        {
+            if (!_syncPersonelFoto || string.IsNullOrEmpty(_legacyFotoPath) || string.IsNullOrEmpty(_localFotoPath))
+            {
+                return null;
+            }
+
+            if (string.IsNullOrWhiteSpace(legacyResimYolu))
+            {
+                return null;
+            }
+
+            try
+            {
+                // Legacy resim tam yolu
+                var sourceFileName = legacyResimYolu;
+                // Eğer uzantı yoksa .jpg ekle
+                if (!Path.HasExtension(sourceFileName))
+                {
+                    sourceFileName += ".jpg";
+                }
+
+                var sourcePath = Path.Combine(_legacyFotoPath, sourceFileName);
+
+                // Hedef klasör
+                if (!Directory.Exists(_localFotoPath))
+                {
+                    Directory.CreateDirectory(_localFotoPath);
+                }
+
+                // Hedef dosya adı: TC Kimlik No + uzantı
+                var targetFileName = $"{tcKimlikNo}{Path.GetExtension(sourceFileName)}";
+                var targetPath = Path.Combine(_localFotoPath, targetFileName);
+
+                // Kaynak dosya var mı kontrol et
+                if (!File.Exists(sourcePath))
+                {
+                    _logger.LogDebug("📷 Kaynak resim bulunamadı: {SourcePath}", sourcePath);
+                    return null;
+                }
+
+                // Hedef dosya zaten varsa ve aynı boyuttaysa atla
+                if (File.Exists(targetPath))
+                {
+                    var sourceInfo = new FileInfo(sourcePath);
+                    var targetInfo = new FileInfo(targetPath);
+                    if (sourceInfo.Length == targetInfo.Length)
+                    {
+                        // Aynı dosya, kopyalamaya gerek yok
+                        return $"/images/avatars/{targetFileName}";
+                    }
+                }
+
+                // Dosyayı kopyala
+                File.Copy(sourcePath, targetPath, overwrite: true);
+                _logger.LogDebug("📷 Resim kopyalandı: {Source} -> {Target}", sourcePath, targetPath);
+
+                return $"/images/avatars/{targetFileName}";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "📷 Resim kopyalama hatası: {LegacyResimYolu}", legacyResimYolu);
+                return null;
+            }
         }
     }
 }
