@@ -114,17 +114,34 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             // Base class permission yükleme ve event subscription'ı yapar
             await base.OnInitializedAsync();
 
-            // Lookup listelerini yükle
-            await LoadLookupData();
-
             if (IsEditMode)
             {
-                // Düzenleme modu: Direkt adım 2'ye geç
+                // Düzenleme modu: Lookup ve Personel verisini PARALEL yükle (performans iyileştirmesi)
                 CurrentStep = 2;
-                await LoadPersonelData();
+                IsLoading = true;
+
+                var lookupTask = LoadLookupDataAsync();
+                var personelTask = _personelApiService.GetByTcKimlikNoAsync(TcKimlikNo!);
+
+                await Task.WhenAll(lookupTask, personelTask);
+
+                // Personel verisini işle
+                var result = await personelTask;
+                if (!result.Success || result.Data == null)
+                {
+                    await _toastService.ShowErrorAsync(result.Message ?? "Personel bulunamadı!");
+                    _navigationManager.NavigateTo("/personel");
+                    return;
+                }
+
+                await ProcessPersonelDataAsync(result.Data);
+                IsLoading = false;
             }
             else
             {
+                // Yeni ekleme modu: Sadece lookup yükle
+                await LoadLookupDataAsync();
+
                 // Query string'den TC ve Ad Soyad kontrolü (Index'ten geldiyse)
                 var uri = new Uri(_navigationManager.Uri);
                 var queryParams = QueryHelpers.ParseQuery(uri.Query);
@@ -153,7 +170,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             base.Dispose();
         }
 
-        private async Task LoadLookupData()
+        private async Task LoadLookupDataAsync()
         {
             try
             {
@@ -179,114 +196,83 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
                 // İl seçiliyse ilçeleri filtrele
                 FilterIlceler();
-
-                // Select2'leri initialize et
-                await RefreshSelect2();
-
-                if (HizmetBinalari.Any())
-                {
-                    Console.WriteLine("    Hizmet Binaları:");
-                    foreach (var bina in HizmetBinalari)
-                    {
-                        Console.WriteLine($"      • ID: {bina.HizmetBinasiId}, Adı: {bina.HizmetBinasiAdi}");
-                    }
-                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($" Lookup verileri yüklenirken HATA: {ex.Message}");
+                _logger.LogError(ex, "Lookup verileri yüklenirken hata oluştu");
                 await _toastService.ShowErrorAsync($"Lookup verileri yüklenirken hata: {ex.Message}");
             }
         }
 
-        private async Task LoadPersonelData()
+        /// <summary>
+        /// API'den gelen personel verisini FormModel ve collection'lara aktar
+        /// </summary>
+        private async Task ProcessPersonelDataAsync(PersonelResponseDto data)
         {
-            IsLoading = true;
-            try
+            // DTO'dan FormModel'e dönüştürme
+            FormModel = MapToFormModel(data);
+
+            // Collection'ları yükle
+            Cocuklar = data.Cocuklar?.Select(c => new CocukModel
             {
-                var result = await _personelApiService.GetByTcKimlikNoAsync(TcKimlikNo!);
+                Isim = c.CocukAdi,
+                DogumTarihi = c.CocukDogumTarihi.ToDateTime(TimeOnly.MinValue),
+                OgrenimDurumu = c.OgrenimDurumu
+            }).ToList() ?? new List<CocukModel>();
 
-                if (!result.Success || result.Data == null)
-                {
-                    await _toastService.ShowErrorAsync(result.Message ?? "Personel bulunamadı!");
-                    _navigationManager.NavigateTo("/personel");
-                    return;
-                }
-
-                // DTO'dan FormModel'e dönüştürme
-                FormModel = MapToFormModel(result.Data);
-
-                //  COLLECTION'LARI YÜKLE
-                Cocuklar = result.Data.Cocuklar?.Select(c => new CocukModel
-                {
-                    Isim = c.CocukAdi,
-                    DogumTarihi = c.CocukDogumTarihi.ToDateTime(TimeOnly.MinValue),
-                    OgrenimDurumu = c.OgrenimDurumu
-                }).ToList() ?? new List<CocukModel>();
-
-                Hizmetler = result.Data.Hizmetler?.Select(h => new HizmetModel
-                {
-                    DepartmanId = h.DepartmanId,
-                    Departman = h.DepartmanAdi,
-                    ServisId = h.ServisId,
-                    Servis = h.ServisAdi,
-                    BaslamaTarihi = h.GorevBaslamaTarihi,
-                    AyrilmaTarihi = h.GorevAyrilmaTarihi,
-                    Sebep = h.Sebep
-                }).ToList() ?? new List<HizmetModel>();
-
-                Egitimler = result.Data.Egitimler?.Select(e => new EgitimModel
-                {
-                    EgitimAdi = e.EgitimAdi,
-                    BaslangicTarihi = e.EgitimBaslangicTarihi,
-                    BitisTarihi = e.EgitimBitisTarihi
-                }).ToList() ?? new List<EgitimModel>();
-
-                Yetkiler = result.Data.ImzaYetkileriDetay?.Select(y => new ImzaYetkisiModel
-                {
-                    DepartmanId = y.DepartmanId,
-                    ServisId = y.ServisId,
-                    GorevDegisimSebebi = y.GorevDegisimSebebi,
-                    ImzaYetkisiBaslamaTarihi = y.ImzaYetkisiBaslamaTarihi,
-                    ImzaYetkisiBitisTarihi = y.ImzaYetkisiBitisTarihi
-                }).ToList() ?? new List<ImzaYetkisiModel>();
-
-                Cezalar = result.Data.Cezalar?.Select(c => new CezaModel
-                {
-                    CezaSebebi = c.CezaSebebi,
-                    AltBendi = c.AltBendi,
-                    CezaTarihi = c.CezaTarihi
-                }).ToList() ?? new List<CezaModel>();
-
-                Engeller = result.Data.Engeller?.Select(e => new EngelModel
-                {
-                    EngelDerecesi = e.EngelDerecesi,
-                    EngelNedeni1 = e.EngelNedeni1,
-                    EngelNedeni2 = e.EngelNedeni2,
-                    EngelNedeni3 = e.EngelNedeni3
-                }).ToList() ?? new List<EngelModel>();
-
-                // İlçeleri filtreleniyor
-                FilterIlceler();
-
-                // Departmana bağlı hizmet binalarını yükle
-                if (FormModel.DepartmanId > 0)
-                {
-                    await LoadDepartmanHizmetBinalariAsync(FormModel.DepartmanId);
-                }
-
-                // Select2'leri initialize ediliyor
-                await RefreshSelect2();
-            }
-            catch (Exception ex)
+            Hizmetler = data.Hizmetler?.Select(h => new HizmetModel
             {
-                await _toastService.ShowErrorAsync($"Personel yüklenirken hata oluştu: {ex.Message}");
-                _navigationManager.NavigateTo("/personel");
-            }
-            finally
+                DepartmanId = h.DepartmanId,
+                Departman = h.DepartmanAdi,
+                ServisId = h.ServisId,
+                Servis = h.ServisAdi,
+                BaslamaTarihi = h.GorevBaslamaTarihi,
+                AyrilmaTarihi = h.GorevAyrilmaTarihi,
+                Sebep = h.Sebep
+            }).ToList() ?? new List<HizmetModel>();
+
+            Egitimler = data.Egitimler?.Select(e => new EgitimModel
             {
-                IsLoading = false;
+                EgitimAdi = e.EgitimAdi,
+                BaslangicTarihi = e.EgitimBaslangicTarihi,
+                BitisTarihi = e.EgitimBitisTarihi
+            }).ToList() ?? new List<EgitimModel>();
+
+            Yetkiler = data.ImzaYetkileriDetay?.Select(y => new ImzaYetkisiModel
+            {
+                DepartmanId = y.DepartmanId,
+                ServisId = y.ServisId,
+                GorevDegisimSebebi = y.GorevDegisimSebebi,
+                ImzaYetkisiBaslamaTarihi = y.ImzaYetkisiBaslamaTarihi,
+                ImzaYetkisiBitisTarihi = y.ImzaYetkisiBitisTarihi
+            }).ToList() ?? new List<ImzaYetkisiModel>();
+
+            Cezalar = data.Cezalar?.Select(c => new CezaModel
+            {
+                CezaSebebi = c.CezaSebebi,
+                AltBendi = c.AltBendi,
+                CezaTarihi = c.CezaTarihi
+            }).ToList() ?? new List<CezaModel>();
+
+            Engeller = data.Engeller?.Select(e => new EngelModel
+            {
+                EngelDerecesi = e.EngelDerecesi,
+                EngelNedeni1 = e.EngelNedeni1,
+                EngelNedeni2 = e.EngelNedeni2,
+                EngelNedeni3 = e.EngelNedeni3
+            }).ToList() ?? new List<EngelModel>();
+
+            // İlçeleri filtrele
+            FilterIlceler();
+
+            // Departmana bağlı hizmet binalarını yükle
+            if (FormModel.DepartmanId > 0)
+            {
+                await LoadDepartmanHizmetBinalariAsync(FormModel.DepartmanId);
             }
+
+            // Select2'leri initialize et
+            await RefreshSelect2();
         }
 
         private PersonelFormModel MapToFormModel(PersonelResponseDto dto)

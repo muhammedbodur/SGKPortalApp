@@ -4,10 +4,30 @@
 // ======================================================
 
 window.Select2Blazor = {
-    // 🔐 Global tracking Set (Blazor re-render'dan etkilenmez)
-    _initializedSelects: new Set(),
+    // 🔐 Global tracking Map: identifier -> element reference
+    _initializedSelects: new Map(),
+
+    // 🧹 Orphan Select2 container'ları temizle
+    cleanupOrphanedSelect2: function () {
+        // Artık DOM'da olmayan element'leri Map'ten kaldır
+        for (const [identifier, elementRef] of this._initializedSelects.entries()) {
+            if (!document.contains(elementRef)) {
+                this._initializedSelects.delete(identifier);
+            }
+        }
+
+        // Orphan select2-container'ları temizle (select element'i olmayan)
+        document.querySelectorAll('.select2-container').forEach(container => {
+            const prevSibling = container.previousElementSibling;
+            if (!prevSibling || prevSibling.tagName !== 'SELECT') {
+                container.remove();
+            }
+        });
+    },
 
     initializeAllSelects: function () {
+        // Önce orphan'ları temizle
+        this.cleanupOrphanedSelect2();
 
         const selects = document.querySelectorAll(
             'select:not([data-no-select2])'
@@ -19,21 +39,27 @@ window.Select2Blazor = {
         selects.forEach(element => {
             // Unique identifier oluştur (name veya id)
             const identifier = element.name || element.id || element.getAttribute('data-val-required');
-            
+
             if (!identifier) {
-                console.warn('⚠️ Select without name/id, skipping:', element);
+                return; // Sessizce skip et
+            }
+
+            // Eğer bu element zaten initialize edilmişse skip et
+            // Ama aynı identifier'a sahip FARKLI bir element varsa (Blazor re-render), yeniden init et
+            const existingElement = this._initializedSelects.get(identifier);
+            if (existingElement === element) {
+                skipCount++;
                 return;
             }
 
-            // 🔒 GLOBAL SET İLE KONTROL (Blazor re-render safe)
-            if (this._initializedSelects.has(identifier)) {
-                skipCount++;
-                console.log(`⏭️ Skip (already init): ${identifier}`);
-                return;
+            // Eğer eski element varsa ve DOM'da hala varsa destroy et
+            if (existingElement && document.contains(existingElement)) {
+                try {
+                    $(existingElement).select2('destroy');
+                } catch (e) { /* ignore */ }
             }
 
             initCount++;
-            console.log(`✅ Init: ${identifier}`);
 
             const currentValue = element.value;
 
@@ -48,8 +74,8 @@ window.Select2Blazor = {
                 }
             });
 
-            // 🔐 GLOBAL SET'E EKLE (Blazor re-render safe)
-            this._initializedSelects.add(identifier);
+            // 🔐 Map'e ekle (element referansı ile)
+            this._initializedSelects.set(identifier, element);
 
             // 🔄 Mevcut değeri koru
             if (currentValue && currentValue !== '0' && currentValue !== '') {
@@ -57,6 +83,7 @@ window.Select2Blazor = {
             }
 
             // 🔗 Blazor ile senkronizasyon
+            $(element).off('select2:select select2:clear'); // Önceki handler'ları temizle
             $(element).on('select2:select', function (e) {
                 element.value = e.params.data.id;
                 element.dispatchEvent(
@@ -72,7 +99,9 @@ window.Select2Blazor = {
             });
         });
 
-        console.log(`📊 Select2 Init Summary: ${initCount} initialized, ${skipCount} skipped, ${this._initializedSelects.size} total tracked`);
+        if (initCount > 0) {
+            console.log(`📊 Select2: ${initCount} init, ${skipCount} skip`);
+        }
     }
 };
 
