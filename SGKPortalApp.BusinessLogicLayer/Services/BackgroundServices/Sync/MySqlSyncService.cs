@@ -1,15 +1,16 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.BackgroundServiceManager;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Entities.Legacy;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
-using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
+using SGKPortalApp.Common.Helpers;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Legacy;
-using SGKPortalApp.BusinessObjectLayer.Entities.Legacy;
-using SGKPortalApp.BusinessLogicLayer.Interfaces.BackgroundServiceManager;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
 {
@@ -628,7 +629,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 TcKimlikNo = tcKimlikNo,
                 SicilNo = k.SicilNo > 0 ? k.SicilNo : null,
                 AdSoyad = k.KullaniciAdi,
-                NickName = GenerateNickName(k.KullaniciAdi),
+                NickName = StringHelper.GenerateNickName(k.KullaniciAdi, 8),
                 PersonelKayitNo = null,
                 KartNo = int.TryParse(k.KartNo, out var kartNo) ? kartNo : 0,
                 KartNoAktiflikTarihi = k.KartAktifTarihi,
@@ -735,16 +736,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
             if (p.SendikaId != validSendikaId) { p.SendikaId = validSendikaId; hasChanges = true; }
 
             return hasChanges;
-        }
-
-        private string GenerateNickName(string adSoyad)
-        {
-            if (string.IsNullOrEmpty(adSoyad)) return "USER";
-            var parts = adSoyad.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            var nick = parts[0].ToUpperInvariant()
-                .Replace("İ", "I").Replace("Ğ", "G").Replace("Ü", "U")
-                .Replace("Ş", "S").Replace("Ö", "O").Replace("Ç", "C");
-            return nick.Length > 8 ? nick[..8] : nick;
         }
 
         private DateTime ParseDogumTarihi(string? dogumTarihi)

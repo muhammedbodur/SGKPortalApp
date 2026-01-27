@@ -465,7 +465,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     }
 
                     // NickName otomatik oluştur
-                    personel.NickName = StringHelper.GenerateNickName(personel.AdSoyad, 12);
+                    personel.NickName = StringHelper.GenerateNickName(personel.AdSoyad, 8);
 
                     await _unitOfWork.Repository<Personel>().AddAsync(personel);
                     await _unitOfWork.SaveChangesAsync();
