@@ -289,9 +289,6 @@ else
                                             @if (sortBy == "sicil-asc") { <i class="bx bx-chevron-up ms-1"></i> }
                                             else if (sortBy == "sicil-desc") { <i class="bx bx-chevron-down ms-1"></i> }
                                         </th>
-                                        <th style="padding: 0.5rem;">PDKS Kayıt No</th>
-                                        <th style="padding: 0.5rem;">Kart No</th>
-                                        <th style="padding: 0.5rem;">Son Gönderim</th>
                                         <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByName" @onclick:stopPropagation="true">
                                             Ad Soyad
                                             @if (sortBy == "name-asc") { <i class="bx bx-chevron-up ms-1"></i> }
@@ -341,47 +338,6 @@ else
                                                 <span class="fw-medium">@personel.TcKimlikNo</span>
                                             </td>
                                             <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.SicilNo</td>
-                                            <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
-                                                <span class="badge bg-label-info">@personel.PersonelKayitNo</span>
-                                            </td>
-                                            <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
-                                                @if (personel.KartNo > 0)
-                                                {
-                                                    <span class="badge bg-label-primary">@personel.KartNo</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted small">-</span>
-                                                }
-                                            </td>
-                                            <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
-                                                @if (personel.KartNoGonderimTarihi.HasValue)
-                                                {
-                                                    <div class="d-flex flex-column">
-                                                        <small class="text-muted">@personel.KartNoGonderimTarihi.Value.ToString("dd.MM.yyyy HH:mm")</small>
-                                                        @switch (personel.KartGonderimIslemBasari)
-                                                        {
-                                                            case IslemBasari.Basarili:
-                                                                <span class="badge bg-label-success" style="font-size: 0.7rem;">
-                                                                    <i class="bx bx-check-circle me-1"></i>Başarılı
-                                                                </span>
-                                                                break;
-                                                            case IslemBasari.Basarisiz:
-                                                                <span class="badge bg-label-danger" style="font-size: 0.7rem;">
-                                                                    <i class="bx bx-x-circle me-1"></i>Başarısız
-                                                                </span>
-                                                                break;
-                                                            default:
-                                                                <span class="badge bg-label-secondary" style="font-size: 0.7rem;">-</span>
-                                                                break;
-                                                        }
-                                                    </div>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted small">Hiç gönderilmedi</span>
-                                                }
-                                            </td>
                                             <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
                                                 <div class="d-flex align-items-center avatar-offline">
                                                     @if (!string.IsNullOrEmpty(personel.Resim))

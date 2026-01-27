@@ -69,7 +69,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private int filterServisId = 0;
         private int filterHizmetBinasiId = 0;
         private int filterUnvanId = 0;
-        private int filterAktiflik = -1; // -1: Tümü, 0: Aktif, 1: Pasif, 2: Emekli
+        private int filterAktiflik = (int)PersonelAktiflikDurum.Aktif; // -1: Tümü, 0: Pasif, 1: Aktif, 2: Emekli
         private int filterZKTecoDeviceId = 0; // 0: Tüm Cihazlar
         private string sortBy = "name-asc";
 
@@ -379,7 +379,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             filterServisId = 0;
             filterHizmetBinasiId = 0;
             filterUnvanId = 0;
-            filterAktiflik = -1;
+            filterAktiflik = (int)PersonelAktiflikDurum.Aktif;
             filterZKTecoDeviceId = 0;
             sortBy = "name-asc";
             _ = ApplyFiltersAndSort();

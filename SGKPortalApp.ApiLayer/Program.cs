@@ -270,7 +270,12 @@ namespace SGKPortalApp.ApiLayer
                 sp => sp.GetRequiredService<SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService>());
 
             // ═══════════════════════════════════════════════════════
-            // 🔧 AUTOMAPPER
+            // �️ IMAGE PATH HELPER
+            // ═══════════════════════════════════════════════════════
+            builder.Services.AddSingleton<SGKPortalApp.Common.Helpers.PersonelImagePathHelper>();
+
+            // ═══════════════════════════════════════════════════════
+            // �🔧 AUTOMAPPER
             // ═══════════════════════════════════════════════════════
             // Sadece proje assembly'lerini scan et - üçüncü parti kütüphaneleri değil
             // Microsoft.AspNet.SignalR.Client artık BusinessLogicLayer'da (sadece orada kullanılıyor)

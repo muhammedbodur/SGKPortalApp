@@ -270,7 +270,12 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                     HizmetBinasiAdi = p.DepartmanHizmetBinasi != null && p.DepartmanHizmetBinasi.HizmetBinasi != null ? p.DepartmanHizmetBinasi.HizmetBinasi.HizmetBinasiAdi : "",
                     Dahili = p.Dahili,
                     CepTelefonu = p.CepTelefonu,
-                    Resim = p.Resim ?? "",
+                    // Resim: DB'de filename varsa /images/avatars/ ile birleştir (PersonelImagePathHelper logic'i ile uyumlu)
+                    Resim = string.IsNullOrWhiteSpace(p.Resim)
+                        ? ""
+                        : (p.Resim.StartsWith("/") || p.Resim.StartsWith("http://") || p.Resim.StartsWith("https://")
+                            ? p.Resim
+                            : (p.Resim.StartsWith("images/") ? "/" + p.Resim : "/images/avatars/" + p.Resim)),
                     PersonelAktiflikDurum = p.PersonelAktiflikDurum,
                     EklenmeTarihi = p.EklenmeTarihi
                 })

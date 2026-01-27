@@ -45,6 +45,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         [Inject] private IAtanmaNedeniApiService _atanmaNedeniApiService { get; set; } = default!;
         [Inject] private IMapper _mapper { get; set; } = default!;
         [Inject] private IUserInfoService _userInfoService { get; set; } = default!;
+        [Inject] private PersonelImagePathHelper _imagePathHelper { get; set; } = default!;
 
         // ═══════════════════════════════════════════════════════════
         // PARAMETERS
@@ -1036,13 +1037,16 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 // Dosya sisteminin güncellenmesi için kısa bir bekleme
                 await Task.Delay(100);
 
+                // ⭐ DB'ye sadece filename kaydet (yeni standart)
+                var filenameOnly = _imagePathHelper.ExtractFilename(imagePath);
+
                 // ⭐ KRITIK: Resmi önce null yap, sonra set et
                 // Bu sayede CachedImage component'i tamamen yeniden render olur
                 FormModel.Resim = null;
                 StateHasChanged();
                 await Task.Delay(50);
                 
-                FormModel.Resim = imagePath;
+                FormModel.Resim = filenameOnly;
                 StateHasChanged();
 
                 if (IsEditMode)

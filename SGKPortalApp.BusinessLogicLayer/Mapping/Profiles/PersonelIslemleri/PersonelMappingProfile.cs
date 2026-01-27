@@ -2,6 +2,7 @@ using AutoMapper;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.BusinessLogicLayer.Mapping.ValueResolvers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
 {
@@ -105,6 +106,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                     opt => opt.MapFrom(src => src.Unvan != null ? src.Unvan.UnvanAdi : ""))
                 .ForMember(dest => dest.AtanmaNedeniAdi,
                     opt => opt.MapFrom(src => src.AtanmaNedeni != null ? src.AtanmaNedeni.AtanmaNedeni : ""))
+                .ForMember(dest => dest.Resim,
+                    opt => opt.MapFrom<PersonelImagePathResolver, string?>(src => src.Resim))
                 .ForMember(dest => dest.DepartmanHizmetBinasiId,
                     opt => opt.MapFrom(src => src.DepartmanHizmetBinasiId))
                 .ForMember(dest => dest.HizmetBinasiId,
@@ -248,6 +251,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                     opt => opt.MapFrom(src => src.Servis != null ? src.Servis.ServisAdi : ""))
                 .ForMember(dest => dest.UnvanAdi,
                     opt => opt.MapFrom(src => src.Unvan != null ? src.Unvan.UnvanAdi : ""))
+                .ForMember(dest => dest.Resim,
+                    opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.Resim)
+                        ? string.Empty
+                        : (src.Resim.StartsWith("/")
+                            || src.Resim.StartsWith("http://")
+                            || src.Resim.StartsWith("https://")
+                                ? src.Resim
+                                : $"/images/avatars/{src.Resim.TrimStart('/')}")))
                 .ForMember(dest => dest.PersonelAktiflikDurum,
                     opt => opt.MapFrom(src => src.PersonelAktiflikDurum.ToString()));
         }

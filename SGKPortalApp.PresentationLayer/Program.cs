@@ -268,6 +268,9 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 // Image Helper Service
 builder.Services.AddScoped<ImageHelper>();
 
+// Personel Image Path Helper (Singleton - config-based)
+builder.Services.AddSingleton<SGKPortalApp.Common.Helpers.PersonelImagePathHelper>();
+
 // Stale Connection Cleanup Background Service
 builder.Services.AddHostedService<SGKPortalApp.PresentationLayer.Services.BackgroundServices.StaleConnectionCleanupService>();
 

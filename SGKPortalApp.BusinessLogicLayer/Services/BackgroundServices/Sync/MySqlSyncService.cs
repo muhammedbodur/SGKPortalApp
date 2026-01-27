@@ -751,9 +751,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
 
             if (p.SendikaId != validSendikaId) { p.SendikaId = validSendikaId; hasChanges = true; }
 
-            // Resim: Format kontrolü ve düzeltme
-            var expectedResimPath = $"/images/avatars/{p.TcKimlikNo}.jpg";
-
+            // Resim: DB'deki değeri manipüle etme; sadece boşsa legacy'den kopyalanan yolu set et
             if (string.IsNullOrEmpty(p.Resim))
             {
                 // Resim yok - legacy'den kopyala
@@ -763,13 +761,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                     p.Resim = copiedResim;
                     hasChanges = true;
                 }
-            }
-            else if (p.Resim != expectedResimPath)
-            {
-                // Resim var ama format yanlış - düzelt
-                p.Resim = expectedResimPath;
-                hasChanges = true;
-                _logger.LogDebug("📷 Resim formatı düzeltildi: {TcKimlikNo}", p.TcKimlikNo);
             }
 
             return hasChanges;
@@ -882,12 +873,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
         }
 
         /// <summary>
-        /// Legacy sunucudan personel fotoğrafını kopyalar
-        /// Uzantı yoksa sırayla .jpg, .jpeg, .png dener
+        /// Legacy'den personel fotoğrafını kopyalar ve hedef klasöre kaydeder.
         /// </summary>
         /// <param name="legacyResimYolu">Legacy'den gelen resim dosya adı (örn: "28165202398" veya "28165202398.jpg")</param>
         /// <param name="tcKimlikNo">Personel TC Kimlik No</param>
-        /// <returns>Kopyalanan resmin relative yolu (örn: "/images/avatars/28165202398.jpg") veya null</returns>
+        /// <returns>Sadece dosya adı (örn: "28165202398.jpg") veya null - DB'de sadece filename saklanır</returns>
         private string? CopyPersonelFotoFromLegacy(string? legacyResimYolu, string tcKimlikNo)
         {
             if (!_syncPersonelFoto || string.IsNullOrEmpty(_legacyFotoPath) || string.IsNullOrEmpty(_localFotoPath))
@@ -958,8 +948,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                     var targetInfo = new FileInfo(targetPath);
                     if (sourceInfo.Length == targetInfo.Length)
                     {
-                        // Aynı dosya, kopyalamaya gerek yok
-                        return $"/images/avatars/{targetFileName}";
+                        // Aynı dosya, kopyalamaya gerek yok - sadece filename döndür
+                        return targetFileName;
                     }
                 }
 
@@ -967,7 +957,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 File.Copy(sourcePath, targetPath, overwrite: true);
                 _logger.LogDebug("📷 Resim kopyalandı: {Source} -> {Target}", sourcePath, targetPath);
 
-                return $"/images/avatars/{targetFileName}";
+                // Sadece filename döndür (DB'de sadece filename saklanır)
+                return targetFileName;
             }
             catch (Exception ex)
             {
