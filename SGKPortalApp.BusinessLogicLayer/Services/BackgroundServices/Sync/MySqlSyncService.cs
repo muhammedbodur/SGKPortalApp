@@ -685,7 +685,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 EsininUnvani = k.EsIsUnvan,
                 EsininIsAdresi = k.EsIsAdres,
                 EsininIsSemt = k.EsSemt,
-                Resim = CopyPersonelFotoFromLegacy(k.ResimYolu, tcKimlikNo) ?? k.ResimYolu,
+                Resim = CopyPersonelFotoFromLegacy(k.ResimYolu, tcKimlikNo),
                 // Aktiflik AuditableEntity'den geliyor, Personel'de yok
                 EkleyenKullanici = "SYNC",
                 EklenmeTarihi = DateTime.Now,
