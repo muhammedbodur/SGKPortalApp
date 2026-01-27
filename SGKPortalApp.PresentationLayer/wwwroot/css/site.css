@@ -539,6 +539,14 @@ html.layout-menu-fixed:not(.layout-menu-collapsed) .layout-menu-toggle .bx-chevr
 }
 
 /* ============================================
+   SELECT2 + BLAZOR FIX
+   ============================================ */
+/* 🔒 Select2 duplicate prevention - Hide original select when Select2 is active */
+select.select2-hidden-accessible {
+    display: none !important;
+}
+
+/* ============================================
    PRINT STYLES
    ============================================ */
 

@@ -161,20 +161,6 @@ else
                                 <option value="2">Emekli</option>
                             </select>
                         </div>
-
-                        <!-- ZKTeco Cihaz Filtresi -->
-                        <div class="col-md-2">
-                            <label class="form-label">
-                                <i class="bx bx-devices me-1"></i>PDKS Cihazı
-                            </label>
-                            <select class="form-select" value="@filterZKTecoDeviceId" @onchange="OnFilterDeviceChanged">
-                                <option value="0">Tüm Cihazlar</option>
-                                @foreach (var device in ZKTecoDevices)
-                                {
-                                    <option value="@device.DeviceId">@device.DeviceName</option>
-                                }
-                            </select>
-                        </div>
                     </div>
 
                     <!-- İstatistikler -->
@@ -314,11 +300,6 @@ else
                                             @if (sortBy == "unvan-asc") { <i class="bx bx-chevron-up ms-1"></i> }
                                             else if (sortBy == "unvan-desc") { <i class="bx bx-chevron-down ms-1"></i> }
                                         </th>
-                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByDahili" @onclick:stopPropagation="true">
-                                            Dahili
-                                            @if (sortBy == "dahili-asc") { <i class="bx bx-chevron-up ms-1"></i> }
-                                            else if (sortBy == "dahili-desc") { <i class="bx bx-chevron-down ms-1"></i> }
-                                        </th>
                                         <th class="text-center" style="width: 80px; padding: 0.5rem 0.25rem;">Durum</th>
                                         <th class="text-center" style="width: 120px; padding: 0.5rem 0.25rem;">İşlemler</th>
                                     </tr>
@@ -342,7 +323,7 @@ else
                                                 <div class="d-flex align-items-center avatar-offline">
                                                     @if (!string.IsNullOrEmpty(personel.Resim))
                                                     {
-                                                        <CachedImage @key="@personel.Resim" Src="@personel.Resim" Alt="avatar" Class="rounded-circle me-1" Width="28" Height="28" />
+                                                        <CachedImage @key="@personel.Resim" Src="@personel.Resim" Alt="avatar" Class="rounded-circle me-1" Width="40" Height="40" />
                                                     }
                                                     else
                                                     {
@@ -365,7 +346,6 @@ else
                                             <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.ServisAdi</td>
                                             <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.HizmetBinasiAdi</td>
                                             <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.UnvanAdi</td>
-                                            <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.Dahili</td>
                                             <td class="text-center" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
                                                 @switch (personel.PersonelAktiflikDurum)
                                                 {
