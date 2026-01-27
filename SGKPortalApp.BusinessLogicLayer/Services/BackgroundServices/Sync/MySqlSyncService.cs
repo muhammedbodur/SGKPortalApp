@@ -873,8 +873,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
 
         /// <summary>
         /// Legacy sunucudan personel fotoğrafını kopyalar
+        /// Uzantı yoksa sırayla .jpg, .jpeg, .png dener
         /// </summary>
-        /// <param name="legacyResimYolu">Legacy'den gelen resim dosya adı (örn: "28165202398.jpg")</param>
+        /// <param name="legacyResimYolu">Legacy'den gelen resim dosya adı (örn: "28165202398" veya "28165202398.jpg")</param>
         /// <param name="tcKimlikNo">Personel TC Kimlik No</param>
         /// <returns>Kopyalanan resmin relative yolu (örn: "/images/avatars/28165202398.jpg") veya null</returns>
         private string? CopyPersonelFotoFromLegacy(string? legacyResimYolu, string tcKimlikNo)
@@ -891,32 +892,54 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
 
             try
             {
-                // Legacy resim tam yolu
-                var sourceFileName = legacyResimYolu;
-                // Eğer uzantı yoksa .jpg ekle
-                if (!Path.HasExtension(sourceFileName))
-                {
-                    sourceFileName += ".jpg";
-                }
-
-                var sourcePath = Path.Combine(_legacyFotoPath, sourceFileName);
-
-                // Hedef klasör
+                // Hedef klasör oluştur
                 if (!Directory.Exists(_localFotoPath))
                 {
                     Directory.CreateDirectory(_localFotoPath);
                 }
 
-                // Hedef dosya adı: TC Kimlik No + uzantı
-                var targetFileName = $"{tcKimlikNo}{Path.GetExtension(sourceFileName)}";
-                var targetPath = Path.Combine(_localFotoPath, targetFileName);
+                string? sourcePath = null;
+                string sourceExtension = ".jpg"; // Varsayılan uzantı
 
-                // Kaynak dosya var mı kontrol et
-                if (!File.Exists(sourcePath))
+                // Eğer uzantı varsa direkt kullan
+                if (Path.HasExtension(legacyResimYolu))
                 {
-                    _logger.LogDebug("📷 Kaynak resim bulunamadı: {SourcePath}", sourcePath);
-                    return null;
+                    sourcePath = Path.Combine(_legacyFotoPath, legacyResimYolu);
+                    sourceExtension = Path.GetExtension(legacyResimYolu);
+
+                    if (!File.Exists(sourcePath))
+                    {
+                        _logger.LogDebug("📷 Kaynak resim bulunamadı: {SourcePath}", sourcePath);
+                        return null;
+                    }
                 }
+                else
+                {
+                    // Uzantı yoksa sırayla dene: .jpg, .jpeg, .png
+                    var extensionsToTry = new[] { ".jpg", ".jpeg", ".png" };
+
+                    foreach (var ext in extensionsToTry)
+                    {
+                        var tryPath = Path.Combine(_legacyFotoPath, legacyResimYolu + ext);
+                        if (File.Exists(tryPath))
+                        {
+                            sourcePath = tryPath;
+                            sourceExtension = ext;
+                            _logger.LogDebug("📷 Resim bulundu: {SourcePath}", sourcePath);
+                            break;
+                        }
+                    }
+
+                    if (sourcePath == null)
+                    {
+                        _logger.LogDebug("📷 Kaynak resim bulunamadı (tüm uzantılar denendi): {LegacyResimYolu}", legacyResimYolu);
+                        return null;
+                    }
+                }
+
+                // Hedef her zaman .jpg olarak kaydedilir (tutarlılık için)
+                var targetFileName = $"{tcKimlikNo}.jpg";
+                var targetPath = Path.Combine(_localFotoPath, targetFileName);
 
                 // Hedef dosya zaten varsa ve aynı boyuttaysa atla
                 if (File.Exists(targetPath))
