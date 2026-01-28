@@ -153,7 +153,7 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogError("IsSessionStillValidAsync failed for SessionID: {SessionId}", sessionId);
-                    return false; // Hata durumunda güvenli taraf: session geçersiz say
+                    return false; // API açık ama hata döndü: session geçersiz say
                 }
 
                 var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
@@ -166,10 +166,17 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth
                 _logger.LogWarning("IsSessionStillValidAsync returned no data for SessionID: {SessionId}", sessionId);
                 return false;
             }
+            catch (HttpRequestException ex)
+            {
+                // API'ye bağlanılamıyor (sunucu kapalı, network hatası vb.)
+                // Bu durumda kullanıcıyı logout etme, devam etmesine izin ver
+                _logger.LogWarning(ex, "IsSessionStillValidAsync: API bağlantı hatası, session kontrolü atlanıyor - SessionID: {SessionId}", sessionId);
+                return true; // Bağlantı hatası: kullanıcıya devam izni ver
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "IsSessionStillValidAsync Exception for SessionID: {SessionId}", sessionId);
-                return false; // Hata durumunda güvenli taraf: session geçersiz say
+                return true; // Beklenmeyen hata: kullanıcıyı logout etme
             }
         }
     }
