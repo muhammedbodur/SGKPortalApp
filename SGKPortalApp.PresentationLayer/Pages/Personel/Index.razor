@@ -308,7 +308,10 @@ else
                                 <tbody>
                                     @foreach (var (personel, index) in FilteredPersoneller.Select((p, i) => (p, i)))
                                     {
-                                        <tr style="@GetClickableRowStyle(ActionType.DETAIL)" @onclick="() => TryNavigateToDetail(personel.TcKimlikNo)">
+                                        <tr style="@GetClickableRowStyle(ActionType.DETAIL)" 
+                                            @onclick="() => TryNavigateToDetail(personel.TcKimlikNo)"
+                                            data-personel-row="@personel.TcKimlikNo"
+                                            class="personel-row-trigger">
                                             <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;" @onclick:stopPropagation="true">
                                                 <input type="checkbox"
                                                        class="form-check-input"
@@ -316,12 +319,8 @@ else
                                                        @onchange="() => TogglePersonelSelection(personel.TcKimlikNo)" />
                                             </td>
                                             <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@((CurrentPage - 1) * PageSize + index + 1)</td>
-                                            <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem; white-space: nowrap;">
-                                                <PersonelHoverCard Personel="@personel" PermissionKey="PER.PERSONEL.INDEX.COMPONENT.HOVERCARD">
-                                                    <span class="fw-medium text-primary" style="cursor: pointer;">@personel.TcKimlikNo</span>
-                                                </PersonelHoverCard>
-                                            </td>
-                                            <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.SicilNo</td>
+                                            <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.TcKimlikNo</td>
+                                            <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.SicilNo</td>
                                             <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
                                                 <div class="d-flex align-items-center avatar-offline">
                                                     @if (!string.IsNullOrEmpty(personel.Resim))
@@ -568,4 +567,10 @@ else
             </div>
         </div>
     </div>
+}
+
+@* Personel Hover Card Tooltips *@
+@foreach (var personel in FilteredPersoneller)
+{
+    <PersonelHoverCard Personel="@personel" PermissionKey="PER.PERSONEL.INDEX.COMPONENT.HOVERCARD" />
 }

@@ -4,120 +4,113 @@
 @using SGKPortalApp.PresentationLayer.Services.StateServices
 @inject PermissionStateService PermissionState
 
-@if (_hasPermission)
-{
-    <div class="personel-hover-trigger"
-         @onmouseenter="ShowCard"
-         @onmouseleave="HideCard"
-         @onmousemove="UpdatePosition">
-        @ChildContent
-    </div>
-}
-else
-{
+<span class="personel-tooltip-trigger" data-personel-id="@Personel?.TcKimlikNo">
     @ChildContent
-}
+</span>
 
-@if (_hasPermission && IsVisible && Personel != null)
+@if (_hasPermission && Personel != null)
 {
-    <div class="personel-hover-card @(IsVisible ? "show" : "")"
-         style="left: @(PositionX)px; top: @(PositionY)px;">
-        <div class="hover-card-content">
-            <!-- Sol: Resim -->
-            <div class="hover-card-image">
-                @if (!string.IsNullOrEmpty(Personel.Resim))
-                {
-                    <img src="@Personel.Resim" alt="@Personel.AdSoyad" />
-                }
-                else
-                {
-                    <div class="avatar-placeholder">
-                        <span>@Personel.AdSoyad.Substring(0, 1).ToUpper()</span>
-                    </div>
-                }
+    <div class="personel-tooltip" data-tooltip-for="@Personel.TcKimlikNo">
+        <div class="tooltip-content">
+            <!-- Header -->
+            <div class="tooltip-header">
+                <div class="tooltip-avatar">
+                    @if (!string.IsNullOrEmpty(Personel.Resim))
+                    {
+                        <img src="@Personel.Resim" alt="@Personel.AdSoyad" />
+                    }
+                    else
+                    {
+                        <div class="avatar-placeholder">
+                            <span>@Personel.AdSoyad.Substring(0, 1).ToUpper()</span>
+                        </div>
+                    }
+                </div>
+                <div class="tooltip-title">
+                    <h6>@Personel.AdSoyad</h6>
+                    @if (!string.IsNullOrEmpty(Personel.UnvanAdi))
+                    {
+                        <span class="subtitle">@Personel.UnvanAdi</span>
+                    }
+                </div>
+                <span class="badge @GetStatusBadgeClass()">@GetStatusText()</span>
             </div>
 
-            <!-- Sag: Icerikler -->
-            <div class="hover-card-info">
-                <div class="hover-card-header">
-                    <h6 class="mb-0">@Personel.AdSoyad</h6>
-                    <span class="badge @GetStatusBadgeClass()">
-                        @GetStatusText()
-                    </span>
-                </div>
-
-                <div class="hover-card-details">
-                    <div class="detail-row">
+            <!-- Body -->
+            <div class="tooltip-body">
+                <!-- Kimlik -->
+                <div class="tooltip-section">
+                    <div class="section-title">Kimlik Bilgileri</div>
+                    <div class="info-row">
                         <i class="bx bx-id-card"></i>
                         <span>@Personel.TcKimlikNo</span>
                     </div>
-
                     @if (Personel.SicilNo != null && Personel.SicilNo > 0)
                     {
-                        <div class="detail-row">
+                        <div class="info-row">
                             <i class="bx bx-hash"></i>
                             <span>Sicil: @Personel.SicilNo</span>
                         </div>
                     }
-
-                    @if (!string.IsNullOrEmpty(Personel.Email))
-                    {
-                        <div class="detail-row">
-                            <i class="bx bx-envelope"></i>
-                            <span>@Personel.Email</span>
-                        </div>
-                    }
-
-                    @if (!string.IsNullOrEmpty(Personel.CepTelefonu))
-                    {
-                        <div class="detail-row">
-                            <i class="bx bx-phone"></i>
-                            <span>@Personel.CepTelefonu</span>
-                        </div>
-                    }
-
-                    @if (Personel.Dahili > 0)
-                    {
-                        <div class="detail-row">
-                            <i class="bx bx-phone-call"></i>
-                            <span>Dahili: @Personel.Dahili</span>
-                        </div>
-                    }
-
-                    <hr class="my-2" />
-
-                    @if (!string.IsNullOrEmpty(Personel.DepartmanAdi))
-                    {
-                        <div class="detail-row">
-                            <i class="bx bx-building"></i>
-                            <span>@Personel.DepartmanAdi</span>
-                        </div>
-                    }
-
-                    @if (!string.IsNullOrEmpty(Personel.HizmetBinasiAdi))
-                    {
-                        <div class="detail-row">
-                            <i class="bx bx-map-pin"></i>
-                            <span>@Personel.HizmetBinasiAdi</span>
-                        </div>
-                    }
-
-                    @if (!string.IsNullOrEmpty(Personel.ServisAdi))
-                    {
-                        <div class="detail-row">
-                            <i class="bx bx-briefcase"></i>
-                            <span>@Personel.ServisAdi</span>
-                        </div>
-                    }
-
-                    @if (!string.IsNullOrEmpty(Personel.UnvanAdi))
-                    {
-                        <div class="detail-row">
-                            <i class="bx bx-user-circle"></i>
-                            <span>@Personel.UnvanAdi</span>
-                        </div>
-                    }
                 </div>
+
+                <!-- İletişim -->
+                @if (!string.IsNullOrEmpty(Personel.Email) || !string.IsNullOrEmpty(Personel.CepTelefonu) || Personel.Dahili > 0)
+                {
+                    <div class="tooltip-section">
+                        <div class="section-title">İletişim</div>
+                        @if (!string.IsNullOrEmpty(Personel.Email))
+                        {
+                            <div class="info-row">
+                                <i class="bx bx-envelope"></i>
+                                <span>@Personel.Email</span>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Personel.CepTelefonu))
+                        {
+                            <div class="info-row">
+                                <i class="bx bx-phone"></i>
+                                <span>@Personel.CepTelefonu</span>
+                            </div>
+                        }
+                        @if (Personel.Dahili > 0)
+                        {
+                            <div class="info-row">
+                                <i class="bx bx-phone-call"></i>
+                                <span>Dahili: @Personel.Dahili</span>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- Organizasyon -->
+                @if (!string.IsNullOrEmpty(Personel.DepartmanAdi) || !string.IsNullOrEmpty(Personel.ServisAdi) || !string.IsNullOrEmpty(Personel.HizmetBinasiAdi))
+                {
+                    <div class="tooltip-section">
+                        <div class="section-title">Organizasyon</div>
+                        @if (!string.IsNullOrEmpty(Personel.DepartmanAdi))
+                        {
+                            <div class="info-row">
+                                <i class="bx bx-building"></i>
+                                <span>@Personel.DepartmanAdi</span>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Personel.ServisAdi))
+                        {
+                            <div class="info-row">
+                                <i class="bx bx-sitemap"></i>
+                                <span>@Personel.ServisAdi</span>
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Personel.HizmetBinasiAdi))
+                        {
+                            <div class="info-row">
+                                <i class="bx bx-map-pin"></i>
+                                <span>@Personel.HizmetBinasiAdi</span>
+                            </div>
+                        }
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -130,38 +123,17 @@ else
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
-    /// <summary>
-    /// Permission key for viewing the hover card (e.g., "PER.PERSONEL.INDEX.COMPONENT.HOVERCARD")
-    /// If empty, hover card is shown without permission check (backward compatible)
-    /// </summary>
     [Parameter]
     public string PermissionKey { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Required permission level (default: View)
-    /// </summary>
     [Parameter]
     public YetkiSeviyesi RequiredLevel { get; set; } = YetkiSeviyesi.View;
 
-    private bool IsVisible { get; set; }
-    private double PositionX { get; set; }
-    private double PositionY { get; set; }
     private bool _hasPermission = true;
-
-    private System.Timers.Timer? _showTimer;
-    private System.Timers.Timer? _hideTimer;
 
     protected override async Task OnInitializedAsync()
     {
         await CheckPermission();
-
-        _showTimer = new System.Timers.Timer(300); // 300ms delay before show
-        _showTimer.AutoReset = false;
-        _showTimer.Elapsed += async (s, e) => await InvokeAsync(() => { IsVisible = true; StateHasChanged(); });
-
-        _hideTimer = new System.Timers.Timer(200); // 200ms delay before hide
-        _hideTimer.AutoReset = false;
-        _hideTimer.Elapsed += async (s, e) => await InvokeAsync(() => { IsVisible = false; StateHasChanged(); });
     }
 
     protected override async Task OnParametersSetAsync()
@@ -180,25 +152,6 @@ else
         await PermissionState.EnsureLoadedAsync();
         var level = PermissionState.GetLevel(PermissionKey);
         _hasPermission = level >= RequiredLevel;
-    }
-
-    private void ShowCard()
-    {
-        _hideTimer?.Stop();
-        _showTimer?.Start();
-    }
-
-    private void HideCard()
-    {
-        _showTimer?.Stop();
-        _hideTimer?.Start();
-    }
-
-    private void UpdatePosition(MouseEventArgs e)
-    {
-        // Offset to avoid cursor overlap
-        PositionX = e.ClientX + 15;
-        PositionY = e.ClientY + 15;
     }
 
     private string GetStatusBadgeClass()
@@ -221,11 +174,5 @@ else
             PersonelAktiflikDurum.Emekli => "Emekli",
             _ => "-"
         };
-    }
-
-    public void Dispose()
-    {
-        _showTimer?.Dispose();
-        _hideTimer?.Dispose();
     }
 }
