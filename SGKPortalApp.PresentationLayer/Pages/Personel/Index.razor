@@ -268,7 +268,7 @@ else
 
                         <!-- Table -->
                         <div class="table-container">
-                            <table class="table table-hover table-sm">
+                            <table class="table table-hover table-sm table-striped">
                                 <thead>
                                     <tr>
                                         <th style="width: 40px; padding: 0.5rem 0.25rem;">
@@ -333,7 +333,7 @@ else
                                         <tr style="@GetClickableRowStyle(ActionType.DETAIL)"
                                             @onclick="() => TryNavigateToDetail(personel.TcKimlikNo)"
                                             data-personel-row="@personel.TcKimlikNo"
-                                            class="personel-row-trigger @(index % 2 == 0 ? "table-row-even" : "table-row-odd")">
+                                            class="personel-row-trigger">
                                             <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;" @onclick:stopPropagation="true">
                                                 <input type="checkbox"
                                                        class="form-check-input"

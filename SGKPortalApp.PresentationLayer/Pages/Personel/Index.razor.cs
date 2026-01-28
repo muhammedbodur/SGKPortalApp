@@ -78,7 +78,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         // ═══════════════════════════════════════════════════════
 
         private int CurrentPage { get; set; } = 1;
-        private int PageSize { get; set; } = 10;
+        private int PageSize { get; set; } = 50;
         private int TotalCount { get; set; } = 0;
         private int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
 

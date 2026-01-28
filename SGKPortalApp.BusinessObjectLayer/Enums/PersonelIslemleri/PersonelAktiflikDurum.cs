@@ -101,7 +101,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
                 PersonelAktiflikDurum.KurumlararasiNakil => "bg-dark",
                 PersonelAktiflikDurum.Mustagfi => "bg-danger",
                 PersonelAktiflikDurum.Vefat => "bg-dark",
-                PersonelAktiflikDurum.Pasif => "bg-secondary",
+                PersonelAktiflikDurum.Pasif => "bg-danger",
                 _ => "bg-secondary"
             };
         }
@@ -123,7 +123,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
                 PersonelAktiflikDurum.KurumlararasiNakil => "bx bx-transfer-alt",
                 PersonelAktiflikDurum.Mustagfi => "bx bx-x-circle",
                 PersonelAktiflikDurum.Vefat => "bx bx-heart",
-                PersonelAktiflikDurum.Pasif => "bx bx-pause-circle",
+                PersonelAktiflikDurum.Pasif => "bx bx-x-circle",
                 _ => "bx bx-question-mark"
             };
         }
