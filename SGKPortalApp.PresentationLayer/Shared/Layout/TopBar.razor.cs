@@ -14,7 +14,7 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         
         /// <summary>
         /// Kullanıcı resmini dinamik olarak oluşturur.
-        /// Claims'teki eski resim yolu yerine, TC Kimlik No ile güncel resim yolunu kontrol eder.
+        /// Claims'teki resim bilgisini kullanarak fiziksel dosya kontrolü yapar.
         /// </summary>
         private string? UserImage
         {
@@ -22,19 +22,22 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
             {
                 var tcKimlikNo = UserInfo.GetTcKimlikNo();
                 var resim = UserInfo.GetResim();
-                var resimWithRoute = UserInfo.GetResimWithRoute();
-                if (string.IsNullOrEmpty(tcKimlikNo))
+
+                if (string.IsNullOrEmpty(tcKimlikNo) || string.IsNullOrEmpty(resim))
                     return null;
 
-                // Resim dosyası var mı kontrol et
-                var fileName = $"{resim}.jpg";
-                
-                if (File.Exists(resimWithRoute))
+                // Fiziksel path: wwwroot/images/avatars/{resim}.jpg
+                var physicalPath = Path.Combine(WebHostEnvironment.WebRootPath, "images", "avatars", $"{resim}.jpg");
+
+                // URL path: /images/avatars/{resim}.jpg
+                var urlPath = $"/images/avatars/{resim}.jpg";
+
+                if (File.Exists(physicalPath))
                 {
-                    return resimWithRoute;
+                    return urlPath;
                 }
 
-                return "";
+                return null;
             }
         }
 
