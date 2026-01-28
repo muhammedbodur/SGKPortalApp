@@ -1,17 +1,20 @@
 using AutoMapper;
 using SGKPortalApp;
+using SGKPortalApp.BusinessLogicLayer.Mapping.ValueConverters;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.Common.Extensions;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
 {
     public class BankoMappingProfile : Profile
     {
-        public BankoMappingProfile()
+        public BankoMappingProfile(PersonelImagePathHelper imagePathHelper)
         {
+            var imageConverter = new ImagePathConverter(imagePathHelper);
             // ═══════════════════════════════════════════════════════
             // REQUEST -> ENTITY
             // ═══════════════════════════════════════════════════════
@@ -77,8 +80,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
                     opt => opt.MapFrom(src => src.Personel != null && src.Personel.Servis != null 
                         ? src.Personel.Servis.ServisAdi 
                         : string.Empty))
-                .ForMember(dest => dest.Resim, 
-                    opt => opt.MapFrom(src => src.Personel != null ? src.Personel.Resim : null))
+                .ForMember(dest => dest.Resim,
+                    opt => opt.ConvertUsing(imageConverter, src => src.Personel != null ? src.Personel.Resim : null))
                 .ForMember(dest => dest.AtanmaTarihi, 
                     opt => opt.MapFrom(src => src.EklenmeTarihi));
         }

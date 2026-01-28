@@ -1,15 +1,18 @@
 using AutoMapper;
+using SGKPortalApp.BusinessLogicLayer.Mapping.ValueConverters;
+using SGKPortalApp.BusinessLogicLayer.Mapping.ValueResolvers;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
-using SGKPortalApp.BusinessLogicLayer.Mapping.ValueResolvers;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
 {
     public class PersonelMappingProfile : Profile
     {
-        public PersonelMappingProfile()
+        public PersonelMappingProfile(PersonelImagePathHelper imagePathHelper)
         {
+            var imageConverter = new ImagePathConverter(imagePathHelper);
             // ═══════════════════════════════════════════════════════
             // DEPARTMAN MAPPING'LERİ
             // ═══════════════════════════════════════════════════════
@@ -252,13 +255,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.UnvanAdi,
                     opt => opt.MapFrom(src => src.Unvan != null ? src.Unvan.UnvanAdi : ""))
                 .ForMember(dest => dest.Resim,
-                    opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.Resim)
-                        ? string.Empty
-                        : (src.Resim.StartsWith("/")
-                            || src.Resim.StartsWith("http://")
-                            || src.Resim.StartsWith("https://")
-                                ? src.Resim
-                                : $"/images/avatars/{src.Resim.TrimStart('/')}")))
+                    opt => opt.ConvertUsing(imageConverter, src => src.Resim))
                 .ForMember(dest => dest.PersonelAktiflikDurum,
                     opt => opt.MapFrom(src => src.PersonelAktiflikDurum));
         }

@@ -5,6 +5,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.Common.Helpers;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
@@ -22,6 +23,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
         private readonly ILoginLogoutLogService _loginLogoutLogService;
         private readonly IWindowsUsernameService _windowsUsernameService;
         private readonly IActiveDirectoryService _activeDirectoryService;
+        private readonly PersonelImagePathHelper _imagePathHelper;
 
         public AuthService(
             ILogger<AuthService> logger,
@@ -29,7 +31,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
             IUnitOfWork unitOfWork,
             ILoginLogoutLogService loginLogoutLogService,
             IWindowsUsernameService windowsUsernameService,
-            IActiveDirectoryService activeDirectoryService)
+            IActiveDirectoryService activeDirectoryService,
+            PersonelImagePathHelper imagePathHelper)
         {
             _logger = logger;
             _personelYetkiService = personelYetkiService;
@@ -37,6 +40,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
             _loginLogoutLogService = loginLogoutLogService;
             _windowsUsernameService = windowsUsernameService;
             _activeDirectoryService = activeDirectoryService;
+            _imagePathHelper = imagePathHelper;
         }
 
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)
@@ -292,7 +296,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                         ServisAdi = user.Personel.Servis?.ServisAdi ?? "",
                         HizmetBinasiId = user.Personel.DepartmanHizmetBinasi?.HizmetBinasiId ?? 0,
                         HizmetBinasiAdi = user.Personel.DepartmanHizmetBinasi?.HizmetBinasi?.HizmetBinasiAdi ?? "",
-                        Resim = user.Personel.Resim,
+                        Resim = _imagePathHelper.GetWebPath(user.Personel.Resim),
                         SessionId = sessionId,
                         UserType = "Personel", // 🎯 Personel kullanıcısı
                         RedirectUrl = "/", // Ana dashboard'a yönlendir
