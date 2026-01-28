@@ -21,20 +21,20 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
             get
             {
                 var tcKimlikNo = UserInfo.GetTcKimlikNo();
+                var resim = UserInfo.GetResim();
+                var resimWithRoute = UserInfo.GetResimWithRoute();
                 if (string.IsNullOrEmpty(tcKimlikNo))
                     return null;
 
                 // Resim dosyası var mı kontrol et
-                var fileName = $"{tcKimlikNo}.jpg";
-                var imagePath = Path.Combine(WebHostEnvironment.WebRootPath, "images", "avatars", fileName);
+                var fileName = $"{resim}.jpg";
                 
-                if (File.Exists(imagePath))
+                if (File.Exists(resimWithRoute))
                 {
-                    return $"/images/avatars/{fileName}";
+                    return resimWithRoute;
                 }
 
-                // Yoksa Claims'teki değeri kullan (eski davranış)
-                return UserInfo.GetResim();
+                return "";
             }
         }
 

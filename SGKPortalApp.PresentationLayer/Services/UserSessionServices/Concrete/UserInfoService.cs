@@ -96,6 +96,12 @@ namespace SGKPortalApp.PresentationLayer.Services.UserSessionServices.Concrete
             return string.IsNullOrEmpty(resim) ? null : resim;
         }
 
+        public string? GetResimWithRoute()
+        {
+            var resim = GetClaimValue("Resim");
+            return string.IsNullOrEmpty(resim) ? null : resim;
+        }
+
         public bool IsAuthenticated()
         {
             return _httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated ?? false;

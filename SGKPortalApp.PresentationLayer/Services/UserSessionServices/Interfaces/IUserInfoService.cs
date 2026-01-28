@@ -69,6 +69,11 @@ namespace SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces
         string? GetResim();
 
         /// <summary>
+        /// Kullanıcının profil resmi yolu (varsa)
+        /// </summary>
+        string? GetResimWithRoute();
+
+        /// <summary>
         /// Kullanıcının oturum açıp açmadığını kontrol eder
         /// </summary>
         bool IsAuthenticated();
@@ -96,5 +101,6 @@ namespace SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces
         public string HizmetBinasiAdi { get; set; } = string.Empty;
         public string SessionId { get; set; } = string.Empty;
         public string? Resim { get; set; }
+        public string? ResimRoute { get; set; }
     }
 }
