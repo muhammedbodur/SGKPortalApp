@@ -157,9 +157,21 @@ else
                             <label class="form-label">Aktiflik</label>
                             <select class="form-select" value="@filterAktiflik" @onchange="OnFilterAktiflikChanged">
                                 <option value="-1">Tümü</option>
-                                <option value="1">Aktif</option>
-                                <option value="0">Pasif</option>
-                                <option value="2">Emekli</option>
+                                <optgroup label="Kurum Personeli">
+                                    <option value="1">Aktif</option>
+                                    <option value="10">Aylıksız İzin</option>
+                                    <option value="11">Geçici Görevlendirme</option>
+                                    <option value="12">Askerlik</option>
+                                    <option value="13">Ücretsiz İzin</option>
+                                </optgroup>
+                                <optgroup label="Ayrılan Personel">
+                                    <option value="0">Pasif</option>
+                                    <option value="2">Emekli</option>
+                                    <option value="3">İstifa</option>
+                                    <option value="4">Kurumlar Arası Nakil</option>
+                                    <option value="5">Müstağfi</option>
+                                    <option value="6">Vefat</option>
+                                </optgroup>
                             </select>
                         </div>
                     </div>
@@ -353,7 +365,7 @@ else
                                                     <i class="@personel.PersonelAktiflikDurum.GetIconClass() me-1"></i>@GetEnumDisplayName(personel.PersonelAktiflikDurum)
                                                 </span>
                                             </td>
-                                            <td class="text-center">
+                                            <td class="text-center actions-column" data-no-tooltip="true">
                                                 <div class="d-flex justify-content-center gap-1">
                                                     <ActionButton ActionType="ActionType.DETAIL"
                                                                   IsVisible="@IsActionVisible(ActionType.DETAIL)"
