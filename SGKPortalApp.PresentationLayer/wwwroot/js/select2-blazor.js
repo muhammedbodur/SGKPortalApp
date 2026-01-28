@@ -7,6 +7,73 @@ window.Select2Blazor = {
     // 🔐 Global tracking Map: identifier -> element reference
     _initializedSelects: new Map(),
 
+    // 🔄 Tek bir select'i yeniden initialize et (clear sonrası duplicate fix için)
+    _reinitialize: function (element) {
+        const identifier = element.name || element.id || element.getAttribute('data-val-required');
+        if (!identifier) return;
+
+        // Map'ten kaldır
+        this._initializedSelects.delete(identifier);
+
+        // Select2'yi destroy et
+        try {
+            $(element).select2('destroy');
+        } catch (e) { /* ignore */ }
+
+        // Duplicate container'ları temizle
+        const nextSibling = element.nextElementSibling;
+        if (nextSibling && nextSibling.classList.contains('select2-container')) {
+            nextSibling.remove();
+        }
+
+        // Yeniden initialize et
+        const currentValue = element.value;
+
+        $(element).select2({
+            placeholder: element.getAttribute('data-placeholder') || 'Seçiniz',
+            allowClear: true,
+            width: '100%',
+            minimumResultsForSearch: 0,
+            language: {
+                noResults: () => "Sonuç bulunamadı",
+                searching: () => "Aranıyor..."
+            }
+        });
+
+        // Map'e geri ekle
+        this._initializedSelects.set(identifier, element);
+
+        // Event handler'ları yeniden bağla
+        this._bindEvents(element);
+
+        // Değeri koru
+        if (currentValue && currentValue !== '0' && currentValue !== '') {
+            $(element).val(currentValue).trigger('change.select2');
+        }
+    },
+
+    // 🔗 Event handler'ları bağla (tekrar kullanılabilir)
+    _bindEvents: function (element) {
+        const self = this;
+
+        $(element).off('select2:select select2:clear');
+
+        $(element).on('select2:select', function (e) {
+            element.value = e.params.data.id;
+            element.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+
+        $(element).on('select2:clear', function () {
+            element.value = '0';
+            element.dispatchEvent(new Event('change', { bubbles: true }));
+
+            // 🔧 50ms sonra reinitialize et (duplicate fix)
+            setTimeout(function () {
+                self._reinitialize(element);
+            }, 50);
+        });
+    },
+
     // 🧹 Orphan Select2 container'ları temizle
     cleanupOrphanedSelect2: function () {
         // Artık DOM'da olmayan element'leri Map'ten kaldır
@@ -82,21 +149,8 @@ window.Select2Blazor = {
                 $(element).val(currentValue).trigger('change.select2');
             }
 
-            // 🔗 Blazor ile senkronizasyon
-            $(element).off('select2:select select2:clear'); // Önceki handler'ları temizle
-            $(element).on('select2:select', function (e) {
-                element.value = e.params.data.id;
-                element.dispatchEvent(
-                    new Event('change', { bubbles: true })
-                );
-            });
-
-            $(element).on('select2:clear', function () {
-                element.value = '0';
-                element.dispatchEvent(
-                    new Event('change', { bubbles: true })
-                );
-            });
+            // 🔗 Event handler'ları bağla (reinitialize ile duplicate fix dahil)
+            this._bindEvents(element);
         });
 
         if (initCount > 0) {

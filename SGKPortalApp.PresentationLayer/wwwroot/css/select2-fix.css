@@ -1,0 +1,15 @@
+/* =====================================================
+   Select2 Duplicate Fix CSS
+   Clear butonuna basıldığında oluşabilecek duplicate
+   select2-container'ları gizler
+   ===================================================== */
+
+/* Ardışık select2-container'ları gizle (duplicate fix) */
+.select2-container + .select2-container {
+    display: none !important;
+}
+
+/* Select elementinin hemen sonrasındaki ilk container hariç diğerlerini gizle */
+select + .select2-container ~ .select2-container {
+    display: none !important;
+}
