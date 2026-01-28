@@ -86,6 +86,19 @@
     // Mouse move - tooltip'i takip et ve son pozisyonu sakla
     document.addEventListener('mousemove', function(e) {
         lastMouseEvent = e;
+
+        // İşlemler sütununda ise tooltip'i gizle
+        const isInActionsColumn = e.target.closest('.actions-column') ||
+                                   e.target.closest('button') ||
+                                   e.target.closest('.dropdown') ||
+                                   e.target.closest('.btn-group') ||
+                                   e.target.closest('[data-no-tooltip]');
+        if (isInActionsColumn && currentTooltip) {
+            clearTimeout(showTimer);
+            hideTooltip();
+            return;
+        }
+
         updateTooltipPosition(e);
     });
 
@@ -93,6 +106,18 @@
     document.addEventListener('mouseenter', function(e) {
         const row = e.target.closest('tr.personel-row-trigger');
         if (!row) return;
+
+        // İşlemler sütununda ise tooltip gösterme
+        const isInActionsColumn = e.target.closest('.actions-column') ||
+                                   e.target.closest('button') ||
+                                   e.target.closest('.dropdown') ||
+                                   e.target.closest('.btn-group') ||
+                                   e.target.closest('[data-no-tooltip]');
+        if (isInActionsColumn) {
+            clearTimeout(showTimer);
+            hideTooltip();
+            return;
+        }
 
         // Timer'ları temizle
         clearTimeout(showTimer);
