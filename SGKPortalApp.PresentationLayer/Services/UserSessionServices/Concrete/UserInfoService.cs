@@ -1,4 +1,5 @@
 using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces;
+using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Models;
 using System.Security.Claims;
 
 namespace SGKPortalApp.PresentationLayer.Services.UserSessionServices.Concrete
