@@ -598,13 +598,21 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             if (string.IsNullOrWhiteSpace(FormModel.AdSoyad))
                 validationErrors.Add("❌ Ad Soyad zorunludur");
 
-            if (string.IsNullOrWhiteSpace(FormModel.Email))
-                validationErrors.Add("❌ Email zorunludur");
-            else if (!FormModel.Email.Contains("@"))
-                validationErrors.Add("❌ Geçerli bir email adresi giriniz");
+            // Email opsiyonel - boşlukları temizle
+            if (!string.IsNullOrWhiteSpace(FormModel.Email))
+            {
+                FormModel.Email = FormModel.Email.Trim();
+                if (!FormModel.Email.Contains("@"))
+                    validationErrors.Add("❌ Geçerli bir email adresi giriniz");
+            }
+            else
+            {
+                FormModel.Email = null;
+            }
 
-            if (FormModel.SicilNo <= 0)
-                validationErrors.Add("❌ Sicil No zorunludur");
+            // SicilNo opsiyonel - 0 ise null yap
+            if (FormModel.SicilNo == 0)
+                FormModel.SicilNo = null;
 
             // Kurum bilgileri
             if (FormModel.DepartmanHizmetBinasiId == 0)

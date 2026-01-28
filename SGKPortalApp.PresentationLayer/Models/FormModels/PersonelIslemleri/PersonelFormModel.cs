@@ -10,9 +10,7 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels.PersonelIslemleri
         [StringLength(11, MinimumLength = 11, ErrorMessage = "TC Kimlik No 11 haneli olmalıdır")]
         public string TcKimlikNo { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Sicil No zorunludur")]
-        [Range(1, int.MaxValue, ErrorMessage = "Geçerli bir Sicil No giriniz")]
-        public int SicilNo { get; set; }
+        public int? SicilNo { get; set; }
 
         [Required(ErrorMessage = "Ad Soyad zorunludur")]
         [StringLength(200, MinimumLength = 3, ErrorMessage = "Ad Soyad 3-200 karakter arasında olmalıdır")]
@@ -20,10 +18,9 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels.PersonelIslemleri
 
         public string? NickName { get; set; }
 
-        [Required(ErrorMessage = "Email zorunludur")]
         [EmailAddress(ErrorMessage = "Geçerli bir email adresi giriniz")]
         [StringLength(100)]
-        public string Email { get; set; } = string.Empty;
+        public string? Email { get; set; }
 
         // ═══════════════════════════════════════════════════════
         // KURUM BİLGİLERİ

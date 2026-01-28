@@ -465,27 +465,64 @@ else
                                         <div class="row">
                                             <div class="col-md-12 mb-3">
                                                 <label class="form-label">Aktiflik Durumu <span class="text-danger">*</span></label>
-                                                <div class="d-flex gap-4 flex-wrap">
-                                                    @if (IsEditMode)
-                                                    {
-                                                        @foreach (var durum in Enum.GetValues<PersonelAktiflikDurum>())
-                                                        {
-                                                            <div class="form-check">
-                                                                <input class="form-check-input"
-                                                                       type="radio"
-                                                                       name="aktiflikDurumu"
-                                                                       id="aktiflik_@durum"
-                                                                       value="@durum"
-                                                                       checked="@(FormModel.PersonelAktiflikDurum == durum)"
-                                                                       @onchange="@(() => FormModel.PersonelAktiflikDurum = durum)" />
-                                                                <label class="form-check-label" for="aktiflik_@durum">
-                                                                    @GetEnumDisplayName(durum)
-                                                                </label>
+                                                @if (IsEditMode)
+                                                {
+                                                    <div class="row">
+                                                        <!-- Kurum Personeli -->
+                                                        <div class="col-md-6">
+                                                            <div class="card border-success mb-2">
+                                                                <div class="card-header bg-success bg-opacity-10 py-2">
+                                                                    <small class="fw-semibold text-success"><i class="bx bx-user-check me-1"></i>Kurum Personeli</small>
+                                                                </div>
+                                                                <div class="card-body py-2">
+                                                                    @foreach (var durum in new[] { PersonelAktiflikDurum.Aktif, PersonelAktiflikDurum.AyliksizIzin, PersonelAktiflikDurum.GeciciGorevlendirme, PersonelAktiflikDurum.Askerlik, PersonelAktiflikDurum.UcretsizIzin })
+                                                                    {
+                                                                        <div class="form-check">
+                                                                            <input class="form-check-input"
+                                                                                   type="radio"
+                                                                                   name="aktiflikDurumu"
+                                                                                   id="aktiflik_@durum"
+                                                                                   value="@durum"
+                                                                                   checked="@(FormModel.PersonelAktiflikDurum == durum)"
+                                                                                   @onchange="@(() => FormModel.PersonelAktiflikDurum = durum)" />
+                                                                            <label class="form-check-label" for="aktiflik_@durum">
+                                                                                @GetEnumDisplayName(durum)
+                                                                            </label>
+                                                                        </div>
+                                                                    }
+                                                                </div>
                                                             </div>
-                                                        }
-                                                    }
-                                                    else
-                                                    {
+                                                        </div>
+                                                        <!-- Ayrılan Personel -->
+                                                        <div class="col-md-6">
+                                                            <div class="card border-danger mb-2">
+                                                                <div class="card-header bg-danger bg-opacity-10 py-2">
+                                                                    <small class="fw-semibold text-danger"><i class="bx bx-user-x me-1"></i>Ayrılan Personel</small>
+                                                                </div>
+                                                                <div class="card-body py-2">
+                                                                    @foreach (var durum in new[] { PersonelAktiflikDurum.Pasif, PersonelAktiflikDurum.Emekli, PersonelAktiflikDurum.Istifa, PersonelAktiflikDurum.KurumlararasiNakil, PersonelAktiflikDurum.Mustagfi, PersonelAktiflikDurum.Vefat })
+                                                                    {
+                                                                        <div class="form-check">
+                                                                            <input class="form-check-input"
+                                                                                   type="radio"
+                                                                                   name="aktiflikDurumu"
+                                                                                   id="aktiflik_@durum"
+                                                                                   value="@durum"
+                                                                                   checked="@(FormModel.PersonelAktiflikDurum == durum)"
+                                                                                   @onchange="@(() => FormModel.PersonelAktiflikDurum = durum)" />
+                                                                            <label class="form-check-label" for="aktiflik_@durum">
+                                                                                @GetEnumDisplayName(durum)
+                                                                            </label>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="d-flex gap-4 flex-wrap">
                                                         <div class="form-check">
                                                             <input class="form-check-input"
                                                                    type="radio"
@@ -499,8 +536,8 @@ else
                                                             </label>
                                                         </div>
                                                         <small class="form-text text-muted">Yeni personel kaydı aktif olarak oluşturulur</small>
-                                                    }
-                                                </div>
+                                                    </div>
+                                                }
                                             </div>
 
                                             @if (FormModel.PersonelAktiflikDurum != PersonelAktiflikDurum.Aktif)
