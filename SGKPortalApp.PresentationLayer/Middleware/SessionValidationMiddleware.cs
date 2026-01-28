@@ -145,7 +145,7 @@ namespace SGKPortalApp.PresentationLayer.Middleware
                                 try
                                 {
                                     var httpClient = httpClientFactory.CreateClient("ApiClient");
-                                    var response = await httpClient.PostAsync($"auth/logout-by-session/{currentSessionId}", null);
+                                    var response = await httpClient.PostAsync($"api/auth/logout-by-session/{currentSessionId}", null);
 
                                     if (response.IsSuccessStatusCode)
                                     {
@@ -175,7 +175,7 @@ namespace SGKPortalApp.PresentationLayer.Middleware
                                 try
                                 {
                                     var httpClient = httpClientFactory.CreateClient("ApiClient");
-                                    var response = await httpClient.PostAsync($"auth/update-activity/{tcKimlikNo}", null);
+                                    var response = await httpClient.PostAsync($"api/auth/update-activity/{tcKimlikNo}", null);
 
                                     if (!response.IsSuccessStatusCode)
                                     {
