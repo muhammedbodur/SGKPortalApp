@@ -330,10 +330,10 @@ else
                                 <tbody>
                                     @foreach (var (personel, index) in FilteredPersoneller.Select((p, i) => (p, i)))
                                     {
-                                        <tr style="@GetClickableRowStyle(ActionType.DETAIL)" 
+                                        <tr style="@GetClickableRowStyle(ActionType.DETAIL)"
                                             @onclick="() => TryNavigateToDetail(personel.TcKimlikNo)"
                                             data-personel-row="@personel.TcKimlikNo"
-                                            class="personel-row-trigger">
+                                            class="personel-row-trigger @(index % 2 == 0 ? "table-row-even" : "table-row-odd")">
                                             <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;" @onclick:stopPropagation="true">
                                                 <input type="checkbox"
                                                        class="form-check-input"

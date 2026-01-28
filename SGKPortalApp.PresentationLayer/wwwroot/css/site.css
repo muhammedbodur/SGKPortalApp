@@ -547,6 +547,37 @@ select.select2-hidden-accessible {
 }
 
 /* ============================================
+   TABLE ZEBRA STRIPING (Alternatif Satır Renkleri)
+   ============================================ */
+
+.table-row-even {
+    background-color: #ffffff;
+}
+
+.table-row-odd {
+    background-color: #f8f9fa;
+}
+
+.table-row-even:hover,
+.table-row-odd:hover {
+    background-color: #e9ecef !important;
+}
+
+/* Dark mode support */
+[data-bs-theme="dark"] .table-row-even {
+    background-color: #2b2c40;
+}
+
+[data-bs-theme="dark"] .table-row-odd {
+    background-color: #232333;
+}
+
+[data-bs-theme="dark"] .table-row-even:hover,
+[data-bs-theme="dark"] .table-row-odd:hover {
+    background-color: #3a3b4f !important;
+}
+
+/* ============================================
    PRINT STYLES
    ============================================ */
 
