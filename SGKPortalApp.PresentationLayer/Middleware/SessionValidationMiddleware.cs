@@ -21,6 +21,11 @@ namespace SGKPortalApp.PresentationLayer.Middleware
         private static readonly Dictionary<string, DateTime> _recentLogins = new();
         private static readonly TimeSpan _gracePeriod = TimeSpan.FromSeconds(3); // 3 saniye grace period
 
+        // ⚠️ Session validation throttling cache
+        // Key: TcKimlikNo, Value: Son kontrol zamanı
+        private static readonly Dictionary<string, DateTime> _lastValidationCheck = new();
+        private static readonly TimeSpan _validationInterval = TimeSpan.FromSeconds(30); // 30 saniyede bir kontrol
+
         public SessionValidationMiddleware(RequestDelegate next, ILogger<SessionValidationMiddleware> logger)
         {
             _next = next;
@@ -110,6 +115,45 @@ namespace SGKPortalApp.PresentationLayer.Middleware
                         if (IsInGracePeriod(tcKimlikNo))
                         {
                             _logger.LogDebug("ℹ️ Grace period aktif, session kontrolü atlandı - TcKimlikNo: {TcKimlikNo}", tcKimlikNo);
+                            await _next(context);
+                            return;
+                        }
+
+                        // ⚠️ Throttling kontrolü: Son kontrolden 30 saniye geçmemişse atla
+                        bool shouldValidate = false;
+                        lock (_lastValidationCheck)
+                        {
+                            if (_lastValidationCheck.TryGetValue(tcKimlikNo, out var lastCheck))
+                            {
+                                var elapsed = DateTime.UtcNow - lastCheck;
+                                if (elapsed >= _validationInterval)
+                                {
+                                    shouldValidate = true;
+                                    _lastValidationCheck[tcKimlikNo] = DateTime.UtcNow;
+                                }
+                            }
+                            else
+                            {
+                                // İlk kontrol
+                                shouldValidate = true;
+                                _lastValidationCheck[tcKimlikNo] = DateTime.UtcNow;
+                            }
+
+                            // Eski kayıtları temizle (1 saatten eski)
+                            var oldKeys = _lastValidationCheck
+                                .Where(x => (DateTime.UtcNow - x.Value).TotalHours > 1)
+                                .Select(x => x.Key)
+                                .ToList();
+
+                            foreach (var key in oldKeys)
+                            {
+                                _lastValidationCheck.Remove(key);
+                            }
+                        }
+
+                        if (!shouldValidate)
+                        {
+                            _logger.LogDebug("⏭️ Throttling: Son kontrolden 30 saniye geçmedi, atlandı - TcKimlikNo: {TcKimlikNo}", tcKimlikNo);
                             await _next(context);
                             return;
                         }

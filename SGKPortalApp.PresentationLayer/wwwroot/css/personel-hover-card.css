@@ -82,11 +82,13 @@
 }
 
 .tooltip-title h6 {
+    white-space: normal;
+    word-break: break-word;
+    overflow: visible;
     font-size: 0.9rem;
     font-weight: 600;
     color: #fff;
     margin: 0 0 2px 0;
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }

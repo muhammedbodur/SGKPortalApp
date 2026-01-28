@@ -16,10 +16,9 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         [StringLength(50)]
         public string? NickName { get; set; }
 
-        [Required]
         [EmailAddress]
         [StringLength(100)]
-        public string Email { get; set; } = string.Empty;
+        public string? Email { get; set; }
 
         public int DepartmanId { get; set; }
         public int ServisId { get; set; }

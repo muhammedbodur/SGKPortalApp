@@ -22,10 +22,9 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         [StringLength(50)]
         public string? NickName { get; set; }
 
-        [Required(ErrorMessage = "Email zorunludur")]
         [EmailAddress(ErrorMessage = "Geçerli bir email adresi giriniz")]
         [StringLength(100)]
-        public string Email { get; set; } = string.Empty;
+        public string? Email { get; set; }
 
         // Organizasyon
         [Required(ErrorMessage = "Departman seçimi zorunludur")]
