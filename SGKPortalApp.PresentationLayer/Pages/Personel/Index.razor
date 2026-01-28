@@ -278,16 +278,22 @@ else
                                                    checked="@IsAllSelected" />
                                         </th>
                                         <th style="width: 40px; padding: 0.5rem 0.25rem;">#</th>
-                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByTc" @onclick:stopPropagation="true">
-                                            TC Kimlik No
-                                            @if (sortBy == "tc-asc") { <i class="bx bx-chevron-up ms-1"></i> }
-                                            else if (sortBy == "tc-desc") { <i class="bx bx-chevron-down ms-1"></i> }
-                                        </th>
-                                        <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortBySicil" @onclick:stopPropagation="true">
-                                            Sicil No
-                                            @if (sortBy == "sicil-asc") { <i class="bx bx-chevron-up ms-1"></i> }
-                                            else if (sortBy == "sicil-desc") { <i class="bx bx-chevron-down ms-1"></i> }
-                                        </th>
+                                        @if (IsFieldVisibleInList("TCKIMLIKNO"))
+                                        {
+                                            <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByTc" @onclick:stopPropagation="true">
+                                                TC Kimlik No
+                                                @if (sortBy == "tc-asc") { <i class="bx bx-chevron-up ms-1"></i> }
+                                                else if (sortBy == "tc-desc") { <i class="bx bx-chevron-down ms-1"></i> }
+                                            </th>
+                                        }
+                                        @if (IsFieldVisibleInList("SICILNO"))
+                                        {
+                                            <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortBySicil" @onclick:stopPropagation="true">
+                                                Sicil No
+                                                @if (sortBy == "sicil-asc") { <i class="bx bx-chevron-up ms-1"></i> }
+                                                else if (sortBy == "sicil-desc") { <i class="bx bx-chevron-down ms-1"></i> }
+                                            </th>
+                                        }
                                         <th style="padding: 0.5rem; cursor: pointer;" @onclick="SortByName" @onclick:stopPropagation="true">
                                             Ad Soyad
                                             @if (sortBy == "name-asc") { <i class="bx bx-chevron-up ms-1"></i> }
@@ -313,6 +319,10 @@ else
                                             @if (sortBy == "unvan-asc") { <i class="bx bx-chevron-up ms-1"></i> }
                                             else if (sortBy == "unvan-desc") { <i class="bx bx-chevron-down ms-1"></i> }
                                         </th>
+                                        @if (IsFieldVisibleInList("DAHILI"))
+                                        {
+                                            <th class="text-center" style="width: 80px; padding: 0.5rem 0.25rem;">Dahili</th>
+                                        }
                                         <th class="text-center" style="width: 80px; padding: 0.5rem 0.25rem;">Durum</th>
                                         <th class="text-center" style="width: 120px; padding: 0.5rem 0.25rem;">İşlemler</th>
                                     </tr>
@@ -331,8 +341,14 @@ else
                                                        @onchange="() => TogglePersonelSelection(personel.TcKimlikNo)" />
                                             </td>
                                             <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@((CurrentPage - 1) * PageSize + index + 1)</td>
-                                            <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.TcKimlikNo</td>
-                                            <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.SicilNo</td>
+                                            @if (IsFieldVisibleInList("TCKIMLIKNO"))
+                                            {
+                                                <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.TcKimlikNo</td>
+                                            }
+                                            @if (IsFieldVisibleInList("SICILNO"))
+                                            {
+                                                <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.SicilNo</td>
+                                            }
                                             <td style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
                                                 <div class="d-flex align-items-center avatar-offline">
                                                     @if (!string.IsNullOrEmpty(personel.Resim))
@@ -360,6 +376,19 @@ else
                                             <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.ServisAdi</td>
                                             <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.HizmetBinasiAdi</td>
                                             <td class="text-break" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">@personel.UnvanAdi</td>
+                                            @if (IsFieldVisibleInList("DAHILI"))
+                                            {
+                                                <td class="text-center" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
+                                                    @if (personel.Dahili > 0)
+                                                    {
+                                                        <span class="badge bg-label-info">@personel.Dahili</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">-</span>
+                                                    }
+                                                </td>
+                                            }
                                             <td class="text-center" style="padding: 0.35rem 0.25rem; font-size: 0.875rem;">
                                                 <span class="badge @personel.PersonelAktiflikDurum.GetBadgeClass()">
                                                     <i class="@personel.PersonelAktiflikDurum.GetIconClass() me-1"></i>@GetEnumDisplayName(personel.PersonelAktiflikDurum)
