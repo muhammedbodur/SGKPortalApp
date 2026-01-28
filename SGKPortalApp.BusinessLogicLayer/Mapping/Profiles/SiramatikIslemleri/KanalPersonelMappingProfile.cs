@@ -1,14 +1,18 @@
 using AutoMapper;
+using SGKPortalApp.BusinessLogicLayer.Mapping.ValueConverters;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
 {
     public class KanalPersonelMappingProfile : Profile
     {
-        public KanalPersonelMappingProfile()
+        public KanalPersonelMappingProfile(PersonelImagePathHelper imagePathHelper)
         {
+            var imageConverter = new ImagePathConverter(imagePathHelper);
+
             // Request -> Entity
             CreateMap<KanalPersonelCreateRequestDto, KanalPersonel>()
                 .ForMember(dest => dest.KanalPersonelId, opt => opt.Ignore())
@@ -24,9 +28,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
                 .ForMember(dest => dest.PersonelAdSoyad,
                     opt => opt.MapFrom(src => src.Personel != null ? src.Personel.AdSoyad : string.Empty))
                 .ForMember(dest => dest.KanalAltIslemAdi,
-                    opt => opt.MapFrom(src => src.KanalAltIslem != null && src.KanalAltIslem.KanalAlt != null 
-                        ? src.KanalAltIslem.KanalAlt.KanalAltAdi 
-                        : string.Empty));
+                    opt => opt.MapFrom(src => src.KanalAltIslem != null && src.KanalAltIslem.KanalAlt != null
+                        ? src.KanalAltIslem.KanalAlt.KanalAltAdi
+                        : string.Empty))
+                .ForMember(dest => dest.Resim,
+                    opt => opt.ConvertUsing(imageConverter, src => src.Personel != null ? src.Personel.Resim : null));
         }
     }
 }

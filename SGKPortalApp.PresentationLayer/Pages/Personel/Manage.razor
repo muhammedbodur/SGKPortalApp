@@ -375,7 +375,8 @@ else
                                                     Hizmet Binası
                                                     <span class="text-danger">*</span>
                                                 </label>
-                                                <select id="hizmetBinasiSelect"
+                                                <select @key="@($"hizmetBinasi_{FormModel.DepartmanId}")"
+                                                        id="hizmetBinasiSelect"
                                                         value="@FormModel.DepartmanHizmetBinasiId"
                                                         @onchange="OnDepartmanHizmetBinasiChanged"
                                                         class="form-select @(FormModel.DepartmanHizmetBinasiId == 0 ? "border-danger" : "")"
