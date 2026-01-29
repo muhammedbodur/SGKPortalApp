@@ -4,13 +4,27 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
 {
     /// <summary>
     /// Personel aktiflik durumu.
-    /// Kurumun Personeli: Aktif, AyliksizIzin, GeciciGorevlendirme
-    /// Kurumun Personeli Değil: Pasif, Emekli, Istifa, KurumlararasiNakil, Mustagfi
+    /// 
+    /// Kurumun Personeli:
+    ///  - Aktif
+    ///  - Aylıksız İzin
+    ///  - Geçici Görevlendirme
+    ///  - Askerlik
+    ///  - Geçici Görevden Uzaklaştırma
+    ///  - Süresiz Görevden Uzaklaştırma
+    /// 
+    /// Kurumun Personeli Değil:
+    ///  - Pasif
+    ///  - Emekli
+    ///  - İstifa
+    ///  - Kurumlar Arası Nakil
+    ///  - Müstağfi
+    ///  - Vefat
     /// </summary>
     public enum PersonelAktiflikDurum : int
     {
         // ==========================================
-        // KURUMUN PERSONELİ DEĞİL (0-9 arası)
+        // KURUMUN PERSONELİ DEĞİL (0-9)
         // ==========================================
 
         [Display(Name = "Pasif")]
@@ -32,7 +46,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
         Vefat = 6,
 
         // ==========================================
-        // KURUMUN PERSONELİ (10+ arası)
+        // KURUMUN PERSONELİ (10+)
         // ==========================================
 
         [Display(Name = "Aktif")]
@@ -47,8 +61,11 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
         [Display(Name = "Askerlik")]
         Askerlik = 12,
 
-        [Display(Name = "Ücretsiz İzin")]
-        UcretsizIzin = 13
+        [Display(Name = "Geçici Görevden Uzaklaştırma")]
+        GeciciGorevdenUzaklastirma = 13,
+
+        [Display(Name = "Süresiz Görevden Uzaklaştırma")]
+        SuresizGorevdenUzaklastirma = 14
     }
 
     /// <summary>
@@ -57,7 +74,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
     public static class PersonelAktiflikDurumExtensions
     {
         /// <summary>
-        /// Personel hala kurumun personeli mi? (aktif çalışan, izinli, geçici görevli vb.)
+        /// Personel hâlen kurumun personeli mi?
         /// </summary>
         public static bool IsKurumPersoneli(this PersonelAktiflikDurum durum)
         {
@@ -65,11 +82,12 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
                 || durum == PersonelAktiflikDurum.AyliksizIzin
                 || durum == PersonelAktiflikDurum.GeciciGorevlendirme
                 || durum == PersonelAktiflikDurum.Askerlik
-                || durum == PersonelAktiflikDurum.UcretsizIzin;
+                || durum == PersonelAktiflikDurum.GeciciGorevdenUzaklastirma
+                || durum == PersonelAktiflikDurum.SuresizGorevdenUzaklastirma;
         }
 
         /// <summary>
-        /// Personel kurumdan ayrılmış mı? (emekli, istifa, nakil vb.)
+        /// Personel kurumdan ayrılmış mı?
         /// </summary>
         public static bool IsAyrilmis(this PersonelAktiflikDurum durum)
         {
@@ -77,7 +95,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
         }
 
         /// <summary>
-        /// Personel aktif çalışıyor mu? (izinli/görevli değil, fiilen çalışıyor)
+        /// Personel fiilen aktif çalışıyor mu?
         /// </summary>
         public static bool IsAktifCalisan(this PersonelAktiflikDurum durum)
         {
@@ -92,16 +110,21 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
             return durum switch
             {
                 PersonelAktiflikDurum.Aktif => "bg-success",
+
                 PersonelAktiflikDurum.AyliksizIzin => "bg-warning",
                 PersonelAktiflikDurum.GeciciGorevlendirme => "bg-info",
                 PersonelAktiflikDurum.Askerlik => "bg-primary",
-                PersonelAktiflikDurum.UcretsizIzin => "bg-warning",
+
+                PersonelAktiflikDurum.GeciciGorevdenUzaklastirma => "bg-warning",
+                PersonelAktiflikDurum.SuresizGorevdenUzaklastirma => "bg-danger",
+
                 PersonelAktiflikDurum.Emekli => "bg-secondary",
                 PersonelAktiflikDurum.Istifa => "bg-danger",
                 PersonelAktiflikDurum.KurumlararasiNakil => "bg-dark",
                 PersonelAktiflikDurum.Mustagfi => "bg-danger",
                 PersonelAktiflikDurum.Vefat => "bg-dark",
                 PersonelAktiflikDurum.Pasif => "bg-danger",
+
                 _ => "bg-secondary"
             };
         }
@@ -114,16 +137,21 @@ namespace SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri
             return durum switch
             {
                 PersonelAktiflikDurum.Aktif => "bx bx-check-circle",
+
                 PersonelAktiflikDurum.AyliksizIzin => "bx bx-time",
                 PersonelAktiflikDurum.GeciciGorevlendirme => "bx bx-transfer",
                 PersonelAktiflikDurum.Askerlik => "bx bx-shield",
-                PersonelAktiflikDurum.UcretsizIzin => "bx bx-calendar-x",
+
+                PersonelAktiflikDurum.GeciciGorevdenUzaklastirma => "bx bx-pause-circle",
+                PersonelAktiflikDurum.SuresizGorevdenUzaklastirma => "bx bx-block",
+
                 PersonelAktiflikDurum.Emekli => "bx bx-user-check",
                 PersonelAktiflikDurum.Istifa => "bx bx-log-out",
                 PersonelAktiflikDurum.KurumlararasiNakil => "bx bx-transfer-alt",
                 PersonelAktiflikDurum.Mustagfi => "bx bx-x-circle",
                 PersonelAktiflikDurum.Vefat => "bx bx-heart",
                 PersonelAktiflikDurum.Pasif => "bx bx-x-circle",
+
                 _ => "bx bx-question-mark"
             };
         }
