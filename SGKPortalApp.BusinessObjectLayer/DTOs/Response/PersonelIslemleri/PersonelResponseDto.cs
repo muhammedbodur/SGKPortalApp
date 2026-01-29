@@ -136,6 +136,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
         public List<PersonelImzaYetkisiResponseDto>? ImzaYetkileriDetay { get; set; }
         public List<PersonelCezaResponseDto>? Cezalar { get; set; }
         public List<PersonelEngelResponseDto>? Engeller { get; set; }
+        public List<PersonelAktiflikDurumHareketResponseDto>? AktiflikDurumHareketleri { get; set; }
 
         // Audit
         public DateTime EklenmeTarihi { get; set; }

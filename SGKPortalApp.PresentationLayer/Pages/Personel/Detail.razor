@@ -268,6 +268,51 @@ else
                                             </div>
                                         }
                                     </div>
+
+                                    <!-- Aktiflik Durum Hareketleri -->
+                                    @if (AktiflikDurumHareketleri.Any())
+                                    {
+                                        <hr class="my-4" />
+                                        <h6 class="text-muted mb-3"><i class="bx bx-history me-1"></i>Durum Değişiklik Geçmişi</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered table-striped">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th>Tarih</th>
+                                                        <th>Önceki Durum</th>
+                                                        <th>Yeni Durum</th>
+                                                        <th>Geçerlilik Başlangıç</th>
+                                                        <th>Geçerlilik Bitiş</th>
+                                                        <th>Açıklama</th>
+                                                        <th>Belge No</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var hareket in AktiflikDurumHareketleri)
+                                                    {
+                                                        <tr>
+                                                            <td>@hareket.DegisiklikTarihi.ToString("dd.MM.yyyy")</td>
+                                                            <td>
+                                                                @if (hareket.OncekiDurum.HasValue)
+                                                                {
+                                                                    <span class="badge @hareket.OncekiDurum.Value.GetBadgeClass()">@hareket.OncekiDurumAdi</span>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span class="text-muted">-</span>
+                                                                }
+                                                            </td>
+                                                            <td><span class="badge @hareket.YeniDurum.GetBadgeClass()">@hareket.YeniDurumAdi</span></td>
+                                                            <td>@(hareket.GecerlilikBaslangicTarihi?.ToString("dd.MM.yyyy") ?? "-")</td>
+                                                            <td>@(hareket.GecerlilikBitisTarihi?.ToString("dd.MM.yyyy") ?? "-")</td>
+                                                            <td>@(hareket.Aciklama ?? "-")</td>
+                                                            <td>@(hareket.BelgeNo ?? "-")</td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    }
                                 </div>
                             </div>
                         }
@@ -616,6 +661,7 @@ else
                                                     <tr>
                                                         <th>Departman</th>
                                                         <th>Servis</th>
+                                                        <th>Atama Tipi</th>
                                                         <th>Göreve Başlama</th>
                                                         <th>Görevden Ayrılma</th>
                                                         <th>Sebep</th>
@@ -627,6 +673,7 @@ else
                                                         <tr>
                                                             <td>@hizmet.DepartmanAdi</td>
                                                             <td>@hizmet.ServisAdi</td>
+                                                            <td><span class="badge bg-info">@GetEnumDisplayName(hizmet.HizmetAtamaTipi)</span></td>
                                                             <td>@hizmet.GorevBaslamaTarihi.ToString("dd.MM.yyyy")</td>
                                                             <td>@(hizmet.GorevAyrilmaTarihi?.ToString("dd.MM.yyyy") ?? "Devam Ediyor")</td>
                                                             <td>@(string.IsNullOrEmpty(hizmet.Sebep) ? "-" : hizmet.Sebep)</td>

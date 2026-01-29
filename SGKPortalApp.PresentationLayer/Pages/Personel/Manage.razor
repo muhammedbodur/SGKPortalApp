@@ -476,7 +476,7 @@ else
                                                                     <small class="fw-semibold text-success"><i class="bx bx-user-check me-1"></i>Kurum Personeli</small>
                                                                 </div>
                                                                 <div class="card-body py-2">
-                                                                    @foreach (var durum in new[] { PersonelAktiflikDurum.Aktif, PersonelAktiflikDurum.AyliksizIzin, PersonelAktiflikDurum.GeciciGorevlendirme, PersonelAktiflikDurum.Askerlik, PersonelAktiflikDurum.UcretsizIzin })
+                                                                    @foreach (var durum in new[] { PersonelAktiflikDurum.Aktif, PersonelAktiflikDurum.AyliksizIzin, PersonelAktiflikDurum.GeciciGorevlendirme, PersonelAktiflikDurum.Askerlik, PersonelAktiflikDurum.GeciciGorevdenUzaklastirma, PersonelAktiflikDurum.SuresizGorevdenUzaklastirma })
                                                                     {
                                                                         <div class="form-check">
                                                                             <input class="form-check-input"
@@ -560,6 +560,52 @@ else
                                                 </div>
                                             }
                                         </div>
+
+                                        <!-- Aktiflik Durum Hareketleri -->
+                                        @if (IsEditMode && AktiflikDurumHareketleri.Any())
+                                        {
+                                            <div class="mb-4">
+                                                <h6 class="text-muted mb-3"><i class="bx bx-history me-1"></i>Durum Değişiklik Geçmişi</h6>
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm table-bordered table-striped">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th>Tarih</th>
+                                                                <th>Önceki Durum</th>
+                                                                <th>Yeni Durum</th>
+                                                                <th>Geçerlilik Başlangıç</th>
+                                                                <th>Geçerlilik Bitiş</th>
+                                                                <th>Açıklama</th>
+                                                                <th>Belge No</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach (var hareket in AktiflikDurumHareketleri)
+                                                            {
+                                                                <tr>
+                                                                    <td>@hareket.DegisiklikTarihi.ToString("dd.MM.yyyy")</td>
+                                                                    <td>
+                                                                        @if (hareket.OncekiDurum.HasValue)
+                                                                        {
+                                                                            <span class="badge @hareket.OncekiDurum.Value.GetBadgeClass()">@hareket.OncekiDurumAdi</span>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <span class="text-muted">-</span>
+                                                                        }
+                                                                    </td>
+                                                                    <td><span class="badge @hareket.YeniDurum.GetBadgeClass()">@hareket.YeniDurumAdi</span></td>
+                                                                    <td>@(hareket.GecerlilikBaslangicTarihi?.ToString("dd.MM.yyyy") ?? "-")</td>
+                                                                    <td>@(hareket.GecerlilikBitisTarihi?.ToString("dd.MM.yyyy") ?? "-")</td>
+                                                                    <td>@(hareket.Aciklama ?? "-")</td>
+                                                                    <td>@(hareket.BelgeNo ?? "-")</td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        }
 
                                         <!-- Kadro Bilgileri -->
                                         <div class="row">
@@ -1019,6 +1065,15 @@ else
                                                         </select>
                                                     </div>
                                                     <div class="col-md-2">
+                                                        <label class="form-label small">Atama Tipi</label>
+                                                        <select @bind="hizmet.HizmetAtamaTipi" class="form-select form-select-sm" data-no-select2="true">
+                                                            @foreach (var atamaTipi in Enum.GetValues<HizmetAtamaTipleri>())
+                                                            {
+                                                                <option value="@atamaTipi">@GetEnumDisplayName(atamaTipi)</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-2">
                                                         <label class="form-label small">Başlama Tarihi</label>
                                                         <input type="date" @bind="hizmet.BaslamaTarihi" class="form-control form-control-sm" />
                                                     </div>
@@ -1026,14 +1081,14 @@ else
                                                         <label class="form-label small">Ayrılma Tarihi</label>
                                                         <input type="date" @bind="hizmet.AyrilmaTarihi" class="form-control form-control-sm" />
                                                     </div>
-                                                    <div class="col-md-3">
-                                                        <label class="form-label small">Sebep</label>
-                                                        <input type="text" @bind="hizmet.Sebep" class="form-control form-control-sm" maxlength="200" />
-                                                    </div>
                                                     <div class="col-md-1 d-flex align-items-end">
                                                         <button type="button" class="btn btn-sm btn-danger w-100" @onclick="() => RemoveHizmet(index)">
                                                             <i class="bx bx-x"></i>
                                                         </button>
+                                                    </div>
+                                                    <div class="col-md-12 mt-2">
+                                                        <label class="form-label small">Sebep</label>
+                                                        <input type="text" @bind="hizmet.Sebep" class="form-control form-control-sm" maxlength="500" placeholder="Açıklama veya sebep giriniz..." />
                                                     </div>
                                                 </div>
                                             }

@@ -104,6 +104,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private List<ImzaYetkisiModel> Yetkiler { get; set; } = new();
         private List<CezaModel> Cezalar { get; set; } = new();
         private List<EngelModel> Engeller { get; set; } = new();
+        private List<PersonelAktiflikDurumHareketResponseDto> AktiflikDurumHareketleri { get; set; } = new();
 
         // ═══════════════════════════════════════════════════════
         // LIFECYCLE METHODS
@@ -228,6 +229,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 Servis = h.ServisAdi,
                 BaslamaTarihi = h.GorevBaslamaTarihi,
                 AyrilmaTarihi = h.GorevAyrilmaTarihi,
+                HizmetAtamaTipi = h.HizmetAtamaTipi,
                 Sebep = h.Sebep
             }).ToList() ?? new List<HizmetModel>();
 
@@ -261,6 +263,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 EngelNedeni2 = e.EngelNedeni2,
                 EngelNedeni3 = e.EngelNedeni3
             }).ToList() ?? new List<EngelModel>();
+
+            AktiflikDurumHareketleri = data.AktiflikDurumHareketleri?.OrderByDescending(h => h.DegisiklikTarihi).ToList()
+                ?? new List<PersonelAktiflikDurumHareketResponseDto>();
 
             // İlçeleri filtrele
             FilterIlceler();
@@ -772,6 +777,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                     ServisId = h.ServisId,
                     GorevBaslamaTarihi = h.BaslamaTarihi!.Value,
                     GorevAyrilmaTarihi = h.AyrilmaTarihi,
+                    HizmetAtamaTipi = h.HizmetAtamaTipi,
                     Sebep = h.Sebep
                 }).ToList(),
                 Egitimler = Egitimler.Where(e => e.BaslangicTarihi.HasValue && !string.IsNullOrEmpty(e.EgitimAdi)).Select(e => new PersonelEgitimCreateRequestDto

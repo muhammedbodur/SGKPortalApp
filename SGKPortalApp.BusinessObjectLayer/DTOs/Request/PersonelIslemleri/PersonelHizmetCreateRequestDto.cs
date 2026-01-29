@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 
 namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
 {
@@ -18,6 +19,8 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri
         public DateTime GorevBaslamaTarihi { get; set; }
 
         public DateTime? GorevAyrilmaTarihi { get; set; }
+
+        public HizmetAtamaTipleri HizmetAtamaTipi { get; set; }
 
         [StringLength(500, ErrorMessage = "Sebep en fazla 500 karakter olabilir")]
         public string? Sebep { get; set; }
