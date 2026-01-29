@@ -107,6 +107,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                     .ThenInclude(y => y.Servis)
                 .Include(p => p.PersonelCezalari)
                 .Include(p => p.PersonelEngelleri)
+                .Include(p => p.PersonelAktiflikDurumHareketleri)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.TcKimlikNo == tcKimlikNo && !p.SilindiMi);
         }
