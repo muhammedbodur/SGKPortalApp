@@ -1,3 +1,5 @@
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
+
 namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
 {
     public class PersonelHizmetResponseDto
@@ -10,6 +12,7 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri
         public string? ServisAdi { get; set; }
         public DateTime GorevBaslamaTarihi { get; set; }
         public DateTime? GorevAyrilmaTarihi { get; set; }
+        public HizmetAtamaTipleri HizmetAtamaTipi { get; set; }
         public string? Sebep { get; set; }
     }
 }

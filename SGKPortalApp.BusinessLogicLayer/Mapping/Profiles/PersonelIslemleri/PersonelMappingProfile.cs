@@ -147,6 +147,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                     opt => opt.MapFrom(src => src.PersonelCezalari))
                 .ForMember(dest => dest.Engeller,
                     opt => opt.MapFrom(src => src.PersonelEngelleri))
+                .ForMember(dest => dest.AktiflikDurumHareketleri,
+                    opt => opt.MapFrom(src => src.PersonelAktiflikDurumHareketleri))
 
                 // Nullable int → int çevirme
                 .ForMember(dest => dest.SendikaId,
@@ -196,6 +198,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.PersonelImzaYetkileri, opt => opt.Ignore())
                 .ForMember(dest => dest.PersonelCezalari, opt => opt.Ignore())
                 .ForMember(dest => dest.PersonelEngelleri, opt => opt.Ignore())
+                .ForMember(dest => dest.PersonelAktiflikDurumHareketleri, opt => opt.Ignore())
                 .ForMember(dest => dest.User, opt => opt.Ignore());
 
 
@@ -242,6 +245,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.PersonelImzaYetkileri, opt => opt.Ignore())
                 .ForMember(dest => dest.PersonelCezalari, opt => opt.Ignore())
                 .ForMember(dest => dest.PersonelEngelleri, opt => opt.Ignore())
+                .ForMember(dest => dest.PersonelAktiflikDurumHareketleri, opt => opt.Ignore())
                 .ForMember(dest => dest.User, opt => opt.Ignore());
 
 

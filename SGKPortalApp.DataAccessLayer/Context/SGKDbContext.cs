@@ -44,6 +44,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<PersonelImzaYetkisi> PersonelImzaYetkileri { get; set; }
         public DbSet<PersonelCeza> PersonelCezalari { get; set; }
         public DbSet<PersonelEngel> PersonelEngelleri { get; set; }
+        public DbSet<PersonelAktiflikDurumHareket> PersonelAktiflikDurumHareketleri { get; set; }
         public DbSet<Departman> Departmanlar { get; set; }
         public DbSet<Servis> Servisler { get; set; }
         public DbSet<Unvan> Unvanlar { get; set; }

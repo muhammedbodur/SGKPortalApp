@@ -1,4 +1,5 @@
 using System;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 
 namespace SGKPortalApp.PresentationLayer.Models.FormModels.PersonelIslemleri
 {
@@ -13,6 +14,7 @@ namespace SGKPortalApp.PresentationLayer.Models.FormModels.PersonelIslemleri
         public string? Servis { get; set; }
         public DateTime? BaslamaTarihi { get; set; }
         public DateTime? AyrilmaTarihi { get; set; }
+        public HizmetAtamaTipleri HizmetAtamaTipi { get; set; }
         public string? Sebep { get; set; }
     }
 }
