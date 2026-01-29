@@ -135,6 +135,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.ApplyConfiguration(new PersonelImzaYetkisiConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelCezaConfiguration());
             modelBuilder.ApplyConfiguration(new PersonelEngelConfiguration());
+            modelBuilder.ApplyConfiguration(new PersonelAktiflikDurumHareketConfiguration());
 
             // Pdks İşlemleri
             modelBuilder.ApplyConfiguration(new IzinSorumluConfiguration());
