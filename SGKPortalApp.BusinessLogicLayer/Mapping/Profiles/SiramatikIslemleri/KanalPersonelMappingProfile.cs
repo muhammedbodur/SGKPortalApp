@@ -9,9 +9,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
 {
     public class KanalPersonelMappingProfile : Profile
     {
-        public KanalPersonelMappingProfile(PersonelImagePathHelper imagePathHelper)
+        public KanalPersonelMappingProfile()
         {
-            var imageConverter = new ImagePathConverter(imagePathHelper);
 
             // Request -> Entity
             CreateMap<KanalPersonelCreateRequestDto, KanalPersonel>()
@@ -32,7 +31,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
                         ? src.KanalAltIslem.KanalAlt.KanalAltAdi
                         : string.Empty))
                 .ForMember(dest => dest.Resim,
-                    opt => opt.ConvertUsing(imageConverter, src => src.Personel != null ? src.Personel.Resim : null));
+                    opt => opt.ConvertUsing<ImagePathConverter, string?>(src => src.Personel != null ? src.Personel.Resim : null));
         }
     }
 }

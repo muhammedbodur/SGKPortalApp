@@ -173,7 +173,13 @@ Console.WriteLine("SignalR Hub: API katmaninda (https://localhost:9080/hubs/sira
 // ═══════════════════════════════════════════════════════
 // 🔧 AUTOMAPPER
 // ═══════════════════════════════════════════════════════
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddAutoMapper((Action<IServiceProvider, AutoMapper.IMapperConfigurationExpression>)((serviceProvider, cfg) =>
+{
+    var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+    // Use service provider for Profile constructors with dependencies
+    cfg.ConstructServicesUsing(serviceProvider.GetService);
+    cfg.AddMaps(assemblies);
+}), AppDomain.CurrentDomain.GetAssemblies());
 
 // ═══════════════════════════════════════════════════════
 // 🔐 HTTP CONTEXT ACCESSOR (Blazor'da user bilgileri için)

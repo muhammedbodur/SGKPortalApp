@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -22,7 +23,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Extensions
             // SignalR Client assembly'si bu scan'de dahil olmaz (sadece Profile'lar aranır)
             try
             {
-                services.AddAutoMapper(businessAssembly);
+                services.AddAutoMapper((Action<IServiceProvider, IMapperConfigurationExpression>)((serviceProvider, cfg) =>
+                {
+                    // Use service provider for Profile constructors with dependencies
+                    cfg.ConstructServicesUsing(serviceProvider.GetService);
+                    cfg.AddMaps(businessAssembly);
+                }), businessAssembly);
                 Console.WriteLine("  ✅ AutoMapper profilleri yüklendi");
             }
             catch (Exception ex)

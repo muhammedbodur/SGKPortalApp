@@ -275,18 +275,21 @@ namespace SGKPortalApp.ApiLayer
             builder.Services.AddSingleton<SGKPortalApp.Common.Helpers.PersonelImagePathHelper>();
 
             // ═══════════════════════════════════════════════════════
-            // �🔧 AUTOMAPPER
+            // 🔧 AUTOMAPPER
             // ═══════════════════════════════════════════════════════
             // Sadece proje assembly'lerini scan et - üçüncü parti kütüphaneleri değil
             // Microsoft.AspNet.SignalR.Client artık BusinessLogicLayer'da (sadece orada kullanılıyor)
             // BusinessObjectLayer temiz (sadece DTOs/Entities) - güvenle scan edilebilir
-            builder.Services.AddAutoMapper(cfg =>
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(a => a.FullName != null && a.FullName.StartsWith("SGKPortalApp"))
+                .ToArray();
+            
+            builder.Services.AddAutoMapper((Action<IServiceProvider, AutoMapper.IMapperConfigurationExpression>)((serviceProvider, cfg) =>
             {
-                var assemblies = AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(a => a.FullName != null && a.FullName.StartsWith("SGKPortalApp"))
-                    .ToArray();
+                // Use service provider for Profile constructors with dependencies
+                cfg.ConstructServicesUsing(serviceProvider.GetService);
                 cfg.AddMaps(assemblies);
-            });
+            }), assemblies);
 
             // ═══════════════════════════════════════════════════════
             // ❤️ HEALTH CHECKS

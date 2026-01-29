@@ -10,9 +10,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
 {
     public class PersonelMappingProfile : Profile
     {
-        public PersonelMappingProfile(PersonelImagePathHelper imagePathHelper)
+        public PersonelMappingProfile()
         {
-            var imageConverter = new ImagePathConverter(imagePathHelper);
             // ═══════════════════════════════════════════════════════
             // DEPARTMAN MAPPING'LERİ
             // ═══════════════════════════════════════════════════════
@@ -35,7 +34,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore());
 
-            // ⭐ Field-level permission revert için gerekli (Entity → UpdateRequestDto)
+            // Field-level permission revert için gerekli (Entity → UpdateRequestDto)
             CreateMap<Departman, DepartmanUpdateRequestDto>();
 
             CreateMap<DepartmanResponseDto, DepartmanCreateRequestDto>();
@@ -64,7 +63,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore());
 
-            // ⭐ Field-level permission revert için gerekli (Entity → UpdateRequestDto)
+            // Field-level permission revert için gerekli (Entity → UpdateRequestDto)
             CreateMap<Servis, ServisUpdateRequestDto>();
 
 
@@ -90,12 +89,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore());
 
-            // ⭐ Field-level permission revert için gerekli (Entity → UpdateRequestDto)
+            // Field-level permission revert için gerekli (Entity → UpdateRequestDto)
             CreateMap<Unvan, UnvanUpdateRequestDto>();
 
 
             // ═══════════════════════════════════════════════════════
-            // ⭐ PERSONEL MAPPING'LERİ - OTOMATİK + ÖZEL DURUMLAR
+            // PERSONEL MAPPING'LERİ - OTOMATİK + ÖZEL DURUMLAR
             // ═══════════════════════════════════════════════════════
 
             //  Entity → Response DTO
@@ -110,7 +109,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.AtanmaNedeniAdi,
                     opt => opt.MapFrom(src => src.AtanmaNedeni != null ? src.AtanmaNedeni.AtanmaNedeni : ""))
                 .ForMember(dest => dest.Resim,
-                    opt => opt.MapFrom<PersonelImagePathResolver, string?>(src => src.Resim))
+                    opt => opt.ConvertUsing<ImagePathConverter, string?>(src => src.Resim))
                 .ForMember(dest => dest.DepartmanHizmetBinasiId,
                     opt => opt.MapFrom(src => src.DepartmanHizmetBinasiId))
                 .ForMember(dest => dest.HizmetBinasiId,
@@ -255,7 +254,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.UnvanAdi,
                     opt => opt.MapFrom(src => src.Unvan != null ? src.Unvan.UnvanAdi : ""))
                 .ForMember(dest => dest.Resim,
-                    opt => opt.ConvertUsing(imageConverter, src => src.Resim))
+                    opt => opt.ConvertUsing<ImagePathConverter, string?>(src => src.Resim))
                 .ForMember(dest => dest.PersonelAktiflikDurum,
                     opt => opt.MapFrom(src => src.PersonelAktiflikDurum));
         }
