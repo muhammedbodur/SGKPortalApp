@@ -1,4 +1,5 @@
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -32,6 +33,8 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri
         public DateTime GorevBaslamaTarihi { get; set; }
 
         public DateTime? GorevAyrilmaTarihi { get; set; }
+
+        public HizmetAtamaTipleri HizmetAtamaTipi { get; set; }
 
         [StringLength(500)]
         public string? Sebep { get; set; }
