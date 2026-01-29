@@ -35,6 +35,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private List<PersonelImzaYetkisiResponseDto> ImzaYetkileri { get; set; } = new();
         private List<PersonelCezaResponseDto> Cezalar { get; set; } = new();
         private List<PersonelEngelResponseDto> Engeller { get; set; } = new();
+        private List<PersonelAktiflikDurumHareketResponseDto> AktiflikDurumHareketleri { get; set; } = new();
 
         // ═══════════════════════════════════════════════════════
         // UI STATE
@@ -81,6 +82,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                     ImzaYetkileri = result.Data.ImzaYetkileriDetay ?? new List<PersonelImzaYetkisiResponseDto>();
                     Cezalar = result.Data.Cezalar ?? new List<PersonelCezaResponseDto>();
                     Engeller = result.Data.Engeller ?? new List<PersonelEngelResponseDto>();
+                    AktiflikDurumHareketleri = result.Data.AktiflikDurumHareketleri?.OrderByDescending(h => h.DegisiklikTarihi).ToList()
+                        ?? new List<PersonelAktiflikDurumHareketResponseDto>();
                 }
                 else
                 {
