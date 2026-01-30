@@ -175,7 +175,8 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
                 SicilNo = p.SicilNo,
                 DepartmanAdi = p.DepartmanAdi,
                 UnvanAdi = p.UnvanAdi,
-                AktifMi = p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif
+                Resim = p.Resim,
+                PersonelAktiflikDurum = p.PersonelAktiflikDurum
             }).ToList();
 
             return Ok(searchResults);
