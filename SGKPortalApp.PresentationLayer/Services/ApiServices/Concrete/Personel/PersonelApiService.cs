@@ -464,5 +464,34 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Personel
                 return ServiceResult<PdksCardSendResultDto>.Fail($"Hata: {ex.Message}");
             }
         }
+
+        public async Task<ServiceResult<List<PersonelListResponseDto>>> SearchAsync(string term, int limit = 20)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"personel/search?term={Uri.EscapeDataString(term)}&limit={limit}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("SearchAsync failed: {Error}", errorContent);
+                    return ServiceResult<List<PersonelListResponseDto>>.Fail("Arama yapılamadı.");
+                }
+
+                var searchResults = await response.Content.ReadFromJsonAsync<List<PersonelListResponseDto>>();
+
+                if (searchResults != null)
+                {
+                    return ServiceResult<List<PersonelListResponseDto>>.Ok(searchResults, "Arama başarılı");
+                }
+
+                return ServiceResult<List<PersonelListResponseDto>>.Fail("Arama sonucu alınamadı");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "SearchAsync Exception");
+                return ServiceResult<List<PersonelListResponseDto>>.Fail($"Hata: {ex.Message}");
+            }
+        }
     }
 }

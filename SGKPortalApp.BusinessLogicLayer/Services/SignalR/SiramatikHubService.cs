@@ -11,6 +11,7 @@ using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
 {
@@ -72,7 +73,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                         Sira = request.Sira,
                         BankoId = request.CallerBankoId,
                         PersonelTc = request.CallerPersonelTc,
-                        Timestamp = DateTime.Now
+                        Timestamp = DateTimeHelper.Now
                     };
 
                     await SendToPersonelsAsync(affectedPersonels, SiraListUpdate, panelPayload);
@@ -115,7 +116,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     {
                         UpdateType = SiraUpdateType.Remove,
                         Sira = new SiraCagirmaResponseDto { SiraId = request.SiraId },
-                        Timestamp = DateTime.Now
+                        Timestamp = DateTimeHelper.Now
                     };
 
                     await SendToPersonelsAsync(affectedPersonels, SiraListUpdate, payload);
@@ -146,7 +147,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     {
                         UpdateType = SiraUpdateType.Remove,
                         Sira = new SiraCagirmaResponseDto { SiraId = request.SiraId },
-                        Timestamp = DateTime.Now
+                        Timestamp = DateTimeHelper.Now
                     };
 
                     await SendToPersonelsAsync(affectedPersonels, SiraListUpdate, payload);
@@ -176,7 +177,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     BankoId = request.SourceBankoId,
                     PersonelTc = request.SourcePersonelTc,
                     Aciklama = "Sıra yönlendirildi",
-                    Timestamp = DateTime.Now
+                    Timestamp = DateTimeHelper.Now
                 };
 
                 await SendToPersonelAsync(request.SourcePersonelTc, SiraListUpdate, removePayload);
@@ -250,7 +251,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                             PreviousSiraId = previousSiraId,
                             NextSiraId = nextSiraId,
                             Aciklama = "Yönlendirilmiş sıra",
-                            Timestamp = DateTime.Now
+                            Timestamp = DateTimeHelper.Now
                         };
 
                         await SendToPersonelAsync(personelTc!, SiraListUpdate, insertPayload);
@@ -362,7 +363,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                         UpdateType = "SiraRedirected", // ⭐ Farklı update type
                         ShowOverlay = false, // ⭐ Overlay gösterme
                         Siralar = siralar,
-                        Timestamp = DateTime.Now
+                        Timestamp = DateTimeHelper.Now
                     };
 
                     await _broadcaster.SendToConnectionsAsync(connectionIds, "TvSiraGuncellendi", tvPayload);
@@ -404,7 +405,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     {
                         UpdateType = SiraUpdateType.Append, // Listenin sonuna ekle
                         Sira = request.Sira,
-                        Timestamp = DateTime.Now
+                        Timestamp = DateTimeHelper.Now
                     };
 
                     await SendToPersonelsAsync(affectedPersonels, SiraListUpdate, payload);
@@ -441,7 +442,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     SiraNo = request.Sira.SiraNo,
                     BankoNo = request.BankoNo,
                     KanalAltAdi = request.Sira.KanalAltAdi,
-                    Timestamp = DateTime.Now
+                    Timestamp = DateTimeHelper.Now
                 };
 
                 // Hizmet binasındaki tüm TV'lere gönder
@@ -530,7 +531,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                         KanalAltAdi = request.Sira.KanalAltAdi,
                         UpdateType = "SiraCalled",
                         Siralar = siralar,
-                        Timestamp = DateTime.Now
+                        Timestamp = DateTimeHelper.Now
                     };
 
                     await _broadcaster.SendToConnectionsAsync(connectionIds, "TvSiraGuncellendi", tvPayload);
@@ -698,7 +699,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                         Sira = tetikleyenSira,
                         Pozisyon = pozisyon,
                         ToplamSiraSayisi = group.Siralar.Count,
-                        Timestamp = DateTime.Now
+                        Timestamp = DateTimeHelper.Now
                     };
 
                     await _broadcaster.SendToConnectionsAsync(new[] { group.ConnectionId }, "BankoPanelSiraGuncellemesi", payload);

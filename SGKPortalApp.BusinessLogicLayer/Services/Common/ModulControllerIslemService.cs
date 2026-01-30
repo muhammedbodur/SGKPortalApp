@@ -9,6 +9,7 @@ using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 {
@@ -54,7 +55,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 }
 
                 user.PermissionStamp = Guid.NewGuid();
-                user.DuzenlenmeTarihi = DateTime.Now;
+                user.DuzenlenmeTarihi = DateTimeHelper.Now;
                 userRepo.Update(user);
                 await _unitOfWork.SaveChangesAsync();
                 return user.PermissionStamp;
@@ -91,7 +92,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     {
                         TcKimlikNo = tcKimlikNo,
                         PermissionStamp = permissionStamp,
-                        Timestamp = DateTime.Now
+                        Timestamp = DateTimeHelper.Now
                     });
             }
             catch (Exception ex)
@@ -143,7 +144,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     "permissionDefinitionsChanged",
                     new
                     {
-                        Timestamp = DateTime.Now,
+                        Timestamp = DateTimeHelper.Now,
                         Message = "Permission definitions updated"
                     });
 
@@ -441,7 +442,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 entity.Aciklama = request.Aciklama;
                 entity.DtoTypeName = request.DtoTypeName;
                 entity.DtoFieldName = request.DtoFieldName;
-                entity.DuzenlenmeTarihi = DateTime.Now;
+                entity.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                 repo.Update(entity);
                 await _unitOfWork.SaveChangesAsync();

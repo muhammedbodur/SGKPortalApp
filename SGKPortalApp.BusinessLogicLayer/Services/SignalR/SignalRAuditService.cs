@@ -4,6 +4,7 @@ using SGKPortalApp.BusinessObjectLayer.Entities.SignalR;
 using SGKPortalApp.BusinessObjectLayer.Enums.SignalR;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SignalR;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
 {
@@ -97,7 +98,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 HizmetBinasiId = request.HizmetBinasiId,
                 CorrelationId = request.CorrelationId,
                 DeliveryStatus = SignalRDeliveryStatus.Pending,
-                SentAt = DateTime.Now
+                SentAt = DateTimeHelper.Now
             };
         }
 

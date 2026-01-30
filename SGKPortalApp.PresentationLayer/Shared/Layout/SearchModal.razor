@@ -1,0 +1,167 @@
+@implements IDisposable
+
+@if (IsVisible)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);" @onclick="Close">
+        <div class="modal-dialog modal-lg modal-dialog-centered" @onclick:stopPropagation="true">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <div class="input-group input-group-merge w-100">
+                        <span class="input-group-text border-0 ps-0">
+                            <i class="bx bx-search"></i>
+                        </span>
+                        <input type="text"
+                               class="form-control border-0 shadow-none"
+                               placeholder="Personel, menü veya sayfa ara... [CTRL + K]"
+                               @bind="SearchTerm"
+                               @bind:event="oninput"
+                               @ref="searchInput"
+                               autofocus />
+                        <span class="input-group-text border-0 pe-0">
+                            <kbd class="bg-light text-muted">ESC</kbd>
+                        </span>
+                    </div>
+                    <button type="button" class="btn-close" @onclick="Close"></button>
+                </div>
+                <div class="modal-body pt-2" style="max-height: 60vh; overflow-y: auto;">
+                    @if (string.IsNullOrWhiteSpace(SearchTerm))
+                    {
+                        <!-- Popüler Aramalar -->
+                        @if (PopularSearches.Any())
+                        {
+                            <div class="mb-4">
+                                <h6 class="text-muted text-uppercase small mb-3">POPÜLER ARAMALAR</h6>
+                                <div class="list-group list-group-flush">
+                                    @foreach (var item in PopularSearches)
+                                    {
+                                        <a href="javascript:void(0)" class="list-group-item list-group-item-action border-0 px-3 py-2" @onclick="() => NavigateAndClose(item.Url)">
+                                            <i class="@item.Icon me-2"></i>
+                                            <span>@item.Title</span>
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Hızlı Erişim -->
+                        @if (QuickAccess.Any())
+                        {
+                            <div>
+                                <h6 class="text-muted text-uppercase small mb-3">HIZLI ERİŞİM</h6>
+                                <div class="list-group list-group-flush">
+                                    @foreach (var item in QuickAccess)
+                                    {
+                                        <a href="javascript:void(0)" class="list-group-item list-group-item-action border-0 px-3 py-2" @onclick="() => NavigateAndClose(item.Url)">
+                                            <i class="@item.Icon me-2"></i>
+                                            <span>@item.Title</span>
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        @if (IsSearching)
+                        {
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Aranıyor...</span>
+                                </div>
+                                <p class="text-muted mt-3">Aranıyor...</p>
+                            </div>
+                        }
+                        else if (PersonelResults.Any() || FilteredResults.Any())
+                        {
+                            <!-- Personel Sonuçları -->
+                            @if (PersonelResults.Any())
+                            {
+                                <div class="mb-4">
+                                    <h6 class="text-muted text-uppercase small mb-3">
+                                        <i class="bx bx-user me-1"></i>PERSONELLER (@PersonelResults.Count)
+                                    </h6>
+                                    <div class="list-group list-group-flush">
+                                        @foreach (var personel in PersonelResults.Take(5))
+                                        {
+                                            <a href="javascript:void(0)" class="list-group-item list-group-item-action border-0 px-3 py-2" @onclick="@(() => NavigateAndClose("/personel/detail/" + personel.TcKimlikNo))">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar avatar-sm me-3">
+                                                        <CachedImage @key="@personel.Resim" Src="@personel.Resim" Alt="avatar" Class="rounded-circle me-1" Width="40" Height="40" />
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-medium">@((MarkupString)HighlightMatch(personel.AdSoyad, SearchTerm))</div>
+                                                        <small class="text-muted">
+                                                            @if (!string.IsNullOrEmpty(personel.SicilNo))
+                                                            {
+                                                                <span>Sicil: @personel.SicilNo</span>
+                                                                <span class="mx-1">•</span>
+                                                            }
+                                                            @if (!string.IsNullOrEmpty(personel.DepartmanAdi))
+                                                            {
+                                                                <span>@personel.DepartmanAdi</span>
+                                                            }
+                                                        </small>
+                                                    </div>
+                                                    @if (personel?.PersonelAktiflikDurum != null)
+                                                    {
+                                                        <span class="badge @personel.PersonelAktiflikDurum.GetBadgeClass()">
+                                                            <i class="@personel.PersonelAktiflikDurum.GetIconClass() me-1"></i>@GetEnumDisplayName(personel.PersonelAktiflikDurum)
+                                                        </span>
+                                                    }
+                                                </div>
+                                            </a>
+                                        }
+                                    </div>
+                                    @if (PersonelResults.Count > 5)
+                                    {
+                                        <div class="text-center mt-2">
+                                            <a href="javascript:void(0)" class="btn btn-sm btn-link" @onclick="@(() => NavigateAndClose("/personel/liste?search=" + Uri.EscapeDataString(SearchTerm)))">
+                                                Tüm sonuçları gör (@PersonelResults.Count personel)
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Menü/Sayfa Sonuçları -->
+                            @if (FilteredResults.Any())
+                            {
+                                <div>
+                                    <h6 class="text-muted text-uppercase small mb-3">
+                                        <i class="bx bx-menu me-1"></i>SAYFALAR (@FilteredResults.Count)
+                                    </h6>
+                                    <div class="list-group list-group-flush">
+                                        @foreach (var result in FilteredResults)
+                                        {
+                                            <a href="javascript:void(0)" class="list-group-item list-group-item-action border-0 px-3 py-2" @onclick="() => NavigateAndClose(result.Url)">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="@result.Icon me-3 text-primary"></i>
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-medium">@((MarkupString)HighlightMatch(result.Title, SearchTerm))</div>
+                                                        @if (!string.IsNullOrEmpty(result.Category))
+                                                        {
+                                                            <small class="text-muted">@result.Category</small>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="bx bx-search-alt" style="font-size: 3rem; color: #ccc;"></i>
+                                <p class="text-muted mt-3">Sonuç bulunamadı</p>
+                                <small class="text-muted">Personel adı, sicil no veya menü adı ile arama yapabilirsiniz</small>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+

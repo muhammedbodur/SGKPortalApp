@@ -14,6 +14,7 @@ using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
 using SGKPortalApp.DataAccessLayer.Repositories.Generic;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 {
@@ -290,7 +291,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 foreach (var relation in existingRelations)
                 {
                     relation.SilindiMi = true;
-                    relation.SilinmeTarihi = DateTime.Now;
+                    relation.SilinmeTarihi = DateTimeHelper.Now;
                     dhbRepo.Update(relation);
                 }
                 
@@ -476,8 +477,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                     ServisAdi = s.ServisAdi,
                     PersonelSayisi = s.PersonelSayisi,
                     Aktiflik = Aktiflik.Aktif, // Repository'den gelen veriler zaten aktif
-                    EklenmeTarihi = DateTime.Now,
-                    DuzenlenmeTarihi = DateTime.Now
+                    EklenmeTarihi = DateTimeHelper.Now,
+                    DuzenlenmeTarihi = DateTimeHelper.Now
                 }).ToList();
 
                 _logger.LogInformation(

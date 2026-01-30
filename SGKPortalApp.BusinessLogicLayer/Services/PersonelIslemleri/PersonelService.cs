@@ -187,7 +187,37 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         unauthorizedFields.Count, tcKimlikNo, string.Join(", ", unauthorizedFields));
                 }
 
+                var oncekiAktiflikDurum = personel.PersonelAktiflikDurum;
+
                 _mapper.Map(request, personel);
+
+                if (oncekiAktiflikDurum != personel.PersonelAktiflikDurum)
+                {
+                    var hareket = new PersonelAktiflikDurumHareket
+                    {
+                        TcKimlikNo = tcKimlikNo,
+                        OncekiDurum = oncekiAktiflikDurum,
+                        YeniDurum = personel.PersonelAktiflikDurum,
+                        DegisiklikTarihi = DateTime.Now,
+                        GecerlilikBaslangicTarihi = personel.DurumDegisiklikTarihi,
+                        Aciklama = personel.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif ? null : personel.PasifNedeni
+                    };
+                    
+                    await _unitOfWork.Repository<PersonelAktiflikDurumHareket>().AddAsync(hareket);
+                    _logger.LogInformation(
+                        "PersonelAktiflikDurumHareket kaydedildi. TC: {TcKimlikNo}, Önceki: {OncekiDurum}, Yeni: {YeniDurum}",
+                        tcKimlikNo, oncekiAktiflikDurum, personel.PersonelAktiflikDurum);
+
+                    // Aktif duruma geçildiğinde PasifNedeni ve DurumDegisiklikTarihi alanlarını temizle
+                    if (personel.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif)
+                    {
+                        personel.PasifNedeni = null;
+                        personel.DurumDegisiklikTarihi = null;
+                        _logger.LogInformation(
+                            "Personel Aktif duruma geçti. PasifNedeni ve DurumDegisiklikTarihi temizlendi. TC: {TcKimlikNo}",
+                            tcKimlikNo);
+                    }
+                }
 
                 _unitOfWork.Repository<Personel>().Update(personel);
                 await _unitOfWork.SaveChangesAsync();
@@ -628,11 +658,40 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     // Hizmet binası veya departman değişikliği kontrolü
                     var eskiDepartmanHizmetBinasiId = personel.DepartmanHizmetBinasiId;
                     var eskiDepartmanId = personel.DepartmanId;
+                    var oncekiAktiflikDurum = personel.PersonelAktiflikDurum;
 
                     _mapper.Map(request.Personel, personel);
 
                     // NickName otomatik oluştur (AdSoyad değiştiyse)
                     personel.NickName = StringHelper.GenerateNickName(personel.AdSoyad, 12);
+
+                    if (oncekiAktiflikDurum != personel.PersonelAktiflikDurum)
+                    {
+                        var hareket = new PersonelAktiflikDurumHareket
+                        {
+                            TcKimlikNo = tcKimlikNo,
+                            OncekiDurum = oncekiAktiflikDurum,
+                            YeniDurum = personel.PersonelAktiflikDurum,
+                            DegisiklikTarihi = SGKPortalApp.Common.Helpers.DateTimeHelper.Now,
+                            GecerlilikBaslangicTarihi = personel.DurumDegisiklikTarihi,
+                            Aciklama = personel.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif ? null : personel.PasifNedeni
+                        };
+                        
+                        await _unitOfWork.Repository<PersonelAktiflikDurumHareket>().AddAsync(hareket);
+                        _logger.LogInformation(
+                            "PersonelAktiflikDurumHareket kaydedildi (UpdateCompleteAsync). TC: {TcKimlikNo}, Önceki: {OncekiDurum}, Yeni: {YeniDurum}",
+                            tcKimlikNo, oncekiAktiflikDurum, personel.PersonelAktiflikDurum);
+
+                        // Aktif duruma geçildiğinde PasifNedeni ve DurumDegisiklikTarihi alanlarını temizle
+                        if (personel.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif)
+                        {
+                            personel.PasifNedeni = null;
+                            personel.DurumDegisiklikTarihi = null;
+                            _logger.LogInformation(
+                                "Personel Aktif duruma geçti (UpdateCompleteAsync). PasifNedeni ve DurumDegisiklikTarihi temizlendi. TC: {TcKimlikNo}",
+                                tcKimlikNo);
+                        }
+                    }
 
                     _unitOfWork.Repository<Personel>().Update(personel);
                     await _unitOfWork.SaveChangesAsync();

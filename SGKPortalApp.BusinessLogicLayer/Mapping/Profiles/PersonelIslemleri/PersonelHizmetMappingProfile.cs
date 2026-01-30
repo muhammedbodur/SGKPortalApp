@@ -2,6 +2,7 @@ using AutoMapper;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
 {
@@ -15,8 +16,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
             
             CreateMap<PersonelHizmetCreateRequestDto, PersonelHizmet>()
                 .ForMember(dest => dest.PersonelHizmetId, opt => opt.Ignore())
-                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
-                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
+                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
                 .ForMember(dest => dest.Personel, opt => opt.Ignore())
                 .ForMember(dest => dest.Departman, opt => opt.Ignore())
                 .ForMember(dest => dest.Servis, opt => opt.Ignore());

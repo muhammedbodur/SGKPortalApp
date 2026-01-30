@@ -4,6 +4,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
+using SGKPortalApp.Common.Helpers;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 using System;
@@ -107,7 +108,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 
                 // 2. Aktif durumu güncelle
                 personel.PersonelAktiflikDurum = request.Aktif ? PersonelAktiflikDurum.Aktif : PersonelAktiflikDurum.Pasif;
-                personel.DuzenlenmeTarihi = DateTime.Now;
+                personel.DuzenlenmeTarihi = DateTimeHelper.Now;
                 personel.DuzenleyenKullanici = currentUserTcKimlikNo;
 
                 // 3. Repository'ye güncelle

@@ -11,6 +11,7 @@ using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 {
@@ -162,7 +163,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     }
 
                     _mapper.Map(request, entity);
-                    entity.DuzenlenmeTarihi = DateTime.Now;
+                    entity.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                     repo.Update(entity);
 
@@ -208,7 +209,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                     entity.SilindiMi = true;
                     entity.Aktiflik = Aktiflik.Pasif;
-                    entity.DuzenlenmeTarihi = DateTime.Now;
+                    entity.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                     repo.Update(entity);
                     await _unitOfWork.SaveChangesAsync();

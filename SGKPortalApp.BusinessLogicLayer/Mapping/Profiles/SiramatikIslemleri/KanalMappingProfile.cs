@@ -2,6 +2,7 @@ using AutoMapper;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
 {
@@ -12,8 +13,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
             // Request -> Entity (Kanal için)
             CreateMap<KanalCreateRequestDto, Kanal>()
                 .ForMember(dest => dest.KanalId, opt => opt.Ignore())
-                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
-                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
+                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
                 .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
                 .ForMember(dest => dest.KanalAltlari, opt => opt.Ignore())
                 .ForMember(dest => dest.KanalIslemleri, opt => opt.Ignore());
@@ -21,7 +22,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
             CreateMap<KanalUpdateRequestDto, Kanal>()
                 .ForMember(dest => dest.KanalId, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
-                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
                 .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
                 .ForMember(dest => dest.KanalAltlari, opt => opt.Ignore())
                 .ForMember(dest => dest.KanalIslemleri, opt => opt.Ignore());

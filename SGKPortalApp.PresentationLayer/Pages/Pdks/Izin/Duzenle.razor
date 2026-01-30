@@ -74,7 +74,7 @@ else
                                         <!-- Mazeret için: Tarih + Saat Dilimi -->
                                         <div class="mb-3">
                                             <label class="form-label">Mazeret Tarihi <span class="text-danger">*</span></label>
-                                            <input type="date" class="form-control" @bind="Request.MazeretTarihi" />
+                                            <input type="text" class="form-control flatpickr-date" @bind="Request.MazeretTarihi" @bind:format="dd.MM.yyyy" placeholder="GG.AA.YYYY" />
                                             <ValidationMessage For="@(() => Request.MazeretTarihi)" />
                                         </div>
 
@@ -101,16 +101,18 @@ else
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Başlangıç Tarihi <span class="text-danger">*</span></label>
-                                                <input type="date" class="form-control"
-                                                       value="@(Request.BaslangicTarihi?.ToString("yyyy-MM-dd"))"
-                                                       @onchange="@(e => { Request.BaslangicTarihi = DateTime.TryParse(e.Value?.ToString(), out var d) ? d : (DateTime?)null; CalculateDays(); })" />
+                                                <input type="text" class="form-control flatpickr-date"
+                                                       @bind="Request.BaslangicTarihi"
+                                                       @bind:after="CalculateDays"
+                                                       placeholder="GG.AA.YYYY" />
                                                 <ValidationMessage For="@(() => Request.BaslangicTarihi)" />
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Bitiş Tarihi <span class="text-danger">*</span></label>
-                                                <input type="date" class="form-control"
-                                                       value="@(Request.BitisTarihi?.ToString("yyyy-MM-dd"))"
-                                                       @onchange="@(e => { Request.BitisTarihi = DateTime.TryParse(e.Value?.ToString(), out var d) ? d : (DateTime?)null; CalculateDays(); })" />
+                                                <input type="text" class="form-control flatpickr-date"
+                                                       @bind="Request.BitisTarihi"
+                                                       @bind:after="CalculateDays"
+                                                       placeholder="GG.AA.YYYY" />
                                                 <ValidationMessage For="@(() => Request.BitisTarihi)" />
                                             </div>
                                         </div>

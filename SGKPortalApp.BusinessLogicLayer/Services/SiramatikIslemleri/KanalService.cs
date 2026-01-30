@@ -11,6 +11,7 @@ using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 {
@@ -194,7 +195,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 // Update
                 kanal.KanalAdi = request.KanalAdi.Trim();
                 kanal.Aktiflik = request.Aktiflik;
-                kanal.DuzenlenmeTarihi = DateTime.Now;
+                kanal.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                 kanalRepo.Update(kanal);
 
@@ -246,7 +247,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 // Soft delete
                 kanal.SilindiMi = true;
-                kanal.DuzenlenmeTarihi = DateTime.Now;
+                kanal.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                 kanalRepo.Update(kanal);
                 await _unitOfWork.SaveChangesAsync();
@@ -308,7 +309,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     x => x.KanalAltId == kanalAlt.KanalAltId);
 
                 kanalAlt.SilindiMi = true;
-                kanalAlt.DuzenlenmeTarihi = DateTime.Now;
+                kanalAlt.DuzenlenmeTarihi = DateTimeHelper.Now;
                 kanalAltRepo.Update(kanalAlt);
             }
 
@@ -323,7 +324,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     x => x.KanalIslemId == kanalIslem.KanalIslemId, processedKanalAltIslemIds);
 
                 kanalIslem.SilindiMi = true;
-                kanalIslem.DuzenlenmeTarihi = DateTime.Now;
+                kanalIslem.DuzenlenmeTarihi = DateTimeHelper.Now;
                 kanalIslemRepo.Update(kanalIslem);
             }
 
@@ -355,7 +356,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     x => x.KanalAltId == kanalAlt.KanalAltId, yeniAktiflik);
 
                 kanalAlt.Aktiflik = yeniAktiflik;
-                kanalAlt.DuzenlenmeTarihi = DateTime.Now;
+                kanalAlt.DuzenlenmeTarihi = DateTimeHelper.Now;
                 kanalAltRepo.Update(kanalAlt);
             }
 
@@ -370,7 +371,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     x => x.KanalIslemId == kanalIslem.KanalIslemId, yeniAktiflik, processedKanalAltIslemIds);
 
                 kanalIslem.Aktiflik = yeniAktiflik;
-                kanalIslem.DuzenlenmeTarihi = DateTime.Now;
+                kanalIslem.DuzenlenmeTarihi = DateTimeHelper.Now;
                 kanalIslemRepo.Update(kanalIslem);
             }
 

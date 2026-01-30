@@ -7,6 +7,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.Common.Helpers;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
 
@@ -140,7 +141,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     var oldAktiflik = entity.Aktiflik;
 
                     _mapper.Map(request, entity);
-                    entity.DuzenlenmeTarihi = DateTime.Now;
+                    entity.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                     repo.Update(entity);
 
@@ -186,7 +187,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                     entity.SilindiMi = true;
                     entity.Aktiflik = Aktiflik.Pasif;
-                    entity.DuzenlenmeTarihi = DateTime.Now;
+                    entity.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                     repo.Update(entity);
                     await _unitOfWork.SaveChangesAsync();

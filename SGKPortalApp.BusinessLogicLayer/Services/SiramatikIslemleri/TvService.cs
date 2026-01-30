@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 {
@@ -53,7 +54,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 }
                 
                 var tv = _mapper.Map<Tv>(request);
-                tv.IslemZamani = DateTime.Now;
+                tv.IslemZamani = DateTimeHelper.Now;
 
                 var createdTv = await tvRepo.AddAsync(tv);
                 await _unitOfWork.SaveChangesAsync();
@@ -94,8 +95,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 var oldAktiflik = existingTv.Aktiflik;
 
                 _mapper.Map(request, existingTv);
-                existingTv.DuzenlenmeTarihi = DateTime.Now;
-                existingTv.IslemZamani = DateTime.Now;
+                existingTv.DuzenlenmeTarihi = DateTimeHelper.Now;
+                existingTv.IslemZamani = DateTimeHelper.Now;
 
                 tvRepo.Update(existingTv);
 
@@ -141,7 +142,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 // Soft delete
                 tv.SilindiMi = true;
-                tv.DuzenlenmeTarihi = DateTime.Now;
+                tv.DuzenlenmeTarihi = DateTimeHelper.Now;
                 tvRepo.Update(tv);
 
                 await _unitOfWork.SaveChangesAsync();
@@ -390,7 +391,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 if (existingTvBanko != null && existingTvBanko.Aktiflik == Aktiflik.Pasif)
                 {
                     existingTvBanko.Aktiflik = Aktiflik.Aktif;
-                    existingTvBanko.DuzenlenmeTarihi = DateTime.Now;
+                    existingTvBanko.DuzenlenmeTarihi = DateTimeHelper.Now;
                     tvBankoRepo.Update(existingTvBanko);
                 }
                 else
@@ -401,7 +402,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                         TvId = tvId,
                         BankoId = bankoId,
                         Aktiflik = Aktiflik.Aktif,
-                        EklenmeTarihi = DateTime.Now
+                        EklenmeTarihi = DateTimeHelper.Now
                     };
 
                     await tvBankoRepo.AddAsync(tvBanko);
@@ -434,7 +435,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 // Soft delete
                 tvBanko.Aktiflik = Aktiflik.Pasif;
-                tvBanko.DuzenlenmeTarihi = DateTime.Now;
+                tvBanko.DuzenlenmeTarihi = DateTimeHelper.Now;
                 tvBankoRepo.Update(tvBanko);
                 
                 await _unitOfWork.SaveChangesAsync();
@@ -562,8 +563,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     UserType = UserType.TvUser,
                     PassWord = password, // Düz metin şifre
                     AktifMi = true,
-                    EklenmeTarihi = DateTime.Now,
-                    DuzenlenmeTarihi = DateTime.Now
+                    EklenmeTarihi = DateTimeHelper.Now,
+                    DuzenlenmeTarihi = DateTimeHelper.Now
                 };
 
                 // ÖNEMLİ: User'ı önce kaydet (FK constraint için gerekli)

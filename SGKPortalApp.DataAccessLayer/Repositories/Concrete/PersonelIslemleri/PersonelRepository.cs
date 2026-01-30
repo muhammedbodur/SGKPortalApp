@@ -176,13 +176,12 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
             if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
             {
                 var trimmedTerm = filter.SearchTerm.Trim();
-                var isNumeric = int.TryParse(trimmedTerm, out var sicilNoSearch);
 
                 query = query.Where(p =>
-                    p.AdSoyad.Contains(trimmedTerm) ||
+                    EF.Functions.Like(p.AdSoyad, $"%{trimmedTerm}%") ||
                     p.TcKimlikNo.Contains(trimmedTerm) ||
-                    p.Email.Contains(trimmedTerm) ||
-                    (isNumeric && p.SicilNo == sicilNoSearch));
+                    (p.Email != null && EF.Functions.Like(p.Email, $"%{trimmedTerm}%")) ||
+                    (p.SicilNo != null && EF.Functions.Like(p.SicilNo.ToString(), $"%{trimmedTerm}%")));
             }
 
             if (filter.DepartmanId.HasValue && filter.DepartmanId > 0)

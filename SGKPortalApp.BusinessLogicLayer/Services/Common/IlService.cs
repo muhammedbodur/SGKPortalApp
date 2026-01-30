@@ -7,6 +7,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 {
@@ -160,7 +161,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 }
 
                 il.IlAdi = request.IlAdi;
-                il.DuzenlenmeTarihi = DateTime.Now;
+                il.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                 ilRepo.Update(il);
                 await _unitOfWork.SaveChangesAsync();

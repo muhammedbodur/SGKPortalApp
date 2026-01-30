@@ -4,6 +4,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
+using SGKPortalApp.Common.Helpers;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -175,7 +176,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     OnaySeviyesi = request.OnaySeviyesi,
                     Aktif = true,
                     Aciklama = request.Aciklama,
-                    EklenmeTarihi = DateTime.Now
+                    EklenmeTarihi = DateTimeHelper.Now
                 };
 
                 await repo.AddAsync(entity);
@@ -222,7 +223,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 entity.OnaySeviyesi = request.OnaySeviyesi;
                 entity.Aktif = request.Aktif;
                 entity.Aciklama = request.Aciklama;
-                entity.DuzenlenmeTarihi = DateTime.Now;
+                entity.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                 repo.Update(entity);
                 await _unitOfWork.SaveChangesAsync();
@@ -255,7 +256,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     return ApiResponseDto<bool>.ErrorResult("İzin sorumlusu bulunamadı");
 
                 entity.Aktif = false;
-                entity.DuzenlenmeTarihi = DateTime.Now;
+                entity.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                 repo.Update(entity);
                 await _unitOfWork.SaveChangesAsync();
@@ -280,7 +281,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     return ApiResponseDto<bool>.ErrorResult("İzin sorumlusu bulunamadı");
 
                 entity.Aktif = true;
-                entity.DuzenlenmeTarihi = DateTime.Now;
+                entity.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                 repo.Update(entity);
                 await _unitOfWork.SaveChangesAsync();

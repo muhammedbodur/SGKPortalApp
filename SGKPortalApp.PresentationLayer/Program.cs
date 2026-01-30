@@ -254,13 +254,25 @@ builder.Services.AddAuthorization(options =>
 });
 
 // ═══════════════════════════════════════════════════════
-// 🌍 LOCALİZATİON (Yerelleştirme)
+// 🌍 LOCALİZATİON (Yerelleştirme) & TÜRKİYE SAAT DİLİMİ
 // ═══════════════════════════════════════════════════════
+// Türkiye culture ayarları
+var turkishCulture = new CultureInfo("tr-TR");
+turkishCulture.DateTimeFormat.ShortDatePattern = "dd.MM.yyyy";
+turkishCulture.DateTimeFormat.LongDatePattern = "dd MMMM yyyy dddd";
+turkishCulture.DateTimeFormat.ShortTimePattern = "HH:mm";
+turkishCulture.DateTimeFormat.LongTimePattern = "HH:mm:ss";
+turkishCulture.DateTimeFormat.FullDateTimePattern = "dd MMMM yyyy dddd HH:mm:ss";
+
+// Global olarak Türkiye culture'ını ayarla
+CultureInfo.DefaultThreadCurrentCulture = turkishCulture;
+CultureInfo.DefaultThreadCurrentUICulture = turkishCulture;
+
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
 var supportedCultures = new[]
 {
-    new CultureInfo("tr-TR"),
+    turkishCulture,
     new CultureInfo("en-US")
 };
 

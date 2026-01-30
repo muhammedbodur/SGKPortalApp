@@ -16,8 +16,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.SiramatikIslemleri
             CreateMap<KanalPersonelCreateRequestDto, KanalPersonel>()
                 .ForMember(dest => dest.KanalPersonelId, opt => opt.Ignore())
                 .ForMember(dest => dest.Aktiflik, opt => opt.Ignore())
-                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
-                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
+                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
                 .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
                 .ForMember(dest => dest.Personel, opt => opt.Ignore())
                 .ForMember(dest => dest.KanalAltIslem, opt => opt.Ignore());

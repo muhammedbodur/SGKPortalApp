@@ -10,6 +10,7 @@ using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using System.Linq;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 {
@@ -108,7 +109,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     else
                     {
                         // Farklı sıra - öncekini tamamla
-                        var oncekiBitisZamani = DateTime.Now;
+                        var oncekiBitisZamani = DateTimeHelper.Now;
                         onceCagrilanSira.BeklemeDurum = BeklemeDurum.Bitti;
                         onceCagrilanSira.IslemBitisZamani = oncekiBitisZamani;
                         _siraRepository.Update(onceCagrilanSira);
@@ -153,7 +154,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 }
 
                 // Sırayı çağır
-                var islemBaslamaZamani = DateTime.Now;
+                var islemBaslamaZamani = DateTimeHelper.Now;
                 sira.BeklemeDurum = BeklemeDurum.Cagrildi;
                 sira.IslemBaslamaZamani = islemBaslamaZamani;
                 sira.TcKimlikNo = personelTcKimlikNo;
@@ -279,7 +280,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
             var hizmetBinasiId = sira.DepartmanHizmetBinasi?.HizmetBinasiId ?? 0;
             var kanalAltIslemId = sira.KanalAltIslemId;
 
-            var islemBitisZamani = DateTime.Now;
+            var islemBitisZamani = DateTimeHelper.Now;
             sira.BeklemeDurum = BeklemeDurum.Bitti;
             sira.IslemBitisZamani = islemBitisZamani;
 
@@ -326,7 +327,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
             // İptal için Bitti durumuna set ediyoruz (enum'da IptalEdildi yok)
             sira.BeklemeDurum = BeklemeDurum.Bitti;
-            sira.IslemBitisZamani = DateTime.Now;
+            sira.IslemBitisZamani = DateTimeHelper.Now;
 
             _siraRepository.Update(sira);
             await _unitOfWork.SaveChangesAsync();

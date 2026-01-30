@@ -4,6 +4,7 @@ using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Auth;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.Common.Helpers;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 
@@ -118,7 +119,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                     return ApiResponseDto<bool>.ErrorResult("SessionId boş olamaz");
 
                 var loginLogoutRepo = _unitOfWork.GetRepository<ILoginLogoutLogRepository>();
-                var result = await loginLogoutRepo.UpdateLogoutTimeBySessionIdAsync(sessionId, DateTime.Now);
+                var result = await loginLogoutRepo.UpdateLogoutTimeBySessionIdAsync(sessionId, DateTimeHelper.Now);
 
                 if (result)
                 {
@@ -158,7 +159,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
 
                 // LoginLogoutLog güncelle
                 var loginLogoutRepo = _unitOfWork.GetRepository<ILoginLogoutLogRepository>();
-                var result = await loginLogoutRepo.UpdateLogoutTimeBySessionIdAsync(user.SessionID, DateTime.Now);
+                var result = await loginLogoutRepo.UpdateLogoutTimeBySessionIdAsync(user.SessionID, DateTimeHelper.Now);
 
                 if (result)
                 {
@@ -189,7 +190,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
 
                 var sessionTimeout = TimeSpan.FromHours(8);
                 var hubConnectionTimeout = TimeSpan.FromMinutes(15);
-                var now = DateTime.Now;
+                var now = DateTimeHelper.Now;
 
                 int totalCleaned = 0;
 

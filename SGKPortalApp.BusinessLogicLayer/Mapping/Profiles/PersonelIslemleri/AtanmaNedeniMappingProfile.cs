@@ -2,6 +2,7 @@ using AutoMapper;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
 {
@@ -15,14 +16,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
             // Request -> Entity
             CreateMap<AtanmaNedeniCreateRequestDto, AtanmaNedenleri>()
                 .ForMember(dest => dest.AtanmaNedeniId, opt => opt.Ignore())
-                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
-                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
+                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore());
             
             CreateMap<AtanmaNedeniUpdateRequestDto, AtanmaNedenleri>()
                 .ForMember(dest => dest.AtanmaNedeniId, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
-                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore());
 
             // ⭐ Field-level permission revert için gerekli (Entity → UpdateRequestDto)

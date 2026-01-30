@@ -159,7 +159,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                     // 5 başarısız denemeden sonra hesabı kilitle
                     if (user.BasarisizGirisSayisi >= 5)
                     {
-                        user.HesapKilitTarihi = DateTime.Now;
+                        user.HesapKilitTarihi = DateTimeHelper.Now;
                         user.AktifMi = false;
                         await _unitOfWork.SaveChangesAsync();
 
@@ -196,8 +196,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                 var oldSessionId = user.SessionID; // Eski session ID'yi sakla
                 var sessionId = Guid.NewGuid().ToString();
                 user.SessionID = sessionId;
-                user.SonGirisTarihi = DateTime.Now;
-                user.SonAktiviteZamani = DateTime.Now; // İlk aktivite zamanı
+                user.SonGirisTarihi = DateTimeHelper.Now;
+                user.SonAktiviteZamani = DateTimeHelper.Now; // İlk aktivite zamanı
                 user.BasarisizGirisSayisi = 0; // Başarılı girişte sıfırla
 
                 // 🪟 Windows username'i yakala ve kaydet
@@ -458,7 +458,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Auth
                 {
                     TcKimlikNo = tcKimlikNo,
                     AdSoyad = adSoyad,
-                    LoginTime = DateTime.Now,
+                    LoginTime = DateTimeHelper.Now,
                     SessionID = sessionId,
                     IpAddress = ipAddress,
                     UserAgent = userAgent,

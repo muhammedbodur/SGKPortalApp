@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.BackgroundServiceManager;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco
 {
@@ -76,7 +77,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco
             try
             {
                 await SyncAllDevicesSequentiallyAsync(cancellationToken);
-                LastRunTime = DateTime.Now;
+                LastRunTime = DateTimeHelper.Now;
                 LastError = null;
                 SuccessCount++;
             }
@@ -114,7 +115,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco
             {
                 try
                 {
-                    var now = DateTime.Now;
+                    var now = DateTimeHelper.Now;
                     var nextHour = now.Date.AddHours(now.Hour + 1);
                     var delayUntilNextHour = nextHour - now;
                     NextRunTime = nextHour;
@@ -133,13 +134,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco
 
                     if (await IsSyncNeededTodayAsync())
                     {
-                        _logger.LogInformation("🚀 Sync needed! Starting attendance sync at {Time:yyyy-MM-dd HH:mm:ss}", DateTime.Now);
+                        _logger.LogInformation("🚀 Sync needed! Starting attendance sync at {Time:yyyy-MM-dd HH:mm:ss}", DateTimeHelper.Now);
                         _isRunning = true;
                         await SyncAllDevicesSequentiallyAsync(stoppingToken);
-                        LastRunTime = DateTime.Now;
+                        LastRunTime = DateTimeHelper.Now;
                         LastError = null;
                         SuccessCount++;
-                        _logger.LogInformation("✅ Attendance sync completed at {Time:yyyy-MM-dd HH:mm:ss}", DateTime.Now);
+                        _logger.LogInformation("✅ Attendance sync completed at {Time:yyyy-MM-dd HH:mm:ss}", DateTimeHelper.Now);
                     }
                     else
                     {
@@ -167,7 +168,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco
             using var scope = _serviceScopeFactory.CreateScope();
             var deviceService = scope.ServiceProvider.GetRequiredService<IDeviceService>();
 
-            var now = DateTime.Now;
+            var now = DateTimeHelper.Now;
             var today = now.Date;
 
             var passedSyncTimes = _syncTimes

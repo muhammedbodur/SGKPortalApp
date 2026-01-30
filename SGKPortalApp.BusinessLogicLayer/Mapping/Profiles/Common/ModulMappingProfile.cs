@@ -2,6 +2,7 @@ using AutoMapper;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
 {
@@ -14,8 +15,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
 
             CreateMap<ModulCreateRequestDto, Modul>()
                 .ForMember(dest => dest.ModulId, opt => opt.Ignore())
-                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(_ => DateTime.Now))
-                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(_ => DateTime.Now))
+                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(_ => DateTimeHelper.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(_ => DateTimeHelper.Now))
                 .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
                 .ForMember(dest => dest.SilinmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.SilenKullanici, opt => opt.Ignore())
@@ -26,7 +27,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
             CreateMap<ModulUpdateRequestDto, Modul>()
                 .ForMember(dest => dest.ModulId, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
-                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(_ => DateTime.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(_ => DateTimeHelper.Now))
                 .ForMember(dest => dest.SilindiMi, opt => opt.Ignore())
                 .ForMember(dest => dest.SilinmeTarihi, opt => opt.Ignore())
                 .ForMember(dest => dest.SilenKullanici, opt => opt.Ignore())

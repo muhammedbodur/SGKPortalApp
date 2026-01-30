@@ -65,7 +65,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                NextRunTime = DateTime.Now.Add(_syncInterval);
+                NextRunTime = DateTimeHelper.Now.Add(_syncInterval);
 
                 if (!IsPaused)
                 {
@@ -73,7 +73,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                     {
                         _isRunning = true;
                         await SyncAllAsync(stoppingToken);
-                        LastRunTime = DateTime.Now;
+                        LastRunTime = DateTimeHelper.Now;
                         LastError = null;
                         SuccessCount++;
                     }
@@ -164,14 +164,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                         existing.DepartmanAdi = birim.BirimAd;
                         existing.DepartmanAdiKisa = birim.KisaAd ?? birim.BirimAd;
                         existing.DuzenleyenKullanici = "SYNC";
-                        existing.DuzenlenmeTarihi = DateTime.Now;
+                        existing.DuzenlenmeTarihi = DateTimeHelper.Now;
                         updated++;
                     }
                 }
                 else
                 {
                     // Yeni kayıt - IDENTITY_INSERT ile ekle
-                    var now = DateTime.Now;
+                    var now = DateTimeHelper.Now;
                     await unitOfWork.ExecuteSqlInterpolatedAsync(
                         $@"SET IDENTITY_INSERT [dbo].[PER_Departmanlar] ON;
                         INSERT INTO [dbo].[PER_Departmanlar]
@@ -214,14 +214,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                     {
                         existing.ServisAdi = servis.ServisAdi;
                         existing.DuzenleyenKullanici = "SYNC";
-                        existing.DuzenlenmeTarihi = DateTime.Now;
+                        existing.DuzenlenmeTarihi = DateTimeHelper.Now;
                         updated++;
                     }
                 }
                 else
                 {
                     // Yeni kayıt - IDENTITY_INSERT ile ekle
-                    var now = DateTime.Now;
+                    var now = DateTimeHelper.Now;
                     await unitOfWork.ExecuteSqlInterpolatedAsync(
                         $@"SET IDENTITY_INSERT [dbo].[PER_Servisler] ON;
                         INSERT INTO [dbo].[PER_Servisler]
@@ -264,14 +264,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                     {
                         existing.UnvanAdi = unvan.Unvan;
                         existing.DuzenleyenKullanici = "SYNC";
-                        existing.DuzenlenmeTarihi = DateTime.Now;
+                        existing.DuzenlenmeTarihi = DateTimeHelper.Now;
                         updated++;
                     }
                 }
                 else
                 {
                     // Yeni kayıt - IDENTITY_INSERT ile ekle
-                    var now = DateTime.Now;
+                    var now = DateTimeHelper.Now;
                     await unitOfWork.ExecuteSqlInterpolatedAsync(
                         $@"SET IDENTITY_INSERT [dbo].[PER_Unvanlar] ON;
                         INSERT INTO [dbo].[PER_Unvanlar]
@@ -311,7 +311,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                     {
                         existing.HizmetBinasiAdi = bina.BinaAdi;
                         existing.DuzenleyenKullanici = "SYNC";
-                        existing.DuzenlenmeTarihi = DateTime.Now;
+                        existing.DuzenlenmeTarihi = DateTimeHelper.Now;
                         updated++;
                     }
                 }
@@ -324,7 +324,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                     {
                         existingByName.LegacyKod = bina.Kod;
                         existingByName.DuzenleyenKullanici = "SYNC";
-                        existingByName.DuzenlenmeTarihi = DateTime.Now;
+                        existingByName.DuzenlenmeTarihi = DateTimeHelper.Now;
                         updated++;
                     }
                     else
@@ -341,9 +341,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                         LegacyKod = bina.Kod,
                         Aktiflik = Aktiflik.Aktif,
                         EkleyenKullanici = "SYNC",
-                        EklenmeTarihi = DateTime.Now,
+                        EklenmeTarihi = DateTimeHelper.Now,
                         DuzenleyenKullanici = "SYNC",
-                        DuzenlenmeTarihi = DateTime.Now
+                        DuzenlenmeTarihi = DateTimeHelper.Now
                     };
                     await unitOfWork.Repository<HizmetBinasi>().AddAsync(newBina);
                     await unitOfWork.SaveChangesAsync(); // Hemen kaydet - duplicate key hatasını önle
@@ -425,8 +425,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                     DepartmanId = eslesme.DepartmanId,
                     HizmetBinasiId = hizmetBinasiId,
                     AnaBina = anaBina,
-                    EklenmeTarihi = DateTime.Now,
-                    DuzenlenmeTarihi = DateTime.Now
+                    EklenmeTarihi = DateTimeHelper.Now,
+                    DuzenlenmeTarihi = DateTimeHelper.Now
                 });
 
                 added++;
@@ -516,7 +516,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                         if (hasChanges)
                         {
                             existingPersonel.DuzenleyenKullanici = "SYNC";
-                            existingPersonel.DuzenlenmeTarihi = DateTime.Now;
+                            existingPersonel.DuzenlenmeTarihi = DateTimeHelper.Now;
                             updated++;
                         }
                     }
@@ -537,9 +537,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                                 PassWord = kullanici.Password ?? tcKimlikNo,
                                 AktifMi = kullanici.CalisanDurum == 1,
                                 EkleyenKullanici = "SYNC",
-                                EklenmeTarihi = DateTime.Now,
+                                EklenmeTarihi = DateTimeHelper.Now,
                                 DuzenleyenKullanici = "SYNC",
-                                DuzenlenmeTarihi = DateTime.Now
+                                DuzenlenmeTarihi = DateTimeHelper.Now
                             });
                         }
                     }
@@ -572,8 +572,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                     DepartmanId = departmanId,
                     HizmetBinasiId = hizmetBinasiId,
                     AnaBina = false,
-                    EklenmeTarihi = DateTime.Now,
-                    DuzenlenmeTarihi = DateTime.Now
+                    EklenmeTarihi = DateTimeHelper.Now,
+                    DuzenlenmeTarihi = DateTimeHelper.Now
                 };
 
                 await unitOfWork.Repository<DepartmanHizmetBinasi>().AddAsync(departmanHizmetBinasi);
@@ -606,8 +606,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                     {
                         AtanmaNedeni = "Belirtilmemiş",
                         LegacyKod = null,
-                        EklenmeTarihi = DateTime.Now,
-                        DuzenlenmeTarihi = DateTime.Now
+                        EklenmeTarihi = DateTimeHelper.Now,
+                        DuzenlenmeTarihi = DateTimeHelper.Now
                     };
                     await unitOfWork.Repository<AtanmaNedenleri>().AddAsync(newAtanmaNedeni);
                     await unitOfWork.SaveChangesAsync();
@@ -699,9 +699,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 TaseronFirma = k.Taseron,
                 // Aktiflik AuditableEntity'den geliyor, Personel'de yok
                 EkleyenKullanici = "SYNC",
-                EklenmeTarihi = DateTime.Now,
+                EklenmeTarihi = DateTimeHelper.Now,
                 DuzenleyenKullanici = "SYNC",
-                DuzenlenmeTarihi = DateTime.Now
+                DuzenlenmeTarihi = DateTimeHelper.Now
             };
         }
 
@@ -869,7 +869,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                         AtanmaNedeni = la.AtanmaNedeni,
                         LegacyKod = la.AtanmaId,
                         EkleyenKullanici = "SYNC",
-                        EklenmeTarihi = DateTime.Now
+                        EklenmeTarihi = DateTimeHelper.Now
                     };
                     await unitOfWork.Repository<AtanmaNedenleri>().AddAsync(newAtanma);
                     added++;
@@ -878,7 +878,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync
                 {
                     existing.AtanmaNedeni = la.AtanmaNedeni;
                     existing.DuzenleyenKullanici = "SYNC";
-                    existing.DuzenlenmeTarihi = DateTime.Now;
+                    existing.DuzenlenmeTarihi = DateTimeHelper.Now;
                     unitOfWork.Repository<AtanmaNedenleri>().Update(existing);
                     updated++;
                 }

@@ -1,6 +1,7 @@
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SignalR;
 using SGKPortalApp.BusinessObjectLayer.Enums.SignalR;
+using SGKPortalApp.Common.Helpers;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SignalR;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
@@ -81,7 +82,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
 
         public async Task<List<SignalREventLogResponseDto>> GetRecentAsync(int minutes = 5)
         {
-            var since = DateTime.Now.AddMinutes(-minutes);
+            var since = DateTimeHelper.Now.AddMinutes(-minutes);
             var allEvents = (await _eventLogRepository.GetAllAsync()).ToList();
 
             var items = allEvents
@@ -155,7 +156,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
         public async Task<SignalREventLogStatsDto> GetStatsAsync(DateTime? startDate, DateTime? endDate)
         {
             var start = startDate ?? DateTime.Today;
-            var end = endDate ?? DateTime.Now;
+            var end = endDate ?? DateTimeHelper.Now;
 
             var stats = await _eventLogRepository.GetStatisticsAsync(start, end);
 

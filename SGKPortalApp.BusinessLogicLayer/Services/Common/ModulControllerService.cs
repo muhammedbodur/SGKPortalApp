@@ -7,6 +7,7 @@ using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 {
@@ -217,7 +218,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 entity.ModulControllerAdi = request.ModulControllerAdi;
                 entity.ModulId = request.ModulId;
                 entity.UstModulControllerId = request.UstModulControllerId;
-                entity.DuzenlenmeTarihi = DateTime.Now;
+                entity.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                 repo.Update(entity);
                 await _unitOfWork.SaveChangesAsync();

@@ -6,6 +6,7 @@ using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.BackgroundServiceManager;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session
 {
@@ -65,7 +66,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session
                 {
                     try
                     {
-                        NextRunTime = DateTime.Now.Add(_checkInterval);
+                        NextRunTime = DateTimeHelper.Now.Add(_checkInterval);
 
                         if (IsPaused)
                         {
@@ -76,7 +77,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session
 
                         _isRunning = true;
                         await CleanupIdleSessionsAsync(stoppingToken);
-                        LastRunTime = DateTime.Now;
+                        LastRunTime = DateTimeHelper.Now;
                         LastError = null;
                         SuccessCount++;
                     }
@@ -136,7 +137,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session
 
                 _logger.LogDebug("🔍 Idle session kontrolü başladı - {Count} aktif kullanıcı kontrol ediliyor", activeUsers.Count);
 
-                var now = DateTime.Now;
+                var now = DateTimeHelper.Now;
                 int logoutCount = 0;
                 int bankoCleanupCount = 0;
 

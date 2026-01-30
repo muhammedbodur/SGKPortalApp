@@ -4,6 +4,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
+using SGKPortalApp.Common.Helpers;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -61,7 +62,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 throw new InvalidOperationException($"Bu IP adresine ({device.IpAddress}) sahip bir cihaz zaten mevcut.");
             }
 
-            device.EklenmeTarihi = DateTime.Now;
+            device.EklenmeTarihi = DateTimeHelper.Now;
             device.SilindiMi = false;
 
             await deviceRepo.AddAsync(device);
@@ -108,7 +109,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             }
 
             device.SilindiMi = true;
-            device.SilinmeTarihi = DateTime.Now;
+            device.SilinmeTarihi = DateTimeHelper.Now;
 
             deviceRepo.Update(device);
             await _unitOfWork.SaveChangesAsync();
@@ -148,7 +149,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             var port = int.TryParse(device.Port, out var p) ? p : 4370;
             var success = await _apiClient.TestConnectionAsync(device.IpAddress, port);
 
-            device.LastHealthCheckTime = DateTime.Now;
+            device.LastHealthCheckTime = DateTimeHelper.Now;
             device.LastHealthCheckSuccess = success;
             device.HealthCheckCount++;
             device.LastHealthCheckStatus = success ? "Bağlantı başarılı" : "Bağlantı başarısız";
@@ -199,7 +200,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
             if (device == null) return false;
 
             var port = int.TryParse(device.Port, out var p) ? p : 4370;
-            return await _apiClient.SetDeviceTimeAsync(device.IpAddress, DateTime.Now, port);
+            return await _apiClient.SetDeviceTimeAsync(device.IpAddress, DateTimeHelper.Now, port);
         }
 
         // ========== Realtime Monitoring ==========

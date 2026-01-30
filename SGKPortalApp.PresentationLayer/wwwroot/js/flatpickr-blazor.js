@@ -7,21 +7,11 @@ window.FlatpickrBlazor = {
 
         uninitializedPickers.forEach(element => {
             flatpickr(element, {
-                dateFormat: 'Y-m-d',
+                dateFormat: "d.m.Y",
+                locale: "tr",
                 allowInput: true,
-                locale: {
-                    firstDayOfWeek: 1,
-                    weekdays: {
-                        shorthand: ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'],
-                        longhand: ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi']
-                    },
-                    months: {
-                        shorthand: ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'],
-                        longhand: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
-                    }
-                },
                 onChange: function (selectedDates, dateStr, instance) {
-                    // Blazor'a değişikliği bildir
+                    // Blazor'a değişikliği bildirir
                     element.value = dateStr;
                     element.dispatchEvent(new Event('change', { bubbles: true }));
                 }

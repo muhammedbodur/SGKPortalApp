@@ -1,19 +1,24 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using SGKPortalApp.Common.Helpers;
 using SGKPortalApp.PresentationLayer.Services.UserSessionServices.Interfaces;
+using System;
 
 namespace SGKPortalApp.PresentationLayer.Shared.Layout
 {
-    public partial class TopBar
+    public partial class TopBar : IAsyncDisposable
     {
         [Inject] private IUserInfoService UserInfo { get; set; } = default!;
         [Inject] private IWebHostEnvironment WebHostEnvironment { get; set; } = default!;
         [Inject] private IConfiguration Configuration { get; set; } = default!;
         [Inject] private PersonelImagePathHelper ImagePathHelper { get; set; } = default!;
+        [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
         private string UserInitials => GetInitials(UserInfo.GetAdSoyad());
         private string UserFullName => UserInfo.GetAdSoyad();
         private string UserDepartment => UserInfo.GetDepartmanAdi();
+        private bool ShowSearchModal { get; set; } = false;
+        private IJSObjectReference? _jsModule;
 
         /// <summary>
         /// Kullanıcı resmini dinamik olarak oluşturur.
@@ -48,6 +53,28 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
             }
         }
 
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/search-modal.js");
+                await _jsModule.InvokeVoidAsync("initSearchShortcut", DotNetObjectReference.Create(this));
+            }
+        }
+
+        [JSInvokable]
+        public void OpenSearchModal()
+        {
+            ShowSearchModal = true;
+            StateHasChanged();
+        }
+
+        private void CloseSearchModal()
+        {
+            ShowSearchModal = false;
+            StateHasChanged();
+        }
+
         private string GetInitials(string fullName)
         {
             if (string.IsNullOrWhiteSpace(fullName))
@@ -60,6 +87,29 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
 
             // İlk ismin ilk harfi + Soyadın ilk harfi
             return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (_jsModule != null)
+            {
+                try
+                {
+                    await _jsModule.DisposeAsync();
+                }
+                catch (JSDisconnectedException)
+                {
+                    // Circuit disconnected, ignore
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Already disposed, ignore
+                }
+                catch
+                {
+                    // Ignore other disposal errors
+                }
+            }
         }
     }
 }

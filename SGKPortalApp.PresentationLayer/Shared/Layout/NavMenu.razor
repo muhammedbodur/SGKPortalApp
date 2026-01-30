@@ -38,114 +38,136 @@
         @if (!IsInBankoMode)
         {
             <!-- Hizmet Binaları -->
-            <li class="menu-item @(IsSectionActive("/common") ? "active open" : "")">
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
-                    <i class="menu-icon tf-icons bx bx-cog"></i>
-                    <div>Ortak Tanımlar</div>
-                </a>
-                <ul class="menu-sub">
-                    <li class="menu-item @(IsActive("/common/hizmetbinasi") && !Navigation.Uri.Contains("/manage") && !Navigation.Uri.Contains("/detail") ? "active" : "")">
-                        <a href="/common/hizmetbinasi" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-building"></i>
-                            <div>Hizmet Binaları</div>
-                        </a>
-                    </li>
-                </ul>
-                <ul class="menu-sub">
-                    <li class="menu-item @(IsSectionActive("/common/il") ? "active" : "")">
-                        <a href="/common/il" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-map"></i>
-                            <div>İller</div>
-                        </a>
-                    </li>
-                </ul>
-                <ul class="menu-sub">
-                    <li class="menu-item @(IsSectionActive("/common/ilce") ? "active" : "")">
-                        <a href="/common/ilce" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-map-pin"></i>
-                            <div>İlçeler</div>
-                        </a>
-                    </li>
-                </ul>
-                <ul class="menu-sub">
-                    <li class="menu-item @(IsSectionActive("/common/resmitatil") ? "active" : "")">
-                        <a href="/common/resmitatil" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-calendar"></i>
-                            <div>Resmi Tatiller</div>
-                        </a>
-                    </li>
-                </ul>
-                <ul class="menu-sub">
-                    <li class="menu-item @(IsSectionActive("/common/background-services") ? "active" : "")">
-                        <a href="/common/background-services" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-server"></i>
-                            <div>Background Servisler</div>
-                        </a>
-                    </li>
-                </ul>
-            </li>
+            <PermissionSection PermissionKey="COM.HIZMETBINASI.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                <li class="menu-item @(IsSectionActive("/common") ? "active open" : "")">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class="menu-icon tf-icons bx bx-cog"></i>
+                        <div>Ortak Tanımlar</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <PermissionSection PermissionKey="COM.HIZMETBINASI.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                            <li class="menu-item @(IsActive("/common/hizmetbinasi") && !Navigation.Uri.Contains("/manage") && !Navigation.Uri.Contains("/detail") ? "active" : "")">
+                                <a href="/common/hizmetbinasi" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-building"></i>
+                                    <div>Hizmet Binaları</div>
+                                </a>
+                            </li>
+                        </PermissionSection>
+                        <PermissionSection PermissionKey="COM.IL.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                            <li class="menu-item @(IsSectionActive("/common/il") ? "active" : "")">
+                                <a href="/common/il" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-map"></i>
+                                    <div>İller</div>
+                                </a>
+                            </li>
+                        </PermissionSection>
+                        <PermissionSection PermissionKey="COM.ILCE.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                            <li class="menu-item @(IsSectionActive("/common/ilce") ? "active" : "")">
+                                <a href="/common/ilce" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-map-pin"></i>
+                                    <div>İlçeler</div>
+                                </a>
+                            </li>
+                        </PermissionSection>
+                        <PermissionSection PermissionKey="COM.RESMITATIL.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                            <li class="menu-item @(IsSectionActive("/common/resmitatil") ? "active" : "")">
+                                <a href="/common/resmitatil" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-calendar"></i>
+                                    <div>Resmi Tatiller</div>
+                                </a>
+                            </li>
+                        </PermissionSection>
+                        <PermissionSection PermissionKey="COM.BACKGROUNDSERVICE.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                            <li class="menu-item @(IsSectionActive("/common/background-services") ? "active" : "")">
+                                <a href="/common/background-services" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-server"></i>
+                                    <div>Background Servisler</div>
+                                </a>
+                            </li>
+                        </PermissionSection>
+                    </ul>
+                </li>
+            </PermissionSection>
 
             <!-- ================ PERSONEL İŞLEMLERİ ================ -->
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">Personel İşlemleri</span>
             </li>
 
-            <li class="menu-item @(IsSectionActive("/personel") ? "active open" : "")">
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
-                    <i class="menu-icon tf-icons bx bx-user"></i>
-                    <div>Personel</div>
-                </a>
-                <ul class="menu-sub">
-                    <li class="menu-item @(IsActive("/personel") && !Navigation.Uri.Contains("/departman") && !Navigation.Uri.Contains("/servis") && !Navigation.Uri.Contains("/unvan") ? "active" : "")">
-                        <a href="/personel" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-user"></i>
-                            <div>Personel Listesi</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(IsActive("/personel/add") ? "active" : "")">
-                        <a href="/personel/add" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-user-plus"></i>
-                            <div>Yeni Personel</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(IsSectionActive("/personel/departman") ? "active" : "")">
-                        <a href="/personel/departman" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-git-branch"></i>
-                            <div>Departmanlar</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(IsSectionActive("/common/departman-hizmet-binasi") ? "active" : "")">
-                        <a href="/common/departman-hizmet-binasi" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-link"></i>
-                            <div>Departman-Bina Eşleştirme</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(IsSectionActive("/personel/servis") ? "active" : "")">
-                        <a href="/personel/servis" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-group"></i>
-                            <div>Servisler</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(IsSectionActive("/personel/unvan") ? "active" : "")">
-                        <a href="/personel/unvan" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-id-card"></i>
-                            <div>Unvanlar</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(IsSectionActive("/personel/sendika") ? "active" : "")">
-                        <a href="/personel/sendika" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-unite"></i>
-                            <div>Sendikalar</div>
-                        </a>
-                    </li>
-                    <li class="menu-item @(IsSectionActive("/personel/atanma-nedeni") ? "active" : "")">
-                        <a href="/personel/atanma-nedeni" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-file"></i>
-                            <div>Atanma Nedenleri</div>
-                        </a>
-                    </li>
-                </ul>
-            </li>
+            <PermissionSection PermissionKey="PER.PERSONEL.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                <li class="menu-item @(IsSectionActive("/personel") ? "active open" : "")">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <i class="menu-icon tf-icons bx bx-user"></i>
+                        <div>Personel</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <PermissionSection PermissionKey="PER.PERSONEL.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                            <li class="menu-item @(IsActive("/personel") && !Navigation.Uri.Contains("/departman") && !Navigation.Uri.Contains("/servis") && !Navigation.Uri.Contains("/unvan") ? "active" : "")">
+                                <a href="/personel" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-user"></i>
+                                    <div>Personel Listesi</div>
+                                </a>
+                            </li>
+                        </PermissionSection>
+                        <PermissionSection PermissionKey="PER.PERSONEL.CREATE" RequiredLevel="YetkiSeviyesi.Edit">
+                            <li class="menu-item @(IsActive("/personel/add") ? "active" : "")">
+                                <a href="/personel/add" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-user-plus"></i>
+                                    <div>Yeni Personel</div>
+                                </a>
+                            </li>
+                        </PermissionSection>
+                        <PermissionSection PermissionKey="PER.DEPARTMAN.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                            <li class="menu-item @(IsSectionActive("/personel/departman") ? "active" : "")">
+                                <a href="/personel/departman" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-git-branch"></i>
+                                    <div>Departmanlar</div>
+                                </a>
+                            </li>
+                        </PermissionSection>
+                        <PermissionSection PermissionKey="COM.DEPARTMANHIZMETBINASI.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                            <li class="menu-item @(IsSectionActive("/common/departman-hizmet-binasi") ? "active" : "")">
+                                <a href="/common/departman-hizmet-binasi" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-link"></i>
+                                    <div>Departman-Bina Eşleştirme</div>
+                                </a>
+                            </li>
+                        </PermissionSection>
+                        <PermissionSection PermissionKey="PER.SERVIS.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                            <li class="menu-item @(IsSectionActive("/personel/servis") ? "active" : "")">
+                                <a href="/personel/servis" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-group"></i>
+                                    <div>Servisler</div>
+                                </a>
+                            </li>
+                        </PermissionSection>
+                        <PermissionSection PermissionKey="PER.UNVAN.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                            <li class="menu-item @(IsSectionActive("/personel/unvan") ? "active" : "")">
+                                <a href="/personel/unvan" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-id-card"></i>
+                                    <div>Unvanlar</div>
+                                </a>
+                            </li>
+                        </PermissionSection>
+                        <PermissionSection PermissionKey="PER.SENDIKA.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                            <li class="menu-item @(IsSectionActive("/personel/sendika") ? "active" : "")">
+                                <a href="/personel/sendika" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-unite"></i>
+                                    <div>Sendikalar</div>
+                                </a>
+                            </li>
+                        </PermissionSection>
+                        <PermissionSection PermissionKey="PER.ATANMANEDENI.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                            <li class="menu-item @(IsSectionActive("/personel/atanma-nedeni") ? "active" : "")">
+                                <a href="/personel/atanma-nedeni" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-file"></i>
+                                    <div>Atanma Nedenleri</div>
+                                </a>
+                            </li>
+                        </PermissionSection>
+                    </ul>
+                </li>
+            </PermissionSection>
 
             <!-- ================ LOG İŞLEMLERİ ================ -->
             <li class="menu-header small text-uppercase">

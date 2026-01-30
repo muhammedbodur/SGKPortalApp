@@ -7,6 +7,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 {
@@ -166,7 +167,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 
                 ilce.IlId = request.IlId;
                 ilce.IlceAdi = request.IlceAdi;
-                ilce.DuzenlenmeTarihi = DateTime.Now;
+                ilce.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                 ilceRepo.Update(ilce);
                 await _unitOfWork.SaveChangesAsync();

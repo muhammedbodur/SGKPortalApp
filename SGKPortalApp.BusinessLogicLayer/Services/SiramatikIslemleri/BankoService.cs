@@ -14,6 +14,7 @@ using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 {
@@ -200,7 +201,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     banko.KatTipi = request.KatTipi;
                     banko.BankoTipi = request.BankoTipi;
                     banko.BankoAciklama = request.BankoAciklama;
-                    banko.DuzenlenmeTarihi = DateTime.Now;
+                    banko.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                     bankoRepo.Update(banko);
                     await _unitOfWork.SaveChangesAsync();
@@ -242,7 +243,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                     // Soft delete
                     banko.SilindiMi = true;
-                    banko.DuzenlenmeTarihi = DateTime.Now;
+                    banko.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                     bankoRepo.Update(banko);
                     await _unitOfWork.SaveChangesAsync();
@@ -426,8 +427,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     TcKimlikNo = request.TcKimlikNo,
                     // ⭐ ÖNEMLİ: Banko'nun DepartmanHizmetBinasiId'si kullanılmalı
                     DepartmanHizmetBinasiId = bankoExists.DepartmanHizmetBinasiId,
-                    EklenmeTarihi = DateTime.Now,
-                    DuzenlenmeTarihi = DateTime.Now,
+                    EklenmeTarihi = DateTimeHelper.Now,
+                    DuzenlenmeTarihi = DateTimeHelper.Now,
                     Banko = null!,
                     Personel = null!,
                     DepartmanHizmetBinasi = null!
@@ -650,7 +651,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     }
 
                     banko.Aktiflik = yeniDurum;
-                    banko.DuzenlenmeTarihi = DateTime.Now;
+                    banko.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                     bankoRepo.Update(banko);
 

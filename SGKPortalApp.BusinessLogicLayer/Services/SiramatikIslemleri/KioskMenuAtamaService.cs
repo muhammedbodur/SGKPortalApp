@@ -6,6 +6,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.Common.Helpers;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
 
@@ -119,7 +120,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     }
 
                     var entity = _mapper.Map<KioskMenuAtama>(request);
-                    entity.AtamaTarihi = DateTime.Now;
+                    entity.AtamaTarihi = DateTimeHelper.Now;
 
                     await repo.AddAsync(entity);
                     await _unitOfWork.SaveChangesAsync();
@@ -161,7 +162,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     }
 
                     _mapper.Map(request, entity);
-                    entity.DuzenlenmeTarihi = DateTime.Now;
+                    entity.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                     repo.Update(entity);
                     await _unitOfWork.SaveChangesAsync();
@@ -194,7 +195,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                     entity.SilindiMi = true;
                     entity.Aktiflik = Aktiflik.Pasif;
-                    entity.DuzenlenmeTarihi = DateTime.Now;
+                    entity.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                     repo.Update(entity);
                     await _unitOfWork.SaveChangesAsync();

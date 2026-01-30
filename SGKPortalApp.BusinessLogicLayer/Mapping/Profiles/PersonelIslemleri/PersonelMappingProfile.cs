@@ -24,14 +24,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.DepartmanId, opt => opt.Ignore())
                 .ForMember(dest => dest.Aktiflik,
                     opt => opt.MapFrom(src => BusinessObjectLayer.Enums.Common.Aktiflik.Aktif))
-                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
-                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
+                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore());
 
             CreateMap<DepartmanUpdateRequestDto, Departman>()
                 .ForMember(dest => dest.DepartmanId, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
-                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore());
 
             // Field-level permission revert için gerekli (Entity → UpdateRequestDto)
@@ -53,14 +53,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.ServisId, opt => opt.Ignore())
                 .ForMember(dest => dest.Aktiflik,
                     opt => opt.MapFrom(src => BusinessObjectLayer.Enums.Common.Aktiflik.Aktif))
-                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
-                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
+                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore());
 
             CreateMap<ServisUpdateRequestDto, Servis>()
                 .ForMember(dest => dest.ServisId, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
-                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore());
 
             // Field-level permission revert için gerekli (Entity → UpdateRequestDto)
@@ -79,14 +79,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.UnvanId, opt => opt.Ignore())
                 .ForMember(dest => dest.Aktiflik,
                     opt => opt.MapFrom(src => BusinessObjectLayer.Enums.Common.Aktiflik.Aktif))
-                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
-                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
+                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore());
 
             CreateMap<UnvanUpdateRequestDto, Unvan>()
                 .ForMember(dest => dest.UnvanId, opt => opt.Ignore())
                 .ForMember(dest => dest.EklenmeTarihi, opt => opt.Ignore())
-                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
                 .ForMember(dest => dest.Personeller, opt => opt.Ignore());
 
             // Field-level permission revert için gerekli (Entity → UpdateRequestDto)
@@ -166,8 +166,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                     src.EsininIsIlceId.HasValue && src.EsininIsIlceId.Value > 0 ? src.EsininIsIlceId : null))
 
                 // Audit
-                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
-                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
+                .ForMember(dest => dest.EklenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
                 .ForMember(dest => dest.SilindiMi, opt => opt.MapFrom(src => false))
 
                 // Otomatik oluşturulan alanlar
@@ -223,7 +223,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.PersonelIslemleri
                 .ForMember(dest => dest.KartNoGonderimTarihi, opt => opt.Ignore())
 
                 // ═══ AUDIT ═══
-                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTime.Now))
+                .ForMember(dest => dest.DuzenlenmeTarihi, opt => opt.MapFrom(src => DateTimeHelper.Now))
 
                 // ═══ NAVIGATION PROPERTIES ═══
                 .ForMember(dest => dest.Departman, opt => opt.Ignore())

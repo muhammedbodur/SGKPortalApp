@@ -6,6 +6,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Request.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
+using SGKPortalApp.Common.Helpers;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
@@ -333,7 +334,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                 kanalAltIslem.KanalIslemId = request.KanalIslemId;
                 kanalAltIslem.DepartmanHizmetBinasiId = request.DepartmanHizmetBinasiId;
                 kanalAltIslem.Aktiflik = request.Aktiflik;
-                kanalAltIslem.DuzenlenmeTarihi = DateTime.Now;
+                kanalAltIslem.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                 kanalAltIslemRepo.Update(kanalAltIslem);
 
@@ -385,7 +386,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 
                 // Soft delete
                 kanalAltIslem.SilindiMi = true;
-                kanalAltIslem.DuzenlenmeTarihi = DateTime.Now;
+                kanalAltIslem.DuzenlenmeTarihi = DateTimeHelper.Now;
 
                 kanalAltIslemRepo.Update(kanalAltIslem);
                 await _unitOfWork.SaveChangesAsync();

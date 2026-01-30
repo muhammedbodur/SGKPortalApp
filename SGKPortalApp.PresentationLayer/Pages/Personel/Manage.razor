@@ -544,7 +544,7 @@ else
                                             @if (FormModel.PersonelAktiflikDurum != PersonelAktiflikDurum.Aktif)
                                             {
                                                 <div class="col-md-6 mb-3">
-                                                    <label class="form-label">Pasif/Ayrılış Nedeni</label>
+                                                    <label class="form-label">Pasiflik/Durum Değişikliği Nedeni</label>
                                                     <InputText @bind-Value="FormModel.PasifNedeni"
                                                                class="form-control"
                                                                placeholder="Örn: İstifa, Nakil, Emeklilik"
@@ -554,9 +554,9 @@ else
                                                     <label class="form-label">Durum Değişiklik Tarihi</label>
                                                     <input type="text"
                                                            @bind="FormModel.DurumDegisiklikTarihi"
-                                                           @bind:format="yyyy-MM-dd"
+                                                           @bind:format="dd.MM.yyyy"
                                                            class="form-control flatpickr-date"
-                                                           placeholder="YYYY-MM-DD" />
+                                                           placeholder="GG.AA.YYYY" />
                                                 </div>
                                             }
                                         </div>
@@ -619,9 +619,9 @@ else
                                                 <label class="form-label">Göreve Başlama Tarihi</label>
                                                 <input type="text"
                                                        @bind="FormModel.GoreveBaslamaTarihi"
-                                                       @bind:format="yyyy-MM-dd"
+                                                       @bind:format="dd.MM.yyyy"
                                                        class="form-control flatpickr-date"
-                                                       placeholder="YYYY-MM-DD" />
+                                                       placeholder="GG.AA.YYYY" />
                                             </div>
                                             <div class="col-md-4 mb-3">
                                                 <label class="form-label">Taşeron Firma</label>
@@ -778,7 +778,7 @@ else
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Doğum Tarihi</label>
-                                                <input type="text" @bind="FormModel.DogumTarihi" @bind:format="yyyy-MM-dd" class="form-control flatpickr-date" placeholder="YYYY-MM-DD" />
+                                                <input type="text" @bind="FormModel.DogumTarihi" @bind:format="dd.MM.yyyy" class="form-control flatpickr-date" placeholder="GG.AA.YYYY" />
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Cinsiyet</label>
@@ -998,7 +998,7 @@ else
                                                     </div>
                                                     <div class="col-md-3">
                                                         <label class="form-label small">Doğum Tarihi</label>
-                                                        <input type="text" @bind="cocuk.DogumTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                                        <input type="text" @bind="cocuk.DogumTarihi" @bind:format="dd.MM.yyyy" class="form-control form-control-sm flatpickr-date" placeholder="GG.AA.YYYY" />
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label class="form-label small">Eğitim</label>
@@ -1033,7 +1033,7 @@ else
                             {
                                 <div class="card mb-4">
                                     <div class="card-header d-flex justify-content-between align-items-center">
-                                        <h5 class="mb-0">Çalıştığı Servisler</h5>
+                                        <h5 class="mb-0">Hizmet Bilgileri</h5>
                                         <button type="button" class="btn btn-sm btn-primary" @onclick="AddHizmet">
                                             <i class="bx bx-plus me-1"></i>Hizmet Ekle
                                         </button>
@@ -1075,11 +1075,11 @@ else
                                                     </div>
                                                     <div class="col-md-2">
                                                         <label class="form-label small">Başlama Tarihi</label>
-                                                        <input type="date" @bind="hizmet.BaslamaTarihi" class="form-control form-control-sm" />
+                                                        <input type="text" @bind="hizmet.BaslamaTarihi" @bind:format="dd.MM.yyyy" class="form-control form-control-sm flatpickr-date" placeholder="GG.AA.YYYY" />
                                                     </div>
                                                     <div class="col-md-2">
                                                         <label class="form-label small">Ayrılma Tarihi</label>
-                                                        <input type="date" @bind="hizmet.AyrilmaTarihi" class="form-control form-control-sm" />
+                                                        <input type="text" @bind="hizmet.AyrilmaTarihi" @bind:format="dd.MM.yyyy" class="form-control form-control-sm flatpickr-date" placeholder="GG.AA.YYYY" />
                                                     </div>
                                                     <div class="col-md-1 d-flex align-items-end">
                                                         <button type="button" class="btn btn-sm btn-danger w-100" @onclick="() => RemoveHizmet(index)">
@@ -1126,11 +1126,11 @@ else
                                                     </div>
                                                     <div class="col-md-3">
                                                         <label class="form-label small">Başlangıç Tarihi</label>
-                                                        <input type="text" @bind="egitim.BaslangicTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                                        <input type="text" @bind="egitim.BaslangicTarihi" @bind:format="dd.MM.yyyy" class="form-control form-control-sm flatpickr-date" placeholder="GG.AA.YYYY" />
                                                     </div>
                                                     <div class="col-md-3">
                                                         <label class="form-label small">Bitiş Tarihi</label>
-                                                        <input type="text" @bind="egitim.BitisTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                                        <input type="text" @bind="egitim.BitisTarihi" @bind:format="dd.MM.yyyy" class="form-control form-control-sm flatpickr-date" placeholder="GG.AA.YYYY" />
                                                     </div>
                                                     <div class="col-md-1 d-flex align-items-end">
                                                         <button type="button" class="btn btn-sm btn-danger w-100" @onclick="() => RemoveEgitim(index)">
@@ -1193,11 +1193,11 @@ else
                                                     </div>
                                                     <div class="col-md-2">
                                                         <label class="form-label small">Başlama Tarihi</label>
-                                                        <input type="text" @bind="yetki.ImzaYetkisiBaslamaTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                                        <input type="text" @bind="yetki.ImzaYetkisiBaslamaTarihi" @bind:format="dd.MM.yyyy" class="form-control form-control-sm flatpickr-date" placeholder="GG.AA.YYYY" />
                                                     </div>
                                                     <div class="col-md-2">
                                                         <label class="form-label small">Bitiş Tarihi</label>
-                                                        <input type="text" @bind="yetki.ImzaYetkisiBitisTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                                        <input type="text" @bind="yetki.ImzaYetkisiBitisTarihi" @bind:format="dd.MM.yyyy" class="form-control form-control-sm flatpickr-date" placeholder="GG.AA.YYYY" />
                                                     </div>
                                                     <div class="col-md-1 d-flex align-items-end">
                                                         <button type="button" class="btn btn-sm btn-danger w-100" @onclick="() => RemoveYetki(index)">
@@ -1244,7 +1244,7 @@ else
                                                     </div>
                                                     <div class="col-md-3">
                                                         <label class="form-label small">Ceza Tarihi</label>
-                                                        <input type="text" @bind="ceza.CezaTarihi" @bind:format="yyyy-MM-dd" class="form-control form-control-sm flatpickr-date" placeholder="YYYY-MM-DD" />
+                                                        <input type="text" @bind="ceza.CezaTarihi" @bind:format="dd.MM.yyyy" class="form-control form-control-sm flatpickr-date" placeholder="GG.AA.YYYY" />
                                                     </div>
                                                     <div class="col-md-1 d-flex align-items-end">
                                                         <button type="button" class="btn btn-sm btn-danger w-100" @onclick="() => RemoveCeza(index)">

@@ -150,6 +150,37 @@ namespace SGKPortalApp.ApiLayer.Controllers.PersonelIslemleri
             return Ok(suggestions);
         }
 
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string? term, [FromQuery] int limit = 20)
+        {
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
+                return Ok(new List<object>());
+
+            var filter = new PersonelFilterRequestDto
+            {
+                SearchTerm = term.Trim(),
+                PageNumber = 1,
+                PageSize = limit
+            };
+
+            var result = await _personelService.GetPagedAsync(filter);
+            
+            if (!result.Success || result.Data?.Items == null)
+                return Ok(new List<object>());
+
+            var searchResults = result.Data.Items.Select(p => new
+            {
+                TcKimlikNo = p.TcKimlikNo,
+                AdSoyad = p.AdSoyad,
+                SicilNo = p.SicilNo,
+                DepartmanAdi = p.DepartmanAdi,
+                UnvanAdi = p.UnvanAdi,
+                AktifMi = p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif
+            }).ToList();
+
+            return Ok(searchResults);
+        }
+
         // ═══════════════════════════════════════════════════════
         // PDKS CİHAZ İŞLEMLERİ
         // ═══════════════════════════════════════════════════════

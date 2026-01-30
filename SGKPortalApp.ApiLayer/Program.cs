@@ -134,6 +134,23 @@ namespace SGKPortalApp.ApiLayer
             builder.Services.AddAuthorization();
 
             // ═══════════════════════════════════════════════════════
+            // 🌍 TÜRKİYE SAAT DİLİMİ & CULTURE AYARLARI
+            // ═══════════════════════════════════════════════════════
+            // Türkiye culture ayarları
+            var turkishCulture = new System.Globalization.CultureInfo("tr-TR");
+            turkishCulture.DateTimeFormat.ShortDatePattern = "dd.MM.yyyy";
+            turkishCulture.DateTimeFormat.LongDatePattern = "dd MMMM yyyy dddd";
+            turkishCulture.DateTimeFormat.ShortTimePattern = "HH:mm";
+            turkishCulture.DateTimeFormat.LongTimePattern = "HH:mm:ss";
+            turkishCulture.DateTimeFormat.FullDateTimePattern = "dd MMMM yyyy dddd HH:mm:ss";
+
+            // Global olarak Türkiye culture'ını ayarla
+            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = turkishCulture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = turkishCulture;
+
+            Console.WriteLine("🌍 Türkiye saat dilimi (UTC+3) ve culture ayarları yapılandırıldı");
+
+            // ═══════════════════════════════════════════════════════
             // ⭐ KATMAN SERVİSLERİ ⭐
             // ═══════════════════════════════════════════════════════
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")

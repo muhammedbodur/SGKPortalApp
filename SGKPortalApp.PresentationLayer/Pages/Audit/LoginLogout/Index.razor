@@ -82,13 +82,13 @@ else
                 @* Başlangıç Tarihi *@
                 <div class="col-md-2">
                     <label class="form-label">Başlangıç Tarihi</label>
-                    <input type="date" class="form-control" @bind="Filter.StartDate" @bind:format="yyyy-MM-dd" />
+                    <input type="text" class="form-control flatpickr-date" @bind="Filter.StartDate" @bind:format="dd.MM.yyyy" placeholder="GG.AA.YYYY" />
                 </div>
 
                 @* Bitiş Tarihi *@
                 <div class="col-md-2">
                     <label class="form-label">Bitiş Tarihi</label>
-                    <input type="date" class="form-control" @bind="Filter.EndDate" @bind:format="yyyy-MM-dd" />
+                    <input type="text" class="form-control flatpickr-date" @bind="Filter.EndDate" @bind:format="dd.MM.yyyy" placeholder="GG.AA.YYYY" />
                 </div>
 
                 @* IP Adresi *@

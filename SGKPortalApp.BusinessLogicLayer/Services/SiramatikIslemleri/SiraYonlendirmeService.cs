@@ -12,6 +12,7 @@ using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.Common.Extensions;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
 {
@@ -163,7 +164,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     }
 
                     // ⭐ Yönlendiren bankonun BankoHareket kaydını tamamla
-                    var yonlendirmeBitisZamani = DateTime.Now;
+                    var yonlendirmeBitisZamani = DateTimeHelper.Now;
                     var bankoHareketRepo = _unitOfWork.GetRepository<IBankoHareketRepository>();
                     var mevcutHareketler = await bankoHareketRepo.GetBySiraForUpdateAsync(request.SiraId);
                     var aktifHareket = mevcutHareketler.FirstOrDefault(bh => 

@@ -103,11 +103,11 @@ else
                 }
                 <div class="col-md-2">
                     <label class="form-label">Başlangıç Tarihi</label>
-                    <input type="date" class="form-control" @bind="baslangicTarihi" />
+                    <input type="text" class="form-control flatpickr-date" @bind="baslangicTarihi" @bind:format="dd.MM.yyyy" placeholder="GG.AA.YYYY" />
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Bitiş Tarihi</label>
-                    <input type="date" class="form-control" @bind="bitisTarihi" />
+                    <input type="text" class="form-control flatpickr-date" @bind="bitisTarihi" @bind:format="dd.MM.yyyy" placeholder="GG.AA.YYYY" />
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
                     <button class="btn btn-primary w-100" @onclick="LoadReport" disabled="@IsLoading">

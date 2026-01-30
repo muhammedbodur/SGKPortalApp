@@ -4,6 +4,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
+using SGKPortalApp.Common.Helpers;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Base;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PdksIslemleri;
@@ -116,7 +117,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                         Reserved = "0",
                         DeviceId = deviceId,
                         CihazIp = device.IpAddress,
-                        CekilmeTarihi = DateTime.Now,
+                        CekilmeTarihi = DateTimeHelper.Now,
                         IsProcessed = false
                     };
 
@@ -180,7 +181,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 
                 if (device != null)
                 {
-                    device.LastSyncTime = DateTime.Now;
+                    device.LastSyncTime = DateTimeHelper.Now;
                     device.LastSyncSuccess = success;
                     device.LastSyncStatus = status;
                     device.SyncCount++;

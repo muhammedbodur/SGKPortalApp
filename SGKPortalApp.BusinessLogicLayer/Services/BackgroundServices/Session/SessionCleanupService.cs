@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Auth;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.BackgroundServiceManager;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session
 {
@@ -55,7 +56,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session
             {
                 try
                 {
-                    NextRunTime = DateTime.Now.Add(_cleanupInterval);
+                    NextRunTime = DateTimeHelper.Now.Add(_cleanupInterval);
                     await Task.Delay(_cleanupInterval, stoppingToken);
 
                     if (IsPaused)
@@ -66,7 +67,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session
 
                     _isRunning = true;
                     await CleanupOrphanSessionsAsync(stoppingToken);
-                    LastRunTime = DateTime.Now;
+                    LastRunTime = DateTimeHelper.Now;
                     LastError = null;
                     SuccessCount++;
                 }

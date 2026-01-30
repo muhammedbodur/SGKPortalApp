@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SGKPortalApp.BusinessObjectLayer.Enums.ZKTeco;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
 {
@@ -191,7 +192,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     return ApiResponseDto<bool>.ErrorResult("Cihaz bulunamadı");
 
                 device.SilindiMi = true;
-                device.SilinmeTarihi = DateTime.Now;
+                device.SilinmeTarihi = DateTimeHelper.Now;
 
                 deviceRepo.Update(device);
                 await _unitOfWork.SaveChangesAsync();
@@ -278,7 +279,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
                 var success = await _apiClient.TestConnectionAsync(device.IpAddress, port);
 
-                device.LastHealthCheckTime = DateTime.Now;
+                device.LastHealthCheckTime = DateTimeHelper.Now;
                 device.LastHealthCheckSuccess = success;
                 device.HealthCheckCount++;
                 device.LastHealthCheckStatus = success ? "Bağlantı başarılı" : "Bağlantı başarısız";
@@ -415,7 +416,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     return ApiResponseDto<bool>.ErrorResult("Cihaz bulunamadı");
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
-                var timeToSet = dateTime ?? DateTime.Now;
+                var timeToSet = dateTime ?? DateTimeHelper.Now;
                 var success = await _apiClient.SetDeviceTimeAsync(device.IpAddress, timeToSet, port);
                 
                 return ApiResponseDto<bool>
@@ -438,7 +439,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                     return ApiResponseDto<bool>.ErrorResult("Cihaz bulunamadı");
 
                 var port = int.TryParse(device.Port, out var p) ? p : 4370;
-                var success = await _apiClient.SetDeviceTimeAsync(device.IpAddress, DateTime.Now, port);
+                var success = await _apiClient.SetDeviceTimeAsync(device.IpAddress, DateTimeHelper.Now, port);
                 
                 return ApiResponseDto<bool>
                     .SuccessResult(success, success ? "Cihaz saati senkronize edildi" : "Cihaz saati senkronize edilemedi");
@@ -1142,7 +1143,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri
                 var logs = rawLogs.Select(r => new AttendanceLogDto
                 {
                     EnrollNumber = r.EnrollNumber,
-                    DateTime = r.EventTime == DateTime.MinValue ? DateTime.Now : r.EventTime, // Tarih kontrolü
+                    DateTime = r.EventTime == DateTime.MinValue ? DateTimeHelper.Now : r.EventTime, // Tarih kontrolü
                     VerifyMethod = (BusinessObjectLayer.Enums.PdksIslemleri.VerifyMethod)r.VerifyMethod,
                     InOutMode = (BusinessObjectLayer.Enums.PdksIslemleri.InOutMode)r.InOutMode,
                     DeviceIp = r.DeviceIp

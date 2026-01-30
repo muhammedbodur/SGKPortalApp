@@ -11,6 +11,7 @@ using SGKPortalApp.BusinessLogicLayer.Interfaces.SignalR;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 {
@@ -49,7 +50,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 }
 
                 user.PermissionStamp = Guid.NewGuid();
-                user.DuzenlenmeTarihi = DateTime.Now;
+                user.DuzenlenmeTarihi = DateTimeHelper.Now;
                 userRepo.Update(user);
                 await _unitOfWork.SaveChangesAsync();
                 return user.PermissionStamp;
@@ -82,7 +83,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                     {
                         TcKimlikNo = tcKimlikNo,
                         PermissionStamp = permissionStamp,
-                        Timestamp = DateTime.Now
+                        Timestamp = DateTimeHelper.Now
                     });
             }
             catch (Exception ex)

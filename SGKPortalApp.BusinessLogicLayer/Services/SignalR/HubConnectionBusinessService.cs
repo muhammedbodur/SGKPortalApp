@@ -4,6 +4,7 @@ using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
+using SGKPortalApp.Common.Helpers;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 
@@ -36,8 +37,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 if (connection != null)
                 {
                     connection.ConnectionStatus = BusinessObjectLayer.Enums.SiramatikIslemleri.ConnectionStatus.online;
-                    connection.IslemZamani = DateTime.Now;
-                    connection.DuzenlenmeTarihi = DateTime.Now;
+                    connection.IslemZamani = DateTimeHelper.Now;
+                    connection.DuzenlenmeTarihi = DateTimeHelper.Now;
                     connection.SilindiMi = false;
                     connection.SilinmeTarihi = null;
                     connection.SilenKullanici = null;
@@ -49,10 +50,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     {
                         TcKimlikNo = tcKimlikNo,
                         ConnectionId = connectionId,
-                        ConnectionStatus = BusinessObjectLayer.Enums.SiramatikIslemleri.ConnectionStatus.online,
-                        IslemZamani = DateTime.Now,
-                        EklenmeTarihi = DateTime.Now,
-                        DuzenlenmeTarihi = DateTime.Now
+                        ConnectionStatus = ConnectionStatus.online,
+                        IslemZamani = DateTimeHelper.Now,
+                        EklenmeTarihi = DateTimeHelper.Now,
+                        DuzenlenmeTarihi = DateTimeHelper.Now,
                     };
                     await repo.AddAsync(connection);
                 }
@@ -81,12 +82,12 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     // OnDisconnectedAsync içinde ConnectionType'a göre yapılıyor:
                     // - BankoMode: HubBankoConnection KORUNUR (sayfa yenileme için TransferBankoConnectionAsync kullanılır)
                     // - TvMode: HubTvConnection TEMİZLENİR (DeactivateTvConnectionByHubConnectionIdAsync ile)
-                    connection.ConnectionStatus = BusinessObjectLayer.Enums.SiramatikIslemleri.ConnectionStatus.offline;
-                    connection.IslemZamani = DateTime.Now;
-                    connection.DuzenlenmeTarihi = DateTime.Now;
-                    connection.LastActivityAt = DateTime.Now;
+                    connection.ConnectionStatus = ConnectionStatus.offline;
+                    connection.IslemZamani = DateTimeHelper.Now;
+                    connection.DuzenlenmeTarihi = DateTimeHelper.Now;
+                    connection.LastActivityAt = DateTimeHelper.Now;
                     connection.SilindiMi = true;
-                    connection.SilinmeTarihi = DateTime.Now;
+                    connection.SilinmeTarihi = DateTimeHelper.Now;
                     connection.SilenKullanici = "SignalR_Disconnect";
                     repo.Update(connection);
                     await _unitOfWork.SaveChangesAsync();
@@ -152,10 +153,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     BankoId = bankoId,
                     TcKimlikNo = tcKimlikNo,
                     BankoModuAktif = true,
-                    BankoModuBaslangic = DateTime.Now,
-                    IslemZamani = DateTime.Now,
-                    EklenmeTarihi = DateTime.Now,
-                    DuzenlenmeTarihi = DateTime.Now
+                    BankoModuBaslangic = DateTimeHelper.Now,
+                    IslemZamani = DateTimeHelper.Now,
+                    EklenmeTarihi = DateTimeHelper.Now,
+                    DuzenlenmeTarihi = DateTimeHelper.Now,
                 };
 
                 await repo.AddAsync(bankoConnection);
@@ -184,11 +185,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 {
                     // HubBankoConnection'ı deaktif et ve soft-delete yap
                     bankoConnection.BankoModuAktif = false;
-                    bankoConnection.BankoModuBitis = DateTime.Now;
+                    bankoConnection.BankoModuBitis = DateTimeHelper.Now;
                     bankoConnection.SilindiMi = true;
-                    bankoConnection.SilinmeTarihi = DateTime.Now;
-                    bankoConnection.SilenKullanici = "ExitBankoMode";
-                    bankoConnection.DuzenlenmeTarihi = DateTime.Now;
+                    bankoConnection.SilinmeTarihi = DateTimeHelper.Now;
+                    bankoConnection.SilenKullanici = "ExitBankoHelperMode";
+                    bankoConnection.DuzenlenmeTarihi = DateTimeHelper.Now;
                     bankoRepo.Update(bankoConnection);
 
                     // User tablosunu temizle
@@ -198,7 +199,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                         user.BankoModuAktif = false;
                         user.AktifBankoId = null;
                         user.BankoModuBaslangic = null;
-                        user.DuzenlenmeTarihi = DateTime.Now;
+                        user.DuzenlenmeTarihi = DateTimeHelper.Now;
                         userRepo.Update(user);
                     }
 
@@ -244,8 +245,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 {
                     // Mevcut kaydı güncelle
                     existingTvConnection.TvId = tvId;
-                    existingTvConnection.IslemZamani = DateTime.Now;
-                    existingTvConnection.DuzenlenmeTarihi = DateTime.Now;
+                    existingTvConnection.IslemZamani = DateTimeHelper.Now;
+                    existingTvConnection.DuzenlenmeTarihi = DateTimeHelper.Now;
                     repo.Update(existingTvConnection);
                     _logger.LogInformation($"✅ Mevcut TV bağlantısı güncellendi: TV#{tvId}, HubConnectionId={hubConnection.HubConnectionId}, TcKimlikNo={hubConnection.TcKimlikNo}");
                 }
@@ -254,11 +255,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     // 3. Yeni HubTvConnection oluştur
                     var tvConnection = new HubTvConnection
                     {
-                        HubConnectionId = hubConnection.HubConnectionId, // ⭐ KRİTİK FİX!
+                        HubConnectionId = hubConnection.HubConnectionId,
                         TvId = tvId,
-                        IslemZamani = DateTime.Now,
-                        EklenmeTarihi = DateTime.Now,
-                        DuzenlenmeTarihi = DateTime.Now
+                        IslemZamani = DateTimeHelper.Now,
+                        EklenmeTarihi = DateTimeHelper.Now,
+                        DuzenlenmeTarihi = DateTimeHelper.Now
                     };
 
                     await repo.AddAsync(tvConnection);
@@ -330,7 +331,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     if (trackedConnection != null)
                     {
                         trackedConnection.ConnectionType = connectionType;
-                        trackedConnection.DuzenlenmeTarihi = DateTime.Now;
+                        trackedConnection.DuzenlenmeTarihi = DateTimeHelper.Now;
                         await _unitOfWork.SaveChangesAsync();
                     }
                 }
@@ -362,7 +363,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     if (trackedConnection != null)
                     {
                         trackedConnection.ConnectionStatus = connectionStatus;
-                        trackedConnection.DuzenlenmeTarihi = DateTime.Now;
+                        trackedConnection.DuzenlenmeTarihi = DateTimeHelper.Now;
                         await _unitOfWork.SaveChangesAsync();
                     }
                 }
@@ -492,10 +493,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     BankoId = bankoId,
                     TcKimlikNo = tcKimlikNo,
                     BankoModuAktif = true,
-                    BankoModuBaslangic = DateTime.Now,
-                    IslemZamani = DateTime.Now,
-                    EklenmeTarihi = DateTime.Now,
-                    DuzenlenmeTarihi = DateTime.Now
+                    BankoModuBaslangic = DateTimeHelper.Now,
+                    IslemZamani = DateTimeHelper.Now,
+                    EklenmeTarihi = DateTimeHelper.Now,
+                    DuzenlenmeTarihi = DateTimeHelper.Now,
                 };
 
                 await repo.AddAsync(bankoConnection);
@@ -529,11 +530,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
 
                 // HubBankoConnection'ı deaktif et ve soft-delete yap
                 bankoConnection.BankoModuAktif = false;
-                bankoConnection.BankoModuBitis = DateTime.Now;
+                bankoConnection.BankoModuBitis = DateTimeHelper.Now;
                 bankoConnection.SilindiMi = true;
-                bankoConnection.SilinmeTarihi = DateTime.Now;
-                bankoConnection.SilenKullanici = "ExitBankoMode";
-                bankoConnection.DuzenlenmeTarihi = DateTime.Now;
+                bankoConnection.SilinmeTarihi = DateTimeHelper.Now;
+                bankoConnection.SilenKullanici = "ExitBankoHelperMode";
+                bankoConnection.DuzenlenmeTarihi = DateTimeHelper.Now;
                 bankoRepo.Update(bankoConnection);
 
                 // User tablosunu temizle
@@ -543,7 +544,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     user.BankoModuAktif = false;
                     user.AktifBankoId = null;
                     user.BankoModuBaslangic = null;
-                    user.DuzenlenmeTarihi = DateTime.Now;
+                    user.DuzenlenmeTarihi = DateTimeHelper.Now;
                     userRepo.Update(user);
                 }
 
@@ -690,25 +691,25 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 if (oldConnection != null)
                 {
                     oldConnection.ConnectionStatus = ConnectionStatus.offline;
-                    oldConnection.LastActivityAt = DateTime.Now;
-                    oldConnection.IslemZamani = DateTime.Now;
-                    oldConnection.DuzenlenmeTarihi = DateTime.Now;
+                    oldConnection.LastActivityAt = DateTimeHelper.Now;
+                    oldConnection.IslemZamani = DateTimeHelper.Now;
+                    oldConnection.DuzenlenmeTarihi = DateTimeHelper.Now;
                     oldConnection.SilindiMi = true;
-                    oldConnection.SilinmeTarihi = DateTime.Now;
+                    oldConnection.SilinmeTarihi = DateTimeHelper.Now;
                     oldConnection.SilenKullanici = "BankoTransfer";
                     connectionRepo.Update(oldConnection);
                 }
 
                 bankoConnection.HubConnectionId = newConnection.HubConnectionId;
-                bankoConnection.IslemZamani = DateTime.Now;
-                bankoConnection.DuzenlenmeTarihi = DateTime.Now;
+                bankoConnection.IslemZamani = DateTimeHelper.Now;
+                bankoConnection.DuzenlenmeTarihi = DateTimeHelper.Now;
                 bankoRepo.Update(bankoConnection);
 
                 newConnection.ConnectionType = "BankoMode";
                 newConnection.ConnectionStatus = ConnectionStatus.online;
-                newConnection.LastActivityAt = DateTime.Now;
-                newConnection.IslemZamani = DateTime.Now;
-                newConnection.DuzenlenmeTarihi = DateTime.Now;
+                newConnection.LastActivityAt = DateTimeHelper.Now;
+                newConnection.IslemZamani = DateTimeHelper.Now;
+                newConnection.DuzenlenmeTarihi = DateTimeHelper.Now;
                 connectionRepo.Update(newConnection);
 
                 await _unitOfWork.SaveChangesAsync();
@@ -739,9 +740,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 {
                     HubConnectionId = hubConnectionId,
                     TvId = tvId,
-                    IslemZamani = DateTime.Now,
-                    EklenmeTarihi = DateTime.Now,
-                    DuzenlenmeTarihi = DateTime.Now
+                    IslemZamani = DateTimeHelper.Now,
+                    EklenmeTarihi = DateTimeHelper.Now,
+                    DuzenlenmeTarihi = DateTimeHelper.Now
                 };
 
                 await repo.AddAsync(tvConnection);
@@ -776,9 +777,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 // TV için User tablosu güncellemesi YOK (Banko'dan fark)
                 // Sadece HubTvConnection'ı soft delete yap
                 tvConnection.SilindiMi = true;
-                tvConnection.SilinmeTarihi = DateTime.Now;
+                tvConnection.SilinmeTarihi = DateTimeHelper.Now;
                 tvConnection.SilenKullanici = "TvDisconnect";
-                tvConnection.DuzenlenmeTarihi = DateTime.Now;
+                tvConnection.DuzenlenmeTarihi = DateTimeHelper.Now;
                 tvRepo.Update(tvConnection);
 
                 await _unitOfWork.SaveChangesAsync();
@@ -899,27 +900,27 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 if (oldConnection != null)
                 {
                     oldConnection.ConnectionStatus = ConnectionStatus.offline;
-                    oldConnection.LastActivityAt = DateTime.Now;
-                    oldConnection.IslemZamani = DateTime.Now;
-                    oldConnection.DuzenlenmeTarihi = DateTime.Now;
+                    oldConnection.LastActivityAt = DateTimeHelper.Now;
+                    oldConnection.IslemZamani = DateTimeHelper.Now;
+                    oldConnection.DuzenlenmeTarihi = DateTimeHelper.Now;
                     oldConnection.SilindiMi = true;
-                    oldConnection.SilinmeTarihi = DateTime.Now;
+                    oldConnection.SilinmeTarihi = DateTimeHelper.Now;
                     oldConnection.SilenKullanici = "TvTransfer";
                     connectionRepo.Update(oldConnection);
                 }
 
                 // HubTvConnection'ı yeni HubConnectionId'ye bağla
                 tvConnection.HubConnectionId = newConnection.HubConnectionId;
-                tvConnection.IslemZamani = DateTime.Now;
-                tvConnection.DuzenlenmeTarihi = DateTime.Now;
+                tvConnection.IslemZamani = DateTimeHelper.Now;
+                tvConnection.DuzenlenmeTarihi = DateTimeHelper.Now;
                 tvRepo.Update(tvConnection);
 
                 // Yeni connection'ı TvDisplay tipine çevir
                 newConnection.ConnectionType = "TvDisplay";
                 newConnection.ConnectionStatus = ConnectionStatus.online;
-                newConnection.LastActivityAt = DateTime.Now;
-                newConnection.IslemZamani = DateTime.Now;
-                newConnection.DuzenlenmeTarihi = DateTime.Now;
+                newConnection.LastActivityAt = DateTimeHelper.Now;
+                newConnection.IslemZamani = DateTimeHelper.Now;
+                newConnection.DuzenlenmeTarihi = DateTimeHelper.Now;
                 connectionRepo.Update(newConnection);
 
                 await _unitOfWork.SaveChangesAsync();
@@ -987,7 +988,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 foreach (var conn in toCleanup)
                 {
                     conn.ConnectionStatus = ConnectionStatus.offline;
-                    conn.DuzenlenmeTarihi = DateTime.Now;
+                    conn.DuzenlenmeTarihi = DateTimeHelper.Now;
                     ClearNavigationReferences(conn);
                     hubConnectionRepo.Update(conn);
                 }
@@ -1031,7 +1032,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                 foreach (var conn in staleConnections)
                 {
                     conn.ConnectionStatus = ConnectionStatus.offline;
-                    conn.DuzenlenmeTarihi = DateTime.Now;
+                    conn.DuzenlenmeTarihi = DateTimeHelper.Now;
                     ClearNavigationReferences(conn);
                     hubConnectionRepo.Update(conn);
                 }
@@ -1096,11 +1097,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     {
                         // HubBankoConnection'ı deaktif et ve soft-delete yap
                         bankoConn.BankoModuAktif = false;
-                        bankoConn.BankoModuBitis = DateTime.Now;
+                        bankoConn.BankoModuBitis = DateTimeHelper.Now;
                         bankoConn.SilindiMi = true;
-                        bankoConn.SilinmeTarihi = DateTime.Now;
+                        bankoConn.SilinmeTarihi = DateTimeHelper.Now;
                         bankoConn.SilenKullanici = "OrphanCleanup";
-                        bankoConn.DuzenlenmeTarihi = DateTime.Now;
+                        bankoConn.DuzenlenmeTarihi = DateTimeHelper.Now;
                         bankoRepo.Update(bankoConn);
 
                         // User tablosunu temizle (dictionary'den al, sorgu YOK)
@@ -1109,7 +1110,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                             user.BankoModuAktif = false;
                             user.AktifBankoId = null;
                             user.BankoModuBaslangic = null;
-                            user.DuzenlenmeTarihi = DateTime.Now;
+                            user.DuzenlenmeTarihi = DateTimeHelper.Now;
                             userRepo.Update(user);
                         }
 
@@ -1170,9 +1171,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SignalR
                     {
                         // HubTvConnection'ı soft-delete yap
                         tvConn.SilindiMi = true;
-                        tvConn.SilinmeTarihi = DateTime.Now;
+                        tvConn.SilinmeTarihi = DateTimeHelper.Now;
                         tvConn.SilenKullanici = "OrphanCleanup";
-                        tvConn.DuzenlenmeTarihi = DateTime.Now;
+                        tvConn.DuzenlenmeTarihi = DateTimeHelper.Now;
                         tvRepo.Update(tvConn);
 
                         orphanCount++;

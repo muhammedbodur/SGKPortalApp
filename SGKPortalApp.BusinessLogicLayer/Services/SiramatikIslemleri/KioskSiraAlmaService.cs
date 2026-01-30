@@ -8,6 +8,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.SiramatikIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.SiramatikIslemleri;
+using SGKPortalApp.Common.Helpers;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Complex;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.SiramatikIslemleri;
@@ -102,7 +103,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.SiramatikIslemleri
                     KanalAltAdi = siraNoBilgisi.KanalAltAdi,
                     DepartmanHizmetBinasiId = siraNoBilgisi.DepartmanHizmetBinasiId,
                     DepartmanHizmetBinasi = null!,   // FK üzerinden ilişki kurulacak
-                    SiraAlisZamani = DateTime.Now,
+                    SiraAlisZamani = DateTimeHelper.Now,
                     BeklemeDurum = BeklemeDurum.Beklemede
                 };
 

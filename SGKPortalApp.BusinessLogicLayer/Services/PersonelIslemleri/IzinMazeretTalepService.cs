@@ -12,6 +12,7 @@ using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri;
 using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PdksIslemleri;
 using SGKPortalApp.Common.Extensions;
 using SGKPortalApp.BusinessObjectLayer.Entities.PdksIslemleri;
+using SGKPortalApp.Common.Helpers;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 {
@@ -126,7 +127,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
                 // Talep oluştur
                 var talep = _mapper.Map<IzinMazeretTalep>(request);
-                talep.TalepTarihi = DateTime.Now;
+                talep.TalepTarihi = DateTimeHelper.Now;
                 talep.IsActive = true;
 
                 // Toplam gün hesapla (İzin için)
@@ -290,7 +291,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 talep.IsActive = false;
                 talep.BirinciOnayDurumu = OnayDurumu.IptalEdildi;
                 talep.BirinciOnayAciklama = $"Talep iptal edildi. Neden: {iptalNedeni}";
-                talep.BirinciOnayTarihi = DateTime.Now;
+                talep.BirinciOnayTarihi = DateTimeHelper.Now;
 
                 _unitOfWork.Repository<IzinMazeretTalep>().Update(talep);
                 await _unitOfWork.SaveChangesAsync();
@@ -400,7 +401,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         return ApiResponseDto<bool>.ErrorResult("1. onayci değilsiniz");
 
                     talep.BirinciOnayDurumu = request.OnayDurumu;
-                    talep.BirinciOnayTarihi = DateTime.Now;
+                    talep.BirinciOnayTarihi = DateTimeHelper.Now;
                     talep.BirinciOnayAciklama = request.Aciklama;
                 }
                 else if (request.OnayciSeviyesi == 2)
@@ -413,7 +414,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         return ApiResponseDto<bool>.ErrorResult("1. onay henüz tamamlanmamış");
 
                     talep.IkinciOnayDurumu = request.OnayDurumu;
-                    talep.IkinciOnayTarihi = DateTime.Now;
+                    talep.IkinciOnayTarihi = DateTimeHelper.Now;
                     talep.IkinciOnayAciklama = request.Aciklama;
                 }
 
@@ -996,7 +997,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                         return ApiResponseDto<bool>.ErrorResult("Bu talep zaten işlenmiş");
 
                     talep.IzinIslendiMi = true;
-                    talep.IzinIslemTarihi = DateTime.Now;
+                    talep.IzinIslemTarihi = DateTimeHelper.Now;
                     talep.IzinIslemYapanKullanici = kullaniciTc;
                     talep.IzinIslemNotlari = request.Notlar;
                 }
