@@ -1,5 +1,3 @@
-@implements IDisposable
-
 @if (IsVisible)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);" @onclick="Close">
@@ -115,7 +113,7 @@
                                     @if (PersonelResults.Count > 5)
                                     {
                                         <div class="text-center mt-2">
-                                            <a href="javascript:void(0)" class="btn btn-sm btn-link" @onclick="@(() => NavigateAndClose("/personel/liste?search=" + Uri.EscapeDataString(SearchTerm)))">
+                                            <a href="javascript:void(0)" class="btn btn-sm btn-link" @onclick="@(() => NavigateAndClose("/personel?search=" + Uri.EscapeDataString(SearchTerm)))">
                                                 Tüm sonuçları gör (@PersonelResults.Count personel)
                                             </a>
                                         </div>

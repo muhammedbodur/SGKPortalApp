@@ -117,6 +117,15 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
             // Base class permission yükleme ve event subscription'ı yapar
             await base.OnInitializedAsync();
             
+            // Query string'den search parametresini al
+            var uri = new Uri(_navigationManager.Uri);
+            var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+            var searchParam = query["search"];
+            if (!string.IsNullOrWhiteSpace(searchParam))
+            {
+                searchTerm = searchParam;
+            }
+            
             QuestPDF.Settings.License = LicenseType.Community;
             await LoadData();
         }
