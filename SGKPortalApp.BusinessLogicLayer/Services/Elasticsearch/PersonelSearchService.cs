@@ -327,55 +327,35 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
 
                             if (isMultiWord)
                             {
-                                // ÇOK KELİMELİ ARAMA: Phrase matching veya partial matching
+                                // ÇOK KELİMELİ ARAMA: TÜM kelimeler bulunmalı (AND)
                                 var shouldQueries = new List<Action<QueryDescriptor<PersonelElasticDto>>>();
-                                
+
                                 // TC/Sicil tam eşleşme (en yüksek öncelik)
                                 shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.TcKimlikNo).Value(searchTerm).Boost(1000.0f)));
                                 shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.SicilNo).Value(searchTerm).Boost(1000.0f)));
-                                
-                                // PHRASE MATCHING: Kelimelerin yakın olması yeterli (slop: 1 veya 2 kelime arası izin ver)
-                                shouldQueries.Add(sh => sh.MatchPhrase(m => m
-                                    .Field(f => f.FullText)
-                                    .Query(searchTerm)
-                                    .Slop(2) // 2 kelimeye kadar arası açık olabilir
-                                    .Boost(500.0f)
-                                ));
-                                
-                                shouldQueries.Add(sh => sh.MatchPhrase(m => m
-                                    .Field(f => f.AdSoyad)
-                                    .Query(searchTerm)
-                                    .Slop(2)
-                                    .Boost(400.0f)
-                                ));
-                                
-                                shouldQueries.Add(sh => sh.MatchPhrase(m => m
-                                    .Field(f => f.UnvanAdi)
-                                    .Query(searchTerm)
-                                    .Slop(1)
-                                    .Boost(300.0f)
-                                ));
-                                
-                                shouldQueries.Add(sh => sh.MatchPhrase(m => m
-                                    .Field(f => f.DepartmanAdi)
-                                    .Query(searchTerm)
-                                    .Slop(1)
-                                    .Boost(200.0f)
-                                ));
-                                
-                                shouldQueries.Add(sh => sh.MatchPhrase(m => m
-                                    .Field(f => f.ServisAdi)
-                                    .Query(searchTerm)
-                                    .Slop(1)
-                                    .Boost(200.0f)
-                                ));
-                                
-                                // Match operatörü ile VEYA arama (daha esnek)
+
+                                // FullText AND operatörü - TÜM kelimeler bulunmalı (EN ÖNEMLİ)
                                 shouldQueries.Add(sh => sh.Match(m => m
                                     .Field(f => f.FullText)
                                     .Query(searchTerm)
-                                    .Operator(Operator.Or) // Tüm kelimelerin olması zorunlu değil
-                                    .Boost(100.0f)
+                                    .Operator(Operator.And) // TÜM kelimeler olmalı
+                                    .Boost(500.0f)
+                                ));
+
+                                // AdSoyad AND - ad soyad araması için
+                                shouldQueries.Add(sh => sh.Match(m => m
+                                    .Field(f => f.AdSoyad)
+                                    .Query(searchTerm)
+                                    .Operator(Operator.And)
+                                    .Boost(400.0f)
+                                ));
+
+                                // Phrase matching: Kelimelerin yakın olması (slop: 3)
+                                shouldQueries.Add(sh => sh.MatchPhrase(m => m
+                                    .Field(f => f.FullText)
+                                    .Query(searchTerm)
+                                    .Slop(3)
+                                    .Boost(300.0f)
                                 ));
 
                                 b.Filter(filters.ToArray())
@@ -384,45 +364,50 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                             }
                             else
                             {
-                                // TEK KELİME ARAMA: Esnek (SHOULD)
+                                // TEK KELİME ARAMA
                                 var shouldQueries = new List<Action<QueryDescriptor<PersonelElasticDto>>>();
-                                
+                                var isNumeric = searchTerm.All(char.IsDigit);
+
                                 // TC ve Sicil No (en yüksek öncelik)
-                                shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.TcKimlikNo).Value(searchTerm).Boost(50.0f)));
-                                shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.SicilNo).Value(searchTerm).Boost(50.0f)));
-                                shouldQueries.Add(sh => sh.Prefix(p => p.Field(f => f.TcKimlikNo).Value(searchTerm).Boost(40.0f)));
-                                shouldQueries.Add(sh => sh.Prefix(p => p.Field(f => f.SicilNo).Value(searchTerm).Boost(40.0f)));
-                                
-                                // Phrase matching
-                                shouldQueries.Add(sh => sh.MatchPhrase(m => m
-                                    .Field(f => f.FullText)
-                                    .Query(searchTerm)
-                                    .Boost(30.0f)
-                                ));
+                                shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.TcKimlikNo).Value(searchTerm).Boost(100.0f)));
+                                shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.SicilNo).Value(searchTerm).Boost(100.0f)));
+                                shouldQueries.Add(sh => sh.Prefix(p => p.Field(f => f.TcKimlikNo).Value(searchTerm).Boost(80.0f)));
+                                shouldQueries.Add(sh => sh.Prefix(p => p.Field(f => f.SicilNo).Value(searchTerm).Boost(80.0f)));
 
-                                // Multi-field
-                                shouldQueries.Add(sh => sh.MultiMatch(m => m
-                                    .Fields(new[] { "adSoyad^3", "unvanAdi^2", "departmanAdi", "servisAdi", "fullText" })
-                                    .Query(searchTerm)
-                                    .Operator(Operator.Or)
-                                    .Boost(20.0f)
-                                ));
+                                if (!isNumeric)
+                                {
+                                    // Sayısal değilse - metin araması
+                                    // Phrase matching
+                                    shouldQueries.Add(sh => sh.MatchPhrase(m => m
+                                        .Field(f => f.FullText)
+                                        .Query(searchTerm)
+                                        .Boost(30.0f)
+                                    ));
 
-                                // Match
-                                shouldQueries.Add(sh => sh.Match(m => m
-                                    .Field(f => f.FullText)
-                                    .Query(searchTerm)
-                                    .Operator(Operator.Or)
-                                    .Boost(15.0f)
-                                ));
+                                    // Multi-field
+                                    shouldQueries.Add(sh => sh.MultiMatch(m => m
+                                        .Fields(new[] { "adSoyad^3", "unvanAdi^2", "departmanAdi", "servisAdi", "fullText" })
+                                        .Query(searchTerm)
+                                        .Operator(Operator.Or)
+                                        .Boost(20.0f)
+                                    ));
 
-                                // Fuzzy (yazım hatası)
-                                shouldQueries.Add(sh => sh.Match(m => m
-                                    .Field(f => f.FullText)
-                                    .Query(searchTerm)
-                                    .Fuzziness(new Fuzziness("1"))
-                                    .Boost(5.0f)
-                                ));
+                                    // Match
+                                    shouldQueries.Add(sh => sh.Match(m => m
+                                        .Field(f => f.FullText)
+                                        .Query(searchTerm)
+                                        .Operator(Operator.Or)
+                                        .Boost(15.0f)
+                                    ));
+
+                                    // Fuzzy (yazım hatası) - SADECE metin için
+                                    shouldQueries.Add(sh => sh.Match(m => m
+                                        .Field(f => f.FullText)
+                                        .Query(searchTerm)
+                                        .Fuzziness(new Fuzziness("AUTO"))
+                                        .Boost(5.0f)
+                                    ));
+                                }
 
                                 b.Filter(filters.ToArray())
                                  .Should(shouldQueries.ToArray())
