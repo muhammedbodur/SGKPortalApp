@@ -217,7 +217,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                 SicilNo = sicilNoStr,
                 DepartmanId = p.DepartmanId,
                 DepartmanAdi = p.Departman?.DepartmanAdi,
-                ServisId = p.ServisId ?? 0,
+                ServisId = p.ServisId,
                 ServisAdi = p.Servis?.ServisAdi,
                 UnvanId = p.UnvanId,
                 UnvanAdi = p.Unvan?.UnvanAdi,
@@ -225,7 +225,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                 PersonelAktiflikDurum = p.PersonelAktiflikDurum,
                 Aktif = p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif,
                 FullText = string.Join(" ", fullTextParts.Where(x => !string.IsNullOrWhiteSpace(x))),
-                GuncellemeTarihi = p.DuzenlenmeTarihi ?? DateTime.UtcNow
+                GuncellemeTarihi = p.DuzenlenmeTarihi
             };
         }
     }

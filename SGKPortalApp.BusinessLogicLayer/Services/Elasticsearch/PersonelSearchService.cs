@@ -421,7 +421,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
             try
             {
                 var response = await _client.CountAsync<PersonelElasticDto>(c => c
-                    .Index(_settings.IndexName)
+                    .Indices(_settings.IndexName)
                 );
 
                 return response.IsValidResponse ? response.Count : 0;
