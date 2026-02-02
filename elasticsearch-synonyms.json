@@ -31,8 +31,8 @@
     ],
     "unvan_esanlamlilari": [
       "doktor, tabip, uzman tabip",
-      "mühendis, müh",
-      "teknisyen, tekn",
+      "müh => mühendis",
+      "tekn => teknisyen",
       "hemşire, hemshire",
       "muhasebeci, muhasebe yetkilisi",
       "şoför, sofor, sürücü",
