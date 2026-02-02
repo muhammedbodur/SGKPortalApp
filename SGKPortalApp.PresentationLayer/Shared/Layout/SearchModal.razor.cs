@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Models;
-using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Elasticsearch;
 using SGKPortalApp.PresentationLayer.Services.StateServices;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
@@ -10,7 +10,7 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
 {
     public partial class SearchModal : IDisposable
     {
-        [Inject] private IPersonelApiService PersonelApiService { get; set; } = default!;
+        [Inject] private IPersonelSearchApiService PersonelSearchApiService { get; set; } = default!;
         [Inject] private NavigationManager Navigation { get; set; } = default!;
         [Inject] private PermissionStateService PermissionState { get; set; } = default!;
 
@@ -102,7 +102,8 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
             try
             {
                 IsSearching = true;
-                var result = await PersonelApiService.SearchAsync(SearchTerm, 20);
+                // Elasticsearch fuzzy search - Türkçe karakter toleranslı
+                var result = await PersonelSearchApiService.SearchAsync(SearchTerm, sadeceAktif: false, size: 20);
 
                 if (result.Success && result.Data != null)
                 {
@@ -111,22 +112,22 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                         TcKimlikNo = p.TcKimlikNo,
                         Resim = p.Resim,
                         AdSoyad = p.AdSoyad,
-                        SicilNo = p.SicilNo?.ToString(),
+                        SicilNo = p.SicilNo,
                         DepartmanAdi = p.DepartmanAdi,
                         UnvanAdi = p.UnvanAdi,
                         PersonelAktiflikDurum = p.PersonelAktiflikDurum
                     }).ToList();
-                    Console.WriteLine($"✅ Personel arama başarılı: {PersonelResults.Count} sonuç");
+                    Console.WriteLine($"✅ Elasticsearch arama başarılı: {PersonelResults.Count} sonuç");
                 }
                 else
                 {
-                    Console.WriteLine($"⚠️ Personel arama başarısız: {result.Message}");
+                    Console.WriteLine($"⚠️ Elasticsearch arama başarısız: {result.Message}");
                     PersonelResults.Clear();
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Personel arama hatası: {ex.Message}");
+                Console.WriteLine($"❌ Elasticsearch arama hatası: {ex.Message}");
                 PersonelResults.Clear();
             }
             finally
