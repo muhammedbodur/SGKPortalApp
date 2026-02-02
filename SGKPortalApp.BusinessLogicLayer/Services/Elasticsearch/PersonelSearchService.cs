@@ -131,7 +131,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                     .Settings(s => s
                         .Analysis(a => a
                             .TokenFilters(tf => tf
-                                .AsciiFolding("tr_ascii", af => af.PreserveOriginal(true))
+                                .AsciiFolding("tr_ascii", af => af.PreserveOriginal(false)) // FALSE: ü→u dönüşümü yapılsın
                                 .EdgeNGram("tr_edge", en => en.MinGram(2).MaxGram(20))
                                 .Synonym("tr_synonym", syn => syn.Synonyms(_synonyms))
                             )
@@ -327,47 +327,55 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
 
                             if (isMultiWord)
                             {
-                                // ÇOK KELİMELİ ARAMA: Sadece phrase matching kabul et
+                                // ÇOK KELİMELİ ARAMA: Phrase matching veya partial matching
                                 var shouldQueries = new List<Action<QueryDescriptor<PersonelElasticDto>>>();
                                 
                                 // TC/Sicil tam eşleşme (en yüksek öncelik)
                                 shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.TcKimlikNo).Value(searchTerm).Boost(1000.0f)));
                                 shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.SicilNo).Value(searchTerm).Boost(1000.0f)));
                                 
-                                // SADECE PHRASE MATCHING: Kelimelerin yan yana olması zorunlu
+                                // PHRASE MATCHING: Kelimelerin yakın olması yeterli (slop: 1 veya 2 kelime arası izin ver)
                                 shouldQueries.Add(sh => sh.MatchPhrase(m => m
                                     .Field(f => f.FullText)
                                     .Query(searchTerm)
-                                    .Slop(0) // Kelimelerin TAM yan yana olması gerekli
+                                    .Slop(2) // 2 kelimeye kadar arası açık olabilir
                                     .Boost(500.0f)
                                 ));
                                 
                                 shouldQueries.Add(sh => sh.MatchPhrase(m => m
                                     .Field(f => f.AdSoyad)
                                     .Query(searchTerm)
-                                    .Slop(0)
+                                    .Slop(2)
                                     .Boost(400.0f)
                                 ));
                                 
                                 shouldQueries.Add(sh => sh.MatchPhrase(m => m
                                     .Field(f => f.UnvanAdi)
                                     .Query(searchTerm)
-                                    .Slop(0)
+                                    .Slop(1)
                                     .Boost(300.0f)
                                 ));
                                 
                                 shouldQueries.Add(sh => sh.MatchPhrase(m => m
                                     .Field(f => f.DepartmanAdi)
                                     .Query(searchTerm)
-                                    .Slop(0)
+                                    .Slop(1)
                                     .Boost(200.0f)
                                 ));
                                 
                                 shouldQueries.Add(sh => sh.MatchPhrase(m => m
                                     .Field(f => f.ServisAdi)
                                     .Query(searchTerm)
-                                    .Slop(0)
+                                    .Slop(1)
                                     .Boost(200.0f)
+                                ));
+                                
+                                // Match operatörü ile VEYA arama (daha esnek)
+                                shouldQueries.Add(sh => sh.Match(m => m
+                                    .Field(f => f.FullText)
+                                    .Query(searchTerm)
+                                    .Operator(Operator.Or) // Tüm kelimelerin olması zorunlu değil
+                                    .Boost(100.0f)
                                 ));
 
                                 b.Filter(filters.ToArray())
