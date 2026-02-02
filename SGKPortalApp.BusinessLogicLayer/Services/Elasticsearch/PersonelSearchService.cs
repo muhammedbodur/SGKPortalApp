@@ -251,7 +251,20 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                     return indexedCount;
                 }
 
+                // Detaylı hata logla
                 _logger.LogError("Toplu indexleme hatası: {Error}", bulkResponse.DebugInformation);
+                
+                // İlk 5 hatalı item'ı detaylı logla
+                var errorItems = bulkResponse.Items.Where(i => !i.IsValid).Take(5);
+                foreach (var item in errorItems)
+                {
+                    _logger.LogError("Bulk hata detayı - Index: {Index}, ID: {Id}, Error: {Error}, Cause: {Cause}", 
+                        item.Index, 
+                        item.Id, 
+                        item.Error?.Reason ?? "Bilinmeyen",
+                        item.Error?.CausedBy?.Reason ?? "Yok");
+                }
+                
                 return 0;
             }
             catch (Exception ex)
@@ -286,6 +299,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                 if (string.IsNullOrWhiteSpace(searchTerm))
                     return Enumerable.Empty<PersonelElasticDto>();
 
+                // Kelime sayısını kontrol et
+                var wordCount = searchTerm.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length;
+                var isMultiWord = wordCount > 1;
+
                 var response = await _client.SearchAsync<PersonelElasticDto>(s => s
                     .Index(_settings.IndexName)
                     .Size(size)
@@ -308,37 +325,101 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                                 ));
                             }
 
-                            // Should koşulları (en az 1 eşleşmeli)
-                            b.Filter(filters.ToArray())
-                             .Should(
-                                // Tam eşleşme (daha yüksek skor)
-                                sh => sh.Match(m => m
+                            if (isMultiWord)
+                            {
+                                // ÇOK KELİMELİ ARAMA: Sadece phrase matching kabul et
+                                var shouldQueries = new List<Action<QueryDescriptor<PersonelElasticDto>>>();
+                                
+                                // TC/Sicil tam eşleşme (en yüksek öncelik)
+                                shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.TcKimlikNo).Value(searchTerm).Boost(1000.0f)));
+                                shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.SicilNo).Value(searchTerm).Boost(1000.0f)));
+                                
+                                // SADECE PHRASE MATCHING: Kelimelerin yan yana olması zorunlu
+                                shouldQueries.Add(sh => sh.MatchPhrase(m => m
                                     .Field(f => f.FullText)
                                     .Query(searchTerm)
-                                    .Operator(Operator.And)
-                                    .Boost(2.0f)
-                                ),
-                                // Fuzzy arama (yanlış yazım toleransı)
-                                sh => sh.Match(m => m
+                                    .Slop(0) // Kelimelerin TAM yan yana olması gerekli
+                                    .Boost(500.0f)
+                                ));
+                                
+                                shouldQueries.Add(sh => sh.MatchPhrase(m => m
+                                    .Field(f => f.AdSoyad)
+                                    .Query(searchTerm)
+                                    .Slop(0)
+                                    .Boost(400.0f)
+                                ));
+                                
+                                shouldQueries.Add(sh => sh.MatchPhrase(m => m
+                                    .Field(f => f.UnvanAdi)
+                                    .Query(searchTerm)
+                                    .Slop(0)
+                                    .Boost(300.0f)
+                                ));
+                                
+                                shouldQueries.Add(sh => sh.MatchPhrase(m => m
+                                    .Field(f => f.DepartmanAdi)
+                                    .Query(searchTerm)
+                                    .Slop(0)
+                                    .Boost(200.0f)
+                                ));
+                                
+                                shouldQueries.Add(sh => sh.MatchPhrase(m => m
+                                    .Field(f => f.ServisAdi)
+                                    .Query(searchTerm)
+                                    .Slop(0)
+                                    .Boost(200.0f)
+                                ));
+
+                                b.Filter(filters.ToArray())
+                                 .Should(shouldQueries.ToArray())
+                                 .MinimumShouldMatch(1);
+                            }
+                            else
+                            {
+                                // TEK KELİME ARAMA: Esnek (SHOULD)
+                                var shouldQueries = new List<Action<QueryDescriptor<PersonelElasticDto>>>();
+                                
+                                // TC ve Sicil No (en yüksek öncelik)
+                                shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.TcKimlikNo).Value(searchTerm).Boost(50.0f)));
+                                shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.SicilNo).Value(searchTerm).Boost(50.0f)));
+                                shouldQueries.Add(sh => sh.Prefix(p => p.Field(f => f.TcKimlikNo).Value(searchTerm).Boost(40.0f)));
+                                shouldQueries.Add(sh => sh.Prefix(p => p.Field(f => f.SicilNo).Value(searchTerm).Boost(40.0f)));
+                                
+                                // Phrase matching
+                                shouldQueries.Add(sh => sh.MatchPhrase(m => m
                                     .Field(f => f.FullText)
                                     .Query(searchTerm)
-                                    .Fuzziness(new Fuzziness("AUTO"))
-                                    .Operator(Operator.And)
-                                ),
-                                // Sicil no ile eşleşme
-                                sh => sh.Prefix(p => p
-                                    .Field(f => f.SicilNo)
-                                    .Value(searchTerm)
-                                    .Boost(3.0f)
-                                ),
-                                // TC ile eşleşme
-                                sh => sh.Prefix(p => p
-                                    .Field(f => f.TcKimlikNo)
-                                    .Value(searchTerm)
-                                    .Boost(3.0f)
-                                )
-                             )
-                             .MinimumShouldMatch(1);
+                                    .Boost(30.0f)
+                                ));
+
+                                // Multi-field
+                                shouldQueries.Add(sh => sh.MultiMatch(m => m
+                                    .Fields(new[] { "adSoyad^3", "unvanAdi^2", "departmanAdi", "servisAdi", "fullText" })
+                                    .Query(searchTerm)
+                                    .Operator(Operator.Or)
+                                    .Boost(20.0f)
+                                ));
+
+                                // Match
+                                shouldQueries.Add(sh => sh.Match(m => m
+                                    .Field(f => f.FullText)
+                                    .Query(searchTerm)
+                                    .Operator(Operator.Or)
+                                    .Boost(15.0f)
+                                ));
+
+                                // Fuzzy (yazım hatası)
+                                shouldQueries.Add(sh => sh.Match(m => m
+                                    .Field(f => f.FullText)
+                                    .Query(searchTerm)
+                                    .Fuzziness(new Fuzziness("1"))
+                                    .Boost(5.0f)
+                                ));
+
+                                b.Filter(filters.ToArray())
+                                 .Should(shouldQueries.ToArray())
+                                 .MinimumShouldMatch(1);
+                            }
                         })
                     )
                 );

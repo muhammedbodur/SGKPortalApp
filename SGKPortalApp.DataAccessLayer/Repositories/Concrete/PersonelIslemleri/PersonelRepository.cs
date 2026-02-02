@@ -30,6 +30,20 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
                 .FirstOrDefaultAsync(p => p.TcKimlikNo == tcKimlikNo && !p.SilindiMi);
         }
 
+        public async Task<IEnumerable<Personel>> GetByTcKimlikNosAsync(IEnumerable<string> tcKimlikNos)
+        {
+            if (tcKimlikNos == null || !tcKimlikNos.Any())
+                return Enumerable.Empty<Personel>();
+
+            return await _dbSet
+                .Include(p => p.Departman)
+                .Include(p => p.Servis)
+                .Include(p => p.Unvan)
+                .AsNoTracking()
+                .Where(p => tcKimlikNos.Contains(p.TcKimlikNo) && !p.SilindiMi)
+                .ToListAsync();
+        }
+
         public async Task<Personel?> GetBySicilNoAsync(int sicilNo)
         {
             return await _dbSet

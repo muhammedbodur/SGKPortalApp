@@ -1,4 +1,5 @@
 using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
+using System.Text.Json.Serialization;
 
 namespace SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch
 {
@@ -59,8 +60,9 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch
         public string? Resim { get; set; }
 
         /// <summary>
-        /// Aktiflik durumu
+        /// Aktiflik durumu (integer olarak serialize edilir)
         /// </summary>
+        [JsonConverter(typeof(JsonNumberEnumConverter<PersonelAktiflikDurum>))]
         public PersonelAktiflikDurum PersonelAktiflikDurum { get; set; }
 
         /// <summary>

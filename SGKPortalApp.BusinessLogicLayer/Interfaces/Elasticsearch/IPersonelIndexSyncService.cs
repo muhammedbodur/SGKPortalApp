@@ -1,3 +1,5 @@
+using SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch;
+
 namespace SGKPortalApp.BusinessLogicLayer.Interfaces.Elasticsearch
 {
     /// <summary>
@@ -33,18 +35,5 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.Elasticsearch
         /// Index durumu hakkında bilgi verir
         /// </summary>
         Task<IndexStatusInfo> GetIndexStatusAsync();
-    }
-
-    /// <summary>
-    /// Index durum bilgisi
-    /// </summary>
-    public class IndexStatusInfo
-    {
-        public bool IsAvailable { get; set; }
-        public bool IndexExists { get; set; }
-        public long DocumentCount { get; set; }
-        public long SqlRecordCount { get; set; }
-        public DateTime? LastSyncTime { get; set; }
-        public string? ErrorMessage { get; set; }
     }
 }

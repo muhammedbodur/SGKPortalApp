@@ -5,10 +5,20 @@
     "cift_yonlu": "x, y, z : hepsi birbirine eşdeğer"
   },
   "synonyms": {
+    "unvan_kisaltmalari": [
+      "sgmm => sosyal güvenlik merkezi müdürü",
+      "sgmmy => sosyal güvenlik merkezi müdür yardımcısı",
+      "ssgm => sosyal sigorta genel müdürlüğü",
+      "ssgmmy => sosyal sigorta genel müdürlüğü müdür yardımcısı",
+      "mmy => müdür yardımcısı",
+      "vhki => vekil hizmet kıdem işlemi",
+      "sg => sosyal güvenlik"
+    ],
     "kisaltmalar": [
       "sgm => sosyal güvenlik merkezi",
       "sgk => sosyal güvenlik kurumu",
-      "ptt => prim tahakkuk tahsilat"
+      "ptt => prim tahakkuk tahsilat",
+      "iup => işsizlik ücret programı"
     ],
     "departman_servis": [
       "il => il müdürlüğü",
@@ -19,10 +29,27 @@
       "hukuk => hukuk servisi",
       "arşiv => arşiv servisi"
     ],
+    "unvan_esanlamlilari": [
+      "doktor, tabip, uzman tabip",
+      "mühendis, müh",
+      "teknisyen, tekn",
+      "hemşire, hemshire",
+      "muhasebeci, muhasebe yetkilisi",
+      "şoför, sofor, sürücü",
+      "bekçi, güvenlik, koruma",
+      "temizlik, temizlikçi, temizlik görevlisi",
+      "aşçı, asci",
+      "işçi, isci"
+    ],
     "yazim_hatalari": [
       "pirim => prim",
       "tahakuk => tahakkuk",
-      "tahsılat => tahsilat"
+      "tahsılat => tahsilat",
+      "muhendis => mühendis",
+      "hemsire => hemşire",
+      "asci => aşçı",
+      "sofor => şoför",
+      "bekci => bekçi"
     ],
     "turkce_karakter": [
       "müdür, mudur",
@@ -31,7 +58,42 @@
       "satınalma, satin alma, satın alma",
       "müdürlüğü, mudurlugu",
       "güvenlik, guvenlik",
-      "işlem, islem"
+      "işlem, islem",
+      "mühendis, muhendis",
+      "teknisyen, teknisyen",
+      "şoför, sofor",
+      "aşçı, asci",
+      "bekçi, bekci",
+      "hemşire, hemsire",
+      "eczacı, eczaci",
+      "tabip, tabib",
+      "çocuk, cocuk",
+      "hizmetli, hizmetli",
+      "dağıtıcı, dagitici",
+      "muhasebeci, muhasebeci",
+      "denetmen, denetmen",
+      "mimar, mimar",
+      "işçi, isci",
+      "bölge, bolge",
+      "şube, sube",
+      "araştırmacı, arastirmaci",
+      "sağlık, saglik",
+      "psikolog, psikolog",
+      "fizyoterapist, fizyoterapist",
+      "çözümleyici, cozumleyici",
+      "sürveyans, surveyan",
+      "kimyager, kimyager",
+      "şehir, sehir",
+      "işletmen, isletmen",
+      "sıhhi, sihhi",
+      "kalorifer, kalorifer",
+      "boyacı, boyaci",
+      "sürekli, surekli",
+      "koordinatör, koordinator",
+      "görevli, gorevli",
+      "dışından, disindan",
+      "görevlendirme, gorevlendirme",
+      "öğrenci, ogrenci"
     ]
   }
 }

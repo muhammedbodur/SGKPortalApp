@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Models;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Elasticsearch;
@@ -13,6 +14,7 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         [Inject] private IPersonelSearchApiService PersonelSearchApiService { get; set; } = default!;
         [Inject] private NavigationManager Navigation { get; set; } = default!;
         [Inject] private PermissionStateService PermissionState { get; set; } = default!;
+        [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
         [Parameter] public bool IsVisible { get; set; }
         [Parameter] public EventCallback OnClose { get; set; }
@@ -110,7 +112,7 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                     PersonelResults = result.Data.Select(p => new PersonelSearchResult
                     {
                         TcKimlikNo = p.TcKimlikNo,
-                        Resim = p.Resim,
+                        Resim = !string.IsNullOrEmpty(p.Resim) ? p.Resim : $"/images/avatars/{p.TcKimlikNo}.jpg",
                         AdSoyad = p.AdSoyad,
                         SicilNo = p.SicilNo,
                         DepartmanAdi = p.DepartmanAdi,
@@ -140,6 +142,21 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         protected override void OnInitialized()
         {
             InitializeSearchItems();
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (IsVisible)
+            {
+                try
+                {
+                    await JSRuntime.InvokeVoidAsync("eval", "document.querySelector('.modal.show input[type=text]')?.focus()");
+                }
+                catch
+                {
+                    // Focus hatası önemli değil
+                }
+            }
         }
 
         private void InitializeSearchItems()
@@ -188,6 +205,7 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                 new SearchItem { Title = "İlçeler", Url = "/common/ilce", Icon = "bx bx-map-pin", Category = "Ortak İşlemler", PermissionKey = "COM.ILCE.INDEX" },
                 new SearchItem { Title = "Resmi Tatiller", Url = "/common/resmitatil", Icon = "bx bx-calendar", Category = "Ortak İşlemler", PermissionKey = "COM.RESMITATIL.INDEX" },
                 new SearchItem { Title = "Background Servisler", Url = "/common/background-services", Icon = "bx bx-server", Category = "Ortak İşlemler", PermissionKey = "COM.BACKGROUNDSERVICE.INDEX" },
+                new SearchItem { Title = "Elasticsearch Yönetimi", Url = "/common/elasticsearch-admin", Icon = "bx bx-search-alt", Category = "Ortak İşlemler", PermissionKey = "COM.ELASTICSEARCH.INDEX" },
                 new SearchItem { Title = "Profilim", Url = "/account/profile", Icon = "bx bx-user-circle", Category = "Hesap" },
                 new SearchItem { Title = "Şifre Değiştir", Url = "/account/change-password", Icon = "bx bx-lock", Category = "Hesap" },
             };

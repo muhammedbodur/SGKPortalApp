@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PersonelIslemleri;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.PdksIslemleri;
+using SGKPortalApp.BusinessLogicLayer.Interfaces.Elasticsearch;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
@@ -35,6 +36,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
         private readonly IFieldPermissionValidationService _fieldPermissionService;
         private readonly IPermissionKeyResolverService _permissionKeyResolver;
         private readonly IZKTecoApiClient _zktecoApiClient;
+        private readonly IPersonelSearchService _personelSearchService;
 
         public PersonelService(
             IUnitOfWork unitOfWork,
@@ -42,7 +44,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             ILogger<PersonelService> logger,
             IFieldPermissionValidationService fieldPermissionService,
             IPermissionKeyResolverService permissionKeyResolver,
-            IZKTecoApiClient zktecoApiClient)
+            IZKTecoApiClient zktecoApiClient,
+            IPersonelSearchService personelSearchService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -50,6 +53,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
             _fieldPermissionService = fieldPermissionService;
             _permissionKeyResolver = permissionKeyResolver;
             _zktecoApiClient = zktecoApiClient;
+            _personelSearchService = personelSearchService;
         }
 
         private async Task<(bool Ok, string? ErrorMessage)> ValidateRequestorAsync(string? requestorTcKimlikNo, string? requestorSessionId)
@@ -391,6 +395,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
         {
             try
             {
+                // Eğer SearchTerm varsa Elasticsearch kullan
+                if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
+                {
+                    return await GetPagedWithElasticsearchAsync(filter);
+                }
+
+                // SearchTerm yoksa normal SQL sorgusu kullan
                 var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
                 var pagedResult = await personelRepo.GetPagedAsync(filter);
                 
@@ -402,6 +413,100 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 _logger.LogError(ex, "Sayfalı personel listesi getirilirken hata oluştu");
                 return ApiResponseDto<PagedResponseDto<PersonelListResponseDto>>
                     .ErrorResult("Sayfalı personel listesi getirilirken bir hata oluştu", ex.Message);
+            }
+        }
+
+        private async Task<ApiResponseDto<PagedResponseDto<PersonelListResponseDto>>> GetPagedWithElasticsearchAsync(PersonelFilterRequestDto filter)
+        {
+            try
+            {
+                // Elasticsearch'ten arama yap
+                var departmanIds = filter.DepartmanId.HasValue ? new[] { filter.DepartmanId.Value } : null;
+                var sadeceAktif = filter.AktiflikDurum == PersonelAktiflikDurum.Aktif;
+                
+                var elasticResults = await _personelSearchService.SearchAsync(
+                    filter.SearchTerm!,
+                    departmanIds,
+                    sadeceAktif,
+                    size: 1000 // Tüm sonuçları al, sonra sayfalama yap
+                );
+
+                // TC Kimlik No'larını al
+                var tcKimlikNos = elasticResults.Select(e => e.TcKimlikNo).ToList();
+
+                if (!tcKimlikNos.Any())
+                {
+                    return ApiResponseDto<PagedResponseDto<PersonelListResponseDto>>
+                        .SuccessResult(new PagedResponseDto<PersonelListResponseDto>
+                        {
+                            Items = new List<PersonelListResponseDto>(),
+                            TotalCount = 0,
+                            PageNumber = filter.PageNumber,
+                            PageSize = filter.PageSize
+                        }, "Arama sonucu bulunamadı");
+                }
+
+                // SQL'den detaylı bilgileri al (Elasticsearch'teki sırayla)
+                var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
+                var personeller = await personelRepo.GetByTcKimlikNosAsync(tcKimlikNos);
+
+                // Elasticsearch sıralamasını koru
+                var orderedPersoneller = tcKimlikNos
+                    .Select(tc => personeller.FirstOrDefault(p => p.TcKimlikNo == tc))
+                    .Where(p => p != null)
+                    .ToList();
+
+                // Ek filtreleri uygula
+                var filteredPersoneller = orderedPersoneller.AsQueryable();
+
+                if (filter.ServisId.HasValue)
+                {
+                    filteredPersoneller = filteredPersoneller.Where(p => p.ServisId == filter.ServisId.Value);
+                }
+
+                if (filter.UnvanId.HasValue)
+                {
+                    filteredPersoneller = filteredPersoneller.Where(p => p.UnvanId == filter.UnvanId.Value);
+                }
+
+                if (filter.DepartmanHizmetBinasiId.HasValue)
+                {
+                    filteredPersoneller = filteredPersoneller.Where(p => p.DepartmanHizmetBinasiId == filter.DepartmanHizmetBinasiId.Value);
+                }
+
+                var totalCount = filteredPersoneller.Count();
+
+                // Sayfalama uygula
+                var pagedPersoneller = filteredPersoneller
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .ToList();
+
+                // DTO'ya map et
+                var personelDtos = _mapper.Map<List<PersonelListResponseDto>>(pagedPersoneller);
+
+                var pagedResult = new PagedResponseDto<PersonelListResponseDto>
+                {
+                    Items = personelDtos,
+                    TotalCount = totalCount,
+                    PageNumber = filter.PageNumber,
+                    PageSize = filter.PageSize
+                };
+
+                return ApiResponseDto<PagedResponseDto<PersonelListResponseDto>>
+                    .SuccessResult(pagedResult, $"{totalCount} sonuç bulundu (Elasticsearch)");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Elasticsearch ile sayfalı personel listesi getirilirken hata oluştu");
+                
+                // Elasticsearch hatası durumunda SQL'e fallback yap
+                _logger.LogWarning("Elasticsearch hatası, SQL'e fallback yapılıyor");
+                var personelRepo = _unitOfWork.GetRepository<IPersonelRepository>();
+                var pagedResult = await personelRepo.GetPagedAsync(filter);
+                
+                return ApiResponseDto<PagedResponseDto<PersonelListResponseDto>>
+                    .SuccessResult(pagedResult, "Sayfalı personel listesi başarıyla getirildi (SQL fallback)");
             }
         }
 
