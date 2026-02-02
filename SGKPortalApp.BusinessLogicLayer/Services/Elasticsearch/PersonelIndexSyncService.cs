@@ -200,13 +200,11 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
 
         private static PersonelElasticDto MapToElasticDto(BusinessObjectLayer.Entities.PersonelIslemleri.Personel p)
         {
-            var adSoyad = $"{p.Ad} {p.Soyad}".Trim();
+            var sicilNoStr = p.SicilNo?.ToString();
             var fullTextParts = new List<string>
             {
-                p.Ad ?? "",
-                p.Soyad ?? "",
-                adSoyad,
-                p.SicilNo ?? "",
+                p.AdSoyad,
+                sicilNoStr ?? "",
                 p.Departman?.DepartmanAdi ?? "",
                 p.Servis?.ServisAdi ?? "",
                 p.Unvan?.UnvanAdi ?? ""
@@ -215,10 +213,8 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
             return new PersonelElasticDto
             {
                 TcKimlikNo = p.TcKimlikNo,
-                Ad = p.Ad ?? "",
-                Soyad = p.Soyad ?? "",
-                AdSoyad = adSoyad,
-                SicilNo = p.SicilNo,
+                AdSoyad = p.AdSoyad,
+                SicilNo = sicilNoStr,
                 DepartmanId = p.DepartmanId,
                 DepartmanAdi = p.Departman?.DepartmanAdi,
                 ServisId = p.ServisId ?? 0,
@@ -229,7 +225,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                 PersonelAktiflikDurum = p.PersonelAktiflikDurum,
                 Aktif = p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif,
                 FullText = string.Join(" ", fullTextParts.Where(x => !string.IsNullOrWhiteSpace(x))),
-                GuncellemeTarihi = p.DuzenlenmeTarihi ?? DateTimeHelper.Now
+                GuncellemeTarihi = p.DuzenlenmeTarihi ?? DateTime.UtcNow
             };
         }
     }
