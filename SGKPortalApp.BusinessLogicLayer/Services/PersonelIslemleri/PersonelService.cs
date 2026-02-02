@@ -423,12 +423,16 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
                 // Elasticsearch'ten arama yap
                 var departmanIds = filter.DepartmanId.HasValue ? new[] { filter.DepartmanId.Value } : null;
                 var sadeceAktif = filter.AktiflikDurum == PersonelAktiflikDurum.Aktif;
+
+                var requestedWindow = Math.Max(1, filter.PageNumber) * Math.Max(1, filter.PageSize);
+                var desiredSize = Math.Max(200, requestedWindow * 5);
+                desiredSize = Math.Min(1000, desiredSize);
                 
                 var elasticResults = await _personelSearchService.SearchAsync(
                     filter.SearchTerm!,
                     departmanIds,
                     sadeceAktif,
-                    size: 1000 // Tüm sonuçları al, sonra sayfalama yap
+                    size: desiredSize // UI için yeterli pencereyi al, gereksiz yükü azalt
                 );
 
                 // TC Kimlik No'larını al
@@ -476,8 +480,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.PersonelIslemleri
 
                 var totalCount = filteredPersoneller.Count();
 
+                // Kurum personeli olanlar her zaman önce gelsin (sıralamayı bozma: stable partition)
+                var filteredList = filteredPersoneller.ToList();
+                var kurumOncelikli = filteredList
+                    .Select((p, idx) => new { p, idx })
+                    .OrderByDescending(x => x.p!.PersonelAktiflikDurum.IsKurumPersoneli())
+                    .ThenBy(x => x.idx)
+                    .Select(x => x.p!)
+                    .ToList();
+
                 // Sayfalama uygula
-                var pagedPersoneller = filteredPersoneller
+                var pagedPersoneller = kurumOncelikli
                     .Skip((filter.PageNumber - 1) * filter.PageSize)
                     .Take(filter.PageSize)
                     .ToList();

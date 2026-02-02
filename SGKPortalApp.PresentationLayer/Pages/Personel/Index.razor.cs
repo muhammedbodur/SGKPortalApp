@@ -90,6 +90,9 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         private bool IsExporting { get; set; } = false;
         private string CurrentExportType { get; set; } = string.Empty;
 
+        private System.Threading.Timer? _searchDebounceTimer;
+        private int _searchRequestVersion = 0;
+
         // ═══════════════════════════════════════════════════════
         // QUICK ADD MODAL PROPERTIES
         // ═══════════════════════════════════════════════════════
@@ -167,6 +170,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         {
             try
             {
+                var requestVersion = Interlocked.Increment(ref _searchRequestVersion);
                 var filter = new PersonelFilterRequestDto
                 {
                     SearchTerm = string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm.Trim(),
@@ -182,6 +186,11 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
                 };
 
                 var result = await _personelApiService.GetPagedAsync(filter);
+
+                if (requestVersion != Volatile.Read(ref _searchRequestVersion))
+                {
+                    return;
+                }
                 
                 if (result.Success && result.Data != null)
                 {
@@ -274,7 +283,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
         private void OnSearchChanged()
         {
-            _ = ApplyFiltersAndSort();
+            _searchDebounceTimer?.Dispose();
+            _searchDebounceTimer = new System.Threading.Timer(async _ =>
+            {
+                try
+                {
+                    await InvokeAsync(ApplyFiltersAndSort);
+                }
+                catch
+                {
+                }
+            }, null, 350, Timeout.Infinite);
         }
 
         private void OnFilterDepartmanChanged(ChangeEventArgs e)

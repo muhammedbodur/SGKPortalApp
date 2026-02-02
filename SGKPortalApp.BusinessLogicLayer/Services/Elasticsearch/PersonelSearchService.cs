@@ -89,6 +89,53 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
             }
         }
 
+        private async Task<IEnumerable<PersonelElasticDto>> SearchExactNumericAsync(
+            string numericTerm,
+            IEnumerable<int>? departmanIds,
+            bool sadeceAktif,
+            int size)
+        {
+            try
+            {
+                var response = await _client.SearchAsync<PersonelElasticDto>(s => s
+                    .Index(_settings.IndexName)
+                    .Size(Math.Min(size, 10))
+                    .Query(q => q
+                        .Bool(b =>
+                        {
+                            var filters = new List<Action<QueryDescriptor<PersonelElasticDto>>>();
+
+                            if (sadeceAktif)
+                            {
+                                filters.Add(f => f.Term(t => t.Field(p => p.Aktif).Value(true)));
+                            }
+
+                            if (departmanIds != null && departmanIds.Any())
+                            {
+                                filters.Add(f => f.Terms(t => t
+                                    .Field(p => p.DepartmanId)
+                                    .Terms(new TermsQueryField(departmanIds.Select(id => FieldValue.Long(id)).ToArray()))
+                                ));
+                            }
+
+                            b.Filter(filters.ToArray())
+                             .Should(
+                                sh => sh.Term(t => t.Field(f => f.TcKimlikNo).Value(numericTerm).Boost(1000.0f)),
+                                sh => sh.Term(t => t.Field(f => f.SicilNo).Value(numericTerm).Boost(1000.0f))
+                             )
+                             .MinimumShouldMatch(1);
+                        })
+                    )
+                );
+
+                return response.IsValidResponse ? response.Documents : Enumerable.Empty<PersonelElasticDto>();
+            }
+            catch
+            {
+                return Enumerable.Empty<PersonelElasticDto>();
+            }
+        }
+
         public async Task<bool> PingAsync()
         {
             try
@@ -299,8 +346,21 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                 if (string.IsNullOrWhiteSpace(searchTerm))
                     return Enumerable.Empty<PersonelElasticDto>();
 
+                var normalizedTerm = searchTerm.Trim();
+                var isNumeric = normalizedTerm.All(char.IsDigit);
+
+                // Sayısal arama: önce kesin TC/Sicil eşleşmesi dene (tek kişi olması beklenir)
+                if (isNumeric)
+                {
+                    var exact = await SearchExactNumericAsync(normalizedTerm, departmanIds, sadeceAktif, size);
+                    if (exact.Any())
+                    {
+                        return exact;
+                    }
+                }
+
                 // Kelime sayısını kontrol et
-                var wordCount = searchTerm.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length;
+                var wordCount = normalizedTerm.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length;
                 var isMultiWord = wordCount > 1;
 
                 var response = await _client.SearchAsync<PersonelElasticDto>(s => s
@@ -330,6 +390,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                                 // ÇOK KELİMELİ ARAMA: TÜM kelimeler bulunmalı (AND)
                                 var shouldQueries = new List<Action<QueryDescriptor<PersonelElasticDto>>>();
 
+                                // MUST: kelimelerin tamamı en az bir alanda yakalanmalı.
+                                // Not: son kelime kısmi yazıldıysa (örn: "müdür yar") MultiMatch AND kaçırabilir,
+                                // bu yüzden MatchPhrasePrefix alternatifini de kabul ediyoruz.
+                                var tokens = searchTerm.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                                var lastToken = tokens.Length > 0 ? tokens[^1] : string.Empty;
+                                var allowPrefixFallback = !string.IsNullOrWhiteSpace(lastToken) && lastToken.Length <= 3;
+
                                 // TC/Sicil tam eşleşme (en yüksek öncelik)
                                 shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.TcKimlikNo).Value(searchTerm).Boost(1000.0f)));
                                 shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.SicilNo).Value(searchTerm).Boost(1000.0f)));
@@ -350,6 +417,22 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                                     .Boost(400.0f)
                                 ));
 
+                                // Multi-field AND: kelimeler farklı alanlara dağılmış olabilir (örn: ilçe + ünvan)
+                                // Bunu MUST tarafında zorunlu kılıyoruz; burada sadece skor için boost veriyoruz.
+                                shouldQueries.Add(sh => sh.MultiMatch(m => m
+                                    .Fields(new[] { "adSoyad^3", "unvanAdi^3", "departmanAdi^2", "servisAdi^2", "fullText" })
+                                    .Query(searchTerm)
+                                    .Operator(Operator.And)
+                                    .Boost(420.0f)
+                                ));
+
+                                // Phrase prefix: son kelime kısmi yazıldığında da eşleşsin (örn: "karşıyaka müdür yar")
+                                shouldQueries.Add(sh => sh.MatchPhrasePrefix(mp => mp
+                                    .Field(f => f.FullText)
+                                    .Query(searchTerm)
+                                    .Boost(450.0f)
+                                ));
+
                                 // Phrase matching: Kelimelerin yakın olması (slop: 3)
                                 shouldQueries.Add(sh => sh.MatchPhrase(m => m
                                     .Field(f => f.FullText)
@@ -358,7 +441,50 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                                     .Boost(300.0f)
                                 ));
 
+                                // Aktif personeller öne çıksın (filtre değil, skor boost)
+                                if (!sadeceAktif)
+                                {
+                                    shouldQueries.Add(sh => sh.Term(t => t
+                                        .Field(f => f.Aktif)
+                                        .Value(true)
+                                        .Boost(50.0f)
+                                    ));
+                                }
+
+                                // MUST: Her token en az bir alanda geçmeli (sıra bağımsız)
+                                var mustTokenQueries = new List<Action<QueryDescriptor<PersonelElasticDto>>>();
+                                for (var i = 0; i < tokens.Length; i++)
+                                {
+                                    var token = tokens[i];
+                                    var isLast = i == tokens.Length - 1;
+                                    var usePrefix = isLast && allowPrefixFallback;
+
+                                    mustTokenQueries.Add(mu => mu.Bool(mb =>
+                                    {
+                                        var perTokenShould = new List<Action<QueryDescriptor<PersonelElasticDto>>>
+                                        {
+                                            sh => sh.Match(m => m.Field(f => f.DepartmanAdi).Query(token).Operator(Operator.Or)),
+                                            sh => sh.Match(m => m.Field(f => f.UnvanAdi).Query(token).Operator(Operator.Or)),
+                                            sh => sh.Match(m => m.Field(f => f.ServisAdi).Query(token).Operator(Operator.Or)),
+                                            sh => sh.Match(m => m.Field(f => f.AdSoyad).Query(token).Operator(Operator.Or)),
+                                            sh => sh.Match(m => m.Field(f => f.FullText).Query(token).Operator(Operator.Or))
+                                        };
+
+                                        if (usePrefix)
+                                        {
+                                            perTokenShould.Add(sh => sh.MatchPhrasePrefix(mpp => mpp
+                                                .Field(f => f.FullText)
+                                                .Query(searchTerm)
+                                            ));
+                                        }
+
+                                        mb.Should(perTokenShould.ToArray())
+                                          .MinimumShouldMatch(1);
+                                    }));
+                                }
+
                                 b.Filter(filters.ToArray())
+                                 .Must(mustTokenQueries.ToArray())
                                  .Should(shouldQueries.ToArray())
                                  .MinimumShouldMatch(1);
                             }
@@ -366,13 +492,17 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                             {
                                 // TEK KELİME ARAMA
                                 var shouldQueries = new List<Action<QueryDescriptor<PersonelElasticDto>>>();
-                                var isNumeric = searchTerm.All(char.IsDigit);
+                                var allowNumericPrefix = isNumeric && normalizedTerm.Length < 6;
 
                                 // TC ve Sicil No (en yüksek öncelik)
-                                shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.TcKimlikNo).Value(searchTerm).Boost(100.0f)));
-                                shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.SicilNo).Value(searchTerm).Boost(100.0f)));
-                                shouldQueries.Add(sh => sh.Prefix(p => p.Field(f => f.TcKimlikNo).Value(searchTerm).Boost(80.0f)));
-                                shouldQueries.Add(sh => sh.Prefix(p => p.Field(f => f.SicilNo).Value(searchTerm).Boost(80.0f)));
+                                shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.TcKimlikNo).Value(normalizedTerm).Boost(100.0f)));
+                                shouldQueries.Add(sh => sh.Term(t => t.Field(f => f.SicilNo).Value(normalizedTerm).Boost(100.0f)));
+
+                                if (allowNumericPrefix)
+                                {
+                                    shouldQueries.Add(sh => sh.Prefix(p => p.Field(f => f.TcKimlikNo).Value(normalizedTerm).Boost(80.0f)));
+                                    shouldQueries.Add(sh => sh.Prefix(p => p.Field(f => f.SicilNo).Value(normalizedTerm).Boost(80.0f)));
+                                }
 
                                 if (!isNumeric)
                                 {
@@ -380,14 +510,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                                     // Phrase matching
                                     shouldQueries.Add(sh => sh.MatchPhrase(m => m
                                         .Field(f => f.FullText)
-                                        .Query(searchTerm)
+                                        .Query(normalizedTerm)
                                         .Boost(30.0f)
                                     ));
 
                                     // Multi-field
                                     shouldQueries.Add(sh => sh.MultiMatch(m => m
                                         .Fields(new[] { "adSoyad^3", "unvanAdi^2", "departmanAdi", "servisAdi", "fullText" })
-                                        .Query(searchTerm)
+                                        .Query(normalizedTerm)
                                         .Operator(Operator.Or)
                                         .Boost(20.0f)
                                     ));
@@ -395,7 +525,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                                     // Match
                                     shouldQueries.Add(sh => sh.Match(m => m
                                         .Field(f => f.FullText)
-                                        .Query(searchTerm)
+                                        .Query(normalizedTerm)
                                         .Operator(Operator.Or)
                                         .Boost(15.0f)
                                     ));
@@ -403,9 +533,19 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                                     // Fuzzy (yazım hatası) - SADECE metin için
                                     shouldQueries.Add(sh => sh.Match(m => m
                                         .Field(f => f.FullText)
-                                        .Query(searchTerm)
+                                        .Query(normalizedTerm)
                                         .Fuzziness(new Fuzziness("AUTO"))
                                         .Boost(5.0f)
+                                    ));
+                                }
+
+                                // Aktif personeller öne çıksın (filtre değil, skor boost)
+                                if (!sadeceAktif)
+                                {
+                                    shouldQueries.Add(sh => sh.Term(t => t
+                                        .Field(f => f.Aktif)
+                                        .Value(true)
+                                        .Boost(10.0f)
                                     ));
                                 }
 

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
+using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using SGKPortalApp.PresentationLayer.Models;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Elasticsearch;
 using SGKPortalApp.PresentationLayer.Services.StateServices;
@@ -109,16 +110,21 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
 
                 if (result.Success && result.Data != null)
                 {
-                    PersonelResults = result.Data.Select(p => new PersonelSearchResult
-                    {
-                        TcKimlikNo = p.TcKimlikNo,
-                        Resim = !string.IsNullOrEmpty(p.Resim) ? p.Resim : $"/images/avatars/{p.TcKimlikNo}.jpg",
-                        AdSoyad = p.AdSoyad,
-                        SicilNo = p.SicilNo,
-                        DepartmanAdi = p.DepartmanAdi,
-                        UnvanAdi = p.UnvanAdi,
-                        PersonelAktiflikDurum = p.PersonelAktiflikDurum
-                    }).ToList();
+                    PersonelResults = result.Data
+                        .Select((p, idx) => new { p, idx })
+                        .OrderByDescending(x => x.p.PersonelAktiflikDurum.IsKurumPersoneli())
+                        .ThenBy(x => x.idx)
+                        .Select(x => new PersonelSearchResult
+                        {
+                            TcKimlikNo = x.p.TcKimlikNo,
+                            Resim = BuildPersonelImageUrl(x.p.Resim, x.p.SicilNo, x.p.TcKimlikNo),
+                            AdSoyad = x.p.AdSoyad,
+                            SicilNo = x.p.SicilNo,
+                            DepartmanAdi = x.p.DepartmanAdi,
+                            UnvanAdi = x.p.UnvanAdi,
+                            PersonelAktiflikDurum = x.p.PersonelAktiflikDurum
+                        })
+                        .ToList();
                     Console.WriteLine($"✅ Elasticsearch arama başarılı: {PersonelResults.Count} sonuç");
                 }
                 else
@@ -137,6 +143,43 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
                 IsSearching = false;
                 StateHasChanged();
             }
+        }
+
+        private static string BuildPersonelImageUrl(string? resim, string? sicilNo, string tcKimlikNo)
+        {
+            if (!string.IsNullOrWhiteSpace(resim))
+            {
+                var trimmed = resim.Trim();
+
+                // Absolute URL
+                if (trimmed.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                {
+                    return trimmed;
+                }
+
+                // Already rooted (e.g. /images/avatars/xxx.jpg)
+                if (trimmed.StartsWith("/", StringComparison.Ordinal))
+                {
+                    return trimmed;
+                }
+
+                // Plain file name coming from DB/Elastic (e.g. 1623.jpg)
+                var fileName = trimmed;
+                if (!fileName.Contains('.', StringComparison.Ordinal))
+                {
+                    fileName += ".jpg";
+                }
+
+                return $"/images/avatars/{fileName}";
+            }
+
+            if (!string.IsNullOrWhiteSpace(sicilNo))
+            {
+                return $"/images/avatars/{sicilNo.Trim()}.jpg";
+            }
+
+            return $"/images/avatars/{tcKimlikNo}.jpg";
         }
 
         protected override void OnInitialized()

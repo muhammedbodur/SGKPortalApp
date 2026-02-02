@@ -223,7 +223,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                 UnvanAdi = p.Unvan?.UnvanAdi,
                 Resim = p.Resim,
                 PersonelAktiflikDurum = p.PersonelAktiflikDurum,
-                Aktif = p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif,
+                Aktif = p.PersonelAktiflikDurum.IsKurumPersoneli(),
                 FullText = string.Join(" ", fullTextParts.Where(x => !string.IsNullOrWhiteSpace(x))),
                 GuncellemeTarihi = p.DuzenlenmeTarihi
             };
