@@ -194,6 +194,20 @@ namespace SGKPortalApp.ApiLayer
             builder.Services.AddBusinessLogicLayer();
 
             // ═══════════════════════════════════════════════════════
+            // 🔍 ELASTICSEARCH CONFIGURATION
+            // ═══════════════════════════════════════════════════════
+            builder.Services.Configure<SGKPortalApp.BusinessObjectLayer.Configuration.ElasticsearchSettings>(
+                builder.Configuration.GetSection(SGKPortalApp.BusinessObjectLayer.Configuration.ElasticsearchSettings.SectionName));
+
+            builder.Services.AddSingleton<SGKPortalApp.BusinessLogicLayer.Interfaces.Elasticsearch.IPersonelSearchService,
+                SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch.PersonelSearchService>();
+
+            builder.Services.AddScoped<SGKPortalApp.BusinessLogicLayer.Interfaces.Elasticsearch.IPersonelIndexSyncService,
+                SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch.PersonelIndexSyncService>();
+
+            Console.WriteLine("🔍 Elasticsearch Services yapılandırıldı");
+
+            // ═══════════════════════════════════════════════════════
             // 🔌 ZKTeco API CLIENT
             // ═══════════════════════════════════════════════════════
             var zkTecoApiBaseUrl = builder.Configuration["ZKTecoApi:BaseUrl"]

@@ -69,6 +69,7 @@ namespace SGKPortalApp.PresentationLayer.Extensions
             services.RegisterApiServices(assembly, apiUrl, "Pdks");
             services.RegisterApiServices(assembly, apiUrl, "Eshot");
             services.RegisterApiServices(assembly, apiUrl, "ZKTeco");
+            services.RegisterApiServices(assembly, apiUrl, "Elasticsearch");
 
             Console.WriteLine("🎉 Presentation Layer hazır!\n");
             return services;
