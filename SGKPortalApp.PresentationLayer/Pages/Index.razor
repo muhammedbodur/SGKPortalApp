@@ -1,124 +1,296 @@
 @page "/"
 @using SGKPortalApp.PresentationLayer.Components.Common
 @using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard
+@inject IDashboardApiService DashboardApi
+@inject NavigationManager Navigation
 
 <PageTitle>SGK Portal - Ana Sayfa</PageTitle>
 
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Dashboard Top Section (Adaptive Grid) -->
-    <div class="dashboard-top-grid mb-4">
-        <!-- Banko Widget - Otomatik gizlenir/gösterilir -->
-        <div class="dashboard-widget-col">
-            <BankoModeWidget />
+    @if (IsLoading)
+    {
+        <div class="d-flex justify-content-center align-items-center" style="min-height: 400px;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Dashboard Top Section -->
+        <div class="dashboard-top-grid mb-4">
+            <!-- Banko Widget -->
+            <div class="dashboard-widget-col">
+                <BankoModeWidget />
+            </div>
+
+            <!-- Welcome Card -->
+            <div class="dashboard-welcome-col">
+                <div class="card h-100">
+                    <div class="d-flex align-items-end row">
+                        <div class="col-sm-7">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">Hoş Geldiniz! 🎉</h5>
+                                <p class="mb-4">
+                                    SGK Portal sistemine hoş geldiniz.
+                                    Sol menüden işlemlerinize başlayabilirsiniz.
+                                </p>
+                                <a href="/personel" class="btn btn-sm btn-outline-primary">
+                                    Personel İşlemleri
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-sm-5 text-center text-sm-end">
+                            <div class="card-body pb-0 px-0 px-md-4">
+                                <img src="/portal/assets/img/illustrations/man-with-laptop-light.png"
+                                     height="140"
+                                     alt="Hoşgeldin" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Welcome Card - Otomatik genişler/daralır -->
-        <div class="dashboard-welcome-col">
-            <div class="card h-100">
-                <div class="d-flex align-items-end row">
-                    <div class="col-sm-7">
+        <div class="row">
+            <!-- Sol Kolon: Duyurular Slider + Liste Duyurular -->
+            <div class="col-lg-8">
+                <!-- Slider Duyurular -->
+                @if (SliderDuyurular.Any())
+                {
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="bx bx-image me-2"></i>Duyurular</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div id="duyuruSlider" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-indicators">
+                                    @for (int i = 0; i < SliderDuyurular.Count; i++)
+                                    {
+                                        var index = i;
+                                        <button type="button" data-bs-target="#duyuruSlider" data-bs-slide-to="@index"
+                                                class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")"></button>
+                                    }
+                                </div>
+                                <div class="carousel-inner">
+                                    @for (int i = 0; i < SliderDuyurular.Count; i++)
+                                    {
+                                        var duyuru = SliderDuyurular[i];
+                                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                                            <div style="position: relative;">
+                                                <img src="@(duyuru.GorselUrl ?? "/portal/assets/img/elements/18.jpg")"
+                                                     class="d-block w-100" style="height: 300px; object-fit: cover;"
+                                                     alt="@duyuru.Baslik" />
+                                                <div class="carousel-caption d-block" style="background: rgba(0,0,0,0.6); padding: 15px;">
+                                                    <h5>@duyuru.Baslik</h5>
+                                                    <p class="mb-0 text-truncate">@duyuru.Icerik</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#duyuruSlider" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Önceki</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#duyuruSlider" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Sonraki</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- SGK Duyurular Listesi -->
+                @if (ListeDuyurular.Any())
+                {
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="bx bx-bell me-2"></i>SGK Duyurular</h5>
+                        </div>
                         <div class="card-body">
-                            <h5 class="card-title text-primary">Hoş Geldiniz! 🎉</h5>
-                            <p class="mb-4">
-                                SGK Portal sistemine hoş geldiniz.
-                                Sol menüden işlemlerinize başlayabilirsiniz.
-                            </p>
-                            <a href="/personel" class="btn btn-sm btn-outline-primary">
-                                Personel İşlemleri
-                            </a>
+                            <ul class="list-group list-group-flush">
+                                @foreach (var duyuru in ListeDuyurular)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <div>
+                                            <span class="fw-semibold">@duyuru.Baslik</span>
+                                            <small class="d-block text-muted text-truncate" style="max-width: 400px;">@duyuru.Icerik</small>
+                                        </div>
+                                        <span class="badge bg-label-primary">@duyuru.YayinTarihi.ToString("dd.MM.yyyy")</span>
+                                    </li>
+                                }
+                            </ul>
                         </div>
                     </div>
-                    <div class="col-sm-5 text-center text-sm-end">
-                        <div class="card-body pb-0 px-0 px-md-4">
-                            <img src="/portal/assets/img/illustrations/man-with-laptop-light.png"
-                                 height="140"
-                                 alt="Hoşgeldin" />
+                }
+
+                <!-- Sık Kullanılan Programlar -->
+                @if (SikKullanilanProgramlar.Any())
+                {
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bx bx-grid-alt me-2"></i>Sık Kullanılan Programlar</h5>
                         </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                @foreach (var program in SikKullanilanProgramlar)
+                                {
+                                    <div class="col-6 col-md-3">
+                                        <a href="@program.Url" target="_blank" class="text-decoration-none">
+                                            <div class="card bg-@program.RenkKodu text-white h-100" style="min-height: 100px;">
+                                                <div class="card-body text-center d-flex flex-column justify-content-center">
+                                                    <i class="bx @program.IkonClass bx-lg mb-2"></i>
+                                                    <span class="small">@program.ProgramAdi</span>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Sağ Kolon: Günün Menüsü + Önemli Linkler + Bugün Doğanlar -->
+            <div class="col-lg-4">
+                <!-- Günün Menüsü -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="mb-0"><i class="bx bx-restaurant me-2"></i>Günün Menüsü</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (GununMenusu != null)
+                        {
+                            <div class="menu-content">
+                                @((MarkupString)GununMenusu.Icerik.Replace("\n", "<br/>"))
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">Bugün için menü bilgisi bulunmuyor.</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- Önemli Linkler -->
+                @if (OnemliLinkler.Any())
+                {
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="bx bx-link me-2"></i>Önemli Linkler</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                @foreach (var link in OnemliLinkler)
+                                {
+                                    <li class="list-group-item">
+                                        <a href="@link.Url" target="_blank" class="text-decoration-none d-flex align-items-center">
+                                            <i class="bx bx-link-external me-2 text-primary"></i>
+                                            @link.LinkAdi
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+
+                <!-- Bugün Doğanlar -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bx bx-cake me-2"></i>Bugün Doğanlar</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (BugunDoganlar.Any())
+                        {
+                            <ul class="list-group list-group-flush">
+                                @foreach (var personel in BugunDoganlar)
+                                {
+                                    <li class="list-group-item d-flex align-items-center px-0 cursor-pointer" @onclick="@(() => NavigateToPersonel(personel.TcKimlikNo))">
+                                        <div class="avatar avatar-sm me-3">
+                                            @if (!string.IsNullOrEmpty(personel.Resim))
+                                            {
+                                                <img src="@personel.Resim" alt="@personel.AdSoyad" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                                            }
+                                            else
+                                            {
+                                                <span class="avatar-initial rounded-circle bg-label-primary">@personel.AdSoyad.Substring(0, 1)</span>
+                                            }
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <span class="fw-semibold">@personel.AdSoyad</span>
+                                            <small class="d-block text-muted">@(personel.DepartmanAdi ?? personel.ServisAdi)</small>
+                                        </div>
+                                        <span class="badge bg-label-success">@personel.Yas yaş</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">Bugün doğum günü olan personel bulunmuyor.</p>
+                        }
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- İstatistik Kartları -->
-    <div class="row">
-        <div class="col-lg-3 col-md-6 col-6 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="card-title d-flex align-items-start justify-content-between">
-                        <div class="avatar flex-shrink-0">
-                            <i class="bx bx-user bx-lg text-primary"></i>
-                        </div>
-                    </div>
-                    <span class="fw-semibold d-block mb-1">Toplam Personel</span>
-                    <h3 class="card-title mb-2">1,234</h3>
-                    <small class="text-success fw-semibold">
-                        <i class="bx bx-up-arrow-alt"></i> +15 bu ay
-                    </small>
-                </div>
+        <!-- Takvim Widget -->
+        <div class="row mt-4">
+            <div class="col-lg-6 col-12">
+                <TakvimWidget />
             </div>
         </div>
-
-        <div class="col-lg-3 col-md-6 col-6 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="card-title d-flex align-items-start justify-content-between">
-                        <div class="avatar flex-shrink-0">
-                            <i class="bx bx-desktop bx-lg text-info"></i>
-                        </div>
-                    </div>
-                    <span class="fw-semibold d-block mb-1">Aktif Bankolar</span>
-                    <h3 class="card-title mb-2">48</h3>
-                    <small class="text-success fw-semibold">
-                        <i class="bx bx-up-arrow-alt"></i> Tümü aktif
-                    </small>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6 col-6 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="card-title d-flex align-items-start justify-content-between">
-                        <div class="avatar flex-shrink-0">
-                            <i class="bx bx-calendar bx-lg text-warning"></i>
-                        </div>
-                    </div>
-                    <span class="fw-semibold d-block mb-1">Bekleyen İzinler</span>
-                    <h3 class="card-title mb-2">12</h3>
-                    <small class="text-danger fw-semibold">
-                        <i class="bx bx-down-arrow-alt"></i> Onay bekliyor
-                    </small>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6 col-6 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="card-title d-flex align-items-start justify-content-between">
-                        <div class="avatar flex-shrink-0">
-                            <i class="bx bx-bus bx-lg text-success"></i>
-                        </div>
-                    </div>
-                    <span class="fw-semibold d-block mb-1">Eshot Kullanımı</span>
-                    <h3 class="card-title mb-2">3,456</h3>
-                    <small class="text-success fw-semibold">
-                        <i class="bx bx-up-arrow-alt"></i> Bu ay
-                    </small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Takvim Widget -->
-    <div class="row mt-4">
-        <div class="col-lg-6 col-12">
-            <TakvimWidget />
-        </div>
-    </div>
+    }
 </div>
 
 @code {
+    private bool IsLoading = true;
+    private List<DuyuruResponseDto> SliderDuyurular = new();
+    private List<DuyuruResponseDto> ListeDuyurular = new();
+    private List<SikKullanilanProgramResponseDto> SikKullanilanProgramlar = new();
+    private List<OnemliLinkResponseDto> OnemliLinkler = new();
+    private GununMenusuResponseDto? GununMenusu;
+    private List<BugunDoganResponseDto> BugunDoganlar = new();
 
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboardData();
+    }
+
+    private async Task LoadDashboardData()
+    {
+        try
+        {
+            IsLoading = true;
+            var response = await DashboardApi.GetDashboardDataAsync();
+
+            if (response.Success && response.Data != null)
+            {
+                SliderDuyurular = response.Data.SliderDuyurular;
+                ListeDuyurular = response.Data.ListeDuyurular;
+                SikKullanilanProgramlar = response.Data.SikKullanilanProgramlar;
+                OnemliLinkler = response.Data.OnemliLinkler;
+                GununMenusu = response.Data.GununMenusu;
+                BugunDoganlar = response.Data.BugunDoganlar;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Dashboard veri yükleme hatası: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void NavigateToPersonel(string tcKimlikNo)
+    {
+        Navigation.NavigateTo($"/personel/detail/{tcKimlikNo}");
+    }
 }
