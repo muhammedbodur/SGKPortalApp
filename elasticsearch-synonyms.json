@@ -1,0 +1,37 @@
+{
+  "description": "Elasticsearch Türkçe Synonym Tanımları - SGK Portal",
+  "usage": {
+    "tek_yonlu": "x => y : x yazıldığında y ile arar",
+    "cift_yonlu": "x, y, z : hepsi birbirine eşdeğer"
+  },
+  "synonyms": {
+    "kisaltmalar": [
+      "sgm => sosyal güvenlik merkezi",
+      "sgk => sosyal güvenlik kurumu",
+      "ptt => prim tahakkuk tahsilat"
+    ],
+    "departman_servis": [
+      "il => il müdürlüğü",
+      "bilgi => bilgi işlem",
+      "muhasebe => muhasebe servisi",
+      "idari => idari işler",
+      "personel => personel servisi",
+      "hukuk => hukuk servisi",
+      "arşiv => arşiv servisi"
+    ],
+    "yazim_hatalari": [
+      "pirim => prim",
+      "tahakuk => tahakkuk",
+      "tahsılat => tahsilat"
+    ],
+    "turkce_karakter": [
+      "müdür, mudur",
+      "şef, sef",
+      "memur, memuru",
+      "satınalma, satin alma, satın alma",
+      "müdürlüğü, mudurlugu",
+      "güvenlik, guvenlik",
+      "işlem, islem"
+    ]
+  }
+}

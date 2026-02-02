@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Elasticsearch;
 using SGKPortalApp.BusinessObjectLayer.Configuration;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch;
+using System.Text.Json;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
 {
@@ -19,6 +20,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
         private readonly ElasticsearchClient _client;
         private readonly ElasticsearchSettings _settings;
         private readonly ILogger<PersonelSearchService> _logger;
+        private readonly List<string> _synonyms;
 
         public PersonelSearchService(
             IOptions<ElasticsearchSettings> settings,
@@ -37,6 +39,54 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
             }
 
             _client = new ElasticsearchClient(clientSettings);
+
+            // Synonym'ları yükle
+            _synonyms = LoadSynonyms();
+        }
+
+        /// <summary>
+        /// Synonym'ları dosyadan veya inline ayarlardan yükler
+        /// </summary>
+        private List<string> LoadSynonyms()
+        {
+            try
+            {
+                // Dosya yolu varsa dosyadan oku
+                if (!string.IsNullOrEmpty(_settings.SynonymsFilePath) && File.Exists(_settings.SynonymsFilePath))
+                {
+                    var json = File.ReadAllText(_settings.SynonymsFilePath);
+                    var doc = JsonDocument.Parse(json);
+                    var synonyms = new List<string>();
+
+                    if (doc.RootElement.TryGetProperty("synonyms", out var synonymsElement))
+                    {
+                        foreach (var category in synonymsElement.EnumerateObject())
+                        {
+                            foreach (var item in category.Value.EnumerateArray())
+                            {
+                                var synonym = item.GetString();
+                                if (!string.IsNullOrWhiteSpace(synonym))
+                                {
+                                    synonyms.Add(synonym);
+                                }
+                            }
+                        }
+                    }
+
+                    _logger.LogInformation("Synonym dosyasından {Count} synonym yüklendi: {FilePath}",
+                        synonyms.Count, _settings.SynonymsFilePath);
+                    return synonyms;
+                }
+
+                // Dosya yoksa inline ayarları kullan
+                _logger.LogInformation("Inline {Count} synonym kullanılıyor", _settings.Synonyms.Count);
+                return _settings.Synonyms;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Synonym yükleme hatası, inline ayarlar kullanılıyor");
+                return _settings.Synonyms;
+            }
         }
 
         public async Task<bool> PingAsync()
@@ -83,7 +133,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                             .TokenFilters(tf => tf
                                 .AsciiFolding("tr_ascii", af => af.PreserveOriginal(true))
                                 .EdgeNGram("tr_edge", en => en.MinGram(2).MaxGram(20))
-                                .Synonym("tr_synonym", syn => syn.Synonyms(_settings.Synonyms))
+                                .Synonym("tr_synonym", syn => syn.Synonyms(_synonyms))
                             )
                             .Analyzers(an => an
                                 .Custom("tr_index", ca => ca

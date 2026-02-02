@@ -33,7 +33,13 @@ namespace SGKPortalApp.BusinessObjectLayer.Configuration
         public bool EnableAutocomplete { get; set; } = true;
 
         /// <summary>
-        /// Synonym tanımları (yanlış yazım düzeltme)
+        /// Synonym dosya yolu (JSON formatında)
+        /// Örnek: "elasticsearch-synonyms.json"
+        /// </summary>
+        public string? SynonymsFilePath { get; set; }
+
+        /// <summary>
+        /// Inline synonym tanımları (SynonymsFilePath yoksa kullanılır)
         /// Örnek: "pirim => prim"
         /// </summary>
         public List<string> Synonyms { get; set; } = new();
