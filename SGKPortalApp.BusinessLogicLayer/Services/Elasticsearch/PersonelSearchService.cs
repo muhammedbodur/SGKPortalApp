@@ -150,8 +150,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                     .Mappings(m => m
                         .Properties<PersonelElasticDto>(p => p
                             .Keyword(k => k.TcKimlikNo)
-                            .Text(t => t.Ad, t => t.Analyzer("tr_search"))
-                            .Text(t => t.Soyad, t => t.Analyzer("tr_search"))
                             .Text(t => t.AdSoyad, t => t.Analyzer("tr_search"))
                             .Keyword(k => k.SicilNo)
                             .IntegerNumber(i => i.DepartmanId)
@@ -267,7 +265,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
         {
             try
             {
-                var response = await _client.DeleteAsync(_settings.IndexName, tcKimlikNo);
+                var response = await _client.DeleteAsync<PersonelElasticDto>(tcKimlikNo, d => d.Index(_settings.IndexName));
                 return response.IsValidResponse;
             }
             catch (Exception ex)
@@ -341,8 +339,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                                 )
                              )
                              .MinimumShouldMatch(1);
-
-                            return b;
                         })
                     )
                 );
@@ -401,8 +397,6 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
                                     .Query(prefix)
                                 )
                              );
-
-                            return b;
                         })
                     )
                 );

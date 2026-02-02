@@ -14,22 +14,12 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch
         public string TcKimlikNo { get; set; } = string.Empty;
 
         /// <summary>
-        /// Personel adı
-        /// </summary>
-        public string Ad { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Personel soyadı
-        /// </summary>
-        public string Soyad { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Ad Soyad birleşik
+        /// Ad Soyad
         /// </summary>
         public string AdSoyad { get; set; } = string.Empty;
 
         /// <summary>
-        /// Sicil numarası
+        /// Sicil numarası (string olarak - arama için)
         /// </summary>
         public string? SicilNo { get; set; }
 
