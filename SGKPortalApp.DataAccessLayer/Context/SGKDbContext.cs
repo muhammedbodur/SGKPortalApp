@@ -33,6 +33,10 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<HizmetBinasi> HizmetBinalari { get; set; }
         public DbSet<DepartmanHizmetBinasi> DepartmanHizmetBinalari { get; set; }
         public DbSet<ResmiTatil> ResmiTatiller { get; set; }
+        public DbSet<Duyuru> Duyurular { get; set; }
+        public DbSet<GununMenusu> GununMenuleri { get; set; }
+        public DbSet<OnemliLink> OnemliLinkler { get; set; }
+        public DbSet<SikKullanilanProgram> SikKullanilanProgramlar { get; set; }
         #endregion
 
         #region Personel İşlemleri
