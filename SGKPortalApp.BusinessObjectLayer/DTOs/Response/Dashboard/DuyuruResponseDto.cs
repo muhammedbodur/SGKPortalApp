@@ -12,5 +12,9 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard
         public DateTime YayinTarihi { get; set; }
         public DateTime? BitisTarihi { get; set; }
         public Aktiflik Aktiflik { get; set; }
+
+        // UI için ek alanlar
+        public string? BadgeColor { get; set; }
+        public string? BadgeText { get; set; }
     }
 }
