@@ -1,5 +1,412 @@
-﻿<h3>Profile</h3>
+@page "/hesap/profil"
+@page "/account/profile"
+@using Microsoft.AspNetCore.Components.Authorization
+@using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IUserApiService UserApiService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Profil - SGK Portal</PageTitle>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">Hesap /</span> Profil
+    </h4>
+
+    <div class="row">
+        <!-- Sol Kolon - Profil Kartı -->
+        <div class="col-xl-4 col-lg-5 col-md-5">
+            <div class="card mb-4">
+                <div class="card-body text-center pt-4">
+                    <div class="avatar avatar-xl mx-auto mb-3">
+                        @if (!string.IsNullOrEmpty(ProfileImage))
+                        {
+                            <img src="@ProfileImage" alt="@UserFullName" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <span class="avatar-initial rounded-circle bg-label-primary fs-1" style="width: 100px; height: 100px; line-height: 100px;">
+                                @(UserFullName?.Length > 0 ? UserFullName.Substring(0, 1).ToUpper() : "?")
+                            </span>
+                        }
+                    </div>
+                    <h5 class="mb-1">@UserFullName</h5>
+                    <span class="badge bg-label-primary mb-3">@UserRole</span>
+                    <div class="d-flex justify-content-center gap-2 mb-3">
+                        <button class="btn btn-primary btn-sm" @onclick="OpenImageUpload">
+                            <i class="bx bx-camera me-1"></i> Fotoğraf Değiştir
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body border-top pt-4">
+                    <h6 class="text-uppercase text-muted small fw-semibold mb-3">Detaylar</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="d-flex align-items-center mb-3">
+                            <i class="bx bx-user text-primary me-2"></i>
+                            <span class="fw-semibold me-2">Kullanıcı Adı:</span>
+                            <span>@UserName</span>
+                        </li>
+                        <li class="d-flex align-items-center mb-3">
+                            <i class="bx bx-envelope text-primary me-2"></i>
+                            <span class="fw-semibold me-2">E-posta:</span>
+                            <span>@UserEmail</span>
+                        </li>
+                        <li class="d-flex align-items-center mb-3">
+                            <i class="bx bx-phone text-primary me-2"></i>
+                            <span class="fw-semibold me-2">Telefon:</span>
+                            <span>@UserPhone</span>
+                        </li>
+                        <li class="d-flex align-items-center mb-3">
+                            <i class="bx bx-building text-primary me-2"></i>
+                            <span class="fw-semibold me-2">Birim:</span>
+                            <span>@UserDepartment</span>
+                        </li>
+                        <li class="d-flex align-items-center">
+                            <i class="bx bx-calendar text-primary me-2"></i>
+                            <span class="fw-semibold me-2">Kayıt Tarihi:</span>
+                            <span>@RegistrationDate</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Güvenlik Kartı -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bx bx-shield text-warning me-2"></i>
+                        Güvenlik
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <a href="/hesap/sifre-degistir" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="bx bx-lock-alt me-2"></i>
+                        Şifre Değiştir
+                    </a>
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                        <div>
+                            <h6 class="mb-0">İki Faktörlü Doğrulama</h6>
+                            <small class="text-muted">Hesap güvenliğini artırın</small>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="twoFactorAuth" @bind="TwoFactorEnabled" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ Kolon - Profil Düzenleme -->
+        <div class="col-xl-8 col-lg-7 col-md-7">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bx bx-edit text-primary me-2"></i>
+                        Profil Bilgileri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (ShowSuccessMessage)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bx bx-check-circle me-2"></i>
+                            Profil bilgileriniz başarıyla güncellendi.
+                            <button type="button" class="btn-close" @onclick="() => ShowSuccessMessage = false"></button>
+                        </div>
+                    }
+
+                    <EditForm Model="ProfileModel" OnValidSubmit="SaveProfile">
+                        <DataAnnotationsValidator />
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Ad</label>
+                                <InputText @bind-Value="ProfileModel.FirstName" class="form-control" placeholder="Adınız" />
+                                <ValidationMessage For="@(() => ProfileModel.FirstName)" class="text-danger small" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Soyad</label>
+                                <InputText @bind-Value="ProfileModel.LastName" class="form-control" placeholder="Soyadınız" />
+                                <ValidationMessage For="@(() => ProfileModel.LastName)" class="text-danger small" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">E-posta</label>
+                                <InputText @bind-Value="ProfileModel.Email" class="form-control" placeholder="ornek@sgk.gov.tr" type="email" />
+                                <ValidationMessage For="@(() => ProfileModel.Email)" class="text-danger small" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Telefon</label>
+                                <InputText @bind-Value="ProfileModel.Phone" class="form-control" placeholder="05XX XXX XX XX" />
+                                <ValidationMessage For="@(() => ProfileModel.Phone)" class="text-danger small" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Birim</label>
+                                <InputText @bind-Value="ProfileModel.Department" class="form-control" disabled />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Unvan</label>
+                                <InputText @bind-Value="ProfileModel.Title" class="form-control" disabled />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Adres</label>
+                            <InputTextArea @bind-Value="ProfileModel.Address" class="form-control" rows="3" placeholder="Adresiniz" />
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-secondary" @onclick="ResetForm">
+                                <i class="bx bx-reset me-1"></i> Sıfırla
+                            </button>
+                            <button type="submit" class="btn btn-primary" disabled="@IsSaving">
+                                @if (IsSaving)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                }
+                                else
+                                {
+                                    <i class="bx bx-save me-1"></i>
+                                }
+                                Kaydet
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+
+            <!-- Bildirim Ayarları -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bx bx-bell text-info me-2"></i>
+                        Bildirim Ayarları
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="mb-0">E-posta Bildirimleri</h6>
+                                    <small class="text-muted">Önemli güncellemeler için e-posta al</small>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" @bind="EmailNotifications" />
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="mb-0">SMS Bildirimleri</h6>
+                                    <small class="text-muted">Acil durumlar için SMS al</small>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" @bind="SmsNotifications" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="mb-0">Duyuru Bildirimleri</h6>
+                                    <small class="text-muted">Yeni duyurulardan haberdar ol</small>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" @bind="AnnouncementNotifications" />
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="mb-0">Takvim Hatırlatıcıları</h6>
+                                    <small class="text-muted">Etkinlikler için hatırlatma al</small>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" @bind="CalendarReminders" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Son Oturum Aktiviteleri -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bx bx-history text-success me-2"></i>
+                        Son Oturum Aktiviteleri
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tarayıcı</th>
+                                    <th>Cihaz</th>
+                                    <th>Konum</th>
+                                    <th>Tarih</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var session in RecentSessions)
+                                {
+                                    <tr>
+                                        <td>
+                                            <i class="bx @session.BrowserIcon me-2"></i>
+                                            @session.Browser
+                                        </td>
+                                        <td>@session.Device</td>
+                                        <td>@session.Location</td>
+                                        <td>@session.Date.ToString("dd.MM.yyyy HH:mm")</td>
+                                        <td>
+                                            <span class="badge bg-label-@(session.IsActive ? "success" : "secondary")">
+                                                @(session.IsActive ? "Aktif" : "Sona Erdi")
+                                            </span>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-xl {
+        width: 100px;
+        height: 100px;
+    }
+    .avatar-xl .avatar-initial {
+        font-size: 2.5rem;
+    }
+</style>
 
 @code {
+    private string UserName = "";
+    private string UserFullName = "";
+    private string UserEmail = "";
+    private string UserPhone = "";
+    private string UserDepartment = "";
+    private string UserRole = "Kullanıcı";
+    private string ProfileImage = "";
+    private string RegistrationDate = "";
+    private bool TwoFactorEnabled = false;
+    private bool EmailNotifications = true;
+    private bool SmsNotifications = false;
+    private bool AnnouncementNotifications = true;
+    private bool CalendarReminders = true;
+    private bool IsSaving = false;
+    private bool ShowSuccessMessage = false;
 
+    private ProfileEditModel ProfileModel = new();
+    private List<SessionInfo> RecentSessions = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUserProfile();
+        LoadRecentSessions();
+    }
+
+    private async Task LoadUserProfile()
+    {
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity?.IsAuthenticated == true)
+            {
+                UserName = user.Identity.Name ?? "kullanici";
+                UserFullName = user.FindFirst("name")?.Value ?? user.Identity.Name ?? "Kullanıcı";
+                UserEmail = user.FindFirst("email")?.Value ?? "email@sgk.gov.tr";
+                UserPhone = user.FindFirst("phone")?.Value ?? "-";
+                UserDepartment = user.FindFirst("department")?.Value ?? "İzmir SGK";
+                UserRole = user.FindFirst("role")?.Value ?? "Kullanıcı";
+                ProfileImage = user.FindFirst("picture")?.Value ?? "";
+                RegistrationDate = DateTime.Now.AddYears(-2).ToString("dd.MM.yyyy");
+
+                // Model'i doldur
+                var nameParts = UserFullName.Split(' ');
+                ProfileModel.FirstName = nameParts.Length > 0 ? nameParts[0] : "";
+                ProfileModel.LastName = nameParts.Length > 1 ? string.Join(" ", nameParts.Skip(1)) : "";
+                ProfileModel.Email = UserEmail;
+                ProfileModel.Phone = UserPhone;
+                ProfileModel.Department = UserDepartment;
+                ProfileModel.Title = UserRole;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Profil yükleme hatası: {ex.Message}");
+        }
+    }
+
+    private void LoadRecentSessions()
+    {
+        RecentSessions = new List<SessionInfo>
+        {
+            new SessionInfo { Browser = "Chrome", BrowserIcon = "bxl-chrome", Device = "Windows 11", Location = "İzmir, TR", Date = DateTime.Now, IsActive = true },
+            new SessionInfo { Browser = "Firefox", BrowserIcon = "bxl-firefox", Device = "MacOS", Location = "İzmir, TR", Date = DateTime.Now.AddDays(-1), IsActive = false },
+            new SessionInfo { Browser = "Safari", BrowserIcon = "bxl-apple", Device = "iPhone 14", Location = "İzmir, TR", Date = DateTime.Now.AddDays(-3), IsActive = false },
+        };
+    }
+
+    private async Task SaveProfile()
+    {
+        IsSaving = true;
+        try
+        {
+            // API çağrısı yapılacak
+            await Task.Delay(1000); // Simülasyon
+            ShowSuccessMessage = true;
+            UserFullName = $"{ProfileModel.FirstName} {ProfileModel.LastName}";
+            UserEmail = ProfileModel.Email ?? "";
+            UserPhone = ProfileModel.Phone ?? "";
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private void ResetForm()
+    {
+        LoadUserProfile();
+    }
+
+    private async Task OpenImageUpload()
+    {
+        await JSRuntime.InvokeVoidAsync("alert", "Fotoğraf yükleme özelliği yakında eklenecek.");
+    }
+
+    private class ProfileEditModel
+    {
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Email { get; set; }
+        public string? Phone { get; set; }
+        public string? Department { get; set; }
+        public string? Title { get; set; }
+        public string? Address { get; set; }
+    }
+
+    private class SessionInfo
+    {
+        public string Browser { get; set; } = "";
+        public string BrowserIcon { get; set; } = "";
+        public string Device { get; set; } = "";
+        public string Location { get; set; } = "";
+        public DateTime Date { get; set; }
+        public bool IsActive { get; set; }
+    }
 }
