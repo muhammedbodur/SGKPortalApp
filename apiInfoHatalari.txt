@@ -930,7 +930,7 @@ info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.Attenda
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.AttendanceSyncService[0]
       ?? Device sync interval: 5 minutes
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.AttendanceSyncService[0]
-      ? Next check at: 15:00 (in 11 minutes)
+      ? Next check at: 17:00 (in 56 minutes)
 info: SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService[0]
       ?? ZKTecoRealtimeService starting...
 info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
@@ -948,13 +948,9 @@ info: Microsoft.Hosting.Lifetime[0]
 info: Microsoft.Hosting.Lifetime[0]
       Content root path: D:\AspNetExamples\SGKPortalApp\SGKPortalApp.ApiLayer
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: 913zej0t_JWihEE0MOojIA - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
+      ?? [SiramatikHub] Yeni bağlantı: YN9erXyp4rruKS46GLtJpQ - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: NVutq31onpehQ0xi9c_5OA - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=92d3a7cd-7617-48b6-9f54-0b8cbe397c49
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=ee13ef36-2d80-4561-a838-c2b54d32873b
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=b8b3cdd2-b2d5-4427-9fff-b08ac4b8926e
 warn: Microsoft.EntityFrameworkCore.Model.Validation[10622]
       Entity 'User' has a global query filter defined and is the required end of a relationship with the entity 'LoginLogoutLog'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[10622]
@@ -985,22 +981,18 @@ warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
       The 'Aktiflik' property 'Aktiflik' on entity type 'KioskMenu' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
       The 'Aktiflik' property 'Aktiflik' on entity type 'Tv' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
-info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
-      Başlangıç temizliği: Temizlenecek online connection yok
-info: SGKPortalApp.ApiLayer.Controllers.SignalR.HubConnectionController[0]
-      Cleanup startup: 0 connection temizlendi
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
         ? Departmanlar: 0 eklendi, 0 güncellendi
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
       ?? Servisler sync ediliyor...
 info: SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService[0]
       Found 2 active ZKTeco devices
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
-        ? Servisler: 0 eklendi, 0 güncellendi
 info: System.Net.Http.HttpClient.ZKTecoApiClient.LogicalHandler[100]
       Start processing HTTP request POST http://localhost:8091/api/realtime/192.168.1.201/start?*
 info: System.Net.Http.HttpClient.ZKTecoApiClient.ClientHandler[100]
       Sending HTTP request POST http://localhost:8091/api/realtime/192.168.1.201/start?*
+info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
+        ? Servisler: 0 eklendi, 0 güncellendi
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
       ?? Ünvanlar sync ediliyor...
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
@@ -1015,12 +1007,24 @@ info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSync
         ? Atanma Nedenleri: 0 eklendi, 0 güncellendi
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
       ?? Departman-Bina İlişkileri sync ediliyor...
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
+      ? Başlangıç temizliği: 1 connection offline yapıldı
+info: SGKPortalApp.ApiLayer.Controllers.SignalR.HubConnectionController[0]
+      Cleanup startup: 1 connection temizlendi
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: NVutq31onpehQ0xi9c_5OA | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: 913zej0t_JWihEE0MOojIA | TC: 28165202398 | Type: MainLayout | IP: ::1
+      ? Yeni bağlantı oluşturuldu: YN9erXyp4rruKS46GLtJpQ | TC: 28165202398 | Type: MainLayout | IP: ::1
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? Banko modu kontrolü: isBankoMode=False
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Personel bağlantısı koptu: 28165202398
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Bağlantı koptu: YN9erXyp4rruKS46GLtJpQ - Kullanıcı: MUHAMMED BODUR
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: G2j1t2LGREQy7Nw81XzKJA - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=b8b3cdd2-b2d5-4427-9fff-b08ac4b8926e
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: G2j1t2LGREQy7Nw81XzKJA | TC: 28165202398 | Type: MainLayout | IP: ::1
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? Banko modu kontrolü: isBankoMode=False
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
@@ -1029,6 +1033,22 @@ info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSync
         ? Departman-Bina İlişkileri: 0 eklendi, 2 atlandı
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
       ?? Personeller sync ediliyor...
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Personel bağlantısı koptu: 28165202398
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Bağlantı koptu: G2j1t2LGREQy7Nw81XzKJA - Kullanıcı: MUHAMMED BODUR
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: jpWgli0eYEXeir7aIDw5ng - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=b8b3cdd2-b2d5-4427-9fff-b08ac4b8926e
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: jpWgli0eYEXeir7aIDw5ng | TC: 28165202398 | Type: MainLayout | IP: ::1
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=False
+warn: Microsoft.EntityFrameworkCore.Query[20504]
+      Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelMesaiService[0]
+      Personel mesai verileri: TcKimlikNo=28165202398, KayitNo=2152, Tarih=01/01/2026 00:00:00-12/31/2026 00:00:00, Kayıt Sayısı=44
 warn: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoApiClient[0]
       Start realtime monitoring timeout (10s): 192.168.1.201:4370
 warn: SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService[0]
@@ -1040,27 +1060,38 @@ info: System.Net.Http.HttpClient.ZKTecoApiClient.ClientHandler[100]
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? Personel bağlantısı koptu: 28165202398
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: 913zej0t_JWihEE0MOojIA - Kullanıcı: MUHAMMED BODUR
+      ?? [SiramatikHub] Bağlantı koptu: jpWgli0eYEXeir7aIDw5ng - Kullanıcı: MUHAMMED BODUR
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: s5MHYIAq_QscJwmoDxUinA - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
+      ?? [SiramatikHub] Yeni bağlantı: K4QSuQEeIuNyjNQX9mshxw - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=ee13ef36-2d80-4561-a838-c2b54d32873b
+      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=b8b3cdd2-b2d5-4427-9fff-b08ac4b8926e
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: s5MHYIAq_QscJwmoDxUinA | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Personel bağlantısı koptu: 28165202398
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: s5MHYIAq_QscJwmoDxUinA - Kullanıcı: MUHAMMED BODUR
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: UQjqKJ_NiKRByhkbhuy84w - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=ee13ef36-2d80-4561-a838-c2b54d32873b
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: UQjqKJ_NiKRByhkbhuy84w | TC: 28165202398 | Type: MainLayout | IP: ::1
+      ? Yeni bağlantı oluşturuldu: K4QSuQEeIuNyjNQX9mshxw | TC: 28165202398 | Type: MainLayout | IP: ::1
 info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
       ?? Banko modu kontrolü: isBankoMode=False
+fail: Microsoft.EntityFrameworkCore.Query[10100]
+      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+fail: Microsoft.EntityFrameworkCore.Query[10100]
+      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+fail: SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService[0]
+      Dashboard verileri getirilirken hata oluştu
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+         at SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common.DuyuruRepository.GetListeDuyurularAsync(Int32 count) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Concrete\Common\DuyuruRepository.cs:line 50
+         at SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService.GetListeDuyurularInternalAsync(Int32 count) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\Common\DashboardService.cs:line 160
+         at SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService.GetDashboardDataAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\Common\DashboardService.cs:line 46
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelMesaiService[0]
+      Personel mesai verileri: TcKimlikNo=28165202398, KayitNo=2152, Tarih=01/01/2026 00:00:00-12/31/2026 00:00:00, Kayıt Sayısı=44
 warn: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoApiClient[0]
       Start realtime monitoring timeout (10s): 192.168.1.202:4370
 warn: SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService[0]
@@ -1068,29 +1099,11 @@ warn: SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerSe
 info: SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService[0]
       ? ZKTecoRealtimeService started successfully
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
-      ? Idle timeout tespit edildi - TC: 12345678901, Son Aktivite: 01/28/2026 12:17:17, Idle Süre: 8792.680520593334 dakika
+      ? Idle timeout tespit edildi - TC: 12345678901, Son Aktivite: 01/28/2026 12:17:17, Idle Süre: 8868.102624181667 dakika
 warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
       ?? SessionID ile aktif login log bulunamadı - SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
 warn: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
       ?? Idle session logout başarısız - TC: 12345678901, SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
-      ? Idle timeout tespit edildi - TC: 12345678901, Son Aktivite: 01/28/2026 12:17:17, Idle Süre: 8797.681983033333 dakika
-warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
-      ?? SessionID ile aktif login log bulunamadı - SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
-warn: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
-      ?? Idle session logout başarısız - TC: 12345678901, SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Personel bağlantısı koptu: 28165202398
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: UQjqKJ_NiKRByhkbhuy84w - Kullanıcı: MUHAMMED BODUR
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: BZrTn-0Aa7nv4biF9M-dyw - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=ee13ef36-2d80-4561-a838-c2b54d32873b
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: BZrTn-0Aa7nv4biF9M-dyw | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
 fail: Microsoft.EntityFrameworkCore.Query[10100]
       An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
       System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
@@ -1118,42 +1131,45 @@ fail: SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService[0]
          at SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common.DuyuruRepository.GetListeDuyurularAsync(Int32 count) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Concrete\Common\DuyuruRepository.cs:line 50
          at SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService.GetListeDuyurularInternalAsync(Int32 count) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\Common\DashboardService.cs:line 160
          at SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService.GetDashboardDataAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\Common\DashboardService.cs:line 46
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: BIL17AraI6qLbm6OI26edQ - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=True, isTvDisplay=False, tabSessionId=c08d61dd-d82c-4fb5-9407-7770f6ebf234
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: BIL17AraI6qLbm6OI26edQ | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: yg9xGY_ywnbYQ6qFYg-44Q - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=True, isTvDisplay=False, tabSessionId=6307462b-f98d-46a8-9fc6-1ca0315781fa
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: yg9xGY_ywnbYQ6qFYg-44Q | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
-warn: Microsoft.EntityFrameworkCore.Query[20504]
-      Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
 info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelMesaiService[0]
-      Personel mesai verileri: TcKimlikNo=28165202398, KayitNo=2152, Tarih=10/26/2025 14:58:33-02/03/2026 14:58:33, Kayıt Sayısı=44
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Personel bağlantısı koptu: 28165202398
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: BIL17AraI6qLbm6OI26edQ - Kullanıcı: MUHAMMED BODUR
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: a96YXESbKgCGYdzxVEC_3Q - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=c08d61dd-d82c-4fb5-9407-7770f6ebf234
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: a96YXESbKgCGYdzxVEC_3Q | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Personel bağlantısı koptu: 28165202398
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: yg9xGY_ywnbYQ6qFYg-44Q - Kullanıcı: MUHAMMED BODUR
+      Personel mesai verileri: TcKimlikNo=28165202398, KayitNo=2152, Tarih=01/01/2026 00:00:00-12/31/2026 00:00:00, Kayıt Sayısı=44
+info: SGKPortalApp.ApiLayer.Controllers.Common.HizmetBinasiController[0]
+      GetAll endpoint çağrıldı
+fail: Microsoft.EntityFrameworkCore.Query[10100]
+      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+fail: Microsoft.EntityFrameworkCore.Query[10100]
+      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+fail: Microsoft.EntityFrameworkCore.Query[10100]
+      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+fail: SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService[0]
+      Dashboard verileri getirilirken hata oluştu
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+         at SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common.DuyuruRepository.GetListeDuyurularAsync(Int32 count) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Concrete\Common\DuyuruRepository.cs:line 50
+         at SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService.GetListeDuyurularInternalAsync(Int32 count) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\Common\DashboardService.cs:line 160
+         at SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService.GetDashboardDataAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\Common\DashboardService.cs:line 46
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelMesaiService[0]
+      Personel mesai verileri: TcKimlikNo=28165202398, KayitNo=2152, Tarih=01/01/2026 00:00:00-12/31/2026 00:00:00, Kayıt Sayısı=44
+info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
+      ? Idle timeout tespit edildi - TC: 12345678901, Son Aktivite: 01/28/2026 12:17:17, Idle Süre: 8873.106205773332 dakika
+warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
+      ?? SessionID ile aktif login log bulunamadı - SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
+warn: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
+      ?? Idle session logout başarısız - TC: 12345678901, SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
 info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
       ?? 0 orphan session temizlendi
 info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
@@ -1162,79 +1178,68 @@ info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
       ?? 0 disconnected-but-not-logged-out session temizlendi
 info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
       ? Toplam 0 kayıt temizlendi
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Personel bağlantısı koptu: 28165202398
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: a96YXESbKgCGYdzxVEC_3Q - Kullanıcı: MUHAMMED BODUR
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: B0Td3MIhrTPFM36rR5_iCA - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=c08d61dd-d82c-4fb5-9407-7770f6ebf234
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: B0Td3MIhrTPFM36rR5_iCA | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
-info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
-      ? Stale connection temizliği: 1 connection offline yapıldı (Threshold: 10 dakika)
-info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelMesaiService[0]
-      Personel mesai verileri: TcKimlikNo=28165202398, KayitNo=2152, Tarih=10/26/2025 14:59:15-02/03/2026 14:59:15, Kayıt Sayısı=44
-info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelListService[0]
-      Personel listesi alındı: 9 kayıt
-info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelListService[0]
-      Personel listesi alındı: 9 kayıt
-info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelMesaiService[0]
-      Personel mesai verileri: TcKimlikNo=25820239102, KayitNo=400, Tarih=10/26/2025 14:59:25-02/03/2026 14:59:25, Kayıt Sayısı=0
-info: SGKPortalApp.ApiLayer.Services.Hubs.PdksHub[0]
-      ?? [PdksHub] Yeni bağlantı: IjXzf2RLYsWB3yWNi23bfA - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.PdksHub[0]
-      PDKS Hub - Client connected: IjXzf2RLYsWB3yWNi23bfA. Total monitors: 1
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
-      ? Idle timeout tespit edildi - TC: 12345678901, Son Aktivite: 01/28/2026 12:17:17, Idle Süre: 8802.68340281 dakika
+      ? Idle timeout tespit edildi - TC: 12345678901, Son Aktivite: 01/28/2026 12:17:17, Idle Süre: 8878.107296596667 dakika
 warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
       ?? SessionID ile aktif login log bulunamadı - SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
 warn: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
       ?? Idle session logout başarısız - TC: 12345678901, SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.AttendanceSyncService[0]
-      ?? Device needs sync: Sağ Cihaz (Last sync: 2026-01-29 13:00)
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.AttendanceSyncService[0]
-      ?? Sync needed! Starting attendance sync at 2026-02-03 15:00:00
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.AttendanceSyncService[0]
-      ?? Starting sequential attendance sync for all active devices...
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.AttendanceSyncService[0]
-      ?? Found 2 active devices
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.AttendanceSyncService[0]
-      ?? Estimated total sync time: 10 minutes
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.AttendanceSyncService[0]
-      ?? [1/2] Syncing device: Sağ Cihaz (192.168.1.202)
-info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoAttendanceService[0]
-      Syncing attendance records from device: Sağ Cihaz (192.168.1.202)
-info: System.Net.Http.HttpClient.ZKTecoApiClient.LogicalHandler[100]
-      Start processing HTTP request GET http://localhost:8091/api/attendance/192.168.1.202?*
-info: System.Net.Http.HttpClient.ZKTecoApiClient.ClientHandler[100]
-      Sending HTTP request GET http://localhost:8091/api/attendance/192.168.1.202?*
-info: System.Net.Http.HttpClient.ZKTecoApiClient.ClientHandler[101]
-      Received HTTP response headers after 14086.4104ms - 200
-info: System.Net.Http.HttpClient.ZKTecoApiClient.LogicalHandler[101]
-      End processing HTTP request after 14091.5079ms - 200
-info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoAttendanceService[0]
-      No records found on device: Sağ Cihaz
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.AttendanceSyncService[0]
-      ? [1/2] Device synced successfully: Sağ Cihaz
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.AttendanceSyncService[0]
-      ? Waiting 5 minutes before next device...
-info: SGKPortalApp.ApiLayer.Services.Hubs.PdksHub[0]
-      PDKS Hub - Client disconnected: IjXzf2RLYsWB3yWNi23bfA. Remaining monitors: 0
-info: SGKPortalApp.ApiLayer.Services.Hubs.PdksHub[0]
-      ?? [PdksHub] Bağlantı koptu: IjXzf2RLYsWB3yWNi23bfA - Kullanıcı: MUHAMMED BODUR
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Personel bağlantısı koptu: 28165202398
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: B0Td3MIhrTPFM36rR5_iCA - Kullanıcı: MUHAMMED BODUR
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: IMHcsnwfiQa_yzgtKxpboQ - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=c08d61dd-d82c-4fb5-9407-7770f6ebf234
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: IMHcsnwfiQa_yzgtKxpboQ | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
+info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
+        ? Personeller: 0 eklendi, 14 güncellendi, 0 atlandı
+info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
+      ? Sync tamamlandı
+info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
+      ? Stale connection temizliği: 1 connection offline yapıldı (Threshold: 10 dakika)
+info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
+      ? Idle timeout tespit edildi - TC: 12345678901, Son Aktivite: 01/28/2026 12:17:17, Idle Süre: 8883.10802693 dakika
+warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
+      ?? SessionID ile aktif login log bulunamadı - SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
+warn: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
+      ?? Idle session logout başarısız - TC: 12345678901, SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
+info: SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch.PersonelSearchService[0]
+      Synonym dosyasından 91 synonym yüklendi: D:\AspNetExamples\SGKPortalApp\elasticsearch-synonyms.json
+info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
+      ?? 0 orphan session temizlendi
+info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
+      ?? 0 stale hub connection pasifleştirildi
+info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
+      ?? 1 disconnected-but-not-logged-out session temizlendi
+info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
+      ? Toplam 1 kayıt temizlendi
+info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.SessionCleanupService[0]
+      ? Cleanup tamamlandı - 1 kayıt temizlendi
+info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
+      ? Idle timeout tespit edildi - TC: 12345678901, Son Aktivite: 01/28/2026 12:17:17, Idle Süre: 8888.108774906666 dakika
+warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
+      ?? SessionID ile aktif login log bulunamadı - SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
+warn: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
+      ?? Idle session logout başarısız - TC: 12345678901, SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
+fail: Microsoft.EntityFrameworkCore.Query[10100]
+      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+fail: Microsoft.EntityFrameworkCore.Query[10100]
+      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+fail: Microsoft.EntityFrameworkCore.Query[10100]
+      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+fail: SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService[0]
+      Dashboard verileri getirilirken hata oluştu
+      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+         at SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common.DuyuruRepository.GetListeDuyurularAsync(Int32 count) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Concrete\Common\DuyuruRepository.cs:line 50
+         at SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService.GetListeDuyurularInternalAsync(Int32 count) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\Common\DashboardService.cs:line 160
+         at SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService.GetDashboardDataAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\Common\DashboardService.cs:line 46
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelMesaiService[0]
+      Personel mesai verileri: TcKimlikNo=28165202398, KayitNo=2152, Tarih=01/01/2026 00:00:00-12/31/2026 00:00:00, Kayıt Sayısı=44
