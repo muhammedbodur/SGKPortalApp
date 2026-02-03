@@ -1,4 +1,4 @@
-using SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Elasticsearch;
 
 namespace SGKPortalApp.BusinessLogicLayer.Interfaces.Elasticsearch
 {

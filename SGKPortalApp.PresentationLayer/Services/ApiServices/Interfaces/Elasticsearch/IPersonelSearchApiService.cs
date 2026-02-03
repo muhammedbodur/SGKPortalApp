@@ -1,5 +1,5 @@
-using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Elasticsearch;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Elasticsearch
 {

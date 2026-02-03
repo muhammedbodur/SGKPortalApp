@@ -8,7 +8,7 @@ using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Shared.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;

@@ -1,7 +1,7 @@
 using SGKPortalApp.BusinessObjectLayer.Enums.PersonelIslemleri;
 using System.Text.Json.Serialization;
 
-namespace SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch
+namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Elasticsearch
 {
     /// <summary>
     /// Elasticsearch'te indexlenecek denormalize personel dokümanı

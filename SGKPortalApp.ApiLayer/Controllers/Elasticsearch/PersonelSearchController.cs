@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Elasticsearch;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Elasticsearch;
 
 namespace SGKPortalApp.ApiLayer.Controllers.Elasticsearch
 {

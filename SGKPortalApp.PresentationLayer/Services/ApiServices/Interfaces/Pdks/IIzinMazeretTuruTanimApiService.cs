@@ -1,4 +1,4 @@
-using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Pdks

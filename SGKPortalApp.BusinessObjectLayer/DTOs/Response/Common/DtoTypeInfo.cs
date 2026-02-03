@@ -1,4 +1,4 @@
-namespace SGKPortalApp.BusinessObjectLayer.DTOs.Common
+namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
 {
     /// <summary>
     /// DTO tipi bilgisi

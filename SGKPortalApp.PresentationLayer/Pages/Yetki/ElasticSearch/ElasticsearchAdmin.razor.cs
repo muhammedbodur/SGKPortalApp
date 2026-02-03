@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Components;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Elasticsearch;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Elasticsearch;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Yetki.ElasticSearch

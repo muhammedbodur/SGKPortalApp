@@ -16,13 +16,4 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
         public bool IsSuccess => FailCount == 0 && SuccessCount > 0;
         public string Message => $"{SuccessCount}/{TotalDevices} cihaza başarıyla gönderildi";
     }
-
-    public class DeviceSyncDetail
-    {
-        public int DeviceId { get; set; }
-        public string DeviceName { get; set; } = string.Empty;
-        public string DeviceIp { get; set; } = string.Empty;
-        public bool Success { get; set; }
-        public string? ErrorMessage { get; set; }
-    }
 }

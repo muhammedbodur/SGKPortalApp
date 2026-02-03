@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Elasticsearch;
 using SGKPortalApp.BusinessObjectLayer.Configuration;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Elasticsearch;
 using System.Text.Json;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch

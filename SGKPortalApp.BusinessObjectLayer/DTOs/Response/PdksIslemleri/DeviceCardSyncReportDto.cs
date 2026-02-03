@@ -17,15 +17,4 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.PdksIslemleri
         public DateTime ReportGeneratedAt { get; set; } = DateTime.Now;
         public TimeSpan TotalProcessingTime { get; set; }
     }
-
-    public class DeviceSyncStatus
-    {
-        public int DeviceId { get; set; }
-        public string DeviceName { get; set; } = string.Empty;
-        public string DeviceIp { get; set; } = string.Empty;
-        public bool Success { get; set; }
-        public int CardCount { get; set; }
-        public string? ErrorMessage { get; set; }
-        public TimeSpan ProcessingTime { get; set; }
-    }
 }

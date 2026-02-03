@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Shared.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Enums.ZKTeco;
 
 namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco

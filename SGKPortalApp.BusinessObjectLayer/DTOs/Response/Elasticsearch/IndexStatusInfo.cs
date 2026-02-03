@@ -1,4 +1,4 @@
-namespace SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch
+namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Elasticsearch
 {
     /// <summary>
     /// Elasticsearch index durum bilgisi
