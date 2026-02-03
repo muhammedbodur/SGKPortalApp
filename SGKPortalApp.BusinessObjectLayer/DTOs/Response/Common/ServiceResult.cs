@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SGKPortalApp.BusinessObjectLayer.DTOs.Common
+namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
 {
     public class ServiceResult<T>
     {

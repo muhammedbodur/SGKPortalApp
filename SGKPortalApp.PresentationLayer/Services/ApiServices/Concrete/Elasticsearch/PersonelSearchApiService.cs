@@ -1,5 +1,5 @@
-using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Elasticsearch;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Elasticsearch;
 using System.Net.Http.Json;
 

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Elasticsearch;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Elasticsearch;
 
 namespace SGKPortalApp.ApiLayer.Controllers.Elasticsearch
 {
@@ -186,6 +186,22 @@ namespace SGKPortalApp.ApiLayer.Controllers.Elasticsearch
         {
             var count = await _searchService.GetDocumentCountAsync();
             return Ok(new { Count = count });
+        }
+
+        /// <summary>
+        /// Index'i siler
+        /// DİKKAT: Tüm veriler kaybolur!
+        /// </summary>
+        [HttpDelete("delete-index")]
+        public async Task<ActionResult> DeleteIndex()
+        {
+            _logger.LogWarning("Index silme isteği alındı");
+            var result = await _searchService.DeleteIndexAsync();
+            if (result)
+            {
+                return Ok(new { Message = "Index başarıyla silindi" });
+            }
+            return BadRequest(new { Message = "Index silinemedi" });
         }
 
         // ═══════════════════════════════════════════════════════

@@ -2,7 +2,7 @@
 // 📁 PresentationLayer/Services/ApiServices/Concrete/Common/HizmetBinasiApiService.cs
 // ════════════════════════════════════════════════════════════════
 using Microsoft.Extensions.Logging;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;

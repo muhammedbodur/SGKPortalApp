@@ -1,5 +1,5 @@
-using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Elasticsearch;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Elasticsearch
 {
@@ -11,5 +11,6 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Elastic
         Task<ServiceResult<int>> FullReindexAsync();
         Task<ServiceResult<int>> IncrementalSyncAsync(int sinceHours = 24);
         Task<ServiceResult<long>> GetDocumentCountAsync();
+        Task<ServiceResult<bool>> DeleteIndexAsync();
     }
 }

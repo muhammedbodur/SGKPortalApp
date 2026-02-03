@@ -1,7 +1,7 @@
 using AutoMapper;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Shared.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Entities.ZKTeco;
 
 namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.ZKTeco

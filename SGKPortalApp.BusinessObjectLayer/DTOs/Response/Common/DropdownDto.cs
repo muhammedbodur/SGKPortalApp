@@ -1,4 +1,4 @@
-namespace SGKPortalApp.BusinessObjectLayer.DTOs.Common
+namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
 {
     /// <summary>
     /// Dropdown için kullanılan DTO (Açıklama ile)

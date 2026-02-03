@@ -2,7 +2,7 @@
 // 📁 PresentationLayer/Services/ApiServices/Concrete/Common/DtoDiscoveryApiService.cs
 // ════════════════════════════════════════════════════════════════
 using Microsoft.Extensions.Logging;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 using System.Net.Http.Json;

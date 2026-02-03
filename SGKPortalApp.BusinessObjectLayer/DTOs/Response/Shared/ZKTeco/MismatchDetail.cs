@@ -1,6 +1,6 @@
 using SGKPortalApp.BusinessObjectLayer.Enums.ZKTeco;
 
-namespace SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco
+namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Shared.ZKTeco
 {
     /// <summary>
     /// Uyuşmazlık detayı

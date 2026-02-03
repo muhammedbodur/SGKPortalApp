@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using SGKPortalApp.ApiLayer.Services.Hubs.Base;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Shared.ZKTeco;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

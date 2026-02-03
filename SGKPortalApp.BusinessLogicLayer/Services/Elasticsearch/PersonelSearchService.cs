@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Elasticsearch;
 using SGKPortalApp.BusinessObjectLayer.Configuration;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Elasticsearch;
 using System.Text.Json;
 
 namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
@@ -253,6 +253,33 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Index yeniden oluşturma hatası");
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteIndexAsync()
+        {
+            try
+            {
+                if (!await IndexExistsAsync())
+                {
+                    _logger.LogInformation("Index zaten mevcut değil: {IndexName}", _settings.IndexName);
+                    return true;
+                }
+
+                var deleteResponse = await _client.Indices.DeleteAsync(_settings.IndexName);
+                if (deleteResponse.IsValidResponse)
+                {
+                    _logger.LogInformation("Index silindi: {IndexName}", _settings.IndexName);
+                    return true;
+                }
+
+                _logger.LogError("Index silme hatası: {Error}", deleteResponse.DebugInformation);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Index silme hatası");
                 return false;
             }
         }

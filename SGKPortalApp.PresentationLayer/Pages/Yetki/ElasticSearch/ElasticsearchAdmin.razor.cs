@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Components;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Elasticsearch;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Elasticsearch;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Yetki.ElasticSearch
@@ -156,6 +156,43 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.ElasticSearch
                 OperationSuccess = false;
                 OperationMessage = $"❌ Hata: {ex.Message}";
                 Logger.LogError(ex, "Incremental sync hatası");
+            }
+            finally
+            {
+                IsProcessing = false;
+                CurrentOperation = null;
+                StateHasChanged();
+            }
+        }
+
+        private async Task DeleteIndex()
+        {
+            IsProcessing = true;
+            CurrentOperation = "delete";
+            OperationMessage = "⏳ Index siliniyor...";
+            StateHasChanged();
+
+            try
+            {
+                var result = await ApiService.DeleteIndexAsync();
+
+                if (result.Success)
+                {
+                    OperationSuccess = true;
+                    OperationMessage = "✅ Index başarıyla silindi!";
+                    await RefreshStatus();
+                }
+                else
+                {
+                    OperationSuccess = false;
+                    OperationMessage = $"❌ {result.Message}";
+                }
+            }
+            catch (Exception ex)
+            {
+                OperationSuccess = false;
+                OperationMessage = $"❌ Hata: {ex.Message}";
+                Logger.LogError(ex, "Index silme hatası");
             }
             finally
             {

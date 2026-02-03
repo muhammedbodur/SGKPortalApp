@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.PersonelIslemleri;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.PersonelIslemleri; // ← YENİ EKLENEN
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;

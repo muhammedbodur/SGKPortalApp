@@ -1,11 +1,11 @@
-using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
 {
     /// <summary>
     /// DTO Discovery API Service - Backend DtoDiscoveryController'a HTTP çağrıları yapar
-    /// DTO'lar BusinessObjectLayer.DTOs.Common.DtoDiscoveryDtos'da tanımlı
+    /// DTO'lar BusinessObjectLayer.DTOs.Response.Common.DtoDiscoveryDtos'da tanımlı
     /// </summary>
     public interface IDtoDiscoveryApiService
     {

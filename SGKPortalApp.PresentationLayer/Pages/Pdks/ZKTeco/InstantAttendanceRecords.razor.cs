@@ -6,7 +6,7 @@ using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.ZKTeco;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Shared.ZKTeco;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Shared.ZKTeco;
 using SGKPortalApp.BusinessObjectLayer.Enums.PdksIslemleri;
 using SGKPortalApp.PresentationLayer.Components.Base;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.ZKTeco;

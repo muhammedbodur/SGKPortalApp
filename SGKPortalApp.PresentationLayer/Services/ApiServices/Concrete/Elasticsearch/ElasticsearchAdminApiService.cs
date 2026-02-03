@@ -1,5 +1,5 @@
-using SGKPortalApp.BusinessObjectLayer.DTOs.Common;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Elasticsearch;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Elasticsearch;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Elasticsearch;
 using System.Net.Http.Json;
 
@@ -150,6 +150,28 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Elasticse
             {
                 _logger.LogError(ex, "GetDocumentCountAsync Exception");
                 return ServiceResult<long>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<bool>> DeleteIndexAsync()
+        {
+            try
+            {
+                var response = await _httpClient.DeleteAsync("personelsearch/delete-index");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return ServiceResult<bool>.Ok(true, "Index başarıyla silindi");
+                }
+
+                var errorContent = await response.Content.ReadAsStringAsync();
+                _logger.LogError("DeleteIndexAsync failed: {StatusCode} - {Error}", response.StatusCode, errorContent);
+                return ServiceResult<bool>.Fail($"Index silinemedi: {response.StatusCode}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DeleteIndexAsync Exception");
+                return ServiceResult<bool>.Fail($"Hata: {ex.Message}");
             }
         }
     }
