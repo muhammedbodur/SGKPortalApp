@@ -35,5 +35,8 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.PersonelIslemleri
 
         // EnrollNumber yönetimi
         Task<string> GetNextAvailableEnrollNumberAsync();
+
+        // Dashboard için bugün doğanlar
+        Task<IEnumerable<Personel>> GetBugunDoganlarAsync();
     }
 }

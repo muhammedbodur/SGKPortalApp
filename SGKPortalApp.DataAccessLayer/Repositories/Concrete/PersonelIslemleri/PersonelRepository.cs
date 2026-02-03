@@ -322,5 +322,20 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.PersonelIslemleri
 
             return nextNumber.ToString();
         }
+
+        public async Task<IEnumerable<Personel>> GetBugunDoganlarAsync()
+        {
+            var today = DateTime.Today;
+            return await _dbSet
+                .Include(p => p.Departman)
+                .Include(p => p.Servis)
+                .AsNoTracking()
+                .Where(p => !p.SilindiMi &&
+                           p.PersonelAktiflikDurum == PersonelAktiflikDurum.Aktif &&
+                           p.DogumTarihi.Month == today.Month &&
+                           p.DogumTarihi.Day == today.Day)
+                .OrderBy(p => p.AdSoyad)
+                .ToListAsync();
+        }
     }
 }
