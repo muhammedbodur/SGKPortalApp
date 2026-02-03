@@ -265,7 +265,7 @@ window.initTakvimWidgetCalendar = function (eventsJson, year) {
 
             // Görünüm ayarları
             initialView: 'dayGridMonth',
-            initialDate: `${year}-01-01`,
+            initialDate: new Date(year, new Date().getMonth(), 1),
 
             // Compact header
             headerToolbar: {
@@ -283,6 +283,13 @@ window.initTakvimWidgetCalendar = function (eventsJson, year) {
             },
             allDayText: 'Tüm gün',
             firstDay: 1,
+
+            fixedWeekCount: false,
+            showNonCurrentDates: true,
+            dayMaxEvents: true,
+
+            handleWindowResize: true,
+            windowResizeDelay: 100,
 
             // Event'ler
             events: events,
@@ -337,10 +344,10 @@ window.initTakvimWidgetCalendar = function (eventsJson, year) {
             },
 
             // Responsive ayarlar - Widget için kompakt
-            height: 'auto',
-            contentHeight: 'auto',
+            height: 380,
+            contentHeight: 380,
             aspectRatio: 1.35,
-            expandRows: false,
+            expandRows: true,
 
             // Hafta sonu vurgulama
             dayCellDidMount: function (info) {
@@ -352,6 +359,12 @@ window.initTakvimWidgetCalendar = function (eventsJson, year) {
 
         // Takvimi render et
         takvimWidgetCalendar.render();
+        setTimeout(() => {
+            try {
+                takvimWidgetCalendar.updateSize();
+            } catch (e) {
+            }
+        }, 150);
         console.log(`✅ Widget takvimi başlatıldı (${year})`);
 
     } catch (error) {

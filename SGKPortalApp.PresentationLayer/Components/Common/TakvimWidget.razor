@@ -1,4 +1,4 @@
-<div class="card">
+<div class="card mb-4 takvim-widget-compact">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="card-title mb-0">
             <i class="bx bx-calendar me-2"></i>Takvim
@@ -7,7 +7,88 @@
             <i class="bx bx-fullscreen me-1"></i>Tümünü Gör
         </a>
     </div>
-    <div class="card-body" style="overflow-x: auto;">
+    <div class="card-body">
         <TakvimComponent ShowSidebar="false" CalendarId="takvimWidgetCalendar" />
     </div>
 </div>
+
+<style>
+    .takvim-widget-compact .card-header {
+        padding: 0.75rem 1rem;
+    }
+
+    .takvim-widget-compact .card-body {
+        padding: 0.5rem 0.75rem;
+        overflow: visible;
+    }
+
+    .takvim-widget-compact #takvimWidgetCalendar {
+        overflow-x: hidden;
+        overflow-y: visible;
+        padding: 0 2px;
+    }
+
+    .takvim-widget-compact #takvimWidgetCalendar .fc,
+    .takvim-widget-compact #takvimWidgetCalendar .fc .fc-view-harness,
+    .takvim-widget-compact #takvimWidgetCalendar .fc .fc-scrollgrid {
+        width: 100%;
+    }
+
+    .takvim-widget-compact #takvimWidgetCalendar .fc table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .takvim-widget-compact #takvimWidgetCalendar .fc .fc-scroller-harness,
+    .takvim-widget-compact #takvimWidgetCalendar .fc .fc-scroller {
+        overflow: visible !important;
+    }
+
+    .takvim-widget-compact #takvimWidgetCalendar .fc {
+        font-size: 0.75rem;
+    }
+
+    .takvim-widget-compact #takvimWidgetCalendar .fc .fc-toolbar {
+        margin-bottom: 0.5rem;
+    }
+
+    .takvim-widget-compact #takvimWidgetCalendar .fc .fc-toolbar-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+    }
+
+    .takvim-widget-compact #takvimWidgetCalendar .fc .fc-button {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        line-height: 1;
+    }
+
+    .takvim-widget-compact #takvimWidgetCalendar .fc .fc-col-header-cell-cushion {
+        padding: 0.25rem 0.1rem;
+        font-size: 0.7rem;
+    }
+
+    .takvim-widget-compact #takvimWidgetCalendar .fc .fc-daygrid-day-number {
+        padding: 0.15rem 0.25rem;
+        font-size: 0.7rem;
+    }
+
+    .takvim-widget-compact #takvimWidgetCalendar .fc .fc-daygrid-day-frame {
+        min-height: 44px;
+    }
+
+    .takvim-widget-compact #takvimWidgetCalendar .fc .fc-daygrid-event {
+        margin-top: 1px;
+    }
+
+    .takvim-widget-compact #takvimWidgetCalendar .fc .fc-event-title,
+    .takvim-widget-compact #takvimWidgetCalendar .fc .fc-event-time {
+        font-size: 0.65rem;
+    }
+
+    .takvim-widget-compact #takvimWidgetCalendar .fc .fc-daygrid-event {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>

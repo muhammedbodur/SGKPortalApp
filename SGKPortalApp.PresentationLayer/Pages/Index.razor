@@ -20,56 +20,10 @@
     }
     else
     {
-        <!-- ====== HERO WELCOME CARD ====== -->
-        <div class="card mb-4 hero-welcome-card">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-lg-8">
-                        <div class="d-flex align-items-center mb-2">
-                            <h3 class="mb-0 me-2">Hoş geldin, @UserName</h3>
-                            <span class="fs-3">👋</span>
-                        </div>
-                        <div class="d-flex align-items-center flex-wrap gap-3">
-                            <span class="text-muted">
-                                <i class="bx bx-calendar me-1"></i>
-                                @DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))
-                            </span>
-                            @if (GununMenusu != null && !string.IsNullOrEmpty(GununMenusu.Icerik))
-                            {
-                                <span class="badge bg-label-warning rounded-pill px-3 py-2">
-                                    <i class="bx bx-restaurant me-1"></i>
-                                    Günün Menüsü: @GetFirstMenuItem()
-                                </span>
-                            }
-                        </div>
-                    </div>
-                    <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                        <div class="weather-widget d-inline-flex align-items-center p-3 rounded-3" style="background: rgba(105, 108, 255, 0.08);">
-                            <div class="weather-icon me-3">
-                                <div class="avatar avatar-md">
-                                    <span class="avatar-initial rounded bg-label-primary">
-                                        <i class="bx bx-calendar-event fs-3"></i>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="text-start">
-                                <div class="fw-semibold text-primary">@DateTime.Now.ToString("dddd", new System.Globalization.CultureInfo("tr-TR"))</div>
-                                <div class="small text-muted">@DateTime.Now.ToString("dd.MM.yyyy")</div>
-                            </div>
-                            <div class="ms-4 text-center border-start ps-4">
-                                <i class="bx bx-sun text-warning fs-1"></i>
-                                <div class="fw-bold text-dark">22°C</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- ====== MAIN CONTENT AREA ====== -->
         <div class="row">
             <!-- ====== LEFT COLUMN (8 cols) ====== -->
-            <div class="col-xl-8 col-lg-7">
+            <div class="col-xl-9 col-lg-7">
 
                 <!-- ====== IMAGE SLIDER / CAROUSEL ====== -->
                 <div class="card mb-4 shadow-sm slider-card">
@@ -278,7 +232,9 @@
             </div>
 
             <!-- ====== RIGHT COLUMN (4 cols) ====== -->
-            <div class="col-xl-4 col-lg-5">
+            <div class="col-xl-3 col-lg-5">
+
+                <TakvimWidget />
 
                 <!-- ====== BUGÜN DOĞAN PERSONELLER ====== -->
                 <div class="card mb-4 shadow-sm">
@@ -313,8 +269,8 @@
                                             <small class="text-muted">@(personel.DepartmanAdi ?? "Birim belirtilmemiş")</small>
                                         </div>
                                         <div class="avatar avatar-sm">
-                                            <span class="avatar-initial rounded-circle bg-label-success">
-                                                @personel.Yas
+                                            <span class="avatar-initial rounded-circle bg-label-warning">
+                                                <i class="bx bx-cake"></i>
                                             </span>
                                         </div>
                                     </div>
@@ -405,18 +361,6 @@
 </div>
 
 <style>
-    /* Hero Welcome Card */
-    .hero-welcome-card {
-        background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
-        border: none;
-        border-radius: 12px;
-    }
-
-    .hero-welcome-card h3 {
-        color: #32475c;
-        font-weight: 600;
-    }
-
     /* Slider Card */
     .slider-card {
         border-radius: 12px;

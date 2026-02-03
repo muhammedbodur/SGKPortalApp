@@ -1,5 +1,6 @@
 @page "/pdks/giris-cikis"
 @using SGKPortalApp.PresentationLayer.Components.Permission
+@using SGKPortalApp.PresentationLayer.Components.Common
 @inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 
 <PageTitle>Giriş/Çıkış Kayıtları</PageTitle>
@@ -15,5 +16,7 @@ else
 {
     <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
         <h3>Giriş/Çıkış Kayıtları</h3>
+
+        <TakvimComponent ShowSidebar="true" CalendarId="pdksGirisCikisCalendar" />
     </FieldPermissionScope>
 }
