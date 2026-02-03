@@ -11,5 +11,6 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Elastic
         Task<ServiceResult<int>> FullReindexAsync();
         Task<ServiceResult<int>> IncrementalSyncAsync(int sinceHours = 24);
         Task<ServiceResult<long>> GetDocumentCountAsync();
+        Task<ServiceResult<bool>> DeleteIndexAsync();
     }
 }

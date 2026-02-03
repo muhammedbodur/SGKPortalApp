@@ -188,6 +188,22 @@ namespace SGKPortalApp.ApiLayer.Controllers.Elasticsearch
             return Ok(new { Count = count });
         }
 
+        /// <summary>
+        /// Index'i siler
+        /// DİKKAT: Tüm veriler kaybolur!
+        /// </summary>
+        [HttpDelete("delete-index")]
+        public async Task<ActionResult> DeleteIndex()
+        {
+            _logger.LogWarning("Index silme isteği alındı");
+            var result = await _searchService.DeleteIndexAsync();
+            if (result)
+            {
+                return Ok(new { Message = "Index başarıyla silindi" });
+            }
+            return BadRequest(new { Message = "Index silinemedi" });
+        }
+
         // ═══════════════════════════════════════════════════════
         // 🔧 YARDIMCI METODLAR
         // ═══════════════════════════════════════════════════════

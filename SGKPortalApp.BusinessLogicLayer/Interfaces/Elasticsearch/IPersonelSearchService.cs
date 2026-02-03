@@ -69,5 +69,10 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.Elasticsearch
         /// Elasticsearch bağlantısını test eder
         /// </summary>
         Task<bool> PingAsync();
+
+        /// <summary>
+        /// Index'i tamamen siler
+        /// </summary>
+        Task<bool> DeleteIndexAsync();
     }
 }

@@ -257,6 +257,33 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch
             }
         }
 
+        public async Task<bool> DeleteIndexAsync()
+        {
+            try
+            {
+                if (!await IndexExistsAsync())
+                {
+                    _logger.LogInformation("Index zaten mevcut değil: {IndexName}", _settings.IndexName);
+                    return true;
+                }
+
+                var deleteResponse = await _client.Indices.DeleteAsync(_settings.IndexName);
+                if (deleteResponse.IsValidResponse)
+                {
+                    _logger.LogInformation("Index silindi: {IndexName}", _settings.IndexName);
+                    return true;
+                }
+
+                _logger.LogError("Index silme hatası: {Error}", deleteResponse.DebugInformation);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Index silme hatası");
+                return false;
+            }
+        }
+
         public async Task<bool> IndexPersonelAsync(PersonelElasticDto personel)
         {
             try

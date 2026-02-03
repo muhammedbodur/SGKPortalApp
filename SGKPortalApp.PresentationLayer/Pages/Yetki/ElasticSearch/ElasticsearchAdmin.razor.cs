@@ -164,5 +164,42 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.ElasticSearch
                 StateHasChanged();
             }
         }
+
+        private async Task DeleteIndex()
+        {
+            IsProcessing = true;
+            CurrentOperation = "delete";
+            OperationMessage = "⏳ Index siliniyor...";
+            StateHasChanged();
+
+            try
+            {
+                var result = await ApiService.DeleteIndexAsync();
+
+                if (result.Success)
+                {
+                    OperationSuccess = true;
+                    OperationMessage = "✅ Index başarıyla silindi!";
+                    await RefreshStatus();
+                }
+                else
+                {
+                    OperationSuccess = false;
+                    OperationMessage = $"❌ {result.Message}";
+                }
+            }
+            catch (Exception ex)
+            {
+                OperationSuccess = false;
+                OperationMessage = $"❌ Hata: {ex.Message}";
+                Logger.LogError(ex, "Index silme hatası");
+            }
+            finally
+            {
+                IsProcessing = false;
+                CurrentOperation = null;
+                StateHasChanged();
+            }
+        }
     }
 }
