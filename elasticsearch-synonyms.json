@@ -6,19 +6,24 @@
   },
   "synonyms": {
     "unvan_kisaltmalari": [
+      "ssgm => müdür",
+      "ssgmy => müdür yardımcısı",
+      "sgmm => müdür",
+      "ssgmm => müdür",
+      "sgmmy => müdür yardımcısı",
+      "ssgmmy => müdür yardımcısı",
       "sgmm => sosyal güvenlik merkezi müdürü",
       "sgmmy => sosyal güvenlik merkezi müdür yardımcısı",
       "ssgm => sosyal sigorta genel müdürlüğü",
       "ssgmmy => sosyal sigorta genel müdürlüğü müdür yardımcısı",
       "mmy => müdür yardımcısı",
-      "vhki => vekil hizmet kıdem işlemi",
-      "sg => sosyal güvenlik"
+      "vhki => veri hazırlama kontrol işletmeni",
+      "sg => sosyal güvenlik",
+      "müdür yar, müdür yrd, müdür yardımcısı"
     ],
     "kisaltmalar": [
       "sgm => sosyal güvenlik merkezi",
-      "sgk => sosyal güvenlik kurumu",
-      "ptt => prim tahakkuk tahsilat",
-      "iup => işsizlik ücret programı"
+      "sgk => sosyal güvenlik kurumu"
     ],
     "departman_servis": [
       "il => il müdürlüğü",
@@ -49,7 +54,15 @@
       "hemsire => hemşire",
       "asci => aşçı",
       "sofor => şoför",
-      "bekci => bekçi"
+      "bekci => bekçi",
+      "mudur => müdür",
+      "müdürü => müdür",
+      "mudur yrd => müdür yardımcısı",
+      "mudur yr => müdür yardımcısı",
+      "müdür yrd => müdür yardımcısı",
+      "müdür yr => müdür yardımcısı",
+      "yrd => yardımcısı",
+      "yr => yardımcısı"
     ],
     "turkce_karakter": [
       "müdür, mudur",
