@@ -7,13 +7,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
 {
     /// <summary>
-    /// Duyuru Entity
-    /// Tablo adı: CMN_Duyurular (Configuration'da tanımlanacak)
+    /// Haber Entity
+    /// Tablo adı: CMN_Haberler
     /// </summary>
-    public class Duyuru : AuditableEntity
+    public class Haber : AuditableEntity
     {
         [Key]
-        public int DuyuruId { get; set; }
+        public int HaberId { get; set; }
 
         [Required]
         [StringLength(200)]
@@ -38,7 +38,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
 
         public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
 
-        // Navigation property - Duyuruya ait tüm görseller
-        public virtual ICollection<DuyuruGorsel> Gorseller { get; set; } = new List<DuyuruGorsel>();
+        // Navigation property - Habere ait tüm görseller
+        public virtual ICollection<HaberGorsel> Gorseller { get; set; } = new List<HaberGorsel>();
     }
 }

@@ -1,0 +1,343 @@
+@page "/common/duyuru/manage"
+@page "/common/duyuru/manage/{id:int}"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+
+<PageTitle>@(IsEditMode ? "Duyuru Düzenle" : "Yeni Duyuru") - SGK Portal</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-xxl flex-grow-1 container-p-y">
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb breadcrumb-style1">
+                    <li class="breadcrumb-item">
+                        <a href="javascript:void(0);" @onclick="NavigateToHome">
+                            <i class="bx bx-home-alt me-1"></i>Ana Sayfa
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="javascript:void(0);" @onclick="NavigateToDuyuruList">
+                            Duyuru Yönetimi
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        @(IsEditMode ? "Düzenle" : "Yeni Duyuru")
+                    </li>
+                </ol>
+            </nav>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        <i class="bx @(IsEditMode ? "bx-edit" : "bx-plus-circle") me-2"></i>
+                        @(IsEditMode ? "Duyuru Düzenle" : "Yeni Duyuru Ekle")
+                    </h4>
+                    <p class="text-muted mb-0">
+                        @(IsEditMode ? "Duyuru bilgilerini güncelleyin" : "Yeni bir duyuru oluşturun")
+                    </p>
+                </div>
+
+                <button class="btn btn-outline-secondary" @onclick="NavigateToDuyuruList">
+                    <i class="bx bx-arrow-back me-1"></i>Geri Dön
+                </button>
+            </div>
+
+            @if (IsLoading)
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Yükleniyor...</span>
+                        </div>
+                        <p class="text-muted">@(IsEditMode ? "Duyuru bilgileri yükleniyor..." : "Hazırlanıyor...")</p>
+                    </div>
+                </div>
+            }
+            else if (NotFound)
+            {
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="bx bx-error-circle display-1 text-danger mb-3"></i>
+                        <h5 class="mb-3">Duyuru Bulunamadı</h5>
+                        <p class="text-muted mb-4">
+                            Aradığınız duyuru bulunamadı veya silinmiş olabilir.
+                        </p>
+                        <button class="btn btn-primary" @onclick="NavigateToDuyuruList">
+                            <i class="bx bx-list-ul me-1"></i>Duyuru Listesine Dön
+                        </button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card mb-4">
+                            <div class="card-header d-flex align-items-center justify-content-between">
+                                <h5 class="mb-0">
+                                    <i class="bx bx-info-circle me-2"></i>Duyuru Bilgileri
+                                </h5>
+                                @if (IsEditMode)
+                                {
+                                    <span class="badge bg-label-info">ID: @Id</span>
+                                }
+                            </div>
+
+                            <div class="card-body">
+                                <EditForm Model="@FormModel" OnValidSubmit="HandleSubmit">
+                                    <DataAnnotationsValidator />
+
+                                    <div class="mb-3">
+                                        <label class="form-label required">
+                                            <i class="bx bx-heading me-1"></i>Başlık
+                                        </label>
+                                        <InputText @bind-Value="FormModel.Baslik"
+                                                   class="form-control"
+                                                   placeholder="Duyuru başlığı"
+                                                   maxlength="200"
+                                                   disabled="@IsSaving" />
+                                        <ValidationMessage For="@(() => FormModel.Baslik)" class="text-danger small mt-1" />
+                                        <div class="form-text">@FormModel.Baslik.Length / 200 karakter</div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label required">
+                                            <i class="bx bx-text me-1"></i>İçerik
+                                        </label>
+                                        <InputTextArea @bind-Value="FormModel.Icerik"
+                                                       class="form-control"
+                                                       placeholder="Duyuru içeriği"
+                                                       rows="5"
+                                                       disabled="@IsSaving" />
+                                        <ValidationMessage For="@(() => FormModel.Icerik)" class="text-danger small mt-1" />
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label required">
+                                                <i class="bx bx-sort-up me-1"></i>Sıra
+                                            </label>
+                                            <InputNumber @bind-Value="FormModel.Sira"
+                                                         class="form-control"
+                                                         min="1"
+                                                         max="999"
+                                                         disabled="@IsSaving" />
+                                            <ValidationMessage For="@(() => FormModel.Sira)" class="text-danger small mt-1" />
+                                            <div class="form-text">Düşük sıra önce gösterilir</div>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label required">
+                                                <i class="bx bx-check-circle me-1"></i>Durum
+                                            </label>
+                                            <InputSelect @bind-Value="FormModel.Aktiflik" class="form-select" disabled="@IsSaving">
+                                                <option value="@Aktiflik.Aktif">Aktif</option>
+                                                <option value="@Aktiflik.Pasif">Pasif</option>
+                                            </InputSelect>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label required">
+                                                <i class="bx bx-calendar me-1"></i>Yayın Tarihi
+                                            </label>
+                                            <InputDate @bind-Value="FormModel.YayinTarihi"
+                                                       class="form-control"
+                                                       disabled="@IsSaving" />
+                                            <ValidationMessage For="@(() => FormModel.YayinTarihi)" class="text-danger small mt-1" />
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">
+                                                <i class="bx bx-calendar-x me-1"></i>Bitiş Tarihi (Opsiyonel)
+                                            </label>
+                                            <InputDate @bind-Value="FormModel.BitisTarihi"
+                                                       class="form-control"
+                                                       disabled="@IsSaving" />
+                                            <div class="form-text">Boş bırakılırsa süresiz yayınlanır</div>
+                                        </div>
+                                    </div>
+
+                                    <ValidationSummary class="alert alert-danger" />
+
+                                    <div class="d-flex gap-2 justify-content-end pt-3 border-top">
+                                        <button type="button"
+                                                class="btn btn-outline-secondary"
+                                                @onclick="NavigateToDuyuruList"
+                                                disabled="@IsSaving">
+                                            <i class="bx bx-x me-1"></i>İptal
+                                        </button>
+
+                                        <button type="submit"
+                                                class="btn btn-primary"
+                                                disabled="@IsSaving">
+                                            @if (IsSaving)
+                                            {
+                                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                                <span>Kaydediliyor...</span>
+                                            }
+                                            else
+                                            {
+                                                <i class="bx bx-check me-1"></i>
+                                                <span>@(IsEditMode ? "Güncelle" : "Kaydet")</span>
+                                            }
+                                        </button>
+                                    </div>
+                                </EditForm>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <!-- GÖRSEL YÜKLEME -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="bx bx-image me-2"></i>Duyuru Görseli
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    @if (!string.IsNullOrEmpty(FormModel.GorselUrl))
+                                    {
+                                        <img src="@FormModel.GorselUrl" alt="Duyuru Görseli"
+                                             class="img-fluid rounded mb-2" style="max-height: 200px; object-fit: cover;" />
+                                        <div>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" @onclick="RemoveImage" disabled="@IsSaving">
+                                                <i class="bx bx-trash me-1"></i>Görseli Kaldır
+                                            </button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light rounded p-4 mb-2">
+                                            <i class="bx bx-image bx-lg text-muted"></i>
+                                            <p class="text-muted mb-0 small mt-2">Henüz görsel yüklenmemiş</p>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bx bx-upload me-1"></i>Görsel Yükle
+                                    </label>
+                                    <InputFile OnChange="HandleFileSelected"
+                                               accept=".jpg,.jpeg,.png,.gif,.webp"
+                                               class="form-control"
+                                               disabled="@(IsSaving || IsUploading)" />
+                                    <div class="form-text">
+                                        JPG, PNG, GIF veya WebP. Maksimum 5MB.
+                                    </div>
+                                </div>
+
+                                @if (IsUploading)
+                                {
+                                    <div class="text-center">
+                                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                                        <span class="text-muted">Yükleniyor...</span>
+                                    </div>
+                                }
+
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bx bx-link me-1"></i>veya URL Girin
+                                    </label>
+                                    <InputText @bind-Value="FormModel.GorselUrl"
+                                               class="form-control"
+                                               placeholder="https://example.com/image.jpg"
+                                               disabled="@IsSaving" />
+                                </div>
+
+                                <div class="alert alert-info small mb-0">
+                                    <i class="bx bx-info-circle me-1"></i>
+                                    <strong>Slider için:</strong> Görsel yüklenen duyurular ana sayfadaki slider'da gösterilir.
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (IsEditMode)
+                        {
+                            <div class="card border-danger">
+                                <div class="card-body">
+                                    <h6 class="text-danger mb-2">
+                                        <i class="bx bx-error-circle me-1"></i>Tehlikeli Bölge
+                                    </h6>
+                                    <p class="text-muted mb-3 small">
+                                        Bu duyuruyu silmek istiyorsanız, aşağıdaki butona tıklayın.
+                                        Bu işlem geri alınamaz.
+                                    </p>
+                                    <button class="btn btn-outline-danger"
+                                            @onclick="ShowDeleteConfirmation"
+                                            disabled="@IsSaving">
+                                        <i class="bx bx-trash me-1"></i>Duyuruyu Sil
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </FieldPermissionScope>
+}
+
+<!-- DELETE CONFIRMATION MODAL -->
+@if (ShowDeleteModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bx bx-trash text-danger me-2"></i>Duyuru Sil
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeleteModal" disabled="@IsDeleting"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger mb-3">
+                        <i class="bx bx-error-circle me-2"></i>
+                        <strong>Dikkat!</strong> Bu işlem geri alınamaz.
+                    </div>
+                    <p class="mb-0">
+                        <strong>@FormModel.Baslik</strong> duyurusunu silmek istediğinizden emin misiniz?
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDeleteModal" disabled="@IsDeleting">
+                        İptal
+                    </button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDelete" disabled="@IsDeleting">
+                        @if (IsDeleting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                            <span>Siliniyor...</span>
+                        }
+                        else
+                        {
+                            <i class="bx bx-trash me-1"></i>
+                            <span>Evet, Sil</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .required::after {
+        content: " *";
+        color: #ff0000;
+    }
+</style>
