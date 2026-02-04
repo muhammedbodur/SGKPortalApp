@@ -35,7 +35,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             {
                 var dashboardData = new DashboardDataResponseDto();
                 
-                dashboardData.SliderDuyurular = await GetSliderDuyurularInternalAsync(5);
+                dashboardData.SliderDuyurular = await GetSliderDuyurularInternalAsync(10);
                 
                 dashboardData.ListeDuyurular = await GetListeDuyurularInternalAsync(10);
                 

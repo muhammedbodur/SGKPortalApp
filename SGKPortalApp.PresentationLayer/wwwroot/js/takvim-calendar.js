@@ -13,7 +13,6 @@ window.initTakvimCalendar = function (eventsJson, year) {
     try {
         console.log('📅 initTakvimCalendar çağrıldı, yıl:', year);
 
-        // FullCalendar yüklü mü kontrol et (Sneat window.Calendar olarak export ediyor)
         if (typeof Calendar === 'undefined') {
             console.error('❌ FullCalendar kütüphanesi yüklenmemiş!');
             return;
@@ -286,7 +285,8 @@ window.initTakvimWidgetCalendar = function (eventsJson, year) {
 
             fixedWeekCount: false,
             showNonCurrentDates: true,
-            dayMaxEvents: true,
+            dayMaxEvents: 2,
+            dayMaxEventRows: 2,
 
             handleWindowResize: true,
             windowResizeDelay: 100,
@@ -343,12 +343,10 @@ window.initTakvimWidgetCalendar = function (eventsJson, year) {
                 window.location.href = '/common/takvim';
             },
 
-            // Responsive ayarlar - Widget için kompakt
-            height: 380,
-            contentHeight: 380,
-            aspectRatio: 1.35,
-            expandRows: true,
-
+            // Responsive ayarlar - Widget için dinamik
+            height: 'auto',
+            contentHeight: 'auto',
+            
             // Hafta sonu vurgulama
             dayCellDidMount: function (info) {
                 if (info.date.getDay() === 0 || info.date.getDay() === 6) {
@@ -359,12 +357,6 @@ window.initTakvimWidgetCalendar = function (eventsJson, year) {
 
         // Takvimi render et
         takvimWidgetCalendar.render();
-        setTimeout(() => {
-            try {
-                takvimWidgetCalendar.updateSize();
-            } catch (e) {
-            }
-        }, 150);
         console.log(`✅ Widget takvimi başlatıldı (${year})`);
 
     } catch (error) {
