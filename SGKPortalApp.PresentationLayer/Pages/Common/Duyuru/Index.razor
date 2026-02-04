@@ -1,0 +1,383 @@
+@page "/common/duyuru"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+
+<PageTitle>Haber Yönetimi - SGK Portal</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- PAGE HEADER -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        <i class="bx bx-news me-2"></i>Haber Yönetimi
+                    </h4>
+                    <p class="text-muted mb-0">
+                        Slider ve liste haberlerini yönetin
+                    </p>
+                </div>
+
+                <div class="d-flex gap-2">
+                    @if (IsActionVisible("EXCEL_EXPORT"))
+                    {
+                        <button class="btn btn-success" @onclick="ExportToExcel" disabled="@IsExporting">
+                            @if (IsExporting && ExportType == "excel")
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            else
+                            {
+                                <i class="bx bx-download me-1"></i>
+                            }
+                            Excel
+                        </button>
+                    }
+
+                    <button class="btn btn-primary" @onclick="NavigateToCreate">
+                        <i class="bx bx-plus me-1"></i>Yeni Haber
+                    </button>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- FILTER CARD -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Haber Ara</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bx bx-search"></i>
+                                </span>
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="Başlık veya içerik..."
+                                       @bind="searchTerm"
+                                       @bind:event="oninput"
+                                       @onkeyup="OnSearchChanged" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Durum</label>
+                            <select class="form-select" value="@statusFilter" @onchange="OnStatusFilterChanged">
+                                <option value="">Tümü</option>
+                                <option value="aktif">Aktif</option>
+                                <option value="pasif">Pasif</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Sıralama</label>
+                            <select class="form-select" value="@sortBy" @onchange="OnSortByChanged">
+                                <option value="date-newest">En Yeni</option>
+                                <option value="date-oldest">En Eski</option>
+                                <option value="sira-asc">Sıra (Artan)</option>
+                                <option value="sira-desc">Sıra (Azalan)</option>
+                                <option value="baslik-asc">Başlık (A-Z)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
+                                <i class="bx bx-reset me-1"></i>Temizle
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col">
+                            <div class="d-flex gap-4 text-muted small">
+                                <span>
+                                    <i class="bx bx-news text-primary"></i>
+                                    Toplam: <strong>@Duyurular.Count</strong>
+                                </span>
+                                <span>
+                                    <i class="bx bx-filter-alt text-info"></i>
+                                    Filtrelenen: <strong>@FilteredDuyurular.Count</strong>
+                                </span>
+                                <span>
+                                    <i class="bx bx-image text-success"></i>
+                                    Slider: <strong>@Duyurular.Count(d => !string.IsNullOrEmpty(d.GorselUrl))</strong>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <!-- TABLE CARD -->
+            <!-- ═══════════════════════════════════════════════════════ -->
+            <div class="card">
+                <div class="card-body">
+                    @if (IsLoading)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Yükleniyor...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Duyurular yükleniyor...</p>
+                        </div>
+                    }
+                    else if (!FilteredDuyurular.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="bx bx-search-alt display-1 text-muted"></i>
+                            <h5 class="mt-3">Haber Bulunamadı</h5>
+                            <p class="text-muted">
+                                @if (string.IsNullOrEmpty(searchTerm))
+                                {
+                                    <span>Henüz haber eklenmemiş.</span>
+                                }
+                                else
+                                {
+                                    <span>Arama kriterlerinize uygun haber bulunamadı.</span>
+                                }
+                            </p>
+                            @if (string.IsNullOrEmpty(searchTerm))
+                            {
+                                <button class="btn btn-primary mt-2" @onclick="NavigateToCreate">
+                                    <i class="bx bx-plus me-1"></i>İlk Haberi Ekle
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-outline-secondary mt-2" @onclick="ClearFilters">
+                                    <i class="bx bx-reset me-1"></i>Filtreleri Temizle
+                                </button>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">#</th>
+                                        <th style="width: 80px;">Görsel</th>
+                                        <th>Başlık</th>
+                                        <th class="text-center" style="width: 80px;">Sıra</th>
+                                        <th class="text-center" style="width: 100px;">Durum</th>
+                                        <th class="text-center" style="width: 130px;">Yayın Tarihi</th>
+                                        <th class="text-center" style="width: 130px;">Bitiş Tarihi</th>
+                                        <th class="text-center" style="width: 130px;">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var pagedData = FilteredDuyurular
+                                            .Skip((CurrentPage - 1) * PageSize)
+                                            .Take(PageSize)
+                                            .ToList();
+                                    }
+                                    @foreach (var (duyuru, index) in pagedData.Select((d, i) => (d, (CurrentPage - 1) * PageSize + i + 1)))
+                                    {
+                                        <tr>
+                                            <td>@index</td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(duyuru.GorselUrl))
+                                                {
+                                                    <img src="@duyuru.GorselUrl" alt="@duyuru.Baslik"
+                                                         class="rounded" style="width: 60px; height: 40px; object-fit: cover;" />
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-light rounded d-flex align-items-center justify-content-center"
+                                                         style="width: 60px; height: 40px;">
+                                                        <i class="bx bx-image text-muted"></i>
+                                                    </div>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong>@duyuru.Baslik</strong>
+                                                    @if (!string.IsNullOrEmpty(duyuru.GorselUrl))
+                                                    {
+                                                        <span class="badge bg-label-success ms-2">Slider</span>
+                                                    }
+                                                </div>
+                                                <small class="text-muted">
+                                                    @(duyuru.Icerik?.Length > 50 ? duyuru.Icerik.Substring(0, 50) + "..." : duyuru.Icerik)
+                                                </small>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-label-info">@duyuru.Sira</span>
+                                            </td>
+                                            <td class="text-center">
+                                                @if (duyuru.Aktiflik == Aktiflik.Aktif)
+                                                {
+                                                    <span class="badge bg-success">Aktif</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Pasif</span>
+                                                }
+                                            </td>
+                                            <td class="text-center text-muted small">
+                                                @duyuru.YayinTarihi.ToString("dd.MM.yyyy")
+                                            </td>
+                                            <td class="text-center text-muted small">
+                                                @(duyuru.BitisTarihi?.ToString("dd.MM.yyyy") ?? "-")
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-flex justify-content-center gap-1">
+                                                    @if (IsActionVisible("EDIT"))
+                                                    {
+                                                        <button class="btn btn-sm btn-icon btn-outline-primary"
+                                                                @onclick="() => NavigateToEdit(duyuru.DuyuruId)"
+                                                                disabled="@(!CanEditAction("EDIT"))"
+                                                                title="Düzenle">
+                                                            <i class="bx bx-edit"></i>
+                                                        </button>
+                                                    }
+
+                                                    @if (IsActionVisible("DELETE"))
+                                                    {
+                                                        <button class="btn btn-sm btn-icon btn-outline-danger"
+                                                                @onclick="() => ShowDeleteConfirmation(duyuru.DuyuruId, duyuru.Baslik)"
+                                                                disabled="@(!CanEditAction("DELETE"))"
+                                                                title="Sil">
+                                                            <i class="bx bx-trash"></i>
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @if (TotalPages > 1)
+                        {
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                <div class="text-muted small">
+                                    Gösterilen: <strong>@((CurrentPage - 1) * PageSize + 1)</strong> - <strong>@Math.Min(CurrentPage * PageSize, FilteredDuyurular.Count)</strong> / <strong>@FilteredDuyurular.Count</strong>
+                                </div>
+
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0">
+                                        <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                                            <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)" disabled="@(CurrentPage == 1)">
+                                                <i class="bx bx-chevron-left"></i>
+                                            </button>
+                                        </li>
+
+                                        @{
+                                            var startPage = Math.Max(1, CurrentPage - 2);
+                                            var endPage = Math.Min(TotalPages, CurrentPage + 2);
+                                        }
+
+                                        @if (startPage > 1)
+                                        {
+                                            <li class="page-item">
+                                                <button class="page-link" @onclick="() => ChangePage(1)">1</button>
+                                            </li>
+                                            @if (startPage > 2)
+                                            {
+                                                <li class="page-item disabled">
+                                                    <span class="page-link">...</span>
+                                                </li>
+                                            }
+                                        }
+
+                                        @for (int i = startPage; i <= endPage; i++)
+                                        {
+                                            var pageNum = i;
+                                            <li class="page-item @(CurrentPage == pageNum ? "active" : "")">
+                                                <button class="page-link" @onclick="() => ChangePage(pageNum)">
+                                                    @pageNum
+                                                </button>
+                                            </li>
+                                        }
+
+                                        @if (endPage < TotalPages)
+                                        {
+                                            @if (endPage < TotalPages - 1)
+                                            {
+                                                <li class="page-item disabled">
+                                                    <span class="page-link">...</span>
+                                                </li>
+                                            }
+                                            <li class="page-item">
+                                                <button class="page-link" @onclick="() => ChangePage(TotalPages)">@TotalPages</button>
+                                            </li>
+                                        }
+
+                                        <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                                            <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)" disabled="@(CurrentPage == TotalPages)">
+                                                <i class="bx bx-chevron-right"></i>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </FieldPermissionScope>
+}
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- DELETE CONFIRMATION MODAL -->
+<!-- ═══════════════════════════════════════════════════════ -->
+@if (ShowDeleteModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bx bx-trash text-danger me-2"></i>Duyuru Sil
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeleteModal" disabled="@IsDeleting"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger mb-3">
+                        <i class="bx bx-error-circle me-2"></i>
+                        <strong>Dikkat!</strong> Bu işlem geri alınamaz.
+                    </div>
+                    <p class="mb-0">
+                        <strong>@DeleteDuyuruBaslik</strong> duyurusunu silmek istediğinizden emin misiniz?
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDeleteModal" disabled="@IsDeleting">
+                        İptal
+                    </button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDelete" disabled="@IsDeleting">
+                        @if (IsDeleting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                            <span>Siliniyor...</span>
+                        }
+                        else
+                        {
+                            <i class="bx bx-trash me-1"></i>
+                            <span>Sil</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -3,11 +3,11 @@ using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard
 {
     /// <summary>
-    /// Haber/Duyuru Response DTO
+    /// Haber Response DTO
     /// </summary>
-    public class DuyuruResponseDto
+    public class HaberResponseDto
     {
-        public int DuyuruId { get; set; }
+        public int HaberId { get; set; }
         public string Baslik { get; set; } = string.Empty;
         public string Icerik { get; set; } = string.Empty;
         public string? GorselUrl { get; set; }
@@ -21,16 +21,16 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard
         public string? BadgeText { get; set; }
 
         // Çoklu görsel desteği
-        public List<DuyuruGorselResponseDto> Gorseller { get; set; } = new();
+        public List<HaberGorselResponseDto> Gorseller { get; set; } = new();
     }
 
     /// <summary>
-    /// Haber/Duyuru Görseli Response DTO
+    /// Haber Görseli Response DTO
     /// </summary>
-    public class DuyuruGorselResponseDto
+    public class HaberGorselResponseDto
     {
-        public int DuyuruGorselId { get; set; }
-        public int DuyuruId { get; set; }
+        public int HaberGorselId { get; set; }
+        public int HaberId { get; set; }
         public string GorselUrl { get; set; } = string.Empty;
         public int Sira { get; set; }
         public bool VitrinFoto { get; set; }
