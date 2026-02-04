@@ -9,7 +9,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
         [Inject] private IHaberApiService HaberApi { get; set; } = default!;
 
         private bool IsLoading = true;
-        private List<HaberResponseDto> Haberler = new();
+        private List<HaberResponseDto> HaberListe = new();
         private string SearchTerm = "";
         private string ActiveSearchTerm = "";
 
@@ -31,13 +31,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
                 var response = await HaberApi.GetHaberListeAsync(CurrentPage, PageSize, ActiveSearchTerm);
                 if (response.Success && response.Data != null)
                 {
-                    Haberler = response.Data.Items;
+                    HaberListe = response.Data.Items;
                     TotalCount = response.Data.TotalCount;
                     TotalPages = response.Data.TotalPages;
                 }
                 else
                 {
-                    Haberler = new();
+                    HaberListe = new();
                     TotalCount = 0;
                     TotalPages = 0;
                 }
@@ -45,7 +45,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
             catch (Exception ex)
             {
                 Console.WriteLine($"Haberler yükleme hatası: {ex.Message}");
-                Haberler = new();
+                HaberListe = new();
             }
             finally
             {

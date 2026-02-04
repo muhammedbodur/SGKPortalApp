@@ -56,10 +56,10 @@
     else
     {
         <!-- ====== HABER LİSTESİ ====== -->
-        @if (Haberler.Any())
+        @if (HaberListe.Any())
         {
             <div class="row g-4">
-                @foreach (var haber in Haberler)
+                @foreach (var haber in HaberListe)
                 {
                     <div class="col-md-6 col-lg-4">
                         <div class="card shadow-sm h-100 haber-card">
