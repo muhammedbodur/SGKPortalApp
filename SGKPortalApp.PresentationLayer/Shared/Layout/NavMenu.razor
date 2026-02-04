@@ -35,6 +35,14 @@
             </a>
         </li>
 
+        <!-- ================ HABERLERİ ================ -->
+        <li class="menu-item @(IsSectionActive("/haberler") ? "active" : "")">
+            <a href="/haberler" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-news"></i>
+                <div>Haberler</div>
+            </a>
+        </li>
+
         @if (!IsInBankoMode)
         {
             <!-- Hizmet Binaları -->

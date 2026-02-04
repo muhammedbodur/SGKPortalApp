@@ -17,48 +17,52 @@
     }
     else
     {
-        <!-- ====== MAIN CONTENT AREA ====== -->
         <div class="row">
-            <!-- ====== LEFT COLUMN (8 cols) ====== -->
+            <!-- ====== LEFT COLUMN ====== -->
             <div class="col-xl-9 col-lg-7">
 
-                <!-- ====== IMAGE SLIDER / CAROUSEL ====== -->
+                <!-- ====== IMAGE SLIDER ====== -->
                 <div class="card mb-4 shadow-sm slider-card">
+                    <div class="d-flex justify-content-end px-3 pt-2">
+                        <a href="/haberler" class="text-primary small fw-semibold text-decoration-none">
+                            <i class="bx bx-news me-1"></i>Tüm Haberler <i class="bx bx-chevron-right"></i>
+                        </a>
+                    </div>
                     <div class="card-body p-0">
-                        @if (SliderDuyurular.Any())
+                        @if (SliderHaberler.Any())
                         {
-                            <div id="duyuruCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div id="haberCarousel" class="carousel slide" data-bs-ride="carousel">
                                 <div class="carousel-indicators">
-                                    @for (int i = 0; i < SliderDuyurular.Count; i++)
+                                    @for (int i = 0; i < SliderHaberler.Count; i++)
                                     {
                                         var index = i;
-                                        <button type="button" data-bs-target="#duyuruCarousel" data-bs-slide-to="@index"
+                                        <button type="button" data-bs-target="#haberCarousel" data-bs-slide-to="@index"
                                                 class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")"></button>
                                     }
                                 </div>
                                 <div class="carousel-inner rounded-3">
-                                    @for (int i = 0; i < SliderDuyurular.Count; i++)
+                                    @for (int i = 0; i < SliderHaberler.Count; i++)
                                     {
-                                        var duyuru = SliderDuyurular[i];
+                                        var haber = SliderHaberler[i];
                                         <div class="carousel-item @(i == 0 ? "active" : "")">
                                             <div class="slider-item" style="position: relative;">
-                                                <img src="@(duyuru.GorselUrl ?? "/portal/assets/img/elements/18.jpg")"
+                                                <img src="@(haber.VitrinResimUrl ?? "/portal/assets/img/elements/18.jpg")"
                                                      class="d-block w-100"
                                                      style="height: 340px; object-fit: cover;"
-                                                     alt="@duyuru.Baslik" />
+                                                     alt="@haber.Baslik" />
                                                 <div class="slider-overlay">
                                                     <div class="slider-content">
-                                                        <h4 class="text-white mb-2 fw-bold">@duyuru.Baslik</h4>
+                                                        <h4 class="text-white mb-2 fw-bold">@haber.Baslik</h4>
                                                         <p class="text-white-50 mb-2 slider-description">
-                                                            @(duyuru.Icerik?.Length > 150 ? duyuru.Icerik.Substring(0, 150) + "..." : duyuru.Icerik)
+                                                            @(haber.Icerik?.Length > 150 ? haber.Icerik.Substring(0, 150) + "..." : haber.Icerik)
                                                         </p>
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <span class="text-white-50 small">
                                                                 <i class="bx bx-calendar me-1"></i>
-                                                                @duyuru.YayinTarihi.ToString("dd.MM.yyyy")
+                                                                @haber.YayinTarihi.ToString("dd.MM.yyyy")
                                                             </span>
-                                                            <a href="/duyurular" class="btn btn-sm btn-primary">
-                                                                Tüm Haberler <i class="bx bx-chevron-right"></i>
+                                                            <a href="/haberler/@haber.HaberId" class="btn btn-sm btn-primary">
+                                                                Haberi Oku <i class="bx bx-chevron-right"></i>
                                                             </a>
                                                         </div>
                                                     </div>
@@ -67,10 +71,10 @@
                                         </div>
                                     }
                                 </div>
-                                <button class="carousel-control-prev" type="button" data-bs-target="#duyuruCarousel" data-bs-slide="prev">
+                                <button class="carousel-control-prev" type="button" data-bs-target="#haberCarousel" data-bs-slide="prev">
                                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                                 </button>
-                                <button class="carousel-control-next" type="button" data-bs-target="#duyuruCarousel" data-bs-slide="next">
+                                <button class="carousel-control-next" type="button" data-bs-target="#haberCarousel" data-bs-slide="next">
                                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                                 </button>
                             </div>
@@ -79,7 +83,7 @@
                         {
                             <div class="text-center py-5">
                                 <i class="bx bx-image-alt bx-lg text-muted mb-3"></i>
-                                <p class="text-muted mb-0">Henüz slider duyurusu bulunmuyor.</p>
+                                <p class="text-muted mb-0">Henüz haber bulunmuyor.</p>
                             </div>
                         }
                     </div>
@@ -119,22 +123,22 @@
                     </div>
                 </div>
 
-                <!-- ====== İZMİR SGK DUYURULARI ====== -->
+                <!-- ====== İZMİR SGK HABERLERİ ====== -->
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header d-flex justify-content-between align-items-center border-0">
                         <h5 class="mb-0">
                             <i class="bx bx-news text-info me-2"></i>
-                            İzmir SGK Duyuruları
+                            İzmir SGK Haberleri
                         </h5>
-                        <a href="/duyurular/izmir" class="text-primary small">
-                            Tüm Duyurular <i class="bx bx-chevron-right"></i>
+                        <a href="/haberler" class="text-primary small">
+                            Tüm Haberler <i class="bx bx-chevron-right"></i>
                         </a>
                     </div>
                     <div class="card-body pt-0">
-                        @if (ListeDuyurular.Any())
+                        @if (ListeHaberler.Any())
                         {
                             <div class="timeline-list">
-                                @foreach (var duyuru in ListeDuyurular.Take(4))
+                                @foreach (var haber in ListeHaberler.Take(4))
                                 {
                                     <div class="timeline-item d-flex mb-3 pb-3 border-bottom">
                                         <div class="timeline-icon me-3">
@@ -145,14 +149,16 @@
                                             </div>
                                         </div>
                                         <div class="timeline-content flex-grow-1">
-                                            <h6 class="mb-1 fw-semibold">@duyuru.Baslik</h6>
+                                            <a href="/haberler/@haber.HaberId" class="text-decoration-none">
+                                                <h6 class="mb-1 fw-semibold text-dark">@haber.Baslik</h6>
+                                            </a>
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <small class="text-muted">
                                                     <i class="bx bx-calendar me-1"></i>
-                                                    @duyuru.YayinTarihi.ToString("dd.MM.yyyy")
+                                                    @haber.YayinTarihi.ToString("dd.MM.yyyy")
                                                 </small>
-                                                <a href="#" class="btn btn-sm btn-outline-secondary">
-                                                    ŞUBE <i class="bx bx-chevron-right"></i>
+                                                <a href="/haberler/@haber.HaberId" class="btn btn-sm btn-outline-secondary">
+                                                    Oku <i class="bx bx-chevron-right"></i>
                                                 </a>
                                             </div>
                                         </div>
@@ -164,21 +170,21 @@
                         {
                             <div class="text-center py-4">
                                 <i class="bx bx-news bx-lg text-muted mb-2"></i>
-                                <p class="text-muted mb-0">Henüz duyuru bulunmuyor.</p>
+                                <p class="text-muted mb-0">Henüz haber bulunmuyor.</p>
                             </div>
                         }
                     </div>
                 </div>
 
-                <!-- ====== SGK GENEL MÜDÜRLÜK DUYURULARI ====== -->
+                <!-- ====== SGK GENEL MÜDÜRLÜK HABERLERİ ====== -->
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header d-flex justify-content-between align-items-center border-0">
                         <h5 class="mb-0">
                             <i class="bx bx-building-house text-warning me-2"></i>
-                            SGK Genel Müdürlük Duyuruları
+                            SGK Genel Müdürlük Haberleri
                         </h5>
-                        <a href="/duyurular/genel" class="text-primary small">
-                            Tüm Duyurular <i class="bx bx-chevron-right"></i>
+                        <a href="/haberler" class="text-primary small">
+                            Tüm Haberler <i class="bx bx-chevron-right"></i>
                         </a>
                     </div>
                     <div class="card-body pt-0">
@@ -186,28 +192,28 @@
                             <table class="table table-borderless mb-0">
                                 <thead>
                                     <tr>
-                                        <th class="text-muted small fw-normal">İzmir SGK Duyuruları</th>
+                                        <th class="text-muted small fw-normal">İzmir SGK Haberleri</th>
                                         <th class="text-muted small fw-normal text-center">Dağıtım</th>
                                         <th class="text-muted small fw-normal text-end">Dağıtım</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if (GenelMudurlukDuyurulari.Any())
+                                    @if (GenelMudurlukHaberler.Any())
                                     {
-                                        @foreach (var duyuru in GenelMudurlukDuyurulari.Take(4))
+                                        @foreach (var haber in GenelMudurlukHaberler.Take(4))
                                         {
                                             <tr>
                                                 <td>
                                                     <div class="d-flex align-items-center">
-                                                        <span class="badge bg-@duyuru.BadgeColor me-2">@duyuru.BadgeText</span>
-                                                        <span class="fw-medium">@duyuru.Baslik</span>
+                                                        <span class="badge bg-@haber.BadgeColor me-2">@haber.BadgeText</span>
+                                                        <a href="/haberler/@haber.HaberId" class="fw-medium text-decoration-none text-dark">@haber.Baslik</a>
                                                     </div>
                                                 </td>
                                                 <td class="text-center">
-                                                    <span class="text-muted">@duyuru.YayinTarihi.ToString("dd.MM.yyyy")</span>
+                                                    <span class="text-muted">@haber.YayinTarihi.ToString("dd.MM.yyyy")</span>
                                                 </td>
                                                 <td class="text-end">
-                                                    <span class="text-muted">@duyuru.YayinTarihi.ToString("dd.MM.yyyy")</span>
+                                                    <span class="text-muted">@haber.YayinTarihi.ToString("dd.MM.yyyy")</span>
                                                 </td>
                                             </tr>
                                         }
@@ -217,7 +223,7 @@
                                         <tr>
                                             <td colspan="3" class="text-center py-4">
                                                 <i class="bx bx-news bx-lg text-muted mb-2 d-block"></i>
-                                                <span class="text-muted">Henüz duyuru bulunmuyor.</span>
+                                                <span class="text-muted">Henüz haber bulunmuyor.</span>
                                             </td>
                                         </tr>
                                     }
@@ -228,7 +234,7 @@
                 </div>
             </div>
 
-            <!-- ====== RIGHT COLUMN (4 cols) ====== -->
+            <!-- ====== RIGHT COLUMN ====== -->
             <div class="col-xl-3 col-lg-5">
 
                 <TakvimWidget />
@@ -358,128 +364,36 @@
 </div>
 
 <style>
-    /* Slider Card */
-    .slider-card {
-        border-radius: 12px;
-        overflow: hidden;
-        border: none;
-    }
-
+    .slider-card { border-radius: 12px; overflow: hidden; border: none; }
     .slider-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
+        position: absolute; bottom: 0; left: 0; right: 0;
         background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 50%, transparent 100%);
         padding: 60px 24px 24px;
     }
-
-    .slider-content h4 {
-        font-size: 1.25rem;
-        line-height: 1.4;
+    .slider-content h4 { font-size: 1.25rem; line-height: 1.4; }
+    .slider-description { font-size: 0.875rem; line-height: 1.5; }
+    .carousel-control-prev, .carousel-control-next {
+        width: 48px; height: 48px; top: 50%; transform: translateY(-50%);
+        background: rgba(255,255,255,0.9); border-radius: 50%; opacity: 1; margin: 0 16px;
     }
-
-    .slider-description {
-        font-size: 0.875rem;
-        line-height: 1.5;
-    }
-
-    .carousel-control-prev,
-    .carousel-control-next {
-        width: 48px;
-        height: 48px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(255,255,255,0.9);
-        border-radius: 50%;
-        opacity: 1;
-        margin: 0 16px;
-    }
-
-    .carousel-control-prev-icon,
-    .carousel-control-next-icon {
-        filter: invert(1) grayscale(100);
-    }
-
-    .carousel-indicators {
-        bottom: 20px;
-    }
-
-    .carousel-indicators button {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        margin: 0 4px;
-    }
-
-    /* Quick Access Cards */
-    .quick-access-card {
-        background: #f8f9fa;
-        border: 1px solid #e9ecef;
-        transition: all 0.3s ease;
-    }
-
-    .quick-access-card:hover {
-        background: #fff;
-        border-color: #696cff;
-        box-shadow: 0 4px 20px rgba(105, 108, 255, 0.15);
-        transform: translateY(-2px);
-    }
-
-    /* Birthday List */
-    .birthday-item {
-        transition: all 0.2s ease;
-    }
-
-    .birthday-item:hover {
-        background: rgba(40, 199, 111, 0.08);
-    }
-
-    /* Link Items */
-    .link-item {
-        transition: all 0.2s ease;
-    }
-
-    .link-item:hover {
-        background: rgba(105, 108, 255, 0.08);
-    }
-
-    /* Cards General */
-    .card {
-        border-radius: 12px;
-        border: none;
-    }
-
-    .card-header {
-        background: transparent;
-        padding: 1.25rem 1.5rem;
-    }
-
-    .card-body {
-        padding: 1.25rem 1.5rem;
-    }
-
-    /* Timeline */
-    .timeline-item:last-child {
-        border-bottom: none !important;
-        margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
-    }
-
-    /* Cursor */
-    .cursor-pointer {
-        cursor: pointer;
-    }
-
-    /* Badge Colors */
+    .carousel-control-prev-icon, .carousel-control-next-icon { filter: invert(1) grayscale(100); }
+    .carousel-indicators { bottom: 20px; }
+    .carousel-indicators button { width: 10px; height: 10px; border-radius: 50%; margin: 0 4px; }
+    .quick-access-card { background: #f8f9fa; border: 1px solid #e9ecef; transition: all 0.3s ease; }
+    .quick-access-card:hover { background: #fff; border-color: #696cff; box-shadow: 0 4px 20px rgba(105,108,255,0.15); transform: translateY(-2px); }
+    .birthday-item { transition: all 0.2s ease; }
+    .birthday-item:hover { background: rgba(40,199,111,0.08); }
+    .link-item { transition: all 0.2s ease; }
+    .link-item:hover { background: rgba(105,108,255,0.08); }
+    .card { border-radius: 12px; border: none; }
+    .card-header { background: transparent; padding: 1.25rem 1.5rem; }
+    .card-body { padding: 1.25rem 1.5rem; }
+    .timeline-item:last-child { border-bottom: none !important; margin-bottom: 0 !important; padding-bottom: 0 !important; }
+    .cursor-pointer { cursor: pointer; }
     .badge.bg-primary { background-color: #696cff !important; }
     .badge.bg-info { background-color: #03c3ec !important; }
     .badge.bg-warning { background-color: #ffab00 !important; }
     .badge.bg-success { background-color: #71dd37 !important; }
     .badge.bg-danger { background-color: #ff3e1d !important; }
-
-    /* Shadow */
-    .shadow-sm {
-        box-shadow: 0 2px 6px rgba(67, 89, 113, 0.08) !important;
-    }
+    .shadow-sm { box-shadow: 0 2px 6px rgba(67,89,113,0.08) !important; }
 </style>
