@@ -34,23 +34,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             try
             {
                 var dashboardData = new DashboardDataResponseDto();
-
-                // Paralel olarak tüm verileri çek
-                var sliderTask = GetSliderDuyurularInternalAsync(5);
-                var listeTask = GetListeDuyurularInternalAsync(10);
-                var programlarTask = GetSikKullanilanProgramlarInternalAsync(8);
-                var linklerTask = GetOnemliLinklerInternalAsync(10);
-                var menuTask = GetGununMenusuInternalAsync();
-                var bugunDoganlarTask = GetBugunDoganlarInternalAsync();
-
-                await Task.WhenAll(sliderTask, listeTask, programlarTask, linklerTask, menuTask, bugunDoganlarTask);
-
-                dashboardData.SliderDuyurular = await sliderTask;
-                dashboardData.ListeDuyurular = await listeTask;
-                dashboardData.SikKullanilanProgramlar = await programlarTask;
-                dashboardData.OnemliLinkler = await linklerTask;
-                dashboardData.GununMenusu = await menuTask;
-                dashboardData.BugunDoganlar = await bugunDoganlarTask;
+                
+                dashboardData.SliderDuyurular = await GetSliderDuyurularInternalAsync(10);
+                
+                dashboardData.ListeDuyurular = await GetListeDuyurularInternalAsync(10);
+                
+                dashboardData.SikKullanilanProgramlar = await GetSikKullanilanProgramlarInternalAsync(8);
+                
+                dashboardData.OnemliLinkler = await GetOnemliLinklerInternalAsync(10);
+                
+                dashboardData.GununMenusu = await GetGununMenusuInternalAsync();
+                
+                dashboardData.BugunDoganlar = await GetBugunDoganlarInternalAsync();
 
                 return ApiResponseDto<DashboardDataResponseDto>.SuccessResult(dashboardData);
             }

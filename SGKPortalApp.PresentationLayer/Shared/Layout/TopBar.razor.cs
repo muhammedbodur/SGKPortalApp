@@ -9,6 +9,7 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
     public partial class TopBar : IAsyncDisposable
     {
         [Inject] private IUserInfoService UserInfo { get; set; } = default!;
+        [Inject] private NavigationManager Navigation { get; set; } = default!;
         [Inject] private IWebHostEnvironment WebHostEnvironment { get; set; } = default!;
         [Inject] private IConfiguration Configuration { get; set; } = default!;
         [Inject] private PersonelImagePathHelper ImagePathHelper { get; set; } = default!;
@@ -19,6 +20,19 @@ namespace SGKPortalApp.PresentationLayer.Shared.Layout
         private string UserDepartment => UserInfo.GetDepartmanAdi();
         private bool ShowSearchModal { get; set; } = false;
         private IJSObjectReference? _jsModule;
+
+        private bool IsHomePage
+        {
+            get
+            {
+                var relative = Navigation.ToBaseRelativePath(Navigation.Uri);
+                if (string.IsNullOrWhiteSpace(relative))
+                    return true;
+
+                var path = relative.Split('?', '#')[0].Trim('/');
+                return string.IsNullOrWhiteSpace(path);
+            }
+        }
 
         /// <summary>
         /// Kullanıcı resmini dinamik olarak oluşturur.

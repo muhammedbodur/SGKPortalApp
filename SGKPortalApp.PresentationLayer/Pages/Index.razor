@@ -3,9 +3,6 @@
 @using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard
 @using Microsoft.AspNetCore.Components.Authorization
-@inject IDashboardApiService DashboardApi
-@inject NavigationManager Navigation
-@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>SGK Portal - Ana Sayfa</PageTitle>
 
@@ -20,56 +17,10 @@
     }
     else
     {
-        <!-- ====== HERO WELCOME CARD ====== -->
-        <div class="card mb-4 hero-welcome-card">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-lg-8">
-                        <div class="d-flex align-items-center mb-2">
-                            <h3 class="mb-0 me-2">Hoş geldin, @UserName</h3>
-                            <span class="fs-3">👋</span>
-                        </div>
-                        <div class="d-flex align-items-center flex-wrap gap-3">
-                            <span class="text-muted">
-                                <i class="bx bx-calendar me-1"></i>
-                                @DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))
-                            </span>
-                            @if (GununMenusu != null && !string.IsNullOrEmpty(GununMenusu.Icerik))
-                            {
-                                <span class="badge bg-label-warning rounded-pill px-3 py-2">
-                                    <i class="bx bx-restaurant me-1"></i>
-                                    Günün Menüsü: @GetFirstMenuItem()
-                                </span>
-                            }
-                        </div>
-                    </div>
-                    <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                        <div class="weather-widget d-inline-flex align-items-center p-3 rounded-3" style="background: rgba(105, 108, 255, 0.08);">
-                            <div class="weather-icon me-3">
-                                <div class="avatar avatar-md">
-                                    <span class="avatar-initial rounded bg-label-primary">
-                                        <i class="bx bx-calendar-event fs-3"></i>
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="text-start">
-                                <div class="fw-semibold text-primary">@DateTime.Now.ToString("dddd", new System.Globalization.CultureInfo("tr-TR"))</div>
-                                <div class="small text-muted">@DateTime.Now.ToString("dd.MM.yyyy")</div>
-                            </div>
-                            <div class="ms-4 text-center border-start ps-4">
-                                <i class="bx bx-sun text-warning fs-1"></i>
-                                <div class="fw-bold text-dark">22°C</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- ====== MAIN CONTENT AREA ====== -->
         <div class="row">
             <!-- ====== LEFT COLUMN (8 cols) ====== -->
-            <div class="col-xl-8 col-lg-7">
+            <div class="col-xl-9 col-lg-7">
 
                 <!-- ====== IMAGE SLIDER / CAROUSEL ====== -->
                 <div class="card mb-4 shadow-sm slider-card">
@@ -278,7 +229,9 @@
             </div>
 
             <!-- ====== RIGHT COLUMN (4 cols) ====== -->
-            <div class="col-xl-4 col-lg-5">
+            <div class="col-xl-3 col-lg-5">
+
+                <TakvimWidget />
 
                 <!-- ====== BUGÜN DOĞAN PERSONELLER ====== -->
                 <div class="card mb-4 shadow-sm">
@@ -292,18 +245,18 @@
                         @if (BugunDoganlar.Any())
                         {
                             <div class="birthday-list">
-                                @foreach (var personel in BugunDoganlar.Take(4))
+                                @foreach (var personel in BugunDoganlar)
                                 {
                                     <div class="birthday-item d-flex align-items-center mb-3 p-2 rounded-3 cursor-pointer"
                                          @onclick="@(() => NavigateToPersonel(personel.TcKimlikNo))">
-                                        <div class="avatar me-3">
+                                        <div class="avatar me-3" style="min-width: 40px; min-height: 40px;">
                                             @if (!string.IsNullOrEmpty(personel.Resim))
                                             {
-                                                <img src="@personel.Resim" alt="@personel.AdSoyad" class="rounded-circle" />
+                                                <img src="@personel.Resim" alt="@personel.AdSoyad" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
                                             }
                                             else
                                             {
-                                                <span class="avatar-initial rounded-circle bg-label-primary">
+                                                <span class="avatar-initial rounded-circle bg-label-primary" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
                                                     @(personel.AdSoyad?.Length > 0 ? personel.AdSoyad.Substring(0, 1).ToUpper() : "?")
                                                 </span>
                                             }
@@ -313,8 +266,8 @@
                                             <small class="text-muted">@(personel.DepartmanAdi ?? "Birim belirtilmemiş")</small>
                                         </div>
                                         <div class="avatar avatar-sm">
-                                            <span class="avatar-initial rounded-circle bg-label-success">
-                                                @personel.Yas
+                                            <span class="avatar-initial rounded-circle bg-label-warning">
+                                                <i class="bx bx-cake"></i>
                                             </span>
                                         </div>
                                     </div>
@@ -405,18 +358,6 @@
 </div>
 
 <style>
-    /* Hero Welcome Card */
-    .hero-welcome-card {
-        background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
-        border: none;
-        border-radius: 12px;
-    }
-
-    .hero-welcome-card h3 {
-        color: #32475c;
-        font-weight: 600;
-    }
-
     /* Slider Card */
     .slider-card {
         border-radius: 12px;
@@ -542,131 +483,3 @@
         box-shadow: 0 2px 6px rgba(67, 89, 113, 0.08) !important;
     }
 </style>
-
-@code {
-    private bool IsLoading = true;
-    private string UserName = "Kullanıcı";
-    private List<DuyuruResponseDto> SliderDuyurular = new();
-    private List<DuyuruResponseDto> ListeDuyurular = new();
-    private List<DuyuruResponseDto> GenelMudurlukDuyurulari = new();
-    private List<SikKullanilanProgramResponseDto> SikKullanilanProgramlar = new();
-    private List<OnemliLinkResponseDto> OnemliLinkler = new();
-    private GununMenusuResponseDto? GununMenusu;
-    private List<BugunDoganResponseDto> BugunDoganlar = new();
-
-    // Quick Access Programs (Static for now)
-    private List<QuickAccessItem> QuickAccessPrograms = new()
-    {
-        new QuickAccessItem { Name = "İşveren Uygulama Rehberi", Description = "Güncel Enim Ann Versions", Icon = "bx-book-reader", Color = "primary", Url = "#" },
-        new QuickAccessItem { Name = "Tevkifat Kontrol", Description = "e-Rehber", Icon = "bx-check-shield", Color = "info", Url = "#" },
-        new QuickAccessItem { Name = "Yetki Talep", Description = "Kobileri", Icon = "bx-key", Color = "warning", Url = "/yetki/talep" },
-        new QuickAccessItem { Name = "Destek Talep", Description = "Se sin 3admin", Icon = "bx-support", Color = "success", Url = "/destek" },
-        new QuickAccessItem { Name = "Ankara Görüşler", Description = "Merkez İletişim", Icon = "bx-conversation", Color = "danger", Url = "#" },
-        new QuickAccessItem { Name = "Daha Fazlası", Description = "Tüm Uygulamalar", Icon = "bx-plus", Color = "secondary", Url = "#" }
-    };
-
-    protected override async Task OnInitializedAsync()
-    {
-        await GetUserName();
-        await LoadDashboardData();
-    }
-
-    private async Task GetUserName()
-    {
-        try
-        {
-            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-            if (user.Identity?.IsAuthenticated == true)
-            {
-                UserName = user.Identity.Name ?? user.FindFirst("name")?.Value ?? "Kullanıcı";
-            }
-        }
-        catch
-        {
-            UserName = "Kullanıcı";
-        }
-    }
-
-    private async Task LoadDashboardData()
-    {
-        try
-        {
-            IsLoading = true;
-            var response = await DashboardApi.GetDashboardDataAsync();
-
-            if (response.Success && response.Data != null)
-            {
-                SliderDuyurular = response.Data.SliderDuyurular ?? new();
-                ListeDuyurular = response.Data.ListeDuyurular ?? new();
-                GenelMudurlukDuyurulari = response.Data.ListeDuyurular?.Take(4).Select((d, i) => new DuyuruResponseDto
-                {
-                    Baslik = d.Baslik,
-                    YayinTarihi = d.YayinTarihi,
-                    BadgeColor = GetBadgeColor(i),
-                    BadgeText = GetBadgeText(i)
-                }).ToList() ?? new();
-                SikKullanilanProgramlar = response.Data.SikKullanilanProgramlar ?? new();
-                OnemliLinkler = response.Data.OnemliLinkler ?? new();
-                GununMenusu = response.Data.GununMenusu;
-                BugunDoganlar = response.Data.BugunDoganlar ?? new();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Dashboard veri yükleme hatası: {ex.Message}");
-        }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
-
-    private string GetFirstMenuItem()
-    {
-        if (GununMenusu?.Icerik == null) return "";
-        var items = GununMenusu.Icerik.Split(new[] { '\n', '\r', ',', '-' }, StringSplitOptions.RemoveEmptyEntries);
-        return items.FirstOrDefault()?.Trim() ?? "";
-    }
-
-    private List<string> GetMenuItems()
-    {
-        if (GununMenusu?.Icerik == null) return new();
-        return GununMenusu.Icerik
-            .Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
-            .Select(x => x.Trim())
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Take(5)
-            .ToList();
-    }
-
-    private string GetBadgeColor(int index) => index switch
-    {
-        0 => "info",
-        1 => "warning",
-        2 => "success",
-        _ => "primary"
-    };
-
-    private string GetBadgeText(int index) => index switch
-    {
-        0 => "Mavi",
-        1 => "Turuncu",
-        2 => "Yeşil",
-        _ => "Genel"
-    };
-
-    private void NavigateToPersonel(string tcKimlikNo)
-    {
-        Navigation.NavigateTo($"/personel/detail/{tcKimlikNo}");
-    }
-
-    private class QuickAccessItem
-    {
-        public string Name { get; set; } = "";
-        public string Description { get; set; } = "";
-        public string Icon { get; set; } = "";
-        public string Color { get; set; } = "";
-        public string Url { get; set; } = "#";
-    }
-}

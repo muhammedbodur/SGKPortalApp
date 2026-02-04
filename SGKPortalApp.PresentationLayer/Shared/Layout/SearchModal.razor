@@ -2,7 +2,7 @@
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);" @onclick="Close">
         <div class="modal-dialog modal-lg modal-dialog-centered" @onclick:stopPropagation="true">
-            <div class="modal-content">
+            <div class="modal-content search-modal-content">
                 <div class="modal-header border-0 pb-0">
                     <div class="input-group input-group-merge w-100">
                         <span class="input-group-text border-0 ps-0">
@@ -21,7 +21,7 @@
                     </div>
                     <button type="button" class="btn-close" @onclick="Close"></button>
                 </div>
-                <div class="modal-body pt-2" style="max-height: 60vh; overflow-y: auto;">
+                <div class="modal-body pt-2 search-modal-body">
                     @if (string.IsNullOrWhiteSpace(SearchTerm))
                     {
                         <!-- Popüler Aramalar -->
@@ -162,4 +162,19 @@
         </div>
     </div>
 }
+
+<style>
+    .search-modal-content {
+        display: flex;
+        flex-direction: column;
+        height: 60vh;
+        max-height: 60vh;
+    }
+
+    .search-modal-body {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+    }
+</style>
 

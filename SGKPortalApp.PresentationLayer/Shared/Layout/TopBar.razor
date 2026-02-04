@@ -1,4 +1,4 @@
-<nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+<nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme flex-wrap" id="layout-navbar">
 
     <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
         <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
@@ -9,13 +9,26 @@
     <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
 
         <!-- Arama -->
-        <div class="navbar-nav align-items-center">
+        <div class="navbar-nav align-items-center flex-grow-1">
             <div class="nav-item navbar-search-wrapper mb-0">
                 <a class="nav-item nav-link search-toggler px-0" href="javascript:void(0);" @onclick="OpenSearchModal">
                     <i class="bx bx-search bx-sm"></i>
                     <span class="d-none d-md-inline-block text-muted">Ara (Ctrl + K)</span>
                 </a>
             </div>
+
+            @if (IsHomePage)
+            {
+                <div class="ms-3 d-none d-lg-flex align-items-center gap-2">
+                    <span class="fw-semibold text-body">İyi çalışmalar, @UserFullName</span>
+                    <span class="badge bg-label-primary">SGK Portal</span>
+                    <span class="text-muted">•</span>
+                    <span class="text-muted">
+                        <i class="bx bx-calendar me-1"></i>
+                        @DateTime.Now.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("tr-TR"))
+                    </span>
+                </div>
+            }
         </div>
 
         <ul class="navbar-nav flex-row align-items-center ms-auto">
