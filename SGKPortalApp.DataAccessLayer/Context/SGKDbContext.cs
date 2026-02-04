@@ -34,6 +34,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<DepartmanHizmetBinasi> DepartmanHizmetBinalari { get; set; }
         public DbSet<ResmiTatil> ResmiTatiller { get; set; }
         public DbSet<Duyuru> Duyurular { get; set; }
+        public DbSet<DuyuruResim> DuyuruResimler { get; set; }
         public DbSet<GununMenusu> GununMenuleri { get; set; }
         public DbSet<OnemliLink> OnemliLinkler { get; set; }
         public DbSet<SikKullanilanProgram> SikKullanilanProgramlar { get; set; }
@@ -120,6 +121,7 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.ApplyConfiguration(new ModulControllerConfiguration());
             modelBuilder.ApplyConfiguration(new ModulControllerIslemConfiguration());
             modelBuilder.ApplyConfiguration(new DuyuruConfiguration());
+            modelBuilder.ApplyConfiguration(new DuyuruResimConfiguration());
             modelBuilder.ApplyConfiguration(new GununMenusuConfiguration());
             modelBuilder.ApplyConfiguration(new OnemliLinkConfiguration());
             modelBuilder.ApplyConfiguration(new SikKullanilanProgramConfiguration());

@@ -8,51 +8,35 @@ namespace SGKPortalApp.PresentationLayer.Pages
     public partial class Index
     {
         [Inject] private IDashboardApiService DashboardApi { get; set; } = default!;
+        [Inject] private IHaberApiService HaberApi { get; set; } = default!;
         [Inject] private NavigationManager Navigation { get; set; } = default!;
         [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
 
         private bool IsLoading = true;
-        private string UserName = "Kullanýcý";
-        private List<DuyuruResponseDto> SliderDuyurular = new();
-        private List<DuyuruResponseDto> ListeDuyurular = new();
-        private List<DuyuruResponseDto> GenelMudurlukDuyurulari = new();
-        private List<SikKullanilanProgramResponseDto> SikKullanilanProgramlar = new();
+
+        // Haber verileri
+        private List<HaberResponseDto> SliderHaberler = new();
+        private List<HaberResponseDto> ListeHaberler = new();
+        private List<HaberResponseDto> GenelMudurlukHaberler = new();
+
+        // Dashboard diÄŸer verileri
         private List<OnemliLinkResponseDto> OnemliLinkler = new();
         private GununMenusuResponseDto? GununMenusu;
         private List<BugunDoganResponseDto> BugunDoganlar = new();
 
-        // Quick Access Programs (Static for now)
         private List<QuickAccessItem> QuickAccessPrograms = new()
         {
-            new QuickAccessItem { Name = "Ýþveren Uygulama Rehberi", Description = "Güncel Enim Ann Versions", Icon = "bx-book-reader", Color = "primary", Url = "#" },
+            new QuickAccessItem { Name = "Ä°ÅŸveren Uygulama Rehberi", Description = "GÃ¼ncel Enim Ann Versions", Icon = "bx-book-reader", Color = "primary", Url = "#" },
             new QuickAccessItem { Name = "Tevkifat Kontrol", Description = "e-Rehber", Icon = "bx-check-shield", Color = "info", Url = "#" },
             new QuickAccessItem { Name = "Yetki Talep", Description = "Kobileri", Icon = "bx-key", Color = "warning", Url = "/yetki/talep" },
             new QuickAccessItem { Name = "Destek Talep", Description = "Se sin 3admin", Icon = "bx-support", Color = "success", Url = "/destek" },
-            new QuickAccessItem { Name = "Ankara Görüþler", Description = "Merkez Ýletiþim", Icon = "bx-conversation", Color = "danger", Url = "#" },
-            new QuickAccessItem { Name = "Daha Fazlasý", Description = "Tüm Uygulamalar", Icon = "bx-plus", Color = "secondary", Url = "#" }
+            new QuickAccessItem { Name = "Ankara GÃ¶rÃ¼ÅŸler", Description = "Merkez Ä°letiÅŸim", Icon = "bx-conversation", Color = "danger", Url = "#" },
+            new QuickAccessItem { Name = "Daha FazlasÄ±", Description = "TÃ¼m Uygulamalar", Icon = "bx-plus", Color = "secondary", Url = "#" }
         };
 
         protected override async Task OnInitializedAsync()
         {
-            await GetUserName();
             await LoadDashboardData();
-        }
-
-        private async Task GetUserName()
-        {
-            try
-            {
-                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-                var user = authState.User;
-                if (user.Identity?.IsAuthenticated == true)
-                {
-                    UserName = user.Identity.Name ?? user.FindFirst("name")?.Value ?? "Kullanýcý";
-                }
-            }
-            catch
-            {
-                UserName = "Kullanýcý";
-            }
         }
 
         private async Task LoadDashboardData()
@@ -60,40 +44,44 @@ namespace SGKPortalApp.PresentationLayer.Pages
             try
             {
                 IsLoading = true;
-                var response = await DashboardApi.GetDashboardDataAsync();
 
-                if (response.Success && response.Data != null)
+                // Slider haberleri
+                var sliderResponse = await HaberApi.GetSliderHaberleriAsync(5);
+                if (sliderResponse.Success && sliderResponse.Data != null)
+                    SliderHaberler = sliderResponse.Data;
+
+                // Liste haberleri
+                var listeResponse = await HaberApi.GetHaberListeAsync(1, 10);
+                if (listeResponse.Success && listeResponse.Data != null)
                 {
-                    SliderDuyurular = response.Data.SliderDuyurular ?? new();
-                    ListeDuyurular = response.Data.ListeDuyurular ?? new();
-                    GenelMudurlukDuyurulari = response.Data.ListeDuyurular?.Take(4).Select((d, i) => new DuyuruResponseDto
+                    ListeHaberler = listeResponse.Data.Items;
+
+                    // Genel MÃ¼dÃ¼rlÃ¼k bÃ¶lÃ¼mÃ¼ iÃ§in badge atama
+                    GenelMudurlukHaberler = listeResponse.Data.Items.Take(4).Select((h, i) =>
                     {
-                        Baslik = d.Baslik,
-                        YayinTarihi = d.YayinTarihi,
-                        BadgeColor = GetBadgeColor(i),
-                        BadgeText = GetBadgeText(i)
-                    }).ToList() ?? new();
-                    SikKullanilanProgramlar = response.Data.SikKullanilanProgramlar ?? new();
-                    OnemliLinkler = response.Data.OnemliLinkler ?? new();
-                    GununMenusu = response.Data.GununMenusu;
-                    BugunDoganlar = response.Data.BugunDoganlar ?? new();
+                        h.BadgeColor = GetBadgeColor(i);
+                        h.BadgeText = GetBadgeText(i);
+                        return h;
+                    }).ToList();
+                }
+
+                // Dashboard diÄŸer verileri (Ã¶nemli linkler, menÃ¼, doÄŸanlar)
+                var dashResponse = await DashboardApi.GetDashboardDataAsync();
+                if (dashResponse.Success && dashResponse.Data != null)
+                {
+                    OnemliLinkler = dashResponse.Data.OnemliLinkler ?? new();
+                    GununMenusu = dashResponse.Data.GununMenusu;
+                    BugunDoganlar = dashResponse.Data.BugunDoganlar ?? new();
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Dashboard veri yükleme hatasý: {ex.Message}");
+                Console.WriteLine($"Dashboard veri yÃ¼kleme hatasÄ±: {ex.Message}");
             }
             finally
             {
                 IsLoading = false;
             }
-        }
-
-        private string GetFirstMenuItem()
-        {
-            if (GununMenusu?.Icerik == null) return "";
-            var items = GununMenusu.Icerik.Split(new[] { '\n', '\r', ',', '-' }, StringSplitOptions.RemoveEmptyEntries);
-            return items.FirstOrDefault()?.Trim() ?? "";
         }
 
         private List<string> GetMenuItems()
@@ -119,7 +107,7 @@ namespace SGKPortalApp.PresentationLayer.Pages
         {
             0 => "Mavi",
             1 => "Turuncu",
-            2 => "Yeþil",
+            2 => "YeÅŸil",
             _ => "Genel"
         };
 

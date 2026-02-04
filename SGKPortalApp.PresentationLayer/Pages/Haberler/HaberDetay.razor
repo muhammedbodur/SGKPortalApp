@@ -1,0 +1,207 @@
+@page "/haberler/{Id:int}"
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard
+
+<PageTitle>@(Haber?.Baslik ?? "Haber Detayı")</PageTitle>
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <!-- Geri dön link -->
+    <div class="mb-3">
+        <a href="/haberler" class="text-primary small text-decoration-none">
+            <i class="bx bx-chevron-left"></i> Haberlere Dön
+        </a>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="d-flex justify-content-center align-items-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Yükleniyor...</span>
+            </div>
+        </div>
+    }
+    else if (Haber == null)
+    {
+        <!-- Haber bulunamadı -->
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="bx bx-error-circle bx-xxl text-danger mb-3 d-block"></i>
+                <h5 class="text-muted">Haber Bulunamadı</h5>
+                <p class="text-muted">Bu haber mevcut değil veya kaldırılmış olabilir.</p>
+                <a href="/haberler" class="btn btn-primary mt-2">
+                    <i class="bx bx-arrow-back me-1"></i> Haberlere Dön
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- ====== HABER BAŞLIK ====== -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h3 class="fw-bold text-dark mb-3">@Haber.Baslik</h3>
+
+                        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                            <small class="text-muted">
+                                <i class="bx bx-calendar me-1"></i>
+                                Yayın Tarihi: @Haber.YayinTarihi.ToString("dd MMMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("tr-TR"))
+                            </small>
+                            <!-- Word indir -->
+                            <button class="btn btn-sm btn-outline-success" @onclick="DownloadWord" disabled="@IsDownloading">
+                                @if (IsDownloading)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                    Hazırlanıyor...
+                                }
+                                else
+                                {
+                                    <i class="bx bx-download me-1"></i>
+                                }
+                                Word Olarak İndir
+                            </button>
+                        </div>
+
+                        <!-- ====== RESİM SLIDER (eğer resim varsa) ====== -->
+                        @if (Haber.Resimler != null && Haber.Resimler.Any())
+                        {
+                            <div class="mb-4">
+                                <div id="detayResimCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                                    <div class="carousel-indicators">
+                                        @for (int i = 0; i < Haber.Resimler.Count; i++)
+                                        {
+                                            var idx = i;
+                                            <button type="button"
+                                                    data-bs-target="#detayResimCarousel"
+                                                    data-bs-slide-to="@idx"
+                                                    class="@(i == 0 ? "active" : "")"
+                                                    style="background-color: #696cff !important;"
+                                                    aria-current="@(i == 0 ? "true" : "false")"
+                                                    aria-label="Resim @(i+1)"></button>
+                                        }
+                                    </div>
+                                    <div class="carousel-inner rounded-3">
+                                        @for (int i = 0; i < Haber.Resimler.Count; i++)
+                                        {
+                                            var resim = Haber.Resimler[i];
+                                            <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                <img src="@resim.ResimUrl"
+                                                     class="d-block w-100"
+                                                     style="height: 360px; object-fit: cover;"
+                                                     alt="Resim @(i+1)" />
+                                            </div>
+                                        }
+                                    </div>
+                                    @if (Haber.Resimler.Count > 1)
+                                    {
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#detayResimCarousel" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                            <span class="visually-hidden">Önceki</span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#detayResimCarousel" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                            <span class="visually-hidden">Sonraki</span>
+                                        </button>
+                                    }
+                                </div>
+                                <!-- Resim sayısı -->
+                                <div class="text-center mt-2">
+                                    <small class="text-muted">
+                                        <i class="bx bx-image me-1"></i>
+                                        @Haber.Resimler.Count resim
+                                    </small>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- ====== İÇERİK ====== -->
+                        <div class="haber-icerik">
+                            @foreach (var line in GetIcerikLines())
+                            {
+                                @if (string.IsNullOrWhiteSpace(line))
+                                {
+                                    <br />
+                                }
+                                else
+                                {
+                                    <p class="text-body mb-3">@line</p>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ====== RIGHT SIDEBAR ====== -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm sticky-top" style="top: 20px;">
+                    <div class="card-header border-0">
+                        <h6 class="mb-0 fw-semibold">
+                            <i class="bx bx-info-circle text-primary me-2"></i>
+                            Haber Bilgileri
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <small class="text-muted d-block mb-1">Başlık</small>
+                            <span class="fw-semibold">@Haber.Baslik</span>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted d-block mb-1">Yayın Tarihi</small>
+                            <span>@Haber.YayinTarihi.ToString("dd.MM.yyyy")</span>
+                        </div>
+                        @if (Haber.BitisTarihi.HasValue)
+                        {
+                            <div class="mb-3">
+                                <small class="text-muted d-block mb-1">Bitiş Tarihi</small>
+                                <span>@Haber.BitisTarihi.Value.ToString("dd.MM.yyyy")</span>
+                            </div>
+                        }
+                        <div class="mb-3">
+                            <small class="text-muted d-block mb-1">Resim Sayısı</small>
+                            <span>@(Haber.Resimler?.Count ?? 0) resim</span>
+                        </div>
+
+                        <hr />
+
+                        <!-- Word İndir -->
+                        <button class="btn btn-success w-100" @onclick="DownloadWord" disabled="@IsDownloading">
+                            @if (IsDownloading)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                Hazırlanıyor...
+                            }
+                            else
+                            {
+                                <i class="bx bx-download me-1"></i>
+                            }
+                            Word Olarak İndir (.docx)
+                        </button>
+
+                        <a href="/haberler" class="btn btn-outline-secondary w-100 mt-2">
+                            <i class="bx bx-arrow-back me-1"></i> Listeye Dön
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .haber-icerik p {
+        line-height: 1.8;
+        font-size: 1rem;
+        color: #495057;
+    }
+    .card { border-radius: 12px; border: none; }
+    .carousel-control-prev, .carousel-control-next {
+        width: 44px; height: 44px;
+        background: rgba(255,255,255,0.9);
+        border-radius: 50%;
+        opacity: 1;
+    }
+    .carousel-control-prev-icon, .carousel-control-next-icon {
+        filter: invert(1) grayscale(100);
+    }
+</style>
