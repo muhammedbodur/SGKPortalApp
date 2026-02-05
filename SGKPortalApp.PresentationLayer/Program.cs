@@ -78,6 +78,9 @@ builder.Services.AddServerSideBlazor(options =>
     options.MaxBufferedUnacknowledgedRenderBatches = 5;
 });
 
+// Blazored.TextEditor (Rich Text Editor)
+builder.Services.AddBlazoredTextEditor();
+
 // ═══════════════════════════════════════════════════════
 // 🗄️ DATABASE CONNECTION (Shared Configuration'dan)
 // ═══════════════════════════════════════════════════════

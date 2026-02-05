@@ -79,14 +79,45 @@ else
                         <!-- İçerik -->
                         <div class="mb-3">
                             <label class="form-label fw-semibold">İçerik <span class="text-danger">*</span></label>
-                            <textarea class="form-control @(string.IsNullOrWhiteSpace(Model.Icerik) && FormSubmitted ? "is-invalid" : "")"
-                                      placeholder="Haber içeriğini girin..."
-                                      rows="6"
-                                      @bind-value="Model.Icerik"
-                                      @bind-value:event="oninput"></textarea>
+                            <BlazoredTextEditor @ref="QuillEditor" Placeholder="Haber içeriğini girin...">
+                                <ToolbarContent>
+                                    <select class="ql-header">
+                                        <option selected=""></option>
+                                        <option value="1"></option>
+                                        <option value="2"></option>
+                                        <option value="3"></option>
+                                    </select>
+                                    <span class="ql-formats">
+                                        <button class="ql-bold"></button>
+                                        <button class="ql-italic"></button>
+                                        <button class="ql-underline"></button>
+                                        <button class="ql-strike"></button>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <select class="ql-color"></select>
+                                        <select class="ql-background"></select>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <button class="ql-list" value="ordered"></button>
+                                        <button class="ql-list" value="bullet"></button>
+                                        <button class="ql-indent" value="-1"></button>
+                                        <button class="ql-indent" value="+1"></button>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <select class="ql-align"></select>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <button class="ql-link"></button>
+                                        <button class="ql-image"></button>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <button class="ql-clean"></button>
+                                    </span>
+                                </ToolbarContent>
+                            </BlazoredTextEditor>
                             @if (string.IsNullOrWhiteSpace(Model.Icerik) && FormSubmitted)
                             {
-                                <div class="invalid-feedback">İçerik zorunludur.</div>
+                                <div class="invalid-feedback d-block">İçerik zorunludur.</div>
                             }
                         </div>
 
