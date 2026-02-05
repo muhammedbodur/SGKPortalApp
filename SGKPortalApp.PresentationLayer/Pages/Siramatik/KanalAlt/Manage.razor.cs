@@ -96,14 +96,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAlt
                 else
                 {
                     await _toastService.ShowErrorAsync(result.Message ?? "Alt kanal bulunamadı");
-                    _navigationManager.NavigateTo("/siramatik/alt-kanal");
+                    _navigationManager.NavigateTo("/siramatik/kanal-alt");
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Alt kanal yüklenirken hata oluştu");
                 await _toastService.ShowErrorAsync("Alt kanal yüklenirken bir hata oluştu");
-                _navigationManager.NavigateTo("/siramatik/alt-kanal");
+                _navigationManager.NavigateTo("/siramatik/kanal-alt");
             }
             finally
             {
@@ -154,7 +154,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAlt
             if (result.Success)
             {
                 await _toastService.ShowSuccessAsync($"{model.KanalAltAdi} başarıyla eklendi");
-                _navigationManager.NavigateTo("/siramatik/alt-kanal");
+                _navigationManager.NavigateTo("/siramatik/kanal-alt");
             }
             else
             {
@@ -176,7 +176,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAlt
             if (result.Success)
             {
                 await _toastService.ShowSuccessAsync($"{model.KanalAltAdi} başarıyla güncellendi");
-                _navigationManager.NavigateTo("/siramatik/alt-kanal");
+                _navigationManager.NavigateTo("/siramatik/kanal-alt");
             }
             else
             {
@@ -186,7 +186,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.KanalAlt
 
         private void NavigateBack()
         {
-            _navigationManager.NavigateTo("/siramatik/alt-kanal");
+            _navigationManager.NavigateTo("/siramatik/kanal-alt");
         }
     }
 }

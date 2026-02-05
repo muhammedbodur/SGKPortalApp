@@ -13,7 +13,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Islem
     public partial class Index
     {
         /// <summary>
-        /// Route: /yetki-islem
+        /// Route: /yetki/islem
         /// Convention: {MODUL_KODU}.{URL_TIRESIZ}.{ACTION}
         /// </summary>
         [Inject] private IModulControllerIslemApiService IslemApiService { get; set; } = default!;

@@ -90,12 +90,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.HizmetBinasi
 
         private void NavigateToList()
         {
-            _navigationManager.NavigateTo("/common/hizmetbinasi");
+            _navigationManager.NavigateTo("/common/hizmet-binasi");
         }
 
         private void NavigateToEdit(int id)
         {
-            _navigationManager.NavigateTo($"/common/hizmetbinasi/manage/{id}");
+            _navigationManager.NavigateTo($"/common/hizmet-binasi/manage/{id}");
         }
 
         private void NavigateToPersonelDetail(string TcKimlikNo)

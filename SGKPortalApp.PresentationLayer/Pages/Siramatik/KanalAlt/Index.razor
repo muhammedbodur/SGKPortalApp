@@ -1,4 +1,4 @@
-@page "/siramatik/alt-kanal"
+@page "/siramatik/kanal-alt"
 @inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.SiramatikIslemleri
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
@@ -60,7 +60,7 @@ else
                         </button>
                     }
 
-                    <a href="/siramatik/alt-kanal/manage" class="btn btn-primary">
+                    <a href="/siramatik/kanal-alt/manage" class="btn btn-primary">
                         <i class="bx bx-plus me-1"></i>Yeni Alt Kanal
                     </a>
                 </div>
@@ -245,7 +245,7 @@ else
                                 <span>Arama kriterlerinize uygun alt kanal bulunamadı.</span>
                             }
                         </p>
-                        <a href="/siramatik/alt-kanal/manage" class="btn btn-primary">
+                        <a href="/siramatik/kanal-alt/manage" class="btn btn-primary">
                             <i class="bx bx-plus me-1"></i>İlk Alt Kanalı Ekle
                         </a>
                     </div>
@@ -268,7 +268,7 @@ else
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end">
                                             <li>
-                                                <a class="dropdown-item" href="/siramatik/alt-kanal/manage/@kanalAlt.KanalAltId">
+                                                <a class="dropdown-item" href="/siramatik/kanal-alt/manage/@kanalAlt.KanalAltId">
                                                     <i class="bx bx-edit-alt me-2 text-primary"></i>Düzenle
                                                 </a>
                                             </li>

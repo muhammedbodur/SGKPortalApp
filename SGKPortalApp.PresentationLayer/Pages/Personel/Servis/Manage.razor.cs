@@ -227,7 +227,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Servis
 
         private void NavigateToServisList()
         {
-            _navigationManager.NavigateTo("/personel/Servis");
+            _navigationManager.NavigateTo("/personel/servis");
         }
 
         private void NavigateToHome()
