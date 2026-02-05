@@ -1,0 +1,333 @@
+@page "/haberler/add"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+@layout MainLayout
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-xxl flex-grow-1 container-p-y">
+
+            <!-- Page Header -->
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h4 class="mb-1">Yeni Haber</h4>
+                    <small class="text-muted">Yeni bir haber oluşturmak için formu doldurun</small>
+                </div>
+                <div class="btn-group">
+                    <a href="/haberler/yonetim" class="btn btn-outline-secondary">
+                        <i class="bx bx-arrow-back me-1"></i> Geri
+                    </a>
+                </div>
+            </div>
+
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Ana Sayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/haberler">Haberler</a></li>
+                    <li class="breadcrumb-item"><a href="/haberler/yonetim">Yönetim</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Yeni Haber</li>
+                </ol>
+            </nav>
+
+            @if (IsLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="text-muted mt-2">Form yükleniyor...</p>
+                </div>
+            }
+            else
+            {
+                <div class="row g-4">
+                    <!-- Left: Form -->
+                    <div class="col-lg-8">
+
+                <!-- Haber Bilgileri -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="card-title mb-0"><i class="bx bx-newspaper me-2 text-primary"></i>Haber Bilgileri</h5>
+                    </div>
+                    <div class="card-body">
+
+                        <!-- Başlık -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Başlık <span class="text-danger">*</span></label>
+                            <input type="text"
+                                   class="form-control @(string.IsNullOrWhiteSpace(Model.Baslik) && FormSubmitted ? "is-invalid" : "")"
+                                   placeholder="Haber başlığını girin..."
+                                   @bind-value="Model.Baslik"
+                                   @bind-value:event="oninput"
+                                   maxlength="200" />
+                            @if (string.IsNullOrWhiteSpace(Model.Baslik) && FormSubmitted)
+                            {
+                                <div class="invalid-feedback">Başlık zorunludur.</div>
+                            }
+                            <div class="text-muted small mt-1">@(Model.Baslik?.Length ?? 0) / 200 karakter</div>
+                        </div>
+
+                        <!-- İçerik -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">İçerik <span class="text-danger">*</span></label>
+                            <BlazoredTextEditor @ref="QuillEditor" Placeholder="Haber içeriğini girin...">
+                                <ToolbarContent>
+                                    <select class="ql-header">
+                                        <option selected=""></option>
+                                        <option value="1"></option>
+                                        <option value="2"></option>
+                                        <option value="3"></option>
+                                    </select>
+                                    <span class="ql-formats">
+                                        <button class="ql-bold"></button>
+                                        <button class="ql-italic"></button>
+                                        <button class="ql-underline"></button>
+                                        <button class="ql-strike"></button>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <select class="ql-color"></select>
+                                        <select class="ql-background"></select>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <button class="ql-list" value="ordered"></button>
+                                        <button class="ql-list" value="bullet"></button>
+                                        <button class="ql-indent" value="-1"></button>
+                                        <button class="ql-indent" value="+1"></button>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <select class="ql-align"></select>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <button class="ql-link"></button>
+                                        <button class="ql-image"></button>
+                                    </span>
+                                    <span class="ql-formats">
+                                        <button class="ql-clean"></button>
+                                    </span>
+                                </ToolbarContent>
+                            </BlazoredTextEditor>
+                            @if (string.IsNullOrWhiteSpace(Model.Icerik) && FormSubmitted)
+                            {
+                                <div class="invalid-feedback d-block">İçerik zorunludur.</div>
+                            }
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Sıra -->
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Sıra <span class="text-danger">*</span></label>
+                                <input type="number"
+                                       class="form-control"
+                                       @bind-value="Model.Sira"
+                                       @bind-value:event="oninput"
+                                       min="1"
+                                       max="999" />
+                            </div>
+
+                            <!-- Aktiflik -->
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Aktiflik</label>
+                                <select class="form-select" @bind="AktiflikValue">
+                                    <option value="1">Aktif</option>
+                                    <option value="0">Pasif</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-1">
+                            <!-- Yayın Tarihi -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Yayın Tarihi <span class="text-danger">*</span></label>
+                                <input type="datetime-local"
+                                       class="form-control"
+                                       value="@Model.YayinTarihi.ToString("yyyy-MM-ddTHH:mm")"
+                                       @oninput="OnYayinTarihiInput" />
+                            </div>
+
+                            <!-- Bitiş Tarihi -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Bitiş Tarihi</label>
+                                <input type="datetime-local"
+                                       class="form-control"
+                                       value="@(Model.BitisTarihi?.ToString("yyyy-MM-ddTHH:mm") ?? "")"
+                                       @oninput="OnBitisTarihiInput" />
+                                <div class="text-muted small mt-1">Boş bırakırsa süresiz yayında kalır.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resim Yönetimi -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h5 class="card-title mb-0"><i class="bx bx-images me-2 text-primary"></i>Resimler</h5>
+                        <span class="badge bg-secondary">@PendingImages.Count resim</span>
+                    </div>
+                    <div class="card-body">
+
+                        <!-- Yeni Resimler -->
+                        @if (PendingImages.Count > 0)
+                        {
+                            <div class="mb-3">
+                                <label class="form-label text-muted small">Eklenecek Resimler</label>
+                                <div class="row g-3">
+                                    @foreach (var pending in PendingImages)
+                                    {
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="card border border-success border-2 h-100">
+                                                <img src="@pending.PreviewUrl"
+                                                     alt="Yeni Resim"
+                                                     class="card-img-top sgk-img sgk-img-card" />
+                                                <div class="card-body p-2 text-center">
+                                                    <span class="badge bg-success mb-1">Yeni</span>
+                                                    <br />
+                                                    <div class="btn-group btn-group-sm">
+                                                        @if (!pending.IsVitrin)
+                                                        {
+                                                            <button class="btn btn-outline-primary btn-sm"
+                                                                    title="Vitrin yap"
+                                                                    @onclick="() => SetPendingVitrin(pending)">
+                                                                <i class="bx bx-star"></i>
+                                                            </button>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-primary">Vitrin</span>
+                                                        }
+                                                        <button class="btn btn-outline-danger btn-sm"
+                                                                title="Kaldır"
+                                                                @onclick="() => RemovePendingImage(pending)">
+                                                            <i class="bx bx-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Dosya Upload Alanı -->
+                        <div class="border border-dashed rounded-3 p-4 text-center" style="background:#f8fafc; border-color:#cbd5e1 !important;">
+                            <i class="bx bx-cloud-upload fs-3 text-muted"></i>
+                            <p class="text-muted mb-2">Resim dosyalarını sürükle-bırak veya aşağıdan seçebilirsiniz</p>
+                            <InputFile class="form-control form-control-sm"
+                                       Multiple
+                                       Accept=".jpg,.jpeg,.png,.gif,.bmp,.webp"
+                                       OnChange="HandleImageUpload" />
+                            <div class="text-muted small mt-2">
+                                Desteklenen: JPG, PNG, GIF, BMP, WebP &middot; Max 5MB/dosya
+                            </div>
+                        </div>
+
+                        @if (UploadError != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible small mt-2" role="alert">
+                                @UploadError
+                                <button type="button" class="btn-close btn-close-sm" @onclick="() => UploadError = null"></button>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between">
+                    <a href="/haberler/yonetim" class="btn btn-outline-secondary">
+                        <i class="bx bx-x me-1"></i> İptal
+                    </a>
+                    <button class="btn btn-primary btn-lg"
+                            @onclick="SaveHaber"
+                            disabled="@IsSaving">
+                        @if (IsSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                        }
+                        <i class="bx bx-save me-1"></i>
+                        Kaydet
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right: Preview -->
+            <div class="col-lg-4">
+                <div class="card sticky-top" style="top:20px;">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0"><i class="bx bx-eye me-2"></i>Önizleme</h6>
+                    </div>
+                    <div class="card-body">
+                        <!-- Vitrin Resim Önizleme -->
+                        @if (!string.IsNullOrEmpty(VitrinPreviewUrl))
+                        {
+                            <img src="@VitrinPreviewUrl"
+                                 alt="Vitrin"
+                                 class="img-fluid rounded mb-3 sgk-img sgk-img-vitrin" />
+                        }
+                        else
+                        {
+                            <div class="bg-secondary-subtle rounded sgk-img-box sgk-img-vitrin mb-3">
+                                <i class="bx bx-image fs-1 text-muted"></i>
+                            </div>
+                        }
+
+                        <h6 class="@(string.IsNullOrEmpty(Model.Baslik) ? "text-muted fst-italic" : "")">
+                            @(string.IsNullOrEmpty(Model.Baslik) ? "Başlık burada görünür..." : Model.Baslik)
+                        </h6>
+
+                        <div class="text-muted small mb-2">
+                            <i class="bx bx-calendar me-1"></i>
+                            Yayın: @Model.YayinTarihi.ToString("dd.MM.yyyy HH:mm")
+                        </div>
+
+                        @if (Model.BitisTarihi.HasValue)
+                        {
+                            <div class="text-muted small mb-2">
+                                <i class="bx bx-calendar-check me-1"></i>
+                                Bitiş: @Model.BitisTarihi.Value.ToString("dd.MM.yyyy HH:mm")
+                            </div>
+                        }
+
+                        <div class="text-muted small mb-3">
+                            <i class="bx bx-list-ul me-1"></i>
+                            Sıra: @Model.Sira &nbsp;|&nbsp; Resim: @PendingImages.Count
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.Icerik))
+                        {
+                            <hr class="my-2" />
+                            <p class="text-muted small" style="line-height:1.5;">
+                                @(Model.Icerik.Length > 200 ? Model.Icerik.Substring(0, 200) + "..." : Model.Icerik)
+                            </p>
+                        }
+                    </div>
+                </div>
+            </div>
+                </div>
+            }
+
+            <!-- Toast Bildirim -->
+            @if (!string.IsNullOrEmpty(ToastMessage))
+            {
+                <div class="toast-container top-0 end-0 p-3" style="position:fixed; z-index:9999;">
+                    <div class="toast show align-items-center text-bg-@ToastType border-0" role="alert">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <i class="bx @(ToastType == "success" ? "bx-check-circle" : "bx-error-circle") me-2"></i>
+                                @ToastMessage
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" @onclick="() => { ToastMessage = string.Empty; }"></button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </FieldPermissionScope>
+}
