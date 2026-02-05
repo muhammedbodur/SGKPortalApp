@@ -74,8 +74,8 @@
                     </a>
                     <ul class="menu-sub">
                         <PermissionSection PermissionKey="COM.HIZMETBINASI.INDEX" RequiredLevel="YetkiSeviyesi.View">
-                            <li class="menu-item @(IsActive("/common/hizmetbinasi") && !Navigation.Uri.Contains("/manage") && !Navigation.Uri.Contains("/detail") ? "active" : "")">
-                                <a href="/common/hizmetbinasi" class="menu-link">
+                            <li class="menu-item @(IsActive("/common/hizmet-binasi") && !Navigation.Uri.Contains("/manage") && !Navigation.Uri.Contains("/detail") ? "active" : "")">
+                                <a href="/common/hizmet-binasi" class="menu-link">
                                     <i class="menu-icon tf-icons bx bx-building"></i>
                                     <div>Hizmet Binaları</div>
                                 </a>
@@ -271,20 +271,20 @@
                             <div>Yetki Atama</div>
                         </a>
                     </li>
-                    <li class="menu-item @(IsSectionActive("/yetki/yetki-modul") ? "active" : "")">
-                        <a href="/yetki/yetki-modul" class="menu-link">
+                    <li class="menu-item @(IsSectionActive("/yetki/modul") ? "active" : "")">
+                        <a href="/yetki/modul" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-folder"></i>
                             <div>Modüller</div>
                         </a>
                     </li>
-                    <li class="menu-item @(IsSectionActive("/yetki/yetki-controller") ? "active" : "")">
-                        <a href="/yetki/yetki-controller" class="menu-link">
+                    <li class="menu-item @(IsSectionActive("/yetki/controller") ? "active" : "")">
+                        <a href="/yetki/controller" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-folder-open"></i>
                             <div>Controller'lar</div>
                         </a>
                     </li>
-                    <li class="menu-item @(IsSectionActive("/yetki/yetki-islem") ? "active" : "")">
-                        <a href="/yetki/yetki-islem" class="menu-link">
+                    <li class="menu-item @(IsSectionActive("/yetki/islem") ? "active" : "")">
+                        <a href="/yetki/islem" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-list-ul"></i>
                             <div>İşlemler</div>
                         </a>
@@ -334,7 +334,7 @@
                     </li>
 
                     <!-- Ana Kanal -->
-                    <li class="menu-item @(IsSectionActive("/siramatik/kanal") || IsSectionActive("/siramatik/alt-kanal") || IsSectionActive("/siramatik/kanal-altkanal-eslestirme") || IsSectionActive("/siramatik/personel-atama") ? "active open" : "")">
+                    <li class="menu-item @(IsSectionActive("/siramatik/kanal") || IsSectionActive("/siramatik/kanal-alt") || IsSectionActive("/siramatik/kanal-altkanal-eslestirme") || IsSectionActive("/siramatik/personel-atama") ? "active open" : "")">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <div>Kanal Yönetimi</div>
                         </a>
@@ -349,13 +349,13 @@
                                     <div>Yeni Kanal</div>
                                 </a>
                             </li> *@
-                            <li class="menu-item @(IsActive("/siramatik/alt-kanal") && !Navigation.Uri.Contains("/manage") ? "active" : "")">
-                                <a href="/siramatik/alt-kanal" class="menu-link">
+                            <li class="menu-item @(IsActive("/siramatik/kanal-alt") && !Navigation.Uri.Contains("/manage") ? "active" : "")">
+                                <a href="/siramatik/kanal-alt" class="menu-link">
                                     <div>Alt Kanallar</div>
                                 </a>
                             </li>
                             @* <li class="menu-item @(IsActive("/siramatik/alt-kanal/manage") ? "active" : "")">
-                                <a href="/siramatik/alt-kanal/manage" class="menu-link">
+                                <a href="/siramatik/kanal-alt/manage" class="menu-link">
                                     <div>Yeni Alt Kanal</div>
                                 </a>
                             </li> *@
@@ -398,8 +398,8 @@
                                     <div>Kiosk Menüleri</div>
                                 </a>
                             </li>
-                            <li class="menu-item @(IsActive("/siramatik/kiosk-yonetimi") || IsActive("/siramatik/kiosk/list") ? "active" : "")">
-                                <a href="/siramatik/kiosk-yonetimi" class="menu-link">
+                            <li class="menu-item @(IsActive("/siramatik/kiosk") ? "active" : "")">
+                                <a href="/siramatik/kiosk" class="menu-link">
                                     <div>Kiosk Cihazları</div>
                                 </a>
                             </li>
@@ -408,8 +408,8 @@
                                     <div>Kiosk Menü Ataması</div>
                                 </a>
                             </li> *@
-                            <li class="menu-item @(IsActive("/siramatik/kiosk-menu-eslestirme") ? "active" : "")">
-                                <a href="/siramatik/kiosk-menu-eslestirme" class="menu-link">
+                            <li class="menu-item @(IsActive("/siramatik/kiosk-menu-atama/eslestirme") ? "active" : "")">
+                                <a href="/siramatik/kiosk-menu-atama/eslestirme" class="menu-link">
                                     <div>Kiosk Menü Eşleştirme</div>
                                 </a>
                             </li>
@@ -418,8 +418,8 @@
                                     <div>Menü Alt Kanal İşlemleri</div>
                                 </a>
                             </li> *@
-                            <li class="menu-item @(IsActive("/siramatik/menu-islem-eslestirme") ? "active" : "")">
-                                <a href="/siramatik/menu-islem-eslestirme" class="menu-link">
+                            <li class="menu-item @(IsActive("/siramatik/kiosk-menu-islem/eslestirme") ? "active" : "")">
+                                <a href="/siramatik/kiosk-menu-islem/eslestirme" class="menu-link">
                                     <div>Kiosk Menü Alt Kanal Eşleştirme</div>
                                 </a>
                             </li>

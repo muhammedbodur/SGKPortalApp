@@ -24,7 +24,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Yetki.Controller
 
         /// <summary>
         /// Permission Key: YET.YETKICONTROLLER.INDEX
-        /// Route: /yetki-controller
+        /// Route: /yetki/controller
         /// Convention: {MODUL_KODU}.{URL_TIRESIZ}.{ACTION}
         /// </summary>
 

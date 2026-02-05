@@ -191,8 +191,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Servis
         // NAVİGASYON
         // ═══════════════════════════════════════════════════════
 
-        private void NavigateToCreate() => _navigationManager.NavigateTo("/personel/Servis/manage");
-        private void NavigateToEdit(int id) => _navigationManager.NavigateTo($"/personel/Servis/manage/{id}");
+        private void NavigateToCreate() => _navigationManager.NavigateTo("/personel/servis/manage");
+        private void NavigateToEdit(int id) => _navigationManager.NavigateTo($"/personel/servis/manage/{id}");
 
         // ═══════════════════════════════════════════════════════
         // TOGGLE STATUS MODAL

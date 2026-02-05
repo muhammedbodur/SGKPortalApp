@@ -64,7 +64,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
                     {
                         await _toastService.ShowWarningAsync("Bu Hizmet Binasına erişim yetkiniz yok!");
                         _logger.LogWarning("Yetkisiz Hizmet Binası erişim denemesi (URL): {BinaId}", HizmetBinasiId.Value);
-                        _navigationManager.NavigateTo("/siramatik/kiosk/list");
+                        _navigationManager.NavigateTo("/siramatik/kiosk");
                         return;
                     }
 
@@ -266,7 +266,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Siramatik.Kiosk
 
         private void NavigateBack()
         {
-            _navigationManager.NavigateTo("/siramatik/kiosk/list");
+            _navigationManager.NavigateTo("/siramatik/kiosk");
         }
     }
 }

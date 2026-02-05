@@ -19,22 +19,12 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
         {
             var now = DateTime.Now;
 
-            // Vitrin resmi olan haberleri önce al
-            var haberIdsWithVitrin = await _context.HaberResimler
-                .AsNoTracking()
-                .Where(r => r.IsVitrin && r.Aktiflik == Aktiflik.Aktif)
-                .Select(r => r.HaberId)
-                .Distinct()
-                .ToListAsync();
-
-            // Aktif haberler arasında vitrin resmi olanları al; yoksa GorselUrl olanları
             var haberler = await _context.Haberler
                 .AsNoTracking()
                 .Where(d => d.Aktiflik == Aktiflik.Aktif &&
                            d.YayinTarihi <= now &&
-                           (d.BitisTarihi == null || d.BitisTarihi >= now) &&
-                           (haberIdsWithVitrin.Contains(d.HaberId) || !string.IsNullOrEmpty(d.GorselUrl)))
-                .OrderBy(d => d.Sira)
+                           (d.BitisTarihi == null || d.BitisTarihi >= now))
+                .OrderByDescending(d => d.YayinTarihi)
                 .Take(count)
                 .ToListAsync();
 
