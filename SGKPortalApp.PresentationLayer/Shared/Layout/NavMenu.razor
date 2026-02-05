@@ -36,11 +36,31 @@
         </li>
 
         <!-- ================ HABERLERİ ================ -->
-        <li class="menu-item @(IsSectionActive("/haberler") ? "active" : "")">
-            <a href="/haberler" class="menu-link">
+        <li class="menu-item @(IsSectionActive("/haberler") ? "active open" : "")">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-news"></i>
                 <div>Haberler</div>
             </a>
+            <ul class="menu-sub">
+                <li class="menu-item @(IsActive("/haberler") ? "active" : "")">
+                    <a href="/haberler" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-list-ul"></i>
+                        <div>Haber Listesi</div>
+                    </a>
+                </li>
+                <li class="menu-item @(IsActive("/haberler/yonetim") ? "active" : "")">
+                    <a href="/haberler/yonetim" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-newspaper"></i>
+                        <div>Haber Yönetimi</div>
+                    </a>
+                </li>
+                <li class="menu-item @(IsActive("/haberler/manage") ? "active" : "")">
+                    <a href="/haberler/manage" class="menu-link">
+                        <i class="menu-icon tf-icons bx bx-plus-circle"></i>
+                        <div>Yeni Haber Ekle</div>
+                    </a>
+                </li>
+            </ul>
         </li>
 
         @if (!IsInBankoMode)

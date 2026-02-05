@@ -27,5 +27,26 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common
         /// Bir habere ait tüm resimlerini sıralı getirir
         /// </summary>
         Task<IEnumerable<HaberResim>> GetHaberResimleriAsync(int haberId);
+
+        // ─── CRUD ───────────────────────────────────────────
+
+        Task<Haber> CreateAsync(Haber haber);
+        Task<Haber> UpdateAsync(Haber haber);
+        Task<bool> DeleteAsync(int haberId);
+
+        /// <summary>
+        /// Admin için tüm haberleri getirir (tarih/aktiflik filtresi yok, sadece SilindiMi=false)
+        /// </summary>
+        Task<(IEnumerable<Haber> Items, int TotalCount)> GetAllForAdminAsync(
+            int pageNumber, int pageSize, string? searchTerm = null);
+
+        /// <summary>
+        /// Admin için tarih filtresi olmadan tek haber getir
+        /// </summary>
+        Task<Haber?> GetHaberByIdForAdminAsync(int haberId);
+
+        Task<HaberResim> CreateResimAsync(HaberResim haberResim);
+        Task<bool> DeleteResimAsync(int haberResimId);
+        Task<HaberResim?> GetResimByIdAsync(int haberResimId);
     }
 }

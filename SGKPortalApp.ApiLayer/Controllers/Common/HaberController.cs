@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 
 namespace SGKPortalApp.ApiLayer.Controllers.Common
 {
@@ -73,6 +74,92 @@ namespace SGKPortalApp.ApiLayer.Controllers.Common
             return File(stream.ToArray(),
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 fileName);
+        }
+
+        // ─── CRUD ENDPOINTS ─────────────────────────────────
+
+        /// <summary>
+        /// Admin liste: tüm haberler (tarih filtresi yok)
+        /// GET /api/haberler/admin?page=1&pageSize=12&search=kelime
+        /// </summary>
+        [HttpGet("admin")]
+        public async Task<IActionResult> GetAdminHaberListe(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 12,
+            [FromQuery] string? search = null)
+        {
+            var result = await _haberService.GetAdminHaberListeAsync(page, pageSize, search);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Yeni haber ekle
+        /// POST /api/haberler
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> CreateHaber([FromBody] HaberCreateRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _haberService.CreateHaberAsync(request);
+            return result.Success ? CreatedAtAction(nameof(GetHaber), new { id = result.Data?.HaberId }, result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Haber güncelle
+        /// PUT /api/haberler/{id}
+        /// </summary>
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateHaber(int id, [FromBody] HaberUpdateRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (id != request.HaberId)
+                return BadRequest("ID uyuşmazlığı");
+
+            var result = await _haberService.UpdateHaberAsync(request);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Haber sil (soft delete)
+        /// DELETE /api/haberler/{id}
+        /// </summary>
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteHaber(int id)
+        {
+            var result = await _haberService.DeleteHaberAsync(id);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Habere resim ekle
+        /// POST /api/haberler/{id}/resim
+        /// </summary>
+        [HttpPost("{id:int}/resim")]
+        public async Task<IActionResult> AddResim(int id, [FromBody] HaberResimCreateRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (id != request.HaberId)
+                return BadRequest("Haber ID uyuşmazlığı");
+
+            var result = await _haberService.AddResimAsync(request);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Haber resimini sil
+        /// DELETE /api/haberler/{id}/resim/{resimId}
+        /// </summary>
+        [HttpDelete("{id:int}/resim/{resimId:int}")]
+        public async Task<IActionResult> DeleteResim(int id, int resimId)
+        {
+            var result = await _haberService.DeleteResimAsync(resimId);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
 
         #region Word Generation
