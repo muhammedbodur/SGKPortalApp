@@ -123,60 +123,7 @@
                     </div>
                 </div>
 
-                <!-- ====== İZMİR SGK HABERLERİ ====== -->
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-header d-flex justify-content-between align-items-center border-0">
-                        <h5 class="mb-0">
-                            <i class="bx bx-news text-info me-2"></i>
-                            İzmir SGK Haberleri
-                        </h5>
-                        <a href="/haberler" class="text-primary small">
-                            Tüm Haberler <i class="bx bx-chevron-right"></i>
-                        </a>
-                    </div>
-                    <div class="card-body pt-0">
-                        @if (ListeHaberler.Any())
-                        {
-                            <div class="timeline-list">
-                                @foreach (var haber in ListeHaberler.Take(4))
-                                {
-                                    <div class="timeline-item d-flex mb-3 pb-3 border-bottom">
-                                        <div class="timeline-icon me-3">
-                                            <div class="avatar avatar-sm">
-                                                <span class="avatar-initial rounded bg-label-primary">
-                                                    <i class="bx bx-file-blank"></i>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="timeline-content flex-grow-1">
-                                            <a href="/haberler/@haber.HaberId" class="text-decoration-none">
-                                                <h6 class="mb-1 fw-semibold text-dark">@haber.Baslik</h6>
-                                            </a>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <small class="text-muted">
-                                                    <i class="bx bx-calendar me-1"></i>
-                                                    @haber.YayinTarihi.ToString("dd.MM.yyyy")
-                                                </small>
-                                                <a href="/haberler/@haber.HaberId" class="btn btn-sm btn-outline-secondary">
-                                                    Oku <i class="bx bx-chevron-right"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="text-center py-4">
-                                <i class="bx bx-news bx-lg text-muted mb-2"></i>
-                                <p class="text-muted mb-0">Henüz haber bulunmuyor.</p>
-                            </div>
-                        }
-                    </div>
-                </div>
-
-                <!-- ====== SGK GENEL MÜDÜRLÜK HABERLERİ ====== -->
+<!-- ====== SGK GENEL MÜDÜRLÜK HABERLERİ ====== -->
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header d-flex justify-content-between align-items-center border-0">
                         <h5 class="mb-0">

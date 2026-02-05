@@ -16,7 +16,6 @@ namespace SGKPortalApp.PresentationLayer.Pages
 
         // Haber verileri
         private List<HaberResponseDto> SliderHaberler = new();
-        private List<HaberResponseDto> ListeHaberler = new();
         private List<HaberResponseDto> GenelMudurlukHaberler = new();
 
         // Dashboard diğer verileri
@@ -47,7 +46,6 @@ namespace SGKPortalApp.PresentationLayer.Pages
                 var listeResponse = await HaberApi.GetHaberListeAsync(1, 10);
                 if (listeResponse.Success && listeResponse.Data != null)
                 {
-                    ListeHaberler = listeResponse.Data.Items;
 
                     // Genel Müdürlük bölümü için badge atama
                     GenelMudurlukHaberler = listeResponse.Data.Items.Take(4).Select((h, i) =>
