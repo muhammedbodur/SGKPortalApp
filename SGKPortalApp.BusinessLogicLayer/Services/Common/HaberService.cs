@@ -26,18 +26,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 
                 foreach (var haber in haberler)
                 {
-                    var resimler = await _haberRepository.GetHaberResimleriAsync(haber.DuyuruId);
+                    var resimler = await _haberRepository.GetHaberResimleriAsync(haber.HaberId);
                     var vitrin = resimler.FirstOrDefault(r => r.IsVitrin);
 
                     result.Add(new HaberResponseDto
                     {
-                        HaberId = haber.DuyuruId,
+                        HaberId = haber.HaberId,
                         Baslik = haber.Baslik,
                         Icerik = haber.Icerik,
                         VitrinResimUrl = vitrin?.ResimUrl ?? haber.GorselUrl,
                         Resimler = resimler.Select(r => new HaberResimResponseDto
                         {
-                            DuyuruResimId = r.DuyuruResimId,
+                            HaberResimId = r.HaberResimId,
                             ResimUrl = r.ResimUrl,
                             IsVitrin = r.IsVitrin,
                             Sira = r.Sira
@@ -67,18 +67,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 var haberList = new List<HaberResponseDto>();
                 foreach (var haber in items)
                 {
-                    var resimler = await _haberRepository.GetHaberResimleriAsync(haber.DuyuruId);
+                    var resimler = await _haberRepository.GetHaberResimleriAsync(haber.HaberId);
                     var vitrin = resimler.FirstOrDefault(r => r.IsVitrin);
 
                     haberList.Add(new HaberResponseDto
                     {
-                        HaberId = haber.DuyuruId,
+                        HaberId = haber.HaberId,
                         Baslik = haber.Baslik,
                         Icerik = haber.Icerik,
                         VitrinResimUrl = vitrin?.ResimUrl ?? haber.GorselUrl,
                         Resimler = resimler.Select(r => new HaberResimResponseDto
                         {
-                            DuyuruResimId = r.DuyuruResimId,
+                            HaberResimId = r.HaberResimId,
                             ResimUrl = r.ResimUrl,
                             IsVitrin = r.IsVitrin,
                             Sira = r.Sira
@@ -119,13 +119,13 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 
                 var result = new HaberResponseDto
                 {
-                    HaberId = haber.DuyuruId,
+                    HaberId = haber.HaberId,
                     Baslik = haber.Baslik,
                     Icerik = haber.Icerik,
                     VitrinResimUrl = vitrin?.ResimUrl ?? haber.GorselUrl,
                     Resimler = resimler.Select(r => new HaberResimResponseDto
                     {
-                        DuyuruResimId = r.DuyuruResimId,
+                        HaberResimId = r.HaberResimId,
                         ResimUrl = r.ResimUrl,
                         IsVitrin = r.IsVitrin,
                         Sira = r.Sira
@@ -140,7 +140,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
                 {
                     result.Resimler.Add(new HaberResimResponseDto
                     {
-                        DuyuruResimId = 0,
+                        HaberResimId = 0,
                         ResimUrl = haber.GorselUrl,
                         IsVitrin = true,
                         Sira = 1

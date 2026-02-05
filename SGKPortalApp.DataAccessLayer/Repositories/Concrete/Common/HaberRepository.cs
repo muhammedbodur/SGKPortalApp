@@ -15,25 +15,25 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
             _context = context;
         }
 
-        public async Task<IEnumerable<Duyuru>> GetSliderHaberleriAsync(int count = 5)
+        public async Task<IEnumerable<Haber>> GetSliderHaberleriAsync(int count = 5)
         {
             var now = DateTime.Now;
 
             // Vitrin resmi olan haberleri önce al
-            var haberIdsWithVitrin = await _context.DuyuruResimler
+            var haberIdsWithVitrin = await _context.HaberResimler
                 .AsNoTracking()
                 .Where(r => r.IsVitrin && r.Aktiflik == Aktiflik.Aktif)
-                .Select(r => r.DuyuruId)
+                .Select(r => r.HaberId)
                 .Distinct()
                 .ToListAsync();
 
             // Aktif haberler arasında vitrin resmi olanları al; yoksa GorselUrl olanları
-            var haberler = await _context.Duyurular
+            var haberler = await _context.Haberler
                 .AsNoTracking()
                 .Where(d => d.Aktiflik == Aktiflik.Aktif &&
                            d.YayinTarihi <= now &&
                            (d.BitisTarihi == null || d.BitisTarihi >= now) &&
-                           (haberIdsWithVitrin.Contains(d.DuyuruId) || !string.IsNullOrEmpty(d.GorselUrl)))
+                           (haberIdsWithVitrin.Contains(d.HaberId) || !string.IsNullOrEmpty(d.GorselUrl)))
                 .OrderBy(d => d.Sira)
                 .Take(count)
                 .ToListAsync();
@@ -41,12 +41,12 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
             return haberler;
         }
 
-        public async Task<(IEnumerable<Duyuru> Items, int TotalCount)> GetHaberListeAsync(
+        public async Task<(IEnumerable<Haber> Items, int TotalCount)> GetHaberListeAsync(
             int pageNumber, int pageSize, string? searchTerm = null)
         {
             var now = DateTime.Now;
 
-            IQueryable<Duyuru> query = _context.Duyurular
+            IQueryable<Haber> query = _context.Haberler
                 .AsNoTracking()
                 .Where(d => d.Aktiflik == Aktiflik.Aktif &&
                            d.YayinTarihi <= now &&
@@ -71,23 +71,23 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
             return (items, totalCount);
         }
 
-        public async Task<Duyuru?> GetHaberByIdAsync(int haberId)
+        public async Task<Haber?> GetHaberByIdAsync(int haberId)
         {
             var now = DateTime.Now;
-            return await _context.Duyurular
+            return await _context.Haberler
                 .AsNoTracking()
                 .FirstOrDefaultAsync(d =>
-                    d.DuyuruId == haberId &&
+                    d.HaberId == haberId &&
                     d.Aktiflik == Aktiflik.Aktif &&
                     d.YayinTarihi <= now &&
                     (d.BitisTarihi == null || d.BitisTarihi >= now));
         }
 
-        public async Task<IEnumerable<DuyuruResim>> GetHaberResimleriAsync(int haberId)
+        public async Task<IEnumerable<HaberResim>> GetHaberResimleriAsync(int haberId)
         {
-            return await _context.DuyuruResimler
+            return await _context.HaberResimler
                 .AsNoTracking()
-                .Where(r => r.DuyuruId == haberId && r.Aktiflik == Aktiflik.Aktif)
+                .Where(r => r.HaberId == haberId && r.Aktiflik == Aktiflik.Aktif)
                 .OrderBy(r => r.Sira)
                 .ToListAsync();
         }

@@ -19,7 +19,7 @@ namespace SGKPortalApp.DataAccessLayer.SeedData
 
             try
             {
-                await SeedDuyurularAsync(context, logger);
+                await SeedHaberleriAsync(context, logger);
                 await SeedGununMenusuAsync(context, logger);
                 await SeedOnemliLinklerAsync(context, logger);
                 await SeedSikKullanilanProgramlarAsync(context, logger);
@@ -33,18 +33,18 @@ namespace SGKPortalApp.DataAccessLayer.SeedData
             }
         }
 
-        private static async Task SeedDuyurularAsync(SGKDbContext context, ILogger? logger)
+        private static async Task SeedHaberleriAsync(SGKDbContext context, ILogger? logger)
         {
-            if (await context.Duyurular.AnyAsync())
+            if (await context.Haberler.AnyAsync())
             {
-                logger?.LogInformation("Duyurular tablosunda zaten veri var, seed atlanıyor.");
+                logger?.LogInformation("Haberler tablosunda zaten veri var, seed atlanıyor.");
                 return;
             }
 
-            var duyurular = new List<Duyuru>
+            var haberler = new List<Haber>
             {
                 // Slider Duyuruları (Sira 1-5 = Slider)
-                new Duyuru
+                new Haber
                 {
                     Baslik = "İzmir İşverenleri ile Değerlendirme Toplantısı Gerçekleşti",
                     Icerik = "İzmir Sosyal Güvenlik İl Müdürü Mehmet Karagöz, işverenlerle değerlendirme toplantısı gerçekleştirerek sorunları ve çözünleri ele aldı. Toplantıda 2024 yılı hedefleri ve yeni uygulamalar hakkında bilgi verildi.",
@@ -55,7 +55,7 @@ namespace SGKPortalApp.DataAccessLayer.SeedData
                     EklenmeTarihi = DateTime.Now,
                     EkleyenKullanici = "System"
                 },
-                new Duyuru
+                new Haber
                 {
                     Baslik = "SGK Mobil Uygulama Yenilendi",
                     Icerik = "SGK Mobil uygulaması yeni özellikleriyle güncellendi. Artık e-Devlet şifresi ile giriş yapabilir, hizmet dökümünüzü görüntüleyebilir ve prim borç sorgulama yapabilirsiniz.",
@@ -66,7 +66,7 @@ namespace SGKPortalApp.DataAccessLayer.SeedData
                     EklenmeTarihi = DateTime.Now,
                     EkleyenKullanici = "System"
                 },
-                new Duyuru
+                new Haber
                 {
                     Baslik = "Emeklilik Yaşı Hesaplama Hizmeti Aktif",
                     Icerik = "Yeni emeklilik yaşı hesaplama hizmeti artık e-Devlet üzerinden aktif. Vatandaşlarımız emeklilik haklarını ve tahmini emeklilik tarihlerini öğrenebilir.",
@@ -77,7 +77,7 @@ namespace SGKPortalApp.DataAccessLayer.SeedData
                     EklenmeTarihi = DateTime.Now,
                     EkleyenKullanici = "System"
                 },
-                new Duyuru
+                new Haber
                 {
                     Baslik = "Konak İlçe Tarım ve Orman Müdürlüğü Ziyareti",
                     Icerik = "İzmir SGK İl Müdürlüğü yetkilileri, Konak İlçe Tarım ve Orman Müdürlüğü'nü ziyaret ederek tarım sigortası konusunda bilgi alışverişinde bulundu.",
@@ -90,7 +90,7 @@ namespace SGKPortalApp.DataAccessLayer.SeedData
                 },
 
                 // Liste Duyuruları (Sira 10+ = Liste)
-                new Duyuru
+                new Haber
                 {
                     Baslik = "Anlaşma Yapılan Özel Hastanelere İlişkin Değerlendirme Tablosu",
                     Icerik = "2024 yılı için anlaşma yapılan özel hastanelerin güncel listesi yayınlandı. Detaylı bilgi için tıklayınız.",
@@ -100,7 +100,7 @@ namespace SGKPortalApp.DataAccessLayer.SeedData
                     EklenmeTarihi = DateTime.Now,
                     EkleyenKullanici = "System"
                 },
-                new Duyuru
+                new Haber
                 {
                     Baslik = "SGK Eğitim Programı Duyurusu",
                     Icerik = "2024 yılı personel eğitim programı açıklandı. Eğitimlere katılım için birim amirlerinize başvurunuz.",
@@ -110,7 +110,7 @@ namespace SGKPortalApp.DataAccessLayer.SeedData
                     EklenmeTarihi = DateTime.Now,
                     EkleyenKullanici = "System"
                 },
-                new Duyuru
+                new Haber
                 {
                     Baslik = "Genel Sağlık Sigortası Düzenlemeleri",
                     Icerik = "Genel sağlık sigortası kapsamında yapılan yeni düzenlemeler hakkında bilgilendirme.",
@@ -120,7 +120,7 @@ namespace SGKPortalApp.DataAccessLayer.SeedData
                     EklenmeTarihi = DateTime.Now,
                     EkleyenKullanici = "System"
                 },
-                new Duyuru
+                new Haber
                 {
                     Baslik = "Kayseri İl Müdürlüğüne Yönelik Eğitim Programı",
                     Icerik = "Kayseri İl Müdürlüğü personeline yönelik düzenlenen eğitim programı hakkında detaylı bilgi.",
@@ -130,7 +130,7 @@ namespace SGKPortalApp.DataAccessLayer.SeedData
                     EklenmeTarihi = DateTime.Now,
                     EkleyenKullanici = "System"
                 },
-                new Duyuru
+                new Haber
                 {
                     Baslik = "Yeni Teşvik Paketinin Yürürlüğe Girmesi",
                     Icerik = "İşverenler için hazırlanan yeni teşvik paketi 01.01.2024 tarihi itibariyle yürürlüğe girdi.",
@@ -142,9 +142,9 @@ namespace SGKPortalApp.DataAccessLayer.SeedData
                 }
             };
 
-            await context.Duyurular.AddRangeAsync(duyurular);
+            await context.Haberler.AddRangeAsync(haberler);
             await context.SaveChangesAsync();
-            logger?.LogInformation("{Count} adet duyuru eklendi.", duyurular.Count);
+            logger?.LogInformation("{Count} adet haber eklendi.", haberler.Count);
         }
 
         private static async Task SeedGununMenusuAsync(SGKDbContext context, ILogger? logger)
@@ -393,7 +393,7 @@ namespace SGKPortalApp.DataAccessLayer.SeedData
             try
             {
                 // Soft delete yerine hard delete yapıyoruz (seed data için)
-                await context.Database.ExecuteSqlRawAsync("DELETE FROM dbo.CMN_Duyurular WHERE EkleyenKullanici = 'System'");
+                await context.Database.ExecuteSqlRawAsync("DELETE FROM dbo.CMN_Haberler WHERE EkleyenKullanici = 'System'");
                 await context.Database.ExecuteSqlRawAsync("DELETE FROM dbo.CMN_GununMenusu WHERE EkleyenKullanici = 'System'");
                 await context.Database.ExecuteSqlRawAsync("DELETE FROM dbo.CMN_OnemliLinkler WHERE EkleyenKullanici = 'System'");
                 await context.Database.ExecuteSqlRawAsync("DELETE FROM dbo.CMN_SikKullanilanProgramlar WHERE EkleyenKullanici = 'System'");

@@ -12,7 +12,7 @@ namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common
         public DashboardMappingProfile()
         {
             // Entity -> Response mappings
-            CreateMap<Duyuru, DuyuruResponseDto>();
+            CreateMap<Haber, HaberDashboardResponseDto>();
             CreateMap<OnemliLink, OnemliLinkResponseDto>();
             CreateMap<SikKullanilanProgram, SikKullanilanProgramResponseDto>();
             CreateMap<GununMenusu, GununMenusuResponseDto>();

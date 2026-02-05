@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
@@ -62,6 +63,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Account
                     ProfileModel.LastName = nameParts.Length > 1 ? string.Join(" ", nameParts.Skip(1)) : "";
                     ProfileModel.Email = UserEmail;
                     ProfileModel.Phone = UserPhone;
+                    ProfileModel.Department = UserDepartment;
+                    ProfileModel.Title = UserRole;
                 }
             }
             catch (Exception ex)
@@ -80,7 +83,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Account
             };
         }
 
-        private async Task SaveProfile()
+        private async Task SaveProfile(EditContext editContext)
         {
             IsSaving = true;
             try

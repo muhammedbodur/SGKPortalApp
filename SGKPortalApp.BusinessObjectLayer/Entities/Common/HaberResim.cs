@@ -6,15 +6,15 @@ using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
 {
     /// <summary>
-    /// Duyuru (Haber) için çok resim desteği
+    /// Haber için çok resim desteği
     /// </summary>
-    public class DuyuruResim : AuditableEntity
+    public class HaberResim : AuditableEntity
     {
         [Key]
-        public int DuyuruResimId { get; set; }
+        public int HaberResimId { get; set; }
 
         [Required]
-        public int DuyuruId { get; set; }
+        public int HaberId { get; set; }
 
         [Required]
         [StringLength(500)]
@@ -33,7 +33,7 @@ namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
         public Aktiflik Aktiflik { get; set; } = Aktiflik.Aktif;
 
         // Navigation
-        [ForeignKey(nameof(DuyuruId))]
-        public Duyuru? Duyuru { get; set; }
+        [ForeignKey(nameof(HaberId))]
+        public Haber? Haber { get; set; }
     }
 }

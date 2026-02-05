@@ -6,13 +6,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace SGKPortalApp.BusinessObjectLayer.Entities.Common
 {
     /// <summary>
-    /// Duyuru Entity
-    /// Tablo adı: CMN_Duyurular (Configuration'da tanımlanacak)
+    /// Haber Entity
+    /// Tablo adı: CMN_Haberler (Configuration'da tanımlanacak)
     /// </summary>
-    public class Duyuru : AuditableEntity
+    public class Haber : AuditableEntity
     {
         [Key]
-        public int DuyuruId { get; set; }
+        public int HaberId { get; set; }
 
         [Required]
         [StringLength(200)]

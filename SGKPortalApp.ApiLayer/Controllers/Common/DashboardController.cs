@@ -29,22 +29,22 @@ namespace SGKPortalApp.ApiLayer.Controllers.Common
         }
 
         /// <summary>
-        /// Slider duyurularını getirir
+        /// Slider haberlerini getirir
         /// </summary>
-        [HttpGet("slider-duyurular")]
-        public async Task<IActionResult> GetSliderDuyurular([FromQuery] int count = 5)
+        [HttpGet("slider-haberler")]
+        public async Task<IActionResult> GetSliderHaberler([FromQuery] int count = 5)
         {
-            var result = await _dashboardService.GetSliderDuyurularAsync(count);
+            var result = await _dashboardService.GetSliderHaberleriAsync(count);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
         /// <summary>
-        /// Liste duyurularını getirir
+        /// Liste haberlerini getirir
         /// </summary>
-        [HttpGet("liste-duyurular")]
-        public async Task<IActionResult> GetListeDuyurular([FromQuery] int count = 10)
+        [HttpGet("liste-haberler")]
+        public async Task<IActionResult> GetListeHaberler([FromQuery] int count = 10)
         {
-            var result = await _dashboardService.GetListeDuyurularAsync(count);
+            var result = await _dashboardService.GetListeHaberleriAsync(count);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 

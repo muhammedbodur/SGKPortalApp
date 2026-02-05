@@ -15,14 +15,14 @@ namespace SGKPortalApp.BusinessLogicLayer.Interfaces.Common
         Task<ApiResponseDto<DashboardDataResponseDto>> GetDashboardDataAsync();
 
         /// <summary>
-        /// Slider duyurularını getirir
+        /// Slider haberlerini getirir
         /// </summary>
-        Task<ApiResponseDto<List<DuyuruResponseDto>>> GetSliderDuyurularAsync(int count = 5);
+        Task<ApiResponseDto<List<HaberDashboardResponseDto>>> GetSliderHaberleriAsync(int count = 5);
 
         /// <summary>
-        /// Liste duyurularını getirir
+        /// Liste haberlerini getirir
         /// </summary>
-        Task<ApiResponseDto<List<DuyuruResponseDto>>> GetListeDuyurularAsync(int count = 10);
+        Task<ApiResponseDto<List<HaberDashboardResponseDto>>> GetListeHaberleriAsync(int count = 10);
 
         /// <summary>
         /// Sık kullanılan programları getirir

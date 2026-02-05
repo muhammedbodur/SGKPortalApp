@@ -35,9 +35,9 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             {
                 var dashboardData = new DashboardDataResponseDto();
                 
-                dashboardData.SliderDuyurular = await GetSliderDuyurularInternalAsync(10);
+                dashboardData.SliderHaberler = await GetSliderHaberleriInternalAsync(10);
                 
-                dashboardData.ListeDuyurular = await GetListeDuyurularInternalAsync(10);
+                dashboardData.ListeHaberler = await GetListeHaberleriInternalAsync(10);
                 
                 dashboardData.SikKullanilanProgramlar = await GetSikKullanilanProgramlarInternalAsync(8);
                 
@@ -56,31 +56,31 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
             }
         }
 
-        public async Task<ApiResponseDto<List<DuyuruResponseDto>>> GetSliderDuyurularAsync(int count = 5)
+        public async Task<ApiResponseDto<List<HaberDashboardResponseDto>>> GetSliderHaberleriAsync(int count = 5)
         {
             try
             {
-                var result = await GetSliderDuyurularInternalAsync(count);
-                return ApiResponseDto<List<DuyuruResponseDto>>.SuccessResult(result);
+                var result = await GetSliderHaberleriInternalAsync(count);
+                return ApiResponseDto<List<HaberDashboardResponseDto>>.SuccessResult(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Slider duyuruları getirilirken hata oluştu");
-                return ApiResponseDto<List<DuyuruResponseDto>>.ErrorResult("Slider duyuruları getirilirken hata oluştu");
+                _logger.LogError(ex, "Slider haberleri getirilirken hata oluştu");
+                return ApiResponseDto<List<HaberDashboardResponseDto>>.ErrorResult("Slider haberleri getirilirken hata oluştu");
             }
         }
 
-        public async Task<ApiResponseDto<List<DuyuruResponseDto>>> GetListeDuyurularAsync(int count = 10)
+        public async Task<ApiResponseDto<List<HaberDashboardResponseDto>>> GetListeHaberleriAsync(int count = 10)
         {
             try
             {
-                var result = await GetListeDuyurularInternalAsync(count);
-                return ApiResponseDto<List<DuyuruResponseDto>>.SuccessResult(result);
+                var result = await GetListeHaberleriInternalAsync(count);
+                return ApiResponseDto<List<HaberDashboardResponseDto>>.SuccessResult(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Liste duyuruları getirilirken hata oluştu");
-                return ApiResponseDto<List<DuyuruResponseDto>>.ErrorResult("Liste duyuruları getirilirken hata oluştu");
+                _logger.LogError(ex, "Liste haberleri getirilirken hata oluştu");
+                return ApiResponseDto<List<HaberDashboardResponseDto>>.ErrorResult("Liste haberleri getirilirken hata oluştu");
             }
         }
 
@@ -142,18 +142,18 @@ namespace SGKPortalApp.BusinessLogicLayer.Services.Common
 
         #region Internal Methods
 
-        private async Task<List<DuyuruResponseDto>> GetSliderDuyurularInternalAsync(int count)
+        private async Task<List<HaberDashboardResponseDto>> GetSliderHaberleriInternalAsync(int count)
         {
-            var repo = _unitOfWork.GetRepository<IDuyuruRepository>();
-            var duyurular = await repo.GetSliderDuyurularAsync(count);
-            return _mapper.Map<List<DuyuruResponseDto>>(duyurular);
+            var repo = _unitOfWork.GetRepository<IHaberDashboardRepository>();
+            var haberler = await repo.GetSliderHaberleriAsync(count);
+            return _mapper.Map<List<HaberDashboardResponseDto>>(haberler);
         }
 
-        private async Task<List<DuyuruResponseDto>> GetListeDuyurularInternalAsync(int count)
+        private async Task<List<HaberDashboardResponseDto>> GetListeHaberleriInternalAsync(int count)
         {
-            var repo = _unitOfWork.GetRepository<IDuyuruRepository>();
-            var duyurular = await repo.GetListeDuyurularAsync(count);
-            return _mapper.Map<List<DuyuruResponseDto>>(duyurular);
+            var repo = _unitOfWork.GetRepository<IHaberDashboardRepository>();
+            var haberler = await repo.GetListeHaberleriAsync(count);
+            return _mapper.Map<List<HaberDashboardResponseDto>>(haberler);
         }
 
         private async Task<List<SikKullanilanProgramResponseDto>> GetSikKullanilanProgramlarInternalAsync(int count)

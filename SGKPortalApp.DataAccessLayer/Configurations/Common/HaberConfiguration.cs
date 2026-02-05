@@ -5,36 +5,36 @@ using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 
 namespace SGKPortalApp.DataAccessLayer.Configurations.Common
 {
-    public class DuyuruConfiguration : IEntityTypeConfiguration<Duyuru>
+    public class HaberConfiguration : IEntityTypeConfiguration<Haber>
     {
-        public void Configure(EntityTypeBuilder<Duyuru> builder)
+        public void Configure(EntityTypeBuilder<Haber> builder)
         {
             // Table
-            builder.ToTable("CMN_Duyurular", "dbo");
+            builder.ToTable("CMN_Haberler", "dbo");
 
             // Primary Key
-            builder.HasKey(d => d.DuyuruId);
+            builder.HasKey(d => d.HaberId);
 
             // Properties
-            builder.Property(d => d.DuyuruId)
+            builder.Property(d => d.HaberId)
                 .ValueGeneratedOnAdd();
 
             builder.Property(d => d.Baslik)
                 .IsRequired()
                 .HasMaxLength(200)
-                .HasComment("Duyuru başlığı");
+                .HasComment("Haber başlığı");
 
             builder.Property(d => d.Icerik)
                 .IsRequired()
-                .HasComment("Duyuru içeriği");
+                .HasComment("Haber içeriği");
 
             builder.Property(d => d.GorselUrl)
                 .HasMaxLength(500)
-                .HasComment("Duyuru görseli URL");
+                .HasComment("Haber görseli URL");
 
             builder.Property(d => d.Sira)
                 .IsRequired()
-                .HasComment("Duyuru sırası");
+                .HasComment("Haber sırası");
 
             builder.Property(d => d.YayinTarihi)
                 .IsRequired()
@@ -48,7 +48,7 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.Common
                 .IsRequired()
                 .HasConversion<int>()
                 .HasDefaultValue(Aktiflik.Aktif)
-                .HasComment("Duyuru aktiflik durumu (0: Pasif, 1: Aktif)");
+                .HasComment("Haber aktiflik durumu (0: Pasif, 1: Aktif)");
 
             // Auditing
             builder.Property(d => d.EklenmeTarihi)
@@ -68,16 +68,16 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.Common
 
             // Indexes
             builder.HasIndex(d => d.YayinTarihi)
-                .HasDatabaseName("IX_CMN_Duyurular_YayinTarihi");
+                .HasDatabaseName("IX_CMN_Haberler_YayinTarihi");
 
             builder.HasIndex(d => d.Aktiflik)
-                .HasDatabaseName("IX_CMN_Duyurular_Aktiflik");
+                .HasDatabaseName("IX_CMN_Haberler_Aktiflik");
 
             builder.HasIndex(d => new { d.Aktiflik, d.SilindiMi })
-                .HasDatabaseName("IX_CMN_Duyurular_Aktiflik_SilindiMi");
+                .HasDatabaseName("IX_CMN_Haberler_Aktiflik_SilindiMi");
 
             builder.HasIndex(d => d.Sira)
-                .HasDatabaseName("IX_CMN_Duyurular_Sira");
+                .HasDatabaseName("IX_CMN_Haberler_Sira");
 
             // Soft Delete Query Filter
             builder.HasQueryFilter(d => !d.SilindiMi);

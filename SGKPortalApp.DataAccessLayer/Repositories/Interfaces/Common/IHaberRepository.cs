@@ -10,22 +10,22 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common
         /// <summary>
         /// Slider için vitrin fotoğrafı olan aktif haberleri getirir
         /// </summary>
-        Task<IEnumerable<Duyuru>> GetSliderHaberleriAsync(int count = 5);
+        Task<IEnumerable<Haber>> GetSliderHaberleriAsync(int count = 5);
 
         /// <summary>
         /// Tüm aktif haberleri, optiyonel arama ile, sayfalama ile getirir
         /// </summary>
-        Task<(IEnumerable<Duyuru> Items, int TotalCount)> GetHaberListeAsync(
+        Task<(IEnumerable<Haber> Items, int TotalCount)> GetHaberListeAsync(
             int pageNumber, int pageSize, string? searchTerm = null);
 
         /// <summary>
         /// Tek haber detayını getirir
         /// </summary>
-        Task<Duyuru?> GetHaberByIdAsync(int haberId);
+        Task<Haber?> GetHaberByIdAsync(int haberId);
 
         /// <summary>
         /// Bir habere ait tüm resimlerini sıralı getirir
         /// </summary>
-        Task<IEnumerable<DuyuruResim>> GetHaberResimleriAsync(int haberId);
+        Task<IEnumerable<HaberResim>> GetHaberResimleriAsync(int haberId);
     }
 }

@@ -8,15 +8,15 @@ using SGKPortalApp.DataAccessLayer.Repositories.Interfaces.Common;
 namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
 {
     /// <summary>
-    /// Duyuru Repository Implementation
+    /// Dashboard Haber Repository Implementation
     /// </summary>
-    public class DuyuruRepository : GenericRepository<Duyuru>, IDuyuruRepository
+    public class HaberDashboardRepository : GenericRepository<Haber>, IHaberDashboardRepository
     {
-        public DuyuruRepository(SGKDbContext context) : base(context)
+        public HaberDashboardRepository(SGKDbContext context) : base(context)
         {
         }
 
-        public async Task<IEnumerable<Duyuru>> GetActiveDuyurularAsync()
+        public async Task<IEnumerable<Haber>> GetActiveHaberleriAsync()
         {
             var now = DateTime.Now;
             return await _dbSet
@@ -29,7 +29,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Duyuru>> GetSliderDuyurularAsync(int count = 5)
+        public async Task<IEnumerable<Haber>> GetSliderHaberleriAsync(int count = 5)
         {
             var now = DateTime.Now;
             return await _dbSet
@@ -44,7 +44,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Duyuru>> GetListeDuyurularAsync(int count = 10)
+        public async Task<IEnumerable<Haber>> GetListeHaberleriAsync(int count = 10)
         {
             var now = DateTime.Now;
             return await _dbSet
@@ -58,7 +58,7 @@ namespace SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Duyuru>> GetYayindakiDuyurularAsync()
+        public async Task<IEnumerable<Haber>> GetYayindakiHaberleriAsync()
         {
             var now = DateTime.Now;
             return await _dbSet

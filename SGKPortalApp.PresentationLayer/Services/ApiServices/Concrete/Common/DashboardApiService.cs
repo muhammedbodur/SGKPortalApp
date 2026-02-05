@@ -35,31 +35,31 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
             }
         }
 
-        public async Task<ApiResponseDto<List<DuyuruResponseDto>>> GetSliderDuyurularAsync(int count = 5)
+        public async Task<ApiResponseDto<List<HaberDashboardResponseDto>>> GetSliderHaberleriAsync(int count = 5)
         {
             try
             {
-                var response = await _httpClient.GetFromJsonAsync<ApiResponseDto<List<DuyuruResponseDto>>>($"{BaseUrl}/slider-duyurular?count={count}");
-                return response ?? ApiResponseDto<List<DuyuruResponseDto>>.ErrorResult("Veri alınamadı");
+                var response = await _httpClient.GetFromJsonAsync<ApiResponseDto<List<HaberDashboardResponseDto>>>($"{BaseUrl}/slider-haberler?count={count}");
+                return response ?? ApiResponseDto<List<HaberDashboardResponseDto>>.ErrorResult("Veri alınamadı");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Slider duyuruları getirilirken hata oluştu");
-                return ApiResponseDto<List<DuyuruResponseDto>>.ErrorResult("Slider duyuruları getirilirken hata oluştu");
+                _logger.LogError(ex, "Slider haberleri getirilirken hata oluştu");
+                return ApiResponseDto<List<HaberDashboardResponseDto>>.ErrorResult("Slider haberleri getirilirken hata oluştu");
             }
         }
 
-        public async Task<ApiResponseDto<List<DuyuruResponseDto>>> GetListeDuyurularAsync(int count = 10)
+        public async Task<ApiResponseDto<List<HaberDashboardResponseDto>>> GetListeHaberleriAsync(int count = 10)
         {
             try
             {
-                var response = await _httpClient.GetFromJsonAsync<ApiResponseDto<List<DuyuruResponseDto>>>($"{BaseUrl}/liste-duyurular?count={count}");
-                return response ?? ApiResponseDto<List<DuyuruResponseDto>>.ErrorResult("Veri alınamadı");
+                var response = await _httpClient.GetFromJsonAsync<ApiResponseDto<List<HaberDashboardResponseDto>>>($"{BaseUrl}/liste-haberler?count={count}");
+                return response ?? ApiResponseDto<List<HaberDashboardResponseDto>>.ErrorResult("Veri alınamadı");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Liste duyuruları getirilirken hata oluştu");
-                return ApiResponseDto<List<DuyuruResponseDto>>.ErrorResult("Liste duyuruları getirilirken hata oluştu");
+                _logger.LogError(ex, "Liste haberleri getirilirken hata oluştu");
+                return ApiResponseDto<List<HaberDashboardResponseDto>>.ErrorResult("Liste haberleri getirilirken hata oluştu");
             }
         }
 

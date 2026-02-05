@@ -5,20 +5,20 @@ using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 
 namespace SGKPortalApp.DataAccessLayer.Configurations.Common
 {
-    public class DuyuruResimConfiguration : IEntityTypeConfiguration<DuyuruResim>
+    public class HaberResimConfiguration : IEntityTypeConfiguration<HaberResim>
     {
-        public void Configure(EntityTypeBuilder<DuyuruResim> builder)
+        public void Configure(EntityTypeBuilder<HaberResim> builder)
         {
-            builder.ToTable("CMN_DuyuruResimler", "dbo");
+            builder.ToTable("CMN_HaberResimler", "dbo");
 
-            builder.HasKey(r => r.DuyuruResimId);
+            builder.HasKey(r => r.HaberResimId);
 
-            builder.Property(r => r.DuyuruResimId)
+            builder.Property(r => r.HaberResimId)
                 .ValueGeneratedOnAdd();
 
-            builder.Property(r => r.DuyuruId)
+            builder.Property(r => r.HaberId)
                 .IsRequired()
-                .HasComment("Bağlı duyuru (haber) ID");
+                .HasComment("Bağlı haber ID");
 
             builder.Property(r => r.ResimUrl)
                 .IsRequired()
@@ -54,17 +54,17 @@ namespace SGKPortalApp.DataAccessLayer.Configurations.Common
                 .HasDefaultValue(false);
 
             // FK
-            builder.HasOne(r => r.Duyuru)
+            builder.HasOne(r => r.Haber)
                 .WithMany()
-                .HasForeignKey(r => r.DuyuruId)
+                .HasForeignKey(r => r.HaberId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Indexes
-            builder.HasIndex(r => r.DuyuruId)
-                .HasDatabaseName("IX_CMN_DuyuruResimler_DuyuruId");
+            builder.HasIndex(r => r.HaberId)
+                .HasDatabaseName("IX_CMN_HaberResimler_HaberId");
 
-            builder.HasIndex(r => new { r.DuyuruId, r.Sira })
-                .HasDatabaseName("IX_CMN_DuyuruResimler_DuyuruId_Sira");
+            builder.HasIndex(r => new { r.HaberId, r.Sira })
+                .HasDatabaseName("IX_CMN_HaberResimler_HaberId_Sira");
 
             // Soft delete filter
             builder.HasQueryFilter(r => !r.SilindiMi);

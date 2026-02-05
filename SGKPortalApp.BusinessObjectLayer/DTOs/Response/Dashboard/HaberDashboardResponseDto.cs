@@ -2,9 +2,9 @@ using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 
 namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard
 {
-    public class DuyuruResponseDto
+    public class HaberDashboardResponseDto
     {
-        public int DuyuruId { get; set; }
+        public int HaberId { get; set; }
         public string Baslik { get; set; } = string.Empty;
         public string Icerik { get; set; } = string.Empty;
         public string? GorselUrl { get; set; }

@@ -6,14 +6,14 @@ namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard
     public class DashboardDataResponseDto
     {
         /// <summary>
-        /// Slider için ana duyurular (görsel olan)
+        /// Slider için ana haberler (görsel olan)
         /// </summary>
-        public List<DuyuruResponseDto> SliderDuyurular { get; set; } = new();
+        public List<HaberDashboardResponseDto> SliderHaberler { get; set; } = new();
 
         /// <summary>
-        /// Liste halinde duyurular
+        /// Liste halinde haberler
         /// </summary>
-        public List<DuyuruResponseDto> ListeDuyurular { get; set; } = new();
+        public List<HaberDashboardResponseDto> ListeHaberler { get; set; } = new();
 
         /// <summary>
         /// Sık kullanılan programlar

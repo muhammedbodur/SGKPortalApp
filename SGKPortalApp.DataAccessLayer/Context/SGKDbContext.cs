@@ -33,8 +33,8 @@ namespace SGKPortalApp.DataAccessLayer.Context
         public DbSet<HizmetBinasi> HizmetBinalari { get; set; }
         public DbSet<DepartmanHizmetBinasi> DepartmanHizmetBinalari { get; set; }
         public DbSet<ResmiTatil> ResmiTatiller { get; set; }
-        public DbSet<Duyuru> Duyurular { get; set; }
-        public DbSet<DuyuruResim> DuyuruResimler { get; set; }
+        public DbSet<Haber> Haberler { get; set; }
+        public DbSet<HaberResim> HaberResimler { get; set; }
         public DbSet<GununMenusu> GununMenuleri { get; set; }
         public DbSet<OnemliLink> OnemliLinkler { get; set; }
         public DbSet<SikKullanilanProgram> SikKullanilanProgramlar { get; set; }
@@ -120,8 +120,8 @@ namespace SGKPortalApp.DataAccessLayer.Context
             modelBuilder.ApplyConfiguration(new ModulConfiguration());
             modelBuilder.ApplyConfiguration(new ModulControllerConfiguration());
             modelBuilder.ApplyConfiguration(new ModulControllerIslemConfiguration());
-            modelBuilder.ApplyConfiguration(new DuyuruConfiguration());
-            modelBuilder.ApplyConfiguration(new DuyuruResimConfiguration());
+            modelBuilder.ApplyConfiguration(new HaberConfiguration());
+            modelBuilder.ApplyConfiguration(new HaberResimConfiguration());
             modelBuilder.ApplyConfiguration(new GununMenusuConfiguration());
             modelBuilder.ApplyConfiguration(new OnemliLinkConfiguration());
             modelBuilder.ApplyConfiguration(new SikKullanilanProgramConfiguration());
