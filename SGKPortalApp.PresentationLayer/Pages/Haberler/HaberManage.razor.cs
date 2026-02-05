@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
+using Blazored.TextEditor;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Haberler
 {
@@ -28,6 +29,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
 
         // ─── State ───────────────────────────────────────────
 
+        private BlazoredTextEditor? QuillEditor;
         private bool IsLoading { get; set; } = true;
         private bool IsSaving { get; set; } = false;
         private bool FormSubmitted { get; set; } = false;
@@ -66,6 +68,14 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
                 await LoadExistingHaber();
 
             IsLoading = false;
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender && QuillEditor != null && !string.IsNullOrWhiteSpace(Model.Icerik))
+            {
+                await QuillEditor.LoadHTMLContent(Model.Icerik);
+            }
         }
 
         private async Task LoadExistingHaber()
@@ -232,6 +242,12 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
         private async Task SaveHaber()
         {
             FormSubmitted = true;
+
+            // Editor'dan HTML içeriğini al
+            if (QuillEditor != null)
+            {
+                Model.Icerik = await QuillEditor.GetHTML();
+            }
 
             if (string.IsNullOrWhiteSpace(Model.Baslik) || string.IsNullOrWhiteSpace(Model.Icerik))
             {
