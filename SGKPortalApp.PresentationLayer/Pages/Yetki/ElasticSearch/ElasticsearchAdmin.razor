@@ -1,189 +1,202 @@
 @page "/yetki/elasticsearch/admin"
 @using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Elasticsearch
 @attribute [Authorize]
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 
 <PageTitle>Elasticsearch Yönetimi</PageTitle>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h4 class="fw-bold mb-1"><i class="bx bx-search-alt me-2"></i>Elasticsearch Yönetimi</h4>
-        <p class="text-muted mb-0">Index yönetimi ve senkronizasyon</p>
-    </div>
-    <div class="d-flex gap-2">
-        <button class="btn btn-outline-primary" @onclick="RefreshStatus" disabled="@IsLoadingStatus">
-            @if (IsLoadingStatus)
-            {
-                <span class="spinner-border spinner-border-sm me-1"></span>
-            }
-            else
-            {
-                <i class="bx bx-refresh me-1"></i>
-            }
-            Yenile
-        </button>
-    </div>
-</div>
-
-@if (IsLoadingStatus)
+@if (!CanViewPage)
 {
-    <div class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Yükleniyor...</span>
-        </div>
-        <p class="mt-3 text-muted">Durum bilgisi yükleniyor...</p>
-    </div>
-}
-else if (Status == null)
-{
-    <div class="card">
-        <div class="card-body text-center py-5">
-            <i class="bx bx-error-circle display-1 text-danger mb-3"></i>
-            <h5 class="text-muted">Durum bilgisi alınamadı</h5>
-        </div>
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
     </div>
 }
 else
 {
-    <!-- Status Card -->
-    <div class="card mb-4">
-        <div class="card-header bg-transparent">
-            <h5 class="mb-0"><i class="bx bx-info-circle me-2"></i>Durum Bilgisi</h5>
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1"><i class="bx bx-search-alt me-2"></i>Elasticsearch Yönetimi</h4>
+                <p class="text-muted mb-0">Index yönetimi ve senkronizasyon</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-primary" @onclick="RefreshStatus" disabled="@IsLoadingStatus">
+                    @if (IsLoadingStatus)
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    else
+                    {
+                        <i class="bx bx-refresh me-1"></i>
+                    }
+                    Yenile
+                </button>
+            </div>
         </div>
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <div class="d-flex align-items-center">
-                        <i class="bx bx-server fs-4 me-2 @(Status.IsAvailable ? "text-success" : "text-danger")"></i>
-                        <div>
-                            <small class="text-muted d-block">Bağlantı</small>
-                            <strong>@(Status.IsAvailable ? "Çalışıyor" : "Kapalı")</strong>
-                        </div>
-                    </div>
+
+        @if (IsLoadingStatus)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Yükleniyor...</span>
                 </div>
-                <div class="col-md-3">
-                    <div class="d-flex align-items-center">
-                        <i class="bx bx-data fs-4 me-2 @(Status.IndexExists ? "text-success" : "text-warning")"></i>
-                        <div>
-                            <small class="text-muted d-block">Index</small>
-                            <strong>@(Status.IndexExists ? "Mevcut" : "Yok")</strong>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="d-flex align-items-center">
-                        <i class="bx bx-file fs-4 me-2 text-info"></i>
-                        <div>
-                            <small class="text-muted d-block">Elasticsearch Kayıt</small>
-                            <strong>@Status.DocumentCount</strong>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="d-flex align-items-center">
-                        <i class="bx bx-database fs-4 me-2 text-primary"></i>
-                        <div>
-                            <small class="text-muted d-block">SQL Kayıt</small>
-                            <strong>@Status.SqlRecordCount</strong>
-                        </div>
-                    </div>
+                <p class="mt-3 text-muted">Durum bilgisi yükleniyor...</p>
+            </div>
+        }
+        else if (Status == null)
+        {
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bx bx-error-circle display-1 text-danger mb-3"></i>
+                    <h5 class="text-muted">Durum bilgisi alınamadı</h5>
                 </div>
             </div>
-            @if (!string.IsNullOrEmpty(Status.ErrorMessage))
-            {
-                <div class="alert alert-danger mt-3 mb-0">
-                    <i class="bx bx-error me-2"></i>@Status.ErrorMessage
+        }
+        else
+        {
+            <!-- Status Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0"><i class="bx bx-info-circle me-2"></i>Durum Bilgisi</h5>
                 </div>
-            }
-        </div>
-    </div>
-
-    <!-- Actions Card -->
-    <div class="card">
-        <div class="card-header bg-transparent">
-            <h5 class="mb-0"><i class="bx bx-cog me-2"></i>İşlemler</h5>
-        </div>
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <div class="border rounded p-3 h-100">
-                        <h6 class="fw-bold mb-2"><i class="bx bx-plus-circle me-1"></i>Index Oluştur</h6>
-                        <p class="text-muted small mb-3">Elasticsearch index'ini oluşturur (synonym'larla birlikte)</p>
-                        <button class="btn btn-sm btn-primary" @onclick="CreateIndex" disabled="@IsProcessing">
-                            @if (IsProcessing && CurrentOperation == "create")
-                            {
-                                <span class="spinner-border spinner-border-sm me-1"></span>
-                            }
-                            else
-                            {
-                                <i class="bx bx-play me-1"></i>
-                            }
-                            Oluştur
-                        </button>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bx bx-server fs-4 me-2 @(Status.IsAvailable ? "text-success" : "text-danger")"></i>
+                                <div>
+                                    <small class="text-muted d-block">Bağlantı</small>
+                                    <strong>@(Status.IsAvailable ? "Çalışıyor" : "Kapalı")</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bx bx-data fs-4 me-2 @(Status.IndexExists ? "text-success" : "text-warning")"></i>
+                                <div>
+                                    <small class="text-muted d-block">Index</small>
+                                    <strong>@(Status.IndexExists ? "Mevcut" : "Yok")</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bx bx-file fs-4 me-2 text-info"></i>
+                                <div>
+                                    <small class="text-muted d-block">Elasticsearch Kayıt</small>
+                                    <strong>@Status.DocumentCount</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <i class="bx bx-database fs-4 me-2 text-primary"></i>
+                                <div>
+                                    <small class="text-muted d-block">SQL Kayıt</small>
+                                    <strong>@Status.SqlRecordCount</strong>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="border rounded p-3 h-100">
-                        <h6 class="fw-bold mb-2"><i class="bx bx-refresh me-1"></i>Tam Yeniden İndexleme</h6>
-                        <p class="text-muted small mb-3">Tüm personelleri yeniden indexler (index'i siler ve yeniden oluşturur)</p>
-                        <button class="btn btn-sm btn-warning" @onclick="FullReindex" disabled="@IsProcessing">
-                            @if (IsProcessing && CurrentOperation == "reindex")
-                            {
-                                <span class="spinner-border spinner-border-sm me-1"></span>
-                            }
-                            else
-                            {
-                                <i class="bx bx-play me-1"></i>
-                            }
-                            Reindex
-                        </button>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="border rounded p-3 h-100">
-                        <h6 class="fw-bold mb-2"><i class="bx bx-sync me-1"></i>Artımlı Senkronizasyon</h6>
-                        <p class="text-muted small mb-3">Son 24 saatte güncellenen personelleri senkronize eder</p>
-                        <button class="btn btn-sm btn-info" @onclick="IncrementalSync" disabled="@IsProcessing">
-                            @if (IsProcessing && CurrentOperation == "sync")
-                            {
-                                <span class="spinner-border spinner-border-sm me-1"></span>
-                            }
-                            else
-                            {
-                                <i class="bx bx-play me-1"></i>
-                            }
-                            Senkronize
-                        </button>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="border border-danger rounded p-3 h-100">
-                        <h6 class="fw-bold mb-2 text-danger"><i class="bx bx-trash me-1"></i>Index Sil</h6>
-                        <p class="text-muted small mb-3">Elasticsearch index'ini tamamen siler (veriler kaybolur)</p>
-                        <button class="btn btn-sm btn-outline-danger" @onclick="DeleteIndex" disabled="@IsProcessing">
-                            @if (IsProcessing && CurrentOperation == "delete")
-                            {
-                                <span class="spinner-border spinner-border-sm me-1"></span>
-                            }
-                            else
-                            {
-                                <i class="bx bx-trash me-1"></i>
-                            }
-                            Sil
-                        </button>
-                    </div>
+                    @if (!string.IsNullOrEmpty(Status.ErrorMessage))
+                    {
+                        <div class="alert alert-danger mt-3 mb-0">
+                            <i class="bx bx-error me-2"></i>@Status.ErrorMessage
+                        </div>
+                    }
                 </div>
             </div>
 
-            @if (!string.IsNullOrEmpty(OperationMessage))
-            {
-                <div class="alert @(OperationSuccess ? "alert-success" : "alert-danger") alert-sm mt-3 mb-0">
-                    <i class="bx @(OperationSuccess ? "bx-check-circle" : "bx-error-circle") me-1"></i>
-                    <small>@OperationMessage</small>
+            <!-- Actions Card -->
+            <div class="card">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0"><i class="bx bx-cog me-2"></i>İşlemler</h5>
                 </div>
-            }
-        </div>
-    </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="fw-bold mb-2"><i class="bx bx-plus-circle me-1"></i>Index Oluştur</h6>
+                                <p class="text-muted small mb-3">Elasticsearch index'ini oluşturur (synonym'larla birlikte)</p>
+                                <button class="btn btn-sm btn-primary" @onclick="CreateIndex" disabled="@IsProcessing">
+                                    @if (IsProcessing && CurrentOperation == "create")
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1"></span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bx bx-play me-1"></i>
+                                    }
+                                    Oluştur
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="fw-bold mb-2"><i class="bx bx-refresh me-1"></i>Tam Yeniden İndexleme</h6>
+                                <p class="text-muted small mb-3">Tüm personelleri yeniden indexler (index'i siler ve yeniden oluşturur)</p>
+                                <button class="btn btn-sm btn-warning" @onclick="FullReindex" disabled="@IsProcessing">
+                                    @if (IsProcessing && CurrentOperation == "reindex")
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1"></span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bx bx-play me-1"></i>
+                                    }
+                                    Reindex
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="border rounded p-3 h-100">
+                                <h6 class="fw-bold mb-2"><i class="bx bx-sync me-1"></i>Artımlı Senkronizasyon</h6>
+                                <p class="text-muted small mb-3">Son 24 saatte güncellenen personelleri senkronize eder</p>
+                                <button class="btn btn-sm btn-info" @onclick="IncrementalSync" disabled="@IsProcessing">
+                                    @if (IsProcessing && CurrentOperation == "sync")
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1"></span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bx bx-play me-1"></i>
+                                    }
+                                    Senkronize
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="border border-danger rounded p-3 h-100">
+                                <h6 class="fw-bold mb-2 text-danger"><i class="bx bx-trash me-1"></i>Index Sil</h6>
+                                <p class="text-muted small mb-3">Elasticsearch index'ini tamamen siler (veriler kaybolur)</p>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="DeleteIndex" disabled="@IsProcessing">
+                                    @if (IsProcessing && CurrentOperation == "delete")
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1"></span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bx bx-trash me-1"></i>
+                                    }
+                                    Sil
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(OperationMessage))
+                    {
+                        <div class="alert @(OperationSuccess ? "alert-success" : "alert-danger") alert-sm mt-3 mb-0">
+                            <i class="bx @(OperationSuccess ? "bx-check-circle" : "bx-error-circle") me-1"></i>
+                            <small>@OperationMessage</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </FieldPermissionScope>
 }

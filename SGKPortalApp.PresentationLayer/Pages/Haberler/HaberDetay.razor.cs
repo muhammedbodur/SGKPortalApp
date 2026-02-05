@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard;
+using SGKPortalApp.PresentationLayer.Components.Base;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Haberler
 {
-    public partial class HaberDetay
+    public partial class HaberDetay : FieldPermissionPageBase
     {
         [Parameter] public int Id { get; set; }
 

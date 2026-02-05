@@ -13,6 +13,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Account
         [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
         [Inject] private IUserApiService UserApiService { get; set; } = default!;
         [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+        [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
         private string UserName = "";
         private string UserFullName = "";
@@ -65,6 +66,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Account
                     ProfileModel.Phone = UserPhone;
                     ProfileModel.Department = UserDepartment;
                     ProfileModel.Title = UserRole;
+                }
+                else
+                {
+                    NavigationManager.NavigateTo("/auth/login", forceLoad: true);
                 }
             }
             catch (Exception ex)

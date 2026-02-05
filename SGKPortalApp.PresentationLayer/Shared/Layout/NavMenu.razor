@@ -105,6 +105,30 @@
                                 </a>
                             </li>
                         </PermissionSection>
+                        <PermissionSection PermissionKey="COM.GUNUNMENUSU.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                            <li class="menu-item @(IsSectionActive("/common/gunun-menusu") ? "active" : "")">
+                                <a href="/common/gunun-menusu" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-food-menu"></i>
+                                    <div>Günün Menüsü</div>
+                                </a>
+                            </li>
+                        </PermissionSection>
+                        <PermissionSection PermissionKey="COM.ONEMLILINK.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                            <li class="menu-item @(IsSectionActive("/common/onemli-link") ? "active" : "")">
+                                <a href="/common/onemli-link" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-link"></i>
+                                    <div>Önemli Linkler</div>
+                                </a>
+                            </li>
+                        </PermissionSection>
+                        <PermissionSection PermissionKey="COM.SIKKULLANILANPROGRAM.INDEX" RequiredLevel="YetkiSeviyesi.View">
+                            <li class="menu-item @(IsSectionActive("/common/sik-kullanilan-program") ? "active" : "")">
+                                <a href="/common/sik-kullanilan-program" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bx-grid-alt"></i>
+                                    <div>Sık Kullanılan Programlar</div>
+                                </a>
+                            </li>
+                        </PermissionSection>
                         <PermissionSection PermissionKey="COM.BACKGROUNDSERVICE.INDEX" RequiredLevel="YetkiSeviyesi.View">
                             <li class="menu-item @(IsSectionActive("/common/background-services") ? "active" : "")">
                                 <a href="/common/background-services" class="menu-link">

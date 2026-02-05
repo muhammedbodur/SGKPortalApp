@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="DTOs\Shared\**" />
+    <EmbeddedResource Remove="DTOs\Shared\**" />
+    <None Remove="DTOs\Shared\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="DTOs\Request\Auth\" />
     <Folder Include="DTOs\Request\EshotIslemleri\" />
     <Folder Include="DTOs\Request\ZKTeco\" />
@@ -16,9 +22,6 @@
     <Folder Include="DTOs\Response\EshotIslemleri\" />
     <Folder Include="DTOs\Response\ZKTeco\" />
     <Folder Include="DTOs\Response\PdksIslemleri\" />
-    <Folder Include="DTOs\Shared\Common\" />
-    <Folder Include="DTOs\Shared\Enums\" />
-    <Folder Include="DTOs\Shared\ValueObjects\" />
     <Folder Include="Entities\EshotIslemleri\" />
     <Folder Include="Entities\DenetmenlikIslemleri\" />
     <Folder Include="Entities\RucuIslemleri\" />

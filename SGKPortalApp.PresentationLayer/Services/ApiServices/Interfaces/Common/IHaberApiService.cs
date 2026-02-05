@@ -1,6 +1,5 @@
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
 {

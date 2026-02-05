@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Account;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 
 namespace SGKPortalApp.ApiLayer.Controllers.Common
@@ -107,6 +109,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.Common
         /// <summary>
         /// Şifre değiştir (Eski şifre gerekli)
         /// </summary>
+        [Authorize]
         [HttpPost("{tcKimlikNo}/change-password")]
         public async Task<IActionResult> ChangePassword(
             string tcKimlikNo,
@@ -115,9 +118,13 @@ namespace SGKPortalApp.ApiLayer.Controllers.Common
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            var currentTc = User.FindFirst("TcKimlikNo")?.Value;
+            if (string.IsNullOrWhiteSpace(currentTc) || !string.Equals(currentTc, tcKimlikNo, StringComparison.OrdinalIgnoreCase))
+                return Forbid();
+
             var result = await _userService.ChangePasswordAsync(
                 tcKimlikNo, 
-                request.OldPassword, 
+                request.CurrentPassword, 
                 request.NewPassword);
             
             if (!result.Success)

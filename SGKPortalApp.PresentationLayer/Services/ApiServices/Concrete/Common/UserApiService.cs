@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Account;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
@@ -48,6 +49,35 @@ namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common
             {
                 _logger.LogError(ex, "GetByTcKimlikNoAsync exception");
                 return ServiceResult<UserResponseDto>.Fail($"Hata: {ex.Message}");
+            }
+        }
+
+        public async Task<ServiceResult<bool>> ChangePasswordAsync(string tcKimlikNo, ChangePasswordRequestDto request)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync($"user/{tcKimlikNo}/change-password", request);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("ChangePasswordAsync failed: {Error}", errorContent);
+                    return ServiceResult<bool>.Fail("Şifre değiştirilemedi.");
+                }
+
+                var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponseDto<bool>>();
+
+                if (apiResponse?.Success == true)
+                {
+                    return ServiceResult<bool>.Ok(apiResponse.Data, apiResponse.Message ?? "İşlem başarılı");
+                }
+
+                return ServiceResult<bool>.Fail(apiResponse?.Message ?? "Şifre değiştirilemedi");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ChangePasswordAsync exception");
+                return ServiceResult<bool>.Fail($"Hata: {ex.Message}");
             }
         }
 

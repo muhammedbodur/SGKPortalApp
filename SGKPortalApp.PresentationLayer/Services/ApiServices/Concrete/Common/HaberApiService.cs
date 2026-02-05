@@ -2,7 +2,6 @@ using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 
 namespace SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common

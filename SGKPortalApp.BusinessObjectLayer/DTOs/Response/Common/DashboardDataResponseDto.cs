@@ -1,4 +1,4 @@
-namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard
+namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
 {
     /// <summary>
     /// Dashboard için tüm verileri içeren birleşik Response DTO

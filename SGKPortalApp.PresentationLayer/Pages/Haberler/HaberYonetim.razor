@@ -1,247 +1,306 @@
 @page "/haberler/yonetim"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @layout MainLayout
 
-<div class="container-xxl flex-grow-1 container-p-y">
-
-    <!-- Page Header -->
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h4 class="mb-1">Haber Yönetimi</h4>
-            <small class="text-muted">Tüm haberler — ekle, düzenle, sil</small>
-        </div>
-        <a href="/haberler/manage" class="btn btn-primary">
-            <i class="bx bx-plus me-1"></i> Yeni Haber
-        </a>
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
     </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-xxl flex-grow-1 container-p-y">
 
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-3">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Ana Sayfa</a></li>
-            <li class="breadcrumb-item"><a href="/haberler">Haberler</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Yönetim</li>
-        </ol>
-    </nav>
+            <!-- Page Header -->
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h4 class="mb-1">Haber Yönetimi</h4>
+                    <small class="text-muted">Tüm haberler — ekle, düzenle, sil</small>
+                </div>
+                @if (IsActionVisible("CREATE"))
+                {
+                    @if (CanEditAction("CREATE"))
+                    {
+                        <a href="/haberler/manage" class="btn btn-primary">
+                            <i class="bx bx-plus me-1"></i> Yeni Haber
+                        </a>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-primary" disabled>
+                            <i class="bx bx-plus me-1"></i> Yeni Haber
+                        </button>
+                    }
+                }
+            </div>
 
-    <!-- Search & Filter Bar -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-5">
-                    <label class="form-label text-muted small mb-1">Arama</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bx bx-search"></i></span>
-                        <input type="text"
-                               class="form-control"
-                               placeholder="Başlık veya içerik ile ara..."
-                               @bind-value="SearchTerm"
-                               @bind-value:event="oninput"
-                               @onkeydown:Enter="Search" />
-                        @if (!string.IsNullOrEmpty(SearchTerm))
-                        {
-                            <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch">
-                                <i class="bx bx-x"></i>
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Ana Sayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/haberler">Haberler</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Yönetim</li>
+                </ol>
+            </nav>
+
+            <!-- Search & Filter Bar -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-5">
+                            <label class="form-label text-muted small mb-1">Arama</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bx bx-search"></i></span>
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="Başlık veya içerik ile ara..."
+                                       @bind-value="SearchTerm"
+                                       @bind-value:event="oninput"
+                                       @onkeydown:Enter="Search" />
+                                @if (!string.IsNullOrEmpty(SearchTerm))
+                                {
+                                    <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch">
+                                        <i class="bx bx-x"></i>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label text-muted small mb-1">Durum</label>
+                            <select class="form-select" @bind="StatusFilter" @bind:after="Search">
+                                <option value="">Tümü</option>
+                                <option value="Aktif">Aktif</option>
+                                <option value="Pasif">Pasif</option>
+                                <option value="Taslak">Taslak (Ileride)</option>
+                                <option value="Bitti">Süresi Dolmuş</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-primary w-100" @onclick="Search">
+                                <i class="bx bx-search me-1"></i> Ara
                             </button>
-                        }
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <label class="form-label text-muted small mb-1">Durum</label>
-                    <select class="form-select" @bind="StatusFilter" @onchange="Search">
-                        <option value="">Tümü</option>
-                        <option value="Aktif">Aktif</option>
-                        <option value="Pasif">Pasif</option>
-                        <option value="Taslak">Taslak (Ileride)</option>
-                        <option value="Bitti">Süresi Dolmuş</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button class="btn btn-primary w-100" @onclick="Search">
-                        <i class="bx bx-search me-1"></i> Ara
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Loading -->
-    @if (IsLoading)
-    {
-        <div class="text-center py-5">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Yükleniyor...</span>
-            </div>
-            <p class="text-muted mt-2">Haberler yükleniyor...</p>
-        </div>
-    }
-    else
-    {
-        <!-- Table -->
-        <div class="card">
-            <div class="table-responsive">
-                <table class="table table-vcenter card-table">
-                    <thead>
-                        <tr>
-                            <th style="width:40px">#</th>
-                            <th style="width:60px">Resim</th>
-                            <th>Başlık</th>
-                            <th style="width:100px" class="text-center">Sıra</th>
-                            <th style="width:120px">Yayın Tarihi</th>
-                            <th style="width:120px">Bitiş Tarihi</th>
-                            <th style="width:80px" class="text-center">Resim</th>
-                            <th style="width:100px" class="text-center">Durum</th>
-                            <th style="width:130px" class="text-center">İşlem</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (FilteredList.Count == 0)
-                        {
-                            <tr>
-                                <td colspan="9" class="text-center text-muted py-4">
-                                    <i class="bx bx-newspaper fs-4"></i><br/>
-                                    Sonuç bulunamadı.
-                                </td>
-                            </tr>
-                        }
-                        else
-                        {
-                            @foreach (var (haber, index) in FilteredList.Select((h, i) => (h, i)))
-                            {
-                                <tr>
-                                    <td class="text-muted small">@(index + 1 + (CurrentPage - 1) * PageSize)</td>
-                                    <td>
-                                        @if (!string.IsNullOrEmpty(haber.VitrinResimUrl))
-                                        {
-                                            <img src="@haber.VitrinResimUrl"
-                                                 alt="@haber.Baslik"
-                                                 class="rounded"
-                                                 style="width:48px; height:36px; object-fit:cover;" />
-                                        }
-                                        else
-                                        {
-                                            <div class="bg-secondary-subtle rounded d-flex align-items-center justify-content-center"
-                                                 style="width:48px; height:36px;">
-                                                <i class="bx bx-image text-muted"></i>
-                                            </div>
-                                        }
-                                    </td>
-                                    <td>
-                                        <strong>@haber.Baslik</strong>
-                                        <div class="text-muted small" style="max-width:320px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                                            @haber.Icerik
-                                        </div>
-                                    </td>
-                                    <td class="text-center">@haber.Sira</td>
-                                    <td class="small">@haber.YayinTarihi.ToString("dd.MM.yyyy HH:mm")</td>
-                                    <td class="small">
-                                        @if (haber.BitisTarihi.HasValue)
-                                            @haber.BitisTarihi.Value.ToString("dd.MM.yyyy HH:mm")
-                                        else
-                                            <span class="text-muted">—</span>
-                                    </td>
-                                    <td class="text-center small">@haber.Resimler.Count</td>
-                                    <td class="text-center">
-                                        <span class="badge @GetStatusBadgeClass(haber)">@GetStatusText(haber)</span>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            <a href="/haberler/manage/@haber.HaberId" class="btn btn-outline-primary" title="Düzenle">
-                                                <i class="bx bx-pencil"></i>
-                                            </a>
-                                            <a href="/haberler/@haber.HaberId" class="btn btn-outline-secondary" title="Detay" target="_blank">
-                                                <i class="bx bx-show"></i>
-                                            </a>
-                                            <button class="btn btn-outline-danger" title="Sil" @onclick="() => ConfirmDelete(haber.HaberId, haber.Baslik)">
-                                                <i class="bx bx-trash"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
             </div>
 
-            <!-- Pagination Footer -->
-            @if (TotalPages > 1)
+            <!-- Loading -->
+            @if (IsLoading)
             {
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <span class="text-muted small">
-                        Toplam <strong>@TotalCount</strong> haber, Sayfa @CurrentPage / @TotalPages
-                    </span>
-                    <nav>
-                        <ul class="pagination pagination-sm mb-0">
-                            <li class="page-item @(CurrentPage <= 1 ? "disabled" : "")">
-                                <button class="page-link" @onclick="() => GoToPage(1)" disabled="@(CurrentPage <= 1)">«</button>
-                            </li>
-                            <li class="page-item @(CurrentPage <= 1 ? "disabled" : "")">
-                                <button class="page-link" @onclick="() => GoToPage(CurrentPage - 1)" disabled="@(CurrentPage <= 1)">‹</button>
-                            </li>
-                            @for (int i = GetStartPage(); i <= GetEndPage(); i++)
-                            {
-                                var page = i;
-                                <li class="page-item @(page == CurrentPage ? "active" : "")">
-                                    <button class="page-link" @onclick="() => GoToPage(page)">@page</button>
-                                </li>
-                            }
-                            <li class="page-item @(CurrentPage >= TotalPages ? "disabled" : "")">
-                                <button class="page-link" @onclick="() => GoToPage(CurrentPage + 1)" disabled="@(CurrentPage >= TotalPages)">›</button>
-                            </li>
-                            <li class="page-item @(CurrentPage >= TotalPages ? "disabled" : "")">
-                                <button class="page-link" @onclick="() => GoToPage(TotalPages)" disabled="@(CurrentPage >= TotalPages)">»</button>
-                            </li>
-                        </ul>
-                    </nav>
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="text-muted mt-2">Haberler yükleniyor...</p>
+                </div>
+            }
+            else
+            {
+                <!-- Table -->
+                <div class="card">
+                    <div class="table-responsive">
+                        <table class="table table-vcenter card-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:40px">#</th>
+                                    <th style="width:60px">Resim</th>
+                                    <th>Başlık</th>
+                                    <th style="width:100px" class="text-center">Sıra</th>
+                                    <th style="width:120px">Yayın Tarihi</th>
+                                    <th style="width:120px">Bitiş Tarihi</th>
+                                    <th style="width:80px" class="text-center">Resim</th>
+                                    <th style="width:100px" class="text-center">Durum</th>
+                                    <th style="width:130px" class="text-center">İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (FilteredList.Count == 0)
+                                {
+                                    <tr>
+                                        <td colspan="9" class="text-center text-muted py-4">
+                                            <i class="bx bx-newspaper fs-4"></i><br />
+                                            Sonuç bulunamadı.
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    @foreach (var (haber, index) in FilteredList.Select((h, i) => (h, i)))
+                                    {
+                                        <tr>
+                                            <td class="text-muted small">@(index + 1 + (CurrentPage - 1) * PageSize)</td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(haber.VitrinResimUrl))
+                                                {
+                                                    <img src="@haber.VitrinResimUrl"
+                                                         alt="@haber.Baslik"
+                                                         class="rounded sgk-img sgk-img-thumb" />
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-secondary-subtle rounded sgk-img-box sgk-img-thumb">
+                                                        <i class="bx bx-image text-muted"></i>
+                                                    </div>
+                                                }
+                                            </td>
+                                            <td>
+                                                <strong>@haber.Baslik</strong>
+                                                <div class="text-muted small" style="max-width:320px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                                    @haber.Icerik
+                                                </div>
+                                            </td>
+                                            <td class="text-center">@haber.Sira</td>
+                                            <td class="small">@haber.YayinTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                                            <td class="small">
+                                                @if (haber.BitisTarihi.HasValue)
+                                                {
+                                                    @haber.BitisTarihi.Value.ToString("dd.MM.yyyy HH:mm")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">—</span>
+                                                }
+                                            </td>
+                                            <td class="text-center small">@haber.Resimler.Count</td>
+                                            <td class="text-center">
+                                                <span class="badge @GetStatusBadgeClass(haber)">@GetStatusText(haber)</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    @if (IsActionVisible("EDIT"))
+                                                    {
+                                                        @if (CanEditAction("EDIT"))
+                                                        {
+                                                            <a href="/haberler/manage/@haber.HaberId" class="btn btn-outline-primary" title="Düzenle">
+                                                                <i class="bx bx-pencil"></i>
+                                                            </a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <button type="button" class="btn btn-outline-primary" title="Düzenle (Yetki Yok)" disabled>
+                                                                <i class="bx bx-pencil"></i>
+                                                            </button>
+                                                        }
+                                                    }
+
+                                                    @if (IsActionVisible("DETAIL"))
+                                                    {
+                                                        @if (CanEditAction("DETAIL"))
+                                                        {
+                                                            <a href="/haberler/@haber.HaberId" class="btn btn-outline-secondary" title="Detay" target="_blank">
+                                                                <i class="bx bx-show"></i>
+                                                            </a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <button type="button" class="btn btn-outline-secondary" title="Detay (Yetki Yok)" disabled>
+                                                                <i class="bx bx-show"></i>
+                                                            </button>
+                                                        }
+                                                    }
+
+                                                    @if (IsActionVisible("DELETE"))
+                                                    {
+                                                        <button class="btn btn-outline-danger"
+                                                                title="@(CanEditAction("DELETE") ? "Sil" : "Sil (Yetki Yok)")"
+                                                                @onclick="() => ConfirmDelete(haber.HaberId, haber.Baslik)"
+                                                                disabled="@(!CanEditAction("DELETE"))">
+                                                            <i class="bx bx-trash"></i>
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination Footer -->
+                    @if (TotalPages > 1)
+                    {
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <span class="text-muted small">
+                                Toplam <strong>@TotalCount</strong> haber, Sayfa @CurrentPage / @TotalPages
+                            </span>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0">
+                                    <li class="page-item @(CurrentPage <= 1 ? "disabled" : "")">
+                                        <button class="page-link" @onclick="() => GoToPage(1)" disabled="@(CurrentPage <= 1)">«</button>
+                                    </li>
+                                    <li class="page-item @(CurrentPage <= 1 ? "disabled" : "")">
+                                        <button class="page-link" @onclick="() => GoToPage(CurrentPage - 1)" disabled="@(CurrentPage <= 1)">‹</button>
+                                    </li>
+                                    @for (int i = GetStartPage(); i <= GetEndPage(); i++)
+                                    {
+                                        var pageNumber = i;
+                                        <li class="page-item @(pageNumber == CurrentPage ? "active" : "")">
+                                            <button class="page-link" @onclick="() => GoToPage(pageNumber)">@pageNumber</button>
+                                        </li>
+                                    }
+                                    <li class="page-item @(CurrentPage >= TotalPages ? "disabled" : "")">
+                                        <button class="page-link" @onclick="() => GoToPage(CurrentPage + 1)" disabled="@(CurrentPage >= TotalPages)">›</button>
+                                    </li>
+                                    <li class="page-item @(CurrentPage >= TotalPages ? "disabled" : "")">
+                                        <button class="page-link" @onclick="() => GoToPage(TotalPages)" disabled="@(CurrentPage >= TotalPages)">»</button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- Silme Onay Modali -->
+            @if (ShowDeleteModal)
+            {
+                <div class="modal fade show" style="display:block;" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header border-0">
+                                <h5 class="modal-title">Silme Onayı</h5>
+                                <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted">Aşağıdaki haberi silmek istediğinizden emin misiniz?</p>
+                                <p class="fw-semibold">"@DeleteModalTitle"</p>
+                                <p class="text-muted small">Bu işlem geri alınamaz.</p>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button type="button" class="btn btn-link text-decoration-none text-muted" @onclick="CloseDeleteModal">İptal</button>
+                                <button type="button" class="btn btn-danger" @onclick="DeleteHaber" disabled="@IsSaving">
+                                    @if (IsSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                    }
+                                    Sil
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-backdrop fade show"></div>
+            }
+
+            <!-- Toast Bildirim -->
+            @if (!string.IsNullOrEmpty(ToastMessage))
+            {
+                <div class="toast-container top-0 end-0 p-3" style="position:fixed; z-index:9999;">
+                    <div class="toast show align-items-center text-bg-@ToastType border-0" role="alert">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <i class="bx @(ToastType == "success" ? "bx-check-circle" : "bx-error-circle") me-2"></i>
+                                @ToastMessage
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" @onclick="() => { ToastMessage = string.Empty; }"></button>
+                        </div>
+                    </div>
                 </div>
             }
         </div>
-    }
-
-    <!-- Silme Onay Modali -->
-    @if (ShowDeleteModal)
-    {
-        <div class="modal fade show" style="display:block;" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header border-0">
-                        <h5 class="modal-title">Silme Onayı</h5>
-                        <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p class="text-muted">Aşağıdaki haberi silmek istediğinizden emin misiniz?</p>
-                        <p class="fw-semibold">"@DeleteModalTitle"</p>
-                        <p class="text-muted small">Bu işlem geri alınamaz.</p>
-                    </div>
-                    <div class="modal-footer border-0">
-                        <button type="button" class="btn btn-link text-decoration-none text-muted" @onclick="CloseDeleteModal">İptal</button>
-                        <button type="button" class="btn btn-danger" @onclick="DeleteHaber" disabled="@IsSaving">
-                            @if (IsSaving)
-                            {
-                                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
-                            }
-                            Sil
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal-backdrop fade show"></div>
-    }
-
-    <!-- Toast Bildirim -->
-    @if (!string.IsNullOrEmpty(ToastMessage))
-    {
-        <div class="toast-container top-0 end-0 p-3" style="position:fixed; z-index:9999;">
-            <div class="toast show align-items-center text-bg-@ToastType border-0" role="alert">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        <i class="bx @(ToastType == "success" ? "bx-check-circle" : "bx-error-circle") me-2"></i>
-                        @ToastMessage
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" @onclick="() => { ToastMessage = \"\"; }"></button>
-                </div>
-            </div>
-        </div>
-    }
-</div>
+    </FieldPermissionScope>
+}

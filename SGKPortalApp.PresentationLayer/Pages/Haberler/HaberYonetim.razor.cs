@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Components;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard;
+using SGKPortalApp.PresentationLayer.Components.Base;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Haberler
 {
-    public partial class HaberYonetim
+    public partial class HaberYonetim : FieldPermissionPageBase
     {
         [Inject] private IHaberApiService HaberApi { get; set; } = default!;
 

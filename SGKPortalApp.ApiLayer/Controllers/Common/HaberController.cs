@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SGKPortalApp.BusinessLogicLayer.Interfaces.Common;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 
 namespace SGKPortalApp.ApiLayer.Controllers.Common
 {
@@ -164,7 +165,7 @@ namespace SGKPortalApp.ApiLayer.Controllers.Common
 
         #region Word Generation
 
-        private static void CreateWordDocument(System.IO.Stream stream, SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard.HaberResponseDto haber)
+        private static void CreateWordDocument(System.IO.Stream stream, HaberResponseDto haber)
         {
             // OpenXML Word generation - manual ZIP-based approach (no external dependency)
             using var zip = new System.IO.Compression.ZipArchive(stream, System.IO.Compression.ZipArchiveMode.Create, true);

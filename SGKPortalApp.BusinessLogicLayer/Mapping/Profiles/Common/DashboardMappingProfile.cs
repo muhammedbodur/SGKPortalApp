@@ -1,5 +1,5 @@
 using AutoMapper;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.BusinessObjectLayer.Entities.Common;
 
 namespace SGKPortalApp.BusinessLogicLayer.Mapping.Profiles.Common

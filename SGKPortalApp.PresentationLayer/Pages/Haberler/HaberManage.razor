@@ -1,46 +1,57 @@
 @page "/haberler/manage"
 @page "/haberler/manage/{Id:int}"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @layout MainLayout
 
-<div class="container-xxl flex-grow-1 container-p-y">
-
-    <!-- Page Header -->
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h4 class="mb-1">@(IsEditMode ? "Haber Düzenle" : "Yeni Haber")</h4>
-            <small class="text-muted">@(IsEditMode ? $"Haber #{Id} düzenleniyor" : "Yeni bir haber oluşturmak için formu doldurun")</small>
-        </div>
-        <div class="btn-group">
-            <a href="/haberler/yonetim" class="btn btn-outline-secondary">
-                <i class="bx bx-arrow-back me-1"></i> Geri
-            </a>
-        </div>
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
     </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+        <div class="container-xxl flex-grow-1 container-p-y">
 
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-3">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Ana Sayfa</a></li>
-            <li class="breadcrumb-item"><a href="/haberler">Haberler</a></li>
-            <li class="breadcrumb-item"><a href="/haberler/yonetim">Yönetim</a></li>
-            <li class="breadcrumb-item active" aria-current="page">@(IsEditMode ? "Düzenle" : "Ekle")</li>
-        </ol>
-    </nav>
-
-    @if (IsLoading)
-    {
-        <div class="text-center py-5">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Yükleniyor...</span>
+            <!-- Page Header -->
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h4 class="mb-1">@(IsEditMode ? "Haber Düzenle" : "Yeni Haber")</h4>
+                    <small class="text-muted">@(IsEditMode ? $"Haber #{Id} düzenleniyor" : "Yeni bir haber oluşturmak için formu doldurun")</small>
+                </div>
+                <div class="btn-group">
+                    <a href="/haberler/yonetim" class="btn btn-outline-secondary">
+                        <i class="bx bx-arrow-back me-1"></i> Geri
+                    </a>
+                </div>
             </div>
-            <p class="text-muted mt-2">Form yükleniyor...</p>
-        </div>
-    }
-    else
-    {
-        <div class="row g-4">
-            <!-- Left: Form -->
-            <div class="col-lg-8">
+
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Ana Sayfa</a></li>
+                    <li class="breadcrumb-item"><a href="/haberler">Haberler</a></li>
+                    <li class="breadcrumb-item"><a href="/haberler/yonetim">Yönetim</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">@(IsEditMode ? "Düzenle" : "Ekle")</li>
+                </ol>
+            </nav>
+
+            @if (IsLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Yükleniyor...</span>
+                    </div>
+                    <p class="text-muted mt-2">Form yükleniyor...</p>
+                </div>
+            }
+            else
+            {
+                <div class="row g-4">
+                    <!-- Left: Form -->
+                    <div class="col-lg-8">
 
                 <!-- Haber Bilgileri -->
                 <div class="card mb-4">
@@ -108,7 +119,7 @@
                                 <input type="datetime-local"
                                        class="form-control"
                                        value="@Model.YayinTarihi.ToString("yyyy-MM-ddTHH:mm")"
-                                       @oninput="e => Model.YayinTarihi = DateTime.Parse(e.Target.Value)" />
+                                       @oninput="OnYayinTarihiInput" />
                             </div>
 
                             <!-- Bitiş Tarihi -->
@@ -117,7 +128,7 @@
                                 <input type="datetime-local"
                                        class="form-control"
                                        value="@(Model.BitisTarihi?.ToString("yyyy-MM-ddTHH:mm") ?? "")"
-                                       @oninput="e => Model.BitisTarihi = string.IsNullOrEmpty(e.Target.Value) ? null : DateTime.Parse(e.Target.Value)" />
+                                       @oninput="OnBitisTarihiInput" />
                                 <div class="text-muted small mt-1">Boş bırakırsa süresiz yayında kalır.</div>
                             </div>
                         </div>
@@ -144,8 +155,7 @@
                                             <div class="card border @(resim.IsVitrin ? "border-primary border-2" : "") h-100">
                                                 <img src="@resim.ResimUrl"
                                                      alt="Resim"
-                                                     class="card-img-top"
-                                                     style="height:120px; object-fit:cover;" />
+                                                     class="card-img-top sgk-img sgk-img-card" />
                                                 <div class="card-body p-2 text-center">
                                                     @if (resim.IsVitrin)
                                                     {
@@ -187,8 +197,7 @@
                                             <div class="card border border-success border-2 h-100">
                                                 <img src="@pending.PreviewUrl"
                                                      alt="Yeni Resim"
-                                                     class="card-img-top"
-                                                     style="height:120px; object-fit:cover;" />
+                                                     class="card-img-top sgk-img sgk-img-card" />
                                                 <div class="card-body p-2 text-center">
                                                     <span class="badge bg-success mb-1">Yeni</span>
                                                     <br />
@@ -272,13 +281,11 @@
                         {
                             <img src="@VitrinPreviewUrl"
                                  alt="Vitrin"
-                                 class="img-fluid rounded mb-3"
-                                 style="width:100%; height:180px; object-fit:cover;" />
+                                 class="img-fluid rounded mb-3 sgk-img sgk-img-vitrin" />
                         }
                         else
                         {
-                            <div class="bg-secondary-subtle rounded d-flex align-items-center justify-content-center mb-3"
-                                 style="width:100%; height:180px;">
+                            <div class="bg-secondary-subtle rounded sgk-img-box sgk-img-vitrin mb-3">
                                 <i class="bx bx-image fs-1 text-muted"></i>
                             </div>
                         }
@@ -315,22 +322,24 @@
                     </div>
                 </div>
             </div>
-        </div>
-    }
-
-    <!-- Toast Bildirim -->
-    @if (!string.IsNullOrEmpty(ToastMessage))
-    {
-        <div class="toast-container top-0 end-0 p-3" style="position:fixed; z-index:9999;">
-            <div class="toast show align-items-center text-bg-@ToastType border-0" role="alert">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        <i class="bx @(ToastType == "success" ? "bx-check-circle" : "bx-error-circle") me-2"></i>
-                        @ToastMessage
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" @onclick="() => { ToastMessage = \"\"; }"></button>
                 </div>
-            </div>
+            }
+
+            <!-- Toast Bildirim -->
+            @if (!string.IsNullOrEmpty(ToastMessage))
+            {
+                <div class="toast-container top-0 end-0 p-3" style="position:fixed; z-index:9999;">
+                    <div class="toast show align-items-center text-bg-@ToastType border-0" role="alert">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <i class="bx @(ToastType == "success" ? "bx-check-circle" : "bx-error-circle") me-2"></i>
+                                @ToastMessage
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" @onclick="() => { ToastMessage = string.Empty; }"></button>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
-    }
-</div>
+    </FieldPermissionScope>
+}

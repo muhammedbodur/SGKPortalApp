@@ -1,0 +1,212 @@
+@page "/common/sik-kullanilan-program"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+@using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
+@using SGKPortalApp.BusinessObjectLayer.Enums.Common
+
+<PageTitle>Sık Kullanılan Programlar - SGK Portal</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="true">
+
+        <div class="container-xxl flex-grow-1 container-p-y">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold mb-1">
+                        <i class="bx bx-grid-alt me-2"></i>Sık Kullanılan Programlar
+                    </h4>
+                    <p class="text-muted mb-0">
+                        Dashboard'da gösterilecek program kısayollarını yönetin
+                    </p>
+                </div>
+
+                <div class="d-flex gap-2">
+                    @if (IsActionVisible("CREATE"))
+                    {
+                        <button class="btn btn-primary"
+                                @onclick="NavigateToCreate"
+                                disabled="@(!CanEditAction("CREATE"))"
+                                title="@(CanEditAction("CREATE") ? "Yeni Program" : "Yeni Program (Yetki Yok)")">
+                            <i class="bx bx-plus me-1"></i>Yeni Program
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label">Arama</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bx bx-search"></i>
+                                </span>
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="Program adı..."
+                                       @bind="SearchTerm"
+                                       @bind:event="oninput"
+                                       @onkeyup="OnSearchChanged" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Durum</label>
+                            <select class="form-select" value="@AktiflikFilter" @onchange="OnAktiflikChanged">
+                                <option value="">Tümü</option>
+                                <option value="@Aktiflik.Aktif">Aktif</option>
+                                <option value="@Aktiflik.Pasif">Pasif</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-outline-secondary w-100" @onclick="ClearFilters">
+                                <i class="bx bx-reset me-1"></i>Temizle
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col">
+                            <div class="d-flex gap-4 text-muted small">
+                                <span><i class="bx bx-list-ul text-primary"></i> Toplam: <strong>@Items.Count</strong></span>
+                                <span><i class="bx bx-check-circle text-success"></i> Aktif: <strong>@ActiveCount</strong></span>
+                                <span><i class="bx bx-x-circle text-danger"></i> Pasif: <strong>@PassiveCount</strong></span>
+                                <span><i class="bx bx-filter-alt text-info"></i> Filtrelenen: <strong>@FilteredItems.Count</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    @if (IsLoading)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="text-muted mt-2 mb-0">Yükleniyor...</p>
+                        </div>
+                    }
+                    else if (!FilteredItems.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="bx bx-grid-alt bx-lg text-muted mb-2"></i>
+                            <p class="text-muted mb-0">Kayıt bulunamadı.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">#</th>
+                                        <th>Program</th>
+                                        <th>URL</th>
+                                        <th class="text-center" style="width: 90px;">Sıra</th>
+                                        <th class="text-center" style="width: 120px;">Durum</th>
+                                        <th class="text-center" style="width: 210px;">İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in FilteredItems)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <span class="fw-semibold">@item.ProgramId</span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar avatar-sm me-3">
+                                                        <span class="avatar-initial rounded bg-label-@item.RenkKodu">
+                                                            <i class="bx @item.IkonClass"></i>
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <strong>@item.ProgramAdi</strong>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <a href="@item.Url" target="@(item.Url.StartsWith("http") ? "_blank" : "_self")" class="text-decoration-none">
+                                                    @item.Url
+                                                </a>
+                                            </td>
+                                            <td class="text-center">
+                                                @item.Sira
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge @(item.Aktiflik == Aktiflik.Aktif ? "bg-success" : "bg-secondary")">
+                                                    @(item.Aktiflik == Aktiflik.Aktif ? "Aktif" : "Pasif")
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-flex gap-2 justify-content-center">
+                                                    @if (IsActionVisible("EDIT"))
+                                                    {
+                                                        <button class="btn btn-sm btn-outline-primary"
+                                                                @onclick="(() => NavigateToEdit(item.ProgramId))"
+                                                                disabled="@(!CanEditAction("EDIT"))"
+                                                                title="@(CanEditAction("EDIT") ? "Düzenle" : "Düzenle (Yetki Yok)")">
+                                                            <i class="bx bx-edit"></i>
+                                                        </button>
+                                                    }
+
+                                                    @if (IsActionVisible("DELETE"))
+                                                    {
+                                                        <button class="btn btn-sm btn-outline-danger"
+                                                                @onclick="(() => ShowDeleteConfirmation(item.ProgramId, item.ProgramAdi))"
+                                                                disabled="@(!CanEditAction("DELETE"))"
+                                                                title="@(CanEditAction("DELETE") ? "Sil" : "Sil (Yetki Yok)")">
+                                                            <i class="bx bx-trash"></i>
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (ShowDeleteModal)
+            {
+                <div class="modal fade show" style="display:block;" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Silme Onayı</h5>
+                                <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p><strong>@DeleteName</strong> programını silmek istediğinize emin misiniz?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-outline-secondary" @onclick="CloseDeleteModal" disabled="@IsDeleting">İptal</button>
+                                <button class="btn btn-danger" @onclick="ConfirmDelete" disabled="@IsDeleting">
+                                    @if (IsDeleting)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1"></span>
+                                    }
+                                    Sil
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-backdrop fade show"></div>
+            }
+
+        </div>
+    </FieldPermissionScope>
+}

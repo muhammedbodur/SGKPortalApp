@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Account;
+using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Account
 {
@@ -10,6 +11,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Account
         [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
         [Inject] private NavigationManager Navigation { get; set; } = default!;
         [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+        [Inject] private IUserApiService UserApiService { get; set; } = default!;
 
         private ChangePasswordRequestDto Model = new();
         private bool IsSubmitting = false;
@@ -95,8 +97,28 @@ namespace SGKPortalApp.PresentationLayer.Pages.Account
 
             try
             {
-                // API çağrısı burada yapılacak
-                await Task.Delay(1500); // Simülasyon
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                var user = authState.User;
+
+                if (user?.Identity?.IsAuthenticated != true)
+                {
+                    Navigation.NavigateTo("/auth/login", forceLoad: true);
+                    return;
+                }
+
+                var tcKimlikNo = user.FindFirst("TcKimlikNo")?.Value;
+                if (string.IsNullOrWhiteSpace(tcKimlikNo))
+                {
+                    ErrorMessage = "Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.";
+                    return;
+                }
+
+                var result = await UserApiService.ChangePasswordAsync(tcKimlikNo, Model);
+                if (!result.Success)
+                {
+                    ErrorMessage = result.Message ?? "Şifre değiştirilemedi.";
+                    return;
+                }
 
                 // Başarılı
                 ShowSuccessMessage = true;

@@ -1,5 +1,5 @@
-@page "/hesap/profil"
 @page "/account/profile"
+@attribute [Authorize]
 @using Microsoft.AspNetCore.Components.Authorization
 @using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common
 
@@ -76,7 +76,7 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <a href="/hesap/sifre-degistir" class="btn btn-outline-primary w-100 mb-2">
+                    <a href="/account/change-password" class="btn btn-outline-primary w-100 mb-2">
                         <i class="bx bx-lock-alt me-2"></i>
                         Şifre Değiştir
                     </a>

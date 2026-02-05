@@ -1,14 +1,20 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.IO;
+using Microsoft.AspNetCore.Components.Forms;
+using SGKPortalApp.PresentationLayer.Components.Base;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 using SGKPortalApp.PresentationLayer.Helpers;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Haberler
 {
-    public partial class HaberManage
+    public partial class HaberManage : FieldPermissionPageBase
     {
         // ─── Route Parameter ─────────────────────────────────
 
@@ -25,7 +31,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
         private bool IsLoading { get; set; } = true;
         private bool IsSaving { get; set; } = false;
         private bool FormSubmitted { get; set; } = false;
-        private bool IsEditMode => Id > 0;
+        protected override bool IsEditMode => Id > 0;
 
         // Form model: kullanım kolaylığı için ayrı DTO
         private HaberFormModel Model { get; set; } = new();
@@ -90,13 +96,13 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
 
         // ─── Image Handling ──────────────────────────────────
 
-        private async Task HandleImageUpload(InputFileEventArgs e)
+        private async Task HandleImageUpload(InputFileChangeEventArgs e)
         {
             UploadError = null;
             var maxSize = 5 * 1024 * 1024; // 5 MB
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
+            string[] allowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"];
 
-            foreach (var file in e.Files)
+            foreach (var file in e.GetMultipleFiles())
             {
                 var ext = System.IO.Path.GetExtension(file.Name).ToLowerInvariant();
                 if (!allowedExtensions.Contains(ext))
@@ -195,6 +201,29 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
                 if (ExistingImages.Count > 0) return ExistingImages[0].ResimUrl;
 
                 return null;
+            }
+        }
+
+        private void OnYayinTarihiInput(ChangeEventArgs e)
+        {
+            if (DateTime.TryParse(e.Value?.ToString(), out var dt))
+            {
+                Model.YayinTarihi = dt;
+            }
+        }
+
+        private void OnBitisTarihiInput(ChangeEventArgs e)
+        {
+            var value = e.Value?.ToString();
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                Model.BitisTarihi = null;
+                return;
+            }
+
+            if (DateTime.TryParse(value, out var dt))
+            {
+                Model.BitisTarihi = dt;
             }
         }
 

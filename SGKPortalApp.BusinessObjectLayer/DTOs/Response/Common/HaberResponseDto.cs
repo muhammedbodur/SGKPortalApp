@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard
+namespace SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common
 {
     public class HaberResponseDto
     {

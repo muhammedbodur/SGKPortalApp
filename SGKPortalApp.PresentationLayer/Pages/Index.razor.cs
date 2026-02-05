@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Dashboard;
+using SGKPortalApp.BusinessObjectLayer.DTOs.Response.Common;
 using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Common;
 
 namespace SGKPortalApp.PresentationLayer.Pages
@@ -20,19 +20,12 @@ namespace SGKPortalApp.PresentationLayer.Pages
         private List<HaberResponseDto> GenelMudurlukHaberler = new();
 
         // Dashboard diğer verileri
+        private List<SikKullanilanProgramResponseDto> SikKullanilanProgramlar = new();
         private List<OnemliLinkResponseDto> OnemliLinkler = new();
         private GununMenusuResponseDto? GununMenusu;
         private List<BugunDoganResponseDto> BugunDoganlar = new();
 
-        private List<QuickAccessItem> QuickAccessPrograms = new()
-        {
-            new QuickAccessItem { Name = "İşveren Uygulama Rehberi", Description = "Güncel Enim Ann Versions", Icon = "bx-book-reader", Color = "primary", Url = "#" },
-            new QuickAccessItem { Name = "Tevkifat Kontrol", Description = "e-Rehber", Icon = "bx-check-shield", Color = "info", Url = "#" },
-            new QuickAccessItem { Name = "Yetki Talep", Description = "Kobileri", Icon = "bx-key", Color = "warning", Url = "/yetki/talep" },
-            new QuickAccessItem { Name = "Destek Talep", Description = "Se sin 3admin", Icon = "bx-support", Color = "success", Url = "/destek" },
-            new QuickAccessItem { Name = "Ankara Görüşler", Description = "Merkez İletişim", Icon = "bx-conversation", Color = "danger", Url = "#" },
-            new QuickAccessItem { Name = "Daha Fazlası", Description = "Tüm Uygulamalar", Icon = "bx-plus", Color = "secondary", Url = "#" }
-        };
+        private List<QuickAccessItem> QuickAccessPrograms = new();
 
         protected override async Task OnInitializedAsync()
         {
@@ -69,9 +62,19 @@ namespace SGKPortalApp.PresentationLayer.Pages
                 var dashResponse = await DashboardApi.GetDashboardDataAsync();
                 if (dashResponse.Success && dashResponse.Data != null)
                 {
+                    SikKullanilanProgramlar = dashResponse.Data.SikKullanilanProgramlar ?? new();
                     OnemliLinkler = dashResponse.Data.OnemliLinkler ?? new();
                     GununMenusu = dashResponse.Data.GununMenusu;
                     BugunDoganlar = dashResponse.Data.BugunDoganlar ?? new();
+
+                    QuickAccessPrograms = SikKullanilanProgramlar.Select(p => new QuickAccessItem
+                    {
+                        Name = p.ProgramAdi,
+                        Description = string.Empty,
+                        Icon = p.IkonClass,
+                        Color = p.RenkKodu,
+                        Url = p.Url
+                    }).ToList();
                 }
             }
             catch (Exception ex)

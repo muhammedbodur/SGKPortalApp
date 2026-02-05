@@ -308,8 +308,43 @@ html.layout-menu-fixed:not(.layout-menu-collapsed) .layout-menu-toggle .bx-chevr
 /* Text Truncate with Tooltip */
 .text-truncate-line-2 {
     display: -webkit-box;
+    line-clamp: 2;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.sgk-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sgk-img-contain {
+    object-fit: contain;
+    background: #f8f9fa;
+}
+
+.sgk-img-thumb {
+    width: 48px;
+    height: 36px;
+}
+
+.sgk-img-card {
+    width: 100%;
+    height: 120px;
+}
+
+.sgk-img-vitrin {
+    width: 100%;
+    height: 180px;
+}
+
+.sgk-img-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
 }
 
