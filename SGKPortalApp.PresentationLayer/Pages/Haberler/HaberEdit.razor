@@ -1,5 +1,5 @@
-@page "/haberler/manage"
-@page "/haberler/manage/{Id:int}"
+@page "/haberler/edit/{Id:int}"
+@page "/haberler/edit/{Id:int}"
 @inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @layout MainLayout
 
@@ -18,8 +18,8 @@ else
             <!-- Page Header -->
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <div>
-                    <h4 class="mb-1">@(IsEditMode ? "Haber Düzenle" : "Yeni Haber")</h4>
-                    <small class="text-muted">@(IsEditMode ? $"Haber #{Id} düzenleniyor" : "Yeni bir haber oluşturmak için formu doldurun")</small>
+                    <h4 class="mb-1">Haber Düzenle</h4>
+                    <small class="text-muted">Haber #@Id düzenleniyor</small>
                 </div>
                 <div class="btn-group">
                     <a href="/haberler/yonetim" class="btn btn-outline-secondary">
@@ -34,7 +34,7 @@ else
                     <li class="breadcrumb-item"><a href="/">Ana Sayfa</a></li>
                     <li class="breadcrumb-item"><a href="/haberler">Haberler</a></li>
                     <li class="breadcrumb-item"><a href="/haberler/yonetim">Yönetim</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">@(IsEditMode ? "Düzenle" : "Ekle")</li>
+                    <li class="breadcrumb-item active" aria-current="page">Düzenle</li>
                 </ol>
             </nav>
 
@@ -295,7 +295,7 @@ else
                             <span class="spinner-border spinner-border-sm me-1" role="status"></span>
                         }
                         <i class="bx bx-save me-1"></i>
-                        @(IsEditMode ? "Güncelle" : "Kaydet")
+                        Güncelle
                     </button>
                 </div>
             </div>

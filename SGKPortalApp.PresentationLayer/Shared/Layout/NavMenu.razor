@@ -54,8 +54,8 @@
                         <div>Haber Yönetimi</div>
                     </a>
                 </li>
-                <li class="menu-item @(IsActive("/haberler/manage") ? "active" : "")">
-                    <a href="/haberler/manage" class="menu-link">
+                <li class="menu-item @(IsActive("/haberler/add") || Navigation.Uri.Contains("/haberler/edit") ? "active" : "")">
+                    <a href="/haberler/add" class="menu-link">
                         <i class="menu-icon tf-icons bx bx-plus-circle"></i>
                         <div>Yeni Haber Ekle</div>
                     </a>

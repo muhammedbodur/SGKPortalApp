@@ -15,7 +15,7 @@ using Blazored.TextEditor;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Haberler
 {
-    public partial class HaberManage : FieldPermissionPageBase
+    public partial class HaberEdit : FieldPermissionPageBase
     {
         // ─── Route Parameter ─────────────────────────────────
 
@@ -33,9 +33,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
         private bool IsLoading { get; set; } = true;
         private bool IsSaving { get; set; } = false;
         private bool FormSubmitted { get; set; } = false;
-        protected override bool IsEditMode => Id > 0;
 
-        // Form model: kullanım kolaylığı için ayrı DTO
+        // Form model
         private HaberFormModel Model { get; set; } = new();
 
         // Aktiflik (enum → int bridge)
@@ -47,10 +46,10 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
 
         // Mevcut DB resimler (edit modunda)
         private List<HaberResimResponseDto> ExistingImages { get; set; } = new();
-        // Silinecek resim IDs (edit modunda kullanıcı "sil" basındığında buraya eklenecek, save'de API'ye gönderilir)
+        // Silinecek resim IDs
         private List<int> PendingDeleteImageIds { get; set; } = new();
 
-        // Yeni yüklenen resimler (henüz kaydedilmemiş, dosya bytes saklı)
+        // Yeni yüklenen resimler (henüz kaydedilmemiş)
         private List<PendingImageItem> PendingImages { get; set; } = new();
 
         // Upload hata
@@ -64,9 +63,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
 
         protected override async Task OnInitializedAsync()
         {
-            if (IsEditMode)
-                await LoadExistingHaber();
-
+            await LoadExistingHaber();
             IsLoading = false;
         }
 
@@ -82,7 +79,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
         {
             try
             {
-                var response = await HaberApi.GetAdminHaberListeAsync(1, 1000); // tüm haberler
+                var response = await HaberApi.GetAdminHaberListeAsync(1, 1000);
                 if (response.Success && response.Data != null)
                 {
                     var haber = response.Data.Items.FirstOrDefault(h => h.HaberId == Id);
@@ -93,7 +90,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
                         Model.Sira = haber.Sira;
                         Model.YayinTarihi = haber.YayinTarihi;
                         Model.BitisTarihi = haber.BitisTarihi;
-                        Model.Aktiflik = Aktiflik.Aktif; // response'ta Aktiflik bilgisi yok; default Aktif
+                        Model.Aktiflik = Aktiflik.Aktif;
                         ExistingImages = haber.Resimler.ToList();
                     }
                 }
@@ -134,7 +131,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
                     await stream.CopyToAsync(ms);
                     ms.Position = 0;
 
-                    // Resize & optimize (800x600, quality 85)
                     var optimized = await ImageHelper.LoadResizeAndOptimizeAsync(ms, maxWidth: 800, maxHeight: 600, quality: 85);
                     if (optimized == null)
                     {
@@ -142,7 +138,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
                         return;
                     }
 
-                    // Preview için base64 data URL oluştur
                     var base64 = Convert.ToBase64String(optimized);
                     var previewUrl = $"data:image/jpeg;base64,{base64}";
 
@@ -177,7 +172,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
 
         private void SetVitrin(HaberResimResponseDto resim)
         {
-            // Tüm existing vitrin'i kaldır
             ExistingImages.ForEach(r => r.IsVitrin = false);
             PendingImages.ForEach(p => p.IsVitrin = false);
             resim.IsVitrin = true;
@@ -190,24 +184,20 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
             item.IsVitrin = true;
         }
 
-        // ─── Vitrin Preview URL (for sidebar preview) ────────
+        // ─── Vitrin Preview URL ──────────────────────────────
 
         private string? VitrinPreviewUrl
         {
             get
             {
-                // Pending (new) vitrin var mı?
                 var pendingVitrin = PendingImages.FirstOrDefault(p => p.IsVitrin);
                 if (pendingVitrin != null) return pendingVitrin.PreviewUrl;
 
-                // Existing vitrin var mı?
                 var existingVitrin = ExistingImages.FirstOrDefault(r => r.IsVitrin);
                 if (existingVitrin != null) return existingVitrin.ResimUrl;
 
-                // Ilk pending resim
                 if (PendingImages.Count > 0) return PendingImages[0].PreviewUrl;
 
-                // İlk existing resim
                 if (ExistingImages.Count > 0) return ExistingImages[0].ResimUrl;
 
                 return null;
@@ -258,82 +248,52 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
             IsSaving = true;
             try
             {
-                int haberId;
-
-                if (IsEditMode)
+                // Update haber
+                var updateDto = new HaberUpdateRequestDto
                 {
-                    // Update
-                    var updateDto = new HaberUpdateRequestDto
-                    {
-                        HaberId = Id,
-                        Baslik = Model.Baslik,
-                        Icerik = Model.Icerik,
-                        Sira = Model.Sira,
-                        YayinTarihi = Model.YayinTarihi,
-                        BitisTarihi = Model.BitisTarihi,
-                        Aktiflik = Model.Aktiflik
-                    };
+                    HaberId = Id,
+                    Baslik = Model.Baslik,
+                    Icerik = Model.Icerik,
+                    Sira = Model.Sira,
+                    YayinTarihi = Model.YayinTarihi,
+                    BitisTarihi = Model.BitisTarihi,
+                    Aktiflik = Model.Aktiflik
+                };
 
-                    var updateResult = await HaberApi.UpdateHaberAsync(Id, updateDto);
-                    if (!updateResult.Success)
-                    {
-                        ShowToast("Güncelleme başarısız oldu.", "danger");
-                        return;
-                    }
-                    haberId = Id;
-                }
-                else
+                var updateResult = await HaberApi.UpdateHaberAsync(Id, updateDto);
+                if (!updateResult.Success)
                 {
-                    // Create
-                    var createDto = new HaberCreateRequestDto
-                    {
-                        Baslik = Model.Baslik,
-                        Icerik = Model.Icerik,
-                        Sira = Model.Sira,
-                        YayinTarihi = Model.YayinTarihi,
-                        BitisTarihi = Model.BitisTarihi,
-                        Aktiflik = Model.Aktiflik
-                    };
-
-                    var createResult = await HaberApi.CreateHaberAsync(createDto);
-                    if (!createResult.Success || createResult.Data == null)
-                    {
-                        ShowToast("Haber oluşturma başarısız oldu.", "danger");
-                        return;
-                    }
-                    haberId = createResult.Data.HaberId;
+                    ShowToast("Güncelleme başarısız oldu.", "danger");
+                    return;
                 }
 
                 // ── Silinecek resimler sil ──
                 foreach (var resimId in PendingDeleteImageIds)
                 {
-                    await HaberApi.DeleteResimAsync(haberId, resimId);
+                    await HaberApi.DeleteResimAsync(Id, resimId);
                 }
 
                 // ── Yeni resimler kaydet ──
                 int siraCounter = ExistingImages.Count + 1;
                 foreach (var pending in PendingImages)
                 {
-                    // Dosyayı diske kaydet
-                    var safeFileName = $"haber_{haberId}_{siraCounter}_{Guid.NewGuid().ToString("N")[..8]}.jpg";
+                    var safeFileName = $"haber_{Id}_{siraCounter}_{Guid.NewGuid().ToString("N")[..8]}.jpg";
                     var savedPath = await ImageHelper.SaveImageAsync(pending.ImageBytes, safeFileName, subfolder: "haberler");
 
-                    // API'ye resim kaydı ekle
                     var resimDto = new HaberResimCreateRequestDto
                     {
-                        HaberId = haberId,
+                        HaberId = Id,
                         ResimUrl = savedPath,
                         IsVitrin = pending.IsVitrin,
                         Sira = siraCounter
                     };
 
-                    await HaberApi.AddResimAsync(haberId, resimDto);
+                    await HaberApi.AddResimAsync(Id, resimDto);
                     siraCounter++;
                 }
 
-                ShowToast(IsEditMode ? "Haber başarıyla güncellendi." : "Haber başarıyla oluşturuldu.", "success");
+                ShowToast("Haber başarıyla güncellendi.", "success");
 
-                // 1.5s sonra yönetim sayfasına yönlendir
                 await Task.Delay(1500);
                 Nav.NavigateTo("/haberler/yonetim");
             }
