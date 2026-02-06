@@ -8,6 +8,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.OnemliLink
 {
     public partial class Manage
     {
+        protected override string? PagePermissionKey => "COM.ONEMLILINK.INDEX";
+
         [Inject] private IOnemliLinkApiService _onemliLinkService { get; set; } = default!;
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;

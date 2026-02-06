@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.JSInterop;
 using SGKPortalApp.PresentationLayer.Components.Base;
 using SGKPortalApp.BusinessObjectLayer.DTOs.Request.Common;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
@@ -10,7 +11,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Blazored.TextEditor;
 
 namespace SGKPortalApp.PresentationLayer.Pages.Haberler
 {
@@ -21,16 +21,20 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
         [Inject] private IHaberApiService HaberApi { get; set; } = default!;
         [Inject] private ImageHelper ImageHelper { get; set; } = default!;
         [Inject] private NavigationManager Nav { get; set; } = default!;
+        [Inject] private IJSRuntime Js { get; set; } = default!;
 
         // ─── State ───────────────────────────────────────────
 
-        private BlazoredTextEditor? QuillEditor;
         private bool IsLoading { get; set; } = true;
         private bool IsSaving { get; set; } = false;
         private bool FormSubmitted { get; set; } = false;
 
         // Form model
         private HaberFormModel Model { get; set; } = new();
+
+        private const int MaxIcerikChars = 5000;
+        private int IcerikCharCount { get; set; } = 0;
+        private DotNetObjectReference<HaberAdd>? _dotNetRef;
 
         // Aktiflik (enum → int bridge)
         private int AktiflikValue
@@ -55,6 +59,43 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
         {
             await Task.CompletedTask;
             IsLoading = false;
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (!firstRender)
+            {
+                return;
+            }
+
+            _dotNetRef = DotNetObjectReference.Create(this);
+
+            try
+            {
+                await Js.InvokeVoidAsync(
+                    "sgkQuill.init",
+                    "#haberAdd-editor",
+                    "#haberAdd-toolbar",
+                    Model.Icerik,
+                    _dotNetRef,
+                    MaxIcerikChars);
+            }
+            catch
+            {
+            }
+        }
+
+        [JSInvokable]
+        public Task OnQuillContentChanged(string html, int textLen)
+        {
+            Model.Icerik = html ?? string.Empty;
+            IcerikCharCount = textLen;
+            return InvokeAsync(StateHasChanged);
+        }
+
+        public void Dispose()
+        {
+            _dotNetRef?.Dispose();
         }
 
         // ─── Image Handling ──────────────────────────────────
@@ -171,12 +212,6 @@ namespace SGKPortalApp.PresentationLayer.Pages.Haberler
         private async Task SaveHaber()
         {
             FormSubmitted = true;
-
-            // Editor'dan HTML içeriğini al
-            if (QuillEditor != null)
-            {
-                Model.Icerik = await QuillEditor.GetHTML();
-            }
 
             if (string.IsNullOrWhiteSpace(Model.Baslik) || string.IsNullOrWhiteSpace(Model.Icerik))
             {

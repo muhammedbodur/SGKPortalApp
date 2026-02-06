@@ -6,7 +6,7 @@ using SGKPortalApp.PresentationLayer.Services.ApiServices.Interfaces.Personel;
 using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Components.Base;
 
-namespace SGKPortalApp.PresentationLayer.Pages.Personel
+namespace SGKPortalApp.PresentationLayer.Pages.Personel.Personel
 {
     public partial class Detail
     {

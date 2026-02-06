@@ -20,7 +20,7 @@ using SGKPortalApp.PresentationLayer.Services.UIServices.Interfaces;
 using SGKPortalApp.PresentationLayer.Components.Base;
 using SGKPortalApp.BusinessObjectLayer.Enums.Common;
 
-namespace SGKPortalApp.PresentationLayer.Pages.Personel
+namespace SGKPortalApp.PresentationLayer.Pages.Personel.Personel
 {
     public partial class Index : FieldPermissionPageBase
     {
@@ -492,8 +492,8 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
                 CloseQuickAddModal();
                 
-                // Manage sayfasına yönlendir (TC ve Ad Soyad ile)
-                _navigationManager.NavigateTo($"/personel/manage?tc={QuickAddModel.TcKimlikNo}&adsoyad={Uri.EscapeDataString(QuickAddModel.AdSoyad)}");
+                // Add sayfasına yönlendir (TC ve Ad Soyad ile)
+                _navigationManager.NavigateTo($"/personel/add?tc={QuickAddModel.TcKimlikNo}&adsoyad={Uri.EscapeDataString(QuickAddModel.AdSoyad)}");
             }
             catch (Exception ex)
             {
@@ -1036,7 +1036,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
 
         private void GoToManagePage()
         {
-            _navigationManager.NavigateTo("/personel/manage");
+            _navigationManager.NavigateTo("/personel/add");
         }
     }
 }

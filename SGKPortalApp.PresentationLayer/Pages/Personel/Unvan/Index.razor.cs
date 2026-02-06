@@ -190,7 +190,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Unvan
         // NAVİGASYON
         // ═══════════════════════════════════════════════════════
 
-        private void NavigateToCreate() => _navigationManager.NavigateTo("/personel/unvan/manage");
+        private void NavigateToCreate() => _navigationManager.NavigateTo("/personel/unvan/add");
         private void NavigateToEdit(int id) => _navigationManager.NavigateTo($"/personel/unvan/manage/{id}");
 
         // ═══════════════════════════════════════════════════════

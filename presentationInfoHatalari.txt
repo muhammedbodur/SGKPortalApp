@@ -1,0 +1,381 @@
+? Shared configuration yüklendi: D:\AspNetExamples\SGKPortalApp\appsettings.Shared.json
+? Audit logging configuration yüklendi: D:\AspNetExamples\SGKPortalApp\appsettings.AuditLogging.json
+?? Database Connection: Server=localhost\SQLEXPRESS;Database=SGKPortalDB;U...
+? HttpClient configured - BaseAddress: https://localhost:9080
+? CleanupClient configured (no auth) - BaseAddress: https://localhost:9080
+?? Common Layer servisleri kaydediliyor...
+  ? IMemoryCache → MemoryCache
+  ? ICurrentUserService → CurrentUserService
+  ? IPermissionKeyResolverService → PermissionKeyResolverService
+  ?? Common Layer hazır!
+
+? PresentationLayer services registered (HTTP-only communication)
+  ? IPermissionKeyResolverService → PermissionKeyResolverAdapter (PresentationLayer override)
+?? Presentation Layer başlatılıyor...
+?? API URL: https://localhost:9080
+?? State Services kaydediliyor...
+  ? 5 State Service kayıt edildi
+?? AuthenticationServices servisleri kaydediliyor...
+    ?? Bulunan interface'ler: 1
+    ?? Bulunan implementation'lar: 4
+    ? ICookieAuthService -> CookieAuthService
+    ?? AuthenticationServices: 1 servis kayıt edildi
+?? UserSessionServices servisleri kaydediliyor...
+    ?? Bulunan interface'ler: 1
+    ?? Bulunan implementation'lar: 1
+    ? IUserInfoService -> UserInfoService
+    ?? UserSessionServices: 1 servis kayıt edildi
+?? StorageServices servisleri kaydediliyor...
+    ??  StorageServices modülünde servis bulunamadı
+?? UIServices servisleri kaydediliyor...
+    ?? Bulunan interface'ler: 5
+    ?? Bulunan implementation'lar: 15
+    ? IImageCacheService -> ImageCacheService
+    ? ILoadingService -> LoadingService
+    ? IModalService -> ModalService
+    ? IThemeService -> ThemeService
+    ? IToastService -> ToastService
+    ?? UIServices: 5 servis kayıt edildi
+?? Auth API Services kaydediliyor...
+    ?? Bulunan interface'ler: 2
+    ?? Bulunan implementation'lar: 12
+    ? IAuthApiService -> AuthApiService (Typed HttpClient)
+    ? ILoginLogoutLogApiService -> LoginLogoutLogApiService (Typed HttpClient)
+    ?? Auth: 2 API service kayıt edildi
+?? Common API Services kaydediliyor...
+    ?? Bulunan interface'ler: 17
+    ?? Bulunan implementation'lar: 144
+    ? IAuditLogApiService -> AuditLogApiService (Typed HttpClient)
+    ? IBackgroundServiceApiService -> BackgroundServiceApiService (Typed HttpClient)
+    ? IDashboardApiService -> DashboardApiService (Typed HttpClient)
+    ? IDepartmanHizmetBinasiApiService -> DepartmanHizmetBinasiApiService (Typed HttpClient)
+    ? IDtoDiscoveryApiService -> DtoDiscoveryApiService (Typed HttpClient)
+    ? IGununMenusuApiService -> GununMenusuApiService (Typed HttpClient)
+    ? IHaberApiService -> HaberApiService (Typed HttpClient)
+    ? IHizmetBinasiApiService -> HizmetBinasiApiService (Typed HttpClient)
+    ? IIlApiService -> IlApiService (Typed HttpClient)
+    ? IIlceApiService -> IlceApiService (Typed HttpClient)
+    ? IModulApiService -> ModulApiService (Typed HttpClient)
+    ? IModulControllerApiService -> ModulControllerApiService (Typed HttpClient)
+    ? IModulControllerIslemApiService -> ModulControllerIslemApiService (Typed HttpClient)
+    ? IOnemliLinkApiService -> OnemliLinkApiService (Typed HttpClient)
+    ? IResmiTatilApiService -> ResmiTatilApiService (Typed HttpClient)
+    ? ISikKullanilanProgramApiService -> SikKullanilanProgramApiService (Typed HttpClient)
+    ? IUserApiService -> UserApiService (Typed HttpClient)
+    ?? Common: 17 API service kayıt edildi
+?? Personel API Services kaydediliyor...
+    ?? Bulunan interface'ler: 8
+    ?? Bulunan implementation'lar: 68
+    ? IAtanmaNedeniApiService -> AtanmaNedeniApiService (Typed HttpClient)
+    ? IDepartmanApiService -> DepartmanApiService (Typed HttpClient)
+    ? IPersonelApiService -> PersonelApiService (Typed HttpClient)
+    ? IPersonelCocukApiService -> PersonelCocukApiService (Typed HttpClient)
+    ? IPersonelYetkiApiService -> PersonelYetkiApiService (Typed HttpClient)
+    ? ISendikaApiService -> SendikaApiService (Typed HttpClient)
+    ? IServisApiService -> ServisApiService (Typed HttpClient)
+    ? IUnvanApiService -> UnvanApiService (Typed HttpClient)
+    ?? Personel: 8 API service kayıt edildi
+?? Siramatik API Services kaydediliyor...
+    ?? Bulunan interface'ler: 14
+    ?? Bulunan implementation'lar: 140
+    ? IBankoApiService -> BankoApiService (Typed HttpClient)
+    ? IKanalAltApiService -> KanalAltApiService (Typed HttpClient)
+    ? IKanalAltIslemApiService -> KanalAltIslemApiService (Typed HttpClient)
+    ? IKanalApiService -> KanalApiService (Typed HttpClient)
+    ? IKanalIslemApiService -> KanalIslemApiService (Typed HttpClient)
+    ? IKanalPersonelApiService -> KanalPersonelApiService (Typed HttpClient)
+    ? IKioskApiService -> KioskApiService (Typed HttpClient)
+    ? IKioskMenuApiService -> KioskMenuApiService (Typed HttpClient)
+    ? IKioskMenuAtamaApiService -> KioskMenuAtamaApiService (Typed HttpClient)
+    ? IKioskMenuIslemApiService -> KioskMenuIslemApiService (Typed HttpClient)
+    ? IKioskSimulatorApiService -> KioskSimulatorApiService (Typed HttpClient)
+    ? ISiraCagirmaApiService -> SiraCagirmaApiService (Typed HttpClient)
+    ? ISiraYonlendirmeApiService -> SiraYonlendirmeApiService (Typed HttpClient)
+    ? ITvApiService -> TvApiService (Typed HttpClient)
+    ?? Siramatik: 14 API service kayıt edildi
+?? Pdks API Services kaydediliyor...
+    ?? Bulunan interface'ler: 6
+    ?? Bulunan implementation'lar: 41
+    ? IDepartmanMesaiApiService -> DepartmanMesaiApiService (Typed HttpClient)
+    ? IIzinMazeretTalepApiService -> IzinMazeretTalepApiService (Typed HttpClient)
+    ? IIzinMazeretTuruTanimApiService -> IzinMazeretTuruTanimApiService (Typed HttpClient)
+    ? IIzinSorumluApiService -> IzinSorumluApiService (Typed HttpClient)
+    ? IPersonelListApiService -> PersonelListApiService (Typed HttpClient)
+    ? IPersonelMesaiApiService -> PersonelMesaiApiService (Typed HttpClient)
+    ?? Pdks: 6 API service kayıt edildi
+?? Eshot API Services kaydediliyor...
+    ??  Eshot modülünde API service bulunamadı
+?? ZKTeco API Services kaydediliyor...
+    ?? Bulunan interface'ler: 3
+    ?? Bulunan implementation'lar: 46
+    ? ICardSyncComparisonApiService -> CardSyncComparisonApiService (Typed HttpClient)
+    ? ISpecialCardApiService -> SpecialCardApiService (Typed HttpClient)
+    ? IZKTecoDeviceApiService -> ZKTecoDeviceApiService (Typed HttpClient)
+    ?? ZKTeco: 3 API service kayıt edildi
+?? Elasticsearch API Services kaydediliyor...
+    ?? Bulunan interface'ler: 2
+    ?? Bulunan implementation'lar: 12
+    ? IElasticsearchAdminApiService -> ElasticsearchAdminApiService (Typed HttpClient)
+    ? IPersonelSearchApiService -> PersonelSearchApiService (Typed HttpClient)
+    ?? Elasticsearch: 2 API service kayıt edildi
+?? Presentation Layer hazır!
+
+SignalR Hub: API katmaninda (https://localhost:9080/hubs/siramatik)
+?? SignalR Hub: API katmanında (https://localhost:9080/hubs/siramatik)
+??  Database migration ApiLayer tarafından yönetiliyor
+
+╔════════════════════════════════════════════════════════╗
+║      SGK PORTAL PRESENTATION BAŞLATILIYOR...           ║
+╚════════════════════════════════════════════════════════╝
+?? Ortam: Development
+?? HTTPS URL: https://localhost:8080
+?? HTTP URL: http://localhost:8081
+?? API URL: https://localhost:9080
+?? Database: Server=localhost\SQLEXPRESS
+╚════════════════════════════════════════════════════════╝
+
+info: SGKPortalApp.PresentationLayer.Services.BackgroundServices.StaleConnectionCleanupService[0]
+      StaleConnectionCleanupService başlatıldı. Interval: 5 dakika, Stale Threshold: 10 dakika, Orphan Interval: 30 dakika
+info: System.Net.Http.HttpClient.CleanupClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/hub-connections/cleanup/startup
+info: System.Net.Http.HttpClient.CleanupClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/hub-connections/cleanup/startup
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: https://localhost:8080
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:8081
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer
+info: System.Net.Http.HttpClient.ILoginLogoutLogApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/loginlogoutlog/is-session-valid/31ba84c1-a020-4adc-9052-3486ca5f4fd3
+info: System.Net.Http.HttpClient.ILoginLogoutLogApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/loginlogoutlog/is-session-valid/31ba84c1-a020-4adc-9052-3486ca5f4fd3
+warn: SGKPortalApp.PresentationLayer.Services.BackgroundServices.StaleConnectionCleanupService[0]
+      ? ApiLayer henüz hazır değil (deneme 1/6). 5 saniye sonra tekrar denenecek...
+warn: SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth.LoginLogoutLogApiService[0]
+      IsSessionStillValidAsync: API bağlantı hatası, session kontrolü atlanıyor - SessionID: 31ba84c1-a020-4adc-9052-3486ca5f4fd3
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:9080)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Auth.LoginLogoutLogApiService.IsSessionStillValidAsync(String sessionId) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer\Services\ApiServices\Concrete\Auth\LoginLogoutLogApiService.cs:line 151
+info: System.Net.Http.HttpClient.IUserApiService.LogicalHandler[100]
+      Start processing HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.IUserApiService.ClientHandler[100]
+      Sending HTTP request GET https://localhost:9080/api/user/28165202398
+info: System.Net.Http.HttpClient.CleanupClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/hub-connections/cleanup/startup
+info: System.Net.Http.HttpClient.CleanupClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/hub-connections/cleanup/startup
+fail: SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common.UserApiService[0]
+      GetByTcKimlikNoAsync exception
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:9080)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.PresentationLayer.Services.ApiServices.Concrete.Common.UserApiService.GetByTcKimlikNoAsync(String tcKimlikNo) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer\Services\ApiServices\Concrete\Common\UserApiService.cs:line 25
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: SGKPortalApp.PresentationLayer.Services.BackgroundServices.StaleConnectionCleanupService[0]
+      ? ApiLayer henüz hazır değil (deneme 2/6). 5 saniye sonra tekrar denenecek...
+warn: Microsoft.AspNetCore.Components.Server.Circuits.RemoteRenderer[100]
+      Unhandled exception rendering component: The following routes are ambiguous:
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+
+      System.InvalidOperationException: The following routes are ambiguous:
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+
+         at Microsoft.AspNetCore.Components.RouteTableFactory.DetectAmbiguousRoutes(TreeRouteBuilder builder)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(Dictionary`2 templatesByHandler, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(List`1 componentTypes, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(RouteKey routeKey, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.Routing.Router.RefreshRouteTable()
+         at Microsoft.AspNetCore.Components.Routing.Router.Refresh(Boolean isNavigationIntercepted)
+         at Microsoft.AspNetCore.Components.Routing.Router.RunOnNavigateAsync(String path, Boolean isNavigationIntercepted)
+         at Microsoft.AspNetCore.Components.Rendering.ComponentState.RenderIntoBatch(RenderBatchBuilder batchBuilder, RenderFragment renderFragment, Exception& renderFragmentException)
+fail: Microsoft.AspNetCore.Components.Server.Circuits.CircuitHost[111]
+      Unhandled exception in circuit 'wLGYURArguRLqf88TVfcDsgCXQllLyLRrYRFbw9X7xQ'.
+      System.InvalidOperationException: The following routes are ambiguous:
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+
+         at Microsoft.AspNetCore.Components.RouteTableFactory.DetectAmbiguousRoutes(TreeRouteBuilder builder)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(Dictionary`2 templatesByHandler, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(List`1 componentTypes, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(RouteKey routeKey, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.Routing.Router.RefreshRouteTable()
+         at Microsoft.AspNetCore.Components.Routing.Router.Refresh(Boolean isNavigationIntercepted)
+         at Microsoft.AspNetCore.Components.Routing.Router.RunOnNavigateAsync(String path, Boolean isNavigationIntercepted)
+         at Microsoft.AspNetCore.Components.Rendering.ComponentState.RenderIntoBatch(RenderBatchBuilder batchBuilder, RenderFragment renderFragment, Exception& renderFragmentException)
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+info: System.Net.Http.HttpClient.CleanupClient.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/hub-connections/cleanup/startup
+info: System.Net.Http.HttpClient.CleanupClient.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/hub-connections/cleanup/startup
+warn: Microsoft.AspNetCore.Components.Server.Circuits.RemoteRenderer[100]
+      Unhandled exception rendering component: The following routes are ambiguous:
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+
+      System.InvalidOperationException: The following routes are ambiguous:
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+
+         at Microsoft.AspNetCore.Components.RouteTableFactory.DetectAmbiguousRoutes(TreeRouteBuilder builder)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(Dictionary`2 templatesByHandler, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(List`1 componentTypes, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(RouteKey routeKey, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.Routing.Router.RefreshRouteTable()
+         at Microsoft.AspNetCore.Components.Routing.Router.Refresh(Boolean isNavigationIntercepted)
+         at Microsoft.AspNetCore.Components.Routing.Router.RunOnNavigateAsync(String path, Boolean isNavigationIntercepted)
+         at Microsoft.AspNetCore.Components.Rendering.ComponentState.RenderIntoBatch(RenderBatchBuilder batchBuilder, RenderFragment renderFragment, Exception& renderFragmentException)
+fail: Microsoft.AspNetCore.Components.Server.Circuits.CircuitHost[111]
+      Unhandled exception in circuit 'UHEMCqdP_f_vZzF9xboKbDF68BRgHMdTBRtvNvASo7U'.
+      System.InvalidOperationException: The following routes are ambiguous:
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+
+         at Microsoft.AspNetCore.Components.RouteTableFactory.DetectAmbiguousRoutes(TreeRouteBuilder builder)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(Dictionary`2 templatesByHandler, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(List`1 componentTypes, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(RouteKey routeKey, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.Routing.Router.RefreshRouteTable()
+         at Microsoft.AspNetCore.Components.Routing.Router.Refresh(Boolean isNavigationIntercepted)
+         at Microsoft.AspNetCore.Components.Routing.Router.RunOnNavigateAsync(String path, Boolean isNavigationIntercepted)
+         at Microsoft.AspNetCore.Components.Rendering.ComponentState.RenderIntoBatch(RenderBatchBuilder batchBuilder, RenderFragment renderFragment, Exception& renderFragmentException)
+info: System.Net.Http.HttpClient.CleanupClient.ClientHandler[101]
+      Received HTTP response headers after 2771.6138ms - 200
+info: System.Net.Http.HttpClient.CleanupClient.LogicalHandler[101]
+      End processing HTTP request after 2781.2388ms - 200
+info: SGKPortalApp.PresentationLayer.Services.BackgroundServices.StaleConnectionCleanupService[0]
+      ? Başlangıç temizliği: 2 connection offline yapıldı
+info: SGKPortalApp.PresentationLayer.Services.BackgroundServices.StaleConnectionCleanupService[0]
+      Periyodik temizlik başlatılıyor (her 5 dakikada bir)...
+info: SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel[0]
+      ?? Logout: MUHAMMED BODUR çıkış yapıyor...
+info: System.Net.Http.HttpClient.Default.LogicalHandler[100]
+      Start processing HTTP request POST https://localhost:9080/api/auth/logout
+info: System.Net.Http.HttpClient.Default.ClientHandler[100]
+      Sending HTTP request POST https://localhost:9080/api/auth/logout
+info: System.Net.Http.HttpClient.Default.ClientHandler[101]
+      Received HTTP response headers after 1694.2881ms - 200
+info: System.Net.Http.HttpClient.Default.LogicalHandler[101]
+      End processing HTTP request after 1694.4845ms - 200
+info: SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel[0]
+      ? API Logout başarılı - 28165202398
+warn: SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel[0]
+      ?? Session temizlenirken hata
+      System.InvalidOperationException: Session has not been configured for this application or request.
+         at Microsoft.AspNetCore.Http.DefaultHttpContext.get_Session()
+         at SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel.OnGetAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.PresentationLayer\Pages\Auth\Logout.cshtml.cs:line 85
+info: SGKPortalApp.PresentationLayer.Pages.Auth.LogoutModel[0]
+      ? Logout: MUHAMMED BODUR başarıyla çıkış yaptı
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Components.Server.Circuits.RemoteRenderer[100]
+      Unhandled exception rendering component: The following routes are ambiguous:
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+
+      System.InvalidOperationException: The following routes are ambiguous:
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+
+         at Microsoft.AspNetCore.Components.RouteTableFactory.DetectAmbiguousRoutes(TreeRouteBuilder builder)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(Dictionary`2 templatesByHandler, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(List`1 componentTypes, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(RouteKey routeKey, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.Routing.Router.RefreshRouteTable()
+         at Microsoft.AspNetCore.Components.Routing.Router.Refresh(Boolean isNavigationIntercepted)
+         at Microsoft.AspNetCore.Components.Routing.Router.RunOnNavigateAsync(String path, Boolean isNavigationIntercepted)
+         at Microsoft.AspNetCore.Components.Rendering.ComponentState.RenderIntoBatch(RenderBatchBuilder batchBuilder, RenderFragment renderFragment, Exception& renderFragmentException)
+fail: Microsoft.AspNetCore.Components.Server.Circuits.CircuitHost[111]
+      Unhandled exception in circuit 'fb59VwTSHaq2R03mPAdpAsgUQ-vd14iwCeAqTO6BWt4'.
+      System.InvalidOperationException: The following routes are ambiguous:
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+
+         at Microsoft.AspNetCore.Components.RouteTableFactory.DetectAmbiguousRoutes(TreeRouteBuilder builder)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(Dictionary`2 templatesByHandler, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(List`1 componentTypes, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(RouteKey routeKey, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.Routing.Router.RefreshRouteTable()
+         at Microsoft.AspNetCore.Components.Routing.Router.Refresh(Boolean isNavigationIntercepted)
+         at Microsoft.AspNetCore.Components.Routing.Router.RunOnNavigateAsync(String path, Boolean isNavigationIntercepted)
+         at Microsoft.AspNetCore.Components.Rendering.ComponentState.RenderIntoBatch(RenderBatchBuilder batchBuilder, RenderFragment renderFragment, Exception& renderFragmentException)
+warn: Microsoft.WebTools.BrowserLink.Net.BrowserLinkMiddleware[4]
+      Unable to configure Browser Link script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Watch.BrowserRefresh.BrowserRefreshMiddleware[4]
+      Unable to configure browser refresh script injection on the response. This may have been caused by the response's Content-Encoding: 'br'. Consider disabling response compression.
+warn: Microsoft.AspNetCore.Components.Server.Circuits.RemoteRenderer[100]
+      Unhandled exception rendering component: The following routes are ambiguous:
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+
+      System.InvalidOperationException: The following routes are ambiguous:
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+
+         at Microsoft.AspNetCore.Components.RouteTableFactory.DetectAmbiguousRoutes(TreeRouteBuilder builder)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(Dictionary`2 templatesByHandler, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(List`1 componentTypes, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(RouteKey routeKey, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.Routing.Router.RefreshRouteTable()
+         at Microsoft.AspNetCore.Components.Routing.Router.Refresh(Boolean isNavigationIntercepted)
+         at Microsoft.AspNetCore.Components.Routing.Router.RunOnNavigateAsync(String path, Boolean isNavigationIntercepted)
+         at Microsoft.AspNetCore.Components.Rendering.ComponentState.RenderIntoBatch(RenderBatchBuilder batchBuilder, RenderFragment renderFragment, Exception& renderFragmentException)
+fail: Microsoft.AspNetCore.Components.Server.Circuits.CircuitHost[111]
+      Unhandled exception in circuit 'm4w5DCaiCj1wW-YYTCIFLme0g4c-sD4slHc062hceCY'.
+      System.InvalidOperationException: The following routes are ambiguous:
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+      'haberler/edit/{Id:int}' in 'SGKPortalApp.PresentationLayer.Pages.Haberler.HaberEdit'
+
+         at Microsoft.AspNetCore.Components.RouteTableFactory.DetectAmbiguousRoutes(TreeRouteBuilder builder)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(Dictionary`2 templatesByHandler, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(List`1 componentTypes, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.RouteTableFactory.Create(RouteKey routeKey, IServiceProvider serviceProvider)
+         at Microsoft.AspNetCore.Components.Routing.Router.RefreshRouteTable()
+         at Microsoft.AspNetCore.Components.Routing.Router.Refresh(Boolean isNavigationIntercepted)
+         at Microsoft.AspNetCore.Components.Routing.Router.RunOnNavigateAsync(String path, Boolean isNavigationIntercepted)
+         at Microsoft.AspNetCore.Components.Rendering.ComponentState.RenderIntoBatch(RenderBatchBuilder batchBuilder, RenderFragment renderFragment, Exception& renderFragmentException)

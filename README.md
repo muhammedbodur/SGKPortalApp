@@ -24,6 +24,7 @@ Bu dokümantasyon, projede kullanılan URL ve Permission Key standartlarını ta
 |-------------|-----|
 | `Pages/Personel/Index.razor` | `/personel` |
 | `Pages/Personel/Manage.razor` | `/personel/manage/{tc}` |
+| `Pages/Personel/Add.razor` | `/personel/add` |
 | `Pages/Personel/Departman/Index.razor` | `/personel-departman` |
 | `Pages/Personel/Departman/Manage.razor` | `/personel-departman/manage/{id}` |
 | `Pages/Yetki/Modul/Index.razor` | `/yetki-modul` |
@@ -53,6 +54,7 @@ Bu dokümantasyon, projede kullanılan URL ve Permission Key standartlarını ta
 |-----|----------------|
 | `/personel` | `PER.PERSONEL.INDEX` |
 | `/personel/manage/{tc}` | `PER.PERSONEL.MANAGE` |
+| `/personel/add` | `PER.PERSONEL.CREATE` |
 | `/personel-departman` | `PER.PERSONELDEPARTMAN.INDEX` |
 | `/personel-departman/manage/{id}` | `PER.PERSONELDEPARTMAN.MANAGE` |
 | `/yetki-modul` | `YET.YETKIMODUL.INDEX` |

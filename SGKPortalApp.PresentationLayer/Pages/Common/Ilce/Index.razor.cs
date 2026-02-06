@@ -199,7 +199,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.Ilce
 
         private void NavigateToCreate()
         {
-            _navigationManager.NavigateTo("/common/ilce/manage");
+            _navigationManager.NavigateTo("/common/ilce/add");
         }
 
         private void NavigateToEdit(int id)

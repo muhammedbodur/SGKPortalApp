@@ -191,7 +191,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Servis
         // NAVİGASYON
         // ═══════════════════════════════════════════════════════
 
-        private void NavigateToCreate() => _navigationManager.NavigateTo("/personel/servis/manage");
+        private void NavigateToCreate() => _navigationManager.NavigateTo("/personel/servis/add");
         private void NavigateToEdit(int id) => _navigationManager.NavigateTo($"/personel/servis/manage/{id}");
 
         // ═══════════════════════════════════════════════════════

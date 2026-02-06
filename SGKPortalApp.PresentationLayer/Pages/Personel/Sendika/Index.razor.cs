@@ -187,7 +187,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Sendika
 
         private void NavigateToCreate()
         {
-            _navigationManager.NavigateTo("/personel/sendika/manage");
+            _navigationManager.NavigateTo("/personel/sendika/add");
         }
 
         private void NavigateToEdit(int id)

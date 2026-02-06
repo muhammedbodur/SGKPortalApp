@@ -12,7 +12,7 @@
   ? SGKDbContext kaydedildi
   ? IUnitOfWork → UnitOfWork
   ? IDatabaseMigrationService → DatabaseMigrationService
-  ? 64 Repository kaydedildi (auto-discovery)
+  ? 65 Repository kaydedildi (auto-discovery)
   ?? DataAccessLayer hazır!
 
 ?? MySQL Sync Service yapılandırıldı
@@ -45,21 +45,25 @@
     ? <UpdateLogoutTimeByTcKimlikNoAsync>d__9 (Concrete - Interface yok)
     ?? Auth: 21 servis kayıt edildi
   ?? Common servisleri kaydediliyor...
-    ?? Bulunan interface'ler: 14
-    ?? Bulunan implementation'lar: 164
+    ?? Bulunan interface'ler: 18
+    ?? Bulunan implementation'lar: 208
     ? IAuditLogService -> AuditLogService
     ? ICascadeHelper -> CascadeHelper
     ? IDashboardService -> DashboardService
     ? IDepartmanHizmetBinasiService -> DepartmanHizmetBinasiService
     ? IDtoDiscoveryService -> DtoDiscoveryService
     ? IFieldPermissionValidationService -> FieldPermissionValidationService
+    ? IGununMenusuService -> GununMenusuService
+    ? IHaberService -> HaberService
     ? IHizmetBinasiService -> HizmetBinasiService
     ? IIlceService -> IlceService
     ? IIlService -> IlService
     ? IModulControllerIslemService -> ModulControllerIslemService
     ? IModulControllerService -> ModulControllerService
     ? IModulService -> ModulService
+    ? IOnemliLinkService -> OnemliLinkService
     ? IResmiTatilService -> ResmiTatilService
+    ? ISikKullanilanProgramService -> SikKullanilanProgramService
     ? IUserService -> UserService
     ? <>c (Concrete - Interface yok)
     ? <GetEntityHistoryAsync>d__9 (Concrete - Interface yok)
@@ -75,14 +79,14 @@
     ? <GetDashboardDataAsync>d__4 (Concrete - Interface yok)
     ? <GetGununMenusuAsync>d__9 (Concrete - Interface yok)
     ? <GetGununMenusuInternalAsync>d__15 (Concrete - Interface yok)
-    ? <GetListeDuyurularAsync>d__6 (Concrete - Interface yok)
-    ? <GetListeDuyurularInternalAsync>d__12 (Concrete - Interface yok)
+    ? <GetListeHaberleriAsync>d__6 (Concrete - Interface yok)
+    ? <GetListeHaberleriInternalAsync>d__12 (Concrete - Interface yok)
     ? <GetOnemliLinklerAsync>d__8 (Concrete - Interface yok)
     ? <GetOnemliLinklerInternalAsync>d__14 (Concrete - Interface yok)
     ? <GetSikKullanilanProgramlarAsync>d__7 (Concrete - Interface yok)
     ? <GetSikKullanilanProgramlarInternalAsync>d__13 (Concrete - Interface yok)
-    ? <GetSliderDuyurularAsync>d__5 (Concrete - Interface yok)
-    ? <GetSliderDuyurularInternalAsync>d__11 (Concrete - Interface yok)
+    ? <GetSliderHaberleriAsync>d__5 (Concrete - Interface yok)
+    ? <GetSliderHaberleriInternalAsync>d__11 (Concrete - Interface yok)
     ? <>c (Concrete - Interface yok)
     ? <>c__DisplayClass10_0 (Concrete - Interface yok)
     ? <>c__DisplayClass8_0 (Concrete - Interface yok)
@@ -107,6 +111,28 @@
     ? <>c (Concrete - Interface yok)
     ? <LoadFieldPermissionsAsync>d__4 (Concrete - Interface yok)
     ? <RefreshCacheAsync>d__8 (Concrete - Interface yok)
+    ? <>c (Concrete - Interface yok)
+    ? <>c__DisplayClass10_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass12_0 (Concrete - Interface yok)
+    ? <>c__DisplayClass12_1 (Concrete - Interface yok)
+    ? <>c__DisplayClass9_0 (Concrete - Interface yok)
+    ? <CreateAsync>d__9 (Concrete - Interface yok)
+    ? <DeleteAsync>d__11 (Concrete - Interface yok)
+    ? <GetAllAsync>d__6 (Concrete - Interface yok)
+    ? <GetByDateAsync>d__8 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__7 (Concrete - Interface yok)
+    ? <GetPagedAsync>d__12 (Concrete - Interface yok)
+    ? <UpdateAsync>d__10 (Concrete - Interface yok)
+    ? <>c (Concrete - Interface yok)
+    ? <AddResimAsync>d__10 (Concrete - Interface yok)
+    ? <CreateHaberAsync>d__6 (Concrete - Interface yok)
+    ? <DeleteHaberAsync>d__8 (Concrete - Interface yok)
+    ? <DeleteResimAsync>d__11 (Concrete - Interface yok)
+    ? <GetAdminHaberListeAsync>d__9 (Concrete - Interface yok)
+    ? <GetHaberByIdAsync>d__5 (Concrete - Interface yok)
+    ? <GetHaberListeAsync>d__4 (Concrete - Interface yok)
+    ? <GetSliderHaberleriAsync>d__3 (Concrete - Interface yok)
+    ? <UpdateHaberAsync>d__7 (Concrete - Interface yok)
     ? <>c (Concrete - Interface yok)
     ? <>c__DisplayClass12_0 (Concrete - Interface yok)
     ? <>c__DisplayClass19_0 (Concrete - Interface yok)
@@ -179,6 +205,15 @@
     ? <GetByIdAsync>d__5 (Concrete - Interface yok)
     ? <GetDropdownAsync>d__9 (Concrete - Interface yok)
     ? <UpdateAsync>d__7 (Concrete - Interface yok)
+    ? <>c (Concrete - Interface yok)
+    ? <>c__DisplayClass12_0 (Concrete - Interface yok)
+    ? <CreateAsync>d__9 (Concrete - Interface yok)
+    ? <DeleteAsync>d__11 (Concrete - Interface yok)
+    ? <GetActiveAsync>d__7 (Concrete - Interface yok)
+    ? <GetAllAsync>d__6 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__8 (Concrete - Interface yok)
+    ? <GetPagedAsync>d__12 (Concrete - Interface yok)
+    ? <UpdateAsync>d__10 (Concrete - Interface yok)
     ? <>c__DisplayClass12_0 (Concrete - Interface yok)
     ? <CreateAsync>d__7 (Concrete - Interface yok)
     ? <DeleteAsync>d__9 (Concrete - Interface yok)
@@ -189,6 +224,15 @@
     ? <IsHolidayAsync>d__10 (Concrete - Interface yok)
     ? <SyncHolidaysFromGoogleCalendarAsync>d__12 (Concrete - Interface yok)
     ? <UpdateAsync>d__8 (Concrete - Interface yok)
+    ? <>c (Concrete - Interface yok)
+    ? <>c__DisplayClass12_0 (Concrete - Interface yok)
+    ? <CreateAsync>d__9 (Concrete - Interface yok)
+    ? <DeleteAsync>d__11 (Concrete - Interface yok)
+    ? <GetActiveAsync>d__7 (Concrete - Interface yok)
+    ? <GetAllAsync>d__6 (Concrete - Interface yok)
+    ? <GetByIdAsync>d__8 (Concrete - Interface yok)
+    ? <GetPagedAsync>d__12 (Concrete - Interface yok)
+    ? <UpdateAsync>d__10 (Concrete - Interface yok)
     ? <>c__DisplayClass19_0 (Concrete - Interface yok)
     ? <ActivateBankoModeAsync>d__20 (Concrete - Interface yok)
     ? <ActivateUserAsync>d__16 (Concrete - Interface yok)
@@ -211,7 +255,7 @@
     ? <<DeleteAsync>b__0>d (Concrete - Interface yok)
     ? <<CreateAsync>b__0>d (Concrete - Interface yok)
     ? <<UpdateAsync>b__0>d (Concrete - Interface yok)
-    ?? Common: 164 servis kayıt edildi
+    ?? Common: 208 servis kayıt edildi
   ?? PersonelIslemleri servisleri kaydediliyor...
     ?? Bulunan interface'ler: 9
     ?? Bulunan implementation'lar: 146
@@ -912,7 +956,7 @@ info: SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerSe
 info: SGKPortalApp.DataAccessLayer.Services.Audit.AuditMaintenanceService[0]
       Audit maintenance service started
 info: SGKPortalApp.DataAccessLayer.Services.Audit.AuditMaintenanceService[0]
-      Next maintenance run scheduled at 02/04/2026 02:00:00
+      Next maintenance run scheduled at 02/06/2026 02:00:00
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
       ?? MySqlSyncService başlatıldı. Sync aralığı: 120 dakika
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
@@ -930,13 +974,11 @@ info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.Attenda
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.AttendanceSyncService[0]
       ?? Device sync interval: 5 minutes
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.ZKTeco.AttendanceSyncService[0]
-      ? Next check at: 17:00 (in 56 minutes)
+      ? Next check at: 22:00 (in 47 minutes)
 info: SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService[0]
       ?? ZKTecoRealtimeService starting...
 info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
       Starting SignalR connection to: http://localhost:8091/signalr
-info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
-      SignalR connection started successfully. State: Connected
 info: Microsoft.Hosting.Lifetime[14]
       Now listening on: https://localhost:9080
 info: Microsoft.Hosting.Lifetime[14]
@@ -947,10 +989,6 @@ info: Microsoft.Hosting.Lifetime[0]
       Hosting environment: Development
 info: Microsoft.Hosting.Lifetime[0]
       Content root path: D:\AspNetExamples\SGKPortalApp\SGKPortalApp.ApiLayer
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: YN9erXyp4rruKS46GLtJpQ - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=b8b3cdd2-b2d5-4427-9fff-b08ac4b8926e
 warn: Microsoft.EntityFrameworkCore.Model.Validation[10622]
       Entity 'User' has a global query filter defined and is the required end of a relationship with the entity 'LoginLogoutLog'. This may lead to unexpected results when the required entity is filtered out. Either configure the navigation as optional, or define matching query filters for both entities in the navigation. See https://go.microsoft.com/fwlink/?linkid=2131316 for more information.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[10622]
@@ -958,9 +996,11 @@ warn: Microsoft.EntityFrameworkCore.Model.Validation[10622]
 warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
       The 'LogStorageType' property 'StorageType' on entity type 'DatabaseLog' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value '0', since this is the CLR default for the 'LogStorageType' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
-      The 'Aktiflik' property 'Aktiflik' on entity type 'Duyuru' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
-warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
       The 'Aktiflik' property 'Aktiflik' on entity type 'GununMenusu' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'Aktiflik' property 'Aktiflik' on entity type 'Haber' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
+warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
+      The 'Aktiflik' property 'Aktiflik' on entity type 'HaberResim' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
       The 'Aktiflik' property 'Aktiflik' on entity type 'OnemliLink' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
@@ -981,16 +1021,43 @@ warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
       The 'Aktiflik' property 'Aktiflik' on entity type 'KioskMenu' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
 warn: Microsoft.EntityFrameworkCore.Model.Validation[20601]
       The 'Aktiflik' property 'Aktiflik' on entity type 'Tv' is configured with a database-generated default, but has no configured sentinel value. The database-generated default will always be used for inserts when the property has the value 'Pasif', since this is the CLR default for the 'Aktiflik' type. Consider using a nullable type, using a nullable backing field, or setting the sentinel value for the property to ensure the database default is used when, and only when, appropriate. See https://aka.ms/efcore-docs-default-values for more information.
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
-        ? Departmanlar: 0 eklendi, 0 güncellendi
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
-      ?? Servisler sync ediliyor...
+warn: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      SignalR connection closed. Attempting to reconnect...
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 1/5...
+warn: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      ZKTecoApi servisine bağlanılamadı. Servis çalışmıyor olabilir. Realtime izleme devre dışı.
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.StartAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 74
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Yeni bağlantı: WoO5ain2g47FDESLMcvK8w - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=14586dba-8aac-46a9-981e-6889cfae6874
 info: SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService[0]
       Found 2 active ZKTeco devices
 info: System.Net.Http.HttpClient.ZKTecoApiClient.LogicalHandler[100]
       Start processing HTTP request POST http://localhost:8091/api/realtime/192.168.1.201/start?*
 info: System.Net.Http.HttpClient.ZKTecoApiClient.ClientHandler[100]
       Sending HTTP request POST http://localhost:8091/api/realtime/192.168.1.201/start?*
+info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
+        ? Departmanlar: 0 eklendi, 0 güncellendi
+info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
+      ?? Servisler sync ediliyor...
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
         ? Servisler: 0 eklendi, 0 güncellendi
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
@@ -1007,239 +1074,716 @@ info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSync
         ? Atanma Nedenleri: 0 eklendi, 0 güncellendi
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
       ?? Departman-Bina İlişkileri sync ediliyor...
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ? Yeni bağlantı oluşturuldu: WoO5ain2g47FDESLMcvK8w | TC: 28165202398 | Type: MainLayout | IP: ::1
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Banko modu kontrolü: isBankoMode=False
 info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
-      ? Başlangıç temizliği: 1 connection offline yapıldı
+      ? Başlangıç temizliği: 2 connection offline yapıldı
 info: SGKPortalApp.ApiLayer.Controllers.SignalR.HubConnectionController[0]
-      Cleanup startup: 1 connection temizlendi
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: YN9erXyp4rruKS46GLtJpQ | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Personel bağlantısı koptu: 28165202398
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: YN9erXyp4rruKS46GLtJpQ - Kullanıcı: MUHAMMED BODUR
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: G2j1t2LGREQy7Nw81XzKJA - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=b8b3cdd2-b2d5-4427-9fff-b08ac4b8926e
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: G2j1t2LGREQy7Nw81XzKJA | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
+      Cleanup startup: 2 connection temizlendi
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
         ?? 72 adet benzersiz departman-bina eşleşmesi bulundu
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
         ? Departman-Bina İlişkileri: 0 eklendi, 2 atlandı
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
       ?? Personeller sync ediliyor...
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Personel bağlantısı koptu: 28165202398
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: G2j1t2LGREQy7Nw81XzKJA - Kullanıcı: MUHAMMED BODUR
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: jpWgli0eYEXeir7aIDw5ng - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=False, isNewTab=False, isTvDisplay=False, tabSessionId=b8b3cdd2-b2d5-4427-9fff-b08ac4b8926e
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: jpWgli0eYEXeir7aIDw5ng | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
-warn: Microsoft.EntityFrameworkCore.Query[20504]
-      Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
-info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelMesaiService[0]
-      Personel mesai verileri: TcKimlikNo=28165202398, KayitNo=2152, Tarih=01/01/2026 00:00:00-12/31/2026 00:00:00, Kayıt Sayısı=44
-warn: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoApiClient[0]
-      Start realtime monitoring timeout (10s): 192.168.1.201:4370
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoApiClient[0]
+      Start realtime monitoring error: 192.168.1.201:4370
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoApiClient.StartRealtimeMonitoringAsync(String deviceIp, Int32 port) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoApiClient.cs:line 554
 warn: SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService[0]
       Failed to start monitoring device: Sol Cİhaz (192.168.1.201)
 info: System.Net.Http.HttpClient.ZKTecoApiClient.LogicalHandler[100]
       Start processing HTTP request POST http://localhost:8091/api/realtime/192.168.1.202/start?*
 info: System.Net.Http.HttpClient.ZKTecoApiClient.ClientHandler[100]
       Sending HTTP request POST http://localhost:8091/api/realtime/192.168.1.202/start?*
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Personel bağlantısı koptu: 28165202398
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Bağlantı koptu: jpWgli0eYEXeir7aIDw5ng - Kullanıcı: MUHAMMED BODUR
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? [SiramatikHub] Yeni bağlantı: K4QSuQEeIuNyjNQX9mshxw - Kullanıcı: MUHAMMED BODUR (TC: 28165202398)
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Page Lifecycle: isRefresh=True, isNewTab=False, isTvDisplay=False, tabSessionId=b8b3cdd2-b2d5-4427-9fff-b08ac4b8926e
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ? Yeni bağlantı oluşturuldu: K4QSuQEeIuNyjNQX9mshxw | TC: 28165202398 | Type: MainLayout | IP: ::1
-info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
-      ?? Banko modu kontrolü: isBankoMode=False
-fail: Microsoft.EntityFrameworkCore.Query[10100]
-      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-fail: Microsoft.EntityFrameworkCore.Query[10100]
-      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-fail: SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService[0]
-      Dashboard verileri getirilirken hata oluştu
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
-         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
-         at SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common.DuyuruRepository.GetListeDuyurularAsync(Int32 count) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Concrete\Common\DuyuruRepository.cs:line 50
-         at SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService.GetListeDuyurularInternalAsync(Int32 count) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\Common\DashboardService.cs:line 160
-         at SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService.GetDashboardDataAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\Common\DashboardService.cs:line 46
-info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelMesaiService[0]
-      Personel mesai verileri: TcKimlikNo=28165202398, KayitNo=2152, Tarih=01/01/2026 00:00:00-12/31/2026 00:00:00, Kayıt Sayısı=44
-warn: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoApiClient[0]
-      Start realtime monitoring timeout (10s): 192.168.1.202:4370
+warn: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      SignalR connection closed. Attempting to reconnect...
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 1/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 1 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 2/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoApiClient[0]
+      Start realtime monitoring error: 192.168.1.202:4370
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoApiClient.StartRealtimeMonitoringAsync(String deviceIp, Int32 port) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoApiClient.cs:line 554
 warn: SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService[0]
       Failed to start monitoring device: Sağ Cihaz (192.168.1.202)
 info: SGKPortalApp.ApiLayer.Services.BackgroundServices.ZKTecoRealtimeListenerService[0]
       ? ZKTecoRealtimeService started successfully
+warn: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      SignalR connection closed. Attempting to reconnect...
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 1/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 1 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 2/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 2 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 3/5...
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? Personel bağlantısı koptu: 28165202398
+info: SGKPortalApp.ApiLayer.Services.Hubs.SiramatikHub[0]
+      ?? [SiramatikHub] Bağlantı koptu: WoO5ain2g47FDESLMcvK8w - Kullanıcı: MUHAMMED BODUR
+info: SGKPortalApp.ApiLayer.Controllers.Auth.AuthController[0]
+      ?? Logout: 28165202398 çıkış yapıyor...
+warn: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      SignalR connection closed. Attempting to reconnect...
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 1/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 2 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 3/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 3 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 4/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 1 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 2/5...
+info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
+      ? Logout time güncellendi - TcKimlikNo: 28165202398, SessionID: 31ba84c1-a020-4adc-9052-3486ca5f4fd3
+info: SGKPortalApp.ApiLayer.Controllers.Auth.AuthController[0]
+      ? Logout log kaydı güncellendi - TcKimlikNo: 28165202398
+info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
+      ?? Banko modundan çıkılıyor: 28165202398
+info: SGKPortalApp.BusinessLogicLayer.Services.Common.UserService[0]
+      Banko modu deaktif edildi. TC: 28165202398
+info: SGKPortalApp.ApiLayer.Services.Hubs.Concrete.BankoModeService[0]
+      ? Banko modundan çıkıldı: 28165202398
+info: SGKPortalApp.ApiLayer.Controllers.Auth.AuthController[0]
+      ? Logout: Banko modu temizlendi - 28165202398
+warn: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      SignalR connection closed. Attempting to reconnect...
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 1/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 1 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 2/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 4 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 5/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 2 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 3/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 3 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 4/5...
+warn: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      SignalR connection closed. Attempting to reconnect...
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 1/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 2 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 4 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 3/5...
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 5/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 1 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 5 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 3 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 2/5...
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 4/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Failed to reconnect after 5 attempts
 info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
-      ? Idle timeout tespit edildi - TC: 12345678901, Son Aktivite: 01/28/2026 12:17:17, Idle Süre: 8868.102624181667 dakika
+      ? Idle timeout tespit edildi - TC: 12345678901, Son Aktivite: 01/28/2026 12:17:17, Idle Süre: 12056.497168295 dakika
 warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
       ?? SessionID ile aktif login log bulunamadı - SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
 warn: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
       ?? Idle session logout başarısız - TC: 12345678901, SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
-fail: Microsoft.EntityFrameworkCore.Query[10100]
-      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-fail: Microsoft.EntityFrameworkCore.Query[10100]
-      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-fail: Microsoft.EntityFrameworkCore.Query[10100]
-      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-fail: SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService[0]
-      Dashboard verileri getirilirken hata oluştu
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
-         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
-         at SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common.DuyuruRepository.GetListeDuyurularAsync(Int32 count) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Concrete\Common\DuyuruRepository.cs:line 50
-         at SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService.GetListeDuyurularInternalAsync(Int32 count) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\Common\DashboardService.cs:line 160
-         at SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService.GetDashboardDataAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\Common\DashboardService.cs:line 46
-info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelMesaiService[0]
-      Personel mesai verileri: TcKimlikNo=28165202398, KayitNo=2152, Tarih=01/01/2026 00:00:00-12/31/2026 00:00:00, Kayıt Sayısı=44
-info: SGKPortalApp.ApiLayer.Controllers.Common.HizmetBinasiController[0]
-      GetAll endpoint çağrıldı
-fail: Microsoft.EntityFrameworkCore.Query[10100]
-      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-fail: Microsoft.EntityFrameworkCore.Query[10100]
-      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-fail: Microsoft.EntityFrameworkCore.Query[10100]
-      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-fail: SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService[0]
-      Dashboard verileri getirilirken hata oluştu
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
-         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
-         at SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common.DuyuruRepository.GetListeDuyurularAsync(Int32 count) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Concrete\Common\DuyuruRepository.cs:line 50
-         at SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService.GetListeDuyurularInternalAsync(Int32 count) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\Common\DashboardService.cs:line 160
-         at SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService.GetDashboardDataAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\Common\DashboardService.cs:line 46
-info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelMesaiService[0]
-      Personel mesai verileri: TcKimlikNo=28165202398, KayitNo=2152, Tarih=01/01/2026 00:00:00-12/31/2026 00:00:00, Kayıt Sayısı=44
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
-      ? Idle timeout tespit edildi - TC: 12345678901, Son Aktivite: 01/28/2026 12:17:17, Idle Süre: 8873.106205773332 dakika
-warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
-      ?? SessionID ile aktif login log bulunamadı - SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
-warn: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
-      ?? Idle session logout başarısız - TC: 12345678901, SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
-info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
-      ?? 0 orphan session temizlendi
-info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
-      ?? 0 stale hub connection pasifleştirildi
-info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
-      ?? 0 disconnected-but-not-logged-out session temizlendi
-info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
-      ? Toplam 0 kayıt temizlendi
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
-      ? Idle timeout tespit edildi - TC: 12345678901, Son Aktivite: 01/28/2026 12:17:17, Idle Süre: 8878.107296596667 dakika
-warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
-      ?? SessionID ile aktif login log bulunamadı - SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
-warn: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
-      ?? Idle session logout başarısız - TC: 12345678901, SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
-        ? Personeller: 0 eklendi, 14 güncellendi, 0 atlandı
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Sync.MySqlSyncService[0]
-      ? Sync tamamlandı
-info: SGKPortalApp.BusinessLogicLayer.Services.SignalR.HubConnectionBusinessService[0]
-      ? Stale connection temizliği: 1 connection offline yapıldı (Threshold: 10 dakika)
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
-      ? Idle timeout tespit edildi - TC: 12345678901, Son Aktivite: 01/28/2026 12:17:17, Idle Süre: 8883.10802693 dakika
-warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
-      ?? SessionID ile aktif login log bulunamadı - SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
-warn: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
-      ?? Idle session logout başarısız - TC: 12345678901, SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
-info: SGKPortalApp.BusinessLogicLayer.Services.Elasticsearch.PersonelSearchService[0]
-      Synonym dosyasından 91 synonym yüklendi: D:\AspNetExamples\SGKPortalApp\elasticsearch-synonyms.json
-info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
-      ?? 0 orphan session temizlendi
-info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
-      ?? 0 stale hub connection pasifleştirildi
-info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
-      ?? 1 disconnected-but-not-logged-out session temizlendi
-info: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
-      ? Toplam 1 kayıt temizlendi
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.SessionCleanupService[0]
-      ? Cleanup tamamlandı - 1 kayıt temizlendi
-info: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
-      ? Idle timeout tespit edildi - TC: 12345678901, Son Aktivite: 01/28/2026 12:17:17, Idle Süre: 8888.108774906666 dakika
-warn: SGKPortalApp.BusinessLogicLayer.Services.Auth.LoginLogoutLogService[0]
-      ?? SessionID ile aktif login log bulunamadı - SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
-warn: SGKPortalApp.BusinessLogicLayer.Services.BackgroundServices.Session.IdleSessionCleanupService[0]
-      ?? Idle session logout başarısız - TC: 12345678901, SessionID: 89b790e2-89ef-47f5-9842-f6e14f8969df
-fail: Microsoft.EntityFrameworkCore.Query[10100]
-      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-fail: Microsoft.EntityFrameworkCore.Query[10100]
-      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-fail: Microsoft.EntityFrameworkCore.Query[10100]
-      An exception occurred while iterating over the results of a query for context type 'SGKPortalApp.DataAccessLayer.Context.SGKDbContext'.
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-fail: SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService[0]
-      Dashboard verileri getirilirken hata oluştu
-      System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-         at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
-         at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
-         at SGKPortalApp.DataAccessLayer.Repositories.Concrete.Common.DuyuruRepository.GetListeDuyurularAsync(Int32 count) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.DataAccessLayer\Repositories\Concrete\Common\DuyuruRepository.cs:line 50
-         at SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService.GetListeDuyurularInternalAsync(Int32 count) in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\Common\DashboardService.cs:line 160
-         at SGKPortalApp.BusinessLogicLayer.Services.Common.DashboardService.GetDashboardDataAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\Common\DashboardService.cs:line 46
-info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.PersonelMesaiService[0]
-      Personel mesai verileri: TcKimlikNo=28165202398, KayitNo=2152, Tarih=01/01/2026 00:00:00-12/31/2026 00:00:00, Kayıt Sayısı=44
+warn: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      SignalR connection closed. Attempting to reconnect...
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 1/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 5 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Failed to reconnect after 5 attempts
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 3 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 4/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 4 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 5/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 2 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 1 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 2/5...
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 3/5...
+warn: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      SignalR connection closed. Attempting to reconnect...
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 1/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 2 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 3/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 5 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Failed to reconnect after 5 attempts
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 1 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 2/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 4 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 5/5...
+fail: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 3 failed
+      System.Net.Http.HttpRequestException: Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı. (localhost:8091)
+       ---> System.Net.Sockets.SocketException (10061): Hedef makine etkin olarak reddettiğinden bağlantı kurulamadı.
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)
+         at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+         at System.Net.Sockets.Socket.<ConnectAsync>g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionWaiter`1.WaitForConnectionWithTelemetryAsync(HttpRequestMessage request, HttpConnectionPool pool, Boolean async, CancellationToken requestCancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+         at SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService.ReconnectAsync() in D:\AspNetExamples\SGKPortalApp\SGKPortalApp.BusinessLogicLayer\Services\PdksIslemleri\ZKTecoRealtimeService.cs:line 186
+info: SGKPortalApp.BusinessLogicLayer.Services.PdksIslemleri.ZKTecoRealtimeService[0]
+      Reconnection attempt 4/5...

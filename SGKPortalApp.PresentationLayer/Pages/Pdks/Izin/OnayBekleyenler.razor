@@ -429,17 +429,3 @@ else
         </div>
     </FieldPermissionScope>
 }
-
-@code {
-    private string GetDurumBadgeClass(OnayDurumu durum)
-    {
-        return durum switch
-        {
-            OnayDurumu.Beklemede => "bg-label-warning",
-            OnayDurumu.Onaylandi => "bg-label-success",
-            OnayDurumu.Reddedildi => "bg-label-danger",
-            OnayDurumu.IptalEdildi => "bg-label-secondary",
-            _ => "bg-label-secondary"
-        };
-    }
-}

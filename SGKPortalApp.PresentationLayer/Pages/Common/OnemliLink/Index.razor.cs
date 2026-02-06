@@ -108,7 +108,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.OnemliLink
 
         private void NavigateToCreate()
         {
-            _navigationManager.NavigateTo("/common/onemli-link/manage");
+            _navigationManager.NavigateTo("/common/onemli-link/add");
         }
 
         private void NavigateToEdit(int id)

@@ -92,7 +92,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.GununMenusu
 
         private void NavigateToCreate()
         {
-            _navigationManager.NavigateTo("/common/gunun-menusu/manage");
+            _navigationManager.NavigateTo("/common/gunun-menusu/add");
         }
 
         private void NavigateToEdit(int id)

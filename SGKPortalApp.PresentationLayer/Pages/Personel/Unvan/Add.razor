@@ -1,0 +1,20 @@
+@page "/personel/unvan/add"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+@using SGKPortalApp.PresentationLayer.Components.Permission
+@using SGKPortalApp.PresentationLayer.Pages.Personel.Unvan.Components
+
+<PageTitle>Yeni Unvan - SGK Portal</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
+        <UnvanForm Id="0" />
+    </FieldPermissionScope>
+}

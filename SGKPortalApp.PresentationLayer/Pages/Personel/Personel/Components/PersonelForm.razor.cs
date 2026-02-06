@@ -20,9 +20,9 @@ using SGKPortalApp.PresentationLayer.Models.FormModels.PersonelIslemleri;
 using SGKPortalApp.PresentationLayer.Services.StateServices;
 using SGKPortalApp.Common.Helpers;
 
-namespace SGKPortalApp.PresentationLayer.Pages.Personel
+namespace SGKPortalApp.PresentationLayer.Pages.Personel.Personel.Components
 {
-    public partial class Manage : FieldPermissionPageBase
+    public partial class PersonelForm : FieldPermissionPageBase
     {
         // ═══════════════════════════════════════════════════════════
         // DEPENDENCY INJECTION
@@ -31,7 +31,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;
         [Inject] private IToastService _toastService { get; set; } = default!;
         [Inject] private IWebHostEnvironment _webHostEnvironment { get; set; } = default!;
-        [Inject] private ILogger<Manage> _logger { get; set; } = default!;
+        [Inject] private ILogger<PersonelForm> _logger { get; set; } = default!;
         [Inject] private ImageHelper _imageHelper { get; set; } = default!;
         [Inject] private IPersonelApiService _personelApiService { get; set; } = default!;
         [Inject] private IDepartmanApiService _departmanApiService { get; set; } = default!;

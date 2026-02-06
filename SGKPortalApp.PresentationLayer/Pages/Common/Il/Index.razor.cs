@@ -166,7 +166,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.Il
 
         private void NavigateToCreate()
         {
-            _navigationManager.NavigateTo("/common/il/manage");
+            _navigationManager.NavigateTo("/common/il/add");
         }
 
         private void NavigateToEdit(int id)

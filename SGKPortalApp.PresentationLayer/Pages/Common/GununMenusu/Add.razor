@@ -1,0 +1,20 @@
+@page "/common/gunun-menusu/add"
+@inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
+@using SGKPortalApp.PresentationLayer.Components.Permission
+@using SGKPortalApp.PresentationLayer.Pages.Common.GununMenusu.Components
+
+<PageTitle>Yeni Menü - SGK Portal</PageTitle>
+
+@if (!CanViewPage)
+{
+    <div class="alert alert-danger" role="alert">
+        <i class="bx bx-lock-alt me-2"></i>
+        Bu sayfayı görüntüleme yetkiniz bulunmuyor.
+    </div>
+}
+else
+{
+    <FieldPermissionScope PageKey="@ResolvedPermissionKey" IsEditMode="false">
+        <GununMenusuForm Id="0" />
+    </FieldPermissionScope>
+}

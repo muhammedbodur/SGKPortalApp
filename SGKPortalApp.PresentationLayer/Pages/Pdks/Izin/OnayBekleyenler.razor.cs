@@ -217,6 +217,17 @@ namespace SGKPortalApp.PresentationLayer.Pages.Pdks.Izin
             return false;
         }
 
+        private string GetDurumBadgeClass(OnayDurumu durum)
+        {
+            return durum switch
+            {
+                OnayDurumu.Beklemede => "bg-label-warning",
+                OnayDurumu.Onaylandi => "bg-label-success",
+                OnayDurumu.Reddedildi => "bg-label-danger",
+                _ => "bg-label-secondary"
+            };
+        }
+
         private string GetDisableReason(IzinMazeretTalepListResponseDto talep)
         {
             // 2. onayci için 1. onay bekleniyor

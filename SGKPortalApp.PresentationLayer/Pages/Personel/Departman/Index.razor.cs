@@ -193,7 +193,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.Departman
 
         private void NavigateToCreate()
         {
-            _navigationManager.NavigateTo("/personel/departman/manage");
+            _navigationManager.NavigateTo("/personel/departman/add");
         }
 
         private void NavigateToEdit(int id)

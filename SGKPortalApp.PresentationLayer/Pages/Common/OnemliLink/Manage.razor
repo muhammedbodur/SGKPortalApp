@@ -1,4 +1,3 @@
-@page "/common/onemli-link/manage"
 @page "/common/onemli-link/manage/{id:int}"
 @inherits SGKPortalApp.PresentationLayer.Components.Base.FieldPermissionPageBase
 @using SGKPortalApp.BusinessObjectLayer.Enums.Common
@@ -136,43 +135,21 @@ else
                                             <i class="bx bx-x me-1"></i>İptal
                                         </button>
 
-                                        @if (!IsEditMode && IsActionVisible("CREATE"))
-                                        {
-                                            <button type="submit"
-                                                    class="btn btn-primary"
-                                                    disabled="@IsSaving || !CanEditAction("CREATE")"
-                                                    title="@(CanEditAction("CREATE") ? "Kaydet" : "Kaydet (Yetki Yok)")">
-                                                @if (IsSaving)
-                                                {
-                                                    <span class="spinner-border spinner-border-sm me-1"></span>
-                                                    <span>Kaydediliyor...</span>
-                                                }
-                                                else
-                                                {
-                                                    <i class="bx bx-check me-1"></i>
-                                                    <span>Kaydet</span>
-                                                }
-                                            </button>
-                                        }
-
-                                        @if (IsEditMode && IsActionVisible("EDIT"))
-                                        {
-                                            <button type="submit"
-                                                    class="btn btn-primary"
-                                                    disabled="@IsSaving || !CanEditAction("EDIT")"
-                                                    title="@(CanEditAction("EDIT") ? "Güncelle" : "Güncelle (Yetki Yok)")">
-                                                @if (IsSaving)
-                                                {
-                                                    <span class="spinner-border spinner-border-sm me-1"></span>
-                                                    <span>Kaydediliyor...</span>
-                                                }
-                                                else
-                                                {
-                                                    <i class="bx bx-check me-1"></i>
-                                                    <span>Güncelle</span>
-                                                }
-                                            </button>
-                                        }
+                                        <button type="submit"
+                                                class="btn btn-primary"
+                                                disabled="@IsSaving || !CanEditPage"
+                                                title="@(CanEditPage ? "Güncelle" : "Güncelle (Yetki Yok)")">
+                                            @if (IsSaving)
+                                            {
+                                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                                <span>Kaydediliyor...</span>
+                                            }
+                                            else
+                                            {
+                                                <i class="bx bx-check me-1"></i>
+                                                <span>Güncelle</span>
+                                            }
+                                        </button>
                                     </div>
                                 </EditForm>
                             </div>
@@ -188,8 +165,8 @@ else
                                     <p class="text-muted mb-3 small">Bu linki silmek istiyorsanız, aşağıdaki butona tıklayın. Bu işlem geri alınamaz.</p>
                                     <button class="btn btn-outline-danger"
                                             @onclick="OpenDeleteModal"
-                                            disabled="@IsSaving || !CanEditAction("DELETE")"
-                                            title="@(CanEditAction("DELETE") ? "Sil" : "Sil (Yetki Yok)")">
+                                            disabled="@IsSaving || !CanEditPage"
+                                            title="@(CanEditPage ? "Sil" : "Sil (Yetki Yok)")">
                                         <i class="bx bx-trash me-1"></i>Linki Sil
                                     </button>
                                 </div>

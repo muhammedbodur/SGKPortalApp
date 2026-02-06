@@ -8,6 +8,7 @@ using SGKPortalApp.PresentationLayer.Middleware;
 using SGKPortalApp.PresentationLayer.Services.Permission;
 using System.Globalization;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ═══════════════════════════════════════════════════════
@@ -78,9 +79,6 @@ builder.Services.AddServerSideBlazor(options =>
     options.MaxBufferedUnacknowledgedRenderBatches = 5;
 });
 
-// Blazored.TextEditor (Rich Text Editor)
-builder.Services.AddBlazoredTextEditor();
-
 // ═══════════════════════════════════════════════════════
 // 🗄️ DATABASE CONNECTION (Shared Configuration'dan)
 // ═══════════════════════════════════════════════════════
@@ -118,7 +116,8 @@ builder.Services.AddCommonServices();
 
 // NOT: PresentationLayer sadece HTTP üzerinden ApiLayer ile iletişim kurar
 // Backend servisleri (BusinessLogicLayer, DataAccessLayer) ApiLayer'da kayıtlı olmalı
-Console.WriteLine("✅ PresentationLayer services registered (HTTP-only communication)");
+Console.WriteLine("✅ PresentationLayer services registered (HTTP-only communication)")
+;
 
 // OVERRIDE: Frontend için PermissionKeyResolverAdapter kullan (PermissionStateService cache kullanır)
 // Backend PermissionKeyResolverService yerine bu adapter kullanılmalı

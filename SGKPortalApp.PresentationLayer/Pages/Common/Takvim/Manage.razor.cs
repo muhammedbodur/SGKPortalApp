@@ -9,7 +9,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.Takvim
 {
     public partial class Manage
     {
-        [Parameter] public int? Id { get; set; }
+        [SupplyParameterFromQuery(Name = "id")] public int? Id { get; set; }
 
         [Inject] private IResmiTatilApiService _resmiTatilService { get; set; } = default!;
         [Inject] private NavigationManager _navigationManager { get; set; } = default!;

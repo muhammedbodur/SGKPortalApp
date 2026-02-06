@@ -108,7 +108,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Common.SikKullanilanProgram
 
         private void NavigateToCreate()
         {
-            _navigationManager.NavigateTo("/common/sik-kullanilan-program/manage");
+            _navigationManager.NavigateTo("/common/sik-kullanilan-program/add");
         }
 
         private void NavigateToEdit(int id)

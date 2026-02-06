@@ -153,7 +153,7 @@ namespace SGKPortalApp.PresentationLayer.Pages.Personel.AtanmaNedeni
 
         private void NavigateToCreate()
         {
-            _navigationManager.NavigateTo("/personel/atanma-nedeni/manage");
+            _navigationManager.NavigateTo("/personel/atanma-nedeni/add");
         }
 
         private void NavigateToEdit(int id)
